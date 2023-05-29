@@ -30,13 +30,11 @@ import { PluginID, Plugins } from '@/types/plugin';
 import HomeContext from '@/pages/api/home/home.context';
 
 import { NewConversationMessagesContainer } from '../ConversationStarter/NewConversationMessagesContainer';
-import Spinner from '../Spinner';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 import AdMessage from './AdMessage';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import { ChatMessage } from './ChatMessage';
-import { ErrorMessageDiv } from './ErrorMessageDiv';
 
 import dayjs from 'dayjs';
 
@@ -52,8 +50,6 @@ export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
     state: {
       selectedConversation,
       conversations,
-      models,
-      modelError,
       loading,
       user,
       outputLanguage,
@@ -388,122 +384,108 @@ export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
 
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
-      {modelError ? (
-        <ErrorMessageDiv error={modelError} />
-      ) : (
-        <>
-          <div
-            className="max-h-full overflow-x-hidden"
-            ref={chatContainerRef}
-            onScroll={handleScroll}
-          >
-            {selectedConversation?.messages.length === 0 ? (
-              <>
-                <div className="mx-auto flex max-w-[350px] flex-col space-y-10 pt-12 md:px-4 sm:max-w-[600px] ">
-                  <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
-                    {models.length === 0 ? (
-                      <div>
-                        <Spinner size="16px" className="mx-auto" />
-                      </div>
-                    ) : (
-                      <NewConversationMessagesContainer
-                        promptOnClick={(prompt: string) => {
-                          const message: Message = {
-                            role: 'user',
-                            content: prompt,
-                            pluginId: null,
-                          };
+      <div
+        className="max-h-full overflow-x-hidden"
+        ref={chatContainerRef}
+        onScroll={handleScroll}
+      >
+        {selectedConversation?.messages.length === 0 ? (
+          <>
+            <div className="mx-auto flex max-w-[350px] flex-col space-y-10 pt-12 md:px-4 sm:max-w-[600px] ">
+              <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
+                <NewConversationMessagesContainer
+                  promptOnClick={(prompt: string) => {
+                    const message: Message = {
+                      role: 'user',
+                      content: prompt,
+                      pluginId: null,
+                    };
 
-                          setCurrentMessage(message);
-                          handleSend(0, message);
-                          event('interaction', {
-                            category: 'Prompt',
-                            label: 'Click on sample prompt',
-                          });
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div
-                  className="justify-center border hidden md:flex
-                  border-b-neutral-300 bg-neutral-100 py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 sticky top-0 z-10"
-                >
-                  {selectedConversation?.name}
-
-                  <button
-                    className="ml-2 cursor-pointer hover:opacity-50"
-                    onClick={onClearAll}
-                  >
-                    <IconClearAll size={18} />
-                  </button>
-
-                  {selectedConversation && (
-                    <StoreConversationButton
-                      conversation={selectedConversation}
-                    />
-                  )}
-                </div>
-
-                {selectedConversation?.messages.map((message, index) => (
-                  <div key={index}>
-                    {
-                      // Show ad every 4 messages
-                      index !== 0 && index % 4 === 0 && (
-                        <AdMessage googleAdSenseId={googleAdSenseId} />
-                      )
-                    }
-                    <ChatMessage
-                      key={index}
-                      message={message}
-                      messageIndex={index}
-                      onEdit={(editedMessage) => {
-                        setCurrentMessage(editedMessage);
-                        // discard edited message and the ones that come after then resend
-                        handleSend(
-                          selectedConversation?.messages.length - index,
-                          editedMessage,
-                        );
-                      }}
-                      displayFooterButtons={
-                        selectedConversation.messages.length - 1 === index &&
-                        !messageIsStreaming
-                      }
-                      conversation={selectedConversation}
-                    />
-                  </div>
-                ))}
-
-                {loading && <ChatLoader />}
-
-                <div
-                  className="h-[162px] bg-white dark:bg-[#343541]"
-                  ref={messagesEndRef}
+                    setCurrentMessage(message);
+                    handleSend(0, message);
+                    event('interaction', {
+                      category: 'Prompt',
+                      label: 'Click on sample prompt',
+                    });
+                  }}
                 />
-              </>
-            )}
-          </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div
+              className="justify-center border hidden md:flex
+                  border-b-neutral-300 bg-neutral-100 py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 sticky top-0 z-10"
+            >
+              {selectedConversation?.name}
 
-          <ChatInput
-            stopConversationRef={stopConversationRef}
-            textareaRef={textareaRef}
-            onSend={() => {
-              handleSend(0);
-            }}
-            onRegenerate={() => {
-              handleSend(
-                2,
-                selectedConversation?.messages[
-                  selectedConversation?.messages.length - 2
-                ],
-              );
-            }}
-          />
-        </>
-      )}
+              <button
+                className="ml-2 cursor-pointer hover:opacity-50"
+                onClick={onClearAll}
+              >
+                <IconClearAll size={18} />
+              </button>
+
+              {selectedConversation && (
+                <StoreConversationButton conversation={selectedConversation} />
+              )}
+            </div>
+
+            {selectedConversation?.messages.map((message, index) => (
+              <div key={index}>
+                {
+                  // Show ad every 4 messages
+                  index !== 0 && index % 4 === 0 && (
+                    <AdMessage googleAdSenseId={googleAdSenseId} />
+                  )
+                }
+                <ChatMessage
+                  key={index}
+                  message={message}
+                  messageIndex={index}
+                  onEdit={(editedMessage) => {
+                    setCurrentMessage(editedMessage);
+                    // discard edited message and the ones that come after then resend
+                    handleSend(
+                      selectedConversation?.messages.length - index,
+                      editedMessage,
+                    );
+                  }}
+                  displayFooterButtons={
+                    selectedConversation.messages.length - 1 === index &&
+                    !messageIsStreaming
+                  }
+                  conversation={selectedConversation}
+                />
+              </div>
+            ))}
+
+            {loading && <ChatLoader />}
+
+            <div
+              className="h-[162px] bg-white dark:bg-[#343541]"
+              ref={messagesEndRef}
+            />
+          </>
+        )}
+      </div>
+
+      <ChatInput
+        stopConversationRef={stopConversationRef}
+        textareaRef={textareaRef}
+        onSend={() => {
+          handleSend(0);
+        }}
+        onRegenerate={() => {
+          handleSend(
+            2,
+            selectedConversation?.messages[
+              selectedConversation?.messages.length - 2
+            ],
+          );
+        }}
+      />
       {showScrollDownButton && (
         <div className="absolute bottom-0 right-0 mb-4 mr-4 pb-20">
           <button

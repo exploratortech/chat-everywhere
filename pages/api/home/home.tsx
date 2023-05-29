@@ -1,7 +1,6 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useQuery } from 'react-query';
 
 import { GetServerSideProps } from 'next';
 import { useTranslation } from 'next-i18next';
@@ -12,9 +11,6 @@ import { event } from 'nextjs-google-analytics';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
-
-import useErrorService from '@/services/errorService';
-import useApiService from '@/services/useApiService';
 
 import { fetchShareableConversation } from '@/utils/app/api';
 import { cleanConversationHistory } from '@/utils/app/clean';
@@ -70,8 +66,6 @@ const Home = ({
   googleAdSenseId,
 }: Props) => {
   const { t } = useTranslation('chat');
-  const { getModels } = useApiService();
-  const { getModelsError } = useErrorService();
   const { isLoading, isPlaying, currentSpeechId, speak, stopPlaying } =
     useAzureTts();
   const [containerHeight, setContainerHeight] = useState('100vh');
@@ -106,24 +100,6 @@ const Home = ({
   } = contextValue;
 
   const stopConversationRef = useRef<boolean>(false);
-
-  const { data, error } = useQuery(
-    ['GetModels', serverSideApiKeyIsSet],
-    ({ signal }) => {
-      if (!serverSideApiKeyIsSet) return null;
-
-      return getModels(signal);
-    },
-    { enabled: true, refetchOnMount: false },
-  );
-
-  useEffect(() => {
-    if (data) dispatch({ field: 'models', value: data });
-  }, [data, dispatch]);
-
-  useEffect(() => {
-    dispatch({ field: 'modelError', value: getModelsError(error) });
-  }, [dispatch, error, getModelsError]);
 
   // FETCH MODELS ----------------------------------------------
 

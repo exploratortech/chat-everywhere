@@ -50,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
       temperatureToUse,
       messagesToSend,
     );
-
+    
     return new Response(stream);
   } catch (error) {
     console.error(error);
