@@ -7,7 +7,6 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   if (req.method !== 'GET') {
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
     res.status(405).json({ message: 'Method not allowed' });
     return;
   }
@@ -22,6 +21,7 @@ export default async function handler(
   try {
     const recordMap = await api.getPage(id as string);
 
+    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
     res.status(200).json({
       recordMap,
     });
