@@ -11,6 +11,7 @@ import {
 import { ExportFormatV1, ExportFormatV2, ExportFormatV4 } from '@/types/export';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 
+import dayjs from 'dayjs';
 import { describe, expect, it } from 'vitest';
 
 describe('Export Format Functions', () => {
@@ -104,6 +105,7 @@ describe('cleanData Functions', () => {
             prompt: DEFAULT_SYSTEM_PROMPT,
             temperature: DEFAULT_TEMPERATURE,
             folderId: null,
+            lastUpdateAtUTC: dayjs().valueOf(),
           },
         ],
         folders: [],
@@ -139,6 +141,7 @@ describe('cleanData Functions', () => {
         ],
       } as ExportFormatV2;
       const obj = cleanData(data);
+      const lastUpdateAtUTC = dayjs().valueOf();
       expect(isLatestExportFormat(obj)).toBe(true);
       expect(obj).toEqual({
         version: 4,
@@ -160,6 +163,7 @@ describe('cleanData Functions', () => {
             prompt: DEFAULT_SYSTEM_PROMPT,
             temperature: DEFAULT_TEMPERATURE,
             folderId: null,
+            lastUpdateAtUTC,
           },
         ],
         folders: [
@@ -167,6 +171,7 @@ describe('cleanData Functions', () => {
             id: '1',
             name: 'folder 1',
             type: 'chat',
+            lastUpdateAtUTC,
           },
         ],
         prompts: [],
