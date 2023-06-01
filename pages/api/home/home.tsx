@@ -214,6 +214,14 @@ const Home = ({
     dispatch({ field: 'prompts', value: updatedPrompts });
     savePrompts(updatedPrompts);
     updateConversationLastUpdatedAtTimeStamp();
+
+    const updatedSelectedConversation = updatedConversations.find(
+      (c) => c.id === selectedConversation?.id,
+    );
+    if (updatedSelectedConversation?.deleted) {
+      const newConversation: Conversation = getNewConversationName();
+      dispatch({ field: 'selectedConversation', value: newConversation });
+    }
   };
 
   const handleUpdateFolder = (folderId: string, name: string) => {
@@ -246,21 +254,7 @@ const Home = ({
 
     const lastConversation = conversations[conversations.length - 1];
 
-    const newConversation: Conversation = {
-      id: uuidv4(),
-      name: `${t('New Conversation')}`,
-      messages: [],
-      model: lastConversation?.model || {
-        id: OpenAIModels[defaultModelId].id,
-        name: OpenAIModels[defaultModelId].name,
-        maxLength: OpenAIModels[defaultModelId].maxLength,
-        tokenLimit: OpenAIModels[defaultModelId].tokenLimit,
-      },
-      prompt: DEFAULT_SYSTEM_PROMPT,
-      temperature: DEFAULT_TEMPERATURE,
-      folderId: null,
-      lastUpdateAtUTC: dayjs().valueOf(),
-    };
+    const newConversation: Conversation = getNewConversationName();
 
     const updatedConversations = [...conversations, newConversation];
 
@@ -294,6 +288,27 @@ const Home = ({
       category: 'Conversation',
       label: 'Create New Conversation',
     });
+  };
+
+  const getNewConversationName = () => {
+    const lastConversation = conversations[conversations.length - 1];
+
+    const newConversation: Conversation = {
+      id: uuidv4(),
+      name: `${t('New Conversation')}`,
+      messages: [],
+      model: lastConversation?.model || {
+        id: OpenAIModels[defaultModelId].id,
+        name: OpenAIModels[defaultModelId].name,
+        maxLength: OpenAIModels[defaultModelId].maxLength,
+        tokenLimit: OpenAIModels[defaultModelId].tokenLimit,
+      },
+      prompt: DEFAULT_SYSTEM_PROMPT,
+      temperature: DEFAULT_TEMPERATURE,
+      folderId: null,
+      lastUpdateAtUTC: dayjs().valueOf(),
+    };
+    return newConversation;
   };
 
   // EFFECTS  --------------------------------------------
