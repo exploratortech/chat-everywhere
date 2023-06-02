@@ -195,6 +195,16 @@ export const ChatMessage: FC<Props> = memo(
         HTMLImageElement
       >) => {
         if (!src) return <></>;
+        if (message.pluginId !== PluginID.IMAGE_GEN) {
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={src}
+              alt=""
+              className="w-full"
+            />
+          );
+        }
         return (
           <Image
             src={src}
