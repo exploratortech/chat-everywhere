@@ -266,7 +266,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                         >
                           <option value="">{t('Select an occupation')}</option>
                           {occupationOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
+                            <option key={option.value} value={option.value} className="bg-[#343541] text-white">
                               <OptionLabels
                                 key={option.value}
                                 option={option.label}
