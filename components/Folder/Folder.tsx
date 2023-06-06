@@ -54,7 +54,7 @@ const Folder = ({
   };
 
   const dropHandler = (e: any) => {
-    if (e.dataTransfer) {
+    if (e.dataTransfer && !e.dataTransfer.getData('folder')) {
       setIsOpen(true);
 
       handleDrop(e, currentFolder);
@@ -74,7 +74,9 @@ const Folder = ({
   };
 
   const highlightDrop = (e: any) => {
-    e.target.style.background = '#343541';
+    if (e.dataTransfer && !e.dataTransfer.getData('folder')) {
+      e.target.style.background = '#343541';
+    }
   };
 
   const removeHighlight = (e: any) => {
