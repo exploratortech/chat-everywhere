@@ -22,7 +22,7 @@ export const PromptFolders = () => {
   } = useContext(PromptbarContext);
 
   const handleDrop = (e: any, folder: FolderInterface) => {
-    if (e.dataTransfer) {
+    if (e.dataTransfer && !e.dataTransfer.getData('folder')) {
       const prompt = JSON.parse(e.dataTransfer.getData('prompt'));
 
       const updatedPrompt = {

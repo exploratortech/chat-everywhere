@@ -63,6 +63,12 @@ const Folder = ({
     }
   };
 
+  const handleDragStart = (e: any) => {
+    if (e.dataTransfer) {
+      e.dataTransfer.setData('folder', JSON.stringify(currentFolder));
+    }
+  };
+
   const allowDrop = (e: any) => {
     e.preventDefault();
   };
@@ -113,8 +119,10 @@ const Folder = ({
         ) : (
           <button
             className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90`}
+            draggable
             onClick={() => setIsOpen(!isOpen)}
             onDrop={(e) => dropHandler(e)}
+            onDragStart={handleDragStart}
             onDragOver={allowDrop}
             onDragEnter={highlightDrop}
             onDragLeave={removeHighlight}
