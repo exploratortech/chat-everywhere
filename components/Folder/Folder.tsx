@@ -19,6 +19,7 @@ import { FolderInterface } from '@/types/folder';
 import HomeContext from '@/pages/api/home/home.context';
 
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
+import PromptFolderDropArea from '@/components/Promptbar/components/PromptFolderDropArea';
 
 interface Props {
   currentFolder: FolderInterface;
@@ -48,7 +49,7 @@ const Folder = ({
   };
 
   const handleRename = () => {
-    handleUpdateFolder(currentFolder.id, renameValue);
+    handleUpdateFolder(currentFolder.id, renameValue, currentFolder.rank);
     setRenameValue('');
     setIsRenaming(false);
   };
@@ -193,7 +194,6 @@ const Folder = ({
           </div>
         )}
       </div>
-
       {isOpen ? folderComponent : null}
     </>
   );
