@@ -25,7 +25,7 @@ import {
   updateConversation,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import { saveFolders } from '@/utils/app/folders';
+import { saveFolders, getNextFolderRank, sortByRank } from '@/utils/app/folders';
 import { savePrompts } from '@/utils/app/prompts';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
@@ -163,6 +163,7 @@ const Home = ({
       name,
       type,
       lastUpdateAtUTC: dayjs().valueOf(),
+      rank: getNextFolderRank(folders),
     };
 
     const updatedFolders = [...folders, newFolder];
@@ -216,12 +217,13 @@ const Home = ({
     updateConversationLastUpdatedAtTimeStamp();
   };
 
-  const handleUpdateFolder = (folderId: string, name: string) => {
+  const handleUpdateFolder = (folderId: string, name: string, rank: number) => {
     const updatedFolders = folders.map((f) => {
       if (f.id === folderId) {
         return {
           ...f,
           name,
+          rank,
           lastUpdateAtUTC: dayjs().valueOf(),
         };
       }
@@ -509,7 +511,7 @@ const Home = ({
 
     const folders = localStorage.getItem('folders');
     if (folders) {
-      dispatch({ field: 'folders', value: JSON.parse(folders) });
+      dispatch({ field: 'folders', value: JSON.parse(folders).sort(sortByRank) });
     }
 
     const prompts = localStorage.getItem('prompts');

@@ -1,6 +1,7 @@
-import { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
+import { RANK_INTERVAL } from '@/utils/app/const';
 
 import { FolderInterface } from '@/types/folder';
 
@@ -10,10 +11,12 @@ import Folder from '@/components/Folder';
 import { PromptComponent } from '@/components/Promptbar/components/Prompt';
 
 import PromptbarContext from '../PromptBar.context';
+import PromptFolderDropArea from './PromptFolderDropArea';
 
 export const PromptFolders = () => {
   const {
     state: { folders },
+    handleUpdateFolder,
   } = useContext(HomeContext);
 
   const {
@@ -21,8 +24,8 @@ export const PromptFolders = () => {
     handleUpdatePrompt,
   } = useContext(PromptbarContext);
 
-  const handleDrop = (e: any, folder: FolderInterface) => {
-    if (e.dataTransfer && !e.dataTransfer.getData('folder')) {
+  const handlePromptDrop = (e: any, folder: FolderInterface) => {
+    if (e.dataTransfer && e.dataTransfer.getData('prompt')) {
       const prompt = JSON.parse(e.dataTransfer.getData('prompt'));
 
       const updatedPrompt = {
@@ -31,6 +34,12 @@ export const PromptFolders = () => {
       };
 
       handleUpdatePrompt(updatedPrompt);
+    }
+  };
+
+  const handleFolderDrop = (e: any, index: number) => {
+    if (e.dataTransfer && e.dataTransfer.getData('folder')) {
+      
     }
   };
 
@@ -49,16 +58,25 @@ export const PromptFolders = () => {
 
   return (
     <div className="flex w-full flex-col pt-2">
+      <PromptFolderDropArea
+        index={0}
+        handleDrop={handleFolderDrop}
+      />
       {getNonDeletedCollection(folders)
         .filter((folder) => folder.type === 'prompt')
         .map((folder, index) => (
-          <Folder
-            key={index}
-            searchTerm={searchTerm}
-            currentFolder={folder}
-            handleDrop={handleDrop}
-            folderComponent={PromptFolders(folder)}
-          />
+          <Fragment key={index}>
+            <Folder
+              searchTerm={searchTerm}
+              currentFolder={folder}
+              handleDrop={handlePromptDrop}
+              folderComponent={PromptFolders(folder)}
+            />
+            <PromptFolderDropArea
+              index={index + 1}
+              handleDrop={handleFolderDrop}
+            />
+          </Fragment>
         ))}
     </div>
   );
