@@ -1,6 +1,7 @@
 import { Fragment, useContext } from 'react';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
+import { generateFolderRank } from '@/utils/app/folders';
 import { RANK_INTERVAL } from '@/utils/app/const';
 
 import { FolderInterface } from '@/types/folder';
@@ -39,7 +40,12 @@ export const PromptFolders = () => {
 
   const handleFolderDrop = (e: any, index: number) => {
     if (e.dataTransfer && e.dataTransfer.getData('folder')) {
-      
+      const folder: FolderInterface = JSON.parse(e.dataTransfer.getData('folder'));
+      handleUpdateFolder(
+        folder.id,
+        folder.name,
+        generateFolderRank(folders, index),
+      );
     }
   };
 
@@ -60,7 +66,7 @@ export const PromptFolders = () => {
     <div className="flex w-full flex-col pt-2">
       <PromptFolderDropArea
         index={0}
-        handleDrop={handleFolderDrop}
+        handleFolderDrop={handleFolderDrop}
       />
       {getNonDeletedCollection(folders)
         .filter((folder) => folder.type === 'prompt')
@@ -74,7 +80,7 @@ export const PromptFolders = () => {
             />
             <PromptFolderDropArea
               index={index + 1}
-              handleDrop={handleFolderDrop}
+              handleFolderDrop={handleFolderDrop}
             />
           </Fragment>
         ))}

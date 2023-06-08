@@ -507,6 +507,7 @@ const Home = ({
 
     const folders = localStorage.getItem('folders');
     if (folders) {
+      console.log("Load folders locally:", JSON.parse(folders).sort(sortByRank));
       dispatch({ field: 'folders', value: JSON.parse(folders).sort(sortByRank) });
     }
 

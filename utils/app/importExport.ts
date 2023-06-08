@@ -43,10 +43,11 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
     return {
       version: 4,
       history: cleanConversationHistory(data.history || []),
-      folders: (data.folders || []).map((chatFolder) => ({
+      folders: (data.folders || []).map((chatFolder, index) => ({
         id: chatFolder.id.toString(),
         name: chatFolder.name,
         type: 'chat',
+        rank: index * 100,
         lastUpdateAtUTC: dayjs().valueOf(),
       })),
       prompts: [],

@@ -19,7 +19,6 @@ import { FolderInterface } from '@/types/folder';
 import HomeContext from '@/pages/api/home/home.context';
 
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
-import PromptFolderDropArea from '@/components/Promptbar/components/PromptFolderDropArea';
 
 interface Props {
   currentFolder: FolderInterface;
