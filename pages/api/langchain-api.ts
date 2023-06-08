@@ -1,15 +1,18 @@
-import { BingSerpAPI } from 'langchain/tools';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { CallbackManager } from 'langchain/callbacks';
-import { AgentExecutor, ZeroShotAgent } from 'langchain/agents';
-import { LLMChain } from 'langchain/chains';
-import { ChatBody } from '@/types/chat';
 import { NextRequest, NextResponse } from 'next/server';
-import { DynamicTool } from 'langchain/tools';
-import { create, all } from 'mathjs';
-import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
-import { PluginID } from '@/types/plugin';
+
 import { truncateLogMessage } from '@/utils/server';
+import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
+
+import { ChatBody } from '@/types/chat';
+import { PluginID } from '@/types/plugin';
+
+import { AgentExecutor, ZeroShotAgent } from 'langchain/agents';
+import { CallbackManager } from 'langchain/callbacks';
+import { LLMChain } from 'langchain/chains';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { BingSerpAPI } from 'langchain/tools';
+import { DynamicTool } from 'langchain/tools';
+import { all, create } from 'mathjs';
 
 export const config = {
   runtime: 'edge',
@@ -39,7 +42,8 @@ const handler = async (req: NextRequest, res: any) => {
   const latestUserPrompt =
     requestBody.messages[requestBody.messages.length - 1].content;
 
-  const selectedOutputLanguage = req.headers.get('Output-Language') ? `(lang=${req.headers.get('Output-Language')})` : '';
+  const selectedOutputLanguage =
+    req.headers.get('Output-Language') || 'Not defined';
 
   const encoder = new TextEncoder();
   const stream = new TransformStream();
@@ -116,9 +120,9 @@ const handler = async (req: NextRequest, res: any) => {
     streaming: false,
   });
 
-  const tools = [new BingSerpAPI(), calculator];
+  const tools = [new BingSerpAPI(process.env.BingApiKey), calculator];
   const toolNames = tools.map((tool) => tool.name);
-  
+
   const prompt = ZeroShotAgent.createPrompt(tools, {
     prefix: `You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format.
       
@@ -136,7 +140,11 @@ const handler = async (req: NextRequest, res: any) => {
       Make sure you include the reference links to the websites you used to answer the user's question in your response using Markdown syntax. You MUST use the following Markdown syntax to include a link in your response:
       [Link Text](https://www.example.com)
 
-      Use the following format:
+      If lang '${selectedOutputLanguage}' is not 'Not defined', all of the output must be in the lang of ${selectedOutputLanguage}.
+
+      
+
+      You must use the following format:
 
       Question: the input question you must answer
       Thought: you should always think about what to do
@@ -144,14 +152,17 @@ const handler = async (req: NextRequest, res: any) => {
       Action Input: the input to the action
       Observation: the result of the action
       ... (this Thought/Action/Action Input/Observation can repeat N times)
+      
+      If it is a question that requires a final answer, you must include the following:
       Thought: I now know the final answer
       Final Answer: the final answer to the original input question
+
     `,
-  });  
+  });
 
   const llmChain = new LLMChain({
     llm: model,
-    prompt: prompt,
+    prompt,
   });
 
   const agent = new ZeroShotAgent({
@@ -169,8 +180,8 @@ const handler = async (req: NextRequest, res: any) => {
     agentExecutor.verbose = true;
 
     agentExecutor.call({
-        input:  `${selectedOutputLanguage} ${latestUserPrompt}`,
-      })
+      input: `${latestUserPrompt}`,
+    });
 
     return new NextResponse(stream.readable, {
       headers: {
@@ -191,7 +202,7 @@ const handler = async (req: NextRequest, res: any) => {
 
 const normalizeTextAnswer = (text: string) => {
   const mindlogRegex = /```Online \n(.|\n)*```/g;
-  return text.replace(mindlogRegex, '').replace("{", "{{").replace("}", "}}");
+  return text.replace(mindlogRegex, '').replace('{', '{{').replace('}', '}}');
 };
 
 export default handler;
