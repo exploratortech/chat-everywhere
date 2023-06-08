@@ -2,7 +2,6 @@ import { Fragment, useContext } from 'react';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { generateFolderRank } from '@/utils/app/folders';
-import { RANK_INTERVAL } from '@/utils/app/const';
 
 import { FolderInterface } from '@/types/folder';
 
