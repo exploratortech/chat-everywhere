@@ -1,8 +1,13 @@
 import { Conversation } from '@/types/chat';
+import { FolderInterface } from '@/types/folder';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import dayjs from 'dayjs';
 
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from './const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_TEMPERATURE,
+  RANK_INTERVAL,
+} from './const';
 
 export const cleanSelectedConversation = (conversation: Conversation) => {
   // added model for each conversation (3/20/23)
@@ -86,6 +91,16 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
         error,
       );
     }
+    return acc;
+  }, []);
+};
+
+export const cleanFolders = (folders: FolderInterface[]): FolderInterface[] => {
+  return folders.reduce((acc: FolderInterface[], folder: FolderInterface, index) => {
+    if (!folder.rank) {
+      folder.rank = (index + 1) * RANK_INTERVAL;
+    }
+    acc.push(folder);
     return acc;
   }, []);
 };
