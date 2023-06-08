@@ -17,7 +17,7 @@ import useErrorService from '@/services/errorService';
 import useApiService from '@/services/useApiService';
 
 import { fetchShareableConversation } from '@/utils/app/api';
-import { cleanConversationHistory } from '@/utils/app/clean';
+import { cleanConversationHistory, cleanFolders } from '@/utils/app/clean';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import {
   saveConversation,
@@ -511,8 +511,9 @@ const Home = ({
 
     const folders = localStorage.getItem('folders');
     if (folders) {
-      console.log("Load folders locally:", JSON.parse(folders).sort(sortByRank));
-      dispatch({ field: 'folders', value: JSON.parse(folders).sort(sortByRank) });
+      const parsedFolders: FolderInterface[] = JSON.parse(folders).sort(sortByRank);
+      const cleanedFolders: FolderInterface[] = cleanFolders(parsedFolders);
+      dispatch({ field: 'folders', value: cleanedFolders });
     }
 
     const prompts = localStorage.getItem('prompts');
