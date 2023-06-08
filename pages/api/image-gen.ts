@@ -36,8 +36,8 @@ const generateMjPrompt = (
 ): string => {
   let resultPrompt = userInputText;
 
-  if (style !== 'default') {
-    resultPrompt += `, ${capitalizeFirstLetter(style)} style --v 5.1`;
+  if (style !== 'Default') {
+    resultPrompt += `, ${capitalizeFirstLetter(style)} --v 5.1`;
   }
 
   switch (quality) {
@@ -111,18 +111,21 @@ const handler = async (req: Request): Promise<Response> => {
         'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
       );
 
+      const generationPrompt = generateMjPrompt(
+        latestUserPromptMessage,
+        requestBody.imageStyle,
+        requestBody.imageQuality,
+        requestBody.temperature,
+      );
+
+      writeToStream(`Prompt: ${generationPrompt} \n`);
       const imageGenerationResponse = await fetch(
         `https://api.thenextleg.io/v2/imagine`,
         {
           method: 'POST',
           headers: requestHeader,
           body: JSON.stringify({
-            msg: generateMjPrompt(
-              latestUserPromptMessage,
-              requestBody.imageStyle,
-              requestBody.imageQuality,
-              requestBody.temperature,
-            ),
+            msg: generationPrompt,
           }),
         },
       );
@@ -144,7 +147,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       const imageGenerationMessageId = imageGenerationResponseJson.messageId;
 
-      // Check every 4 seconds if the image generation is done
+      // Check every 3.5 seconds if the image generation is done
       let generationStartedAt = Date.now();
       let imageGenerationProgress = null;
 
@@ -172,7 +175,7 @@ const handler = async (req: Request): Promise<Response> => {
           await imageGenerationProgressResponse.json();
 
         const generationProgress = imageGenerationProgressResponseJson.progress;
-        
+
         if (generationProgress === 100) {
           writeToStream(`Completed in ${getTotalGenerationTime()}s \n`);
           writeToStream('``` \n');

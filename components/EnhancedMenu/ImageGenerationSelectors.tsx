@@ -13,6 +13,7 @@ import HomeContext from '@/pages/api/home/home.context';
 const AVAILABLE_STYLES = {
   default: 'Default',
   photorealism: 'Photorealism',
+  portrait: 'Portrait photography',
   cinematic: 'Cinematic',
   anime: 'Anime',
   'analog-film': 'Analog Film',
