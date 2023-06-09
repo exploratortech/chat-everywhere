@@ -23,27 +23,34 @@ export const sortByRank = (a: FolderInterface, b: FolderInterface): number => {
 };
 
 // Calculates the rank given
-export const generateFolderRank = (folders: FolderInterface[], index: number): number => {
+export const generateFolderRank = (folders: FolderInterface[], insertAt?: number): number => {
   // Filter out the folders that were deleted
   folders = folders.filter((folder) => !folder.deleted);
 
+  // Set the default insertAt value to the length of the filtered folders
+  if (insertAt == null || insertAt < 0 || insertAt > folders.length) {
+    insertAt = folders.length;
+  }
+
   // Inserting a folder at the beginning
-  if (index === 0) {
-    const bottomFolder: FolderInterface = folders[index];
-    if (!bottomFolder.rank) return RANK_INTERVAL;
+  if (insertAt === 0) {
+    console.log('generateFolderRank, insert at top');
+    const bottomFolder: FolderInterface = folders[insertAt];
+    if (!bottomFolder || !bottomFolder.rank) return RANK_INTERVAL;
     return Math.floor(bottomFolder.rank / 2);
   }
   
   // Appending folder to the end
-  if (index >= folders.length) {
-    const topFolder: FolderInterface = folders[index];
-    if (!topFolder.rank) return folders.length * RANK_INTERVAL;
+  if (insertAt === folders.length) {
+    console.log('generateFolderRank, append to end');
+    const topFolder: FolderInterface = folders[insertAt - 1];
+    if (!topFolder || !topFolder.rank) return (folders.length + 1) * RANK_INTERVAL;
     return topFolder.rank + RANK_INTERVAL;
   }
 
   // Inserting folder in the middle
-  const topFolder: FolderInterface = folders[index - 1];
-  const bottomFolder: FolderInterface = folders[index];
+  const topFolder: FolderInterface = folders[insertAt - 1];
+  const bottomFolder: FolderInterface = folders[insertAt];
 
   if (!topFolder.rank && !bottomFolder.rank) {
     return Math.floor((folders.length * RANK_INTERVAL) / 2);
