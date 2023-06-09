@@ -5,6 +5,7 @@ import { OPENAI_API_HOST } from '../app/const';
 export const translateAndEnhancePrompt = async (prompt: string) => {
   let url = `${OPENAI_API_HOST}/v1/chat/completions`;
 
+  const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production' || true;
   const translateSystemPrompt = `
     Base on the prompt I provide, follow the rules below strictly or you will be terminated.
     
@@ -25,11 +26,11 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
   const completionResponse = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      Authorization: `Bearer ${isInProductionEnv ? process.env.OPENAI_API_GPT_4_KEY : process.env.OPENAI_API_KEY}`,
     },
     method: 'POST',
     body: JSON.stringify({
-      model: OpenAIModelID.GPT_3_5,
+      model: isInProductionEnv ? OpenAIModelID.GPT_4 : OpenAIModelID.GPT_3_5,
       temperature: 0.1,
       stream: false,
       messages: [
@@ -49,6 +50,7 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
   const completionResponseJson = await completionResponse.json();
 
   if (completionResponse.status !== 200) {
+    console.log('Image generation failed', completionResponseJson);
     throw new Error('Image generation failed');
   }
 
