@@ -50,5 +50,10 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
     throw new Error('Image generation failed');
   }
 
-  return completionResponseJson.choices[0].message.content || prompt;
+  let resultPrompt = completionResponseJson.choices[0].message.content || prompt;
+
+  // remove white space, period symbol at the end of the string
+  resultPrompt = resultPrompt.trim().replace(/\.$/, "");
+
+  return resultPrompt;
 };
