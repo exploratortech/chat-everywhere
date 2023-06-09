@@ -5,7 +5,7 @@ import { OPENAI_API_HOST } from '../app/const';
 export const translateAndEnhancePrompt = async (prompt: string) => {
   let url = `${OPENAI_API_HOST}/v1/chat/completions`;
 
-  const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production' || true;
+  const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production';
   const translateSystemPrompt = `
     Base on the prompt I provide, follow the rules below strictly or you will be terminated.
     
