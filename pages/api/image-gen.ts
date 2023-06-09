@@ -5,6 +5,7 @@ import {
   DEFAULT_IMAGE_GENERATION_STYLE,
 } from '@/utils/app/const';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
+import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
 import {
   addUsageEntry,
   getAdminSupabaseClient,
@@ -37,7 +38,7 @@ const generateMjPrompt = (
   let resultPrompt = userInputText;
 
   if (style !== 'Default') {
-    resultPrompt += `, ${capitalizeFirstLetter(style)} --v 5.1`;
+    resultPrompt += `, ${capitalizeFirstLetter(style)}`;
   }
 
   switch (quality) {
@@ -61,7 +62,7 @@ const generateMjPrompt = (
     resultPrompt += ' --chaos 50';
   }
 
-  return resultPrompt;
+  return resultPrompt + ' --v 5.1';
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -83,6 +84,7 @@ const handler = async (req: Request): Promise<Response> => {
   const encoder = new TextEncoder();
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
+  let generationPrompt = '';
 
   let jobTerminated = false;
 
@@ -95,6 +97,15 @@ const handler = async (req: Request): Promise<Response> => {
 
   const requestBody = (await req.json()) as ChatBody;
 
+  writeToStream('```MJImage \n');
+  writeToStream('Initializing ... \n');
+  writeToStream(
+    'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
+  );
+
+  const latestUserPromptMessage =
+    requestBody.messages[requestBody.messages.length - 1].content;
+
   const imageGeneration = async () => {
     const requestHeader = {
       Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
@@ -102,23 +113,20 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
     try {
-      const latestUserPromptMessage =
-        requestBody.messages[requestBody.messages.length - 1].content;
-
-      writeToStream('```MJImage \n');
-      writeToStream('Initializing ... \n');
-      writeToStream(
-        'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
+      // Translate and enhance the prompt
+      writeToStream(`Enhancing and translating user input prompt ... \n`);
+      generationPrompt = await translateAndEnhancePrompt(
+        latestUserPromptMessage,
       );
 
-      const generationPrompt = generateMjPrompt(
-        latestUserPromptMessage,
+      generationPrompt = generateMjPrompt(
+        generationPrompt,
         requestBody.imageStyle,
         requestBody.imageQuality,
         requestBody.temperature,
       );
 
-      writeToStream(`Prompt: ${generationPrompt} \n`);
+      writeToStream(`Prompt: ${generationPrompt} \n`, true);
       const imageGenerationResponse = await fetch(
         `https://api.thenextleg.io/v2/imagine`,
         {
