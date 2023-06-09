@@ -24,6 +24,7 @@ module.exports = {
       "zh", // even tho this is not a valid locale, it is needed for the fallback
       "zh-Hant",
       "zh-Hans",
+      "hi",
     ],
     fallbackLng: {
       'zh': ['zh-Hant'],

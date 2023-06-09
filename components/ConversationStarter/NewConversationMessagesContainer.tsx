@@ -58,6 +58,13 @@ export const NewConversationMessagesContainer: FC<Props> = ({
       label: 'survey_banner',
     });
   };
+  const featureOnClick = () => {
+    dispatch({ field: 'showFeaturesModel', value: true });
+    event('Feature banner clicked', {
+      category: 'Engagement',
+      label: 'feature_introduction_banner',
+    });
+  };
 
   return (
     <div className="font-normal">
@@ -77,6 +84,19 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         </div>
       )}
 
+      {/* Feature Introduction Popup */}
+      <div
+        className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none cursor-pointer"
+        onClick={featureOnClick}
+      >
+        <span className="bg-yellow-100 text-yellow-800 text-xs font-medium ml-2 mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-800 dark:text-yellow-300">
+          New
+        </span>
+        <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
+          {t('Check out out new features page!')}
+        </span>
+      </div>
+
       {/* Survey for user information */}
       {!isSurveyFilled && (
         <div
@@ -84,12 +104,11 @@ export const NewConversationMessagesContainer: FC<Props> = ({
           onClick={surveyOnClick}
         >
           <span className="bg-yellow-100 text-yellow-800 text-xs font-medium ml-2 mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-800 dark:text-yellow-300">
-            {' '}
-            New{' '}
+            New
           </span>
           <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
             {t('Please share your thoughts by completing a brief survey.')}
-          </span>{' '}
+          </span>
         </div>
       )}
 

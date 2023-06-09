@@ -41,9 +41,11 @@ import { UserProfile } from '@/types/user';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
+import FeaturesModel from '@/components/Features/FeaturesModel';
 import { useAzureTts } from '@/components/Hooks/useAzureTts';
 import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
 import { Navbar } from '@/components/Mobile/Navbar';
+import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
 import { ProfileModel } from '@/components/User/ProfileModel';
@@ -95,6 +97,8 @@ const Home = ({
       showProfileModel,
       showUsageModel,
       showSurveyModel,
+      showNewsModel,
+      showFeaturesModel,
       user,
       isPaidUser,
       conversationLastSyncAt,
@@ -640,7 +644,6 @@ const Home = ({
 
           <div className="flex h-full w-full pt-[48px] md:pt-0 overflow-x-hidden">
             <Chatbar />
-
             <div className="flex flex-1">
               <Chat
                 stopConversationRef={stopConversationRef}
@@ -677,6 +680,18 @@ const Home = ({
                 }
               />
             )}
+            <NewsModel
+              open={showNewsModel}
+              onOpen={() => dispatch({ field: 'showNewsModel', value: true })}
+              onClose={() => dispatch({ field: 'showNewsModel', value: false })}
+            />
+
+            <FeaturesModel
+              open={showFeaturesModel}
+              onClose={() =>
+                dispatch({ field: 'showFeaturesModel', value: false })
+              }
+            />
             <Promptbar />
           </div>
         </main>
@@ -710,6 +725,8 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
         'rolesContent',
         'feature',
         'survey',
+        'news',
+        'features',
       ])),
     },
   };
