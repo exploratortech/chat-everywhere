@@ -50,8 +50,10 @@
   "anime": "動漫",
   "cinematic": "電影",
   "comic-book": "漫畫",
+  "digital-art": "數位藝術",
   "line-art": "線條",
   "low-poly": "向量",
   "photorealism": "現實",
+  "portrait": "肖像",
   "pixel-art": "像素"
 }
