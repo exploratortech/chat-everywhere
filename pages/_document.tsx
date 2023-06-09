@@ -31,10 +31,8 @@ export default function Document(props: Props) {
         {/* Ad Verification tag for Infolinks*/}
         {process.env.NEXT_PUBLIC_ENV === 'production' && (
         <>
-          <Script 
+          <script 
             type="text/javascript"
-            id="show-banner"
-            strategy="lazyOnload"
             dangerouslySetInnerHTML={{
               __html: `
                 var infolinks_pid = 3395445;
@@ -42,13 +40,11 @@ export default function Document(props: Props) {
               `
             }}
           />
-          <Script type="text/javascript" async src="http://resources.infolinks.com/js/infolinks_main.js"/>
+          <script type="text/javascript" async src="http://resources.infolinks.com/js/infolinks_main.js"/>
         
           {/* Sovrn ads code for Affiliate Links */}
-          <Script 
+          <script 
             type="text/javascript"
-            id="show-banner"
-            strategy="lazyOnload"
             dangerouslySetInnerHTML={{
               __html: `
                 var vglnk = {key: '${sovrnAdsKey}'};
