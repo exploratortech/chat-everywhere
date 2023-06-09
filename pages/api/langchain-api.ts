@@ -6,6 +6,7 @@ import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 import { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
+import { t } from 'i18next';
 import { AgentExecutor, ZeroShotAgent } from 'langchain/agents';
 import { CallbackManager } from 'langchain/callbacks';
 import { LLMChain } from 'langchain/chains';
@@ -42,8 +43,7 @@ const handler = async (req: NextRequest, res: any) => {
   const latestUserPrompt =
     requestBody.messages[requestBody.messages.length - 1].content;
 
-  const selectedOutputLanguage =
-    req.headers.get('Output-Language') || 'Not defined';
+  const selectedOutputLanguage = req.headers.get('Output-Language') || '';
 
   const encoder = new TextEncoder();
   const stream = new TransformStream();
@@ -123,8 +123,13 @@ const handler = async (req: NextRequest, res: any) => {
   const tools = [new BingSerpAPI(process.env.BingApiKey), calculator];
   const toolNames = tools.map((tool) => tool.name);
 
+  const langPrompt = selectedOutputLanguage
+    ? `Your output must be in the language (${selectedOutputLanguage}).`
+    : "Your output must be in the same language as the user's input.";
+
   const prompt = ZeroShotAgent.createPrompt(tools, {
-    prefix: `You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format.
+    prefix:
+      `You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format.
       
       Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
       ${requestBody.messages
@@ -140,29 +145,29 @@ const handler = async (req: NextRequest, res: any) => {
       Make sure you include the reference links to the websites you used to answer the user's question in your response using Markdown syntax. You MUST use the following Markdown syntax to include a link in your response:
       [Link Text](https://www.example.com)
 
-      If lang '${selectedOutputLanguage}' is not 'Not defined', all of the output must be in the lang of ${selectedOutputLanguage}.
-
-      
 
       You must use the following format:
 
-      Question: the input question you must answer
-      Thought: you should always think about what to do
-      Action: the action to take, should be one of ${toolNames}
-      Action Input: the input to the action
-      Observation: the result of the action
-      ... (this Thought/Action/Action Input/Observation can repeat N times)
-      
-      If it is a question that requires a final answer, you must include the following:
-      Thought: I now know the final answer
-      Final Answer: the final answer to the original input question
+\`\`\`
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of ${toolNames}
+Action_Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action_Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question
+\`\`\`
 
-    `,
+Please revalidate the format of your response before outputting it to the user.
+  
+    ` + langPrompt,
   });
 
   const llmChain = new LLMChain({
     llm: model,
     prompt,
+    verbose: true,
   });
 
   const agent = new ZeroShotAgent({
