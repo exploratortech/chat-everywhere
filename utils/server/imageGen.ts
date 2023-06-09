@@ -12,7 +12,7 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
       1. Translate the prompt to English in simple terms consider the context
       2. Add more details to make the final image more visually appealing
       3. Ensure your answer is in English only (no other language)
-      3. Only output your final answer without any description or thought
+      4. Only output your final answer without any description or thought
     
     If the prompt is in English:
       1. Only repeat the original prompt
