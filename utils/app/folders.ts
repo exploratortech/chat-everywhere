@@ -5,24 +5,13 @@ export const saveFolders = (folders: FolderInterface[]) => {
   localStorage.setItem('folders', JSON.stringify(folders));
 };
 
-export const getNextFolderRank = (folders: FolderInterface[]): number => {
-  // TODO: Look into this some more
-  let largestRank: number = 0;
-  folders.forEach((folder: FolderInterface) => {
-    if (folder.rank > largestRank) {
-      largestRank = folder.rank;
-    }
-  });
-  return largestRank + RANK_INTERVAL;
-};
-
 // Sorts by ascending rank
 export const sortByRank = (a: FolderInterface, b: FolderInterface): number => {
   if (!a.rank || !b.rank) return 0;
   return a.rank - b.rank;
 };
 
-// Calculates the rank given
+// Calculates the new rank of a folder given the index of where to move it.
 export const generateFolderRank = (folders: FolderInterface[], insertAt?: number): number => {
   // Filter out the folders that were deleted
   folders = folders.filter((folder) => !folder.deleted);
