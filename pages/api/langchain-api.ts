@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { truncateLogMessage } from '@/utils/server';
+import { translateMessageToLanguage } from '@/utils/server/langchain';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
@@ -78,7 +79,17 @@ const handler = async (req: NextRequest, res: any) => {
           'Sorry, I ran out of time to think (TnT) Please try again with a more detailed question.',
         );
       } else {
-        await writeToStream(action.returnValues.output);
+        const finalOutput = action.returnValues.output;
+
+        if (selectedOutputLanguage) {
+          const response = await translateMessageToLanguage(
+            finalOutput,
+            selectedOutputLanguage,
+          );
+          await writeToStream(response.text);
+        } else {
+          await writeToStream(finalOutput);
+        }
       }
       await writeToStream('[DONE]');
       console.log('Done');
@@ -123,13 +134,8 @@ const handler = async (req: NextRequest, res: any) => {
   const tools = [new BingSerpAPI(process.env.BingApiKey), calculator];
   const toolNames = tools.map((tool) => tool.name);
 
-  const langPrompt = selectedOutputLanguage
-    ? `Your output must be in the language (${selectedOutputLanguage}).`
-    : "Your output must be in the same language as the user's input.";
-
   const prompt = ZeroShotAgent.createPrompt(tools, {
-    prefix:
-      `You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format.
+    prefix: `You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format.
       
       Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
       ${requestBody.messages
@@ -145,7 +151,6 @@ const handler = async (req: NextRequest, res: any) => {
       Make sure you include the reference links to the websites you used to answer the user's question in your response using Markdown syntax. You MUST use the following Markdown syntax to include a link in your response:
       [Link Text](https://www.example.com)
 
-
       You must use the following format:
 
 \`\`\`
@@ -160,8 +165,7 @@ Final Answer: the final answer to the original input question
 \`\`\`
 
 Please revalidate the format of your response before outputting it to the user.
-  
-    ` + langPrompt,
+    `,
   });
 
   const llmChain = new LLMChain({
