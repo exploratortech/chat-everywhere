@@ -25,7 +25,13 @@ import {
   updateConversation,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import { generateFolderRank, saveFolders, sortByRank } from '@/utils/app/folders';
+import {
+  areRanksBalanced,
+  generateFolderRank,
+  rebalanceRanks,
+  saveFolders,
+  sortByRank,
+} from '@/utils/app/folders';
 import { savePrompts } from '@/utils/app/prompts';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
@@ -217,18 +223,12 @@ const Home = ({
     updateConversationLastUpdatedAtTimeStamp();
   };
 
-  const handleUpdateFolder = (folderId: string, name: string, rank: number) => {
-    let hasRankChanged = false;
-
+  const handleUpdateFolder = (folderId: string, name: string) => {
     const updatedFolders = folders.map((f) => {
       if (f.id === folderId) {
-        if (f.rank !== rank) {
-          hasRankChanged = true;
-        }
         return {
           ...f,
           name,
-          rank,
           lastUpdateAtUTC: dayjs().valueOf(),
         };
       }
@@ -236,8 +236,36 @@ const Home = ({
       return f;
     });
 
-    if (hasRankChanged) {
-      updatedFolders.sort(sortByRank);
+    dispatch({ field: 'folders', value: updatedFolders });
+
+    saveFolders(updatedFolders);
+
+    updateConversationLastUpdatedAtTimeStamp();
+  };
+
+  const handleReorderFolder = (
+    folderId: string,
+    rank: number,
+  ): void => {
+    let updatedFolders: FolderInterface[] = folders.map((f) => {
+      if (f.id === folderId) {
+        return {
+          ...f,
+          rank,
+          lastUpdateAtUTC: dayjs().valueOf(),
+        };
+      }
+      return f;
+    });
+
+    updatedFolders.sort(sortByRank);
+
+    if (!areRanksBalanced(updatedFolders)) {
+      updatedFolders = rebalanceRanks(
+        updatedFolders,
+        folderId,
+        rank,
+      );
     }
 
     dispatch({ field: 'folders', value: updatedFolders });
@@ -522,6 +550,7 @@ const Home = ({
     if (folders) {
       const parsedFolders: FolderInterface[] = JSON.parse(folders).sort(sortByRank);
       const cleanedFolders: FolderInterface[] = cleanFolders(parsedFolders);
+      console.log(cleanedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
 
@@ -626,6 +655,7 @@ const Home = ({
         handleCreateFolder,
         handleDeleteFolder,
         handleUpdateFolder,
+        handleReorderFolder,
         handleSelectConversation,
         handleUpdateConversation,
         handleUserLogout,

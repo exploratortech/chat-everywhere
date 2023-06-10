@@ -14,7 +14,8 @@ export interface HomeContextProps {
   handleNewConversation: () => void;
   handleCreateFolder: (name: string, type: FolderType) => void;
   handleDeleteFolder: (folderId: string) => void;
-  handleUpdateFolder: (folderId: string, name: string, rank: number) => void;
+  handleUpdateFolder: (folderId: string, name: string) => void;
+  handleReorderFolder: (folderId: string, rank: number) => void;
   handleSelectConversation: (conversation: Conversation) => void;
   handleUpdateConversation: (
     conversation: Conversation,
