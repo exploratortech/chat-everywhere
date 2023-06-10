@@ -55,7 +55,7 @@ export const generateFolderRank = (folders: FolderInterface[], insertAt?: number
 }
 
 // Checks if the ranks are balanced by seeing if there are any duplicate,
-// adjacent items or folders with rank value zero in the collection. The
+// adjacent items or folders with rank values <=0 in the collection. The
 // argument is the collection of folders sorted by rank.
 export const areRanksBalanced = (folders: FolderInterface[]): boolean => {
   // Filter out the folders that were deleted
@@ -94,7 +94,8 @@ export const rebalanceRanks = (
     }
 
     // This block ensures that the moved folder gets inserted after the
-    // conflicting folder
+    // conflicting folder when the folder is moved in the middle/to the end of
+    // the list.
     if (currentFolder.rank === rank && i + 1 < folders.length) {
       const afterFolder = folders[i + 1];
       if (afterFolder.rank === rank && currentFolder.id === folderId) {
