@@ -16,7 +16,7 @@ import PromptFolderDropArea from './PromptFolderDropArea';
 export const PromptFolders = () => {
   const {
     state: { folders },
-    handleUpdateFolder,
+    handleReorderFolder,
   } = useContext(HomeContext);
 
   const {
@@ -40,9 +40,8 @@ export const PromptFolders = () => {
   const handleFolderDrop = (e: any, index: number) => {
     if (e.dataTransfer && e.dataTransfer.getData('folder')) {
       const folder: FolderInterface = JSON.parse(e.dataTransfer.getData('folder'));
-      handleUpdateFolder(
+      handleReorderFolder(
         folder.id,
-        folder.name,
         generateFolderRank(folders, index),
       );
     }
