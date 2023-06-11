@@ -30,8 +30,6 @@ const upscaleImage = async (
   imagePosition: number,
   operation: 'upscale' | 'various',
 ): Promise<string> => {
-  console.log('Sending request');
-
   const operationalResponse = await fetch('api/image-upscale', {
     method: 'POST',
     headers: {
