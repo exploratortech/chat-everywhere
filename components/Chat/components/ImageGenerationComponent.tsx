@@ -1,9 +1,9 @@
 import {
+  IconApps,
+  IconAspectRatio,
   IconCloudDownload,
   IconTools,
   IconToolsOff,
-  IconArrowBigUpLines,
-  IconApps
 } from '@tabler/icons-react';
 import { FC, useContext, useEffect, useMemo, useState } from 'react';
 
@@ -19,7 +19,7 @@ type Props = {
 
 export const ImageGenerationComponent: FC<Props> = ({
   src,
-  title: messageId,
+  title: buttonMessageId,
 }) => {
   const { t } = useTranslation('chat');
   const [isOperationalMode, setIsOperationalMode] = useState<boolean>(false);
@@ -27,17 +27,17 @@ export const ImageGenerationComponent: FC<Props> = ({
     useState<boolean>(false);
 
   useEffect(() => {
-    if (messageId && messageId.length > 0) {
+    if (buttonMessageId && buttonMessageId.length > 0) {
       setEnableAdditionalTools(true);
     }
-  }, [messageId]);
+  }, [buttonMessageId]);
 
   const upscaleImageButtonOnClick = (imagePosition: number) => {
-    console.log('upscaleImageButtonOnClick', imagePosition);
+    console.log('upscaleImageButtonOnClick', imagePosition, buttonMessageId);
   };
 
   const variousImageButtonOnClick = (imagePosition: number) => {
-    console.log('variousImageButtonOnClick', imagePosition);
+    console.log('variousImageButtonOnClick', imagePosition, buttonMessageId);
   };
 
   const OperationalButtons = ({ imagePosition }: { imagePosition: number }) =>
@@ -47,14 +47,14 @@ export const ImageGenerationComponent: FC<Props> = ({
           <button
             className="hover:text-gray-700 dark:hover:text-gray-300 h-fit mb-2"
             onClick={() => upscaleImageButtonOnClick(imagePosition)}
-            title={t("Upscale") || "Upscale"}
+            title={t('Upscale') || 'Upscale'}
           >
-            <IconArrowBigUpLines size={20} fill="none" />
+            <IconAspectRatio size={20} fill="none" />
           </button>
           <button
             className="hover:text-gray-700 dark:hover:text-gray-300 h-fit"
             onClick={() => variousImageButtonOnClick(imagePosition)}
-            title={t("Various") || "Various"}
+            title={t('Various') || 'Various'}
           >
             <IconApps size={20} fill="none" />
           </button>
@@ -68,12 +68,12 @@ export const ImageGenerationComponent: FC<Props> = ({
       {isOperationalMode && (
         <div className="flex flex-col justify-between h-full mr-1">
           <OperationalButtons imagePosition={1} />
-          <OperationalButtons imagePosition={2} />
+          <OperationalButtons imagePosition={3} />
         </div>
       )}
       <Image
         src={src}
-        alt={""}
+        alt={''}
         width={0}
         height={0}
         sizes="100vw"
@@ -81,7 +81,7 @@ export const ImageGenerationComponent: FC<Props> = ({
       />
       {isOperationalMode && (
         <div className="flex flex-col justify-between h-full ml-1">
-          <OperationalButtons imagePosition={3} />
+          <OperationalButtons imagePosition={2} />
           <OperationalButtons imagePosition={4} />
         </div>
       )}
@@ -92,9 +92,9 @@ export const ImageGenerationComponent: FC<Props> = ({
             onClick={() => setIsOperationalMode(!isOperationalMode)}
           >
             {isOperationalMode ? (
-              <IconToolsOff size={16} fill="none" />
+              <IconToolsOff size={15} fill="none" />
             ) : (
-              <IconTools size={16} fill="none" />
+              <IconTools size={15} fill="none" />
             )}
           </button>
         )}

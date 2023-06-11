@@ -29,42 +29,6 @@ const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
 const MAX_TIMEOUT = 600; // 10 minutes
 
-const generateMjPrompt = (
-  userInputText: string,
-  style: string = DEFAULT_IMAGE_GENERATION_STYLE,
-  quality: string = DEFAULT_IMAGE_GENERATION_QUALITY,
-  temperature: number = 0.5,
-): string => {
-  let resultPrompt = userInputText;
-
-  if (style !== 'Default') {
-    resultPrompt += `, ${capitalizeFirstLetter(style)}`;
-  }
-
-  switch (quality) {
-    case 'High':
-      resultPrompt += ' --quality 1';
-      break;
-    case 'Medium':
-      resultPrompt += ' --quality .5';
-      break;
-    case 'Low':
-      resultPrompt += ' --quality .25';
-      break;
-    default:
-      resultPrompt += ' --quality 1';
-      break;
-  }
-
-  if (temperature === 0.5) {
-    resultPrompt += ' --chaos 5';
-  } else if (temperature > 0.5) {
-    resultPrompt += ' --chaos 50';
-  }
-
-  return resultPrompt + ' --v 5.1';
-};
-
 const handler = async (req: Request): Promise<Response> => {
   const userToken = req.headers.get('user-token');
 
@@ -118,13 +82,6 @@ const handler = async (req: Request): Promise<Response> => {
       writeToStream(`Enhancing and translating user input prompt ... \n`);
       generationPrompt = await translateAndEnhancePrompt(
         latestUserPromptMessage,
-      );
-
-      generationPrompt = generateMjPrompt(
-        generationPrompt,
-        requestBody.imageStyle,
-        requestBody.imageQuality,
-        requestBody.temperature,
       );
 
       writeToStream(`Prompt: ${generationPrompt} \n`, true);
@@ -190,7 +147,7 @@ const handler = async (req: Request): Promise<Response> => {
           writeToStream('``` \n');
 
           writeToStream(
-            `![Generated Image](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationProgressResponseJson.response.buttonMessageId}") \n`,
+            `![Generated Image](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationMessageId}") \n`,
           );
           await addUsageEntry(PluginID.IMAGE_GEN, user.id);
           await subtractCredit(user.id, PluginID.IMAGE_GEN);
