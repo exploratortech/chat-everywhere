@@ -28,12 +28,16 @@ type RequestBody = {
 
 const addApiUsageEntry = async (tokenLength: number) => {
   const supabase = getAdminSupabaseClient();
-  await supabase.from('api_usages').insert([
+  const { error } = await supabase.from('api_usages').insert([
     {
       length: tokenLength,
       api_type: 'gpt-3.5-api',
     },
   ]);
+
+  if (error) {
+    console.error(error);
+  }
 };
 
 const handler = async (req: Request): Promise<Response> => {
