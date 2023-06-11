@@ -97,6 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   const requestBody = (await req.json()) as ChatBody;
 
+  // Do not modity this line, it is used by front-end to detect if the message is for image generation
   writeToStream('```MJImage \n');
   writeToStream('Initializing ... \n');
   writeToStream(
@@ -189,7 +190,7 @@ const handler = async (req: Request): Promise<Response> => {
           writeToStream('``` \n');
 
           writeToStream(
-            `![Generated Image](${imageGenerationProgressResponseJson.response.imageUrl}) \n`,
+            `![Generated Image](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationMessageId}") \n`,
           );
           await addUsageEntry(PluginID.IMAGE_GEN, user.id);
           await subtractCredit(user.id, PluginID.IMAGE_GEN);
