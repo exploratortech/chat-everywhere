@@ -51,6 +51,7 @@ const handler = async (req: Request): Promise<Response> => {
     .upload(imageFileName, resultEncodedImage, {
       cacheControl: '3600',
       upsert: false,
+      contentType: 'image/png',
     });
   if (fileUploadError) throw fileUploadError;
 

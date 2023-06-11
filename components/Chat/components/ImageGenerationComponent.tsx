@@ -20,6 +20,7 @@ import dayjs from 'dayjs';
 
 type Props = {
   src: string;
+  messageIndex: number;
   title?: string; // where message ID is being passed down
 };
 
@@ -60,6 +61,7 @@ const upscaleImage = async (
 export const ImageGenerationComponent: FC<Props> = ({
   src,
   title: buttonMessageId,
+  messageIndex,
 }) => {
   const { t } = useTranslation('chat');
   const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
@@ -104,7 +106,7 @@ export const ImageGenerationComponent: FC<Props> = ({
 
         const updatedMessages: Message[] = selectedConversation.messages.map(
           (message, index) => {
-            if (index === selectedConversation.messages.length - 1) {
+            if (index === messageIndex) {
               return {
                 ...message,
                 content:
@@ -155,6 +157,7 @@ export const ImageGenerationComponent: FC<Props> = ({
             className="hover:text-gray-700 dark:hover:text-gray-300 h-fit mb-2"
             onClick={() => upscaleImageButtonOnClick(imagePosition)}
             title={t('Upscale') || 'Upscale'}
+            disabled={imageOperationInProgress}
           >
             <IconAspectRatio size={20} fill="none" />
           </button>

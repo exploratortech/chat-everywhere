@@ -49,7 +49,7 @@ interface Props {
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, displayFooterButtons, conversation, onEdit }) => {
+  ({ message, displayFooterButtons, conversation, onEdit, messageIndex }) => {
     const { t } = useTranslation('chat');
 
     const {
@@ -183,7 +183,7 @@ export const ChatMessage: FC<Props> = memo(
             <img src={src} alt="" className="w-full" />
           );
         }
-        return <ImageGenerationComponent src={src} title={title}/>;
+        return <ImageGenerationComponent src={src} title={title} messageIndex={messageIndex}/>;
       };
       Component.displayName = 'ImgComponent';
       return Component;
