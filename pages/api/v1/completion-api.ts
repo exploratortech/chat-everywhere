@@ -34,7 +34,7 @@ const addApiUsageEntry = async (tokenLength: number) => {
       api_type: 'gpt-3.5-api',
     },
   ]);
-  
+
   if (error) {
     console.error(error);
   }
@@ -110,15 +110,13 @@ const handler = async (req: Request): Promise<Response> => {
             const data = event.data;
 
             try {
-              const json = JSON.parse(data);
-              if (json.choices[0].finish_reason != null) {
+              if (data === '[DONE]') {
+                await addApiUsageEntry(getTokenLength(responseContent));
                 controller.close();
-
-                const tokenLength = getTokenLength(responseContent);
-                await addApiUsageEntry(tokenLength);
                 return;
               }
 
+              const json = JSON.parse(data);
               const text = json.choices[0].delta.content;
               if (text) {
                 responseContent += text;
