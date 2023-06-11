@@ -21,6 +21,7 @@ import dayjs from 'dayjs';
 type Props = {
   src: string;
   messageIndex: number;
+  generationPrompt: string;
   title?: string; // where message ID is being passed down
 };
 
@@ -60,6 +61,7 @@ export const ImageGenerationComponent: FC<Props> = ({
   src,
   title: buttonMessageId,
   messageIndex,
+  generationPrompt,
 }) => {
   const { t } = useTranslation('chat');
   const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
@@ -108,7 +110,8 @@ export const ImageGenerationComponent: FC<Props> = ({
               return {
                 ...message,
                 content:
-                  message.content + `![Upscale image](${upscaledImageUrl}) \n`,
+                  message.content +
+                  `![${generationPrompt}](${upscaledImageUrl}) \n`,
               };
             }
             return message;
@@ -183,10 +186,10 @@ export const ImageGenerationComponent: FC<Props> = ({
       <div className="relative h-fit">
         <Image
           src={src}
-          alt={''}
+          alt={generationPrompt}
           width={0}
           height={0}
-          sizes="100vw"
+          sizes="200vw"
           style={{
             width: '100%',
             height: 'auto',
@@ -229,7 +232,10 @@ export const ImageGenerationComponent: FC<Props> = ({
             onClick={() =>
               downloadFile(
                 src,
-                `chateverywhere-ai-image-${dayjs().valueOf()}.png`,
+                'chateverywhere-' +
+                  (generationPrompt ? `${generationPrompt}-` : '') +
+                  dayjs().valueOf() +
+                  '.png',
               )
             }
           >

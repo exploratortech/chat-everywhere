@@ -189,8 +189,9 @@ const handler = async (req: Request): Promise<Response> => {
           writeToStream(`Completed in ${getTotalGenerationTime()}s \n`);
           writeToStream('``` \n');
 
+          const imageAlt = latestUserPromptMessage.replace(/\s+/g, '-').slice(0, 20);
           writeToStream(
-            `![Generated Image](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationProgressResponseJson.response.buttonMessageId}") \n`,
+            `![${imageAlt}](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationProgressResponseJson.response.buttonMessageId}") \n`,
           );
           await addUsageEntry(PluginID.IMAGE_GEN, user.id);
           await subtractCredit(user.id, PluginID.IMAGE_GEN);

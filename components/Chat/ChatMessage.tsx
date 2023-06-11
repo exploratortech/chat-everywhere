@@ -171,7 +171,8 @@ export const ChatMessage: FC<Props> = memo(
     const ImgComponent = useMemo(() => {
       const Component = ({
         src,
-        title
+        title,
+        alt
       }: React.DetailedHTMLProps<
         React.ImgHTMLAttributes<HTMLImageElement>,
         HTMLImageElement
@@ -183,11 +184,11 @@ export const ChatMessage: FC<Props> = memo(
             <img src={src} alt="" className="w-full" />
           );
         }
-        return <ImageGenerationComponent src={src} title={title} messageIndex={messageIndex}/>;
+        return <ImageGenerationComponent src={src} title={title} messageIndex={messageIndex} generationPrompt={alt || ""}/>;
       };
       Component.displayName = 'ImgComponent';
       return Component;
-    }, [message.pluginId]);
+    }, [message.pluginId, messageIndex]);
 
     const CodeComponent = useMemo(() => {
       const Component: React.FC<any> = ({
