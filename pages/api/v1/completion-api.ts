@@ -34,7 +34,7 @@ const addApiUsageEntry = async (tokenLength: number) => {
       api_type: 'gpt-3.5-api',
     },
   ]);
-
+  
   if (error) {
     console.error(error);
   }
@@ -46,6 +46,8 @@ const handler = async (req: Request): Promise<Response> => {
   if (auth !== `Bearer ${process.env.API_ACCESS_KEY}`) {
     return new Response('Unauthorized', { status: 401 });
   }
+
+  await init((imports) => WebAssembly.instantiate(wasm, imports));
 
   try {
     const { message, temperature } = (await req.json()) as RequestBody;
@@ -103,16 +105,20 @@ const handler = async (req: Request): Promise<Response> => {
 
     const stream = new ReadableStream({
       async start(controller) {
-        const onParse = (event: ParsedEvent | ReconnectInterval) => {
+        const onParse = async (event: ParsedEvent | ReconnectInterval) => {
           if (event.type === 'event') {
             const data = event.data;
 
             try {
               const json = JSON.parse(data);
               if (json.choices[0].finish_reason != null) {
-                getTokenLength(responseContent).then(addApiUsageEntry);
                 controller.close();
+
+                const tokenLength = getTokenLength(responseContent);
+                await addApiUsageEntry(tokenLength);
+                return;
               }
+
               const text = json.choices[0].delta.content;
               if (text) {
                 responseContent += text;
@@ -120,6 +126,7 @@ const handler = async (req: Request): Promise<Response> => {
               const queue = encoder.encode(text);
               controller.enqueue(queue);
             } catch (e) {
+              console.error(e);
               controller.error(e);
             }
           }
@@ -144,9 +151,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-const getTokenLength = async (value: string) => {
-  await init((imports) => WebAssembly.instantiate(wasm, imports));
-
+const getTokenLength = (value: string) => {
   const encoding = new Tiktoken(
     model.bpe_ranks,
     model.special_tokens,
@@ -154,6 +159,7 @@ const getTokenLength = async (value: string) => {
   );
   const tokens = encoding.encode(value);
   encoding.free();
+
   return tokens.length;
 };
 
