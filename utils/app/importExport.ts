@@ -7,6 +7,7 @@ import {
   SupportedExportFormats,
 } from '@/types/export';
 
+import { RANK_INTERVAL } from './const';
 import { cleanConversationHistory } from './clean';
 
 import dayjs from 'dayjs';
@@ -47,7 +48,7 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
         id: chatFolder.id.toString(),
         name: chatFolder.name,
         type: 'chat',
-        rank: index * 100,
+        rank: index * RANK_INTERVAL,
         lastUpdateAtUTC: dayjs().valueOf(),
       })),
       prompts: [],
