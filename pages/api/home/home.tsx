@@ -251,7 +251,10 @@ const Home = ({
           lastUpdateAtUTC: dayjs().valueOf(),
         };
       }
-      return f;
+      return {
+        ...f,
+        lastUpdateAtUTC: dayjs().valueOf(),
+      };
     });
 
     updatedFolders.sort(sortByRank);
@@ -267,8 +270,6 @@ const Home = ({
     dispatch({ field: 'folders', value: updatedFolders });
 
     saveFolders(updatedFolders);
-
-    updateConversationLastUpdatedAtTimeStamp();
   };
 
   // CONVERSATION OPERATIONS  --------------------------------------------
@@ -546,7 +547,6 @@ const Home = ({
     if (folders) {
       const parsedFolders: FolderInterface[] = JSON.parse(folders).sort(sortByRank);
       const cleanedFolders: FolderInterface[] = cleanFolders(parsedFolders);
-      console.log(cleanedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
 
