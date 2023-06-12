@@ -8,7 +8,7 @@ import {
 } from '@/types/export';
 
 import { RANK_INTERVAL } from './const';
-import { cleanConversationHistory } from './clean';
+import { cleanConversationHistory, cleanFolders } from './clean';
 
 import dayjs from 'dayjs';
 
@@ -56,11 +56,19 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
   }
 
   if (isExportFormatV3(data)) {
-    return { ...data, version: 4, prompts: [] };
+    return {
+      ...data,
+      version: 4,
+      folders: cleanFolders(data.folders),
+      prompts: [],
+    };
   }
 
   if (isExportFormatV4(data)) {
-    return data;
+    return {
+      ...data,
+      folders: cleanFolders(data.folders),
+    };
   }
 
   throw new Error('Unsupported data format');
