@@ -48,7 +48,7 @@ const Folder = ({
   };
 
   const handleRename = () => {
-    handleUpdateFolder(currentFolder.id, renameValue, currentFolder.rank);
+    handleUpdateFolder(currentFolder.id, renameValue);
     setRenameValue('');
     setIsRenaming(false);
   };
