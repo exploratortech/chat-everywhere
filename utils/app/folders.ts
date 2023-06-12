@@ -120,7 +120,3 @@ export const rebalanceRanks = (
 
   return rebalancedFolders;
 };
-
-export const preserveOrderOfMovedFolder = (folders: FolderInterface[]): void => {
-  
-};
