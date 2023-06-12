@@ -255,10 +255,7 @@ const Home = ({
           lastUpdateAtUTC: dayjs().valueOf(),
         };
       }
-      return {
-        ...f,
-        lastUpdateAtUTC: dayjs().valueOf(),
-      };
+      return f;
     });
 
     updatedFolders.sort(sortByRank);
