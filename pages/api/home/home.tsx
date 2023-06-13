@@ -631,14 +631,14 @@ const Home = ({
           className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
           style={{ height: containerHeight }}
         >
-          <div className="fixed top-0 w-full md:hidden">
+          <div className="w-full md:hidden">
             <Navbar
               selectedConversation={selectedConversation}
               onNewConversation={handleNewConversation}
             />
           </div>
 
-          <div className="flex h-full w-full pt-[48px] md:pt-0 overflow-x-hidden">
+          <div className="flex h-full w-full overflow-x-hidden">
             <Chatbar />
 
             <div className="flex flex-1">
