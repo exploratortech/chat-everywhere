@@ -70,10 +70,11 @@ const handler = async (req: Request): Promise<Response> => {
     await addUsageEntry(PluginID.GPT4, data.user.id);
     await subtractCredit(data.user.id, PluginID.GPT4);
     // Only enable GPT-4 in production
-    const modelToUse =
-      process.env.NEXT_PUBLIC_ENV === 'production'
-        ? OpenAIModels[OpenAIModelID.GPT_4]
-        : OpenAIModels[OpenAIModelID.GPT_3_5];
+    // const modelToUse =
+    //   process.env.NEXT_PUBLIC_ENV === 'production'
+    //     ? OpenAIModels[OpenAIModelID.GPT_4]
+    //     : OpenAIModels[OpenAIModelID.GPT_3_5];
+    const modelToUse = OpenAIModels[OpenAIModelID.GPT_4];
 
     const stream = await OpenAIStream(
       modelToUse,
@@ -86,6 +87,14 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error) {
     console.error(error);
     if (error instanceof OpenAIError) {
+      if (error.httpCode === 429) {
+        // TODO: add back credit
+        return new Response('Error', {
+          status: 429,
+          statusText:
+            'We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.',
+        });
+      }
       return new Response('Error', { status: 500, statusText: error.message });
     } else {
       return new Response('Error', { status: 500 });
