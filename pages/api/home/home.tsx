@@ -631,7 +631,7 @@ const Home = ({
           className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
           style={{ height: containerHeight }}
         >
-          <div className="w-full md:hidden">
+          <div className="w-full lg:hidden">
             <Navbar
               selectedConversation={selectedConversation}
               onNewConversation={handleNewConversation}

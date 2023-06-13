@@ -35,6 +35,7 @@ import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
 import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';
 import { SpeechButton } from './SpeechButton';
+
 import rehypeMathjax from 'rehype-mathjax';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
@@ -172,7 +173,7 @@ export const ChatMessage: FC<Props> = memo(
       const Component = ({
         src,
         title,
-        alt
+        alt,
       }: React.DetailedHTMLProps<
         React.ImgHTMLAttributes<HTMLImageElement>,
         HTMLImageElement
@@ -184,7 +185,14 @@ export const ChatMessage: FC<Props> = memo(
             <img src={src} alt="" className="w-full" />
           );
         }
-        return <ImageGenerationComponent src={src} title={title} messageIndex={messageIndex} generationPrompt={alt || ""}/>;
+        return (
+          <ImageGenerationComponent
+            src={src}
+            title={title}
+            messageIndex={messageIndex}
+            generationPrompt={alt || ''}
+          />
+        );
       };
       Component.displayName = 'ImgComponent';
       return Component;
@@ -379,11 +387,11 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 </div>
                 <div className="flex flex-row items-center mt-3 w-full justify-between">
-                  <div className="flex flex-row">
-                    {message.pluginId === PluginID.GPT4 ||
-                      (message.pluginId === null && (
-                        <SpeechButton inputText={message.content} />
-                      ))}
+                  <div className="flex flex-row items-center">
+                    {(message.pluginId === PluginID.GPT4 ||
+                      !message.pluginId) && (
+                      <SpeechButton inputText={message.content} />
+                    )}
                     {displayFooterButtons && (
                       <>
                         <FeedbackContainer conversation={conversation} />
