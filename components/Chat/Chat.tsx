@@ -175,9 +175,17 @@ export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
         if (!response.ok) {
           homeDispatch({ field: 'loading', value: false });
           homeDispatch({ field: 'messageIsStreaming', value: false });
-          toast.error(
-            response.statusText || t('Unknown error, please contact support'),
-          );
+          if (response.status === 429) {
+            toast.error(
+              t(
+                'We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.',
+              ),
+            );
+          } else {
+            toast.error(
+              response.statusText || t('Unknown error, please contact support'),
+            );
+          }
 
           // remove the last message from the conversation
           homeDispatch({
