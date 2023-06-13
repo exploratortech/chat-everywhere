@@ -437,10 +437,10 @@ export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
             ) : (
               <>
                 <div
-                  className="justify-center border hidden md:flex
+                  className="justify-center border hidden lg:flex
                   border-b-neutral-300 bg-neutral-100 py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 sticky top-0 z-10"
                 >
-                  {selectedConversation?.name}
+                  {selectedConversation?.name} 
 
                   <button
                     className="ml-2 cursor-pointer hover:opacity-50"
