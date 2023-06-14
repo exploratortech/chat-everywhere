@@ -5,6 +5,7 @@ import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 import { PluginKey } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
 import { CreditUsage, User } from '@/types/user';
+import { DragData } from '@/types/drag';
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -31,6 +32,7 @@ export interface HomeInitialState {
   serverSideApiKeyIsSet: boolean;
   serverSidePluginKeysSet: boolean;
   outputLanguage: string;
+  currentDrag: DragData | undefined;
 
   // Supabase / Cloud Sync
   supabaseClient: SupabaseClient | null;
@@ -86,6 +88,7 @@ export const initialState: HomeInitialState = {
   serverSideApiKeyIsSet: false,
   serverSidePluginKeysSet: false,
   outputLanguage: '',
+  currentDrag: undefined,
 
   // Supabase / Cloud Sync
   supabaseClient: null,

@@ -44,6 +44,7 @@ import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModelID, OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 import { UserProfile } from '@/types/user';
+import { DragData } from '@/types/drag';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
@@ -339,6 +340,16 @@ const Home = ({
       lastUpdateAtUTC: dayjs().valueOf(),
     };
     return newConversation;
+  };
+
+  // DRAGGING ITEMS --------------------------------------
+
+  const setDragData = (dragData: DragData): void => {
+    dispatch({ field: 'currentDrag', value: dragData });
+  };
+
+  const removeDragData = (): void => {
+    dispatch({ field: 'currentDrag', value: undefined });
   };
 
   // EFFECTS  --------------------------------------------
@@ -660,6 +671,8 @@ const Home = ({
         playMessage: (text, speechId) =>
           speak(text, speechId, user?.token || ''),
         stopPlaying,
+        setDragData,
+        removeDragData,
       }}
     >
       <Head>

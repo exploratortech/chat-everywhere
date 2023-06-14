@@ -23,7 +23,7 @@ import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 interface Props {
   currentFolder: FolderInterface;
   searchTerm: string;
-  handleDrop: (e: any, folder: FolderInterface) => void;
+  handleDrop: (folder: FolderInterface) => void;
   folderComponent: (ReactElement | undefined)[];
 }
 
@@ -33,7 +33,13 @@ const Folder = ({
   handleDrop,
   folderComponent,
 }: Props) => {
-  const { handleDeleteFolder, handleUpdateFolder } = useContext(HomeContext);
+  const {
+    state: { currentDrag },
+    handleDeleteFolder,
+    handleUpdateFolder,
+    setDragData,
+    removeDragData,
+  } = useContext(HomeContext);
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -54,19 +60,20 @@ const Folder = ({
   };
 
   const dropHandler = (e: any) => {
-    if (e.dataTransfer && !e.dataTransfer.getData('folder')) {
+    if (currentDrag && currentDrag.type !== 'folder') {
       setIsOpen(true);
 
-      handleDrop(e, currentFolder);
+      handleDrop(currentFolder);
 
       e.target.style.background = 'none';
     }
   };
 
-  const handleDragStart = (e: any) => {
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('folder', JSON.stringify(currentFolder));
-    }
+  const handleDragStart = () => {
+    setDragData({
+      data: currentFolder,
+      type: 'folder',
+    });
   };
 
   const allowDrop = (e: any) => {
@@ -74,7 +81,7 @@ const Folder = ({
   };
 
   const highlightDrop = (e: any) => {
-    if (e.dataTransfer && !e.dataTransfer.getData('folder')) {
+    if (currentDrag && currentDrag.type !== 'folder') {
       e.target.style.background = '#343541';
     }
   };
@@ -128,6 +135,7 @@ const Folder = ({
             onDragOver={allowDrop}
             onDragEnter={highlightDrop}
             onDragLeave={removeHighlight}
+            onDragEnd={removeDragData}
           >
             {isOpen ? (
               <IconCaretDown size={18} />

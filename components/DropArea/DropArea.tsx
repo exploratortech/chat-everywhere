@@ -1,17 +1,31 @@
+import { useContext, useRef } from 'react';
+
+import HomeContext from '@/pages/api/home/home.context';
+
+import { DragDataType } from '@/types/drag';
+
 interface Props {
+  canDrop?: () => boolean;
   index: number;
-  onDrop: (e: any, index: number) => void;
+  onDrop: (index: number) => void;
 }
 
-const DropArea = ({ index, onDrop }: Props) => {
+const DropArea = ({ canDrop = () => false, index, onDrop }: Props) => {
+  const {
+    state: { currentDrag },
+  } = useContext(HomeContext);
+
+  const indicatorRef = useRef<HTMLDivElement>(null);
+
   const handleDrop = (e: any) => {
-    onDrop(e, index);
+    onDrop(index);
     removeHighlight(e);
   };
 
   const onDragEnter = (e: any) => {
-    if (e.dataTransfer && e.dataTransfer.getData('folder')) {
-      e.target.parentNode.style.background = '#343541';
+    if (canDrop() && currentDrag) {
+      if (indicatorRef.current)
+        indicatorRef.current.style.background = '#343541';
     }
   };
 
@@ -24,19 +38,21 @@ const DropArea = ({ index, onDrop }: Props) => {
   };
 
   const removeHighlight = (e: any) => {
-    e.target.parentNode.style.background = 'none';
+    if (indicatorRef.current)
+      indicatorRef.current.style.background = 'none';
   }
 
   return (
     <div
-      className="relative pt-1 rounded-lg"
+      className="relative h-3"
+      onDrop={handleDrop}
+      onDragEnter={onDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={allowDrop}
     >
       <div
-        className="absolute top-0 left-0 right-0 py-4 -translate-y-1/2 z-50"
-        onDrop={handleDrop}
-        onDragEnter={onDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={allowDrop}
+        ref={indicatorRef}
+        className="absolute h-6 top-0 bottom-0 left-0 right-0 rounded-lg z-50 pointer-events-none m-0 my-auto"
       />
     </div>
   );

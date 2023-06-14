@@ -4,6 +4,7 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 
 import { FolderInterface } from '@/types/folder';
+import { Conversation } from '@/types/chat';
 
 import HomeContext from '@/pages/api/home/home.context';
 
@@ -19,14 +20,18 @@ interface Props {
 
 export const ChatFolders = ({ searchTerm }: Props) => {
   const {
-    state: { folders, conversations },
+    state: {
+      folders,
+      conversations,
+      currentDrag,
+    },
     handleUpdateConversation,
     handleReorderFolder,
   } = useContext(HomeContext);
 
-  const handleConversationDrop = (e: any, folder: FolderInterface) => {
-    if (e.dataTransfer) {
-      const conversation = JSON.parse(e.dataTransfer.getData('conversation'));
+  const handleConversationDrop = (folder: FolderInterface) => {
+    if (currentDrag && currentDrag.type === 'conversation') {
+      const conversation = currentDrag.data as Conversation;
       handleUpdateConversation(conversation, {
         key: 'folderId',
         value: folder.id,
@@ -34,9 +39,9 @@ export const ChatFolders = ({ searchTerm }: Props) => {
     }
   };
 
-  const handleFolderDrop = (e: any, index: number) => {
-    if (e.dataTransfer && e.dataTransfer.getData('folder')) {
-      const folder: FolderInterface = JSON.parse(e.dataTransfer.getData('folder'));
+  const handleFolderDrop = (index: number) => {
+    if (currentDrag && currentDrag.type === 'folder') {
+      const folder: FolderInterface = currentDrag.data as FolderInterface;
       if (folder.type !== 'chat') return;
       handleReorderFolder(
         folder.id,
@@ -44,6 +49,14 @@ export const ChatFolders = ({ searchTerm }: Props) => {
         'chat',
       );
     }
+  };
+
+  const handleCanDrop = (): boolean => {
+    return (
+      !!currentDrag &&
+      currentDrag.type === 'folder' &&
+      (currentDrag.data as FolderInterface).type === 'chat'
+    );
   };
 
   const ChatFolders = (currentFolder: FolderInterface) => {
@@ -68,6 +81,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
   return (
     <TransitionGroup className="flex w-full flex-col pt-2">
       <DropArea
+        canDrop={handleCanDrop}
         index={0}
         onDrop={handleFolderDrop}
       />
@@ -85,6 +99,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
               />
             </CSSTransition>
             <DropArea
+              canDrop={handleCanDrop}
               index={index + 1}
               onDrop={handleFolderDrop}
             />

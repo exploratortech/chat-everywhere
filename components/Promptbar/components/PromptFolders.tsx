@@ -3,6 +3,7 @@ import { Fragment, useContext } from 'react';
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { generateFolderRank } from '@/utils/app/folders';
 
+import { Prompt } from '@/types/prompt';
 import { FolderInterface } from '@/types/folder';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -15,8 +16,12 @@ import DropArea from '@/components/DropArea/DropArea';
 
 export const PromptFolders = () => {
   const {
-    state: { folders },
+    state: {
+      currentDrag,
+      folders,
+    },
     handleReorderFolder,
+    removeDragData,
   } = useContext(HomeContext);
 
   const {
@@ -24,9 +29,9 @@ export const PromptFolders = () => {
     handleUpdatePrompt,
   } = useContext(PromptbarContext);
 
-  const handlePromptDrop = (e: any, folder: FolderInterface) => {
-    if (e.dataTransfer && e.dataTransfer.getData('prompt')) {
-      const prompt = JSON.parse(e.dataTransfer.getData('prompt'));
+  const handlePromptDrop = (folder: FolderInterface) => {
+    if (currentDrag && currentDrag.type === 'prompt') {
+      const prompt = currentDrag.data as Prompt;
 
       const updatedPrompt = {
         ...prompt,
@@ -34,12 +39,13 @@ export const PromptFolders = () => {
       };
 
       handleUpdatePrompt(updatedPrompt);
+      removeDragData();
     }
   };
 
-  const handleFolderDrop = (e: any, index: number) => {
-    if (e.dataTransfer && e.dataTransfer.getData('folder')) {
-      const folder: FolderInterface = JSON.parse(e.dataTransfer.getData('folder'));
+  const handleFolderDrop = (index: number) => {
+    if (currentDrag && currentDrag.type === 'folder') {
+      const folder = currentDrag.data as FolderInterface;
       if (folder.type !== 'prompt') return;
       handleReorderFolder(
         folder.id,
@@ -47,6 +53,14 @@ export const PromptFolders = () => {
         'prompt',
       );
     }
+  };
+
+  const handleCanDrop = (): boolean => {
+    return (
+      !!currentDrag &&
+      currentDrag.type === 'folder' &&
+      (currentDrag.data as FolderInterface).type === 'prompt'
+    );
   };
 
   const PromptFolders = (currentFolder: FolderInterface) =>
@@ -65,6 +79,7 @@ export const PromptFolders = () => {
   return (
     <div className="flex w-full flex-col pt-2">
       <DropArea
+        canDrop={handleCanDrop}
         index={0}
         onDrop={handleFolderDrop}
       />
@@ -79,6 +94,7 @@ export const PromptFolders = () => {
               folderComponent={PromptFolders(folder)}
             />
             <DropArea
+              canDrop={handleCanDrop}
               index={index + 1}
               onDrop={handleFolderDrop}
             />
