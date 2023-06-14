@@ -11,7 +11,7 @@ import Folder from '@/components/Folder';
 import { PromptComponent } from '@/components/Promptbar/components/Prompt';
 
 import PromptbarContext from '../PromptBar.context';
-import PromptFolderDropArea from './PromptFolderDropArea';
+import DropArea from '@/components/DropArea/DropArea';
 
 export const PromptFolders = () => {
   const {
@@ -62,9 +62,9 @@ export const PromptFolders = () => {
 
   return (
     <div className="flex w-full flex-col pt-2">
-      <PromptFolderDropArea
+      <DropArea
         index={0}
-        handleFolderDrop={handleFolderDrop}
+        onDrop={handleFolderDrop}
       />
       {getNonDeletedCollection(folders)
         .filter((folder) => folder.type === 'prompt')
@@ -76,9 +76,9 @@ export const PromptFolders = () => {
               handleDrop={handlePromptDrop}
               folderComponent={PromptFolders(folder)}
             />
-            <PromptFolderDropArea
+            <DropArea
               index={index + 1}
-              handleFolderDrop={handleFolderDrop}
+              onDrop={handleFolderDrop}
             />
           </Fragment>
         ))}

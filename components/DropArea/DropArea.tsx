@@ -1,11 +1,11 @@
 interface Props {
   index: number;
-  handleFolderDrop: (e: any, index: number) => void;
+  onDrop: (e: any, index: number) => void;
 }
 
-const PromptFolderDropArea = ({ index, handleFolderDrop }: Props) => {
+const DropArea = ({ index, onDrop }: Props) => {
   const handleDrop = (e: any) => {
-    handleFolderDrop(e, index);
+    onDrop(e, index);
     removeHighlight(e);
   };
 
@@ -42,4 +42,4 @@ const PromptFolderDropArea = ({ index, handleFolderDrop }: Props) => {
   );
 };
 
-export default PromptFolderDropArea;
+export default DropArea;
