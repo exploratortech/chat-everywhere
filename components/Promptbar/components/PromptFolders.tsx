@@ -71,7 +71,7 @@ export const PromptFolders = () => {
       {getNonDeletedCollection(folders)
         .filter((folder) => folder.type === 'prompt')
         .map((folder, index) => (
-          <Fragment key={index}>
+          <Fragment key={folder.id}>
             <Folder
               searchTerm={searchTerm}
               currentFolder={folder}
