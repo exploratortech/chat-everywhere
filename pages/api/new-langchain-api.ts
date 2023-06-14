@@ -1,4 +1,3 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { CustomStreamCallbackHandler } from '@/utils/server/CustomStreamCallbackHandler';
@@ -8,12 +7,29 @@ import { ChatBody } from '@/types/chat';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { BingSerpAPI } from 'langchain/tools';
-import { Calculator } from 'langchain/tools/calculator';
-import { WebBrowser } from 'langchain/tools/webbrowser';
+import { BingSerpAPI, DynamicTool } from 'langchain/tools';
+import { all, create } from 'mathjs';
+
+const calculator = new DynamicTool({
+  name: 'calculator',
+  description:
+    'Useful for getting the result of a math expression. The input to this tool should ONLY be a valid mathematical expression that could be executed by a simple calculator.',
+  func: (input) => {
+    const math = create(all, {});
+
+    try {
+      const value = math.evaluate(input);
+      return value.toString();
+    } catch (e) {
+      return 'Unable to evaluate expression, please make sure it is a valid mathematical expression with no unit';
+    }
+  },
+});
+
+// import { WebBrowser } from 'langchain/tools/webbrowser';
 
 const BingAPIKey = process.env.BingApiKey;
-const embeddings = new OpenAIEmbeddings();
+// const embeddings = new OpenAIEmbeddings();
 
 export const config = {
   runtime: 'edge',
@@ -43,7 +59,7 @@ const handler = async (req: NextRequest, res: any) => {
     callbacks: [customHandler],
   });
   const tools = [
-    new Calculator(),
+    calculator,
     new BingSerpAPI(BingAPIKey),
     // new WebBrowser({ model, embeddings }),
   ];
