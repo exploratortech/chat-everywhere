@@ -39,7 +39,8 @@ function TokenCounter({
       case 'gpt-4':
         return OpenAIModels[OpenAIModelID.GPT_4].tokenLimit;
       default:
-        return OpenAIModels[OpenAIModelID.GPT_3_5].tokenLimit;
+        // The Chat endpoint will automatically use the 16k content window model if the prompt is longer than 2048 tokens
+        return OpenAIModels[OpenAIModelID.GPT_3_5_16K].tokenLimit;
     }
   }, [currentMessage?.pluginId]);
 
