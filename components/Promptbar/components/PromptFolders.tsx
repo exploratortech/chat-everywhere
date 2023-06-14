@@ -42,7 +42,8 @@ export const PromptFolders = () => {
       const folder: FolderInterface = JSON.parse(e.dataTransfer.getData('folder'));
       handleReorderFolder(
         folder.id,
-        generateFolderRank(folders, index),
+        generateFolderRank(folders, folder.type, index),
+        'prompt',
       );
     }
   };

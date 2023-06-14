@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 
-import { FolderInterface } from '@/types/folder';
+import { FolderInterface, FolderType } from '@/types/folder';
 import { RANK_INTERVAL } from '@/utils/app/const';
+import { getNonDeletedCollection } from './conversation';
 
 export const saveFolders = (folders: FolderInterface[]) => {
   localStorage.setItem('folders', JSON.stringify(folders));
@@ -16,9 +17,14 @@ export const sortByRank = (a: FolderInterface, b: FolderInterface): number => {
 };
 
 // Calculates the new rank of a folder given the index of where to move it.
-export const generateFolderRank = (folders: FolderInterface[], insertAt?: number): number => {
+export const generateFolderRank = (
+  folders: FolderInterface[],
+  folderType: FolderType,
+  insertAt?: number,
+): number => {
   // Filter out the folders that were deleted
-  folders = folders.filter((folder) => !folder.deleted);
+  folders = getNonDeletedCollection(folders)
+    .filter((folder: FolderInterface) => folder.type === folderType);
 
   // Set the default insertAt value to the length of the filtered folders
   if (insertAt == null || insertAt < 0 || insertAt > folders.length) {
@@ -42,6 +48,7 @@ export const generateFolderRank = (folders: FolderInterface[], insertAt?: number
   // Inserting folder in the middle
   const topFolder: FolderInterface = folders[insertAt - 1];
   const bottomFolder: FolderInterface = folders[insertAt];
+  console.log('folders:', folders);
 
   if (!topFolder.rank && !bottomFolder.rank) {
     return Math.floor((folders.length * RANK_INTERVAL) / 2);
@@ -57,9 +64,13 @@ export const generateFolderRank = (folders: FolderInterface[], insertAt?: number
 // Checks if the ranks are balanced by seeing if there are any duplicate,
 // adjacent items or folders with rank values <=0 in the collection. The
 // argument is the collection of folders sorted by rank.
-export const areRanksBalanced = (folders: FolderInterface[]): boolean => {
+export const areRanksBalanced = (
+  folders: FolderInterface[],
+  folderType: FolderType,
+): boolean => {
   // Filter out the folders that were deleted
-  folders = folders.filter((folder) => !folder.deleted);
+  folders = getNonDeletedCollection(folders)
+    .filter((folder: FolderInterface) => folder.type === folderType);
 
   for (let i = 0; i < folders.length - 1; i++) {
     const folder1 = folders[i];

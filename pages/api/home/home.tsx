@@ -169,7 +169,7 @@ const Home = ({
       name,
       type,
       lastUpdateAtUTC: dayjs().valueOf(),
-      rank: generateFolderRank(folders),
+      rank: generateFolderRank(folders, type),
     };
 
     const updatedFolders = [...folders, newFolder];
@@ -246,6 +246,7 @@ const Home = ({
   const handleReorderFolder = (
     folderId: string,
     rank: number,
+    folderType: FolderType,
   ): void => {
     let updatedFolders: FolderInterface[] = folders.map((f) => {
       if (f.id === folderId) {
@@ -260,7 +261,7 @@ const Home = ({
 
     updatedFolders.sort(sortByRank);
 
-    if (!areRanksBalanced(updatedFolders)) {
+    if (!areRanksBalanced(updatedFolders, folderType)) {
       updatedFolders = rebalanceRanks(
         updatedFolders,
         folderId,
@@ -548,6 +549,7 @@ const Home = ({
     if (folders) {
       const parsedFolders: FolderInterface[] = JSON.parse(folders).sort(sortByRank);
       const cleanedFolders: FolderInterface[] = cleanFolders(parsedFolders);
+      console.log('cleanedFOdlers:', cleanedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
 
