@@ -1,15 +1,18 @@
-import { BingSerpAPI } from 'langchain/tools';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { CallbackManager } from 'langchain/callbacks';
-import { AgentExecutor, ZeroShotAgent } from 'langchain/agents';
-import { LLMChain } from 'langchain/chains';
-import { ChatBody } from '@/types/chat';
 import { NextRequest, NextResponse } from 'next/server';
-import { DynamicTool } from 'langchain/tools';
-import { create, all } from 'mathjs';
-import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
-import { PluginID } from '@/types/plugin';
+
 import { truncateLogMessage } from '@/utils/server';
+import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
+
+import { ChatBody } from '@/types/chat';
+import { PluginID } from '@/types/plugin';
+
+import { AgentExecutor, ZeroShotAgent } from 'langchain/agents';
+import { CallbackManager } from 'langchain/callbacks';
+import { LLMChain } from 'langchain/chains';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { BingSerpAPI } from 'langchain/tools';
+import { DynamicTool } from 'langchain/tools';
+import { all, create } from 'mathjs';
 
 export const config = {
   runtime: 'edge',
@@ -39,7 +42,9 @@ const handler = async (req: NextRequest, res: any) => {
   const latestUserPrompt =
     requestBody.messages[requestBody.messages.length - 1].content;
 
-  const selectedOutputLanguage = req.headers.get('Output-Language') ? `(lang=${req.headers.get('Output-Language')})` : '';
+  const selectedOutputLanguage = req.headers.get('Output-Language')
+    ? `(lang=${req.headers.get('Output-Language')})`
+    : '';
 
   const encoder = new TextEncoder();
   const stream = new TransformStream();
@@ -116,9 +121,10 @@ const handler = async (req: NextRequest, res: any) => {
     streaming: false,
   });
 
-  const tools = [new BingSerpAPI(), calculator];
+  const BingAPIKey = process.env.BingApiKey;
+  const tools = [new BingSerpAPI(BingAPIKey), calculator];
   const toolNames = tools.map((tool) => tool.name);
-  
+
   const prompt = ZeroShotAgent.createPrompt(tools, {
     prefix: `You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format.
       
@@ -147,7 +153,7 @@ const handler = async (req: NextRequest, res: any) => {
       Thought: I now know the final answer
       Final Answer: the final answer to the original input question
     `,
-  });  
+  });
 
   const llmChain = new LLMChain({
     llm: model,
@@ -169,8 +175,8 @@ const handler = async (req: NextRequest, res: any) => {
     agentExecutor.verbose = true;
 
     agentExecutor.call({
-        input:  `${selectedOutputLanguage} ${latestUserPrompt}`,
-      })
+      input: `${selectedOutputLanguage} ${latestUserPrompt}`,
+    });
 
     return new NextResponse(stream.readable, {
       headers: {
@@ -191,7 +197,7 @@ const handler = async (req: NextRequest, res: any) => {
 
 const normalizeTextAnswer = (text: string) => {
   const mindlogRegex = /```Online \n(.|\n)*```/g;
-  return text.replace(mindlogRegex, '').replace("{", "{{").replace("}", "}}");
+  return text.replace(mindlogRegex, '').replace('{', '{{').replace('}', '}}');
 };
 
 export default handler;
