@@ -23,7 +23,7 @@ export const Navbar: FC<Props> = ({
       </div>
 
       <div className="max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap">
-        {selectedConversation.name}
+        {selectedConversation.name !== 'New conversation' && selectedConversation.name}
       </div>
 
       <IconPlus
