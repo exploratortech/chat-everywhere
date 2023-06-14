@@ -1,4 +1,9 @@
-import { NextRequest } from 'next/server';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
+
+import { CustomStreamCallbackHandler } from '@/utils/server/CustomStreamCallbackHandler';
+
+import { ChatBody } from '@/types/chat';
 
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
@@ -8,30 +13,64 @@ import { Calculator } from 'langchain/tools/calculator';
 import { WebBrowser } from 'langchain/tools/webbrowser';
 
 const BingAPIKey = process.env.BingApiKey;
-const model = new ChatOpenAI({ modelName: 'gpt-4-0613', temperature: 0 });
 const embeddings = new OpenAIEmbeddings();
-const tools = [
-  new Calculator(),
-  new BingSerpAPI(BingAPIKey),
-  new WebBrowser({ model, embeddings }),
-];
 
+export const config = {
+  runtime: 'edge',
+};
 const handler = async (req: NextRequest, res: any) => {
+  // const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  // const requestBody = req.body as ChatBody;
+  const requestBody = (await req.json()) as ChatBody;
+
+  const input = requestBody.messages[requestBody.messages.length - 1].content;
+
+  const encoder = new TextEncoder();
+  const stream = new TransformStream();
+
+  const writer = stream.writable.getWriter();
+
+  const writeToStream = async (text: string) => {
+    await writer.write(encoder.encode(text));
+  };
+
+  const customHandler = new CustomStreamCallbackHandler(writer, writeToStream);
+
+  const model = new ChatOpenAI({
+    modelName: 'gpt-4-0613',
+    temperature: 0,
+    streaming: false,
+    callbacks: [customHandler],
+  });
+  const tools = [
+    new Calculator(),
+    new BingSerpAPI(BingAPIKey),
+    // new WebBrowser({ model, embeddings }),
+  ];
+
   const executor = await initializeAgentExecutorWithOptions(tools, model, {
-    agentType: 'openai-functions',
+    agentType: 'zero-shot-react-description',
     verbose: true,
+    callbacks: [customHandler],
   });
-  let link = 'https://videomaker.cc/coursesall/aivideomaker02/';
-  let input = `將下列網頁内容改寫成課程宣傅影片的分鏡腳本，請用表格列出，包含時間、書面、文字、音樂等 ${link} `;
 
-  // let input = '';
-  // input = `這個Page的課程名叫什麼? ${link}}`;
-
-  const result = await executor.call({ input });
-
-  res.json({
-    result: JSON.stringify(result, null, 2),
-  });
+  try {
+    executor.call({ input });
+    return new NextResponse(stream.readable, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+      },
+    });
+  } catch (e) {
+    await writer.ready;
+    await writeToStream('``` \n\n');
+    await writeToStream('Sorry, I am not able to answer your question. \n\n');
+    await writer.abort(e);
+    console.log('Request closed');
+    console.error(e);
+    console.log(typeof e);
+  }
 };
 
 export default handler;
