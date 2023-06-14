@@ -40,6 +40,7 @@ export const PromptFolders = () => {
   const handleFolderDrop = (e: any, index: number) => {
     if (e.dataTransfer && e.dataTransfer.getData('folder')) {
       const folder: FolderInterface = JSON.parse(e.dataTransfer.getData('folder'));
+      if (folder.type !== 'prompt') return;
       handleReorderFolder(
         folder.id,
         generateFolderRank(folders, folder.type, index),
