@@ -48,7 +48,6 @@ export const generateFolderRank = (
   // Inserting folder in the middle
   const topFolder: FolderInterface = folders[insertAt - 1];
   const bottomFolder: FolderInterface = folders[insertAt];
-  console.log('folders:', folders);
 
   if (!topFolder.rank && !bottomFolder.rank) {
     return Math.floor((folders.length * RANK_INTERVAL) / 2);

@@ -549,7 +549,6 @@ const Home = ({
     if (folders) {
       const parsedFolders: FolderInterface[] = JSON.parse(folders).sort(sortByRank);
       const cleanedFolders: FolderInterface[] = cleanFolders(parsedFolders);
-      console.log('cleanedFOdlers:', cleanedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
 
