@@ -30,6 +30,8 @@ export const ConversationComponent = ({ conversation }: Props) => {
     state: { selectedConversation, messageIsStreaming },
     handleSelectConversation,
     handleUpdateConversation,
+    setDragData,
+    removeDragData,
   } = useContext(HomeContext);
 
   const { handleDeleteConversation } = useContext(ChatbarContext);
@@ -45,13 +47,8 @@ export const ConversationComponent = ({ conversation }: Props) => {
     }
   };
 
-  const handleDragStart = (
-    e: DragEvent<HTMLButtonElement>,
-    conversation: Conversation,
-  ) => {
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('conversation', JSON.stringify(conversation));
-    }
+  const handleDragStart = () => {
+    setDragData({ data: conversation, type: 'conversation'});
   };
 
   const handleRename = (conversation: Conversation) => {
@@ -126,7 +123,8 @@ export const ConversationComponent = ({ conversation }: Props) => {
           onClick={() => handleSelectConversation(conversation)}
           disabled={messageIsStreaming}
           draggable="true"
-          onDragStart={(e) => handleDragStart(e, conversation)}
+          onDragStart={handleDragStart}
+          onDragEnd={removeDragData}
         >
           <IconMessage size={18} />
           <div

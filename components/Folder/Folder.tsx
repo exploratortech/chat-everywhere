@@ -70,10 +70,7 @@ const Folder = ({
   };
 
   const handleDragStart = () => {
-    setDragData({
-      data: currentFolder,
-      type: 'folder',
-    });
+    setDragData({ data: currentFolder, type: 'folder' });
   };
 
   const allowDrop = (e: any) => {
@@ -132,10 +129,10 @@ const Folder = ({
             onClick={() => setIsOpen(!isOpen)}
             onDrop={(e) => dropHandler(e)}
             onDragStart={handleDragStart}
+            onDragEnd={removeDragData}
             onDragOver={allowDrop}
             onDragEnter={highlightDrop}
             onDragLeave={removeHighlight}
-            onDragEnd={removeDragData}
           >
             {isOpen ? (
               <IconCaretDown size={18} />

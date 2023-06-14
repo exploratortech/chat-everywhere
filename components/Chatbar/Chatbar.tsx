@@ -49,6 +49,7 @@ export const Chatbar = () => {
       pluginKeys,
       showPromptbar,
       selectedConversation,
+      currentDrag,
     },
     dispatch: homeDispatch,
     handleCreateFolder,
@@ -237,8 +238,8 @@ export const Chatbar = () => {
   };
 
   const handleDrop = (e: any) => {
-    if (e.dataTransfer) {
-      const conversation = JSON.parse(e.dataTransfer.getData('conversation'));
+    if (currentDrag) {
+      const conversation = currentDrag.data as Conversation;
       handleUpdateConversation(conversation, { key: 'folderId', value: 0 });
       chatDispatch({ field: 'searchTerm', value: '' });
       e.target.style.background = 'none';

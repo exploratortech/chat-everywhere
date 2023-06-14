@@ -2,8 +2,6 @@ import { useContext, useRef } from 'react';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import { DragDataType } from '@/types/drag';
-
 interface Props {
   canDrop?: () => boolean;
   index: number;
@@ -52,7 +50,7 @@ const DropArea = ({ canDrop = () => false, index, onDrop }: Props) => {
     >
       <div
         ref={indicatorRef}
-        className="absolute h-6 top-0 bottom-0 left-0 right-0 rounded-lg z-50 pointer-events-none m-0 my-auto"
+        className="absolute h-4 my-auto top-0 bottom-0 left-0 right-0 rounded-lg z-50 pointer-events-none"
       />
     </div>
   );

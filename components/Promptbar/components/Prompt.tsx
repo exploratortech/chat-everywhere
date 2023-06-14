@@ -16,6 +16,8 @@ import { Prompt } from '@/types/prompt';
 
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 
+import HomeContext from '@/pages/api/home/home.context';
+
 import PromptbarContext from '../PromptBar.context';
 import { PromptModal } from './PromptModal';
 
@@ -24,6 +26,11 @@ interface Props {
 }
 
 export const PromptComponent = ({ prompt }: Props) => {
+  const {
+    setDragData,
+    removeDragData,
+  } = useContext(HomeContext);
+
   const {
     dispatch: promptDispatch,
     handleUpdatePrompt,
@@ -61,10 +68,8 @@ export const PromptComponent = ({ prompt }: Props) => {
     setIsDeleting(true);
   };
 
-  const handleDragStart = (e: DragEvent<HTMLButtonElement>, prompt: Prompt) => {
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('prompt', JSON.stringify(prompt));
-    }
+  const handleDragStart = () => {
+    setDragData({ data: prompt, type: 'prompt' });
   };
 
   useEffect(() => {
@@ -84,7 +89,8 @@ export const PromptComponent = ({ prompt }: Props) => {
           e.stopPropagation();
           setShowModal(true);
         }}
-        onDragStart={(e) => handleDragStart(e, prompt)}
+        onDragStart={handleDragStart}
+        onDragEnd={removeDragData}
         onMouseLeave={() => {
           setIsDeleting(false);
           setIsRenaming(false);

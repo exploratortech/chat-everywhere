@@ -21,7 +21,6 @@ export const PromptFolders = () => {
       folders,
     },
     handleReorderFolder,
-    removeDragData,
   } = useContext(HomeContext);
 
   const {
@@ -39,7 +38,6 @@ export const PromptFolders = () => {
       };
 
       handleUpdatePrompt(updatedPrompt);
-      removeDragData();
     }
   };
 
