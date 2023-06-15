@@ -11,7 +11,7 @@ interface Props {
 
 export const Conversations = ({ conversations }: Props) => {
   return (
-    <TransitionGroup className="flex w-full gap-1 flex-col-reverse">
+    <TransitionGroup className="flex w-full gap-1 flex-col-reverse rounded-lg">
       {conversations
         .filter((conversation) => !conversation.folderId)
         .map((conversation) => (

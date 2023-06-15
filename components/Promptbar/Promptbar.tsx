@@ -31,7 +31,13 @@ const Promptbar = () => {
   });
 
   const {
-    state: { prompts, defaultModelId, showChatbar, showPromptbar },
+    state: {
+      prompts,
+      defaultModelId,
+      showChatbar,
+      showPromptbar,
+      currentDrag,
+    },
     dispatch: homeDispatch,
     handleCreateFolder,
   } = useContext(HomeContext);
@@ -110,8 +116,8 @@ const Promptbar = () => {
   };
 
   const handleDrop = (e: any) => {
-    if (e.dataTransfer) {
-      const prompt = JSON.parse(e.dataTransfer.getData('prompt'));
+    if (currentDrag) {
+      const prompt = currentDrag.data as Prompt;
 
       const updatedPrompt = {
         ...prompt,
