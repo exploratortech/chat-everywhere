@@ -31,6 +31,17 @@ const calculator = new DynamicTool({
   },
 });
 
+const webBrowser = new DynamicTool({
+  name: 'web-browser',
+  description:
+    'useful for when you need to find something on or summarize a webpage. input should be a comma separated list of "ONE valid http URL including protocol","what you want to find on the page or empty string for a detail summary".',
+  func: async (input) => {
+    const response = await fetch(`${process.env.SERVER_HOST}/api/web-summary?browserQuery=${input}`);
+    const { summary } = await response.json();
+    return summary;
+  },
+});
+
 const handler = async (req: NextRequest, res: any) => {
   retrieveUserSessionAndLogUsages(req, PluginID.LANGCHAIN_CHAT);
 
@@ -114,9 +125,10 @@ const handler = async (req: NextRequest, res: any) => {
     callbackManager,
     openAIApiKey: process.env.OPENAI_API_KEY,
     streaming: false,
+    modelName: 'gpt-3.5-turbo-16k'
   });
 
-  const tools = [new BingSerpAPI(), calculator];
+  const tools = [new BingSerpAPI(), calculator, webBrowser];
   const toolNames = tools.map((tool) => tool.name);
   
   const prompt = ZeroShotAgent.createPrompt(tools, {
@@ -156,7 +168,7 @@ const handler = async (req: NextRequest, res: any) => {
 
   const agent = new ZeroShotAgent({
     llmChain,
-    allowedTools: ['bing-search', 'calculator'],
+    allowedTools: ['bing-search', 'calculator', 'web-browser'],
   });
 
   const agentExecutor = AgentExecutor.fromAgentAndTools({
