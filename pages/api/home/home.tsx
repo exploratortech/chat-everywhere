@@ -521,9 +521,6 @@ const Home = () => {
       router.query;
 
     if (accessibleConversationId) {
-      console.log('Loading conversation');
-      console.log(accessibleConversationId);
-
       dispatch({ field: 'loading', value: true });
       fetchShareableConversation(accessibleConversationId as string)
         .then((conversation) => {
