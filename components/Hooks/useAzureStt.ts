@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 
 export const useAzureStt = () => {
   const [isListening, setIsListening] = useState(false);
+  const [isMicrophoneDisabled, setIsMicrophoneDisabled] = useState(false);
 
   const audioStream = useRef<MediaStream>();
 
@@ -24,10 +25,17 @@ export const useAzureStt = () => {
 
   const startListening = async (userToken: string): Promise<void> => {
     // Prompt for permission to use microphone
-    audioStream.current = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: false,
-    });
+    try {
+      audioStream.current = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+      setIsMicrophoneDisabled(false);
+    } catch (error) {
+      setIsMicrophoneDisabled(true);
+      toast.error('Unable to access microphone.');
+      return;
+    }
 
     try {
       if (!token.current || !region.current) {
@@ -46,7 +54,7 @@ export const useAzureStt = () => {
     );
 
     const audioConfig = AudioConfig.fromStreamInput(
-      audioStream.current
+      audioStream.current,
     );
 
     // Perform speech recognition from the microphone
@@ -58,6 +66,7 @@ export const useAzureStt = () => {
     speechRecognizer.current.startContinuousRecognitionAsync(() => {
       setIsListening(true);
     }, (error) => {
+      setIsMicrophoneDisabled(true);
       toast.error('Unable to begin speech recognition.');
       console.error(error);
     });
@@ -78,6 +87,7 @@ export const useAzureStt = () => {
 
   return {
     audioStream: audioStream.current,
+    isMicrophoneDisabled,
     isListening,
     startListening,
     stopListening,
