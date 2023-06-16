@@ -56,19 +56,8 @@ import { HomeInitialState, initialState } from './home.state';
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 
-interface Props {
-  serverSideApiKeyIsSet: boolean;
-  serverSidePluginKeysSet: boolean;
-  defaultModelId: OpenAIModelID;
-  googleAdSenseId: string;
-}
-
-const Home = ({
-  serverSideApiKeyIsSet,
-  serverSidePluginKeysSet,
-  defaultModelId,
-  googleAdSenseId,
-}: Props) => {
+const Home = () => {
+  const defaultModelId = fallbackModelID;
   const { t } = useTranslation('chat');
   const { getModels } = useApiService();
   const { getModelsError } = useErrorService();
@@ -108,10 +97,8 @@ const Home = ({
   const stopConversationRef = useRef<boolean>(false);
 
   const { data, error } = useQuery(
-    ['GetModels', serverSideApiKeyIsSet],
+    ['GetModels'],
     ({ signal }) => {
-      if (!serverSideApiKeyIsSet) return null;
-
       return getModels(signal);
     },
     { enabled: true, refetchOnMount: false },
@@ -304,17 +291,7 @@ const Home = ({
   useEffect(() => {
     defaultModelId &&
       dispatch({ field: 'defaultModelId', value: defaultModelId });
-    serverSideApiKeyIsSet &&
-      dispatch({
-        field: 'serverSideApiKeyIsSet',
-        value: serverSideApiKeyIsSet,
-      });
-    serverSidePluginKeysSet &&
-      dispatch({
-        field: 'serverSidePluginKeysSet',
-        value: serverSidePluginKeysSet,
-      });
-  }, [defaultModelId, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
+  }, [defaultModelId]);
 
   // CLOUD SYNC ------------------------------------------
 
@@ -577,12 +554,7 @@ const Home = ({
         value: newConversation,
       });
     }
-  }, [
-    defaultModelId,
-    dispatch,
-    serverSideApiKeyIsSet,
-    serverSidePluginKeysSet,
-  ]);
+  }, []);
 
   // APPLY HOOKS VALUE TO CONTEXT -------------------------------------
   useEffect(() => {
@@ -642,10 +614,7 @@ const Home = ({
             <Chatbar />
 
             <div className="flex flex-1">
-              <Chat
-                stopConversationRef={stopConversationRef}
-                googleAdSenseId={googleAdSenseId}
-              />
+              <Chat stopConversationRef={stopConversationRef} />
             </div>
             {showLoginSignUpModel && (
               <AuthModel
@@ -687,17 +656,8 @@ const Home = ({
 export default Home;
 
 export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
-  const defaultModelId = fallbackModelID;
-
-  let serverSidePluginKeysSet = true;
-  const googleAdSenseId = process.env.GOOGLE_ADSENSE_ID;
-
   return {
     props: {
-      serverSideApiKeyIsSet: !!process.env.OPENAI_API_KEY,
-      defaultModelId,
-      serverSidePluginKeysSet,
-      googleAdSenseId,
       ...(await serverSideTranslations(locale ?? 'en', [
         'common',
         'chat',

@@ -42,10 +42,9 @@ import dayjs from 'dayjs';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
-  googleAdSenseId: string;
 }
 
-export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
+export const Chat = memo(({ stopConversationRef }: Props) => {
   const { t } = useTranslation('chat');
 
   const {
@@ -458,12 +457,6 @@ export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
 
                 {selectedConversation?.messages.map((message, index) => (
                   <div key={index}>
-                    {
-                      // Show ad every 4 messages
-                      index !== 0 && index % 4 === 0 && (
-                        <AdMessage googleAdSenseId={googleAdSenseId} />
-                      )
-                    }
                     <ChatMessage
                       key={index}
                       message={message}
