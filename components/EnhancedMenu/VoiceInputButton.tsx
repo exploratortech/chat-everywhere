@@ -1,7 +1,8 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { IconMicrophone } from '@tabler/icons-react';
-import HomeContext from '@/pages/api/home/home.context';
+import { IconMicrophone, IconMicrophoneOff } from '@tabler/icons-react';
+
 import { useAzureStt } from '../Hooks/useAzureStt';
+import HomeContext from '@/pages/api/home/home.context';
 
 const getLargestValue = (bytes: Uint8Array): number => {
   let largest = 0;
@@ -22,6 +23,7 @@ const VoiceInputButton = () => {
 
   const {
     audioStream,
+    isMicrophoneDisabled,
     isListening,
     startListening,
     stopListening,
@@ -92,10 +94,17 @@ const VoiceInputButton = () => {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-2 bg-transparent"
         onClick={handleClick}
       >
-        <IconMicrophone
-          className="dark:bg-[#343541] rounded-full"
-          size={18}
-        />
+        {isMicrophoneDisabled ? (
+          <IconMicrophoneOff
+            className="dark:bg-[#343541] rounded-full opacity-50"
+            size={18}
+          />
+        ) : (
+          <IconMicrophone
+            className="dark:bg-[#343541] rounded-full"
+            size={18}
+          />
+        )}
       </button>
       {isListening && (
         <div className="absolute w-1.5 h-1.5 m-1.5 top-0 right-0 bg-green-500 rounded-full" />
