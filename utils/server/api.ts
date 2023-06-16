@@ -60,3 +60,22 @@ export const shortenMessagesBaseOnTokenLimit = async (
     return messagesToSend;
   }
 };
+
+export const getMessagesTokenCount = async (messages: Message[]): Promise<number> => {
+  await init((imports) => WebAssembly.instantiate(wasm, imports));
+
+  const encoding = new Tiktoken(
+    tiktokenModel.bpe_ranks,
+    tiktokenModel.special_tokens,
+    tiktokenModel.pat_str,
+  );
+
+  let tokenCount = 0;
+  for (let i = 0; i < messages.length; i++) {
+    const message = messages[i];
+    const tokens = encoding.encode(message.content);
+    tokenCount += tokens.length;
+  }
+
+  return tokenCount;
+};
