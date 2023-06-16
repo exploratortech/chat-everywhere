@@ -13,6 +13,7 @@ import HomeContext from '@/pages/api/home/home.context';
 import ChangeOutputLanguageButton from './ChangeOutputLanguageButton';
 import ConversationStyleSelector from './ConversationStyleSelector';
 import ImageGenerationSelectors from './ImageGenerationSelectors';
+import VoiceInputButton from './VoiceInputButton';
 import ModeSelector from './ModeSelector';
 
 import PropTypes from 'prop-types';
@@ -68,7 +69,10 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
           <ModeSelector />
           <ConversationStyleSelector />
           {currentMessage?.pluginId !== PluginID.IMAGE_GEN && (
-            <ChangeOutputLanguageButton />
+            <>
+              <ChangeOutputLanguageButton />
+              <VoiceInputButton />
+            </>
           )}
         </div>
         {currentMessage?.pluginId === PluginID.IMAGE_GEN && (
