@@ -55,7 +55,7 @@ const VoiceInputButton = () => {
     requestAnimationFrame(() => draw(node));
   }, []);
 
-  useEffect((): void => {
+  useEffect(() => {
     if (audioStream) {
       const audioContext = new window.AudioContext();
       const analyserNode = audioContext.createAnalyser();
@@ -66,6 +66,11 @@ const VoiceInputButton = () => {
 
       animationFrameId.current = requestAnimationFrame(() => draw(analyserNode));
     }
+
+    return () => {
+      if (animationFrameId.current)
+        cancelAnimationFrame(animationFrameId.current);
+    };
   }, [audioStream, draw]);
 
   const handleClick = async (): Promise<void> => {
