@@ -3,6 +3,8 @@ import { FC, useContext, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
 
+import { FeatureItem, PlanDetail } from '@/utils/app/ui';
+
 import HomeContext from '@/pages/api/home/home.context';
 
 import { FootNoteMessage } from './FootNoteMessage';
@@ -17,6 +19,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   promptOnClick,
 }) => {
   const { t } = useTranslation('chat');
+  const { t: modelTranslate } = useTranslation('model');
   const {
     state: { user, isSurveyFilled },
     dispatch,
@@ -38,11 +41,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   };
 
   const bannerOnClick = () => {
-    if (user) {
-      dispatch({ field: 'showProfileModel', value: true });
-    } else {
-      dispatch({ field: 'showLoginSignUpModel', value: true });
-    }
+    dispatch({ field: 'showProfileModel', value: true });
 
     event('Support banner clicked', {
       category: 'Engagement',
@@ -68,19 +67,24 @@ export const NewConversationMessagesContainer: FC<Props> = ({
 
   return (
     <div className="font-normal">
-      <span className="font-semibold">Chat Everywhere</span>
+      <span className="font-semibold font-serif">Chat Everywhere</span>
 
       {/* Ask for support banner */}
       {(!user || user?.plan === 'free') && (
         <div
-          className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 bg-gradient-to-r from-[#ff80b5] to-[#9089fc] cursor-pointer"
+          className="mt-4 flex flex-col items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] cursor-pointer"
           onClick={bannerOnClick}
         >
-          <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
-            {t(
-              'If you like this project, please support us by subscripting to our Pro plan!',
+          <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm font-semibold">
+            {modelTranslate(
+              'Unlock all the features by upgrading to our Pro plan with only USD$9.99/month',
             )}
           </span>
+          <div className="flex flex-row flex-wrap items-center justify-center text-xs font-light pt-2">
+            {PlanDetail.combinedSimplify.map((feature, index) => (
+              <FeatureItem key={index} featureName={modelTranslate(feature)} />
+            ))}
+          </div>
         </div>
       )}
 
@@ -93,7 +97,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
           New
         </span>
         <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
-          {t('Check out out new features page!')}
+          {t('Features introduction page is now available!')}
         </span>
       </div>
 
@@ -103,11 +107,8 @@ export const NewConversationMessagesContainer: FC<Props> = ({
           className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none cursor-pointer"
           onClick={surveyOnClick}
         >
-          <span className="bg-yellow-100 text-yellow-800 text-xs font-medium ml-2 mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-800 dark:text-yellow-300">
-            New
-          </span>
           <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
-            {t('Please share your thoughts by completing a brief survey.')}
+            {t('Please share your thoughts by completing a brief survey')}
           </span>
         </div>
       )}

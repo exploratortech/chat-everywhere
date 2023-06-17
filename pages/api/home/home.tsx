@@ -48,7 +48,7 @@ import { Navbar } from '@/components/Mobile/Navbar';
 import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
-import { ProfileModel } from '@/components/User/ProfileModel';
+import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 
@@ -627,9 +627,8 @@ const Home = () => {
                 }
               />
             )}
-            {showProfileModel && session && (
-              <ProfileModel
-                session={session}
+            {showProfileModel && (
+              <ProfileUpgradeModel
                 onClose={() =>
                   dispatch({ field: 'showProfileModel', value: false })
                 }
