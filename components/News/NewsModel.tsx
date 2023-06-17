@@ -142,7 +142,7 @@ const NewsModel = memo(({ className = '', open, onOpen, onClose }: Props) => {
             >
               <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-[80vh] transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
                 <div className="mb-3 flex flex-row justify-between items-center">
-                  <h1>{t('Latest Updates')}</h1>
+                  <p className="text-lg">{t('Latest Updates')}</p>
 
                   {!selectPageId ? (
                     <button className="w-max min-h-[34px]" onClick={onClose}>
@@ -153,7 +153,7 @@ const NewsModel = memo(({ className = '', open, onOpen, onClose }: Props) => {
                       className="w-max px-4 py-1 border rounded-lg shadow focus:outline-none border-neutral-800 border-opacity-50 bg-white text-black hover:bg-neutral-300 "
                       onClick={() => setSelectedPageId(null)}
                     >
-                      Back
+                      {t('More')}
                     </button>
                   )}
                 </div>
@@ -169,10 +169,10 @@ const NewsModel = memo(({ className = '', open, onOpen, onClose }: Props) => {
                       key={`${news.id} ${index}`}
                       onClick={() => setSelectedPageId(news.id)}
                     >
-                      <h3 className="text-sm font-medium leading-5">
+                      <h2 className="text-sm font-medium leading-5">
                         {news.title}
-                      </h3>
-                      <p>{formatDatetime(news.createdTime)}</p>
+                      </h2>
+                      <span>{formatDatetime(news.createdTime)}</span>
                     </li>
                   ))}
 
