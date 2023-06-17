@@ -61,6 +61,10 @@ export interface HomeInitialState {
   speechRegion: null | string;
   isPlaying: boolean;
   isLoading: boolean;
+
+  // Speech to Text
+  speechContent: string;
+  isSpeechRecognitionActive: boolean;
 }
 
 export const initialState: HomeInitialState = {
@@ -116,4 +120,8 @@ export const initialState: HomeInitialState = {
   speechRegion: null,
   isPlaying: false,
   isLoading: false,
+
+  // Speech to Text
+  speechContent: '',
+  isSpeechRecognitionActive: false,
 };

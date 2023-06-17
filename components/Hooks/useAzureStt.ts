@@ -1,13 +1,15 @@
-import { useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import {
   AudioConfig,
   SpeechConfig,
   SpeechRecognizer,
 } from 'microsoft-cognitiveservices-speech-sdk';
 import { toast } from 'react-hot-toast';
+import HomeContext from '@/pages/api/home/home.context';
 
 export const useAzureStt = () => {
-  const [isListening, setIsListening] = useState(false);
+  const { dispatch } = useContext(HomeContext);
+
   const [isMicrophoneDisabled, setIsMicrophoneDisabled] = useState(false);
 
   const audioStream = useRef<MediaStream>();
@@ -64,7 +66,7 @@ export const useAzureStt = () => {
     );
 
     speechRecognizer.current.startContinuousRecognitionAsync(() => {
-      setIsListening(true);
+      dispatch({ field: 'isSpeechRecognitionActive', value: true });
     }, (error) => {
       setIsMicrophoneDisabled(true);
       toast.error('Unable to begin speech recognition.');
@@ -75,7 +77,7 @@ export const useAzureStt = () => {
   const stopListening = async (): Promise<void> => {
     if (!speechRecognizer.current) return;
     speechRecognizer.current.stopContinuousRecognitionAsync(() => {
-      setIsListening(false);
+      dispatch({ field: 'isSpeechRecognitionActive', value: false });
       audioStream.current
         ?.getTracks()
         .forEach((mediaTrack) => mediaTrack.stop());
@@ -88,7 +90,6 @@ export const useAzureStt = () => {
   return {
     audioStream: audioStream.current,
     isMicrophoneDisabled,
-    isListening,
     startListening,
     stopListening,
   };
