@@ -3,6 +3,7 @@ import { IconMicrophone, IconMicrophoneOff } from '@tabler/icons-react';
 
 import { useAzureStt } from '../Hooks/useAzureStt';
 import HomeContext from '@/pages/api/home/home.context';
+import { toast } from 'react-hot-toast';
 
 const getLargestValue = (bytes: Uint8Array): number => {
   let largest = 0;
@@ -18,13 +19,13 @@ const VoiceInputButton = () => {
   const {
     state: {
       user,
+      isSpeechRecognitionActive,
     },
   } = useContext(HomeContext);
 
   const {
     audioStream,
     isMicrophoneDisabled,
-    isListening,
     startListening,
     stopListening,
   } = useAzureStt();
@@ -74,47 +75,53 @@ const VoiceInputButton = () => {
   }, [audioStream, draw]);
 
   const handleClick = async (): Promise<void> => {
-    if (isListening) {
+    if (isSpeechRecognitionActive) {
       stopListening();
       if (animationFrameId.current)
         cancelAnimationFrame(animationFrameId.current);
     } else {
       if (user && user.token) {
         await startListening(user.token);
+      } else {
+        toast.error('You must be signed in to use this feature.');
       }
     }
   };
 
   return (
-    <div
-      className="relative w-9 h-9"
-    >
-      <canvas
-        className="w-full h-full"
-        width="36"
-        height="36"
-        ref={canvasRef}
-      />
-      <button
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-2 bg-transparent"
-        onClick={handleClick}
+    <>
+      <div
+        className="relative w-9 h-9 z-[1100] dark:bg-[#343541] rounded-full"
       >
-        {isMicrophoneDisabled ? (
-          <IconMicrophoneOff
-            className="dark:bg-[#343541] rounded-full opacity-50"
-            size={18}
+        <div className="relative">
+          <canvas
+            className="w-full h-full"
+            width="36"
+            height="36"
+            ref={canvasRef}
           />
-        ) : (
-          <IconMicrophone
-            className="dark:bg-[#343541] rounded-full"
-            size={18}
-          />
-        )}
-      </button>
-      {isListening && (
-        <div className="absolute w-1.5 h-1.5 m-1.5 top-0 right-0 bg-green-500 rounded-full" />
-      )}
-    </div>
+          <button
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-2 bg-transparent"
+            onClick={handleClick}
+          >
+            {isMicrophoneDisabled ? (
+              <IconMicrophoneOff
+                className="dark:bg-[#343541] rounded-full opacity-50"
+                size={18}
+              />
+            ) : (
+              <IconMicrophone
+                className="dark:bg-[#343541] rounded-full"
+                size={18}
+              />
+            )}
+          </button>
+          {isSpeechRecognitionActive && (
+            <div className="absolute w-1.5 h-1.5 m-1.5 top-0 right-0 bg-green-500 rounded-full" />
+          )}
+        </div>
+      </div>
+    </>
   );
 };
 

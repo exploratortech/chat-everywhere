@@ -51,6 +51,7 @@ import { AuthModel } from '@/components/User/AuthModel';
 import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
+import VoiceInputActiveOverlay from '@/components/EnhancedMenu/VoiceInputActiveOverlay';
 
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
@@ -94,6 +95,7 @@ const Home = () => {
       forceSyncConversation,
       replaceRemoteData,
       messageIsStreaming,
+      isSpeechRecognitionActive,
     },
     dispatch,
   } = contextValue;
@@ -663,6 +665,7 @@ const Home = () => {
             />
             <Promptbar />
           </div>
+          <VoiceInputActiveOverlay />
         </main>
       )}
     </HomeContext.Provider>

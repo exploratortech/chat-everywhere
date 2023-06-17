@@ -50,6 +50,7 @@ export const ChatInput = ({
       messageIsStreaming,
       prompts: originalPrompts,
       currentMessage,
+      isSpeechRecognitionActive,
     },
 
     dispatch: homeDispatch,
@@ -341,7 +342,10 @@ export const ChatInput = ({
 
           <textarea
             ref={textareaRef}
-            className={`m-0 w-full transition-all resize-none border-0 bg-transparent pt-3 pr-8 pl-10 text-black dark:bg-transparent dark:text-white outline-none`}
+            className={`
+              m-0 w-full transition-all resize-none border-0 bg-transparent pt-3 pr-8 pl-10 text-black dark:bg-transparent dark:text-white outline-none
+              ${ isSpeechRecognitionActive ? 'z-[1100]' : '' }
+            `}
             style={{
               marginBottom: `${
                 isCloseToTokenLimit || isOverTokenLimit ? '2.2' : '0.75'

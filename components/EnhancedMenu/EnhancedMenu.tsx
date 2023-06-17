@@ -15,6 +15,7 @@ import ConversationStyleSelector from './ConversationStyleSelector';
 import ImageGenerationSelectors from './ImageGenerationSelectors';
 import VoiceInputButton from './VoiceInputButton';
 import ModeSelector from './ModeSelector';
+import VoiceInputActiveOverlay from './VoiceInputActiveOverlay';
 
 import PropTypes from 'prop-types';
 
@@ -26,7 +27,11 @@ type EnhancedMenuProps = {
 const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
   ({ isFocused, setIsFocused }, ref) => {
     const {
-      state: { messageIsStreaming, currentMessage },
+      state: {
+        messageIsStreaming,
+        currentMessage,
+        isSpeechRecognitionActive,
+      },
     } = useContext(HomeContext);
 
     const shouldShow = useMemo(() => {
@@ -54,30 +59,35 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
     return (
       <div
         ref={ref}
-        className={`absolute h-fit left-0 w-full px-4 py-2 flex flex-col 
+        className={`absolute w-full h-fit left-0 overflow-hidden
           bg-white dark:bg-[#343541] text-black dark:text-white 
           z-10 rounded-md -translate-y-[100%]
           border dark:border-gray-900/50 shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]
           transition-all ease-in-out ${
             showMenuAnimation ? '-top-2 opacity-90' : 'top-8 opacity-0'
+          } ${
+            isSpeechRecognitionActive ? 'z-[1100]' : ''
           }`}
         style={{
           display: showMenuDisplay ? 'flex' : 'none',
         }}
       >
-        <div className="flex flex-col md:flex-row w-full justify-between">
-          <ModeSelector />
-          <ConversationStyleSelector />
-          {currentMessage?.pluginId !== PluginID.IMAGE_GEN && (
-            <>
-              <ChangeOutputLanguageButton />
-              <VoiceInputButton />
-            </>
+        <div className="relative w-full px-4 py-2 flex flex-col">
+          <div className="flex flex-col md:flex-row w-full justify-between">
+            <ModeSelector />
+            <ConversationStyleSelector />
+            {currentMessage?.pluginId !== PluginID.IMAGE_GEN && (
+              <>
+                <ChangeOutputLanguageButton />
+                <VoiceInputButton />
+              </>
+            )}
+          </div>
+          {currentMessage?.pluginId === PluginID.IMAGE_GEN && (
+            <ImageGenerationSelectors />
           )}
+          <VoiceInputActiveOverlay />
         </div>
-        {currentMessage?.pluginId === PluginID.IMAGE_GEN && (
-          <ImageGenerationSelectors />
-        )}
       </div>
     );
   },
