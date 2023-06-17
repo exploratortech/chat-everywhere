@@ -144,18 +144,22 @@ const NewsModel = memo(({ className = '', open, onOpen, onClose }: Props) => {
                 <div className="mb-3 flex flex-row justify-between items-center">
                   <p className="text-lg">{t('Latest Updates')}</p>
 
-                  {!selectPageId ? (
-                    <button className="w-max min-h-[34px]" onClick={onClose}>
-                      <IconX></IconX>
-                    </button>
-                  ) : (
+                  <div className="flex justify-center items-center">
+                    {selectPageId && (
+                      <button
+                        className="w-max px-4 py-1 border rounded-lg shadow focus:outline-none border-neutral-800 border-opacity-50 bg-white text-black hover:bg-neutral-200 text-xs"
+                        onClick={() => setSelectedPageId(null)}
+                      >
+                        {t('All Updates')}
+                      </button>
+                    )}
                     <button
-                      className="w-max px-4 py-1 border rounded-lg shadow focus:outline-none border-neutral-800 border-opacity-50 bg-white text-black hover:bg-neutral-300 "
-                      onClick={() => setSelectedPageId(null)}
+                      className="w-max min-h-[34px] ml-2"
+                      onClick={onClose}
                     >
-                      {t('More')}
+                      <IconX />
                     </button>
-                  )}
+                  </div>
                 </div>
 
                 <ul
