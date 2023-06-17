@@ -64,7 +64,8 @@ const Sidebar = <T,>({
     <div
       className={`${isOpen ? 'w-[260px]' : 'w-0'} ${
         side === 'left' ? 'tablet:left-0' : 'tablet:right-0'
-      } transition-all h-full ease-linear mobile:max-h-[calc(100vh-48px)] relative box-content tablet:fixed tablet:z-10`}
+      }
+        transition-all ease-linear relative box-content tablet:fixed tablet:h-[calc(100%-48px)] tablet:z-10`}
     >
       <div
         className={`${
@@ -75,9 +76,7 @@ const Sidebar = <T,>({
       <div
         className={`${side === 'left' && !isOpen ? '-translate-x-full' : ''} ${
           side === 'right' && !isOpen ? 'translate-x-full' : ''
-        } absolute z-10 top-0 ${
-          side === 'left' ? 'right' : 'left'
-        }-0 flex transition-all ease-linear w-[260px] h-full flex-none flex-col p-2 space-y-2 bg-[#202123] text-[14px]`}
+        } absolute z-10 top-0 ${side}-0 flex transition-all ease-linear w-[260px] h-full flex-none flex-col p-2 space-y-2 bg-[#202123] text-[14px]`}
       >
         <div className="flex items-center">
           <button
@@ -104,7 +103,7 @@ const Sidebar = <T,>({
           onSearch={handleSearchTerm}
         />
 
-        <div className="flex-grow overflow-auto resize-y">
+        <div className="flex-1 overflow-auto">
           {items?.length > 0 && (
             <div className="flex border-b border-white/20 pb-2">
               {folderComponent}

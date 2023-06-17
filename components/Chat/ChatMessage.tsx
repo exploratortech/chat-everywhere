@@ -17,7 +17,6 @@ import {
 } from 'react';
 
 import { useTranslation } from 'next-i18next';
-import Image from 'next/image';
 import { event } from 'nextjs-google-analytics';
 
 import { updateConversation } from '@/utils/app/conversation';
@@ -28,6 +27,7 @@ import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import { ImageGenerationComponent } from './components/ImageGenerationComponent';
 import TokenCounter from './components/TokenCounter';
 
 import { CodeBlock } from '../Markdown/CodeBlock';
@@ -36,7 +36,6 @@ import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';
 import { SpeechButton } from './SpeechButton';
 
-import dayjs from 'dayjs';
 import rehypeMathjax from 'rehype-mathjax';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
@@ -51,7 +50,7 @@ interface Props {
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, displayFooterButtons, conversation, onEdit }) => {
+  ({ message, displayFooterButtons, conversation, onEdit, messageIndex }) => {
     const { t } = useTranslation('chat');
 
     const {
@@ -170,50 +169,34 @@ export const ChatMessage: FC<Props> = memo(
       }
     };
 
-    const downloadFile = async (url: string, filename: string) => {
-      const response = await fetch(url);
-      const blob = await response.blob();
-
-      const href = URL.createObjectURL(blob);
-
-      // Create a "hidden" anchor tag with the download attribute and simulate a click.
-      const link = document.createElement('a');
-      link.href = href;
-      link.download = filename;
-      link.style.display = 'none';
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    };
-
     const ImgComponent = useMemo(() => {
       const Component = ({
         src,
+        title,
+        alt,
       }: React.DetailedHTMLProps<
         React.ImgHTMLAttributes<HTMLImageElement>,
         HTMLImageElement
       >) => {
         if (!src) return <></>;
+        if (message.pluginId !== PluginID.IMAGE_GEN) {
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={src} alt="" className="w-full" />
+          );
+        }
         return (
-          <Image
+          <ImageGenerationComponent
             src={src}
-            alt={t('Click to download image')}
-            width={512}
-            height={512}
-            className="cursor-pointer w-full"
-            onClick={() =>
-              downloadFile(
-                src,
-                `chateverywhere-ai-image-${dayjs().valueOf()}.png`,
-              )
-            }
+            title={title}
+            messageIndex={messageIndex}
+            generationPrompt={alt || ''}
           />
         );
       };
       Component.displayName = 'ImgComponent';
       return Component;
-    }, [t]);
+    }, [message.pluginId, messageIndex]);
 
     const CodeComponent = useMemo(() => {
       const Component: React.FC<any> = ({
@@ -404,11 +387,11 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 </div>
                 <div className="flex flex-row items-center mt-3 w-full justify-between">
-                  <div className="flex flex-row">
-                    {message.pluginId === PluginID.GPT4 ||
-                      (message.pluginId === null && (
-                        <SpeechButton inputText={message.content} />
-                      ))}
+                  <div className="flex flex-row items-center">
+                    {(message.pluginId === PluginID.GPT4 ||
+                      !message.pluginId) && (
+                      <SpeechButton inputText={message.content} />
+                    )}
                     {displayFooterButtons && (
                       <>
                         <FeedbackContainer conversation={conversation} />

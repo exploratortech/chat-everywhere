@@ -5,6 +5,7 @@ import {
   DEFAULT_IMAGE_GENERATION_STYLE,
 } from '@/utils/app/const';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
+import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
 import {
   addUsageEntry,
   getAdminSupabaseClient,
@@ -36,8 +37,8 @@ const generateMjPrompt = (
 ): string => {
   let resultPrompt = userInputText;
 
-  if (style !== 'default') {
-    resultPrompt += `, ${capitalizeFirstLetter(style)} style --v 5.1`;
+  if (style !== 'Default') {
+    resultPrompt += `, ${capitalizeFirstLetter(style)}`;
   }
 
   switch (quality) {
@@ -61,7 +62,7 @@ const generateMjPrompt = (
     resultPrompt += ' --chaos 50';
   }
 
-  return resultPrompt;
+  return resultPrompt + ' --v 5.1';
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -83,6 +84,7 @@ const handler = async (req: Request): Promise<Response> => {
   const encoder = new TextEncoder();
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
+  let generationPrompt = '';
 
   let jobTerminated = false;
 
@@ -95,6 +97,16 @@ const handler = async (req: Request): Promise<Response> => {
 
   const requestBody = (await req.json()) as ChatBody;
 
+  // Do not modity this line, it is used by front-end to detect if the message is for image generation
+  writeToStream('```MJImage \n');
+  writeToStream('Initializing ... \n');
+  writeToStream(
+    'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
+  );
+
+  const latestUserPromptMessage =
+    requestBody.messages[requestBody.messages.length - 1].content;
+
   const imageGeneration = async () => {
     const requestHeader = {
       Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
@@ -102,27 +114,27 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
     try {
-      const latestUserPromptMessage =
-        requestBody.messages[requestBody.messages.length - 1].content;
-
-      writeToStream('```MJImage \n');
-      writeToStream('Initializing ... \n');
-      writeToStream(
-        'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
+      // Translate and enhance the prompt
+      writeToStream(`Enhancing and translating user input prompt ... \n`);
+      generationPrompt = await translateAndEnhancePrompt(
+        latestUserPromptMessage,
       );
 
+      generationPrompt = generateMjPrompt(
+        generationPrompt,
+        requestBody.imageStyle,
+        requestBody.imageQuality,
+        requestBody.temperature,
+      );
+
+      writeToStream(`Prompt: ${generationPrompt} \n`, true);
       const imageGenerationResponse = await fetch(
         `https://api.thenextleg.io/v2/imagine`,
         {
           method: 'POST',
           headers: requestHeader,
           body: JSON.stringify({
-            msg: generateMjPrompt(
-              latestUserPromptMessage,
-              requestBody.imageStyle,
-              requestBody.imageQuality,
-              requestBody.temperature,
-            ),
+            msg: generationPrompt,
           }),
         },
       );
@@ -144,7 +156,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       const imageGenerationMessageId = imageGenerationResponseJson.messageId;
 
-      // Check every 4 seconds if the image generation is done
+      // Check every 3.5 seconds if the image generation is done
       let generationStartedAt = Date.now();
       let imageGenerationProgress = null;
 
@@ -172,13 +184,14 @@ const handler = async (req: Request): Promise<Response> => {
           await imageGenerationProgressResponse.json();
 
         const generationProgress = imageGenerationProgressResponseJson.progress;
-        
+
         if (generationProgress === 100) {
           writeToStream(`Completed in ${getTotalGenerationTime()}s \n`);
           writeToStream('``` \n');
 
+          const imageAlt = latestUserPromptMessage.replace(/\s+/g, '-').slice(0, 20);
           writeToStream(
-            `![Generated Image](${imageGenerationProgressResponseJson.response.imageUrl}) \n`,
+            `![${imageAlt}](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationProgressResponseJson.response.buttonMessageId}") \n`,
           );
           await addUsageEntry(PluginID.IMAGE_GEN, user.id);
           await subtractCredit(user.id, PluginID.IMAGE_GEN);
