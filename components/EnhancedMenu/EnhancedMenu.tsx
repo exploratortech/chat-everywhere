@@ -14,6 +14,7 @@ import ChangeOutputLanguageButton from './ChangeOutputLanguageButton';
 import ConversationStyleSelector from './ConversationStyleSelector';
 import ImageGenerationSelectors from './ImageGenerationSelectors';
 import VoiceInputButton from './VoiceInputButton';
+import SpeechRecognitionLanguageSelector from './SpeechRecognitionLanguageSelector';
 import ModeSelector from './ModeSelector';
 import VoiceInputActiveOverlay from './VoiceInputActiveOverlay';
 
@@ -73,13 +74,16 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
         }}
       >
         <div className="relative w-full px-4 py-2 flex flex-col">
+          <div className="flex flex-col md:flex-row w-full justify-start pb-2 mb-2 border-b dark:border-gray-900/50">
+            <VoiceInputButton />
+            <SpeechRecognitionLanguageSelector />
+          </div>
           <div className="flex flex-col md:flex-row w-full justify-between">
             <ModeSelector />
             <ConversationStyleSelector />
             {currentMessage?.pluginId !== PluginID.IMAGE_GEN && (
               <>
                 <ChangeOutputLanguageButton />
-                <VoiceInputButton />
               </>
             )}
           </div>
