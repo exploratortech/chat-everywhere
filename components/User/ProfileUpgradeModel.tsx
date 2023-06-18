@@ -185,8 +185,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                       </p>
                       {user && (
                         <p className="text-xs text-neutral-400 mt-2">
-                          {t('Your registration email is ')}
-                          {user?.email}
+                          {t('Your registration email is')} {user?.email}
                         </p>
                       )}
                     </div>
