@@ -100,7 +100,7 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
                       className="w-max px-4 py-1 border rounded-lg shadow focus:outline-none border-neutral-800 border-opacity-50 bg-white text-black hover:bg-neutral-300 "
                       onClick={() => setSelectedPageId(null)}
                     >
-                      Back
+                      {t('Back')}
                     </button>
                   )}
                 </div>
