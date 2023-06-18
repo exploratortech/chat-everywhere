@@ -9,7 +9,10 @@ import { toast } from 'react-hot-toast';
 import HomeContext from '@/pages/api/home/home.context';
 
 export const useAzureStt = () => {
-  const { dispatch } = useContext(HomeContext);
+  const {
+    state: { speechRecognitionLanguage },
+    dispatch,
+  } = useContext(HomeContext);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMicrophoneDisabled, setIsMicrophoneDisabled] = useState<boolean>(false);
@@ -65,6 +68,7 @@ export const useAzureStt = () => {
       token.current,
       region.current,
     );
+    speechConfig.speechRecognitionLanguage = speechRecognitionLanguage || 'en-US';
 
     const audioConfig = AudioConfig.fromStreamInput(stream);
 

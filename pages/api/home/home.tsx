@@ -502,6 +502,11 @@ const Home = () => {
       dispatch({ field: 'outputLanguage', value: outputLanguage });
     }
 
+    const speechRecognitionLanguage = localStorage.getItem('speechRecognitionLanguage');
+    if (speechRecognitionLanguage) {
+      dispatch({ field: 'speechRecognitionLanguage', value: speechRecognitionLanguage});
+    }
+
     const conversationHistory = localStorage.getItem('conversationHistory');
     let cleanedConversationHistory: Conversation[] = [];
     if (conversationHistory) {
