@@ -10,9 +10,9 @@ import HomeContext from '@/pages/api/home/home.context';
 export const useAzureStt = () => {
   const { dispatch } = useContext(HomeContext);
 
-  const [isMicrophoneDisabled, setIsMicrophoneDisabled] = useState(false);
-
-  const audioStream = useRef<MediaStream>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isMicrophoneDisabled, setIsMicrophoneDisabled] = useState<boolean>(false);
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
 
   const token = useRef<string>('');
   const region = useRef<string>('');
@@ -26,16 +26,29 @@ export const useAzureStt = () => {
   };
 
   const startListening = async (userToken: string): Promise<void> => {
+    setIsLoading(true);
+    dispatch({ field: 'isSpeechRecognitionActive', value: true });
+
     // Prompt for permission to use microphone
+    let stream: MediaStream | undefined;
     try {
-      audioStream.current = await navigator.mediaDevices.getUserMedia({
+      stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: false,
       });
+      stream.getTracks().forEach((track, index) => {
+        console.log(`Track ${track}:`, track);
+      });
+      setAudioStream(stream);
       setIsMicrophoneDisabled(false);
     } catch (error) {
       setIsMicrophoneDisabled(true);
       toast.error('Unable to access microphone.');
+      return;
+    }
+
+    if (!stream) {
+      toast.error('Unable to access microphone');
       return;
     }
 
@@ -55,9 +68,7 @@ export const useAzureStt = () => {
       region.current,
     );
 
-    const audioConfig = AudioConfig.fromStreamInput(
-      audioStream.current,
-    );
+    const audioConfig = AudioConfig.fromStreamInput(stream);
 
     // Perform speech recognition from the microphone
     speechRecognizer.current = new SpeechRecognizer(
@@ -65,8 +76,24 @@ export const useAzureStt = () => {
       audioConfig,
     );
 
+    speechRecognizer.current.sessionStarted = (sender, event) => {
+      setIsLoading(false);
+    };
+
+    speechRecognizer.current.canceled = (sender, event) => {
+      stopListening();
+    };
+
+    speechRecognizer.current.sessionStopped = (sender, event) => {
+      dispatch({ field: 'isSpeechRecognitionActive', value: false });
+      stream
+        ?.getTracks()
+        .forEach((mediaTrack) => mediaTrack.stop());
+      setAudioStream(null);
+      speechRecognizer.current?.close();
+    }
+    
     speechRecognizer.current.startContinuousRecognitionAsync(() => {
-      dispatch({ field: 'isSpeechRecognitionActive', value: true });
     }, (error) => {
       setIsMicrophoneDisabled(true);
       toast.error('Unable to begin speech recognition.');
@@ -76,19 +103,15 @@ export const useAzureStt = () => {
 
   const stopListening = async (): Promise<void> => {
     if (!speechRecognizer.current) return;
-    speechRecognizer.current.stopContinuousRecognitionAsync(() => {
-      dispatch({ field: 'isSpeechRecognitionActive', value: false });
-      audioStream.current
-        ?.getTracks()
-        .forEach((mediaTrack) => mediaTrack.stop());
-    }, (error) => {
+    speechRecognizer.current.stopContinuousRecognitionAsync(() => {}, (error) => {
       toast.error('Unable to stop speech recognition.');
       console.error(error);
     });
   };
 
   return {
-    audioStream: audioStream.current,
+    audioStream,
+    isLoading,
     isMicrophoneDisabled,
     startListening,
     stopListening,
