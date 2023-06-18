@@ -50,6 +50,7 @@ export const ChatInput = ({
       messageIsStreaming,
       prompts: originalPrompts,
       currentMessage,
+      speechContent,
       isSpeechRecognitionActive,
     },
 
@@ -80,6 +81,10 @@ export const ChatInput = ({
   const enhancedMenuDisplayValue = useDisplayAttribute(menuRef);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (isSpeechRecognitionActive) {
+      e.preventDefault();
+      return;
+    }
     const value = e.target.value;
 
     setContent(value);
@@ -273,6 +278,10 @@ export const ChatInput = ({
       window.removeEventListener('click', handleOutsideClick);
     };
   }, []);
+
+  useEffect(() => {
+    setContent(speechContent);
+  }, [speechContent]);
 
   const isAiImagePluginSelected = useMemo(
     () => currentMessage?.pluginId === PluginID.IMAGE_GEN,

@@ -1,6 +1,7 @@
 import { useContext, useRef, useState } from 'react';
 import {
   AudioConfig,
+  ResultReason,
   SpeechConfig,
   SpeechRecognizer,
 } from 'microsoft-cognitiveservices-speech-sdk';
@@ -35,9 +36,6 @@ export const useAzureStt = () => {
       stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: false,
-      });
-      stream.getTracks().forEach((track, index) => {
-        console.log(`Track ${track}:`, track);
       });
       setAudioStream(stream);
       setIsMicrophoneDisabled(false);
@@ -76,8 +74,27 @@ export const useAzureStt = () => {
       audioConfig,
     );
 
+    let speechContent = '';
+    let speechBuffer = '';
+
     speechRecognizer.current.sessionStarted = (sender, event) => {
       setIsLoading(false);
+      dispatch({ field: 'speechContent', value: '' });
+    };
+
+    speechRecognizer.current.recognizing = (sender, event) => {
+      if (event.result.reason === ResultReason.RecognizedSpeech) {
+        speechBuffer = event.result.text;
+        dispatch({ field: 'speechContent', value: `${speechContent} ${speechBuffer}`});
+      }
+    };
+
+    speechRecognizer.current.recognized = (sender, event) => {
+      if (event.result.reason === ResultReason.RecognizedSpeech) {
+        speechBuffer = event.result.text;
+        speechContent = `${speechContent} ${speechBuffer}`;
+      }
+      dispatch({ field: 'speechContent', value: speechContent });
     };
 
     speechRecognizer.current.canceled = (sender, event) => {
