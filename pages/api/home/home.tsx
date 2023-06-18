@@ -442,6 +442,7 @@ const Home = () => {
   const handleUserLogout = async () => {
     await supabase.auth.signOut();
     dispatch({ field: 'user', value: null });
+    dispatch({ field: 'showProfileModel', value: false });
     toast.success(t('You have been logged out'));
   };
 
@@ -686,7 +687,7 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
         'survey',
         'news',
         'features',
-        'auth'
+        'auth',
       ])),
     },
   };

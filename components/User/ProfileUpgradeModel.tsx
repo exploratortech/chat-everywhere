@@ -17,6 +17,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
   const {
     state: { user },
     handleUserLogout,
+    dispatch,
   } = useContext(HomeContext);
 
   const upgradeLinkOnClick = () => {
@@ -57,6 +58,11 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
       `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
       '_blank',
     );
+  };
+
+  const changePasswordOnClick = () => {
+    dispatch({ field: 'showProfileModel', value: false });
+    dispatch({ field: 'showLoginSignUpModel', value: true });
   };
 
   const subscriptionManagementLink = () =>
@@ -190,13 +196,21 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                   </button>
 
                   {user && (
-                    <button
-                      type="button"
-                      className="px-4 py-2 border rounded-lg shadow border-neutral-500 text-neutral-200 hover:bg-neutral-700 focus:outline-none"
-                      onClick={handleUserLogout}
-                    >
-                      {t('Sign Out')}
-                    </button>
+                    <div className="flex flex-row items-center">
+                      <span
+                        className="px-4 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer mr-2 text-xs"
+                        onClick={changePasswordOnClick}
+                      >
+                        {t('Change password')}
+                      </span>
+                      <button
+                        type="button"
+                        className="px-4 py-2 border rounded-lg shadow border-neutral-500 text-neutral-200 hover:bg-neutral-700 focus:outline-none"
+                        onClick={handleUserLogout}
+                      >
+                        {t('Sign Out')}
+                      </button>
+                    </div>
                   )}
                 </div>
               </Dialog.Panel>

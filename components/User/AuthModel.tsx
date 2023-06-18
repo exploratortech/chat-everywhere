@@ -1,8 +1,10 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Auth } from '@supabase/auth-ui-react';
-import { FC, Fragment } from 'react';
+import { Auth, UpdatePassword } from '@supabase/auth-ui-react';
+import { FC, Fragment, useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
+
+import HomeContext from '@/pages/api/home/home.context';
 
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -14,6 +16,10 @@ type Props = {
 
 export const AuthModel: FC<Props> = ({ onClose, supabase }) => {
   const { t } = useTranslation('auth');
+  const {
+    state: { user },
+  } = useContext(HomeContext);
+
   const authLabels = {
     sign_up: {
       email_label: t('Email address'),
@@ -80,41 +86,60 @@ export const AuthModel: FC<Props> = ({ onClose, supabase }) => {
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200">
-                <div>
-                  📣{' '}
-                  {t(
-                    'Sign up to get access to all the amazing features of Chat Everywhere!',
-                  )}
-                </div>
-                <Auth
-                  supabaseClient={supabase}
-                  appearance={{ theme: ThemeSupa,
-                  style: {
-                    message: {
-                      color: "white",
-                      fontSize: "1.1rem",
-                      textDecoration: "underline",
-                    }
-                  } }}
-                  providers={[]}
-                  theme='dark'
-                  localization={{
-                    variables: {
-                      ...authLabels,
-                    },
-                  }}
-                />
-                <div className="text-xs text-neutral-400 text-center">
-                  {t('By signing up, you agree to our ')}
-                  <a
-                    href="https://intro.chateverywhere.app/terms-of-service.html"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline"
-                  >
-                    {t('Terms of Service.')}
-                  </a>
-                </div>
+                {!user && (
+                  <>
+                    <div>
+                      📣{' '}
+                      {t(
+                        'Sign up to get access to all the amazing features of Chat Everywhere!',
+                      )}
+                    </div>
+                    <Auth
+                      supabaseClient={supabase}
+                      appearance={{
+                        theme: ThemeSupa,
+                      }}
+                      providers={[]}
+                      theme="dark"
+                      localization={{
+                        variables: {
+                          ...authLabels,
+                        },
+                      }}
+                    />
+                    <div className="text-xs text-neutral-400 text-center">
+                      {t('By signing up, you agree to our ')}
+                      <a
+                        href="https://intro.chateverywhere.app/terms-of-service.html"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline"
+                      >
+                        {t('Terms of Service.')}
+                      </a>
+                    </div>
+                  </>
+                )}
+
+                {user && (
+                  <UpdatePassword
+                    supabaseClient={supabase}
+                    appearance={{
+                      theme: ThemeSupa,
+                      style:{
+                        input: {
+                          color: 'white',
+                        }
+                      }
+                    }}
+                    theme='dark'
+                    localization={{
+                      variables: {
+                        ...authLabels,
+                      },
+                    }}
+                  />
+                )}
               </Dialog.Panel>
             </Transition.Child>
           </div>
