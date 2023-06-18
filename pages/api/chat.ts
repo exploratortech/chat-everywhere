@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
       OpenAIModels[OpenAIModelID.GPT_3_5_16K].tokenLimit;
 
     const useLargerContextWindowModel =
-      (await getMessagesTokenCount(messages)) > defaultTokenLimit;
+      (await getMessagesTokenCount(messages) + 1000) > defaultTokenLimit; // Add buffer token to take system prompt into account
     
     const messagesToSend = await shortenMessagesBaseOnTokenLimit(
       prompt,
