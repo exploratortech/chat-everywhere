@@ -18,7 +18,7 @@ const SpeechRecognitionLanguageSelector = () => {
   const sourceLanguages = getAvailableSpeechSourceLanguages();
 
   return (
-    <div className="flex flex-row items-center justify-between mt-2 md:justify-start md:mt-0">
+    <div className="flex flex-row items-center justify-between md:justify-start">
       <label className="text-left text-sm text-neutral-700 dark:text-neutral-400 mr-2">
         {t('Language')}
       </label>

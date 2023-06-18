@@ -74,7 +74,7 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
         }}
       >
         <div className="relative w-full px-4 py-2 flex flex-col">
-          <div className="flex flex-col md:flex-row w-full justify-start pb-2 mb-2 border-b dark:border-gray-900/50">
+          <div className="flex flex-row w-full justify-start items-center pb-2 mb-2 border-b dark:border-gray-900/50">
             <VoiceInputButton />
             <SpeechRecognitionLanguageSelector />
           </div>
