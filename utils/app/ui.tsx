@@ -4,8 +4,41 @@ import {
   IconNumber4,
   IconPaint,
 } from '@tabler/icons-react';
+import { IconCheck } from '@tabler/icons-react';
 
 import { PluginID } from '@/types/plugin';
+
+export const PlanDetail = {
+  free: {
+    features: [
+      'Online mode',
+      'Share conversations',
+      'Folder manager',
+      'Prompt manager',
+    ],
+  },
+  pro: {
+    features: [
+      'Cloud sync',
+      'AI speech',
+      'GPT-4 (50 response/month + credit)',
+      'MidJourney generation (50 images/month + credit)',
+    ],
+  },
+  combinedSimplify: [
+    'Cloud sync',
+    'GPT-4',
+    'MidJourney image generation',
+    'AI speech'
+  ]
+};
+
+export const FeatureItem = ({ featureName }: { featureName: string }) => (
+  <div className="flex flex-row items-center">
+    <IconCheck size={16} stroke={1} className="ml-2 mr-1" color="lightgreen" />
+    <span>{featureName}</span>
+  </div>
+);
 
 export const getPluginIcon = (
   pluginId: string | undefined | null,

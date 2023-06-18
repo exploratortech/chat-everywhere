@@ -20,6 +20,7 @@ function getAvailableLocales() {
     { name: 'తెలుగు', value: 'te' },
     { name: 'Tiếng Việt', value: 'vi' },
     { name: 'العربية', value: 'ar' },
+    { name: 'हिंदी', value: 'hi' },
   ];
 }
 

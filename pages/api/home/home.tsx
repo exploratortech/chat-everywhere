@@ -41,12 +41,14 @@ import { UserProfile } from '@/types/user';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
+import FeaturesModel from '@/components/Features/FeaturesModel';
 import { useAzureTts } from '@/components/Hooks/useAzureTts';
 import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
 import { Navbar } from '@/components/Mobile/Navbar';
+import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
-import { ProfileModel } from '@/components/User/ProfileModel';
+import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 
@@ -84,6 +86,8 @@ const Home = () => {
       showProfileModel,
       showUsageModel,
       showSurveyModel,
+      showNewsModel,
+      showFeaturesModel,
       user,
       isPaidUser,
       conversationLastSyncAt,
@@ -438,6 +442,7 @@ const Home = () => {
   const handleUserLogout = async () => {
     await supabase.auth.signOut();
     dispatch({ field: 'user', value: null });
+    dispatch({ field: 'showProfileModel', value: false });
     toast.success(t('You have been logged out'));
   };
 
@@ -612,7 +617,6 @@ const Home = () => {
 
           <div className="flex h-full w-full overflow-x-hidden">
             <Chatbar />
-
             <div className="flex flex-1">
               <Chat stopConversationRef={stopConversationRef} />
             </div>
@@ -624,9 +628,8 @@ const Home = () => {
                 }
               />
             )}
-            {showProfileModel && session && (
-              <ProfileModel
-                session={session}
+            {showProfileModel && (
+              <ProfileUpgradeModel
                 onClose={() =>
                   dispatch({ field: 'showProfileModel', value: false })
                 }
@@ -646,6 +649,18 @@ const Home = () => {
                 }
               />
             )}
+            <NewsModel
+              open={showNewsModel}
+              onOpen={() => dispatch({ field: 'showNewsModel', value: true })}
+              onClose={() => dispatch({ field: 'showNewsModel', value: false })}
+            />
+
+            <FeaturesModel
+              open={showFeaturesModel}
+              onClose={() =>
+                dispatch({ field: 'showFeaturesModel', value: false })
+              }
+            />
             <Promptbar />
           </div>
         </main>
@@ -670,6 +685,9 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
         'rolesContent',
         'feature',
         'survey',
+        'news',
+        'features',
+        'auth',
       ])),
     },
   };

@@ -33,7 +33,7 @@
   "Copy link": "複製鏈結",
   "Failed to copy the sharable link to clipboard.": "無法複製鏈結到剪貼板",
   "Failed to store the conversation": "無法保存對話",
-  "Link copied to clipboard!" : "鏈結已複製到剪貼板！",
+  "Link copied to clipboard!": "鏈結已複製到剪貼板！",
   "Failed to copy the link to clipboard.": "無法複製鏈結到剪貼板",
   "Please copy it manually:": "請手動複製以下鏈結：",
   "Try out the new internet-connected enhance chat mode by clicking the": "試試最新連網增強交談模式，點擊圖示",
@@ -45,10 +45,11 @@
   "Sure!": "好的！",
   "No Thanks": "不用了",
   "You have been logged out": "成功登出",
-  "If you like this project, please support us by subscripting to our Pro plan!": "如果你喜歡這個APP,請通過Pro月費計劃來支持這個項目的可持續發展,每月只需美金$9.99！",
-  "Please share your thoughts by completing a brief survey.": "請參加問卷調查，讓我們更懂您的需求",
+  "If you like this project, please support us by subscribing to our Pro plan!": "如果你喜歡這個APP,請通過Pro月費計劃來支持這個項目的可持續發展,每月只需美金$9.99！",
+  "Please share your thoughts by completing a brief survey": "請參加問卷調查，讓我們更懂您的需求",
   "Remaining Credits": "剩餘點數",
   "Click to download image": "點擊下載",
+  "Features introduction page is now available!": "閱讀最新的功能介紹，讓您更得心應手！",
   "Upscale image failed": "放大圖片失敗, 請稍後再試",
   "We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.": "很抱歉造成不便，我們的伺服器目前正在經歷高流量，請稍後再試。感謝您的耐心等待。"
 }

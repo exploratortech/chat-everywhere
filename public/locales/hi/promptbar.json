@@ -1,0 +1,13 @@
+{
+  "New prompt": "नया प्रम्प्ट",
+  "New folder": "नया फ़ोल्डर",
+  "No prompts.": "कोई प्रम्प्ट नहीं।",
+  "Search prompts...": "प्रम्प्ट खोजें...",
+  "Name": "नाम",
+  "A name for your prompt.": "आपके प्रम्प्ट के लिए एक नाम।",
+  "Description": "विवरण",
+  "A description for your prompt.": "आपके प्रम्प्ट के लिए एक विवरण।",
+  "Prompt": "प्रम्प्ट",
+  "Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}": "प्रम्प्ट सामग्री। एक चर को दर्शाने के लिए {{}} का उपयोग करें। उदाहरण: {{name}} एक {{adjective}} {{noun}} है।",
+  "Save": "Save"
+}
