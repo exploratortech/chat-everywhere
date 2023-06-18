@@ -38,7 +38,7 @@ function useFocusHandler(textareaRef: RefObject<HTMLTextAreaElement>): FocusHand
     return () => {
       document.removeEventListener('mousedown', handleFocus);
     };
-  }, [textareaRef]);
+  }, [textareaRef, isSpeechRecognitionActive]);
 
   return { isFocused, menuRef , setIsFocused};
 }
