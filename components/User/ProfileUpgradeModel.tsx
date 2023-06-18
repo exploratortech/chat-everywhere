@@ -108,7 +108,6 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                     <div className="flex flex-col md:flex-row justify-evenly mb-3">
                       <div className="flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
                         <span className="text-2xl font-bold">Free</span>
-                        <span className="text-sm mb-2">USD$0</span>
                         <div className="text-xs leading-5">
                           {PlanDetail.free.features.map((feature, index) => (
                             <FeatureItem key={index} featureName={t(feature)} />
@@ -117,7 +116,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                       </div>
                       <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
                         <span className="text-2xl font-bold">Pro</span>
-                        <span className="text-sm mb-2">USD$9.99 / month</span>
+                        <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
                         <div className="text-xs leading-5">
                           <FeatureItem
                             featureName={t('Everything in free plan')}
