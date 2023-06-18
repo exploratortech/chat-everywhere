@@ -116,7 +116,9 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                       </div>
                       <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
                         <span className="text-2xl font-bold">Pro</span>
-                        <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
+                        <span className="text-sm mb-2">
+                          {t('USD$9.99 / month')}
+                        </span>
                         <div className="text-xs leading-5">
                           <FeatureItem
                             featureName={t('Everything in free plan')}
@@ -181,6 +183,12 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                           jack@exploratorlabs.com
                         </a>
                       </p>
+                      {user && (
+                        <p className="text-xs text-neutral-400 mt-2">
+                          {t('Your registration email is ')}
+                          {user?.email}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </Dialog.Description>
