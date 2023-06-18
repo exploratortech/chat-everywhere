@@ -8,7 +8,11 @@ import { createClient } from '@supabase/supabase-js';
 export const getAdminSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseServerRoleKey = process.env.SUPABASE_SERVER_ROLE_KEY || '';
-  return createClient(supabaseUrl, supabaseServerRoleKey);
+  return createClient(supabaseUrl, supabaseServerRoleKey, {
+    auth: {
+      persistSession: false,
+    },
+  });
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile> => {
