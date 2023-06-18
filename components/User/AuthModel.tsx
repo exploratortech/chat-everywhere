@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Auth, UpdatePassword } from '@supabase/auth-ui-react';
-import { FC, Fragment, useContext } from 'react';
+import { FC, Fragment, useContext, useEffect } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
@@ -8,6 +8,8 @@ import HomeContext from '@/pages/api/home/home.context';
 
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { SupabaseClient } from '@supabase/supabase-js';
+
+import { toast } from 'react-hot-toast';
 
 type Props = {
   onClose: () => void;
@@ -19,6 +21,23 @@ export const AuthModel: FC<Props> = ({ onClose, supabase }) => {
   const {
     state: { user },
   } = useContext(HomeContext);
+
+  useEffect(() => {
+    // A workaround to fix the issue after password reset but kicked back to a non-functional page
+    const subscriptionInstance = supabase.auth.onAuthStateChange(async (e) => {
+      switch (e) {
+        case 'USER_UPDATED': {
+          toast.success(t('Your password has been updated'));
+          onClose();
+          break;
+        }
+      }
+    });
+
+    return () => {
+      subscriptionInstance.data.subscription.unsubscribe();
+    };
+  }, []);
 
   const authLabels = {
     sign_up: {
@@ -98,6 +117,11 @@ export const AuthModel: FC<Props> = ({ onClose, supabase }) => {
                       supabaseClient={supabase}
                       appearance={{
                         theme: ThemeSupa,
+                        style: {
+                          input: {
+                            color: 'white',
+                          },
+                        },
                       }}
                       providers={[]}
                       theme="dark"
@@ -126,13 +150,13 @@ export const AuthModel: FC<Props> = ({ onClose, supabase }) => {
                     supabaseClient={supabase}
                     appearance={{
                       theme: ThemeSupa,
-                      style:{
+                      style: {
                         input: {
                           color: 'white',
-                        }
-                      }
+                        },
+                      },
                     }}
-                    theme='dark'
+                    theme="dark"
                     localization={{
                       variables: {
                         ...authLabels,
