@@ -13,7 +13,7 @@ import TierTag from './TierTag';
 import dayjs from 'dayjs';
 
 function formatDatetime(dateString: string) {
-  return dayjs(dateString).format('YYYY/MM/DD' + ' ' + 'HH:mm');
+  return dayjs(dateString).format('YYYY/MM/DD');
 }
 
 type Props = {
@@ -127,7 +127,7 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
                               />
                             ))}
                         </h3>
-                        <label className="italic text-sm">
+                        <label className="italic text-xs">
                           {formatDatetime(featureItem.lastEditedTime)}
                         </label>
                       </div>
