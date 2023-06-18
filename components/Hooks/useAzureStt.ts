@@ -98,7 +98,7 @@ export const useAzureStt = () => {
         speechBuffer = event.result.text;
         speechContent = `${speechContent} ${speechBuffer}`;
       }
-      dispatch({ field: 'speechContent', value: speechContent });
+      dispatch({ field: 'speechContent', value: speechContent.trim() });
     };
 
     speechRecognizer.current.canceled = (sender, event) => {
