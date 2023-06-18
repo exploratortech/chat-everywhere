@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { IconMicrophone, IconMicrophoneOff } from '@tabler/icons-react';
 
 import { useAzureStt } from '../Hooks/useAzureStt';
@@ -25,6 +25,7 @@ const VoiceInputButton = () => {
 
   const {
     audioStream,
+    isLoading,
     isMicrophoneDisabled,
     startListening,
     stopListening,
@@ -53,7 +54,7 @@ const VoiceInputButton = () => {
     ctx.stroke();
 
     node.getByteFrequencyData(byteArray.current);
-    requestAnimationFrame(() => draw(node));
+    animationFrameId.current = requestAnimationFrame(() => draw(node));
   }, []);
 
   useEffect(() => {
@@ -74,11 +75,28 @@ const VoiceInputButton = () => {
     };
   }, [audioStream, draw]);
 
+  const renderStatusIndicator = useMemo(() => {
+    let color = 'bg-green-500';
+    if (isLoading) {
+      color = 'bg-amber-500';
+    } else if (!isLoading && !isSpeechRecognitionActive) {
+      return null;
+    }
+    return <div className={`absolute w-1.5 h-1.5 m-1.5 top-0 right-0 ${color} rounded-full`} />;
+  }, [isLoading, isSpeechRecognitionActive]);
+
   const handleClick = async (): Promise<void> => {
     if (isSpeechRecognitionActive) {
       stopListening();
+
       if (animationFrameId.current)
         cancelAnimationFrame(animationFrameId.current);
+
+        // Clear the canvas
+        if (canvasRef.current && canvasRef.current.getContext('2d')) {
+          const ctx = canvasRef.current.getContext('2d');
+          ctx?.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        }
     } else {
       if (user && user.token) {
         await startListening(user.token);
@@ -116,9 +134,7 @@ const VoiceInputButton = () => {
               />
             )}
           </button>
-          {isSpeechRecognitionActive && (
-            <div className="absolute w-1.5 h-1.5 m-1.5 top-0 right-0 bg-green-500 rounded-full" />
-          )}
+          {renderStatusIndicator}
         </div>
       </div>
     </>
