@@ -12,7 +12,7 @@ export const getEndpoint = (plugin: Plugin | null) => {
   }
 
   if (plugin.id === PluginID.LANGCHAIN_CHAT) {
-    return 'api/new-langchain-api';
+    return 'api/langchain-api';
   }
 
   if (plugin.id === PluginID.GPT4) {

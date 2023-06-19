@@ -4,6 +4,7 @@ import { truncateLogMessage } from '@/utils/server';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
+import { OpenAIModelID } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
 
 import { AgentExecutor, ZeroShotAgent } from 'langchain/agents';
@@ -33,6 +34,20 @@ const calculator = new DynamicTool({
     }
   },
 });
+
+const webBrowser = (webSummaryEndpoint: string) =>
+  new DynamicTool({
+    name: 'web-browser',
+    description:
+      'useful for when you need to find something on or summarize a webpage. input should be a comma separated list of "ONE valid http URL including protocol","what you want to find on the page or empty string for a detail summary".',
+    func: async (input) => {
+      const requestURL = new URL(webSummaryEndpoint);
+      requestURL.searchParams.append('browserQuery', input);
+      const response = await fetch(requestURL.toString());
+      const { summary } = await response.json();
+      return summary;
+    },
+  });
 
 const handler = async (req: NextRequest, res: any) => {
   retrieveUserSessionAndLogUsages(req, PluginID.LANGCHAIN_CHAT);
@@ -117,12 +132,22 @@ const handler = async (req: NextRequest, res: any) => {
   const model = new ChatOpenAI({
     temperature: 0,
     callbackManager,
+    modelName: OpenAIModelID.GPT_3_5_16K,
     openAIApiKey: process.env.OPENAI_API_KEY,
     streaming: false,
   });
 
   const BingAPIKey = process.env.BingApiKey;
-  const tools = [new BingSerpAPI(BingAPIKey), calculator];
+  const isHttps = req.headers.get('x-forwarded-proto') === 'https';
+  const webSummaryEndpoint = `${isHttps ? 'https' : 'http'}://${req.headers.get(
+    'host',
+  )}/api/web-summary`;
+
+  const tools = [
+    new BingSerpAPI(BingAPIKey),
+    calculator,
+    webBrowser(webSummaryEndpoint),
+  ];
   const toolNames = tools.map((tool) => tool.name);
 
   const prompt = ZeroShotAgent.createPrompt(tools, {
