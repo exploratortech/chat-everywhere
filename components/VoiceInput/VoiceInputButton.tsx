@@ -124,12 +124,12 @@ const VoiceInputButton = () => {
         >
           {isMicrophoneDisabled ? (
             <IconMicrophoneOff
-              className="text-neutral-800 dark:text-neutral-100 dark:bg-[#40414F] rounded-full opacity-30"
+              className="text-zinc-500 dark:text-zinc-400 dark:bg-[#40414F] rounded-full opacity-50"
               size={18}
             />
           ) : (
             <IconMicrophone
-              className="text-neutral-800 dark:text-neutral-100 dark:bg-[#40414F] rounded-full opacity-60"
+              className="text-zinc-500 dark:text-zinc-400 dark:bg-[#40414F] rounded-full"
               size={18}
             />
           )}

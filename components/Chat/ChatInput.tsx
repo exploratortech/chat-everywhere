@@ -348,7 +348,7 @@ export const ChatInput = ({
             <div className="flex items-center pt-1 pl-1">
               <VoiceInputButton />
               <button
-                className="rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 cursor-default"
+                className="rounded-sm p-1 text-zinc-500 dark:text-zinc-400 cursor-default"
                 onKeyDown={(e) => {}}
               >
                 {getPluginIcon(currentMessage?.pluginId)}
@@ -399,7 +399,7 @@ export const ChatInput = ({
             onClick={handleSend}
           >
             {messageIsStreaming ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-t-2 border-neutral-800 opacity-60 dark:border-neutral-100"></div>
+              <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
             ) : (
               <IconSend size={18} />
             )}
