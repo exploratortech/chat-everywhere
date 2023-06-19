@@ -296,8 +296,8 @@ export const ChatInput = ({
             ? 'mt-[1.5rem] md:mt-[3rem]'
             : `${
                 isAiImagePluginSelected
-                  ? 'mt-[13.7rem] md:mt-[9.5rem]'
-                  : 'mt-[10.7rem] md:mt-[6.7rem]'
+                  ? 'mt-[16.9rem] md:mt-[12.8rem]'
+                  : 'mt-[14rem] md:mt-[10rem]'
               }`
         } stretch mx-2 mt-4 mb-4 flex flex-row gap-3 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-3xl transition-all ease-in-out`}
       >
