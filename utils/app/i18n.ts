@@ -52,4 +52,33 @@ function getAvailableSpeechSourceLanguages() {
   ];
 }
 
-export { getAvailableLocales, getAvailableSpeechSourceLanguages };
+const voiceMap: { [language: string]: string } = {
+  'en-Us': 'en-US-JennyNeural',
+  'zh-CN': 'zh-CN-XiaoxiaoNeural',
+  'zh-TW': 'zh-TW-HsiaoChenNeural',
+  'zh-HK': 'zh-HK-HiuMaanNeural',
+  'bn-IN': 'bn-IN-TanishaaNeural',
+  'de-DE': 'de-DE-KatjaNeural',
+  'es-ES': 'es-ES-ElviraNeural',
+  'fr-FR': 'fr-FR-DeniseNeural',
+  'he-IL': 'he-IL-HilaNeural',
+  'id-ID': 'id-ID-GadisNeural',
+  'it-IT': 'it-IT-ElsaNeural',
+  'ja-JP': 'ja-JP-NanamiNeural',
+  'ko-KR': 'ko-KR-SunHiNeural',
+  'pl-PL': 'pl-PL-AgnieszkaNeural',
+  'pt-PT': 'pt-PT-RaquelNeural',
+  'ru-RU': 'ru-RU-SvetlanaNeural',
+  'ro-RO': 'ro-RO-AlinaNeural',
+  'sv-SE': 'sv-SE-SofieNeural',
+  'te-IN': 'te-IN-ShrutiNeural',
+  'vi-VN': 'vi-VN-HoaiMyNeural',
+  'ar-EG': 'ar-EG-SalmaNeural',
+  'hi-IN': 'hi-IN-SwaraNeural',
+};
+
+export {
+  getAvailableLocales,
+  getAvailableSpeechSourceLanguages,
+  voiceMap,
+};

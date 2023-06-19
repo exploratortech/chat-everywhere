@@ -95,7 +95,7 @@ const Home = () => {
       forceSyncConversation,
       replaceRemoteData,
       messageIsStreaming,
-      isSpeechRecognitionActive,
+      speechRecognitionLanguage,
     },
     dispatch,
   } = contextValue;
@@ -597,7 +597,7 @@ const Home = () => {
         handleUpdateConversation,
         handleUserLogout,
         playMessage: (text, speechId) =>
-          speak(text, speechId, user?.token || ''),
+          speak(text, speechId, user?.token || '', speechRecognitionLanguage),
         stopPlaying,
       }}
     >

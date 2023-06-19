@@ -8,6 +8,8 @@ import {
   SpeechSynthesizer,
 } from 'microsoft-cognitiveservices-speech-sdk';
 
+import { voiceMap } from '@/utils/app/i18n';
+
 export const useAzureTts = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -56,7 +58,7 @@ export const useAzureTts = () => {
       'This feature is not available at the moment. Please try again later.',
     );
 
-  const speak = async (text: string, speechId: string, userToken: string) => {
+  const speak = async (text: string, speechId: string, userToken: string, language: string) => {
     try {
       stopPlaying();
 
@@ -80,7 +82,7 @@ export const useAzureTts = () => {
       );
 
       // Default to use Mandarin voice, since it can also handle English fairly well
-      speechConfig.speechSynthesisVoiceName = 'zh-TW-HsiaoChenNeural';
+      speechConfig.speechSynthesisVoiceName = voiceMap[language];
       const synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
 
       synthesizer.speakTextAsync(
