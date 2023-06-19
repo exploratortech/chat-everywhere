@@ -1,45 +1,23 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { IconCheck } from '@tabler/icons-react';
 import { FC, Fragment, useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
 
-import HomeContext from '@/pages/api/home/home.context';
+import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
-import { Session } from '@supabase/supabase-js';
+import HomeContext from '@/pages/api/home/home.context';
 
 type Props = {
   onClose: () => void;
-  session: Session;
 };
 
-const PlanDetail = {
-  free: {
-    features: [
-      'Enhance chat mode',
-      'Share conversations',
-      'Folder manager',
-      'Prompt manager',
-    ],
-  },
-  pro: {
-    features: [
-      'Everything in free plan',
-      'Priority response time',
-      'Cloud sync',
-      'AI speech',
-      'GPT-4 integration (Credit system)',
-      'AI image generation (Credit system)',
-    ],
-  },
-};
-
-export const ProfileModel: FC<Props> = ({ onClose }) => {
+export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
   const { t } = useTranslation('model');
   const {
     state: { user },
     handleUserLogout,
+    dispatch,
   } = useContext(HomeContext);
 
   const upgradeLinkOnClick = () => {
@@ -82,17 +60,15 @@ export const ProfileModel: FC<Props> = ({ onClose }) => {
     );
   };
 
+  const changePasswordOnClick = () => {
+    dispatch({ field: 'showProfileModel', value: false });
+    dispatch({ field: 'showLoginSignUpModel', value: true });
+  };
+
   const subscriptionManagementLink = () =>
     process.env.NEXT_PUBLIC_ENV === 'production'
       ? 'https://billing.stripe.com/p/login/5kAbMj0wt5VF6AwaEE'
       : 'https://billing.stripe.com/p/login/test_28o4jFe6GaqK1UY5kk';
-
-  const FeatureItem = ({ feature }: { feature: string }) => (
-    <div className="flex flex-row items-center">
-      <IconCheck size={16} stroke={1} className="mr-1" color="lightgreen" />
-      <span>{t(feature)}</span>
-    </div>
-  );
 
   return (
     <Transition appear show={true} as={Fragment}>
@@ -126,34 +102,41 @@ export const ProfileModel: FC<Props> = ({ onClose }) => {
                   <div className="rounded-2xl flex flex-col">
                     <span className="text-sm mb-6">
                       {t(
-                        'As an effort to reach sustainability for Chat Everywhere, we are introducing pro plan for our users to support us and this project, so we can continue to provide you with the best feature and experience.',
+                        'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime! Please make sure you registered before upgrading to avoid wait time.',
                       )}
                     </span>
                     <div className="flex flex-col md:flex-row justify-evenly mb-3">
-                      <div className="flex flex-col border rounded-2xl p-4 text-neutral-400 border-neutral-400 md:w-1/2">
+                      <div className="flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
                         <span className="text-2xl font-bold">Free</span>
-                        <span className="text-sm mb-2">USD$0</span>
                         <div className="text-xs leading-5">
                           {PlanDetail.free.features.map((feature, index) => (
-                            <FeatureItem key={index} feature={feature} />
+                            <FeatureItem key={index} featureName={t(feature)} />
                           ))}
                         </div>
                       </div>
-                      <div className="flex flex-col border rounded-2xl p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
+                      <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
                         <span className="text-2xl font-bold">Pro</span>
-                        <span className="text-sm mb-2">USD$9.99 per month</span>
+                        <span className="text-sm mb-2">
+                          {t('USD$9.99 / month')}
+                        </span>
                         <div className="text-xs leading-5">
+                          <FeatureItem
+                            featureName={t('Everything in free plan')}
+                          />
+                          <FeatureItem
+                            featureName={t('Priority response time')}
+                          />
                           {PlanDetail.pro.features.map((feature, index) => (
-                            <FeatureItem key={index} feature={feature} />
+                            <FeatureItem key={index} featureName={t(feature)} />
                           ))}
                         </div>
-                        {user?.plan === 'free' && (
+                        {user?.plan !== 'pro' && (
                           <div className="flex flex-col">
                             <a
                               target="_blank"
                               rel="noreferrer"
                               onClick={() => upgradeLinkOnClick()}
-                              className="px-4 py-2 border rounded-lg bg-neutral-100 shadow border-neutral-500 text-neutral-700 hover:bg-white focus:outline-none mt-4 text-center text-sm cursor-pointer"
+                              className="px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
                             >
                               {t('Upgrade')}
                             </a>
@@ -161,9 +144,11 @@ export const ProfileModel: FC<Props> = ({ onClose }) => {
                               target="_blank"
                               rel="noreferrer"
                               onClick={() => upgradeForOneMonthLinkOnClick()}
-                              className="px-4 py-2 border rounded-lg bg-neutral-300 shadow border-neutral-500 text-neutral-700 hover:bg-white focus:outline-none mt-2 text-center text-sm cursor-pointer"
+                              className="px-4 py-2 text-xs border rounded-lg bg-neutral-300 shadow border-none text-neutral-700 hover:bg-white focus:outline-none mt-2 text-center cursor-pointer"
                             >
-                              {t('Upgrade for one month')}
+                              {t(
+                                'Upgrade for one month only (active in 24 hours)',
+                              )}
                             </a>
                           </div>
                         )}
@@ -198,6 +183,11 @@ export const ProfileModel: FC<Props> = ({ onClose }) => {
                           jack@exploratorlabs.com
                         </a>
                       </p>
+                      {user && (
+                        <p className="text-xs text-neutral-400 mt-2">
+                          {t('Your registration email is')} {user?.email}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </Dialog.Description>
@@ -211,13 +201,23 @@ export const ProfileModel: FC<Props> = ({ onClose }) => {
                     {t('Okay')}
                   </button>
 
-                  <button
-                    type="button"
-                    className="px-4 py-2 border rounded-lg shadow border-neutral-500 text-neutral-200 hover:bg-neutral-700 focus:outline-none"
-                    onClick={handleUserLogout}
-                  >
-                    {t('Sign Out')}
-                  </button>
+                  {user && (
+                    <div className="flex flex-row items-center">
+                      <span
+                        className="px-4 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer mr-2 text-xs"
+                        onClick={changePasswordOnClick}
+                      >
+                        {t('Change password')}
+                      </span>
+                      <button
+                        type="button"
+                        className="px-4 py-2 border rounded-lg shadow border-neutral-500 text-neutral-200 hover:bg-neutral-700 focus:outline-none"
+                        onClick={handleUserLogout}
+                      >
+                        {t('Sign Out')}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </Dialog.Panel>
             </Transition.Child>

@@ -2,6 +2,7 @@ import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import {
+  addBackCreditBy1,
   addUsageEntry,
   getAdminSupabaseClient,
   getUserProfile,
@@ -86,7 +87,30 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error) {
     console.error(error);
     if (error instanceof OpenAIError) {
-      return new Response('Error', { status: 500, statusText: error.message });
+      switch (error.httpCode) {
+        case 429:
+          try {
+            // Add credit back to user's account
+            await addBackCreditBy1(data.user.id, PluginID.GPT4);
+          } catch (error) {
+            // Handle error adding credit back
+            return new Response('Error adding credit back', {
+              status: 500,
+              statusText: 'Internal Server Error',
+            });
+          }
+          // Return 429 error to user
+          return new Response('OpenAI API Error', {
+            status: 429,
+            statusText: 'OpenAI API Error',
+          });
+        default:
+          // Return error message to user
+          return new Response('Error', {
+            status: 500,
+            statusText: error.message,
+          });
+      }
     } else {
       return new Response('Error', { status: 500 });
     }

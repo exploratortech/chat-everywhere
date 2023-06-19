@@ -1,6 +1,10 @@
+// This endpoint only allow GPT-3.5 and GPT-3.5 16K models
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
-import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
+import {
+  getMessagesTokenCount,
+  shortenMessagesBaseOnTokenLimit,
+} from '@/utils/server/api';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
@@ -17,8 +21,7 @@ const handler = async (req: Request): Promise<Response> => {
     const selectedOutputLanguage = req.headers.get('Output-Language')
       ? `{lang=${req.headers.get('Output-Language')}}`
       : '';
-    const { model, messages, prompt, temperature } =
-      (await req.json()) as ChatBody;
+    const { messages, prompt, temperature } = (await req.json()) as ChatBody;
 
     let promptToSend = prompt;
     if (!promptToSend) {
@@ -30,10 +33,17 @@ const handler = async (req: Request): Promise<Response> => {
       temperatureToUse = DEFAULT_TEMPERATURE;
     }
 
+    const defaultTokenLimit = OpenAIModels[OpenAIModelID.GPT_3_5].tokenLimit;
+    const extendedTokenLimit =
+      OpenAIModels[OpenAIModelID.GPT_3_5_16K].tokenLimit;
+
+    const useLargerContextWindowModel =
+      (await getMessagesTokenCount(messages) + 1000) > defaultTokenLimit; // Add buffer token to take system prompt into account
+    
     const messagesToSend = await shortenMessagesBaseOnTokenLimit(
       prompt,
       messages,
-      model.tokenLimit,
+      extendedTokenLimit,
     );
 
     if (selectedOutputLanguage) {
@@ -45,7 +55,9 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const stream = await OpenAIStream(
-      OpenAIModels[OpenAIModelID.GPT_3_5],
+      useLargerContextWindowModel
+        ? OpenAIModels[OpenAIModelID.GPT_3_5_16K]
+        : OpenAIModels[OpenAIModelID.GPT_3_5],
       promptToSend,
       temperatureToUse,
       messagesToSend,

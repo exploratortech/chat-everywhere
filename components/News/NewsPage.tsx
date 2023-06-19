@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { NotionRenderer } from 'react-notion-x';
 
 import Spinner from '../Spinner/Spinner';
@@ -29,6 +29,20 @@ function NewsPage({ pageId }: Props) {
         fullPage={false}
         header={true}
         darkMode={true}
+        components={{
+          Collection: () => {
+            return <></>;
+          },
+          PageLink: ({ ...props }) => {
+            return (
+              <a
+                target='_blank'
+                {...props}
+                href={`https://explorator.notion.site/${props.href}`}
+              />
+            );
+          },
+        }}
       />
     );
   }

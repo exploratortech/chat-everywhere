@@ -213,7 +213,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                   <div className="rounded-2xl flex flex-col">
                     <span className="text-lg mb-6">
                       {t(
-                        'Please share your thoughts by completing a brief survey.',
+                        'Please share your thoughts by completing a brief survey',
                       )}
                     </span>
 

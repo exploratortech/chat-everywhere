@@ -13,7 +13,7 @@ import TierTag from './TierTag';
 import dayjs from 'dayjs';
 
 function formatDatetime(dateString: string) {
-  return dayjs(dateString).format('YYYY/MM/DD' + ' ' + 'HH:mm');
+  return dayjs(dateString).format('YYYY/MM/DD');
 }
 
 type Props = {
@@ -77,7 +77,7 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center text-center">
+          <div className="flex min-h-full items-center justify-center text-center mobile:block">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -87,7 +87,7 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-[80vh] transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-screen mobile:!max-w-[unset] mobile:!rounded-none">
+              <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-[80vh] transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
                 <div className="mb-3 flex flex-row justify-between items-center">
                   <h1>{t('Feature Introduction')}</h1>
 
@@ -100,7 +100,7 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
                       className="w-max px-4 py-1 border rounded-lg shadow focus:outline-none border-neutral-800 border-opacity-50 bg-white text-black hover:bg-neutral-300 "
                       onClick={() => setSelectedPageId(null)}
                     >
-                      Back
+                      {t('Back')}
                     </button>
                   )}
                 </div>
@@ -127,7 +127,7 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
                               />
                             ))}
                         </h3>
-                        <label className="italic text-sm">
+                        <label className="italic text-xs">
                           {formatDatetime(featureItem.lastEditedTime)}
                         </label>
                       </div>

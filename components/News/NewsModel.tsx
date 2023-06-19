@@ -130,7 +130,7 @@ const NewsModel = memo(({ className = '', open, onOpen, onClose }: Props) => {
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center text-center">
+          <div className="flex min-h-full items-center justify-center text-center mobile:block">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -140,22 +140,26 @@ const NewsModel = memo(({ className = '', open, onOpen, onClose }: Props) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-[80vh] transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-screen mobile:!max-w-[unset] mobile:!rounded-none">
+              <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-[80vh] transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
                 <div className="mb-3 flex flex-row justify-between items-center">
-                  <h1>{t('Latest Updates')}</h1>
+                  <p className="text-lg">{t('Latest Updates')}</p>
 
-                  {!selectPageId ? (
-                    <button className="w-max min-h-[34px]" onClick={onClose}>
-                      <IconX></IconX>
-                    </button>
-                  ) : (
+                  <div className="flex justify-center items-center">
+                    {selectPageId && (
+                      <button
+                        className="w-max px-4 py-1 border rounded-lg shadow focus:outline-none border-neutral-800 border-opacity-50 bg-white text-black hover:bg-neutral-200 text-xs"
+                        onClick={() => setSelectedPageId(null)}
+                      >
+                        {t('All Updates')}
+                      </button>
+                    )}
                     <button
-                      className="w-max px-4 py-1 border rounded-lg shadow focus:outline-none border-neutral-800 border-opacity-50 bg-white text-black hover:bg-neutral-300 "
-                      onClick={() => setSelectedPageId(null)}
+                      className="w-max min-h-[34px] ml-2"
+                      onClick={onClose}
                     >
-                      Back
+                      <IconX />
                     </button>
-                  )}
+                  </div>
                 </div>
 
                 <ul
@@ -169,10 +173,10 @@ const NewsModel = memo(({ className = '', open, onOpen, onClose }: Props) => {
                       key={`${news.id} ${index}`}
                       onClick={() => setSelectedPageId(news.id)}
                     >
-                      <h3 className="text-sm font-medium leading-5">
+                      <h2 className="text-sm font-medium leading-5">
                         {news.title}
-                      </h3>
-                      <p>{formatDatetime(news.createdTime)}</p>
+                      </h2>
+                      <span>{formatDatetime(news.createdTime)}</span>
                     </li>
                   ))}
 
