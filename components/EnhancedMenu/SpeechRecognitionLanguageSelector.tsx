@@ -5,7 +5,7 @@ import { getAvailableSpeechSourceLanguages } from '@/utils/app/i18n';
 import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 
 import HomeContext from '@/pages/api/home/home.context';
-import { saveSpeechRecognitionLanguage } from '@/utils/app/outputLanguage copy';
+import { saveSpeechRecognitionLanguage } from '@/utils/app/speechRecognitionLanguage.ts';
 
 const SpeechRecognitionLanguageSelector = () => {
   const { t } = useTranslation('model');
