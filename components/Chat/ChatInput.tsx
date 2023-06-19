@@ -92,7 +92,7 @@ export const ChatInput = ({
   };
 
   const handleSend = () => {
-    if (messageIsStreaming) {
+    if (messageIsStreaming || isSpeechRecognitionActive) {
       return;
     }
 
@@ -353,7 +353,7 @@ export const ChatInput = ({
             ref={textareaRef}
             className={`
               m-0 w-full transition-all resize-none border-0 bg-transparent pt-3 pr-8 pl-10 text-black dark:bg-transparent dark:text-white outline-none
-              ${ isSpeechRecognitionActive ? 'z-[1100]' : '' }
+              ${ isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : '' }
             `}
             style={{
               marginBottom: `${

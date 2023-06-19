@@ -1,9 +1,9 @@
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef } from 'react'
 import { IconMicrophone, IconMicrophoneOff } from '@tabler/icons-react';
-
-import { useAzureStt } from '../Hooks/useAzureStt';
-import HomeContext from '@/pages/api/home/home.context';
 import { toast } from 'react-hot-toast';
+
+import HomeContext from '@/pages/api/home/home.context';
+import { useAzureStt } from '../Hooks/useAzureStt';
 
 const getLargestValue = (bytes: Uint8Array): number => {
   let largest = 0;
@@ -27,8 +27,8 @@ const VoiceInputButton = () => {
     audioStream,
     isLoading,
     isMicrophoneDisabled,
-    startListening,
-    stopListening,
+    startSpeechRecognition,
+    stopSpeechRecognition,
   } = useAzureStt();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -87,7 +87,7 @@ const VoiceInputButton = () => {
 
   const handleClick = async (): Promise<void> => {
     if (isSpeechRecognitionActive) {
-      stopListening();
+      stopSpeechRecognition();
 
       if (animationFrameId.current)
         cancelAnimationFrame(animationFrameId.current);
@@ -99,7 +99,7 @@ const VoiceInputButton = () => {
         }
     } else {
       if (user && user.token) {
-        await startListening(user.token);
+        await startSpeechRecognition(user.token);
       } else {
         toast.error('You must be signed in to use this feature.');
       }

@@ -6,6 +6,7 @@ import {
   SpeechRecognizer,
 } from 'microsoft-cognitiveservices-speech-sdk';
 import { toast } from 'react-hot-toast';
+
 import HomeContext from '@/pages/api/home/home.context';
 
 export const useAzureStt = () => {
@@ -29,7 +30,9 @@ export const useAzureStt = () => {
     return await response.json();
   };
 
-  const startListening = async (userToken: string): Promise<void> => {
+  const startSpeechRecognition = async (userToken: string): Promise<void> => {
+    if (isLoading) return;
+
     setIsLoading(true);
     dispatch({ field: 'isSpeechRecognitionActive', value: true });
 
@@ -43,12 +46,14 @@ export const useAzureStt = () => {
       setAudioStream(stream);
       setIsMicrophoneDisabled(false);
     } catch (error) {
+      setIsLoading(false);
       setIsMicrophoneDisabled(true);
       toast.error('Unable to access microphone.');
       return;
     }
 
     if (!stream) {
+      setIsLoading(false);
       toast.error('Unable to access microphone');
       return;
     }
@@ -60,6 +65,7 @@ export const useAzureStt = () => {
         region.current = data.region;
       }
     } catch (error) {
+      setIsLoading(false);
       toast.error('Unable to fetch token.');
       console.error(error);
     }
@@ -102,7 +108,8 @@ export const useAzureStt = () => {
     };
 
     speechRecognizer.current.canceled = (sender, event) => {
-      stopListening();
+      setIsLoading(false);
+      stopSpeechRecognition();
     };
 
     speechRecognizer.current.sessionStopped = (sender, event) => {
@@ -116,13 +123,14 @@ export const useAzureStt = () => {
     
     speechRecognizer.current.startContinuousRecognitionAsync(() => {
     }, (error) => {
+      setIsLoading(false);
       setIsMicrophoneDisabled(true);
       toast.error('Unable to begin speech recognition.');
       console.error(error);
     });
   };
 
-  const stopListening = async (): Promise<void> => {
+  const stopSpeechRecognition = async (): Promise<void> => {
     if (!speechRecognizer.current) return;
     speechRecognizer.current.stopContinuousRecognitionAsync(() => {}, (error) => {
       toast.error('Unable to stop speech recognition.');
@@ -134,7 +142,7 @@ export const useAzureStt = () => {
     audioStream,
     isLoading,
     isMicrophoneDisabled,
-    startListening,
-    stopListening,
+    startSpeechRecognition,
+    stopSpeechRecognition,
   };
 };
