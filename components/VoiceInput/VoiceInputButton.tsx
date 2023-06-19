@@ -108,37 +108,35 @@ const VoiceInputButton = () => {
   };
 
   return (
-    <>
-      <div
-        className="relative w-9 h-9 z-[1100] dark:bg-[#343541] rounded-full"
-      >
-        <div className="relative">
-          <canvas
-            className="w-full h-full"
-            width="36"
-            height="36"
-            ref={canvasRef}
-          />
-          <button
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-2 bg-transparent"
-            onClick={handleClick}
-          >
-            {isMicrophoneDisabled ? (
-              <IconMicrophoneOff
-                className="dark:bg-[#343541] rounded-full opacity-50"
-                size={18}
-              />
-            ) : (
-              <IconMicrophone
-                className="dark:bg-[#343541] rounded-full"
-                size={18}
-              />
-            )}
-          </button>
-          {renderStatusIndicator}
-        </div>
+    <div
+      className="w-9 h-9 z-[1100] dark:bg-[#40414F] rounded-full"
+    >
+      <div className="relative">
+        <canvas
+          className="w-full h-full"
+          width="36"
+          height="36"
+          ref={canvasRef}
+        />
+        <button
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-2 bg-transparent"
+          onClick={handleClick}
+        >
+          {isMicrophoneDisabled ? (
+            <IconMicrophoneOff
+              className="text-neutral-800 dark:text-neutral-100 dark:bg-[#40414F] rounded-full opacity-30"
+              size={18}
+            />
+          ) : (
+            <IconMicrophone
+              className="text-neutral-800 dark:text-neutral-100 dark:bg-[#40414F] rounded-full opacity-60"
+              size={18}
+            />
+          )}
+        </button>
+        {renderStatusIndicator}
       </div>
-    </>
+    </div>
   );
 };
 

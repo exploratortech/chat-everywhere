@@ -13,10 +13,9 @@ import HomeContext from '@/pages/api/home/home.context';
 import ChangeOutputLanguageButton from './ChangeOutputLanguageButton';
 import ConversationStyleSelector from './ConversationStyleSelector';
 import ImageGenerationSelectors from './ImageGenerationSelectors';
-import VoiceInputButton from './VoiceInputButton';
 import SpeechRecognitionLanguageSelector from './SpeechRecognitionLanguageSelector';
 import ModeSelector from './ModeSelector';
-import VoiceInputActiveOverlay from './VoiceInputActiveOverlay';
+import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
 
 import PropTypes from 'prop-types';
 
@@ -75,7 +74,6 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
       >
         <div className="relative w-full px-4 py-2 flex flex-col">
           <div className="flex flex-row w-full justify-start items-center pb-2 mb-2 border-b dark:border-gray-900/50">
-            <VoiceInputButton />
             <SpeechRecognitionLanguageSelector />
           </div>
           <div className="flex flex-col md:flex-row w-full justify-between">
