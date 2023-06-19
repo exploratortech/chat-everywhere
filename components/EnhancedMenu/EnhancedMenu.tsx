@@ -86,7 +86,6 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
           {currentMessage?.pluginId === PluginID.IMAGE_GEN && (
             <ImageGenerationSelectors />
           )}
-          <VoiceInputActiveOverlay />
         </div>
       </div>
     );

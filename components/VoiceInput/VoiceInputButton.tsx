@@ -85,7 +85,7 @@ const VoiceInputButton = () => {
     return <div className={`absolute w-1.5 h-1.5 m-1.5 top-0 right-0 ${color} rounded-full`} />;
   }, [isLoading, isSpeechRecognitionActive]);
 
-  const handleClick = async (): Promise<void> => {
+  const handleClick = async (e: any): Promise<void> => {
     if (isLoading) return;
     if (isSpeechRecognitionActive) {
       stopSpeechRecognition();
@@ -105,6 +105,7 @@ const VoiceInputButton = () => {
         toast.error('You must be signed in to use this feature.');
       }
     }
+    e.stopPropagation();
   };
 
   return (
@@ -121,6 +122,10 @@ const VoiceInputButton = () => {
         <button
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-2 bg-transparent"
           onClick={handleClick}
+          onMouseDown={(e) => {
+            // Prevents closing enhanced menu if its opened
+            e.stopPropagation();
+          }}
         >
           {isMicrophoneDisabled ? (
             <IconMicrophoneOff

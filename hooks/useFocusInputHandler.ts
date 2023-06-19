@@ -9,17 +9,11 @@ interface FocusHandlerResult {
 }
 
 function useFocusHandler(textareaRef: RefObject<HTMLTextAreaElement>): FocusHandlerResult {
-  const { state: { isSpeechRecognitionActive } } = useContext(HomeContext);
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleFocus = (e: MouseEvent) => {
-      if (isSpeechRecognitionActive) {
-        setIsFocused(true);
-        return;
-      }
-
       if (
         menuRef.current &&
         menuRef.current.contains(e.target as HTMLDivElement)
@@ -38,7 +32,7 @@ function useFocusHandler(textareaRef: RefObject<HTMLTextAreaElement>): FocusHand
     return () => {
       document.removeEventListener('mousedown', handleFocus);
     };
-  }, [textareaRef, isSpeechRecognitionActive]);
+  }, [textareaRef]);
 
   return { isFocused, menuRef , setIsFocused};
 }
