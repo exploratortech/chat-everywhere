@@ -209,20 +209,20 @@ export const ChatMessage: FC<Props> = memo(
         const match = /language-(\w+)/.exec(className || '');
         return !inline ? (
           <CodeBlock
-            key={Math.random()}
+            key={messageIndex}
             language={(match && match[1]) || ''}
             value={String(children).replace(/\n$/, '')}
             {...props}
           />
         ) : (
-          <code className={className} {...props}>
+          <code className={className} {...props} key={messageIndex}>
             {children}
           </code>
         );
       };
       Component.displayName = 'CodeComponent';
       return Component;
-    }, []);
+    }, [messageIndex]);
 
     return (
       <div
