@@ -79,7 +79,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
   };
 
   return (
-    <TransitionGroup className="flex w-full flex-col pt-2">
+    <div className="flex w-full flex-col pt-2">
       <DropArea
         canDrop={handleCanDrop}
         index={0}
@@ -89,15 +89,13 @@ export const ChatFolders = ({ searchTerm }: Props) => {
         .filter((folder) => folder.type === 'chat')
         .map((folder, index) => (
           <Fragment key={folder.id}>
-            <CSSTransition timeout={500} classNames="item">
-              <Folder
-                key={folder.id}
-                searchTerm={searchTerm}
-                currentFolder={folder}
-                handleDrop={handleConversationDrop}
-                folderComponent={ChatFolders(folder)}
-              />
-            </CSSTransition>
+            <Folder
+              key={folder.id}
+              searchTerm={searchTerm}
+              currentFolder={folder}
+              handleDrop={handleConversationDrop}
+              folderComponent={ChatFolders(folder)}
+            />
             <DropArea
               canDrop={handleCanDrop}
               index={index + 1}
@@ -105,6 +103,6 @@ export const ChatFolders = ({ searchTerm }: Props) => {
             />
           </Fragment>
         ))}
-    </TransitionGroup>
+    </div>
   );
 };
