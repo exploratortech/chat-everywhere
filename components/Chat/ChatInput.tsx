@@ -329,7 +329,7 @@ export const ChatInput = ({
             border bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] 
             dark:bg-[#40414F] dark:text-white 
             dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4 
-            ${isOverTokenLimit ? '!border-red-500 dark:!border-red-600' : ''}
+            ${isOverTokenLimit && !isSpeechRecognitionActive ? '!border-red-500 dark:!border-red-600' : ''}
             ${
               !currentMessage || currentMessage.pluginId === null
                 ? 'border-black/10 dark:border-gray-900/50'
@@ -349,7 +349,6 @@ export const ChatInput = ({
               <VoiceInputButton />
               <button
                 className="rounded-sm p-1 text-zinc-500 dark:text-zinc-400 cursor-default"
-                onKeyDown={(e) => {}}
               >
                 {getPluginIcon(currentMessage?.pluginId)}
               </button>
@@ -358,11 +357,12 @@ export const ChatInput = ({
             <textarea
               ref={textareaRef}
               className={`
-                m-0 w-full transition-all resize-none border-0 bg-transparent pt-3 pr-8 pl-2 text-black dark:bg-transparent dark:text-white outline-none
+                m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md
                 ${ isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : '' }
+                ${ isOverTokenLimit && isSpeechRecognitionActive ? 'border !border-red-500 dark:!border-red-600' : 'border-0' }
               `}
               style={{
-                marginBottom: `${
+                paddingBottom: `${
                   isCloseToTokenLimit || isOverTokenLimit ? '2.2' : '0.75'
                 }rem `,
                 resize: 'none',
@@ -384,11 +384,12 @@ export const ChatInput = ({
           </div>
 
           <TokenCounter
-            className={` ${
-              isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''
-            } ${
-              isCloseToTokenLimit || isOverTokenLimit ? 'visible' : 'invisible'
-            } absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400`}
+            className={`
+              ${isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''}
+              ${isCloseToTokenLimit || isOverTokenLimit ? 'visible' : 'invisible'}
+              ${ isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : '' }
+              absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400
+            `}
             value={content}
             setIsOverLimit={setIsOverTokenLimit}
             setIsCloseToLimit={setIsCloseToTokenLimit}

@@ -19,6 +19,7 @@ const VoiceInputButton = () => {
   const {
     state: {
       user,
+      lightMode,
       isSpeechRecognitionActive,
     },
   } = useContext(HomeContext);
@@ -41,7 +42,7 @@ const VoiceInputButton = () => {
     const largestValue = getLargestValue(byteArray.current);
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = lightMode === 'dark' ? '#ffffff' : '#71717a';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(
@@ -55,7 +56,7 @@ const VoiceInputButton = () => {
 
     node.getByteFrequencyData(byteArray.current);
     animationFrameId.current = requestAnimationFrame(() => draw(node));
-  }, []);
+  }, [lightMode]);
 
   useEffect(() => {
     if (audioStream) {
@@ -110,7 +111,7 @@ const VoiceInputButton = () => {
 
   return (
     <div
-      className="w-9 h-9 z-[1100] dark:bg-[#40414F] rounded-full"
+      className="w-9 h-9 z-[1100] bg-white dark:bg-[#40414F] rounded-full"
     >
       <div className="relative">
         <canvas
@@ -129,12 +130,12 @@ const VoiceInputButton = () => {
         >
           {isMicrophoneDisabled ? (
             <IconMicrophoneOff
-              className="text-zinc-500 dark:text-zinc-400 dark:bg-[#40414F] rounded-full opacity-50"
+              className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full opacity-50"
               size={18}
             />
           ) : (
             <IconMicrophone
-              className="text-zinc-500 dark:text-zinc-400 dark:bg-[#40414F] rounded-full"
+              className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full"
               size={18}
             />
           )}
