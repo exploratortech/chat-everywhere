@@ -27,21 +27,21 @@ export const shortenMessagesBaseOnTokenLimit = async (
     const message = messages[i];
     const tokens = encoding.encode(message.content);
 
-    if (tokenCount + tokens.length + 1000 > tokenLimit) {
+    if (tokenCount + tokens.length + 1400 > tokenLimit) {
       break;
     }
     tokenCount += tokens.length;
     messagesToSend = [message, ...messagesToSend];
   }
-  
-  if(messagesToSend.length === 0) {
+
+  if (messagesToSend.length === 0) {
     // Shorten the last message if it's too long
     const lastMessage = messages[messages.length - 1];
-    let shortenedMessageContent = "";
+    let shortenedMessageContent = '';
     for (let i = 0; i < lastMessage.content.length; i++) {
       const char = lastMessage.content[i];
       const tokens = encoding.encode(char);
-      if (tokenCount + tokens.length + 1000 > tokenLimit) {
+      if (tokenCount + tokens.length + 1400 > tokenLimit) {
         break;
       }
       tokenCount += tokens.length;
@@ -53,10 +53,29 @@ export const shortenMessagesBaseOnTokenLimit = async (
       {
         ...lastMessage,
         content: shortenedMessageContent,
-      }
-    ]
-  }else{
+      },
+    ];
+  } else {
     encoding.free();
     return messagesToSend;
   }
+};
+
+export const getMessagesTokenCount = async (messages: Message[]): Promise<number> => {
+  await init((imports) => WebAssembly.instantiate(wasm, imports));
+
+  const encoding = new Tiktoken(
+    tiktokenModel.bpe_ranks,
+    tiktokenModel.special_tokens,
+    tiktokenModel.pat_str,
+  );
+
+  let tokenCount = 0;
+  for (let i = 0; i < messages.length; i++) {
+    const message = messages[i];
+    const tokens = encoding.encode(message.content);
+    tokenCount += tokens.length;
+  }
+
+  return tokenCount;
 };

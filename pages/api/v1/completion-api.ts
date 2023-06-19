@@ -91,6 +91,7 @@ const handler = async (req: Request): Promise<Response> => {
           result.error.type,
           result.error.param,
           result.error.code,
+          res.status,
         );
       } else {
         throw new Error(

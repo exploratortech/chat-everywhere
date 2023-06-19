@@ -1,17 +1,25 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    const { accessible_id } = req.body;
+export const config = {
+  runtime: 'edge',
+};
 
+const handler = async (req: Request): Promise<Response> => {
+  if (req.method === 'POST') {
+    const { accessible_id } = await req.json();
+
+    const res = new Response();
     if (!accessible_id) {
-      res.status(400).json({ error: 'Missing accessible_id parameter' });
-      return;
+      return new Response(
+        JSON.stringify({ error: 'Missing accessible_id parameter' }),
+        {
+          status: 400,
+        },
+      );
     }
 
     try {
@@ -22,22 +30,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .single();
 
       if (error) {
-        res.status(500).json({ error: 'Error fetching data' });
-        return;
+        return new Response(JSON.stringify({ error: 'Error fetching data' }), {
+          status: 500,
+        });
       }
 
       if (!data) {
-        res.status(404).json({ error: 'No conversation found for the given accessible_id' });
-        return;
+        return new Response(
+          JSON.stringify({
+            error: 'No conversation found for the given accessible_id',
+          }),
+          {
+            status: 404,
+          },
+        );
       }
 
-      res.status(200).json({ title: data.title, prompts: data.prompts });
+      return new Response(
+        JSON.stringify({ title: data.title, prompts: data.prompts }),
+      );
     } catch (error) {
-      console.error(error)
-      res.status(500).json({ error: 'Error fetching data' });
+      console.error(error);
+      return new Response(JSON.stringify({ error: 'Error fetching data' }), {
+        status: 500,
+      });
     }
   } else {
-    res.setHeader('Allow', 'POST');
-    res.status(405).end('Method Not Allowed');
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+    });
   }
-}
+};
+
+export default handler;

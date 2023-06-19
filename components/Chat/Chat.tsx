@@ -42,10 +42,9 @@ import dayjs from 'dayjs';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
-  googleAdSenseId: string;
 }
 
-export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
+export const Chat = memo(({ stopConversationRef }: Props) => {
   const { t } = useTranslation('chat');
 
   const {
@@ -175,9 +174,17 @@ export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
         if (!response.ok) {
           homeDispatch({ field: 'loading', value: false });
           homeDispatch({ field: 'messageIsStreaming', value: false });
-          toast.error(
-            response.statusText || t('Unknown error, please contact support'),
-          );
+          if (response.status === 429) {
+            toast.error(
+              t(
+                'We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.',
+              ),
+            );
+          } else {
+            toast.error(
+              response.statusText || t('Unknown error, please contact support'),
+            );
+          }
 
           // remove the last message from the conversation
           homeDispatch({
@@ -316,7 +323,7 @@ export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
     ],
   );
 
-  const handleScroll = () => {
+  const handleScroll = throttle(() => {
     if (chatContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } =
         chatContainerRef.current;
@@ -330,7 +337,7 @@ export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
         setShowScrollDownButton(false);
       }
     }
-  };
+  }, 100);
 
   const handleScrollDown = () => {
     chatContainerRef.current?.scrollTo({
@@ -429,10 +436,10 @@ export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
             ) : (
               <>
                 <div
-                  className="justify-center border hidden md:flex
+                  className="justify-center border hidden lg:flex
                   border-b-neutral-300 bg-neutral-100 py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 sticky top-0 z-10"
                 >
-                  {selectedConversation?.name}
+                  {selectedConversation?.name} 
 
                   <button
                     className="ml-2 cursor-pointer hover:opacity-50"
@@ -450,12 +457,6 @@ export const Chat = memo(({ stopConversationRef, googleAdSenseId }: Props) => {
 
                 {selectedConversation?.messages.map((message, index) => (
                   <div key={index}>
-                    {
-                      // Show ad every 4 messages
-                      index !== 0 && index % 4 === 0 && (
-                        <AdMessage googleAdSenseId={googleAdSenseId} />
-                      )
-                    }
                     <ChatMessage
                       key={index}
                       message={message}

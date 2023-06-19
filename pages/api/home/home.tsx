@@ -41,12 +41,14 @@ import { UserProfile } from '@/types/user';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
+import FeaturesModel from '@/components/Features/FeaturesModel';
 import { useAzureTts } from '@/components/Hooks/useAzureTts';
 import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
 import { Navbar } from '@/components/Mobile/Navbar';
+import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
-import { ProfileModel } from '@/components/User/ProfileModel';
+import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 
@@ -56,19 +58,8 @@ import { HomeInitialState, initialState } from './home.state';
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 
-interface Props {
-  serverSideApiKeyIsSet: boolean;
-  serverSidePluginKeysSet: boolean;
-  defaultModelId: OpenAIModelID;
-  googleAdSenseId: string;
-}
-
-const Home = ({
-  serverSideApiKeyIsSet,
-  serverSidePluginKeysSet,
-  defaultModelId,
-  googleAdSenseId,
-}: Props) => {
+const Home = () => {
+  const defaultModelId = fallbackModelID;
   const { t } = useTranslation('chat');
   const { getModels } = useApiService();
   const { getModelsError } = useErrorService();
@@ -95,6 +86,8 @@ const Home = ({
       showProfileModel,
       showUsageModel,
       showSurveyModel,
+      showNewsModel,
+      showFeaturesModel,
       user,
       isPaidUser,
       conversationLastSyncAt,
@@ -108,10 +101,8 @@ const Home = ({
   const stopConversationRef = useRef<boolean>(false);
 
   const { data, error } = useQuery(
-    ['GetModels', serverSideApiKeyIsSet],
+    ['GetModels'],
     ({ signal }) => {
-      if (!serverSideApiKeyIsSet) return null;
-
       return getModels(signal);
     },
     { enabled: true, refetchOnMount: false },
@@ -304,17 +295,7 @@ const Home = ({
   useEffect(() => {
     defaultModelId &&
       dispatch({ field: 'defaultModelId', value: defaultModelId });
-    serverSideApiKeyIsSet &&
-      dispatch({
-        field: 'serverSideApiKeyIsSet',
-        value: serverSideApiKeyIsSet,
-      });
-    serverSidePluginKeysSet &&
-      dispatch({
-        field: 'serverSidePluginKeysSet',
-        value: serverSidePluginKeysSet,
-      });
-  }, [defaultModelId, serverSideApiKeyIsSet, serverSidePluginKeysSet]);
+  }, [defaultModelId]);
 
   // CLOUD SYNC ------------------------------------------
 
@@ -461,6 +442,7 @@ const Home = ({
   const handleUserLogout = async () => {
     await supabase.auth.signOut();
     dispatch({ field: 'user', value: null });
+    dispatch({ field: 'showProfileModel', value: false });
     toast.success(t('You have been logged out'));
   };
 
@@ -577,12 +559,7 @@ const Home = ({
         value: newConversation,
       });
     }
-  }, [
-    defaultModelId,
-    dispatch,
-    serverSideApiKeyIsSet,
-    serverSidePluginKeysSet,
-  ]);
+  }, []);
 
   // APPLY HOOKS VALUE TO CONTEXT -------------------------------------
   useEffect(() => {
@@ -631,21 +608,17 @@ const Home = ({
           className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
           style={{ height: containerHeight }}
         >
-          <div className="fixed top-0 w-full md:hidden">
+          <div className="w-full lg:hidden">
             <Navbar
               selectedConversation={selectedConversation}
               onNewConversation={handleNewConversation}
             />
           </div>
 
-          <div className="flex h-full w-full pt-[48px] md:pt-0 overflow-x-hidden">
+          <div className="flex h-full w-full overflow-x-hidden">
             <Chatbar />
-
             <div className="flex flex-1">
-              <Chat
-                stopConversationRef={stopConversationRef}
-                googleAdSenseId={googleAdSenseId}
-              />
+              <Chat stopConversationRef={stopConversationRef} />
             </div>
             {showLoginSignUpModel && (
               <AuthModel
@@ -655,9 +628,8 @@ const Home = ({
                 }
               />
             )}
-            {showProfileModel && session && (
-              <ProfileModel
-                session={session}
+            {showProfileModel && (
+              <ProfileUpgradeModel
                 onClose={() =>
                   dispatch({ field: 'showProfileModel', value: false })
                 }
@@ -677,6 +649,18 @@ const Home = ({
                 }
               />
             )}
+            <NewsModel
+              open={showNewsModel}
+              onOpen={() => dispatch({ field: 'showNewsModel', value: true })}
+              onClose={() => dispatch({ field: 'showNewsModel', value: false })}
+            />
+
+            <FeaturesModel
+              open={showFeaturesModel}
+              onClose={() =>
+                dispatch({ field: 'showFeaturesModel', value: false })
+              }
+            />
             <Promptbar />
           </div>
         </main>
@@ -687,17 +671,8 @@ const Home = ({
 export default Home;
 
 export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
-  const defaultModelId = fallbackModelID;
-
-  let serverSidePluginKeysSet = true;
-  const googleAdSenseId = process.env.GOOGLE_ADSENSE_ID;
-
   return {
     props: {
-      serverSideApiKeyIsSet: !!process.env.OPENAI_API_KEY,
-      defaultModelId,
-      serverSidePluginKeysSet,
-      googleAdSenseId,
       ...(await serverSideTranslations(locale ?? 'en', [
         'common',
         'chat',
@@ -710,6 +685,9 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
         'rolesContent',
         'feature',
         'survey',
+        'news',
+        'features',
+        'auth',
       ])),
     },
   };

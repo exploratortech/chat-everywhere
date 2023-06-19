@@ -28,8 +28,6 @@ export interface HomeInitialState {
   messageError: boolean;
   searchTerm: string;
   defaultModelId: OpenAIModelID | undefined;
-  serverSideApiKeyIsSet: boolean;
-  serverSidePluginKeysSet: boolean;
   outputLanguage: string;
 
   // Supabase / Cloud Sync
@@ -46,6 +44,8 @@ export interface HomeInitialState {
   showProfileModel: boolean;
   showUsageModel: boolean;
   showSurveyModel: boolean;
+  showNewsModel: boolean;
+  showFeaturesModel: boolean;
   user: User | null;
   isPaidUser: boolean;
   isSurveyFilled: boolean;
@@ -81,8 +81,6 @@ export const initialState: HomeInitialState = {
   messageError: false,
   searchTerm: '',
   defaultModelId: undefined,
-  serverSideApiKeyIsSet: false,
-  serverSidePluginKeysSet: false,
   outputLanguage: '',
 
   // Supabase / Cloud Sync
@@ -99,6 +97,8 @@ export const initialState: HomeInitialState = {
   showProfileModel: false,
   showUsageModel: false,
   showSurveyModel: false,
+  showNewsModel: false,
+  showFeaturesModel: false,
   user: null,
   isPaidUser: false,
   isSurveyFilled: false,

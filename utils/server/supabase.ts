@@ -1,13 +1,18 @@
+import { DefaultMonthlyCredits } from '@/utils/config';
+
 import { PluginID } from '@/types/plugin';
 import { UserProfile } from '@/types/user';
-import { DefaultMonthlyCredits } from '@/utils/config';
 
 import { createClient } from '@supabase/supabase-js';
 
 export const getAdminSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseServerRoleKey = process.env.SUPABASE_SERVER_ROLE_KEY || '';
-  return createClient(supabaseUrl, supabaseServerRoleKey);
+  return createClient(supabaseUrl, supabaseServerRoleKey, {
+    auth: {
+      persistSession: false,
+    },
+  });
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile> => {
@@ -50,7 +55,7 @@ export const getIntervalUsages = async (
 };
 
 export const addUsageEntry = async (
-  apiType: PluginID | "gpt-3.5",
+  apiType: PluginID | 'gpt-3.5',
   userId: string,
 ): Promise<void> => {
   const supabase = getAdminSupabaseClient();
@@ -104,16 +109,28 @@ export const updateUserCredits = async (
   if (error) {
     throw error;
   }
-  
+
   if (!userCreditEntries || userCreditEntries.length === 0) {
     await addUserCreditsEntry(userId, apiType);
   }
 };
 
 // Subtract one credit from user's balance
-export const subtractCredit = async (userId: string, apiType: PluginID): Promise<void> => {
+export const subtractCredit = async (
+  userId: string,
+  apiType: PluginID,
+): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
   const newBalance = userCredits.balance - 1;
+  await updateUserCredits(userId, apiType, newBalance);
+};
+
+export const addBackCreditBy1 = async (
+  userId: string,
+  apiType: PluginID,
+): Promise<void> => {
+  const userCredits = await getUserCredits(userId, apiType);
+  const newBalance = userCredits.balance + 1;
   await updateUserCredits(userId, apiType, newBalance);
 };
 
@@ -134,7 +151,10 @@ export const addUserCreditsEntry = async (
 };
 
 // Check if user has run out of credits
-export const hasUserRunOutOfCredits = async (userId: string, apiType: PluginID): Promise<boolean> => {
+export const hasUserRunOutOfCredits = async (
+  userId: string,
+  apiType: PluginID,
+): Promise<boolean> => {
   const userCredits = await getUserCredits(userId, apiType);
   return userCredits.balance <= 0;
 };

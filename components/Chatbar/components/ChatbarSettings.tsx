@@ -1,11 +1,12 @@
 import {
   IconArticle,
   IconBrandFacebook,
+  IconCurrencyDollar,
   IconFileExport,
   IconLogin,
   IconMoon,
+  IconNews,
   IconSun,
-  IconCurrencyDollar
 } from '@tabler/icons-react';
 import { useContext } from 'react';
 
@@ -73,7 +74,7 @@ export const ChatbarSettings = () => {
   };
 
   return (
-    <>
+    <div className="min-h-min">
       <CloudSyncStatusComponent />
       <div className="flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm overflow-auto">
         {conversations.length > 0 ? (
@@ -123,6 +124,16 @@ export const ChatbarSettings = () => {
           />
         )}
         <SidebarButton
+          text={t('Latest Updates')}
+          icon={<IconNews size={18} />}
+          onClick={() => {
+            homeDispatch({
+              field: 'showNewsModel',
+              value: true,
+            });
+          }}
+        />
+        <SidebarButton
           text={t('Follow for updates!')}
           icon={<IconBrandFacebook size={18} />}
           onClick={() => {
@@ -133,6 +144,6 @@ export const ChatbarSettings = () => {
           }}
         />
       </div>
-    </>
+    </div>
   );
 };

@@ -1,7 +1,7 @@
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 
 import { Conversation } from '@/types/chat';
-import { OpenAIModels } from '@/types/openai';
+import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { Plugin, PluginID } from '@/types/plugin';
 
 import dayjs from 'dayjs';
@@ -48,7 +48,7 @@ export async function fetchShareableConversation(
       id: accessibleId,
       name: title + ' (Shared)',
       messages: JSON.parse(prompts),
-      model: OpenAIModels['gpt-3.5-turbo'],
+      model: OpenAIModels['gpt-3.5-turbo-0613'],
       prompt: DEFAULT_SYSTEM_PROMPT,
       folderId: null,
       temperature: DEFAULT_TEMPERATURE,

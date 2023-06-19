@@ -176,7 +176,7 @@ export const ImageGenerationComponent: FC<Props> = ({
     );
 
   return (
-    <div className="flex flex-row h-[15rem] md:h-[38rem] justify-center items-center">
+    <div className="flex flex-row h-[13rem] xxs:h-[15rem] xs:h-[18rem] sm:h-[22rem] md:h-[34rem] lg:h-[40rem] justify-center items-center">
       {isOperationalMode && (
         <div className="flex flex-col justify-between h-full mr-1">
           <OperationalButtons imagePosition={1} />
@@ -189,7 +189,7 @@ export const ImageGenerationComponent: FC<Props> = ({
           alt={generationPrompt}
           width={0}
           height={0}
-          sizes="200vw"
+          sizes="70vw"
           style={{
             width: '100%',
             height: 'auto',
