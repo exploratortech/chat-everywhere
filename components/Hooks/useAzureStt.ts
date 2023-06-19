@@ -31,8 +31,6 @@ export const useAzureStt = () => {
   };
 
   const startSpeechRecognition = async (userToken: string): Promise<void> => {
-    if (isLoading) return;
-
     setIsLoading(true);
     dispatch({ field: 'isSpeechRecognitionActive', value: true });
 
@@ -120,7 +118,7 @@ export const useAzureStt = () => {
       setAudioStream(null);
       speechRecognizer.current?.close();
     }
-    
+
     speechRecognizer.current.startContinuousRecognitionAsync(() => {
     }, (error) => {
       setIsLoading(false);

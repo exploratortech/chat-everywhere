@@ -86,17 +86,18 @@ const VoiceInputButton = () => {
   }, [isLoading, isSpeechRecognitionActive]);
 
   const handleClick = async (): Promise<void> => {
+    if (isLoading) return;
     if (isSpeechRecognitionActive) {
       stopSpeechRecognition();
 
       if (animationFrameId.current)
         cancelAnimationFrame(animationFrameId.current);
 
-        // Clear the canvas
-        if (canvasRef.current && canvasRef.current.getContext('2d')) {
-          const ctx = canvasRef.current.getContext('2d');
-          ctx?.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        }
+      // Clear the canvas
+      if (canvasRef.current && canvasRef.current.getContext('2d')) {
+        const ctx = canvasRef.current.getContext('2d');
+        ctx?.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      }
     } else {
       if (user && user.token) {
         await startSpeechRecognition(user.token);
