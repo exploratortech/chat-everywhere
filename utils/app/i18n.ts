@@ -27,8 +27,9 @@ function getAvailableLocales() {
 // https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=stt#supported-languages
 function getAvailableSpeechSourceLanguages() {
   return [
-    { name: 'English', value: 'en-US'},
-    { name: '官話', value: 'zh-CN' },
+    { name: 'English', value: 'en-US' },
+    { name: '國語(簡体)', value: 'zh-CN' },
+    { name: '國語(繁體)', value: 'zh-TW' },
     { name: '廣東話', value: 'zh-HK' },
     { name: 'বাংলা', value: 'bn-IN' },
     { name: 'Deutsch', value: 'de-DE' },
