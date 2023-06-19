@@ -91,7 +91,6 @@ export const useAzureStt = () => {
     };
 
     speechRecognizer.current.recognizing = (sender, event) => {
-      console.log('recognizing');
       const reasons = [
         ResultReason.RecognizedSpeech,
         ResultReason.RecognizingSpeech,
@@ -103,7 +102,6 @@ export const useAzureStt = () => {
     };
 
     speechRecognizer.current.recognized = (sender, event) => {
-      console.log('recognized');
       if (event.result.reason === ResultReason.RecognizedSpeech) {
         speechBuffer = event.result.text;
         speechContent = `${speechContent} ${speechBuffer}`;
