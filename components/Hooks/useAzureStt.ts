@@ -91,13 +91,19 @@ export const useAzureStt = () => {
     };
 
     speechRecognizer.current.recognizing = (sender, event) => {
-      if (event.result.reason === ResultReason.RecognizedSpeech) {
+      console.log('recognizing');
+      const reasons = [
+        ResultReason.RecognizedSpeech,
+        ResultReason.RecognizingSpeech,
+      ];
+      if (reasons.includes(event.result.reason)) {
         speechBuffer = event.result.text;
-        dispatch({ field: 'speechContent', value: `${speechContent} ${speechBuffer}`});
+        dispatch({ field: 'speechContent', value: `${speechContent} ${speechBuffer} ...`.trim() });
       }
     };
 
     speechRecognizer.current.recognized = (sender, event) => {
+      console.log('recognized');
       if (event.result.reason === ResultReason.RecognizedSpeech) {
         speechBuffer = event.result.text;
         speechContent = `${speechContent} ${speechBuffer}`;
