@@ -1,6 +1,10 @@
 import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
+import { useTranslation } from 'next-i18next';
+
+import { voiceMap } from '@/utils/app/i18n';
+
 import {
   AudioConfig,
   SpeakerAudioDestination,
@@ -8,9 +12,9 @@ import {
   SpeechSynthesizer,
 } from 'microsoft-cognitiveservices-speech-sdk';
 
-import { voiceMap } from '@/utils/app/i18n';
-
 export const useAzureTts = () => {
+  const { t } = useTranslation('common');
+
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSpeechId, setCurrentSpeechId] = useState<string | null>(null);
@@ -55,10 +59,15 @@ export const useAzureTts = () => {
 
   const displayErrorToast = () =>
     toast.error(
-      'This feature is not available at the moment. Please try again later.',
+      t('This feature is not available at the moment. Please try again later'),
     );
 
-  const speak = async (text: string, speechId: string, userToken: string, language: string) => {
+  const speak = async (
+    text: string,
+    speechId: string,
+    userToken: string,
+    language: string,
+  ) => {
     try {
       stopPlaying();
 

@@ -1,22 +1,28 @@
 import { useContext, useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
+
+import { useTranslation } from 'next-i18next';
+
+import HomeContext from '@/pages/api/home/home.context';
+
 import {
   AudioConfig,
   ResultReason,
   SpeechConfig,
   SpeechRecognizer,
 } from 'microsoft-cognitiveservices-speech-sdk';
-import { toast } from 'react-hot-toast';
-
-import HomeContext from '@/pages/api/home/home.context';
 
 export const useAzureStt = () => {
+  const { t } = useTranslation('common');
+
   const {
     state: { speechRecognitionLanguage },
     dispatch,
   } = useContext(HomeContext);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isMicrophoneDisabled, setIsMicrophoneDisabled] = useState<boolean>(false);
+  const [isMicrophoneDisabled, setIsMicrophoneDisabled] =
+    useState<boolean>(false);
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
 
   const token = useRef<string>('');
@@ -47,7 +53,7 @@ export const useAzureStt = () => {
       setIsLoading(false);
       setIsMicrophoneDisabled(true);
       dispatch({ field: 'isSpeechRecognitionActive', value: false });
-      toast.error('Unable to access microphone.');
+      toast.error(t('Unable to access microphone'));
       return;
     }
 
@@ -60,7 +66,11 @@ export const useAzureStt = () => {
     } catch (error) {
       setIsLoading(false);
       dispatch({ field: 'isSpeechRecognitionActive', value: false });
-      toast.error('Unable to fetch token.');
+      toast.error(
+        t(
+          'The speech service is unavailable at the moment, please try again later',
+        ),
+      );
       console.error(error);
     }
 
@@ -68,15 +78,13 @@ export const useAzureStt = () => {
       token.current,
       region.current,
     );
-    speechConfig.speechRecognitionLanguage = speechRecognitionLanguage || 'en-US';
+    speechConfig.speechRecognitionLanguage =
+      speechRecognitionLanguage || 'en-US';
 
     const audioConfig = AudioConfig.fromStreamInput(stream);
 
     // Perform speech recognition from the microphone
-    speechRecognizer.current = new SpeechRecognizer(
-      speechConfig,
-      audioConfig,
-    );
+    speechRecognizer.current = new SpeechRecognizer(speechConfig, audioConfig);
 
     let speechContent = '';
     let speechBuffer = '';
@@ -93,7 +101,10 @@ export const useAzureStt = () => {
       ];
       if (reasons.includes(event.result.reason)) {
         speechBuffer = event.result.text;
-        dispatch({ field: 'speechContent', value: `${speechContent} ${speechBuffer} ...`.trim() });
+        dispatch({
+          field: 'speechContent',
+          value: `${speechContent} ${speechBuffer} ...`.trim(),
+        });
       }
     };
 
@@ -113,29 +124,40 @@ export const useAzureStt = () => {
 
     speechRecognizer.current.sessionStopped = (sender, event) => {
       dispatch({ field: 'isSpeechRecognitionActive', value: false });
-      stream
-        ?.getTracks()
-        .forEach((mediaTrack) => mediaTrack.stop());
+      stream?.getTracks().forEach((mediaTrack) => mediaTrack.stop());
       setAudioStream(null);
       speechRecognizer.current?.close();
-    }
+    };
 
-    speechRecognizer.current.startContinuousRecognitionAsync(() => {
-    }, (error) => {
-      setIsLoading(false);
-      setIsMicrophoneDisabled(true);
-      dispatch({ field: 'isSpeechRecognitionActive', value: false });
-      toast.error('Unable to begin speech recognition.');
-      console.error(error);
-    });
+    speechRecognizer.current.startContinuousRecognitionAsync(
+      () => {},
+      (error) => {
+        setIsLoading(false);
+        setIsMicrophoneDisabled(true);
+        dispatch({ field: 'isSpeechRecognitionActive', value: false });
+        toast.error(
+          t(
+            'The speech service is unavailable at the moment, please try again later',
+          ),
+        );
+        console.error(error);
+      },
+    );
   };
 
   const stopSpeechRecognition = async (): Promise<void> => {
     if (!speechRecognizer.current) return;
-    speechRecognizer.current.stopContinuousRecognitionAsync(() => {}, (error) => {
-      toast.error('Unable to stop speech recognition.');
-      console.error(error);
-    });
+    speechRecognizer.current.stopContinuousRecognitionAsync(
+      () => {},
+      (error) => {
+        toast.error(
+          t(
+            'The speech service is unavailable at the moment, please try again later',
+          ),
+        );
+        console.error(error);
+      },
+    );
   };
 
   return {
