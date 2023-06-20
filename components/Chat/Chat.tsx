@@ -323,7 +323,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     ],
   );
 
-  const handleScroll = () => {
+  const handleScroll = throttle(() => {
     if (chatContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } =
         chatContainerRef.current;
@@ -337,7 +337,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         setShowScrollDownButton(false);
       }
     }
-  };
+  }, 100);
 
   const handleScrollDown = () => {
     chatContainerRef.current?.scrollTo({
