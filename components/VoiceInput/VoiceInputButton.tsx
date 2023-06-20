@@ -111,7 +111,10 @@ const VoiceInputButton = () => {
 
   return (
     <div
-      className="w-9 h-9 z-[1100] bg-white dark:bg-[#40414F] rounded-full"
+      className={`
+        w-9 h-9 bg-white dark:bg-[#40414F] rounded-full
+        ${ isLoading || isSpeechRecognitionActive ? 'z-[1100]' : '' }
+      `}
     >
       <div className="relative">
         <canvas
