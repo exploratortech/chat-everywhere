@@ -140,6 +140,10 @@ export const ChatMessage: FC<Props> = memo(
       });
     };
 
+    const large16kModelBadgeOnClick = () => {
+      console.log("Badge on click");
+    };
+
     useEffect(() => {
       if (textareaRef.current) {
         textareaRef.current.style.height = 'inherit';
@@ -244,9 +248,10 @@ export const ChatMessage: FC<Props> = memo(
                   {(message.largeContextResponse ||
                     message.showHintForLargeContextResponse) && (
                     <span
+                      onClick={large16kModelBadgeOnClick}
                       className={`px-2 mt-2 cursor-pointer border text-xs font-medium rounded ${
                         message.showHintForLargeContextResponse
-                          ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400 border-gray-500'
+                          ? 'text-gray-800 dark:text-gray-400 border-gray-500 line-through'
                           : 'bg-yellow-100 text-yellow-800 dark:bg-gray-700 dark:text-yellow-300 border-yellow-300'
                       }`}
                     >
