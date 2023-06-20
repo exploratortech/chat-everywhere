@@ -35,7 +35,7 @@ export const useAzureStt = () => {
     dispatch({ field: 'isSpeechRecognitionActive', value: true });
 
     // Prompt for permission to use microphone
-    let stream: MediaStream | undefined;
+    let stream: MediaStream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -47,12 +47,6 @@ export const useAzureStt = () => {
       setIsLoading(false);
       setIsMicrophoneDisabled(true);
       toast.error('Unable to access microphone.');
-      return;
-    }
-
-    if (!stream) {
-      setIsLoading(false);
-      toast.error('Unable to access microphone');
       return;
     }
 
