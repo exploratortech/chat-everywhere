@@ -80,11 +80,11 @@ const VoiceInputButton = () => {
     let color = 'bg-green-500';
     if (isLoading) {
       color = 'bg-amber-500';
-    } else if (!isLoading && !isSpeechRecognitionActive) {
+    } else if (!isLoading && !isSpeechRecognitionActive || isMicrophoneDisabled) {
       return null;
     }
     return <div className={`absolute w-1.5 h-1.5 m-1.5 top-0 right-0 ${color} rounded-full`} />;
-  }, [isLoading, isSpeechRecognitionActive]);
+  }, [isLoading, isSpeechRecognitionActive, isMicrophoneDisabled]);
 
   const handleClick = async (e: any): Promise<void> => {
     if (isLoading) return;

@@ -46,6 +46,7 @@ export const useAzureStt = () => {
     } catch (error) {
       setIsLoading(false);
       setIsMicrophoneDisabled(true);
+      dispatch({ field: 'isSpeechRecognitionActive', value: false });
       toast.error('Unable to access microphone.');
       return;
     }
@@ -58,6 +59,7 @@ export const useAzureStt = () => {
       }
     } catch (error) {
       setIsLoading(false);
+      dispatch({ field: 'isSpeechRecognitionActive', value: false });
       toast.error('Unable to fetch token.');
       console.error(error);
     }
@@ -104,8 +106,9 @@ export const useAzureStt = () => {
     };
 
     speechRecognizer.current.canceled = (sender, event) => {
-      setIsLoading(false);
       stopSpeechRecognition();
+      setIsLoading(false);
+      dispatch({ field: 'isSpeechRecognitionActive', value: false });
     };
 
     speechRecognizer.current.sessionStopped = (sender, event) => {
@@ -121,6 +124,7 @@ export const useAzureStt = () => {
     }, (error) => {
       setIsLoading(false);
       setIsMicrophoneDisabled(true);
+      dispatch({ field: 'isSpeechRecognitionActive', value: false });
       toast.error('Unable to begin speech recognition.');
       console.error(error);
     });
