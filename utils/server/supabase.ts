@@ -158,3 +158,23 @@ export const hasUserRunOutOfCredits = async (
   const userCredits = await getUserCredits(userId, apiType);
   return userCredits.balance <= 0;
 };
+
+export const isPaidUserByAuthToken = async (userToken: string | null): Promise<boolean> => {
+  try {
+    if (!userToken) return false;
+
+    const supabase = getAdminSupabaseClient();
+    const { data, error } = await supabase.auth.getUser(userToken || '');
+    if (!data || error) return false;
+
+    const user = await getUserProfile(data.user.id);
+    if (!user) return false;
+
+    if (user.plan === 'free') return false;
+
+    return true;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+};

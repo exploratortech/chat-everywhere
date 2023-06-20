@@ -5,6 +5,7 @@ import {
   getMessagesTokenCount,
   shortenMessagesBaseOnTokenLimit,
 } from '@/utils/server/api';
+import { isPaidUserByAuthToken } from '@/utils/server/supabase';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
@@ -37,13 +38,17 @@ const handler = async (req: Request): Promise<Response> => {
     const extendedTokenLimit =
       OpenAIModels[OpenAIModelID.GPT_3_5_16K].tokenLimit;
 
+    const requireToUseLargerContextWindowModel =
+      (await getMessagesTokenCount(messages)) + 1000 > defaultTokenLimit; // Add buffer token to take system prompt into account
+
     const useLargerContextWindowModel =
-      (await getMessagesTokenCount(messages) + 1000) > defaultTokenLimit; // Add buffer token to take system prompt into account
-    
+      requireToUseLargerContextWindowModel &&
+      (await isPaidUserByAuthToken(req.headers.get('user-token')));
+
     const messagesToSend = await shortenMessagesBaseOnTokenLimit(
       prompt,
       messages,
-      extendedTokenLimit,
+      useLargerContextWindowModel ? extendedTokenLimit : defaultTokenLimit,
     );
 
     if (selectedOutputLanguage) {
