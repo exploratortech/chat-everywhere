@@ -18,7 +18,7 @@ const handler = async (req: Request): Promise<Response> => {
   if (!data || error) return unauthorizedResponse;
 
   const user = await getUserProfile(data.user.id);
-  if (!user || user.plan === 'free') return unauthorizedResponse;
+  if (!user) return unauthorizedResponse;
 
   const res = new Response();
   res.headers.set('Content-Type', 'application/json');
