@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 
 import HomeContext from '@/pages/api/home/home.context';
 import { useAzureStt } from '../Hooks/useAzureStt';
+import { useTranslation } from 'next-i18next';
 
 const getLargestValue = (bytes: Uint8Array): number => {
   let largest = 0;
@@ -16,6 +17,8 @@ const getLargestValue = (bytes: Uint8Array): number => {
 };
 
 const VoiceInputButton = () => {
+  const { t } = useTranslation('common');
+
   const {
     state: {
       user,
@@ -103,7 +106,7 @@ const VoiceInputButton = () => {
       if (user && user.token) {
         await startSpeechRecognition(user.token);
       } else {
-        toast.error('You must be signed in to use this feature.');
+        toast.error(t('Please register and sign in to enable voice input'));
       }
     }
     e.stopPropagation();

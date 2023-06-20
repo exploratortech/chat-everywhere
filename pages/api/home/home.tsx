@@ -26,6 +26,7 @@ import {
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { saveFolders } from '@/utils/app/folders';
+import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
@@ -502,9 +503,14 @@ const Home = () => {
       dispatch({ field: 'outputLanguage', value: outputLanguage });
     }
 
-    const speechRecognitionLanguage = localStorage.getItem('speechRecognitionLanguage');
+    const speechRecognitionLanguage = localStorage.getItem(
+      'speechRecognitionLanguage',
+    );
     if (speechRecognitionLanguage) {
-      dispatch({ field: 'speechRecognitionLanguage', value: speechRecognitionLanguage});
+      dispatch({
+        field: 'speechRecognitionLanguage',
+        value: speechRecognitionLanguage,
+      });
     }
 
     const conversationHistory = localStorage.getItem('conversationHistory');
@@ -597,7 +603,12 @@ const Home = () => {
         handleUpdateConversation,
         handleUserLogout,
         playMessage: (text, speechId) =>
-          speak(text, speechId, user?.token || '', speechRecognitionLanguage),
+          speak(
+            convertMarkdownToText(text),
+            speechId,
+            user?.token || '',
+            speechRecognitionLanguage,
+          ),
         stopPlaying,
       }}
     >
