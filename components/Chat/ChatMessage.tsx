@@ -234,15 +234,31 @@ export const ChatMessage: FC<Props> = memo(
         style={{ overflowWrap: 'anywhere' }}
       >
         <div className="relative m-auto flex gap-4 py-4 text-base md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
-          <div className="min-w-[40px] text-center font-bold flex justify-center">
+          <div className="min-w-[40px] text-center font-bold flex flex-col justify-start">
             {message.role === 'assistant' ? (
               message.pluginId ? (
                 getPluginIcon(message.pluginId, 28)
               ) : (
-                <IconRobot size={28} />
+                <div className="flex flex-col justify-center items-center">
+                  <IconRobot size={28} />
+                  {(message.largeContextResponse ||
+                    message.showHintForLargeContextResponse) && (
+                    <span
+                      className={`px-2 mt-2 cursor-pointer border text-xs font-medium rounded ${
+                        message.showHintForLargeContextResponse
+                          ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400 border-gray-500'
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-gray-700 dark:text-yellow-300 border-yellow-300'
+                      }`}
+                    >
+                      16K
+                    </span>
+                  )}
+                </div>
               )
             ) : (
-              <IconUser size={30} />
+              <div className="flex flex-col justify-center items-center">
+                <IconUser size={30} />
+              </div>
             )}
           </div>
 

@@ -218,6 +218,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let done = false;
         let isFirst = true;
         let text = '';
+        let largeContextResponse = false;
+        let showHintForLargeContextResponse = false;
+
         while (!done) {
           if (stopConversationRef.current === true) {
             controller.abort();
@@ -234,6 +237,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             done = true;
           }
 
+          if (text.includes('[16K]')) {
+            text = text.replace('[16K]', '');
+            largeContextResponse = true;
+          }
+
+          if (text.includes('[16K-Optional]')) {
+            text = text.replace('[16K-Optional]', '');
+            showHintForLargeContextResponse = true;
+          }
+
           if (text.includes('[REMOVE_LAST_LINE]')) {
             text = text.replace('[REMOVE_LAST_LINE]', '');
             text = removeSecondLastLine(text);
@@ -246,6 +259,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               {
                 role: 'assistant',
                 content: chunkValue,
+                largeContextResponse,
+                showHintForLargeContextResponse,
                 pluginId: plugin?.id || null,
               },
             ];
@@ -265,6 +280,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   return {
                     ...message,
                     content: text,
+                    largeContextResponse,
+                    showHintForLargeContextResponse
                   };
                 }
                 return message;

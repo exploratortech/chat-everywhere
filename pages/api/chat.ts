@@ -59,6 +59,15 @@ const handler = async (req: Request): Promise<Response> => {
       }`;
     }
 
+    // Stream back 16k option or already being applied
+    let messageToStreamBack: string | null = null;
+
+    if (useLargerContextWindowModel) {
+      messageToStreamBack = '[16K]';
+    } else if (requireToUseLargerContextWindowModel) {
+      messageToStreamBack = '[16K-Optional]';
+    }
+
     const stream = await OpenAIStream(
       useLargerContextWindowModel
         ? OpenAIModels[OpenAIModelID.GPT_3_5_16K]
@@ -66,6 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
       promptToSend,
       temperatureToUse,
       messagesToSend,
+      messageToStreamBack
     );
 
     return new Response(stream);
