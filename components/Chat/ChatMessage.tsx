@@ -52,6 +52,7 @@ interface Props {
 export const ChatMessage: FC<Props> = memo(
   ({ message, displayFooterButtons, conversation, onEdit, messageIndex }) => {
     const { t } = useTranslation('chat');
+    const { i18n } = useTranslation();
 
     const {
       state: { selectedConversation, conversations },
@@ -141,7 +142,18 @@ export const ChatMessage: FC<Props> = memo(
     };
 
     const large16kModelBadgeOnClick = () => {
-      console.log("Badge on click");
+      const displayChineseVersion = /^zh/.test(i18n.language);
+
+      homeDispatch({
+        field: 'showFeaturePageOnLoad',
+        value: !displayChineseVersion
+          ? 'c1ff4f2c-d6f0-4482-b756-d222e21c756a'
+          : '81631873-a71a-4f77-93c0-c617566fa9a7',
+      });
+      homeDispatch({
+        field: 'showFeaturesModel',
+        value: true,
+      });
     };
 
     useEffect(() => {

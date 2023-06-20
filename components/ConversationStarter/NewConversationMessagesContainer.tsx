@@ -59,6 +59,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   };
   const featureOnClick = () => {
     dispatch({ field: 'showFeaturesModel', value: true });
+    dispatch({ field: 'showFeaturePageOnLoad', value: null });
     event('Feature banner clicked', {
       category: 'Engagement',
       label: 'feature_introduction_banner',
