@@ -1,6 +1,10 @@
 import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
+import { useTranslation } from 'next-i18next';
+
+import { voiceMap } from '@/utils/app/i18n';
+
 import {
   AudioConfig,
   SpeakerAudioDestination,
@@ -9,6 +13,8 @@ import {
 } from 'microsoft-cognitiveservices-speech-sdk';
 
 export const useAzureTts = () => {
+  const { t } = useTranslation('common');
+
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSpeechId, setCurrentSpeechId] = useState<string | null>(null);
@@ -53,10 +59,15 @@ export const useAzureTts = () => {
 
   const displayErrorToast = () =>
     toast.error(
-      'This feature is not available at the moment. Please try again later.',
+      t('This feature is not available at the moment. Please try again later'),
     );
 
-  const speak = async (text: string, speechId: string, userToken: string) => {
+  const speak = async (
+    text: string,
+    speechId: string,
+    userToken: string,
+    language: string,
+  ) => {
     try {
       stopPlaying();
 
@@ -80,7 +91,7 @@ export const useAzureTts = () => {
       );
 
       // Default to use Mandarin voice, since it can also handle English fairly well
-      speechConfig.speechSynthesisVoiceName = 'zh-TW-HsiaoChenNeural';
+      speechConfig.speechSynthesisVoiceName = voiceMap[language];
       const synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
 
       synthesizer.speakTextAsync(

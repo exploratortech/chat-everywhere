@@ -26,6 +26,7 @@ import {
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { saveFolders } from '@/utils/app/folders';
+import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
@@ -51,6 +52,7 @@ import { AuthModel } from '@/components/User/AuthModel';
 import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
+import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
 
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
@@ -94,6 +96,7 @@ const Home = () => {
       forceSyncConversation,
       replaceRemoteData,
       messageIsStreaming,
+      speechRecognitionLanguage,
     },
     dispatch,
   } = contextValue;
@@ -500,6 +503,16 @@ const Home = () => {
       dispatch({ field: 'outputLanguage', value: outputLanguage });
     }
 
+    const speechRecognitionLanguage = localStorage.getItem(
+      'speechRecognitionLanguage',
+    );
+    if (speechRecognitionLanguage) {
+      dispatch({
+        field: 'speechRecognitionLanguage',
+        value: speechRecognitionLanguage,
+      });
+    }
+
     const conversationHistory = localStorage.getItem('conversationHistory');
     let cleanedConversationHistory: Conversation[] = [];
     if (conversationHistory) {
@@ -590,7 +603,12 @@ const Home = () => {
         handleUpdateConversation,
         handleUserLogout,
         playMessage: (text, speechId) =>
-          speak(text, speechId, user?.token || ''),
+          speak(
+            convertMarkdownToText(text),
+            speechId,
+            user?.token || '',
+            speechRecognitionLanguage,
+          ),
         stopPlaying,
       }}
     >
@@ -663,6 +681,7 @@ const Home = () => {
             />
             <Promptbar />
           </div>
+          <VoiceInputActiveOverlay />
         </main>
       )}
     </HomeContext.Provider>

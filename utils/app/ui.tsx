@@ -12,6 +12,7 @@ export const PlanDetail = {
   free: {
     features: [
       'Online mode',
+      'Voice input',
       'Share conversations',
       'Folder manager',
       'Prompt manager',
