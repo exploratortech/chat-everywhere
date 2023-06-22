@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconX } from '@tabler/icons-react';
-import React, { Fragment, memo, useContext, useState } from 'react';
+import React, { Fragment, memo, useContext, useEffect, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
@@ -25,7 +25,36 @@ const ReferralModel = memo(({ onClose }: Props) => {
     dispatch,
   } = useContext(HomeContext);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const getReferralCode = async () => {
+    const response = await fetch('/api/referral/get-code', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-id': user?.id || '',
+      },
+    });
+
+    return (await response.json()) as { code: string };
+  };
+
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    // if user has no referral code, get one from server
+    if (user && !user?.referralCode) {
+      getReferralCode().then((res) => {
+        dispatch({
+          field: 'user',
+          value: {
+            ...user,
+            referralCode: res.code,
+          },
+        });
+        setIsLoading(false);
+      });
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
 
   return (
     <Transition appear show={true} as={Fragment}>

@@ -3,8 +3,9 @@ import { DefaultMonthlyCredits } from '@/utils/config';
 import { PluginID } from '@/types/plugin';
 import { UserProfile } from '@/types/user';
 
+import { generateRandomReferralCode } from './referralCode';
+
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
-import voucher_codes from 'voucher-code-generator';
 
 export const getAdminSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -173,10 +174,6 @@ export const isPaidUserByAuthToken = async (
 };
 
 export const batchRefreshReferralCodes = async (): Promise<void> => {
-  function generateRandomReferralCode() {
-    return voucher_codes.generate({ length: 8, count: 1 }).pop();
-  }
-
   try {
     const supabase = getAdminSupabaseClient();
     const { data: eduUserId, error: fetchEduIdError } = await supabase
@@ -216,6 +213,45 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
     console.log(e);
     throw e;
   }
+};
+
+export const getReferralCode = async (userId: string): Promise<string> => {
+  const supabase = getAdminSupabaseClient();
+  const { data: record, error } = await supabase
+    .from('profiles')
+    .select('referral_code')
+    .eq('plan', 'edu')
+    .eq('id', userId)
+    .single();
+
+  let referralCode = record?.referral_code;
+
+  if (!referralCode) {
+    const newCode = generateRandomReferralCode();
+    const { data: newRecord, error } = await supabase
+      .from('profiles')
+      .update({ referral_code: newCode })
+      .eq('plan', 'edu')
+      .eq('id', userId)
+      .single();
+    if (error) {
+      throw error;
+    }
+    console.log({
+      newRecord,
+    });
+    referralCode = (
+      newRecord as {
+        referral_code: string;
+      }
+    ).referral_code;
+  }
+
+  if (error) {
+    throw error;
+  }
+
+  return referralCode;
 };
 
 export const userProfile = async (client: SupabaseClient, userId: string) => {
