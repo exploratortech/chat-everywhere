@@ -3,7 +3,7 @@ import { DefaultMonthlyCredits } from '@/utils/config';
 import { PluginID } from '@/types/plugin';
 import { UserProfile } from '@/types/user';
 
-import { createClient } from '@supabase/supabase-js';
+import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import voucher_codes from 'voucher-code-generator';
 
 export const getAdminSupabaseClient = () => {
@@ -18,22 +18,7 @@ export const getAdminSupabaseClient = () => {
 
 export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   const supabase = getAdminSupabaseClient();
-  const { data: user, error } = await supabase
-    .from('profiles')
-    .select('id, plan, pro_plan_expiration_date, referral_code')
-    .eq('id', userId)
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return {
-    id: user.id,
-    plan: user.plan,
-    referralCode: user.referral_code,
-    proPlanExpirationDate: user.pro_plan_expiration_date,
-  } as UserProfile;
+  return await userProfile(supabase, userId);
 };
 
 export const getIntervalUsages = async (
@@ -231,4 +216,23 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
     console.log(e);
     throw e;
   }
+};
+
+export const userProfile = async (client: SupabaseClient, userId: string) => {
+  const { data: user, error } = await client
+    .from('profiles')
+    .select('id, plan, pro_plan_expiration_date, referral_code')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    id: user.id,
+    plan: user.plan,
+    referralCode: user.referral_code,
+    proPlanExpirationDate: user.pro_plan_expiration_date,
+  } as UserProfile;
 };

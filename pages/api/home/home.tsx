@@ -31,6 +31,7 @@ import { savePrompts } from '@/utils/app/prompts';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
+import { userProfile } from '@/utils/server/supabase';
 
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
@@ -38,7 +39,6 @@ import { LatestExportFormat } from '@/types/export';
 import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModelID, OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
-import { UserProfile } from '@/types/user';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
@@ -387,39 +387,20 @@ const Home = () => {
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
-      supabase
-        .from('profiles')
-        .select('plan, pro_plan_expiration_date, referral_code')
-        .eq('id', session.user.id)
-        .then(({ data, error }) => {
-          if (error) {
-            console.log('error', error);
-          } else {
-            dispatch({ field: 'isPaidUser', value: data[0].plan !== 'free' });
-          }
-
-          if (!data || data.length === 0) {
-            toast.error(
-              t('Unable to load your information, please try again later.'),
-            );
-            return;
-          }
-
-          const userProfile = data[0];
-
-          dispatch({ field: 'showLoginSignUpModel', value: false });
-          dispatch({
-            field: 'user',
-            value: {
-              id: session.user.id,
-              email: session.user.email,
-              plan: userProfile.plan || 'free',
-              token: session.access_token,
-              referralCode: userProfile.referral_code,
-              proPlanExpirationDate: userProfile.pro_plan_expiration_date,
-            },
-          });
+      userProfile(supabase, session.user.id).then((userProfile) => {
+        dispatch({ field: 'showLoginSignUpModel', value: false });
+        dispatch({
+          field: 'user',
+          value: {
+            id: session.user.id,
+            email: session.user.email,
+            plan: userProfile.plan || 'free',
+            token: session.access_token,
+            referralCode: userProfile.referralCode,
+            proPlanExpirationDate: userProfile.proPlanExpirationDate,
+          },
         });
+      });
 
       //Check if survey is filled by logged in user
       supabase
