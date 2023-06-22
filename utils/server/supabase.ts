@@ -19,7 +19,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   const supabase = getAdminSupabaseClient();
   const { data: user, error } = await supabase
     .from('profiles')
-    .select('id, plan')
+    .select('id, plan,pro_plan_expiration_date, referral_code')
     .eq('id', userId)
     .single();
 
@@ -27,7 +27,12 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
     throw error;
   }
 
-  return user as UserProfile;
+  return {
+    id: user.id,
+    plan: user.plan,
+    referralCode: user.referral_code,
+    proPlanExpirationDate: user.pro_plan_expiration_date,
+  } as UserProfile;
 };
 
 export const getIntervalUsages = async (
@@ -159,7 +164,9 @@ export const hasUserRunOutOfCredits = async (
   return userCredits.balance <= 0;
 };
 
-export const isPaidUserByAuthToken = async (userToken: string | null): Promise<boolean> => {
+export const isPaidUserByAuthToken = async (
+  userToken: string | null,
+): Promise<boolean> => {
   try {
     if (!userToken) return false;
 

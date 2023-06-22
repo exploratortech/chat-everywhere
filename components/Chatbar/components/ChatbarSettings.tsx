@@ -35,7 +35,7 @@ export const ChatbarSettings = () => {
     handleExportData,
   } = useContext(ChatbarContext);
 
-  const isPaidUser = user && user.plan === 'pro';
+  const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
 
   const signInAccountOnClick = () => {
@@ -129,12 +129,12 @@ export const ChatbarSettings = () => {
         />
         {isEduUser && (
           <SidebarButton
-            text={t('Referral')}
+            text={t('Referral Program')}
             icon={<IconCurrencyDollar size={18} />}
-            onClick={() => referralBtnOnClick}
+            onClick={() => referralBtnOnClick()}
           />
         )}
-        {isPaidUser && (
+        {isProUser && (
           <SidebarButton
             text={t('Usage & credit')}
             icon={<IconCurrencyDollar size={18} />}

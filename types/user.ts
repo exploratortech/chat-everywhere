@@ -1,11 +1,8 @@
 import { ExportFormatV4 } from './export';
 import { PluginID } from './plugin';
 
-export interface User {
-  id: string;
+export interface User extends UserProfile {
   email: string;
-  name: string;
-  plan: SubscriptionPlan;
   token: string;
 }
 
@@ -19,8 +16,9 @@ export interface UserConversation {
 
 export interface UserProfile {
   id: string;
-  plan: 'free' | 'pro';
-  name: string;
+  plan: SubscriptionPlan;
+  referralCode: string | undefined;
+  proPlanExpirationDate: string | undefined;
 }
 
 export interface CreditUsage {

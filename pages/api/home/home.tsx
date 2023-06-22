@@ -50,6 +50,7 @@ import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
 import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
+import ReferralModel from '@/components/User/ReferralModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
@@ -86,6 +87,7 @@ const Home = () => {
       temperature,
       showLoginSignUpModel,
       showProfileModel,
+      showReferralModel,
       showUsageModel,
       showSurveyModel,
       showNewsModel,
@@ -413,6 +415,8 @@ const Home = () => {
               email: session.user.email,
               plan: userProfile.plan || 'free',
               token: session.access_token,
+              referralCode: userProfile.referralCode,
+              proPlanExpirationDate: userProfile.proPlanExpirationDate,
             },
           });
         });
@@ -653,6 +657,14 @@ const Home = () => {
                 }
               />
             )}
+            {showReferralModel && (
+              <ReferralModel
+                onClose={() =>
+                  dispatch({ field: 'showReferralModel', value: false })
+                }
+              />
+            )}
+
             {showUsageModel && session && (
               <UsageCreditModel
                 onClose={() =>
