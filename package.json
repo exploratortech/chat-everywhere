@@ -29,6 +29,7 @@
     "markdown-to-txt": "^2.0.1",
     "mathjs": "^11.8.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.28.0",
+    "mixpanel-browser": "^2.47.0",
     "next": "13.2.4",
     "next-i18next": "^13.2.2",
     "nextjs-google-analytics": "^2.3.3",
@@ -52,7 +53,6 @@
     "remark-math": "^5.1.1",
     "stream": "^0.0.2",
     "stripe": "^12.2.0",
-    "universal-analytics": "^0.5.3",
     "uuid": "^9.0.0",
     "ws": "^8.13.0"
   },
@@ -61,6 +61,7 @@
     "@tailwindcss/typography": "^0.5.9",
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "@types/jsdom": "^21.1.1",
+    "@types/mixpanel-browser": "^2.38.2",
     "@types/node": "^18.15.0",
     "@types/papaparse": "^5.3.7",
     "@types/react": "18.0.28",

@@ -1,8 +1,12 @@
 import { IconBrandStackshare, IconLoader } from '@tabler/icons-react';
 import { FC, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Conversation } from '@/types/chat';
+
 import { useTranslation } from 'next-i18next';
+
+import { trackEvent } from '@/utils/app/eventTracking';
+
+import { Conversation } from '@/types/chat';
 
 interface Props {
   conversation: Conversation;
@@ -84,6 +88,7 @@ export const StoreConversationButton: FC<Props> = ({ conversation }) => {
             <span>{t('Conversation saved!')}</span>
             <button
               onClick={() => {
+                trackEvent('Share conversation button clicked');
                 shareConversationCopyButtonOnClick(url);
               }}
               className="m-auto mt-2 block rounded-md bg-blue-500 px-2 py-1 text-sm text-white"

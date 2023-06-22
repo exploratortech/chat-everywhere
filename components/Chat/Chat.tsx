@@ -32,13 +32,13 @@ import HomeContext from '@/pages/api/home/home.context';
 import { NewConversationMessagesContainer } from '../ConversationStarter/NewConversationMessagesContainer';
 import Spinner from '../Spinner';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
-import AdMessage from './AdMessage';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import { ChatMessage } from './ChatMessage';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
 
 import dayjs from 'dayjs';
+import { trackEvent } from '@/utils/app/eventTracking';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -328,6 +328,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         updateConversationLastUpdatedAtTimeStamp();
         logGaEvent(text.length);
+        trackEvent("Send message", {
+          length: text.length,
+        });
       }
     },
     [
