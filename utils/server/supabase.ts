@@ -4,6 +4,7 @@ import { PluginID } from '@/types/plugin';
 import { UserProfile } from '@/types/user';
 
 import { createClient } from '@supabase/supabase-js';
+import voucher_codes from 'voucher-code-generator';
 
 export const getAdminSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -19,7 +20,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   const supabase = getAdminSupabaseClient();
   const { data: user, error } = await supabase
     .from('profiles')
-    .select('id, plan,pro_plan_expiration_date, referral_code')
+    .select('id, plan, pro_plan_expiration_date, referral_code')
     .eq('id', userId)
     .single();
 
@@ -183,5 +184,51 @@ export const isPaidUserByAuthToken = async (
   } catch (e) {
     console.log(e);
     return false;
+  }
+};
+
+export const batchRefreshReferralCodes = async (): Promise<void> => {
+  function generateRandomReferralCode() {
+    return voucher_codes.generate({ length: 8, count: 1 }).pop();
+  }
+
+  try {
+    const supabase = getAdminSupabaseClient();
+    const { data: eduUserId, error: fetchEduIdError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('plan', 'edu');
+
+    if (fetchEduIdError) {
+      console.error(fetchEduIdError);
+      throw new Error('Error fetching records');
+    }
+
+    if (!eduUserId) {
+      throw new Error('No records found');
+    }
+
+    const newRecords = eduUserId.map((record) => {
+      const generatedCode = generateRandomReferralCode();
+      return {
+        id: record.id,
+        referral_code: generatedCode,
+      };
+    });
+
+    const { data: refreshedRecords, error: refreshError } = await supabase.rpc(
+      'refresh_referral_codes', // this function defined in supabase
+      { payload: newRecords },
+    );
+
+    if (refreshError) {
+      console.error(refreshError);
+      throw new Error('Error refreshing referral codes');
+    } else {
+      console.log('Refreshed all referral codes');
+    }
+  } catch (e) {
+    console.log(e);
+    throw e;
   }
 };
