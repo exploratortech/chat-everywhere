@@ -28,7 +28,7 @@ type PayloadType = {
   largeContextModel?: boolean;
 };
 
-const enableTracking = process.env.NEXT_PUBLIC_ENV === 'production';
+export const enableTracking = process.env.NEXT_PUBLIC_ENV === 'production';
 
 export const initializeMixpanel = () => {
   if(!enableTracking) return;

@@ -26,6 +26,7 @@ import {
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { trackEvent } from '@/utils/app/eventTracking';
+import { enableTracking } from '@/utils/app/eventTracking';
 import { saveFolders } from '@/utils/app/folders';
 import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
@@ -418,11 +419,13 @@ const Home = () => {
             },
           });
 
-          mixpanel.identify(session.user.id);
-          mixpanel.people.union({
-            Email: session.user.email,
-            Plan: userProfile.plan || 'free',
-          });
+          if (enableTracking) {
+            mixpanel.identify(session.user.id);
+            mixpanel.people.union({
+              Email: session.user.email,
+              Plan: userProfile.plan || 'free',
+            });
+          }
         });
 
       //Check if survey is filled by logged in user
