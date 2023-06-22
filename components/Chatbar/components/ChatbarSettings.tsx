@@ -36,6 +36,7 @@ export const ChatbarSettings = () => {
   } = useContext(ChatbarContext);
 
   const isPaidUser = user && user.plan === 'pro';
+  const isEduUser = user && user.plan === 'edu';
 
   const signInAccountOnClick = () => {
     if (user) {
@@ -46,6 +47,15 @@ export const ChatbarSettings = () => {
     } else {
       homeDispatch({
         field: 'showLoginSignUpModel',
+        value: true,
+      });
+    }
+  };
+
+  const referralBtnOnClick = () => {
+    if (isEduUser) {
+      homeDispatch({
+        field: 'showReferralModel',
         value: true,
       });
     }
@@ -117,6 +127,13 @@ export const ChatbarSettings = () => {
           suffixIcon={getAccountButtonSuffixBadge()}
           onClick={signInAccountOnClick}
         />
+        {isEduUser && (
+          <SidebarButton
+            text={t('Referral')}
+            icon={<IconCurrencyDollar size={18} />}
+            onClick={() => referralBtnOnClick}
+          />
+        )}
         {isPaidUser && (
           <SidebarButton
             text={t('Usage & credit')}

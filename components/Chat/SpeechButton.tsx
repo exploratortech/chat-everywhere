@@ -61,7 +61,8 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   };
 
   // Only enable for Pro plan users
-  if(!user || user?.plan !== 'pro' || messageIsStreaming) return <></>;
+  const isProUser = user && (user.plan === 'pro' || user.plan === 'edu');
+  if (!isProUser || messageIsStreaming) return <></>;
 
   return (
     <div className={`cursor-pointer text-gray-500 hover:text-gray-300 mr-2`}>

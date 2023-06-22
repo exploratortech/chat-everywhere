@@ -33,7 +33,7 @@ const ModeSelector = () => {
     });
   };
 
-  const isPaidUser = user && user?.plan === 'pro';
+  const isProUser = user && (user.plan === 'pro' || user.plan === 'edu');
 
   return (
     <div className="flex flex-row items-center justify-between md:justify-start">
@@ -63,7 +63,7 @@ const ModeSelector = () => {
           >
             {t('Online mode')}
           </option>
-          {isPaidUser && (
+          {isProUser && (
             <>
               <option
                 value={PluginID.GPT4}
