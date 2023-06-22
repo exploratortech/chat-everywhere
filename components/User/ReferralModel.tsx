@@ -25,7 +25,6 @@ const ReferralModel = memo(({ onClose }: Props) => {
     dispatch,
   } = useContext(HomeContext);
 
-  console.log({ user });
   const [isLoading, setIsLoading] = useState(false);
 
   return (

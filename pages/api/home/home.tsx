@@ -389,7 +389,7 @@ const Home = () => {
     if (session?.user) {
       supabase
         .from('profiles')
-        .select('plan')
+        .select('plan, pro_plan_expiration_date, referral_code')
         .eq('id', session.user.id)
         .then(({ data, error }) => {
           if (error) {
@@ -405,7 +405,7 @@ const Home = () => {
             return;
           }
 
-          const userProfile = data[0] as UserProfile;
+          const userProfile = data[0];
 
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({
@@ -415,8 +415,8 @@ const Home = () => {
               email: session.user.email,
               plan: userProfile.plan || 'free',
               token: session.access_token,
-              referralCode: userProfile.referralCode,
-              proPlanExpirationDate: userProfile.proPlanExpirationDate,
+              referralCode: userProfile.referral_code,
+              proPlanExpirationDate: userProfile.pro_plan_expiration_date,
             },
           });
         });
