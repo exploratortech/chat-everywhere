@@ -25,6 +25,7 @@ type EventNameTypes = (typeof EventNames)[number];
 type PayloadType = {
   length?: number;
   pluginId?: string | null;
+  largeContextModel?: boolean;
 };
 
 export const initializeMixpanel = () => {

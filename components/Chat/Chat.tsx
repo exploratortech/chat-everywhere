@@ -330,6 +330,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         logGaEvent(text.length);
         trackEvent("Send message", {
           length: text.length,
+          pluginId: plugin?.id || null,
+          largeContextModel: largeContextResponse,
         });
       }
     },
