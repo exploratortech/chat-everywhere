@@ -19,6 +19,7 @@ const EventNames = [
   'Upgrade button clicked',
   'Upgrade (one-month only) button clicked',
   'Voice input button clicked',
+  'AI speech play button clicked',
 ];
 
 type EventNameTypes = (typeof EventNames)[number];

@@ -5,6 +5,8 @@ import {
 } from '@tabler/icons-react';
 import { useContext, useEffect, useMemo, useState } from 'react';
 
+import { trackEvent } from '@/utils/app/eventTracking';
+
 import HomeContext from '@/pages/api/home/home.context';
 
 import { useLogger } from '@/components/Hooks/useLogger';
@@ -41,6 +43,7 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
     } else {
       await playMessage(inputText, componentSpeechId);
       logGeneralEvent('speech');
+      trackEvent('AI speech play button clicked');
     }
   };
 
@@ -61,7 +64,7 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   };
 
   // Only enable for Pro plan users
-  if(!user || user?.plan !== 'pro' || messageIsStreaming) return <></>;
+  if (!user || user?.plan !== 'pro' || messageIsStreaming) return <></>;
 
   return (
     <div className={`cursor-pointer text-gray-500 hover:text-gray-300 mr-2`}>
