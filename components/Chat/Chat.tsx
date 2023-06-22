@@ -20,6 +20,7 @@ import {
 } from '@/utils/app/const';
 import { saveConversation, saveConversations } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
+import { trackEvent } from '@/utils/app/eventTracking';
 import { removeSecondLastLine } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 import { throttle } from '@/utils/data/throttle';
@@ -38,7 +39,6 @@ import { ChatMessage } from './ChatMessage';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
 
 import dayjs from 'dayjs';
-import { trackEvent } from '@/utils/app/eventTracking';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -281,7 +281,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     ...message,
                     content: text,
                     largeContextResponse,
-                    showHintForLargeContextResponse
+                    showHintForLargeContextResponse,
                   };
                 }
                 return message;
@@ -328,10 +328,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         updateConversationLastUpdatedAtTimeStamp();
         logGaEvent(text.length);
-        trackEvent("Send message", {
-          length: text.length,
-          pluginId: plugin?.id || null,
-          largeContextModel: largeContextResponse,
+        trackEvent('Send message', {
+          Length: text.length,
+          PluginId: plugin?.id || null,
+          LargeContextModel: largeContextResponse,
         });
       }
     },
@@ -461,7 +461,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   className="justify-center border hidden lg:flex
                   border-b-neutral-300 bg-neutral-100 py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 sticky top-0 z-10"
                 >
-                  {selectedConversation?.name} 
+                  {selectedConversation?.name}
 
                   <button
                     className="ml-2 cursor-pointer hover:opacity-50"

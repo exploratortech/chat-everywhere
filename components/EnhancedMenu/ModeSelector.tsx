@@ -26,7 +26,7 @@ const ModeSelector = () => {
 
   const pluginOnChange = (pluginId: string) => {
     trackEvent('Switch plugin', {
-      pluginId: pluginId === 'default' ? null : pluginId,
+      PluginId: pluginId === 'default' ? null : pluginId,
     });
 
     homeDispatch({

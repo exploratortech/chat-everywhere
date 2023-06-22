@@ -24,15 +24,15 @@ const EventNames = [
 
 type EventNameTypes = (typeof EventNames)[number];
 type PayloadType = {
-  length?: number;
-  pluginId?: string | null;
-  largeContextModel?: boolean;
+  Length?: number;
+  PluginId?: string | null;
+  LargeContextModel?: boolean;
 };
 
 export const enableTracking = process.env.NEXT_PUBLIC_ENV === 'production';
 
 export const initializeMixpanel = () => {
-  if(!enableTracking) return;
+  if (!enableTracking) return;
   mixpanel.init('4a378d158509c05295af13dc46eb3f1a');
   trackEvent('Landed');
 };
@@ -41,6 +41,6 @@ export const trackEvent = (
   eventName: EventNameTypes,
   additionalPayload?: PayloadType,
 ) => {
-  if(!enableTracking) return;
+  if (!enableTracking) return;
   mixpanel.track(eventName, additionalPayload);
 };
