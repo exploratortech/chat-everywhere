@@ -1,7 +1,6 @@
 import mixpanel from 'mixpanel-browser';
 
 const EventNames = [
-  'Landed',
   'Send message',
   'Switch plugin',
   'Click on Account',
@@ -34,7 +33,6 @@ export const enableTracking = process.env.NEXT_PUBLIC_ENV === 'production';
 export const initializeMixpanel = () => {
   if (!enableTracking) return;
   mixpanel.init('4a378d158509c05295af13dc46eb3f1a');
-  trackEvent('Landed');
 };
 
 export const trackEvent = (
