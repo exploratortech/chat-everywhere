@@ -4,6 +4,7 @@ export const config = {
   runtime: 'edge',
 };
 
+// TODO: move to cron job
 const handler = async (req: Request): Promise<Response> => {
   try {
     await batchRefreshReferralCodes();
