@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import updateUserAccount from '@/utils/stripe/updateUserAccount';
+import updateUserAccount from '@/utils/server/stripe/updateUserAccount';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
