@@ -8,6 +8,8 @@ import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import { ReferralCodeEnter } from './ReferralCodeEnter';
+
 type Props = {
   onClose: () => void;
 };
@@ -19,6 +21,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
     handleUserLogout,
     dispatch,
   } = useContext(HomeContext);
+  const isProUser = user && (user.plan === 'pro' || user.plan === 'edu');
 
   const upgradeLinkOnClick = () => {
     const paymentLink =
@@ -100,11 +103,12 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
               <Dialog.Panel className="w-full max-w-md md:max-w-lg transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-white">
                 <Dialog.Description>
                   <div className="rounded-2xl flex flex-col">
-                    <span className="text-sm mb-6">
+                    <span className="text-sm mb-2">
                       {t(
                         'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime! Please make sure you registered before upgrading to avoid wait time.',
                       )}
                     </span>
+                    {!isProUser && <ReferralCodeEnter />}
                     <div className="flex flex-col md:flex-row justify-evenly mb-3">
                       <div className="flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
                         <span className="text-2xl font-bold">Free</span>

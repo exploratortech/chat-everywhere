@@ -6,6 +6,7 @@ import { UserProfile } from '@/types/user';
 import { generateRandomReferralCode } from './referralCode';
 
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import dayjs from 'dayjs';
 
 export const getAdminSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -252,6 +253,63 @@ export const getReferralCode = async (userId: string): Promise<string> => {
   }
 
   return referralCode;
+};
+
+export const isValidReferralCode = async (
+  code: string,
+): Promise<{
+  isValid: boolean;
+  referrerId?: string;
+}> => {
+  const supabase = getAdminSupabaseClient();
+  const { data: record, error } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('referral_code', code)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return {
+    isValid: !!record,
+    referrerId: record?.id,
+  };
+};
+
+export const redeemReferralCode = async ({
+  referrerId,
+  referreeId,
+}: {
+  referrerId: string;
+  referreeId: string;
+}): Promise<void> => {
+  const supabase = getAdminSupabaseClient();
+  const trailDays =
+    typeof process.env.REFERRAL_TRIAL_DAYS === 'string'
+      ? parseInt(process.env.REFERRAL_TRIAL_DAYS)
+      : 3;
+  // create a record in the referral table
+  const { error: referralError } = await supabase.from('referral').insert([
+    {
+      referrer_id: referrerId,
+      referree_id: referreeId,
+      referral_date: dayjs().toDate(),
+    },
+  ]);
+  if (referralError) {
+    throw referralError;
+  }
+  // upgrade the user to pro plan
+  const { error: upgradeError } = await supabase
+    .from('profiles')
+    .update({
+      plan: 'pro',
+      pro_plan_expiration_date: dayjs().add(trailDays, 'days').toDate(),
+    })
+    .eq('id', referreeId);
+  if (upgradeError) {
+    throw upgradeError;
+  }
 };
 
 export const userProfile = async (client: SupabaseClient, userId: string) => {
