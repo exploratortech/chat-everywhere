@@ -42,7 +42,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log(event);
       const userId = session.client_reference_id;
       const planCode = session.metadata?.plan_code;
       stripeSubscriptionId = session.subscription as string;
@@ -59,25 +58,46 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const proPlanExpirationDateUTC = dayjs(currentDate)
           .add(1, 'month')
           .toDate();
-        await updateUserAccount(
+        // upgrading
+        await updateUserAccount({
+          upgrade: true,
           userId,
           stripeSubscriptionId,
-          true,
-          proPlanExpirationDateUTC,
-        );
+          proPlanExpirationDate: proPlanExpirationDateUTC,
+        });
       }
     }
-    // if (event.type === 'customer.subscription.updated') {
-    //   const session = event.data.object as Stripe.Subscription;
-    //   stripeSubscriptionId = session.id;
+    if (event.type === 'customer.subscription.updated') {
+      const session = event.data.object as Stripe.Subscription;
+      stripeSubscriptionId = session.id;
 
-    //   if (!stripeSubscriptionId) {
-    //     console.error(session);
-    //     throw new Error('Subscription id not found from Stripe webhook');
-    //   }
+      if (!stripeSubscriptionId) {
+        console.error(session);
+        throw new Error('Subscription id not found from Stripe webhook');
+      }
 
-    //   await updateUserAccount(null, stripeSubscriptionId, false);
-    // }
+      if (!session.cancel_at) {
+        return res.json({ received: true });
+      }
+
+      const cancelAtDate = dayjs.unix(session.cancel_at!).utc().toDate();
+      const today = dayjs().utc().toDate();
+
+      if (cancelAtDate < today) {
+        // Downgrade to free plan
+        await updateUserAccount({
+          upgrade: false,
+          stripeSubscriptionId,
+        });
+      } else {
+        // Monthly Pro Plan Subscription recurring payment, extend expiration date
+        await updateUserAccount({
+          upgrade: true,
+          stripeSubscriptionId,
+          proPlanExpirationDate: cancelAtDate,
+        });
+      }
+    }
 
     if (event.type === 'customer.subscription.deleted') {
       const session = event.data.object as Stripe.Subscription;
@@ -88,7 +108,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         throw new Error('Subscription id not found from Stripe webhook');
       }
 
-      await updateUserAccount(null, stripeSubscriptionId, false);
+      await updateUserAccount({
+        upgrade: false,
+        stripeSubscriptionId,
+      });
     }
 
     // Return a response to acknowledge receipt of the event
