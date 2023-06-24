@@ -1,5 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { FC, Fragment, useContext } from 'react';
+import { FC, Fragment, useContext, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
@@ -27,6 +27,8 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
     handleUserLogout,
     dispatch,
   } = useContext(HomeContext);
+  const [displayReferralCodeEnterer, setDisplayReferralCodeEnterer] =
+    useState(false);
 
   const upgradeLinkOnClick = () => {
     const paymentLink =
@@ -117,7 +119,6 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                         )}
                       </span>
                     )}
-                    <ReferralCodeEnter />
                     <div className="flex flex-col md:flex-row justify-evenly mb-3">
                       <div className="flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
                         <span className="text-2xl font-bold">Free</span>
@@ -175,6 +176,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                         )}
                       </div>
                     </div>
+                    {displayReferralCodeEnterer && <ReferralCodeEnter />}
                     <div>
                       {user?.plan === 'pro' && !user?.hasReferrer && (
                         <p className="text-xs text-neutral-400">
@@ -224,6 +226,17 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
 
                   {user && (
                     <div className="flex flex-row items-center">
+                      <span
+                        className="pr-2 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer text-xs"
+                        onClick={() =>
+                          setDisplayReferralCodeEnterer(
+                            !displayReferralCodeEnterer,
+                          )
+                        }
+                      >
+                        {t('Referral code')}
+                      </span>
+
                       <span
                         className="px-4 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer mr-2 text-xs"
                         onClick={changePasswordOnClick}

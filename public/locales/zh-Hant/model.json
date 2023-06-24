@@ -62,5 +62,10 @@
   "portrait": "肖像",
   "pixel-art": "像素",
   "Change password": "更改密碼",
-  "Your registration email is": "您的註冊電郵地址是"
+  "Your registration email is": "您的註冊電郵地址是",
+  "Referral code": "推廣碼",
+  "Please enter a referral code to start your trial": "請輸入推廣碼",
+  "Submit": "提交",
+  "Loading...": "載入中...",
+  "Invalid or referral code has already expired, please contact your referrer": "推廣碼無效或過期，請聯繫您的推廣大使"
 }
