@@ -143,7 +143,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                             <FeatureItem key={index} featureName={t(feature)} />
                           ))}
                         </div>
-                        {user?.plan !== 'pro' && (
+                        {(!user || !isPaidUser) && (
                           <div className="flex flex-col">
                             <a
                               target="_blank"
@@ -167,9 +167,10 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                         )}
                         {user?.plan === 'pro' && user.proPlanExpirationDate && (
                           <div className="text-center text-neutral-500 p-2 text-xs">
-                            {`Expires on date: ${dayjs(
-                              user.proPlanExpirationDate,
-                            ).format('ll')}`}{' '}
+                            {`${t('Expires on')}: 
+                            ${dayjs(user.proPlanExpirationDate).format(
+                              'll',
+                            )}`}{' '}
                           </div>
                         )}
                       </div>

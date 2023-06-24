@@ -1,5 +1,5 @@
 import {
-  isValidReferralCode,
+  getReferralCodeDetail,
   redeemReferralCode,
 } from '../../../utils/server/supabase';
 import { getReferralCode, getUserProfile } from '@/utils/server/supabase';
@@ -25,7 +25,7 @@ const handler = async (req: Request): Promise<Response> => {
       referralCode: string;
     };
 
-    const { isValid, referrerId } = await isValidReferralCode(referralCode);
+    const { isValid, referrerId } = await getReferralCodeDetail(referralCode);
 
     // Check if referral code is valid
     if (!isValid || !referrerId)
@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Redeem code and upgrade user account to Pro plan
     await redeemReferralCode({
       referrerId,
-      referreeId: userId,
+      refereeId: userId,
     });
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });

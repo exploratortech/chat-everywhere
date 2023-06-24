@@ -404,7 +404,7 @@ const Home = () => {
               referralCode: userProfile.referralCode,
               proPlanExpirationDate: userProfile.proPlanExpirationDate,
               hasReferrer: userProfile.hasReferrer,
-              hasReferree: userProfile.hasReferree,
+              hasReferee: userProfile.hasReferee,
             },
           });
           if (enableTracking) {

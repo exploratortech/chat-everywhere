@@ -255,7 +255,7 @@ export const getReferralCode = async (userId: string): Promise<string> => {
   return referralCode;
 };
 
-export const isValidReferralCode = async (
+export const getReferralCodeDetail = async (
   code: string,
 ): Promise<{
   isValid: boolean;
@@ -278,13 +278,13 @@ export const isValidReferralCode = async (
 
 export const redeemReferralCode = async ({
   referrerId,
-  referreeId,
+  refereeId,
 }: {
   referrerId: string;
-  referreeId: string;
+  refereeId: string;
 }): Promise<void> => {
   const supabase = getAdminSupabaseClient();
-  const trailDays =
+  const trialDays =
     typeof process.env.REFERRAL_TRIAL_DAYS === 'string'
       ? parseInt(process.env.REFERRAL_TRIAL_DAYS)
       : 3;
@@ -292,7 +292,7 @@ export const redeemReferralCode = async ({
   const { error: referralError } = await supabase.from('referral').insert([
     {
       referrer_id: referrerId,
-      referree_id: referreeId,
+      referee_id: refereeId,
       referral_date: dayjs().toDate(),
     },
   ]);
@@ -304,9 +304,9 @@ export const redeemReferralCode = async ({
     .from('profiles')
     .update({
       plan: 'pro',
-      pro_plan_expiration_date: dayjs().add(trailDays, 'days').toDate(),
+      pro_plan_expiration_date: dayjs().add(trialDays, 'days').toDate(),
     })
-    .eq('id', referreeId);
+    .eq('id', refereeId);
   if (upgradeError) {
     throw upgradeError;
   }
@@ -326,16 +326,16 @@ export const userProfileQuery = async (
     throw error;
   }
 
-  const { data: referree, error: referreeError } = await client
+  const { data: referee, error: refereeError } = await client
     .from('referral')
     .select('*')
-    .or(`referree_id.eq.${userId},referrer_id.eq.${userId}`);
-  if (referreeError) {
-    throw referreeError;
+    .or(`referee_id.eq.${userId},referrer_id.eq.${userId}`);
+  if (refereeError) {
+    throw refereeError;
   }
 
-  const hasReferrer = referree?.find((r) => r.referree_id === userId);
-  const hasReferree = referree?.find((r) => r.referrer_id === userId);
+  const hasReferrer = referee?.find((r) => r.referee_id === userId);
+  const hasReferee = referee?.find((r) => r.referrer_id === userId);
 
   return {
     id: user.id,
@@ -343,7 +343,7 @@ export const userProfileQuery = async (
     referralCode: user.referral_code,
     proPlanExpirationDate: user.pro_plan_expiration_date,
     hasReferrer: !!hasReferrer,
-    hasReferree: !!hasReferree,
+    hasReferee: !!hasReferee,
   } as UserProfile;
 };
 
