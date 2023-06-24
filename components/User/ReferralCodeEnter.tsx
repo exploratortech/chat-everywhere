@@ -1,5 +1,6 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import React, { useContext, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 
@@ -62,6 +63,15 @@ export const ReferralCodeEnter = () => {
             hasReferee: profile.hasReferee,
           },
         });
+        dispatch({
+          field: 'showProfileModel',
+          value: false,
+        });
+        dispatch({
+          field: 'isPaidUser',
+          value: true,
+        });
+        toast.success(t('Referral code has been redeemed'));
       },
     },
   );
@@ -76,7 +86,10 @@ export const ReferralCodeEnter = () => {
   return (
     <div className="my-2 text-sm">
       <h2 className="">{t('Referral code')}</h2>
-      <form className="flex items-center gap-2 justify-between" onSubmit={handleSubmit}>
+      <form
+        className="flex items-center gap-2 justify-between"
+        onSubmit={handleSubmit}
+      >
         <input
           className="w-[70%] my-2 rounded-md border border-neutral-500 px-4 py-1 text-white shadow focus:outline-none bg-transparent dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
           placeholder={
@@ -87,14 +100,16 @@ export const ReferralCodeEnter = () => {
         />
         <button
           type="submit"
-          className="px-4 py-[.23rem] h-min border rounded-md shadow text-black bg-slate-200 hover:bg-slate-300 focus:outline-none w-fit cursor-pointer"
+          className="px-4 py-[.23rem] h-min border rounded-md shadow text-black disabled:bg-slate-400 disabled:border-none  bg-slate-200 hover:bg-slate-300 focus:outline-none w-fit"
           disabled={!referralCode || isLoading}
         >
           {isLoading ? t('Loading...') : t('Submit')}
         </button>
       </form>
       {isError && (
-        <div className="text-red-500 text-sm my-2">{t(queryError?.message)}</div>
+        <div className="text-red-500 text-sm my-2">
+          {t(queryError?.message)}
+        </div>
       )}
     </div>
   );

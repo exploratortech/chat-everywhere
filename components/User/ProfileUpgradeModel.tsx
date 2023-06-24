@@ -1,4 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
+import { IconCircleCheck } from '@tabler/icons-react';
 import { FC, Fragment, useContext, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
@@ -119,6 +120,16 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                         )}
                       </span>
                     )}
+                    {isPaidUser && user?.hasReferrer && (
+                      <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
+                        <IconCircleCheck className="text-green-500" size={19} />
+                        <p className="flex items-center">
+                          {t(
+                            'Enjoy our pro plan experience during your trial!',
+                          )}
+                        </p>
+                      </div>
+                    )}
                     <div className="flex flex-col md:flex-row justify-evenly mb-3">
                       <div className="flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
                         <span className="text-2xl font-bold">Free</span>
@@ -167,7 +178,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                           </div>
                         )}
                         {user?.plan === 'pro' && user.proPlanExpirationDate && (
-                          <div className="text-center text-neutral-500 p-2 text-xs">
+                          <div className="text-left text-neutral-500 p-2 text-xs">
                             {`${t('Expires on')}: 
                             ${dayjs(user.proPlanExpirationDate).format(
                               'll',
@@ -226,16 +237,18 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
 
                   {user && (
                     <div className="flex flex-row items-center">
-                      <span
-                        className="pr-2 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer text-xs"
-                        onClick={() =>
-                          setDisplayReferralCodeEnterer(
-                            !displayReferralCodeEnterer,
-                          )
-                        }
-                      >
-                        {t('Referral code')}
-                      </span>
+                      {!isPaidUser && (
+                        <span
+                          className="pr-2 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer text-xs"
+                          onClick={() =>
+                            setDisplayReferralCodeEnterer(
+                              !displayReferralCodeEnterer,
+                            )
+                          }
+                        >
+                          {t('Referral code')}
+                        </span>
+                      )}
 
                       <span
                         className="px-4 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer mr-2 text-xs"
