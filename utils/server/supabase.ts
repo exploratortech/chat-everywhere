@@ -346,3 +346,22 @@ export const userProfileQuery = async (
     hasReferree: !!hasReferree,
   } as UserProfile;
 };
+
+export const updateProAccountsPlan = async (): Promise<void> => {
+  // UPDATE ALL USER WHOSE HAS PRO PLAN
+  // AND THEIR EXPIRED DATE IS LESS THAN (TODAY - 1 DAY) TO FREE PLAN
+  // GIVE ONE DAY PAYMENT GRACE PERIOD
+
+  const supabase = getAdminSupabaseClient();
+  const nowMinusOneDay = dayjs.utc().subtract(1, 'day').toISOString();
+
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ plan: 'free' })
+    .eq('plan', 'pro')
+    .lte('pro_plan_expiration_date', nowMinusOneDay);
+
+  if (updateError) {
+    throw updateError;
+  }
+};
