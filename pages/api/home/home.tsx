@@ -25,6 +25,8 @@ import {
   updateConversation,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
+import { trackEvent } from '@/utils/app/eventTracking';
+import { enableTracking } from '@/utils/app/eventTracking';
 import { saveFolders } from '@/utils/app/folders';
 import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
@@ -59,6 +61,7 @@ import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 
 import dayjs from 'dayjs';
+import mixpanel from 'mixpanel-browser';
 import { v4 as uuidv4 } from 'uuid';
 
 const Home = () => {
@@ -387,22 +390,37 @@ const Home = () => {
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
-      userProfileQuery(supabase, session.user.id).then((userProfile) => {
-        dispatch({ field: 'showLoginSignUpModel', value: false });
-        dispatch({
-          field: 'user',
-          value: {
-            id: session.user.id,
-            email: session.user.email,
-            plan: userProfile.plan || 'free',
-            token: session.access_token,
-            referralCode: userProfile.referralCode,
-            proPlanExpirationDate: userProfile.proPlanExpirationDate,
-            hasReferrer: userProfile.hasReferrer,
-            hasReferree: userProfile.hasReferree,
-          },
+      userProfileQuery(supabase, session.user.id)
+        .then((userProfile) => {
+          dispatch({ field: 'showLoginSignUpModel', value: false });
+          dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
+          dispatch({
+            field: 'user',
+            value: {
+              id: session.user.id,
+              email: session.user.email,
+              plan: userProfile.plan || 'free',
+              token: session.access_token,
+              referralCode: userProfile.referralCode,
+              proPlanExpirationDate: userProfile.proPlanExpirationDate,
+              hasReferrer: userProfile.hasReferrer,
+              hasReferree: userProfile.hasReferree,
+            },
+          });
+          if (enableTracking) {
+            mixpanel.identify(session.user.id);
+            mixpanel.people.union({
+              Email: session.user.email,
+              Plan: userProfile.plan || 'free',
+            });
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          toast.error(
+            t('Unable to load your information, please try again later.'),
+          );
         });
-      });
 
       //Check if survey is filled by logged in user
       supabase
@@ -552,6 +570,7 @@ const Home = () => {
         })
         .finally(() => {
           dispatch({ field: 'loading', value: false });
+          trackEvent('Share conversation loaded');
         });
     } else {
       dispatch({

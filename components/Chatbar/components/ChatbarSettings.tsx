@@ -12,6 +12,8 @@ import { useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import { trackEvent } from '@/utils/app/eventTracking';
+
 import HomeContext from '@/pages/api/home/home.context';
 
 import CloudSyncStatusComponent from '../../Sidebar/components/CloudSyncComponent';
@@ -40,11 +42,13 @@ export const ChatbarSettings = () => {
 
   const signInAccountOnClick = () => {
     if (user) {
+      trackEvent('Account button clicked');
       homeDispatch({
         field: 'showProfileModel',
         value: true,
       });
     } else {
+      trackEvent('Sign in button clicked');
       homeDispatch({
         field: 'showLoginSignUpModel',
         value: true,
@@ -139,6 +143,7 @@ export const ChatbarSettings = () => {
             text={t('Usage & credit')}
             icon={<IconCurrencyDollar size={18} />}
             onClick={() => {
+              trackEvent('Usages & credit clicked');
               homeDispatch({
                 field: 'showUsageModel',
                 value: true,
@@ -150,6 +155,7 @@ export const ChatbarSettings = () => {
           text={t('Latest Updates')}
           icon={<IconNews size={18} />}
           onClick={() => {
+            trackEvent('Latest updates clicked');
             homeDispatch({
               field: 'showNewsModel',
               value: true,

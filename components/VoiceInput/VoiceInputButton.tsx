@@ -1,10 +1,14 @@
-import { useCallback, useContext, useEffect, useMemo, useRef } from 'react'
 import { IconMicrophone, IconMicrophoneOff } from '@tabler/icons-react';
+import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 
-import HomeContext from '@/pages/api/home/home.context';
-import { useAzureStt } from '../Hooks/useAzureStt';
 import { useTranslation } from 'next-i18next';
+
+import { trackEvent } from '@/utils/app/eventTracking';
+
+import HomeContext from '@/pages/api/home/home.context';
+
+import { useAzureStt } from '../Hooks/useAzureStt';
 
 const getLargestValue = (bytes: Uint8Array): number => {
   let largest = 0;
@@ -20,11 +24,7 @@ const VoiceInputButton = () => {
   const { t } = useTranslation('common');
 
   const {
-    state: {
-      user,
-      lightMode,
-      isSpeechRecognitionActive,
-    },
+    state: { user, lightMode, isSpeechRecognitionActive },
   } = useContext(HomeContext);
 
   const {
@@ -39,27 +39,32 @@ const VoiceInputButton = () => {
   const animationFrameId = useRef<number>();
   const byteArray = useRef<Uint8Array>(new Uint8Array());
 
-  const draw = useCallback((node: AnalyserNode): void => {
-    if (!canvasRef.current) return;
-    const ctx = canvasRef.current.getContext('2d') as CanvasRenderingContext2D;
-    const largestValue = getLargestValue(byteArray.current);
+  const draw = useCallback(
+    (node: AnalyserNode): void => {
+      if (!canvasRef.current) return;
+      const ctx = canvasRef.current.getContext(
+        '2d',
+      ) as CanvasRenderingContext2D;
+      const largestValue = getLargestValue(byteArray.current);
 
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.strokeStyle = lightMode === 'dark' ? '#ffffff' : '#71717a';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(
-      ctx.canvas.width / 2,
-      ctx.canvas.height / 2,
-      ((ctx.canvas.width - 2) / 2) * (largestValue / 255),
-      0,
-      2 * Math.PI
-    );
-    ctx.stroke();
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.strokeStyle = lightMode === 'dark' ? '#ffffff' : '#71717a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(
+        ctx.canvas.width / 2,
+        ctx.canvas.height / 2,
+        ((ctx.canvas.width - 2) / 2) * (largestValue / 255),
+        0,
+        2 * Math.PI,
+      );
+      ctx.stroke();
 
-    node.getByteFrequencyData(byteArray.current);
-    animationFrameId.current = requestAnimationFrame(() => draw(node));
-  }, [lightMode]);
+      node.getByteFrequencyData(byteArray.current);
+      animationFrameId.current = requestAnimationFrame(() => draw(node));
+    },
+    [lightMode],
+  );
 
   useEffect(() => {
     if (audioStream) {
@@ -70,7 +75,9 @@ const VoiceInputButton = () => {
       audioSource.connect(analyserNode);
       byteArray.current = new Uint8Array(analyserNode.frequencyBinCount);
 
-      animationFrameId.current = requestAnimationFrame(() => draw(analyserNode));
+      animationFrameId.current = requestAnimationFrame(() =>
+        draw(analyserNode),
+      );
     }
 
     return () => {
@@ -83,10 +90,17 @@ const VoiceInputButton = () => {
     let color = 'bg-green-500';
     if (isLoading) {
       color = 'bg-amber-500';
-    } else if (!isLoading && !isSpeechRecognitionActive || isMicrophoneDisabled) {
+    } else if (
+      (!isLoading && !isSpeechRecognitionActive) ||
+      isMicrophoneDisabled
+    ) {
       return null;
     }
-    return <div className={`absolute w-1.5 h-1.5 m-1.5 top-0 right-0 ${color} rounded-full`} />;
+    return (
+      <div
+        className={`absolute w-1.5 h-1.5 m-1.5 top-0 right-0 ${color} rounded-full`}
+      />
+    );
   }, [isLoading, isSpeechRecognitionActive, isMicrophoneDisabled]);
 
   const handleClick = async (e: any): Promise<void> => {
@@ -110,13 +124,14 @@ const VoiceInputButton = () => {
       }
     }
     e.stopPropagation();
+    trackEvent('Voice input button clicked');
   };
 
   return (
     <div
       className={`
         w-9 h-9 bg-white dark:bg-[#40414F] rounded-full
-        ${ isLoading || isSpeechRecognitionActive ? 'z-[1100]' : '' }
+        ${isLoading || isSpeechRecognitionActive ? 'z-[1100]' : ''}
       `}
     >
       <div className="relative">
@@ -151,6 +166,5 @@ const VoiceInputButton = () => {
     </div>
   );
 };
-
 
 export default VoiceInputButton;

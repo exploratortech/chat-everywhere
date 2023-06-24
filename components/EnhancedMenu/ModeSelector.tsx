@@ -1,6 +1,7 @@
 import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { trackEvent } from '@/utils/app/eventTracking';
 import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 
 import { PluginID } from '@/types/plugin';
@@ -24,6 +25,10 @@ const ModeSelector = () => {
   }, [currentMessage]);
 
   const pluginOnChange = (pluginId: string) => {
+    trackEvent('Switch plugin', {
+      PluginId: pluginId === 'default' ? null : pluginId,
+    });
+
     homeDispatch({
       field: 'currentMessage',
       value: {

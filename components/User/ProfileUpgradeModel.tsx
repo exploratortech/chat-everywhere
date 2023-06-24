@@ -4,6 +4,7 @@ import { FC, Fragment, useContext } from 'react';
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
 
+import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -40,6 +41,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
       label: 'Upgrade',
       userEmail: userEmail || 'N/A',
     });
+    trackEvent('Upgrade button clicked');
 
     window.open(
       `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
@@ -60,6 +62,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
       label: 'Upgrade',
       userEmail: userEmail || 'N/A',
     });
+    trackEvent('Upgrade (one-month only) button clicked');
 
     window.open(
       `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
