@@ -10,6 +10,11 @@ import HomeContext from '@/pages/api/home/home.context';
 
 import { ReferralCodeEnter } from './ReferralCodeEnter';
 
+import dayjs from 'dayjs';
+import LocalizedFormat from 'dayjs/plugin/localizedFormat';
+
+dayjs.extend(LocalizedFormat);
+
 type Props = {
   onClose: () => void;
 };
@@ -153,6 +158,13 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                                 'Upgrade for one month only (active in 24 hours)',
                               )}
                             </a>
+                          </div>
+                        )}
+                        {user?.plan === 'pro' && user.proPlanExpirationDate && (
+                          <div className="text-center text-neutral-500 p-2 text-xs">
+                            {`Expires on date: ${dayjs(
+                              user.proPlanExpirationDate,
+                            ).format('ll')}`}{' '}
                           </div>
                         )}
                       </div>
