@@ -1,34 +1,71 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import React, { useContext, useEffect, useState } from 'react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from 'react-query';
+
+import { userProfile } from '@/utils/server/supabase';
+
+import { UserProfile } from '@/types/user';
 
 import HomeContext from '@/pages/api/home/home.context';
 
 export const ReferralCodeEnter = () => {
   const { t } = useTranslation('referral');
   const [referralCode, setReferralCode] = useState('');
-  const [error, setError] = useState('');
+  const supabase = useSupabaseClient();
 
   const {
     state: { user },
     dispatch,
   } = useContext(HomeContext);
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      await submitCode({
-        referralCode,
-        userId: user!.id,
-      });
-      dispatch({
-        field: 'user',
-        value: {
-          ...user,
-          plan: 'pro',
+
+  const {
+    isLoading,
+    isError,
+    error: queryError,
+    refetch: queryReferralCodeRefetch,
+  } = useQuery<{ profile: UserProfile }, Error>(
+    'redeemReferralCode',
+    async () => {
+      const response = await fetch('/api/referral/redeem-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'user-id': user!.id,
         },
+        body: JSON.stringify({
+          referralCode,
+        }),
       });
-    } catch (error) {
-      setError((error as Error).message);
+      if (!response.ok) {
+        throw new Error('Invalid Code');
+      }
+      const profile = await userProfile(supabase, user!.id);
+      return { profile };
+    },
+    {
+      enabled: false,
+      retry: false,
+      onError: (error) => {
+        console.error(error);
+      },
+      onSuccess: ({ profile }) => {
+        dispatch({
+          field: 'user',
+          value: {
+            ...user,
+            plan: profile.plan,
+            proPlanExpirationDate: profile.proPlanExpirationDate,
+          },
+        });
+      },
+    },
+  );
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (referralCode) {
+      queryReferralCodeRefetch();
     }
   };
   return (
@@ -46,40 +83,14 @@ export const ReferralCodeEnter = () => {
         <button
           type="submit"
           className="px-4 py-[.23rem] h-min border rounded-lg shadow text-black bg-slate-200 hover:bg-slate-300 focus:outline-none"
-          disabled={!referralCode}
+          disabled={!referralCode || isLoading}
         >
-          {t('Enter')}
+          {isLoading ? t('Loading...') : t('Enter')}
         </button>
       </form>
-      {error && <div className="text-red-500 text-sm my-2">{error}</div>}
+      {isError && (
+        <div className="text-red-500 text-sm my-2">{queryError?.message}</div>
+      )}
     </div>
   );
 };
-
-async function submitCode({
-  referralCode,
-  userId,
-}: {
-  referralCode: string;
-  userId: string;
-}) {
-  try {
-    const body = JSON.stringify({
-      referralCode,
-    });
-
-    const response = await fetch('/api/referral/redeem-code', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'user-id': userId,
-      },
-      body,
-    });
-    if (!response.ok) {
-      throw new Error('Invalid Code');
-    }
-  } catch (error) {
-    throw new Error('Invalid Code');
-  }
-}
