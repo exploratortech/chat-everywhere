@@ -4,12 +4,16 @@ import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(duration);
 dayjs.extend(isSameOrBefore);
-
+dayjs.extend(utc);
+dayjs.extend(timezone);
 const calculateTimeLeft = () => {
-  const now = dayjs();
+  // The cron job run at Taipei time 23:59:59
+  const now = dayjs.tz(new Date(), 'Asia/Taipei');
   const endOfDay = now.endOf('day');
 
   if (endOfDay.isSameOrBefore(now)) {
