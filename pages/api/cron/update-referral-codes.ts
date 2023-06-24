@@ -18,8 +18,7 @@ const handler = async (req: Request): Promise<Response> => {
         .tz(new Date(), 'Asia/Taipei')
         .format('YYYY-MM-DD HH:mm:ss'),
     });
-    // TODO: uncomment this when ready
-    // await batchRefreshReferralCodes();
+    await batchRefreshReferralCodes();
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
     console.error(error);

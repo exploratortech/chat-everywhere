@@ -1,8 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/refresh-referral-codes",
-      "schedule": "*/1 * * * *"
+      "path": "/api/cron/update-referral-codes",
+      "schedule": "0 16 * * *"
     }
   ]
 }
