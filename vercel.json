@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/refresh-referral-codes",
+      "schedule": "*/1 * * * *"
+    }
+  ]
+}
