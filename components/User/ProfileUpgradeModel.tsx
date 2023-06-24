@@ -21,7 +21,6 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
     handleUserLogout,
     dispatch,
   } = useContext(HomeContext);
-  const isProUser = user && (user.plan === 'pro' || user.plan === 'edu');
 
   const upgradeLinkOnClick = () => {
     const paymentLink =
@@ -108,7 +107,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                         'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime! Please make sure you registered before upgrading to avoid wait time.',
                       )}
                     </span>
-                    {!isProUser && <ReferralCodeEnter />}
+                    <ReferralCodeEnter />
                     <div className="flex flex-col md:flex-row justify-evenly mb-3">
                       <div className="flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
                         <span className="text-2xl font-bold">Free</span>

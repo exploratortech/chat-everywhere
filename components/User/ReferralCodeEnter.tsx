@@ -1,9 +1,10 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { IconCircleCheck } from '@tabler/icons-react';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 
-import { userProfile } from '@/utils/server/supabase';
+import { userProfileQuery } from '@/utils/server/supabase';
 
 import { UserProfile } from '@/types/user';
 
@@ -40,7 +41,7 @@ export const ReferralCodeEnter = () => {
       if (!response.ok) {
         throw new Error('Invalid Code');
       }
-      const profile = await userProfile(supabase, user!.id);
+      const profile = await userProfileQuery(supabase, user!.id);
       return { profile };
     },
     {
@@ -56,6 +57,8 @@ export const ReferralCodeEnter = () => {
             ...user,
             plan: profile.plan,
             proPlanExpirationDate: profile.proPlanExpirationDate,
+            hasReferrer: profile.hasReferrer,
+            hasReferree: profile.hasReferree,
           },
         });
       },
@@ -68,29 +71,42 @@ export const ReferralCodeEnter = () => {
       queryReferralCodeRefetch();
     }
   };
-  return (
-    <div className="my-4">
-      <h2 className="">Referral Code</h2>
-      <form className="flex items-center gap-2" onSubmit={handleSubmit}>
-        <input
-          className="w-full my-2 rounded-lg border border-neutral-500 px-4 py-1 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
-          placeholder={
-            t('Please enter a referral code to start your trial') || ''
-          }
-          value={referralCode}
-          onChange={(e) => setReferralCode(e.target.value)}
-        />
-        <button
-          type="submit"
-          className="px-4 py-[.23rem] h-min border rounded-lg shadow text-black bg-slate-200 hover:bg-slate-300 focus:outline-none"
-          disabled={!referralCode || isLoading}
-        >
-          {isLoading ? t('Loading...') : t('Enter')}
-        </button>
-      </form>
-      {isError && (
-        <div className="text-red-500 text-sm my-2">{queryError?.message}</div>
-      )}
-    </div>
-  );
+  if (user?.hasReferrer) {
+    return (
+      <div className="text-xs leading-5 text-neutral-400 flex gap-2 my-2">
+        <IconCircleCheck className="text-green-500"></IconCircleCheck>
+        {t(
+          'You have already entered a referral code. Thank you for your support!',
+        )}
+      </div>
+    );
+  } else if (user?.plan === 'free') {
+    return (
+      <div className="my-4">
+        <h2 className="">Referral Code</h2>
+        <form className="flex items-center gap-2" onSubmit={handleSubmit}>
+          <input
+            className="w-full my-2 rounded-lg border border-neutral-500 px-4 py-1 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
+            placeholder={
+              t('Please enter a referral code to start your trial') || ''
+            }
+            value={referralCode}
+            onChange={(e) => setReferralCode(e.target.value)}
+          />
+          <button
+            type="submit"
+            className="px-4 py-[.23rem] h-min border rounded-lg shadow text-black bg-slate-200 hover:bg-slate-300 focus:outline-none"
+            disabled={!referralCode || isLoading}
+          >
+            {isLoading ? t('Loading...') : t('Enter')}
+          </button>
+        </form>
+        {isError && (
+          <div className="text-red-500 text-sm my-2">{queryError?.message}</div>
+        )}
+      </div>
+    );
+  } else {
+    return null;
+  }
 };

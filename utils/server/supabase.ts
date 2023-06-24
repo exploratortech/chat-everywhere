@@ -20,7 +20,7 @@ export const getAdminSupabaseClient = () => {
 
 export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   const supabase = getAdminSupabaseClient();
-  return await userProfile(supabase, userId);
+  return await userProfileQuery(supabase, userId);
 };
 
 export const getIntervalUsages = async (
@@ -312,7 +312,10 @@ export const redeemReferralCode = async ({
   }
 };
 
-export const userProfile = async (client: SupabaseClient, userId: string) => {
+export const userProfileQuery = async (
+  client: SupabaseClient,
+  userId: string,
+) => {
   const { data: user, error } = await client
     .from('profiles')
     .select('id, plan, pro_plan_expiration_date, referral_code')
@@ -323,10 +326,23 @@ export const userProfile = async (client: SupabaseClient, userId: string) => {
     throw error;
   }
 
+  const { data: referree, error: referreeError } = await client
+    .from('referral')
+    .select('*')
+    .or(`referree_id.eq.${userId},referrer_id.eq.${userId}`);
+  if (referreeError) {
+    throw referreeError;
+  }
+
+  const hasReferrer = referree?.find((r) => r.referree_id === userId);
+  const hasReferree = referree?.find((r) => r.referrer_id === userId);
+
   return {
     id: user.id,
     plan: user.plan,
     referralCode: user.referral_code,
     proPlanExpirationDate: user.pro_plan_expiration_date,
+    hasReferrer: !!hasReferrer,
+    hasReferree: !!hasReferree,
   } as UserProfile;
 };

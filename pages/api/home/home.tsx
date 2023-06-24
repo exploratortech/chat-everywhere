@@ -31,7 +31,7 @@ import { savePrompts } from '@/utils/app/prompts';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
-import { userProfile } from '@/utils/server/supabase';
+import { userProfileQuery } from '@/utils/server/supabase';
 
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
@@ -387,7 +387,7 @@ const Home = () => {
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
-      userProfile(supabase, session.user.id).then((userProfile) => {
+      userProfileQuery(supabase, session.user.id).then((userProfile) => {
         dispatch({ field: 'showLoginSignUpModel', value: false });
         dispatch({
           field: 'user',
@@ -398,6 +398,8 @@ const Home = () => {
             token: session.access_token,
             referralCode: userProfile.referralCode,
             proPlanExpirationDate: userProfile.proPlanExpirationDate,
+            hasReferrer: userProfile.hasReferrer,
+            hasReferree: userProfile.hasReferree,
           },
         });
       });
