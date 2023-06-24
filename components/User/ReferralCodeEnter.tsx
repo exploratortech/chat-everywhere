@@ -73,11 +73,13 @@ export const ReferralCodeEnter = () => {
   };
   if (user?.hasReferrer) {
     return (
-      <div className="text-xs leading-5 text-neutral-400 flex gap-2 my-2">
-        <IconCircleCheck className="text-green-500"></IconCircleCheck>
-        {t(
-          'You have already entered a referral code. Thank you for your support!',
-        )}
+      <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
+        <IconCircleCheck className="text-green-500" size={19}/>
+        <p className="flex items-center">
+          {t(
+            'You have already entered a referral code. Enjoy our pro plan experience!',
+          )}
+        </p>
       </div>
     );
   } else if (user?.plan === 'free') {

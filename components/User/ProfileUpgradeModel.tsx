@@ -23,7 +23,7 @@ type Props = {
 export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
   const { t } = useTranslation('model');
   const {
-    state: { user },
+    state: { user, isPaidUser },
     handleUserLogout,
     dispatch,
   } = useContext(HomeContext);
@@ -110,11 +110,13 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
               <Dialog.Panel className="w-full max-w-md md:max-w-lg transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-white">
                 <Dialog.Description>
                   <div className="rounded-2xl flex flex-col">
-                    <span className="text-sm mb-2">
-                      {t(
-                        'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime! Please make sure you registered before upgrading to avoid wait time.',
-                      )}
-                    </span>
+                    {!isPaidUser && (
+                      <span className="text-sm mb-2">
+                        {t(
+                          'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime! Please make sure you registered before upgrading to avoid wait time.',
+                        )}
+                      </span>
+                    )}
                     <ReferralCodeEnter />
                     <div className="flex flex-col md:flex-row justify-evenly mb-3">
                       <div className="flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
@@ -173,7 +175,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                       </div>
                     </div>
                     <div>
-                      {user?.plan === 'pro' && (
+                      {user?.plan === 'pro' && !user?.hasReferrer && (
                         <p className="text-xs text-neutral-400">
                           {t(
                             'Thank you for supporting us! If you want to cancel your subscription, please visit ',
