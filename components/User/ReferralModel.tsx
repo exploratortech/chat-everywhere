@@ -7,14 +7,9 @@ import { useTranslation } from 'next-i18next';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import ReferralCodeTimeLeft from '../Referral/ReferralCodeTimeLeft';
 import ReferralProgramData from '../Referral/ReferralProgramData';
 import Spinner from '../Spinner/Spinner';
-
-import dayjs from 'dayjs';
-
-function formatDatetime(dateString: string) {
-  return dayjs(dateString).format('YYYY/MM/DD');
-}
 
 type Props = {
   onClose: () => void;
@@ -51,11 +46,9 @@ const ReferralModel = memo(({ onClose }: Props) => {
             referralCode: res.code,
           },
         });
-        setIsLoading(false);
       });
-    } else {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   }, []);
   const handleCopy = () => {
     navigator.clipboard.writeText(user?.referralCode || '');
@@ -104,11 +97,17 @@ const ReferralModel = memo(({ onClose }: Props) => {
                 )}
                 {!isLoading && (
                   <div>
-                    <div onClick={handleCopy} className="cursor-pointer">
-                      Your referral code is:{' '}
-                      <span className="inline  bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1">
-                        {user?.referralCode}
-                      </span>
+                    <div
+                      onClick={handleCopy}
+                      className="cursor-pointer flex justify-between items-center"
+                    >
+                      <div className="select-none">
+                        Your referral code is:{' '}
+                        <span className="inline  bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1">
+                          {user?.referralCode}
+                        </span>
+                      </div>
+                      <ReferralCodeTimeLeft />
                     </div>
                     <ReferralProgramData />
                   </div>
