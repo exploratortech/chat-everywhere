@@ -1,11 +1,13 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { IconX } from '@tabler/icons-react';
+import { IconPlanet, IconX } from '@tabler/icons-react';
 import React, { Fragment, memo, useContext, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import ReferralProgramData from '../Referral/ReferralProgramData';
 import Spinner from '../Spinner/Spinner';
 
 import dayjs from 'dayjs';
@@ -55,6 +57,10 @@ const ReferralModel = memo(({ onClose }: Props) => {
       setIsLoading(false);
     }
   }, []);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(user?.referralCode || '');
+    toast.success(t('Copied to clipboard'));
+  };
 
   return (
     <Transition appear show={true} as={Fragment}>
@@ -85,19 +91,26 @@ const ReferralModel = memo(({ onClose }: Props) => {
             >
               <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-[80vh] transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
                 <div className="mb-3 flex flex-row justify-between items-center">
-                  <h1>{t('Referral Program')}</h1>
+                  <h1 className="text-xl">{t('Referral Program')}</h1>
                   <button className="w-max min-h-[34px]" onClick={onClose}>
                     <IconX></IconX>
                   </button>
                 </div>
 
-                <div>
-                  Your referral code is:{' '}
-                  <span className="text-primary-500">{user?.referralCode}</span>
-                </div>
                 {isLoading && (
                   <div className="flex mt-[50%]">
                     <Spinner size="16px" className="mx-auto" />
+                  </div>
+                )}
+                {!isLoading && (
+                  <div>
+                    <div onClick={handleCopy} className="cursor-pointer">
+                      Your referral code is:{' '}
+                      <span className="inline  bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1">
+                        {user?.referralCode}
+                      </span>
+                    </div>
+                    <ReferralProgramData />
                   </div>
                 )}
               </Dialog.Panel>
