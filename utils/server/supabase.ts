@@ -340,7 +340,9 @@ export const userProfileQuery = async (
 ) => {
   const { data: user, error } = await client
     .from('profiles')
-    .select('id, plan, pro_plan_expiration_date, referral_code')
+    .select(
+      'id, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date',
+    )
     .eq('id', userId)
     .single();
 
@@ -364,6 +366,7 @@ export const userProfileQuery = async (
     plan: user.plan,
     referralCode: user.referral_code,
     proPlanExpirationDate: user.pro_plan_expiration_date,
+    referralCodeExpirationDate: user.referral_code_expiration_date,
     hasReferrer: !!hasReferrer,
     hasReferee: !!hasReferee,
   } as UserProfile;

@@ -18,6 +18,7 @@ export interface UserProfile {
   id: string;
   plan: SubscriptionPlan;
   referralCode: string | undefined;
+  referralCodeExpirationDate: string | undefined;
   proPlanExpirationDate: string | undefined;
   hasReferee: boolean;
   hasReferrer: boolean;

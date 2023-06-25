@@ -402,6 +402,8 @@ const Home = () => {
               plan: userProfile.plan || 'free',
               token: session.access_token,
               referralCode: userProfile.referralCode,
+              referralCodeExpirationDate:
+                userProfile.referralCodeExpirationDate,
               proPlanExpirationDate: userProfile.proPlanExpirationDate,
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
