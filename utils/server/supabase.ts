@@ -3,7 +3,7 @@ import { DefaultMonthlyCredits } from '@/utils/config';
 import { PluginID } from '@/types/plugin';
 import { UserProfile } from '@/types/user';
 
-import { generateRandomReferralCode } from './referralCode';
+import { generateReferralCodeAndExpirationDate } from './referralCode';
 
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
@@ -177,9 +177,9 @@ export const isPaidUserByAuthToken = async (
 export const batchRefreshReferralCodes = async (): Promise<void> => {
   try {
     const supabase = getAdminSupabaseClient();
-    const { data: eduUserId, error: fetchEduIdError } = await supabase
+    const { data: eduUserData, error: fetchEduIdError } = await supabase
       .from('profiles')
-      .select('id')
+      .select('id, referral_code_expiration_date')
       .eq('plan', 'edu');
 
     if (fetchEduIdError) {
@@ -187,19 +187,34 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
       throw new Error('Error fetching records');
     }
 
-    if (!eduUserId) {
+    if (!eduUserData) {
       throw new Error('No records found');
     }
 
-    const newRecords = eduUserId.map((record) => {
-      const generatedCode = generateRandomReferralCode();
-      return {
-        id: record.id,
-        referral_code: generatedCode,
-      };
+    // Regenerate referral code only if it's expired within 2 hour, and cron job will run every hour.
+    let newRecords;
+
+    eduUserData.forEach((record) => {
+      const existingCodeExpirationDate =
+        record.referral_code_expiration_date &&
+        dayjs(record.referral_code_expiration_date);
+
+      if (
+        !existingCodeExpirationDate ||
+        dayjs().isAfter(existingCodeExpirationDate.subtract(2, 'hour'))
+      ) {
+        const { code: generatedCode, expiresAt: expirationDate } =
+          generateReferralCodeAndExpirationDate();
+
+        newRecords.push({
+          id: record.id,
+          referral_code: generatedCode,
+          referral_code_expiration_date: expirationDate,
+        });
+      }
     });
 
-    const { data: refreshedRecords, error: refreshError } = await supabase.rpc(
+    const { error: refreshError } = await supabase.rpc(
       'refresh_referral_codes', // this function defined in supabase
       { payload: newRecords },
     );
@@ -228,19 +243,22 @@ export const getReferralCode = async (userId: string): Promise<string> => {
   let referralCode = record?.referral_code;
 
   if (!referralCode) {
-    const newCode = generateRandomReferralCode();
+    const { code: generatedCode, expiresAt: expirationDate } =
+      generateReferralCodeAndExpirationDate();
+
     const { data: newRecord, error } = await supabase
       .from('profiles')
-      .update({ referral_code: newCode })
+      .update({
+        referral_code: generatedCode,
+        referral_code_expiration_date: expirationDate,
+      })
       .eq('plan', 'edu')
       .eq('id', userId)
       .single();
     if (error) {
       throw error;
     }
-    console.log({
-      newRecord,
-    });
+    
     referralCode = (
       newRecord as {
         referral_code: string;

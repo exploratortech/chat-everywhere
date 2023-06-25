@@ -14,6 +14,8 @@ alter table "public"."profiles" add column "pro_plan_expiration_date" timestamp 
 
 alter table "public"."profiles" add column "referral_code" character varying;
 
+alter table "public"."profiles" add column "referral_code_expiration_date" timestamp with time zone;
+
 CREATE UNIQUE INDEX referral_id_key ON public.referral USING btree (id);
 
 CREATE UNIQUE INDEX referral_pkey ON public.referral USING btree (id);

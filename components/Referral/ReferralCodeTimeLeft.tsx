@@ -11,6 +11,7 @@ dayjs.extend(duration);
 dayjs.extend(isSameOrBefore);
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
 const calculateTimeLeft = () => {
   // The cron job run at Taipei time 23:59:59
   const now = dayjs.tz(new Date(), 'Asia/Taipei');
