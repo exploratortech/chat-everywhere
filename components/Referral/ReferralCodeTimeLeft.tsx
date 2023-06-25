@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { en } from '@supabase/auth-ui-shared';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -12,11 +13,13 @@ dayjs.extend(isSameOrBefore);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const calculateTimeLeft = () => {
-  // The cron job run at Taipei time 23:59:59
-  const now = dayjs.tz(new Date(), 'Asia/Taipei');
-  const endOfDay = now.endOf('day');
+const calculateTimeLeft = (endOfDayInput: string) => {
+  const now = dayjs().utc();
+  const endOfDay = dayjs(endOfDayInput).utc();
 
+  console.log(now.format('YYYY-MM-DD HH:mm:ss'));
+  console.log(endOfDay.format('YYYY-MM-DD HH:mm:ss'));
+  console.log('isSameOrBefore', endOfDay.isSameOrBefore(now));
   if (endOfDay.isSameOrBefore(now)) {
     return null;
   }
@@ -31,13 +34,17 @@ const calculateTimeLeft = () => {
     .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
-export default function ReferralCodeTimeLeft() {
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+export default function ReferralCodeTimeLeft({
+  endOfDay,
+}: {
+  endOfDay: string;
+}) {
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(endOfDay));
   const { t } = useTranslation('referral');
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const time = calculateTimeLeft();
+      const time = calculateTimeLeft(endOfDay);
       setTimeLeft(time);
       if (!time) {
         clearInterval(timer);
@@ -45,7 +52,7 @@ export default function ReferralCodeTimeLeft() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [endOfDay]);
 
   if (!timeLeft) {
     return (

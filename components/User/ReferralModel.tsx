@@ -97,17 +97,18 @@ const ReferralModel = memo(({ onClose }: Props) => {
                 )}
                 {!isLoading && (
                   <div>
-                    <div
-                      onClick={handleCopy}
-                      className="cursor-pointer flex justify-between items-center"
-                    >
-                      <div className="select-none">
+                    <div className="flex select-none justify-between items-center">
+                      <div onClick={handleCopy} className="cursor-pointer ">
                         Your referral code is:{' '}
                         <span className="inline  bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1">
                           {user?.referralCode}
                         </span>
                       </div>
-                      <ReferralCodeTimeLeft />
+                      {user?.referralCodeExpirationDate && (
+                        <ReferralCodeTimeLeft
+                          endOfDay={user?.referralCodeExpirationDate}
+                        />
+                      )}
                     </div>
                     <ReferralProgramData />
                   </div>
