@@ -13,12 +13,6 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   try {
-    console.log({
-      twTimeNow: dayjs
-        .tz(new Date(), 'Asia/Taipei')
-        .format('YYYY-MM-DD HH:mm:ss'),
-    });
-    
     await batchRefreshReferralCodes();
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {

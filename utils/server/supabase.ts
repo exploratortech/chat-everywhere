@@ -192,7 +192,11 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
     }
 
     // Regenerate referral code only if it's expired within 2 hour, and cron job will run every hour.
-    let newRecords;
+    let newRecords: {
+      id: string;
+      referral_code: string;
+      referral_code_expiration_date: string;
+    }[] = [];
 
     eduUserData.forEach((record) => {
       const existingCodeExpirationDate =
@@ -258,7 +262,7 @@ export const getReferralCode = async (userId: string): Promise<string> => {
     if (error) {
       throw error;
     }
-    
+
     referralCode = (
       newRecord as {
         referral_code: string;
