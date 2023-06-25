@@ -276,6 +276,41 @@ export const getReferralCode = async (userId: string): Promise<string> => {
 
   return referralCode;
 };
+export const regenerateReferralCode = async (userId: string) => {
+  try {
+    const supabase = getAdminSupabaseClient();
+    const { data: record, error: getProfileError } = await supabase
+      .from('profiles')
+      .select('referral_code')
+      .eq('plan', 'edu')
+      .eq('id', userId)
+      .single();
+    if (getProfileError) throw getProfileError;
+
+    const { code: newGeneratedCode, expiresAt: newExpirationDate } =
+      generateReferralCodeAndExpirationDate();
+    const { data: newRecord, error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        referral_code: newGeneratedCode,
+        referral_code_expiration_date: newExpirationDate,
+      })
+      .eq('plan', 'edu')
+      .eq('id', userId)
+      .single();
+    if (updateError) {
+      throw updateError;
+    }
+
+    return {
+      code: newGeneratedCode,
+      expiresAt: newExpirationDate,
+    };
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
 
 export const getReferralCodeDetail = async (
   code: string,

@@ -17,15 +17,12 @@ const calculateTimeLeft = (endOfDayInput: string) => {
   const now = dayjs().utc();
   const endOfDay = dayjs(endOfDayInput).utc();
 
-  console.log(now.format('YYYY-MM-DD HH:mm:ss'));
-  console.log(endOfDay.format('YYYY-MM-DD HH:mm:ss'));
-  console.log('isSameOrBefore', endOfDay.isSameOrBefore(now));
   if (endOfDay.isSameOrBefore(now)) {
     return null;
   }
 
   const timeLeft = dayjs.duration(endOfDay.diff(now));
-  const hours = timeLeft.hours();
+  const hours = timeLeft.hours() + timeLeft.days() * 24;
   const minutes = timeLeft.minutes();
   const seconds = timeLeft.seconds();
 
@@ -43,6 +40,7 @@ export default function ReferralCodeTimeLeft({
   const { t } = useTranslation('referral');
 
   useEffect(() => {
+    console.log('endOfDay', endOfDay);
     const timer = setInterval(() => {
       const time = calculateTimeLeft(endOfDay);
       setTimeLeft(time);
@@ -55,11 +53,7 @@ export default function ReferralCodeTimeLeft({
   }, [endOfDay]);
 
   if (!timeLeft) {
-    return (
-      <div className="text-sm font-bold text-red-500">
-        {t('Expired, please refresh page')}
-      </div>
-    );
+    return <div className="text-sm font-bold text-red-500">{t('Expired')}</div>;
   }
   return (
     <div className="text-sm text-neutral-500">

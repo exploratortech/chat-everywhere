@@ -1,7 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { IconPlanet, IconX } from '@tabler/icons-react';
+import { IconPlanet, IconRefresh, IconX } from '@tabler/icons-react';
 import React, { Fragment, memo, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
@@ -49,11 +50,55 @@ const ReferralModel = memo(({ onClose }: Props) => {
       });
     }
     setIsLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(user?.referralCode || '');
     toast.success(t('Copied to clipboard'));
   };
+
+  const {
+    isLoading: isRegenerating,
+    isError,
+    error: queryError,
+    refetch: queryReferralCodeRefetch,
+  } = useQuery<{ code: string; expiresAt: string }, Error>(
+    'regenerateReferralCode',
+    async () => {
+      const response = await fetch('/api/referral/regenerate-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'user-id': user!.id,
+        },
+      });
+
+      const data = (await response.json()) as {
+        code: string;
+        expiresAt: string;
+      };
+      return data;
+    },
+    {
+      enabled: false,
+      retry: false,
+      onError: (error) => {
+        console.error(error);
+      },
+      onSuccess: (code) => {
+        dispatch({
+          field: 'user',
+          value: {
+            ...user,
+            referralCode: code.code,
+            referralCodeExpirationDate: code.expiresAt,
+          },
+        });
+        toast.success(t('a new referral code has been regenerated'));
+      },
+    },
+  );
 
   return (
     <Transition appear show={true} as={Fragment}>
@@ -97,8 +142,11 @@ const ReferralModel = memo(({ onClose }: Props) => {
                 )}
                 {!isLoading && (
                   <div>
-                    <div className="flex select-none justify-between items-center">
-                      <div onClick={handleCopy} className="cursor-pointer ">
+                    <div className="flex select-none justify-between items-center flex-wrap gap-2">
+                      <div
+                        onClick={handleCopy}
+                        className="cursor-pointer flex-shrink-0"
+                      >
                         Your referral code is:{' '}
                         <span className="inline  bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1">
                           {user?.referralCode}
@@ -110,6 +158,20 @@ const ReferralModel = memo(({ onClose }: Props) => {
                         />
                       )}
                     </div>
+                    <button
+                      className="mx-auto my-3 flex w-fit items-center gap-3 rounded border text-sm py-2 px-4 hover:opacity-50 border-neutral-600  text-white md:mb-0 md:mt-2"
+                      onClick={() => {
+                        queryReferralCodeRefetch();
+                      }}
+                      disabled={isRegenerating}
+                    >
+                      {isRegenerating ? (
+                        <Spinner size="16px" />
+                      ) : (
+                        <IconRefresh />
+                      )}
+                      <div>{t('Regenerate code')}</div>
+                    </button>
                     <ReferralProgramData />
                   </div>
                 )}
