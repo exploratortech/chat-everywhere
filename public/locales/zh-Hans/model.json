@@ -64,5 +64,16 @@
   "portrait": "肖像",
   "pixel-art": "像素",
   "Change password": "更改密码",
-  "Your registration email is": "您的注册电邮地址是"
+  "Your registration email is": "您的注册电邮地址是",
+  "Enjoy our pro plan experience during your trial!": "专业版试用已啟用！",
+  "Expires on": "到期日期",
+  "Referral code": "推广码",
+  "Please enter a referral code to start your trial": "请输入推广码",
+  "Submit": "提交",
+  "Loading...": "加载中...",
+  "Invalid or referral code has already expired, please contact your referrer": "推广码无效或已过期，请联系您的推荐人",
+  "Referral code has been redeemed": "推广码已成功兑换",
+  "Your referral code is": "您的推广码是",
+  "Expires in": "剩余时间",
+  "Regenerate code": "重新生成"
 }

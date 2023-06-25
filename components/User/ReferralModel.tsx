@@ -18,6 +18,7 @@ type Props = {
 
 const ReferralModel = memo(({ onClose }: Props) => {
   const { t } = useTranslation('model');
+  const { t: sideBarT } = useTranslation('sidebar');
   const {
     state: { user },
     dispatch,
@@ -129,7 +130,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
             >
               <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-[80vh] transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
                 <div className="mb-3 flex flex-row justify-between items-center">
-                  <h1 className="text-xl">{t('Referral Program')}</h1>
+                  <h1 className="text-xl">{sideBarT('Referral Program')}</h1>
                   <button className="w-max min-h-[34px]" onClick={onClose}>
                     <IconX></IconX>
                   </button>
@@ -147,7 +148,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
                         onClick={handleCopy}
                         className="cursor-pointer flex-shrink-0"
                       >
-                        Your referral code is:{' '}
+                        {`${t('Your referral code is')}: `}
                         <span className="inline  bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1">
                           {user?.referralCode}
                         </span>

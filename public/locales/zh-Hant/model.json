@@ -70,5 +70,8 @@
   "Submit": "提交",
   "Loading...": "載入中...",
   "Invalid or referral code has already expired, please contact your referrer": "推廣碼無效或過期，請聯繫您的推廣大使",
-  "Referral code has been redeemed": "推廣碼兌換成功"
+  "Referral code has been redeemed": "推廣碼兌換成功",
+  "Your referral code is": "您的推廣碼是",
+  "Expires in": "有效期限",
+  "Regenerate code": "重新生成"
 }

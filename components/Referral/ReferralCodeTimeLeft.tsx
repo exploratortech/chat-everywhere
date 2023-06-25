@@ -37,7 +37,7 @@ export default function ReferralCodeTimeLeft({
   endOfDay: string;
 }) {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(endOfDay));
-  const { t } = useTranslation('referral');
+  const { t } = useTranslation('model');
 
   useEffect(() => {
     console.log('endOfDay', endOfDay);
