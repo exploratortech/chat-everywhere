@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/update-referral-codes",
-      "schedule": "0 16 * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/cron/update-pro-accounts-plan",
