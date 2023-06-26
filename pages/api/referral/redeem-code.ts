@@ -1,0 +1,63 @@
+import {
+  getReferralCodeDetail,
+  redeemReferralCode,
+} from '../../../utils/server/supabase';
+import {
+  getAdminSupabaseClient,
+  getUserProfile,
+} from '@/utils/server/supabase';
+
+export const config = {
+  runtime: 'edge',
+};
+
+const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
+
+const handler = async (req: Request): Promise<Response> => {
+  try {
+    const userId = req.headers.get('user-id');
+    if (!userId) return unauthorizedResponse;
+    const userProfile = await getUserProfile(userId);
+
+    if (!userProfile) return unauthorizedResponse;
+
+    if (userProfile.plan !== 'free')
+      return new Response('User must be on free plan', { status: 400 });
+
+    // Check if user has already redeemed a referral code before
+    const supabase = getAdminSupabaseClient();
+    const { data: userReferralCodeHistory } = await supabase
+      .from('referral')
+      .select('id')
+      .eq('referee_id', userId)
+      .single();
+
+    if (userReferralCodeHistory) {
+      return new Response('User has already redeemed a referral code', {
+        status: 403,
+      });
+    }
+
+    const { referralCode } = (await req.json()) as {
+      referralCode: string;
+    };
+
+    const { isValid, referrerId } = await getReferralCodeDetail(referralCode);
+
+    // Check if referral code is valid
+    if (!isValid || !referrerId)
+      return new Response('Invalid referral code', { status: 400 });
+
+    // Redeem code and upgrade user account to Pro plan
+    await redeemReferralCode({
+      referrerId,
+      refereeId: userId,
+    });
+
+    return new Response(JSON.stringify({ success: true }), { status: 200 });
+  } catch (error) {
+    return new Response('Invalid Code', { status: 500 });
+  }
+};
+
+export default handler;

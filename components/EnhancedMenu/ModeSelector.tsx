@@ -12,7 +12,7 @@ const ModeSelector = () => {
   const { t } = useTranslation('model');
 
   const {
-    state: { currentMessage, user },
+    state: { currentMessage, user, isPaidUser },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -37,8 +37,6 @@ const ModeSelector = () => {
       },
     });
   };
-
-  const isPaidUser = user && user?.plan === 'pro';
 
   return (
     <div className="flex flex-row items-center justify-between md:justify-start">

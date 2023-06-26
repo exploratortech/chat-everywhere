@@ -33,6 +33,7 @@ import { savePrompts } from '@/utils/app/prompts';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
+import { userProfileQuery } from '@/utils/server/supabase';
 
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
@@ -40,7 +41,6 @@ import { LatestExportFormat } from '@/types/export';
 import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModelID, OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
-import { UserProfile } from '@/types/user';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
@@ -52,6 +52,7 @@ import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
 import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
+import ReferralModel from '@/components/User/ReferralModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
@@ -89,6 +90,7 @@ const Home = () => {
       temperature,
       showLoginSignUpModel,
       showProfileModel,
+      showReferralModel,
       showUsageModel,
       showSurveyModel,
       showNewsModel,
@@ -388,27 +390,10 @@ const Home = () => {
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
-      supabase
-        .from('profiles')
-        .select('plan')
-        .eq('id', session.user.id)
-        .then(({ data, error }) => {
-          if (error) {
-            console.log('error', error);
-          } else {
-            dispatch({ field: 'isPaidUser', value: data[0].plan !== 'free' });
-          }
-
-          if (!data || data.length === 0) {
-            toast.error(
-              t('Unable to load your information, please try again later.'),
-            );
-            return;
-          }
-
-          const userProfile = data[0] as UserProfile;
-
+      userProfileQuery(supabase, session.user.id)
+        .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
+          dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
           dispatch({
             field: 'user',
             value: {
@@ -416,9 +401,14 @@ const Home = () => {
               email: session.user.email,
               plan: userProfile.plan || 'free',
               token: session.access_token,
+              referralCode: userProfile.referralCode,
+              referralCodeExpirationDate:
+                userProfile.referralCodeExpirationDate,
+              proPlanExpirationDate: userProfile.proPlanExpirationDate,
+              hasReferrer: userProfile.hasReferrer,
+              hasReferee: userProfile.hasReferee,
             },
           });
-
           if (enableTracking) {
             mixpanel.identify(session.user.id);
             mixpanel.people.union({
@@ -426,6 +416,12 @@ const Home = () => {
               Plan: userProfile.plan || 'free',
             });
           }
+        })
+        .catch((error) => {
+          console.log(error);
+          toast.error(
+            t('Unable to load your information, please try again later.'),
+          );
         });
 
       //Check if survey is filled by logged in user
@@ -665,6 +661,14 @@ const Home = () => {
                 }
               />
             )}
+            {showReferralModel && (
+              <ReferralModel
+                onClose={() =>
+                  dispatch({ field: 'showReferralModel', value: false })
+                }
+              />
+            )}
+
             {showUsageModel && session && (
               <UsageCreditModel
                 onClose={() =>

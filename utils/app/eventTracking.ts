@@ -19,6 +19,10 @@ const EventNames = [
   'Upgrade (one-month only) button clicked',
   'Voice input button clicked',
   'AI speech play button clicked',
+  'Referral code redemption success',
+  'Referral code redemption failed',
+  'Referral code redemption button clicked',
+  'Regenerate referral code clicked'
 ];
 
 type EventNameTypes = (typeof EventNames)[number];
@@ -26,6 +30,7 @@ type PayloadType = {
   Length?: number;
   PluginId?: string | null;
   LargeContextModel?: boolean;
+  ReferralCode?: string;
 };
 
 export const enableTracking = process.env.NEXT_PUBLIC_ENV === 'production';

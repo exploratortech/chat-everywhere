@@ -1,5 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { FC, Fragment, useContext } from 'react';
+import { IconCircleCheck } from '@tabler/icons-react';
+import { FC, Fragment, useContext, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
@@ -9,6 +11,13 @@ import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import { ReferralCodeEnter } from './ReferralCodeEnter';
+
+import dayjs from 'dayjs';
+import LocalizedFormat from 'dayjs/plugin/localizedFormat';
+
+dayjs.extend(LocalizedFormat);
+
 type Props = {
   onClose: () => void;
 };
@@ -16,10 +25,12 @@ type Props = {
 export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
   const { t } = useTranslation('model');
   const {
-    state: { user },
+    state: { user, isPaidUser },
     handleUserLogout,
     dispatch,
   } = useContext(HomeContext);
+  const [displayReferralCodeEnterer, setDisplayReferralCodeEnterer] =
+    useState(false);
 
   const upgradeLinkOnClick = () => {
     const paymentLink =
@@ -36,10 +47,14 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
     });
     trackEvent('Upgrade button clicked');
 
-    window.open(
-      `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
-      '_blank',
-    );
+    if (!user) {
+      toast.error('Please sign-up before upgrading to pro plan');
+    } else {
+      window.open(
+        `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
+        '_blank',
+      );
+    }
   };
 
   const upgradeForOneMonthLinkOnClick = () => {
@@ -57,10 +72,14 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
     });
     trackEvent('Upgrade (one-month only) button clicked');
 
-    window.open(
-      `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
-      '_blank',
-    );
+    if (!user) {
+      toast.error('Please sign-up before upgrading to pro plan');
+    } else {
+      window.open(
+        `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
+        '_blank',
+      );
+    }
   };
 
   const changePasswordOnClick = () => {
@@ -103,11 +122,23 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
               <Dialog.Panel className="w-full max-w-md md:max-w-lg transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-white">
                 <Dialog.Description>
                   <div className="rounded-2xl flex flex-col">
-                    <span className="text-sm mb-6">
-                      {t(
-                        'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime! Please make sure you registered before upgrading to avoid wait time.',
-                      )}
-                    </span>
+                    {!isPaidUser && (
+                      <span className="text-sm mb-2">
+                        {t(
+                          'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime! Please make sure you registered before upgrading to avoid wait time.',
+                        )}
+                      </span>
+                    )}
+                    {isPaidUser && user?.hasReferrer && (
+                      <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
+                        <IconCircleCheck className="text-green-500" size={19} />
+                        <p className="flex items-center">
+                          {t(
+                            'Enjoy our pro plan experience during your trial!',
+                          )}
+                        </p>
+                      </div>
+                    )}
                     <div className="flex flex-col md:flex-row justify-evenly mb-3">
                       <div className="flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
                         <span className="text-2xl font-bold">Free</span>
@@ -133,7 +164,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                             <FeatureItem key={index} featureName={t(feature)} />
                           ))}
                         </div>
-                        {user?.plan !== 'pro' && (
+                        {(!user || !isPaidUser) && (
                           <div className="flex flex-col">
                             <a
                               target="_blank"
@@ -149,16 +180,23 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                               onClick={() => upgradeForOneMonthLinkOnClick()}
                               className="px-4 py-2 text-xs border rounded-lg bg-neutral-300 shadow border-none text-neutral-700 hover:bg-white focus:outline-none mt-2 text-center cursor-pointer"
                             >
-                              {t(
-                                'Upgrade for one month only (active in 24 hours)',
-                              )}
+                              {t('Upgrade for one month only')}
                             </a>
+                          </div>
+                        )}
+                        {user?.plan === 'pro' && user.proPlanExpirationDate && (
+                          <div className="text-left text-neutral-500 p-2 text-xs">
+                            {`${t('Expires on')}: 
+                            ${dayjs(user.proPlanExpirationDate).format(
+                              'll',
+                            )}`}{' '}
                           </div>
                         )}
                       </div>
                     </div>
+                    {displayReferralCodeEnterer && <ReferralCodeEnter />}
                     <div>
-                      {user?.plan === 'pro' && (
+                      {user?.plan === 'pro' && !user?.hasReferrer && (
                         <p className="text-xs text-neutral-400">
                           {t(
                             'Thank you for supporting us! If you want to cancel your subscription, please visit ',
@@ -206,6 +244,19 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
 
                   {user && (
                     <div className="flex flex-row items-center">
+                      {!isPaidUser && (
+                        <span
+                          className="pr-2 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer text-xs"
+                          onClick={() =>
+                            setDisplayReferralCodeEnterer(
+                              !displayReferralCodeEnterer,
+                            )
+                          }
+                        >
+                          {t('Referral code')}
+                        </span>
+                      )}
+
                       <span
                         className="px-4 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer mr-2 text-xs"
                         onClick={changePasswordOnClick}
