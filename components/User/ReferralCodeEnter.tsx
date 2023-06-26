@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 
+import { trackEvent } from '@/utils/app/eventTracking';
 import { userProfileQuery } from '@/utils/server/supabase';
 
 import { UserProfile } from '@/types/user';
@@ -39,6 +40,7 @@ export const ReferralCodeEnter = () => {
         }),
       });
       if (!response.ok) {
+        trackEvent('Referral code redemption failed');
         if (response.status === 403) {
           throw new Error('User has already redeemed referral code before');
         }
@@ -76,12 +78,16 @@ export const ReferralCodeEnter = () => {
           value: true,
         });
         toast.success(t('Referral code has been redeemed'));
+        trackEvent('Referral code redemption success', {
+          ReferralCode: referralCode,
+        });
       },
     },
   );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    trackEvent('Referral code redemption button clicked');
     if (referralCode) {
       queryReferralCodeRefetch();
     }

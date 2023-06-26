@@ -6,6 +6,7 @@ import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
+import { trackEvent } from '@/utils/app/eventTracking';
 import { CodeGenerationPayloadType } from '@/utils/server/referralCode';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -165,6 +166,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
                     <button
                       className="mx-auto my-3 flex w-fit items-center gap-3 rounded border text-sm py-2 px-4 hover:opacity-50 border-neutral-600  text-white md:mb-0 md:mt-2"
                       onClick={() => {
+                        trackEvent('Regenerate referral code clicked');
                         queryReferralCodeRefetch();
                       }}
                       disabled={isRegenerating}
