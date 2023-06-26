@@ -12,7 +12,7 @@ const ModeSelector = () => {
   const { t } = useTranslation('model');
 
   const {
-    state: { currentMessage, user },
+    state: { currentMessage, user, isPaidUser },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -37,8 +37,6 @@ const ModeSelector = () => {
       },
     });
   };
-
-  const isProUser = user && (user.plan === 'pro' || user.plan === 'edu');
 
   return (
     <div className="flex flex-row items-center justify-between md:justify-start">
@@ -68,7 +66,7 @@ const ModeSelector = () => {
           >
             {t('Online mode')}
           </option>
-          {isProUser && (
+          {isPaidUser && (
             <>
               <option
                 value={PluginID.GPT4}
