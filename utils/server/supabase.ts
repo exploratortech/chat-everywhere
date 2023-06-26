@@ -23,6 +23,44 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   return await userProfileQuery(supabase, userId);
 };
 
+// Retrieve user profile by either userId, stripeSubscriptionId, or email
+export const retrieveUserProfileBy = async (
+  userId?: string,
+  stripeSubscriptionId?: string,
+  email?: string,
+): Promise<UserProfile> => {
+  const supabase = getAdminSupabaseClient();
+
+  const throwUserNotFoundErrorMessage = new Error(
+    `User not found by:  userId: ${userId}, stripeSubscriptionId: ${stripeSubscriptionId}, email: ${email}`,
+  );
+
+  if (userId) {
+    return await getUserProfile(userId);
+  } else if (stripeSubscriptionId) {
+    const { data: userProfiles, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('stripe_subscription_id', stripeSubscriptionId)
+      .limit(1);
+    if (error || userProfiles.length === 0) throw throwUserNotFoundErrorMessage;
+    return userProfiles[0];
+  } else if (email) {
+    // TODO: Implement email retrieval, need to add email column to profiles table, along with database trigger and migration script
+    throw throwUserNotFoundErrorMessage;
+
+    // const { data: userProfiles, error } = await supabase
+    //   .from('profiles')
+    //   .select('*')
+    //   .eq('email', email)
+    //   .limit(1);
+    // if (error || userProfiles.length === 0) throw throwUserNotFoundErrorMessage;
+    // return userProfiles[0];
+  } else {
+    throw throwUserNotFoundErrorMessage;
+  }
+};
+
 export const getIntervalUsages = async (
   apiType: PluginID,
   userId: string,

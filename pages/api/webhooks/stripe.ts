@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import updateUserAccount from '@/utils/server/stripe/updateUserAccount';
+import { retrieveUserProfileBy } from '@/utils/server/supabase';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -16,6 +17,18 @@ const ONE_TIME_PRO_PLAN_FOR_1_MONTH =
   process.env.STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH;
 const MONTHLY_PRO_PLAN_SUBSCRIPTION =
   process.env.STRIPE_PLAN_CODE_MONTHLY_PRO_PLAN_SUBSCRIPTION;
+
+const isUserInEducationPlan = async (
+  userId?: string,
+  stripeSubscriptionId?: string
+) => {
+  const userProfile = await retrieveUserProfileBy(
+    userId,
+    stripeSubscriptionId
+  );
+
+  return userProfile.plan === 'edu';
+};
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
@@ -42,17 +55,28 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
-      const userId = session.client_reference_id;
+      let userId = session.client_reference_id;
+      const customerEmail = session.customer_details?.email || undefined;
       const planCode = session.metadata?.plan_code;
       stripeSubscriptionId = session.subscription as string;
+
+      if(!userId) {
+        const userProfile = await retrieveUserProfileBy(
+          undefined,
+          stripeSubscriptionId,
+          customerEmail,
+        );
+        userId = userProfile.id;
+      }
 
       if (!userId || !planCode) {
         throw new Error('missing User id or plan code from Stripe webhook');
       }
 
       if (
-        planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH ||
-        planCode === MONTHLY_PRO_PLAN_SUBSCRIPTION
+        (await !isUserInEducationPlan(userId)) &&
+        (planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH ||
+          planCode === MONTHLY_PRO_PLAN_SUBSCRIPTION)
       ) {
         const currentDate = dayjs().utc().toDate();
         const proPlanExpirationDateUTC = dayjs(currentDate)
@@ -67,6 +91,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       }
     }
+
     if (event.type === 'customer.subscription.updated') {
       const session = event.data.object as Stripe.Subscription;
       stripeSubscriptionId = session.id;
@@ -75,6 +100,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         console.error(session);
         throw new Error('Subscription id not found from Stripe webhook');
       }
+
+      // Skip if user is in education plan
+      if (await isUserInEducationPlan(undefined, stripeSubscriptionId))
+        return res.json({ received: true });
 
       if (!session.cancel_at) {
         return res.json({ received: true });
@@ -102,6 +131,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (event.type === 'customer.subscription.deleted') {
       const session = event.data.object as Stripe.Subscription;
       stripeSubscriptionId = session.id;
+
+      // Skip if user is in education plan
+      if (await isUserInEducationPlan(undefined, stripeSubscriptionId))
+        return res.json({ received: true });
 
       if (!stripeSubscriptionId) {
         console.error(session);
