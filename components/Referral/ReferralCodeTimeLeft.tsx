@@ -40,7 +40,6 @@ export default function ReferralCodeTimeLeft({
   const { t } = useTranslation('model');
 
   useEffect(() => {
-    console.log('endOfDay', endOfDay);
     const timer = setInterval(() => {
       const time = calculateTimeLeft(endOfDay);
       setTimeLeft(time);
