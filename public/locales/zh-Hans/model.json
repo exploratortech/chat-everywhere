@@ -72,6 +72,7 @@
   "Submit": "提交",
   "Loading...": "加载中...",
   "Invalid or referral code has already expired, please contact your referrer": "推广码无效或已过期，请联系您的推荐人",
+  "User has already redeemed referral code before": "每个帐户只能兑换一次推广码",
   "Referral code has been redeemed": "推广码已成功兑换",
   "Your referral code is": "您的推广码是",
   "Expires in": "剩余时间",

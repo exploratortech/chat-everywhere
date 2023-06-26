@@ -2,7 +2,10 @@ import {
   getReferralCodeDetail,
   redeemReferralCode,
 } from '../../../utils/server/supabase';
-import { getReferralCode, getUserProfile } from '@/utils/server/supabase';
+import {
+  getAdminSupabaseClient,
+  getUserProfile,
+} from '@/utils/server/supabase';
 
 export const config = {
   runtime: 'edge',
@@ -20,6 +23,20 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (userProfile.plan !== 'free')
       return new Response('User must be on free plan', { status: 400 });
+
+    // Check if user has already redeemed a referral code before
+    const supabase = getAdminSupabaseClient();
+    const { data: userReferralCodeHistory } = await supabase
+      .from('referral')
+      .select('id')
+      .eq('referee_id', userId)
+      .single();
+
+    if (userReferralCodeHistory) {
+      return new Response('User has already redeemed a referral code', {
+        status: 403,
+      });
+    }
 
     const { referralCode } = (await req.json()) as {
       referralCode: string;

@@ -39,6 +39,10 @@ export const ReferralCodeEnter = () => {
         }),
       });
       if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('User has already redeemed referral code before');
+        }
+
         throw new Error(
           'Invalid or referral code has already expired, please contact your referrer',
         );
