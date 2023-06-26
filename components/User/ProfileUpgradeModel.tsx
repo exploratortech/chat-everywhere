@@ -172,7 +172,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                               className="px-4 py-2 text-xs border rounded-lg bg-neutral-300 shadow border-none text-neutral-700 hover:bg-white focus:outline-none mt-2 text-center cursor-pointer"
                             >
                               {t(
-                                'Upgrade for one month only (active in 24 hours)',
+                                'Upgrade for one month only',
                               )}
                             </a>
                           </div>
