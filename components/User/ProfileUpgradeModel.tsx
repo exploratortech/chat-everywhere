@@ -1,6 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconCircleCheck } from '@tabler/icons-react';
 import { FC, Fragment, useContext, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
@@ -46,10 +47,14 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
     });
     trackEvent('Upgrade button clicked');
 
-    window.open(
-      `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
-      '_blank',
-    );
+    if (!user) {
+      toast.error('Please sign-up before upgrading to pro plan');
+    } else {
+      window.open(
+        `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
+        '_blank',
+      );
+    }
   };
 
   const upgradeForOneMonthLinkOnClick = () => {
@@ -67,10 +72,14 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
     });
     trackEvent('Upgrade (one-month only) button clicked');
 
-    window.open(
-      `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
-      '_blank',
-    );
+    if (!user) {
+      toast.error('Please sign-up before upgrading to pro plan');
+    } else {
+      window.open(
+        `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
+        '_blank',
+      );
+    }
   };
 
   const changePasswordOnClick = () => {
@@ -171,9 +180,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                               onClick={() => upgradeForOneMonthLinkOnClick()}
                               className="px-4 py-2 text-xs border rounded-lg bg-neutral-300 shadow border-none text-neutral-700 hover:bg-white focus:outline-none mt-2 text-center cursor-pointer"
                             >
-                              {t(
-                                'Upgrade for one month only',
-                              )}
+                              {t('Upgrade for one month only')}
                             </a>
                           </div>
                         )}
