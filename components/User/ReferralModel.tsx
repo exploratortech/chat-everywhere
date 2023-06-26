@@ -1,15 +1,16 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { IconPlanet, IconRefresh, IconX } from '@tabler/icons-react';
+import { IconRefresh, IconX } from '@tabler/icons-react';
 import React, { Fragment, memo, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
+import { CodeGenerationPayloadType } from '@/utils/server/referralCode';
+
 import HomeContext from '@/pages/api/home/home.context';
 
 import ReferralCodeTimeLeft from '../Referral/ReferralCodeTimeLeft';
-import ReferralProgramData from '../Referral/ReferralProgramData';
 import Spinner from '../Spinner/Spinner';
 
 type Props = {
@@ -33,10 +34,11 @@ const ReferralModel = memo(({ onClose }: Props) => {
       },
     });
 
-    return (await response.json()) as { code: string };
+    return (await response.json()) as CodeGenerationPayloadType;
   };
 
   const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     // if user has no referral code, get one from server
     if (user && !user?.referralCode) {
@@ -46,6 +48,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
           value: {
             ...user,
             referralCode: res.code,
+            referralCodeExpirationDate: res.expiresAt,
           },
         });
       });
@@ -96,7 +99,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
             referralCodeExpirationDate: code.expiresAt,
           },
         });
-        toast.success(t('a new referral code has been regenerated'));
+        toast.success(t('A new referral code has been regenerated'));
       },
     },
   );
@@ -128,7 +131,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-[80vh] transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
+              <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-fit transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
                 <div className="mb-3 flex flex-row justify-between items-center">
                   <h1 className="text-xl">{sideBarT('Referral Program')}</h1>
                   <button className="w-max min-h-[34px]" onClick={onClose}>
@@ -173,7 +176,8 @@ const ReferralModel = memo(({ onClose }: Props) => {
                       )}
                       <div>{t('Regenerate code')}</div>
                     </button>
-                    <ReferralProgramData />
+                    {/* TO BE IMPLEMENTED */}
+                    {/* <ReferralProgramData /> */}
                   </div>
                 )}
               </Dialog.Panel>

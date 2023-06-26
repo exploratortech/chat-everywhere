@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import voucher_codes from 'voucher-code-generator';
 
-type CodeGenerationPayloadType = {
+export type CodeGenerationPayloadType = {
   code: string;
   expiresAt: string;
 };

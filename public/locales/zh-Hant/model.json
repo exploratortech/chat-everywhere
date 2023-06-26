@@ -74,5 +74,6 @@
   "Referral code has been redeemed": "推廣碼兌換成功",
   "Your referral code is": "您的推廣碼是",
   "Expires in": "有效期限",
-  "Regenerate code": "重新生成"
+  "Regenerate code": "重新生成",
+  "A new referral code has been regenerated": "成功生成新的推廣碼"
 }

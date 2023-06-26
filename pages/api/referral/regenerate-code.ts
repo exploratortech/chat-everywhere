@@ -1,5 +1,4 @@
 import {
-  getReferralCode,
   getUserProfile,
   regenerateReferralCode,
 } from '@/utils/server/supabase';

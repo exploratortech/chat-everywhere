@@ -3,7 +3,10 @@ import { DefaultMonthlyCredits } from '@/utils/config';
 import { PluginID } from '@/types/plugin';
 import { UserProfile } from '@/types/user';
 
-import { generateReferralCodeAndExpirationDate } from './referralCode';
+import {
+  CodeGenerationPayloadType,
+  generateReferralCodeAndExpirationDate,
+} from './referralCode';
 
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
@@ -21,30 +24,6 @@ export const getAdminSupabaseClient = () => {
 export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   const supabase = getAdminSupabaseClient();
   return await userProfileQuery(supabase, userId);
-};
-
-export const getIntervalUsages = async (
-  apiType: PluginID,
-  userId: string,
-  hourInterval: number,
-): Promise<number> => {
-  const supabase = getAdminSupabaseClient();
-  const { data: usages, error } = await supabase
-    .from('api_usages')
-    .select('id, api_type, user_id, timestamp')
-    .eq('api_type', apiType)
-    .eq('user_id', userId)
-    .gte(
-      'timestamp',
-      new Date(Date.now() - hourInterval * 60 * 60 * 1000).toISOString(),
-    )
-    .order('timestamp', { ascending: true });
-
-  if (error) {
-    throw error;
-  }
-
-  return usages.length;
 };
 
 export const addUsageEntry = async (
@@ -235,48 +214,58 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
   }
 };
 
-export const getReferralCode = async (userId: string): Promise<string> => {
-  const supabase = getAdminSupabaseClient();
-  const { data: record, error } = await supabase
-    .from('profiles')
-    .select('referral_code')
-    .eq('plan', 'edu')
-    .eq('id', userId)
-    .single();
-
-  let referralCode = record?.referral_code;
-
-  if (!referralCode) {
-    const { code: generatedCode, expiresAt: expirationDate } =
-      generateReferralCodeAndExpirationDate();
-
-    const { data: newRecord, error } = await supabase
+export const getReferralCode = async (
+  userId: string,
+): Promise<CodeGenerationPayloadType> => {
+  try {
+    const supabase = getAdminSupabaseClient();
+    const { data: record, error } = await supabase
       .from('profiles')
-      .update({
-        referral_code: generatedCode,
-        referral_code_expiration_date: expirationDate,
-      })
+      .select('referral_code, referral_code_expiration_date')
       .eq('plan', 'edu')
       .eq('id', userId)
       .single();
-    if (error) {
-      throw error;
+
+    let referralCode = record?.referral_code;
+    let expirationDate = record?.referral_code_expiration_date;
+
+    if (!referralCode) {
+      const { code: generatedCode, expiresAt: expirationDate } =
+        generateReferralCodeAndExpirationDate();
+
+      const { data: newRecord, error } = await supabase
+        .from('profiles')
+        .update({
+          referral_code: generatedCode,
+          referral_code_expiration_date: expirationDate,
+        })
+        .eq('plan', 'edu')
+        .eq('id', userId)
+        .single();
+      if (error) {
+        throw error;
+      }
+
+      referralCode = (
+        newRecord as {
+          referral_code: string;
+        }
+      ).referral_code;
     }
 
-    referralCode = (
-      newRecord as {
-        referral_code: string;
-      }
-    ).referral_code;
+    return {
+      code: referralCode,
+      expiresAt: expirationDate,
+    };
+  } catch (e) {
+    console.log(e);
+    throw e;
   }
-
-  if (error) {
-    throw error;
-  }
-
-  return referralCode;
 };
-export const regenerateReferralCode = async (userId: string) => {
+
+export const regenerateReferralCode = async (
+  userId: string,
+): Promise<CodeGenerationPayloadType> => {
   try {
     const supabase = getAdminSupabaseClient();
     const { data: record, error: getProfileError } = await supabase

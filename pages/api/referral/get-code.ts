@@ -14,8 +14,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!userProfile || userProfile.plan !== 'edu') return unauthorizedResponse;
 
-    const code = await getReferralCode(userId);
-    return new Response(JSON.stringify({ code }), { status: 200 });
+    const { code, expiresAt } = await getReferralCode(userId);
+    return new Response(JSON.stringify({ code, expiresAt }), { status: 200 });
   } catch (error) {
     console.error(error);
     return new Response('Error', { status: 500 });
