@@ -1,19 +1,25 @@
-import { createClient } from '@supabase/supabase-js';
+import { getAdminSupabaseClient } from '../supabase';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseServerRoleKey = process.env.SUPABASE_SERVER_ROLE_KEY || '';
-
+// Skip any account operation on Edu accounts
 export default async function updateUserAccount(props: UpdateUserAccountProps) {
-  const supabase = createClient(supabaseUrl, supabaseServerRoleKey);
+  const supabase = getAdminSupabaseClient();
 
   if (isUpgradeUserAccountProps(props)) {
     // Update user account
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('id', props.userId)
+      .single();
+
+    if (userProfile?.plan === 'edu') return;
+
     const { error: updatedUserError } = await supabase
       .from('profiles')
       .update({
         plan: 'pro',
         stripe_subscription_id: props.stripeSubscriptionId,
-        pro_plan_expiration_date: props.proPlanExpirationDate,
+        pro_plan_expiration_date: props.proPlanExpirationDate || null,
       })
       .eq('id', props.userId);
 
@@ -21,6 +27,15 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
     console.log(`User ${props.userId} updated to pro`);
   } else if (isDowngradeUserAccountProps(props)) {
     // Downgrade user account
+
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('stripe_subscription_id', props.stripeSubscriptionId)
+      .single();
+
+    if (userProfile?.plan === 'edu') return;
+
     const { error: updatedUserError } = await supabase
       .from('profiles')
       .update({
@@ -33,6 +48,15 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
     );
   } else if (isExtendProPlanProps(props)) {
     // Extend pro plan
+
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('stripe_subscription_id', props.stripeSubscriptionId)
+      .single();
+
+    if (userProfile?.plan === 'edu') return;
+
     const { error: updatedUserError } = await supabase
       .from('profiles')
       .update({
@@ -52,7 +76,7 @@ interface UpgradeUserAccountProps {
   upgrade: true;
   userId: string;
   stripeSubscriptionId?: string;
-  proPlanExpirationDate: Date;
+  proPlanExpirationDate?: Date;
 }
 
 interface DowngradeUserAccountProps {
@@ -80,7 +104,8 @@ function isUpgradeUserAccountProps(
     props.upgrade === true &&
     'userId' in props &&
     typeof props.userId === 'string' &&
-    props.proPlanExpirationDate instanceof Date
+    (props.proPlanExpirationDate instanceof Date ||
+      props.proPlanExpirationDate === undefined)
   );
 }
 
