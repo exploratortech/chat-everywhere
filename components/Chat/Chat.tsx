@@ -112,7 +112,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   );
 
   const handleSend = useCallback(
-    async (deleteCount = 0, overrideCurrentMessage?: Message) => {
+    async (
+      deleteCount = 0,
+      overrideCurrentMessage?: Message,
+      continueFromLastMessage?: boolean,
+    ) => {
       const message = overrideCurrentMessage || currentMessage;
 
       if (!message) return;
@@ -129,23 +133,32 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
           updatedConversation = {
             ...selectedConversation,
-            messages: [...updatedMessages, message],
+            messages: !continueFromLastMessage
+              ? [...updatedMessages, message]
+              : [...updatedMessages],
           };
         } else {
           updatedConversation = {
             ...selectedConversation,
-            messages: [...selectedConversation.messages, message],
+            messages: !continueFromLastMessage
+              ? [...selectedConversation.messages, message]
+              : [...selectedConversation.messages],
           };
         }
+
         homeDispatch({
           field: 'selectedConversation',
           value: updatedConversation,
         });
-        homeDispatch({ field: 'loading', value: true });
+
+        if (!continueFromLastMessage) {
+          homeDispatch({ field: 'loading', value: true });
+        }
+
         homeDispatch({ field: 'messageIsStreaming', value: true });
         const chatBody: ChatBody = {
           model: updatedConversation.model,
-          messages: updatedConversation.messages,
+          messages: [...updatedConversation.messages],
           prompt: updatedConversation.prompt,
           temperature: updatedConversation.temperature,
         };
@@ -157,6 +170,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             DEFAULT_IMAGE_GENERATION_QUALITY;
           chatBody.imageStyle =
             selectedConversation.imageStyle || DEFAULT_IMAGE_GENERATION_STYLE;
+        }
+
+        if (continueFromLastMessage) {
+          chatBody.messages = [
+            ...chatBody.messages,
+            {
+              role: 'user',
+              content:
+                'Complete your last interrupted message, output your response from EXACTLY where you left off and NOTHING ELSE.',
+              pluginId: null,
+            },
+          ];
+          chatBody.temperature = 0;
         }
 
         const body = JSON.stringify(chatBody);
@@ -171,6 +197,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           signal: controller.signal,
           body,
         });
+
         if (!response.ok) {
           homeDispatch({ field: 'loading', value: false });
           homeDispatch({ field: 'messageIsStreaming', value: false });
@@ -196,6 +223,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           });
           return;
         }
+
         const data = response.body;
         if (!data) {
           homeDispatch({ field: 'loading', value: false });
@@ -212,6 +240,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             name: customName,
           };
         }
+
         homeDispatch({ field: 'loading', value: false });
         const reader = data.getReader();
         const decoder = new TextDecoder();
@@ -220,6 +249,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let text = '';
         let largeContextResponse = false;
         let showHintForLargeContextResponse = false;
+
+        if (continueFromLastMessage) {
+          text =
+            updatedConversation.messages[
+              updatedConversation.messages.length - 1
+            ].content;
+
+          text = text.replace(' ... ', ' ');
+          updatedConversation.messages.pop();
+        }
 
         while (!done) {
           if (stopConversationRef.current === true) {
@@ -496,6 +535,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         !messageIsStreaming
                       }
                       conversation={selectedConversation}
+                      continueGenerateButtonOnClick={() =>
+                        handleSend(0, undefined, true)
+                      }
                     />
                   </div>
                 ))}

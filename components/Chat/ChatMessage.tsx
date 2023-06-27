@@ -48,10 +48,11 @@ interface Props {
   displayFooterButtons: boolean;
   conversation: Conversation;
   onEdit?: (editedMessage: Message) => void;
+  continueGenerateButtonOnClick: () => {};
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, displayFooterButtons, conversation, onEdit, messageIndex }) => {
+  ({ message, displayFooterButtons, conversation, onEdit, messageIndex, continueGenerateButtonOnClick }) => {
     const { t } = useTranslation('chat');
     const { i18n } = useTranslation();
 
@@ -439,7 +440,7 @@ export const ChatMessage: FC<Props> = memo(
                         <div className="m-1 hidden tablet:flex">
                           <CopyButton className="translate-x-[unset] !text-gray-500 hover:!text-gray-300" />
                         </div>
-                        {messageCanBeContinued && <ContinueGenerationButton />}
+                        {messageCanBeContinued && <ContinueGenerationButton continueGenerateButtonOnClick={continueGenerateButtonOnClick}/>}
                       </>
                     )}
                   </div>
