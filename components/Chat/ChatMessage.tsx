@@ -27,6 +27,7 @@ import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import { ContinueGenerationButton } from './components/ContinueGenerationButton';
 import { ImageGenerationComponent } from './components/ImageGenerationComponent';
 import TokenCounter from './components/TokenCounter';
 
@@ -55,7 +56,7 @@ export const ChatMessage: FC<Props> = memo(
     const { i18n } = useTranslation();
 
     const {
-      state: { selectedConversation, conversations },
+      state: { selectedConversation, conversations, messageIsStreaming },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -65,6 +66,7 @@ export const ChatMessage: FC<Props> = memo(
     const [messagedCopied, setMessageCopied] = useState(false);
     const [isOverTokenLimit, setIsOverTokenLimit] = useState(false);
     const [isCloseToTokenLimit, setIsCloseToTokenLimit] = useState(false);
+    const [messageCanBeContinued, setMessageCanBeContinued] = useState(false);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -162,6 +164,12 @@ export const ChatMessage: FC<Props> = memo(
         textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
       }
     }, [isEditing]);
+
+    useEffect(() => {
+      if (message.content.includes(' ... ') && !messageIsStreaming) {
+        setMessageCanBeContinued(true);
+      }
+    }, [message, messageIsStreaming]);
 
     const CopyButton = ({ className = '' }: { className?: string }) => {
       if (message.pluginId === PluginID.IMAGE_GEN) return <></>;
@@ -431,6 +439,7 @@ export const ChatMessage: FC<Props> = memo(
                         <div className="m-1 hidden tablet:flex">
                           <CopyButton className="translate-x-[unset] !text-gray-500 hover:!text-gray-300" />
                         </div>
+                        {messageCanBeContinued && <ContinueGenerationButton />}
                       </>
                     )}
                   </div>

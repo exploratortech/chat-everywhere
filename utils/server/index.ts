@@ -40,7 +40,7 @@ export const OpenAIStream = async (
   systemPrompt: string,
   temperature: number,
   messages: Message[],
-  customMessageToStreamBack?: string | null // Stream this string at the end of the streaming
+  customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
 ) => {
   let url = `${OPENAI_API_HOST}/v1/chat/completions`;
   // Ensure you have the OPENAI_API_GPT_4_KEY set in order to use the GPT-4 model
@@ -104,10 +104,21 @@ export const OpenAIStream = async (
           const data = event.data;
 
           try {
+            if (data === '[DONE]') {
+              controller.close();
+              return;
+            }
+
             const json = JSON.parse(data);
             if (json.choices[0].finish_reason != null) {
               if (customMessageToStreamBack) {
                 const queue = encoder.encode(customMessageToStreamBack);
+                controller.enqueue(queue);
+              }
+
+              if (json.choices[0].finish_reason === 'length') {
+                // Flag to let the front-end know that the message can be continued
+                const queue = encoder.encode(' ... ');
                 controller.enqueue(queue);
               }
 
