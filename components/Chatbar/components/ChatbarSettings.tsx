@@ -12,6 +12,8 @@ import { useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import { trackEvent } from '@/utils/app/eventTracking';
+
 import HomeContext from '@/pages/api/home/home.context';
 
 import CloudSyncStatusComponent from '../../Sidebar/components/CloudSyncComponent';
@@ -35,17 +37,29 @@ export const ChatbarSettings = () => {
     handleExportData,
   } = useContext(ChatbarContext);
 
-  const isPaidUser = user && user.plan === 'pro';
+  const isProUser = user && user.plan === 'pro';
+  const isEduUser = user && user.plan === 'edu';
 
   const signInAccountOnClick = () => {
     if (user) {
+      trackEvent('Account button clicked');
       homeDispatch({
         field: 'showProfileModel',
         value: true,
       });
     } else {
+      trackEvent('Sign in button clicked');
       homeDispatch({
         field: 'showLoginSignUpModel',
+        value: true,
+      });
+    }
+  };
+
+  const referralBtnOnClick = () => {
+    if (isEduUser) {
+      homeDispatch({
+        field: 'showReferralModel',
         value: true,
       });
     }
@@ -57,6 +71,12 @@ export const ChatbarSettings = () => {
         return (
           <span className="bg-indigo-100 text-indigo-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-indigo-400 border border-indigo-400">
             Pro
+          </span>
+        );
+      } else if (user.plan === 'edu') {
+        return (
+          <span className="text-xs font-medium mr-2 px-2.5 py-0.5 rounded bg-gray-700 text-green-400 border border-green-400">
+            Edu
           </span>
         );
       } else {
@@ -111,11 +131,19 @@ export const ChatbarSettings = () => {
           suffixIcon={getAccountButtonSuffixBadge()}
           onClick={signInAccountOnClick}
         />
-        {isPaidUser && (
+        {isEduUser && (
+          <SidebarButton
+            text={t('Referral Program')}
+            icon={<IconCurrencyDollar size={18} />}
+            onClick={() => referralBtnOnClick()}
+          />
+        )}
+        {isProUser && (
           <SidebarButton
             text={t('Usage & credit')}
             icon={<IconCurrencyDollar size={18} />}
             onClick={() => {
+              trackEvent('Usages & credit clicked');
               homeDispatch({
                 field: 'showUsageModel',
                 value: true,
@@ -127,6 +155,7 @@ export const ChatbarSettings = () => {
           text={t('Latest Updates')}
           icon={<IconNews size={18} />}
           onClick={() => {
+            trackEvent('Latest updates clicked');
             homeDispatch({
               field: 'showNewsModel',
               value: true,

@@ -13,6 +13,7 @@ import {
   saveConversations,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
+import { trackEvent } from '@/utils/app/eventTracking';
 import { saveFolders } from '@/utils/app/folders';
 import { exportData, importData } from '@/utils/app/importExport';
 
@@ -120,6 +121,7 @@ export const Chatbar = () => {
 
   const handleExportData = () => {
     exportData();
+    trackEvent('Export conversation clicked');
   };
 
   const handleImportConversations = (data: SupportedExportFormats) => {
@@ -148,6 +150,7 @@ export const Chatbar = () => {
       setTimeout(() => {
         setIsImportingData(false);
       }, 500);
+      trackEvent('Import conversation clicked');
     }
   };
 
@@ -184,6 +187,8 @@ export const Chatbar = () => {
       category: 'Conversation',
       label: 'Clear conversations',
     });
+
+    trackEvent('Clear conversation clicked');
   };
 
   const handleDeleteConversation = (conversation: Conversation) => {

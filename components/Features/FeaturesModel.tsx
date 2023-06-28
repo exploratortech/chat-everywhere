@@ -1,10 +1,19 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconX } from '@tabler/icons-react';
-import React, { Fragment, memo, useEffect, useRef, useState } from 'react';
+import React, {
+  Fragment,
+  memo,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { useTranslation } from 'next-i18next';
 
 import { ChatEverywhereFeatures } from '@/types/notion';
+
+import HomeContext from '@/pages/api/home/home.context';
 
 import Spinner from '../Spinner/Spinner';
 import FeaturesPage from './FeaturePage';
@@ -23,6 +32,9 @@ type Props = {
 };
 
 const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
+  const {
+    state: { showFeaturePageOnLoad },
+  } = useContext(HomeContext);
   const { t } = useTranslation('features');
 
   const [featuresList, setFeaturesList] = useState<ChatEverywhereFeatures[]>(
@@ -54,6 +66,11 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
   useEffect(() => {
     fetchLatestFeatures();
   }, []);
+
+  // Load specified page and remove specified page after page being loaded
+  useEffect(() => {
+    setSelectedPageId(showFeaturePageOnLoad);
+  }, [showFeaturePageOnLoad]);
 
   return (
     <Transition appear show={open} as={Fragment}>

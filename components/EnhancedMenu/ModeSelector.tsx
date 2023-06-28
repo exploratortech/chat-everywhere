@@ -1,6 +1,7 @@
 import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { trackEvent } from '@/utils/app/eventTracking';
 import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 
 import { PluginID } from '@/types/plugin';
@@ -11,7 +12,7 @@ const ModeSelector = () => {
   const { t } = useTranslation('model');
 
   const {
-    state: { currentMessage, user },
+    state: { currentMessage, user, isPaidUser },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -24,6 +25,10 @@ const ModeSelector = () => {
   }, [currentMessage]);
 
   const pluginOnChange = (pluginId: string) => {
+    trackEvent('Switch plugin', {
+      PluginId: pluginId === 'default' ? null : pluginId,
+    });
+
     homeDispatch({
       field: 'currentMessage',
       value: {
@@ -32,8 +37,6 @@ const ModeSelector = () => {
       },
     });
   };
-
-  const isPaidUser = user && user?.plan === 'pro';
 
   return (
     <div className="flex flex-row items-center justify-between md:justify-start">

@@ -32,10 +32,14 @@ import {
   saveFolders,
   sortByRank,
 } from '@/utils/app/folders';
+import { trackEvent } from '@/utils/app/eventTracking';
+import { enableTracking } from '@/utils/app/eventTracking';
+import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
+import { userProfileQuery } from '@/utils/server/supabase';
 
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
@@ -56,13 +60,16 @@ import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
 import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
+import ReferralModel from '@/components/User/ReferralModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
+import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
 
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 
 import dayjs from 'dayjs';
+import mixpanel from 'mixpanel-browser';
 import { v4 as uuidv4 } from 'uuid';
 
 const Home = () => {
@@ -91,6 +98,7 @@ const Home = () => {
       temperature,
       showLoginSignUpModel,
       showProfileModel,
+      showReferralModel,
       showUsageModel,
       showSurveyModel,
       showNewsModel,
@@ -101,6 +109,7 @@ const Home = () => {
       forceSyncConversation,
       replaceRemoteData,
       messageIsStreaming,
+      speechRecognitionLanguage,
     },
     dispatch,
   } = contextValue;
@@ -431,27 +440,10 @@ const Home = () => {
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
-      supabase
-        .from('profiles')
-        .select('plan')
-        .eq('id', session.user.id)
-        .then(({ data, error }) => {
-          if (error) {
-            console.log('error', error);
-          } else {
-            dispatch({ field: 'isPaidUser', value: data[0].plan !== 'free' });
-          }
-
-          if (!data || data.length === 0) {
-            toast.error(
-              t('Unable to load your information, please try again later.'),
-            );
-            return;
-          }
-
-          const userProfile = data[0] as UserProfile;
-
+      userProfileQuery(supabase, session.user.id)
+        .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
+          dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
           dispatch({
             field: 'user',
             value: {
@@ -459,8 +451,27 @@ const Home = () => {
               email: session.user.email,
               plan: userProfile.plan || 'free',
               token: session.access_token,
+              referralCode: userProfile.referralCode,
+              referralCodeExpirationDate:
+                userProfile.referralCodeExpirationDate,
+              proPlanExpirationDate: userProfile.proPlanExpirationDate,
+              hasReferrer: userProfile.hasReferrer,
+              hasReferee: userProfile.hasReferee,
             },
           });
+          if (enableTracking) {
+            mixpanel.identify(session.user.id);
+            mixpanel.people.union({
+              Email: session.user.email,
+              Plan: userProfile.plan || 'free',
+            });
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          toast.error(
+            t('Unable to load your information, please try again later.'),
+          );
         });
 
       //Check if survey is filled by logged in user
@@ -551,6 +562,16 @@ const Home = () => {
       dispatch({ field: 'outputLanguage', value: outputLanguage });
     }
 
+    const speechRecognitionLanguage = localStorage.getItem(
+      'speechRecognitionLanguage',
+    );
+    if (speechRecognitionLanguage) {
+      dispatch({
+        field: 'speechRecognitionLanguage',
+        value: speechRecognitionLanguage,
+      });
+    }
+
     const conversationHistory = localStorage.getItem('conversationHistory');
     let cleanedConversationHistory: Conversation[] = [];
     if (conversationHistory) {
@@ -603,6 +624,7 @@ const Home = () => {
         })
         .finally(() => {
           dispatch({ field: 'loading', value: false });
+          trackEvent('Share conversation loaded');
         });
     } else {
       dispatch({
@@ -642,7 +664,12 @@ const Home = () => {
         handleUpdateConversation,
         handleUserLogout,
         playMessage: (text, speechId) =>
-          speak(text, speechId, user?.token || ''),
+          speak(
+            convertMarkdownToText(text),
+            speechId,
+            user?.token || '',
+            speechRecognitionLanguage,
+          ),
         stopPlaying,
         setDragData,
         removeDragData,
@@ -689,6 +716,14 @@ const Home = () => {
                 }
               />
             )}
+            {showReferralModel && (
+              <ReferralModel
+                onClose={() =>
+                  dispatch({ field: 'showReferralModel', value: false })
+                }
+              />
+            )}
+
             {showUsageModel && session && (
               <UsageCreditModel
                 onClose={() =>
@@ -717,6 +752,7 @@ const Home = () => {
             />
             <Promptbar />
           </div>
+          <VoiceInputActiveOverlay />
         </main>
       )}
     </HomeContext.Provider>

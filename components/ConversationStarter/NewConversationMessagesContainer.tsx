@@ -3,6 +3,7 @@ import { FC, useContext, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
 
+import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -47,6 +48,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
       category: 'Engagement',
       label: 'Banner',
     });
+    trackEvent('Promotional banner clicked');
   };
 
   const surveyOnClick = () => {
@@ -57,12 +59,15 @@ export const NewConversationMessagesContainer: FC<Props> = ({
       label: 'survey_banner',
     });
   };
+
   const featureOnClick = () => {
     dispatch({ field: 'showFeaturesModel', value: true });
+    dispatch({ field: 'showFeaturePageOnLoad', value: null });
     event('Feature banner clicked', {
       category: 'Engagement',
       label: 'feature_introduction_banner',
     });
+    trackEvent('Feature introduction opened');
   };
 
   return (
