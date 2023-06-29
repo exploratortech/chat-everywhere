@@ -22,6 +22,7 @@ export interface UserProfile {
   proPlanExpirationDate: string | undefined;
   hasReferee: boolean;
   hasReferrer: boolean;
+  isInReferralTrial: boolean;
 }
 
 export interface CreditUsage {

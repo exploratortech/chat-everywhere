@@ -331,8 +331,8 @@ export const redeemReferralCode = async ({
 }): Promise<void> => {
   const supabase = getAdminSupabaseClient();
   const trialDays =
-    typeof process.env.REFERRAL_TRIAL_DAYS === 'string'
-      ? parseInt(process.env.REFERRAL_TRIAL_DAYS)
+    typeof process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS === 'string'
+      ? parseInt(process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS)
       : 3;
   // create a record in the referral table
   const { error: referralError } = await supabase.from('referral').insert([
@@ -374,7 +374,7 @@ export const userProfileQuery = async (
     throw error;
   }
 
-  const { data: referee, error: refereeError } = await client
+  const { data: referralTable, error: refereeError } = await client
     .from('referral')
     .select('*')
     .or(`referee_id.eq.${userId},referrer_id.eq.${userId}`);
@@ -382,8 +382,17 @@ export const userProfileQuery = async (
     throw refereeError;
   }
 
-  const hasReferrer = referee?.find((r) => r.referee_id === userId);
-  const hasReferee = referee?.find((r) => r.referrer_id === userId);
+  const referrerRecords = referralTable?.find((r) => r.referee_id === userId);
+  const refereeRecords = referralTable?.find((r) => r.referrer_id === userId);
+
+  const isInReferralTrial = (() => {
+    if (!referrerRecords) return false;
+    const referrerDate = dayjs(referrerRecords.referral_date);
+    const trailDays = +process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS!;
+    const trailExpirationDate = referrerDate.add(trailDays, 'days');
+
+    return dayjs().isBefore(trailExpirationDate);
+  })();
 
   return {
     id: user.id,
@@ -391,8 +400,9 @@ export const userProfileQuery = async (
     referralCode: user.referral_code,
     proPlanExpirationDate: user.pro_plan_expiration_date,
     referralCodeExpirationDate: user.referral_code_expiration_date,
-    hasReferrer: !!hasReferrer,
-    hasReferee: !!hasReferee,
+    hasReferrer: !!referrerRecords,
+    hasReferee: !!refereeRecords,
+    isInReferralTrial: isInReferralTrial,
   } as UserProfile;
 };
 

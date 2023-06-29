@@ -67,6 +67,7 @@ export const ReferralCodeEnter = () => {
             proPlanExpirationDate: profile.proPlanExpirationDate,
             hasReferrer: profile.hasReferrer,
             hasReferee: profile.hasReferee,
+            isInReferralTrial: profile.isInReferralTrial,
           },
         });
         dispatch({

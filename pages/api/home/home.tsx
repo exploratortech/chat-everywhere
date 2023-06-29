@@ -407,6 +407,7 @@ const Home = () => {
               proPlanExpirationDate: userProfile.proPlanExpirationDate,
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
+              isInReferralTrial: userProfile.isInReferralTrial,
             },
           });
           if (enableTracking) {
