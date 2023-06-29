@@ -1,5 +1,4 @@
 import React, { Fragment, useContext } from 'react';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 
