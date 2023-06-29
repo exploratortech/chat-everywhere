@@ -247,7 +247,7 @@ export const Chatbar = () => {
       const conversation = currentDrag.data as Conversation;
       handleUpdateConversation(conversation, { key: 'folderId', value: 0 });
       chatDispatch({ field: 'searchTerm', value: '' });
-      e.target.style.background = 'none';
+      e.currentTarget.style.background = 'none';
     }
   };
 

@@ -50,6 +50,11 @@ export const ConversationComponent = ({ conversation }: Props) => {
     }
   };
 
+  const handleDrop = (e: any) => {
+    e.currentTarget.style.background = 'none';
+    e.preventDefault();
+  };
+
   const handleDragStart = () => {
     setDragData({ data: conversation, type: 'conversation'});
   };
@@ -140,6 +145,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
           onClick={() => handleSelectConversation(conversation)}
           disabled={messageIsStreaming}
           draggable="true"
+          onDrop={handleDrop}
           onDragEnter={highlightDrop}
           onDragLeave={removeHighlight}
           onDragStart={handleDragStart}
