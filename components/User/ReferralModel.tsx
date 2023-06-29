@@ -133,7 +133,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-fit transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
+              <Dialog.Panel className="w-full max-w-[100rem] tablet:max-w-[90vw] h-fit transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
                 <div className="mb-3 flex flex-row justify-between items-center">
                   <h1 className="text-xl">{sideBarT('Referral Program')}</h1>
                   <button className="w-max min-h-[34px]" onClick={onClose}>

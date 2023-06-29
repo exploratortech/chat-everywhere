@@ -1,7 +1,7 @@
 import { DefaultMonthlyCredits } from '@/utils/config';
 
 import { PluginID } from '@/types/plugin';
-import { RefereeProfile } from '@/types/referral';
+import { RawRefereeProfile } from '@/types/referral';
 import { UserProfile } from '@/types/user';
 
 import {
@@ -274,7 +274,7 @@ export const getRefereesProfile = async (userId: string) => {
     );
 
     if (error) throw error;
-    return data as RefereeProfile[];
+    return data as RawRefereeProfile[];
   } catch (e) {
     console.log(e);
     throw e;
