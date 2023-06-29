@@ -129,7 +129,7 @@ const Sidebar = <T,>({
             </div>
           )}
           <div
-            className={`mt-2 transition-all duration-500 ${
+            className={`mt-2 transition-all duration-500 rounded-lg ${
               !itemsIsImporting && items?.length > 0
                 ? 'visible opacity-100'
                 : 'invisible opacity-0'
