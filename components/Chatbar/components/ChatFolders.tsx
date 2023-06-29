@@ -12,6 +12,7 @@ import Folder from '@/components/Folder';
 import { ConversationComponent } from './Conversation';
 import DropArea from '@/components/DropArea/DropArea';
 import { generateFolderRank } from '@/utils/app/folders';
+import ChatbarContext from '../Chatbar.context';
 
 interface Props {
   searchTerm: string;
@@ -21,12 +22,15 @@ export const ChatFolders = ({ searchTerm }: Props) => {
   const {
     state: {
       folders,
-      conversations,
       currentDrag,
     },
     handleUpdateConversation,
     handleReorderFolder,
   } = useContext(HomeContext);
+
+  const {
+    state: { filteredConversations },
+  } = useContext(ChatbarContext);
 
   const handleConversationDrop = (folder: FolderInterface) => {
     if (currentDrag && currentDrag.type === 'conversation') {
@@ -60,18 +64,12 @@ export const ChatFolders = ({ searchTerm }: Props) => {
 
   const ChatFolders = (currentFolder: FolderInterface) => {
     return (
-      conversations &&
-      conversations
-        .filter(
-          (conversation) =>
-            conversation.folderId && conversation.folderId === currentFolder.id,
-        )
-        .map((conversation, index) => (
+      filteredConversations
+        .filter((conversation) =>
+          conversation.folderId && conversation.folderId === currentFolder.id
+        ).map((conversation) => (
           <div key={conversation.id} className="ml-5 gap-2 border-l pl-2 item">
-            <ConversationComponent
-              key={conversation.id}
-              conversation={conversation}
-            />
+            <ConversationComponent conversation={conversation} />
           </div>
         ))
     );

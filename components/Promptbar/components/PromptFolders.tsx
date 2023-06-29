@@ -64,10 +64,10 @@ export const PromptFolders = () => {
   const PromptFolders = (currentFolder: FolderInterface) =>
     filteredPrompts
       .filter((p) => p.folderId)
-      .map((prompt, index) => {
+      .map((prompt) => {
         if (prompt.folderId === currentFolder.id) {
           return (
-            <div key={index} className="ml-5 gap-2 border-l pl-2">
+            <div key={prompt.id} className="ml-5 gap-2 border-l pl-2">
               <PromptComponent prompt={prompt} />
             </div>
           );
