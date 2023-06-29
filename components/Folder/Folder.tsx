@@ -11,6 +11,7 @@ import {
   ReactElement,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -46,6 +47,9 @@ const Folder = ({
   const [renameValue, setRenameValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dragEnterTarget = useRef<HTMLElement>();
+
   const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -62,10 +66,9 @@ const Folder = ({
   const dropHandler = (e: any) => {
     if (currentDrag && currentDrag.type !== 'folder') {
       setIsOpen(true);
-
       handleDrop(currentFolder);
-
-      e.target.style.background = 'none';
+      if (buttonRef.current)
+        buttonRef.current.style.background = 'none';
     }
   };
 
@@ -78,13 +81,15 @@ const Folder = ({
   };
 
   const highlightDrop = (e: any) => {
-    if (currentDrag && currentDrag.type !== 'folder') {
-      e.target.style.background = '#343541';
+    dragEnterTarget.current = e.target;
+    if (currentDrag && currentDrag.type !== 'folder' && buttonRef.current) {
+      buttonRef.current.style.background = '#343541';
     }
   };
 
   const removeHighlight = (e: any) => {
-    e.target.style.background = 'none';
+    if (dragEnterTarget.current === e.target && buttonRef.current)
+      buttonRef.current.style.background = 'none';
   };
 
   useEffect(() => {
@@ -127,12 +132,13 @@ const Folder = ({
             className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90`}
             draggable
             onClick={() => setIsOpen(!isOpen)}
-            onDrop={(e) => dropHandler(e)}
+            onDrop={dropHandler}
             onDragStart={handleDragStart}
             onDragEnd={removeDragData}
             onDragOver={allowDrop}
             onDragEnter={highlightDrop}
             onDragLeave={removeHighlight}
+            ref={buttonRef}
           >
             {isOpen ? (
               <IconCaretDown size={18} />
@@ -146,57 +152,65 @@ const Folder = ({
           </button>
         )}
 
-        {(isDeleting || isRenaming) && (
-          <div className="absolute right-1 z-10 flex text-gray-300">
-            <SidebarActionButton
-              handleClick={(e) => {
-                e.stopPropagation();
+        <div
+          className="absolute right-1 z-10 flex text-gray-300"
+          onDragOver={allowDrop}
+          onDrop={dropHandler}
+          onDragEnter={highlightDrop}
+          onDragLeave={removeHighlight}
+        >
+          {(isDeleting || isRenaming) && (
+            <>
+              <SidebarActionButton
+                handleClick={(e) => {
+                  e.stopPropagation();
 
-                if (isDeleting) {
-                  handleDeleteFolder(currentFolder.id);
-                } else if (isRenaming) {
-                  handleRename();
-                }
+                  if (isDeleting) {
+                    handleDeleteFolder(currentFolder.id);
+                  } else if (isRenaming) {
+                    handleRename();
+                  }
 
-                setIsDeleting(false);
-                setIsRenaming(false);
-              }}
-            >
-              <IconCheck size={18} />
-            </SidebarActionButton>
-            <SidebarActionButton
-              handleClick={(e) => {
-                e.stopPropagation();
-                setIsDeleting(false);
-                setIsRenaming(false);
-              }}
-            >
-              <IconX size={18} />
-            </SidebarActionButton>
-          </div>
-        )}
+                  setIsDeleting(false);
+                  setIsRenaming(false);
+                }}
+              >
+                <IconCheck size={18} />
+              </SidebarActionButton>
+              <SidebarActionButton
+                handleClick={(e) => {
+                  e.stopPropagation();
+                  setIsDeleting(false);
+                  setIsRenaming(false);
+                }}
+              >
+                <IconX size={18} />
+              </SidebarActionButton>
+            </>
+          )}
 
-        {!isDeleting && !isRenaming && (
-          <div className="absolute right-1 z-10 flex text-gray-300">
-            <SidebarActionButton
-              handleClick={(e) => {
-                e.stopPropagation();
-                setIsRenaming(true);
-                setRenameValue(currentFolder.name);
-              }}
-            >
-              <IconPencil size={18} />
-            </SidebarActionButton>
-            <SidebarActionButton
-              handleClick={(e) => {
-                e.stopPropagation();
-                setIsDeleting(true);
-              }}
-            >
-              <IconTrash size={18} />
-            </SidebarActionButton>
-          </div>
-        )}
+          {!isDeleting && !isRenaming && (
+            <>
+              <SidebarActionButton
+                handleClick={(e) => {
+                  e.stopPropagation();
+                  setIsRenaming(true);
+                  setRenameValue(currentFolder.name);
+                }}
+              >
+                <IconPencil size={18} />
+              </SidebarActionButton>
+              <SidebarActionButton
+                handleClick={(e) => {
+                  e.stopPropagation();
+                  setIsDeleting(true);
+                }}
+              >
+                <IconTrash size={18} />
+              </SidebarActionButton>
+            </>
+          )}
+        </div>
       </div>
       {isOpen ? folderComponent : null}
     </>
