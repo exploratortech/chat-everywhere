@@ -1,6 +1,3 @@
-import { useState } from 'react';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
-
 import { Conversation } from '@/types/chat';
 
 import { ConversationComponent } from './Conversation';
@@ -11,18 +8,15 @@ interface Props {
 
 export const Conversations = ({ conversations }: Props) => {
   return (
-    <TransitionGroup className="flex w-full gap-1 flex-col-reverse rounded-lg">
+    <div className="flex w-full gap-1 flex-col-reverse rounded-lg">
       {conversations
         .filter((conversation) => !conversation.folderId)
         .map((conversation) => (
-          <CSSTransition
-            key={`transition-${conversation.id}`}
-            timeout={500}
-            classNames="item"
-          >
-            <ConversationComponent conversation={conversation} />
-          </CSSTransition>
+          <ConversationComponent
+            key={conversation.id}
+            conversation={conversation}
+          />
         ))}
-    </TransitionGroup>
+    </div>
   );
 };

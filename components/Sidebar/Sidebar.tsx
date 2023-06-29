@@ -50,14 +50,15 @@ const Sidebar = <T,>({
 
   const allowDrop = (e: any) => {
     e.preventDefault();
+    e.stopPropagation();
   };
 
   const highlightDrop = (e: any) => {
-    e.target.style.background = '#343541';
+    e.currentTarget.style.background = '#343541';
   };
 
   const removeHighlight = (e: any) => {
-    e.target.style.background = 'none';
+    e.currentTarget.style.background = 'none';
   };
 
   return (

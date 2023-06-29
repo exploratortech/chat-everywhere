@@ -11,6 +11,7 @@ import {
   MouseEventHandler,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -40,6 +41,8 @@ export const ConversationComponent = ({ conversation }: Props) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
 
+  const enterTarget = useRef<HTMLElement>();
+
   const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -49,6 +52,20 @@ export const ConversationComponent = ({ conversation }: Props) => {
 
   const handleDragStart = () => {
     setDragData({ data: conversation, type: 'conversation'});
+  };
+
+  const highlightDrop = (e: any) => {
+    enterTarget.current = e.target;
+    e.currentTarget.style.background = '#343541';
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const removeHighlight = (e: any) => {
+    if (enterTarget.current === e.target)
+      e.currentTarget.style.background = 'none';
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleRename = (conversation: Conversation) => {
@@ -123,12 +140,14 @@ export const ConversationComponent = ({ conversation }: Props) => {
           onClick={() => handleSelectConversation(conversation)}
           disabled={messageIsStreaming}
           draggable="true"
+          onDragEnter={highlightDrop}
+          onDragLeave={removeHighlight}
           onDragStart={handleDragStart}
           onDragEnd={removeDragData}
         >
           <IconMessage size={18} />
           <div
-            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3 pointer-events-none ${
+            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3 ${
               selectedConversation?.id === conversation.id ? 'pr-12' : 'pr-1'
             }`}
           >
