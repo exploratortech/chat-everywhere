@@ -25,6 +25,26 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
 
     if (updatedUserError) throw updatedUserError;
     console.log(`User ${props.userId} updated to pro`);
+  } else if (isUpgradeUserAccountByEmailProps(props)) {
+    // Update user account by Email
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('email', props.email)
+      .single();
+
+    if (userProfile?.plan === 'edu') return;
+
+    const { error: updatedUserError } = await supabase
+      .from('profiles')
+      .update({
+        plan: 'pro',
+        stripe_subscription_id: props.stripeSubscriptionId,
+        pro_plan_expiration_date: props.proPlanExpirationDate || null,
+      })
+      .eq('email', props.email);
+    if (updatedUserError) throw updatedUserError;
+    console.log(`User ${props.email} updated to pro`);
   } else if (isDowngradeUserAccountProps(props)) {
     // Downgrade user account
 
@@ -79,6 +99,13 @@ interface UpgradeUserAccountProps {
   proPlanExpirationDate?: Date;
 }
 
+interface UpgradeUserAccountByEmailProps {
+  upgrade: true;
+  email: string;
+  stripeSubscriptionId?: string;
+  proPlanExpirationDate?: Date;
+}
+
 interface DowngradeUserAccountProps {
   upgrade: false;
   stripeSubscriptionId: string;
@@ -93,6 +120,7 @@ interface ExtendProPlanProps {
 
 type UpdateUserAccountProps =
   | UpgradeUserAccountProps
+  | UpgradeUserAccountByEmailProps
   | DowngradeUserAccountProps
   | ExtendProPlanProps;
 
@@ -104,6 +132,18 @@ function isUpgradeUserAccountProps(
     props.upgrade === true &&
     'userId' in props &&
     typeof props.userId === 'string' &&
+    (props.proPlanExpirationDate instanceof Date ||
+      props.proPlanExpirationDate === undefined)
+  );
+}
+
+function isUpgradeUserAccountByEmailProps(
+  props: UpdateUserAccountProps,
+): props is UpgradeUserAccountByEmailProps {
+  return (
+    props.upgrade === true &&
+    'email' in props &&
+    typeof props.email === 'string' &&
     (props.proPlanExpirationDate instanceof Date ||
       props.proPlanExpirationDate === undefined)
   );

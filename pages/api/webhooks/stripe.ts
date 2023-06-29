@@ -42,18 +42,44 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
-      let userId = session.client_reference_id;
+      const userId = session.client_reference_id;
+      const email = session.customer_details?.email;
+
       const planCode = session.metadata?.plan_code;
       stripeSubscriptionId = session.subscription as string;
 
-      if (!userId || !planCode) {
-        throw new Error('missing User id or plan code from Stripe webhook');
+      if (!planCode) {
+        throw new Error('plan code from Stripe webhook');
       }
 
-      if (
-        planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH ||
-        planCode === MONTHLY_PRO_PLAN_SUBSCRIPTION
-      ) {
+      if (!userId && !email) {
+        throw new Error('missing User id and Email from Stripe webhook');
+      }
+
+      // Update user account by User id
+      if (userId) {
+        if (
+          planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH ||
+          planCode === MONTHLY_PRO_PLAN_SUBSCRIPTION
+        ) {
+          const currentDate = dayjs().utc().toDate();
+          const proPlanExpirationDateUTC = dayjs(currentDate)
+            .add(1, 'month')
+            .toDate();
+
+          // Only store expiration for one month plan
+          await updateUserAccount({
+            upgrade: true,
+            userId,
+            stripeSubscriptionId,
+            proPlanExpirationDate:
+              planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH
+                ? proPlanExpirationDateUTC
+                : undefined,
+          });
+        }
+      } else {
+        // Update user account by Email
         const currentDate = dayjs().utc().toDate();
         const proPlanExpirationDateUTC = dayjs(currentDate)
           .add(1, 'month')
@@ -62,9 +88,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // Only store expiration for one month plan
         await updateUserAccount({
           upgrade: true,
-          userId,
+          email: email!,
           stripeSubscriptionId,
-          proPlanExpirationDate: planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH ? proPlanExpirationDateUTC : undefined,
+          proPlanExpirationDate:
+            planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH
+              ? proPlanExpirationDateUTC
+              : undefined,
         });
       }
     }
