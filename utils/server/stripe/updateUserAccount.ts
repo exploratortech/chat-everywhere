@@ -115,7 +115,7 @@ interface DowngradeUserAccountProps {
 interface ExtendProPlanProps {
   upgrade: true;
   stripeSubscriptionId: string;
-  proPlanExpirationDate: Date;
+  proPlanExpirationDate: Date | undefined;
 }
 
 type UpdateUserAccountProps =
@@ -164,8 +164,9 @@ function isExtendProPlanProps(
   props: UpdateUserAccountProps,
 ): props is ExtendProPlanProps {
   return (
-    props.upgrade === true &&
-    typeof props.stripeSubscriptionId === 'string' &&
-    props.proPlanExpirationDate instanceof Date
+    (props.upgrade === true &&
+      typeof props.stripeSubscriptionId === 'string' &&
+      props.proPlanExpirationDate instanceof Date) ||
+    props.proPlanExpirationDate === undefined
   );
 }

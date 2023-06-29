@@ -125,7 +125,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         await updateUserAccount({
           upgrade: true,
           stripeSubscriptionId,
-          proPlanExpirationDate: cancelAtDate,
+          proPlanExpirationDate: undefined,
         });
       }
     }
