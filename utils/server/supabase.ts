@@ -1,6 +1,7 @@
 import { DefaultMonthlyCredits } from '@/utils/config';
 
 import { PluginID } from '@/types/plugin';
+import { RefereeProfile } from '@/types/referral';
 import { UserProfile } from '@/types/user';
 
 import {
@@ -257,6 +258,23 @@ export const getReferralCode = async (
       code: referralCode,
       expiresAt: expirationDate,
     };
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+
+export const getRefereesProfile = async (userId: string) => {
+  try {
+    const supabase = getAdminSupabaseClient();
+
+    const { data, error } = await supabase.rpc(
+      'get_referees_profile_by_referrer_id',
+      { referrer: userId },
+    );
+
+    if (error) throw error;
+    return data as RefereeProfile[];
   } catch (e) {
     console.log(e);
     throw e;
