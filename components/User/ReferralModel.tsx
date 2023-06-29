@@ -12,6 +12,7 @@ import { CodeGenerationPayloadType } from '@/utils/server/referralCode';
 import HomeContext from '@/pages/api/home/home.context';
 
 import ReferralCodeTimeLeft from '../Referral/ReferralCodeTimeLeft';
+import ReferralProgramData from '../Referral/ReferralProgramData';
 import Spinner from '../Spinner/Spinner';
 
 type Props = {
@@ -178,8 +179,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
                       )}
                       <div>{t('Regenerate code')}</div>
                     </button>
-                    {/* TO BE IMPLEMENTED */}
-                    {/* <ReferralProgramData /> */}
+                    <ReferralProgramData />
                   </div>
                 )}
               </Dialog.Panel>

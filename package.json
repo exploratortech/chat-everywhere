@@ -21,6 +21,7 @@
     "@supabase/auth-ui-react": "^0.4.2",
     "@supabase/supabase-js": "^2.15.0",
     "@tabler/icons-react": "^2.9.0",
+    "@tanstack/react-table": "^8.9.3",
     "base64-arraybuffer": "^1.0.2",
     "dayjs": "^1.11.7",
     "eventsource-parser": "^0.1.0",
