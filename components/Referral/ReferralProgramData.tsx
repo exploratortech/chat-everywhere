@@ -3,6 +3,7 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 import React, { useContext } from 'react';
@@ -53,23 +54,20 @@ export default function ReferralProgramData() {
     },
   );
   return (
-    <div className="text-center opacity-40 my-4 select-none">
+    <div className="text-center my-4 select-none">
       <h1 className="text-xl">Referral Data</h1>
-      {isSuccess && <TheTable referees={data.referees ?? []} />}
+      {isSuccess && data.referees.length > 0 && (
+        <RefereesTable referees={data.referees} />
+      )}
+      {isSuccess && data.referees.length === 0 && (
+        <div className="my-10 text-neutral-500">No referees yet</div>
+      )}
     </div>
   );
 }
 
-const TheTable = ({ referees }: { referees: RefereeProfile[] }) => {
+const RefereesTable = ({ referees }: { referees: RefereeProfile[] }) => {
   const columnHelper = createColumnHelper<RefereeProfile>();
-  // id: string;
-  // plan: SubscriptionPlan;
-  // stripe_subscription_id: string;
-  // pro_plan_expiration_date: string | null;
-  // referral_code: string | null;
-  // referral_code_expiration_date: string | null;
-  // email: string;
-  // referral_date: string;
 
   const columns = [
     columnHelper.accessor('email', {
@@ -94,51 +92,116 @@ const TheTable = ({ referees }: { referees: RefereeProfile[] }) => {
     data: referees,
     columns, // 輸入定義好的表頭
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
-    <table className="w-full my-10">
-      <thead>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <tr key={headerGroup.id}>
-            {headerGroup.headers.map((header) => {
-              return (
-                <th
-                  key={header.id}
-                  colSpan={header.colSpan}
-                  {...{
-                    onClick: header.column.getToggleSortingHandler(),
-                  }}
-                >
-                  {header.isPlaceholder ? null : (
-                    <div>
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                      {{
-                        asc: '?',
-                        desc: '?',
-                      }[header.column.getIsSorted() as string] ?? null}
-                    </div>
-                  )}
-                </th>
-              );
-            })}
-          </tr>
-        ))}
-      </thead>
-      <tbody className="">
-        {table.getRowModel().rows.map((row, i) => (
-          <tr className="" key={row.id}>
-            {row.getVisibleCells().map((cell, i) => (
-              <td data-rowIndex={i} key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div>
+      <table className="w-full my-10 ">
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <th key={header.id} colSpan={header.colSpan}>
+                    {header.isPlaceholder ? null : (
+                      <div className="bg-neutral-900 p-4">
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {{
+                          asc: '?',
+                          desc: '?',
+                        }[header.column.getIsSorted() as string] ?? null}
+                      </div>
+                    )}
+                  </th>
+                );
+              })}
+            </tr>
+          ))}
+        </thead>
+        <tbody className="">
+          {table.getRowModel().rows.map((row, rIndex) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell, i) => (
+                <td data-rowIndex={i} key={cell.id}>
+                  <div
+                    className={`${
+                      rIndex % 2 === 0 ? 'bg-neutral-800' : 'bg-neutral-700'
+                    } p-2`}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </div>
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="flex items-center justify-center gap-2">
+        <button
+          className="border rounded p-1"
+          onClick={() => table.setPageIndex(0)}
+          disabled={!table.getCanPreviousPage()}
+        >
+          {'<<'}
+        </button>
+        <button
+          className="border rounded p-1"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          {'<'}
+        </button>
+        <button
+          className="border rounded p-1"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          {'>'}
+        </button>
+        <button
+          className="border rounded p-1"
+          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+          disabled={!table.getCanNextPage()}
+        >
+          {'>>'}
+        </button>
+        <span className="flex items-center gap-1">
+          <div>Page</div>
+          <strong>
+            {table.getState().pagination.pageIndex + 1} of{' '}
+            {table.getPageCount()}
+          </strong>
+        </span>
+        <span className="flex items-center gap-1">
+          | Go to page:
+          <input
+            type="number"
+            defaultValue={table.getState().pagination.pageIndex + 1}
+            onChange={(e) => {
+              const page = e.target.value ? Number(e.target.value) - 1 : 0;
+              table.setPageIndex(page);
+            }}
+            className="border p-1 rounded w-16 text-black"
+          />
+        </span>
+        <select
+          className="text-black "
+          value={table.getState().pagination.pageSize}
+          onChange={(e) => {
+            table.setPageSize(Number(e.target.value));
+          }}
+        >
+          {[10, 20, 30, 40, 50].map((pageSize) => (
+            <option key={pageSize} value={pageSize}>
+              Show {pageSize}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
   );
 };
