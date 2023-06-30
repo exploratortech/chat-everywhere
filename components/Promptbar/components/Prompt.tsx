@@ -83,7 +83,7 @@ export const PromptComponent = ({ prompt }: Props) => {
   return (
     <div className="relative flex items-center">
       <button
-        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90"
+        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 translate-x-0"
         draggable="true"
         onClick={(e) => {
           e.stopPropagation();
@@ -102,7 +102,7 @@ export const PromptComponent = ({ prompt }: Props) => {
         <div
           className={`${
             isDeleting || isRenaming ? 'pr-12' : 'pr-4'
-          } relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3 pointer-events-none`}
+          } relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3`}
         >
           {prompt.name}
         </div>
