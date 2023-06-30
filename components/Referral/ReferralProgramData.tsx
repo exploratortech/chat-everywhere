@@ -12,8 +12,11 @@ import { useQuery } from 'react-query';
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { RefereeProfile } from '@/types/referral';
+import { SubscriptionPlan } from '@/types/user';
 
 import HomeContext from '@/pages/api/home/home.context';
+
+import dayjs from 'dayjs';
 
 export default function ReferralProgramData() {
   const {
@@ -46,7 +49,17 @@ export default function ReferralProgramData() {
       const { referees } = (await response.json()) as {
         referees: RefereeProfile[];
       };
-      return { referees };
+      const formattedReferees = referees.map((referee) => ({
+        ...referee,
+        plan: (referee.plan.charAt(0).toUpperCase() +
+          referee.plan.slice(1)) as SubscriptionPlan,
+        pro_plan_expiration_date: dayjs(
+          referee.pro_plan_expiration_date,
+        ).format('ll'),
+        referral_date: dayjs(referee.referral_date).format('ll'),
+      }));
+
+      return { referees: formattedReferees };
     },
     {
       enabled: true,
