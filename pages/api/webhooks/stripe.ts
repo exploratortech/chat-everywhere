@@ -40,64 +40,64 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(400).send(`Webhook signature verification failed.`);
     }
 
+    // One time payment / Initial Monthly Pro Plan Subscription
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       const userId = session.client_reference_id;
       const email = session.customer_details?.email;
 
       const planCode = session.metadata?.plan_code;
+      const planGivingWeeks = session.metadata?.plan_giving_weeks;
       stripeSubscriptionId = session.subscription as string;
 
-      if (!planCode) {
-        throw new Error('plan code from Stripe webhook');
+      if (!planCode && !planGivingWeeks) {
+        throw new Error(
+          'no plan code or plan giving weeks from Stripe webhook',
+        );
       }
 
       if (!userId && !email) {
         throw new Error('missing User id and Email from Stripe webhook');
       }
 
+      const proPlanExpirationDate = (() => {
+        // Takes plan_giving_weeks priority over plan_code
+        if (planGivingWeeks && typeof planGivingWeeks === 'string') {
+          const currentDate = dayjs().utc().toDate();
+          return dayjs(currentDate).add(+planGivingWeeks, 'week').toDate();
+        } else if (planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH) {
+          // Only store expiration for one month plan
+          const currentDate = dayjs().utc().toDate();
+          return dayjs(currentDate).add(1, 'month').toDate();
+        } else {
+          return undefined;
+        }
+      })();
+
       // Update user account by User id
       if (userId) {
-        if (
-          planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH ||
-          planCode === MONTHLY_PRO_PLAN_SUBSCRIPTION
-        ) {
-          const currentDate = dayjs().utc().toDate();
-          const proPlanExpirationDateUTC = dayjs(currentDate)
-            .add(1, 'month')
-            .toDate();
-
-          // Only store expiration for one month plan
-          await updateUserAccount({
-            upgrade: true,
-            userId,
-            stripeSubscriptionId,
-            proPlanExpirationDate:
-              planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH
-                ? proPlanExpirationDateUTC
-                : undefined,
-          });
-        }
+        await updateUserAccount({
+          upgrade: true,
+          userId,
+          stripeSubscriptionId,
+          proPlanExpirationDate: proPlanExpirationDate,
+        });
       } else {
         // Update user account by Email
-        const currentDate = dayjs().utc().toDate();
-        const proPlanExpirationDateUTC = dayjs(currentDate)
-          .add(1, 'month')
-          .toDate();
-
-        // Only store expiration for one month plan
+        console.log({
+          email,
+          proPlanExpirationDate,
+        });
         await updateUserAccount({
           upgrade: true,
           email: email!,
           stripeSubscriptionId,
-          proPlanExpirationDate:
-            planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH
-              ? proPlanExpirationDateUTC
-              : undefined,
+          proPlanExpirationDate: proPlanExpirationDate,
         });
       }
     }
 
+    // Monthly Pro Plan Subscription recurring payment
     if (event.type === 'customer.subscription.updated') {
       const session = event.data.object as Stripe.Subscription;
       stripeSubscriptionId = session.id;
@@ -130,6 +130,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
+    // Monthly Pro Plan Subscription removal
     if (event.type === 'customer.subscription.deleted') {
       const session = event.data.object as Stripe.Subscription;
       stripeSubscriptionId = session.id;
