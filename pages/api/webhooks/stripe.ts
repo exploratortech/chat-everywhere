@@ -84,10 +84,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         });
       } else {
         // Update user account by Email
-        console.log({
-          email,
-          proPlanExpirationDate,
-        });
         await updateUserAccount({
           upgrade: true,
           email: email!,
