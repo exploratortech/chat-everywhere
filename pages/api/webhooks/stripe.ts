@@ -56,8 +56,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         );
       }
 
-      if (!userId && !email) {
-        throw new Error('missing User id and Email from Stripe webhook');
+      if (!email) {
+        throw new Error('missing Email from Stripe webhook');
       }
 
       const proPlanExpirationDate = (() => {
