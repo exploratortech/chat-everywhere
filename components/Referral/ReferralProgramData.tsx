@@ -97,7 +97,7 @@ const RefereesTable = ({ referees }: { referees: RefereeProfile[] }) => {
 
   return (
     <div>
-      <div className="mb-6 overflow-x-scroll w-[calc(100dvw-48px)]">
+      <div className="mb-6 mx-auto overflow-x-scroll tablet:w-[calc(85dvw-1.5rem)] w-[calc(100%-1.5rem)]">
         <table className="min-w-max w-full my-10 ">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
