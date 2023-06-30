@@ -5,6 +5,7 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
 import { savePrompts } from '@/utils/app/prompts';
+import { generateRank } from '@/utils/app/rank';
 
 import { OpenAIModels } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
@@ -68,6 +69,7 @@ const Promptbar = () => {
         model: OpenAIModels[defaultModelId],
         folderId: null,
         lastUpdateAtUTC: dayjs().valueOf(),
+        rank: generateRank(filteredPrompts),
       };
 
       const updatedPrompts = [...prompts, newPrompt];

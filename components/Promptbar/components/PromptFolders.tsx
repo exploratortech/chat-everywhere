@@ -1,7 +1,8 @@
-import { Fragment, useContext } from 'react';
+import { Fragment, useContext, useMemo } from 'react';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
-import { generateFolderRank } from '@/utils/app/folders';
+import { saveFolders } from '@/utils/app/folders';
+import { generateRank, reorderItem } from '@/utils/app/rank';
 
 import { Prompt } from '@/types/prompt';
 import { FolderInterface } from '@/types/folder';
@@ -20,13 +21,18 @@ export const PromptFolders = () => {
       currentDrag,
       folders,
     },
-    handleReorderFolder,
+    dispatch,
   } = useContext(HomeContext);
 
   const {
     state: { searchTerm, filteredPrompts },
     handleUpdatePrompt,
   } = useContext(PromptbarContext);
+
+  const filteredFolders = useMemo(() => {
+    return getNonDeletedCollection(folders)
+      .filter((folder) => folder.type === 'prompt');
+  }, [folders]);
 
   const handlePromptDrop = (folder: FolderInterface) => {
     if (currentDrag && currentDrag.type === 'prompt') {
@@ -41,16 +47,20 @@ export const PromptFolders = () => {
     }
   };
 
-  const handleFolderDrop = (index: number) => {
+  const handleFolderDrop = (e: React.DragEvent<HTMLElement>, index: number) => {
     if (currentDrag && currentDrag.type === 'folder') {
       const folder = currentDrag.data as FolderInterface;
       if (folder.type !== 'prompt') return;
-      handleReorderFolder(
+      const reorderedFolders = reorderItem(
+        folders,
         folder.id,
-        generateFolderRank(folders, folder.type, index),
-        'prompt',
+        generateRank(filteredFolders, index),
+        (folder: FolderInterface) => folder.type === 'prompt',
       );
+      dispatch({ field: 'folders', value: reorderedFolders });
+      saveFolders(reorderedFolders);
     }
+    e.stopPropagation();
   };
 
   const handleCanDrop = (): boolean => {
@@ -80,26 +90,24 @@ export const PromptFolders = () => {
         allowedDragTypes={['folder']}
         canDrop={handleCanDrop}
         index={0}
-        onDrop={handleFolderDrop}
+        onDrop={(e) => handleFolderDrop(e, 0)}
       />
-      {getNonDeletedCollection(folders)
-        .filter((folder) => folder.type === 'prompt')
-        .map((folder, index) => (
-          <Fragment key={folder.id}>
-            <Folder
-              searchTerm={searchTerm}
-              currentFolder={folder}
-              handleDrop={handlePromptDrop}
-              folderComponent={PromptFolders(folder)}
-            />
-            <DropArea
-              allowedDragTypes={['folder']}
-              canDrop={handleCanDrop}
-              index={index + 1}
-              onDrop={handleFolderDrop}
-            />
-          </Fragment>
-        ))}
+      {filteredFolders.map((folder, index) => (
+        <Fragment key={folder.id}>
+          <Folder
+            searchTerm={searchTerm}
+            currentFolder={folder}
+            handleDrop={handlePromptDrop}
+            folderComponent={PromptFolders(folder)}
+          />
+          <DropArea
+            allowedDragTypes={['folder']}
+            canDrop={handleCanDrop}
+            index={index + 1}
+            onDrop={(e) => handleFolderDrop(e, index + 1)}
+          />
+        </Fragment>
+      ))}
     </div>
   );
 };

@@ -7,7 +7,7 @@ interface Props {
   allowedDragTypes?: DragDataType[];
   canDrop?: () => boolean;
   index: number;
-  onDrop: (index: number) => void;
+  onDrop: (e: React.DragEvent<HTMLElement>, index: number) => void;
 }
 
 const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop }: Props) => {
@@ -19,7 +19,7 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
   const isDragTypeAllowed = !!currentDrag && allowedDragTypes.includes(currentDrag.type);
 
   const handleDrop = (e: any) => {
-    onDrop(index);
+    onDrop(e, index);
     removeHighlight(e);
   };
 
@@ -49,7 +49,7 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
     >
       <div
         className={`
-          absolute h-3 my-auto top-0 bottom-0 left-0 right-0 rounded-lg
+          absolute h-3 my-auto top-0 bottom-0 left-0 right-0 rounded-lg bg-red-300
           ${ isDragTypeAllowed ? 'z-50' : '-z-10' }
         `}
         ref={indicatorRef}

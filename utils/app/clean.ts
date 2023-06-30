@@ -1,5 +1,6 @@
 import { Conversation } from '@/types/chat';
 import { FolderInterface } from '@/types/folder';
+import { Prompt } from '@/types/prompt';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import dayjs from 'dayjs';
 
@@ -101,6 +102,16 @@ export const cleanFolders = (folders: FolderInterface[]): FolderInterface[] => {
       folder.rank = (index + 1) * RANK_INTERVAL;
     }
     acc.push(folder);
+    return acc;
+  }, []);
+};
+
+export const cleanPrompts = (prompts: Prompt[]): Prompt[] => {
+  return prompts.reduce((acc: Prompt[], prompt: Prompt, index) => {
+    if (!prompt.rank) {
+      prompt.rank = (index + 1) * RANK_INTERVAL;
+    }
+    acc.push(prompt);
     return acc;
   }, []);
 };

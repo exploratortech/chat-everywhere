@@ -17,21 +17,20 @@ import useErrorService from '@/services/errorService';
 import useApiService from '@/services/useApiService';
 
 import { fetchShareableConversation } from '@/utils/app/api';
-import { cleanConversationHistory, cleanFolders } from '@/utils/app/clean';
+import {
+  cleanConversationHistory,
+  cleanFolders,
+  cleanPrompts,
+} from '@/utils/app/clean';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import {
+  getNonDeletedCollection,
   saveConversation,
   saveConversations,
   updateConversation,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import {
-  areRanksBalanced,
-  generateFolderRank,
-  rebalanceRanks,
-  saveFolders,
-  sortByRank,
-} from '@/utils/app/folders';
+import { saveFolders } from '@/utils/app/folders';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { enableTracking } from '@/utils/app/eventTracking';
 import { convertMarkdownToText } from '@/utils/app/outputLanguage';
@@ -39,6 +38,7 @@ import { savePrompts } from '@/utils/app/prompts';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
+import { generateRank, sortByRank } from '@/utils/app/rank';
 import { userProfileQuery } from '@/utils/server/supabase';
 
 import { Conversation } from '@/types/chat';
@@ -166,7 +166,10 @@ const Home = () => {
       name,
       type,
       lastUpdateAtUTC: dayjs().valueOf(),
-      rank: generateFolderRank(folders, type),
+      rank: generateRank(
+        getNonDeletedCollection(folders)
+          .filter((folder) => folder.type === type)
+      ),
     };
 
     const updatedFolders = [...folders, newFolder];
@@ -238,37 +241,6 @@ const Home = () => {
     saveFolders(updatedFolders);
 
     updateConversationLastUpdatedAtTimeStamp();
-  };
-
-  const handleReorderFolder = (
-    folderId: string,
-    rank: number,
-    folderType: FolderType,
-  ): void => {
-    let updatedFolders: FolderInterface[] = folders.map((f) => {
-      if (f.id === folderId) {
-        return {
-          ...f,
-          rank,
-          lastUpdateAtUTC: dayjs().valueOf(),
-        };
-      }
-      return f;
-    });
-
-    updatedFolders.sort(sortByRank);
-
-    if (!areRanksBalanced(updatedFolders, folderType)) {
-      updatedFolders = rebalanceRanks(
-        updatedFolders,
-        folderId,
-        rank,
-      );
-    }
-
-    dispatch({ field: 'folders', value: updatedFolders });
-
-    saveFolders(updatedFolders);
   };
 
   // CONVERSATION OPERATIONS  --------------------------------------------
@@ -554,7 +526,9 @@ const Home = () => {
 
     const prompts = localStorage.getItem('prompts');
     if (prompts) {
-      dispatch({ field: 'prompts', value: JSON.parse(prompts) });
+      const parsedPrompts: Prompt[] = JSON.parse(prompts).sort(sortByRank);
+      const cleanedPrompts: Prompt[] = cleanPrompts(parsedPrompts);
+      dispatch({ field: 'prompts', value: cleanedPrompts });
     }
 
     const outputLanguage = localStorage.getItem('outputLanguage');
@@ -659,7 +633,6 @@ const Home = () => {
         handleCreateFolder,
         handleDeleteFolder,
         handleUpdateFolder,
-        handleReorderFolder,
         handleSelectConversation,
         handleUpdateConversation,
         handleUserLogout,

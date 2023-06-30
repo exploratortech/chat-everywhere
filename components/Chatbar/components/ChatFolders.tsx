@@ -1,6 +1,8 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useMemo } from 'react';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
+import { saveFolders } from '@/utils/app/folders';
+import { generateRank, reorderItem } from '@/utils/app/rank';
 
 import { FolderInterface } from '@/types/folder';
 import { Conversation } from '@/types/chat';
@@ -11,7 +13,6 @@ import Folder from '@/components/Folder';
 
 import { ConversationComponent } from './Conversation';
 import DropArea from '@/components/DropArea/DropArea';
-import { generateFolderRank } from '@/utils/app/folders';
 import ChatbarContext from '../Chatbar.context';
 
 interface Props {
@@ -24,13 +25,18 @@ export const ChatFolders = ({ searchTerm }: Props) => {
       folders,
       currentDrag,
     },
+    dispatch,
     handleUpdateConversation,
-    handleReorderFolder,
   } = useContext(HomeContext);
 
   const {
     state: { filteredConversations },
   } = useContext(ChatbarContext);
+
+  const filteredFolders = useMemo(() => {
+    return getNonDeletedCollection(folders)
+      .filter((folder) => folder.type === 'chat');
+  }, [folders]);
 
   const handleConversationDrop = (folder: FolderInterface) => {
     if (currentDrag && currentDrag.type === 'conversation') {
@@ -42,16 +48,20 @@ export const ChatFolders = ({ searchTerm }: Props) => {
     }
   };
 
-  const handleFolderDrop = (index: number) => {
+  const handleFolderDrop = (e: React.DragEvent<HTMLElement>, index: number) => {
     if (currentDrag && currentDrag.type === 'folder') {
       const folder: FolderInterface = currentDrag.data as FolderInterface;
       if (folder.type !== 'chat') return;
-      handleReorderFolder(
+      const reorderedFolders = reorderItem(
+        folders,
         folder.id,
-        generateFolderRank(folders, 'chat', index),
-        'chat',
+        generateRank(filteredFolders, index),
+        (folder: FolderInterface) => folder.type === 'chat',
       );
+      dispatch({ field: 'folders', value: reorderedFolders });
+      saveFolders(reorderedFolders);
     }
+    e.stopPropagation();
   };
 
   const handleCanDrop = (): boolean => {
@@ -81,27 +91,25 @@ export const ChatFolders = ({ searchTerm }: Props) => {
         allowedDragTypes={['folder']}
         canDrop={handleCanDrop}
         index={0}
-        onDrop={handleFolderDrop}
+        onDrop={(e) => handleFolderDrop(e, 0)}
       />
-      {getNonDeletedCollection(folders)
-        .filter((folder) => folder.type === 'chat')
-        .map((folder, index) => (
-          <Fragment key={folder.id}>
-            <Folder
-              key={folder.id}
-              searchTerm={searchTerm}
-              currentFolder={folder}
-              handleDrop={handleConversationDrop}
-              folderComponent={ChatFolders(folder)}
-            />
-            <DropArea
-              allowedDragTypes={['folder']}
-              canDrop={handleCanDrop}
-              index={index + 1}
-              onDrop={handleFolderDrop}
-            />
-          </Fragment>
-        ))}
+      {filteredFolders.map((folder, index) => (
+        <Fragment key={folder.id}>
+          <Folder
+            key={folder.id}
+            searchTerm={searchTerm}
+            currentFolder={folder}
+            handleDrop={handleConversationDrop}
+            folderComponent={ChatFolders(folder)}
+          />
+          <DropArea
+            allowedDragTypes={['folder']}
+            canDrop={handleCanDrop}
+            index={index + 1}
+            onDrop={(e) => handleFolderDrop(e, index + 1)}
+          />
+        </Fragment>
+      ))}
     </div>
   );
 };
