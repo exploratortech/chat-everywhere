@@ -458,6 +458,17 @@ const Home = () => {
   // ON LOAD --------------------------------------------
 
   useEffect(() => {
+    // "Fixes" keyboard spacing on IOS
+    const scrollUp = () => {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    }
+    const interval = setInterval(scrollUp, 1000);
+    return () => {
+      clearInterval(interval);
+    }
+  }, []);
+
+  useEffect(() => {
     const theme = localStorage.getItem('theme');
     if (theme) {
       dispatch({ field: 'lightMode', value: theme as 'dark' | 'light' });
