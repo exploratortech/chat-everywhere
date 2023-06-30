@@ -71,7 +71,6 @@ const Home = () => {
   const { getModelsError } = useErrorService();
   const { isLoading, isPlaying, currentSpeechId, speak, stopPlaying } =
     useAzureTts();
-  const [containerHeight, setContainerHeight] = useState('100vh');
   const router = useRouter();
   const session = useSession();
   const supabase = useSupabaseClient();
@@ -616,7 +615,6 @@ const Home = () => {
       {selectedConversation && (
         <main
           className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
-          style={{ height: containerHeight }}
         >
           <div className="w-full lg:hidden">
             <Navbar
