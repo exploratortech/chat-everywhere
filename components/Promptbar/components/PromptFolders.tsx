@@ -77,6 +77,7 @@ export const PromptFolders = () => {
   return (
     <div className="flex w-full flex-col pt-2">
       <DropArea
+        allowedDragTypes={['folder']}
         canDrop={handleCanDrop}
         index={0}
         onDrop={handleFolderDrop}
@@ -92,6 +93,7 @@ export const PromptFolders = () => {
               folderComponent={PromptFolders(folder)}
             />
             <DropArea
+              allowedDragTypes={['folder']}
               canDrop={handleCanDrop}
               index={index + 1}
               onDrop={handleFolderDrop}
