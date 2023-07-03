@@ -48,19 +48,6 @@ const Sidebar = <T,>({
 }: Props<T>) => {
   const { t } = useTranslation('promptbar');
 
-  const allowDrop = (e: any) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const highlightDrop = (e: any) => {
-    e.currentTarget.style.background = '#343541';
-  };
-
-  const removeHighlight = (e: any) => {
-    e.currentTarget.style.background = 'none';
-  };
-
   return (
     <div
       className={`${isOpen ? 'w-[260px]' : 'w-0'} ${
@@ -134,10 +121,6 @@ const Sidebar = <T,>({
                 ? 'visible opacity-100'
                 : 'invisible opacity-0'
             }`}
-            onDrop={handleDrop}
-            onDragOver={allowDrop}
-            onDragEnter={highlightDrop}
-            onDragLeave={removeHighlight}
           >
             {itemComponent}
           </div>
