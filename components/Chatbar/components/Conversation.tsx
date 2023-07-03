@@ -28,7 +28,11 @@ interface Props {
 
 export const ConversationComponent = ({ conversation }: Props) => {
   const {
-    state: { selectedConversation, messageIsStreaming },
+    state: {
+      currentDrag,
+      selectedConversation,
+      messageIsStreaming,
+    },
     handleSelectConversation,
     handleUpdateConversation,
     setDragData,
@@ -49,6 +53,13 @@ export const ConversationComponent = ({ conversation }: Props) => {
       selectedConversation && handleRename(selectedConversation);
     }
   };
+
+  const handleButtonFocusKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (["Space", "Enter"].includes(e.code)) {
+      if (!messageIsStreaming)
+        handleSelectConversation(conversation);
+    }
+  }
 
   const handleDrop = (e: any) => {
     e.currentTarget.style.background = 'none';
@@ -120,7 +131,10 @@ export const ConversationComponent = ({ conversation }: Props) => {
   }, [isRenaming, isDeleting]);
 
   return (
-    <div className="relative flex items-center">
+    <div className={`
+      relative flex items-center
+      ${ !currentDrag || currentDrag.type === 'conversation' && currentDrag.data.id === conversation.id ? 'pointer-events-auto' : 'pointer-events-none' }
+    `}>
       {isRenaming && selectedConversation?.id === conversation.id ? (
         <div className="flex w-full items-center gap-3 rounded-lg bg-[#343541]/90 p-3">
           <IconMessage size={18} />
@@ -134,22 +148,24 @@ export const ConversationComponent = ({ conversation }: Props) => {
           />
         </div>
       ) : (
-        <button
-          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90 translate-x-0 ${
-            messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
-          } ${
-            selectedConversation?.id === conversation.id
-              ? '!bg-[#343541]/90'
-              : ''
-          }`}
-          onClick={() => handleSelectConversation(conversation)}
-          disabled={messageIsStreaming}
+        <div
+          className={
+            `flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90 translate-x-0 z-10
+            ${ messageIsStreaming ? 'disabled:cursor-not-allowed' : '' }
+            ${ selectedConversation?.id === conversation.id ? '!bg-[#343541]/90' : '' }
+          `}
+          onClick={() => {
+            if (!messageIsStreaming)
+              handleSelectConversation(conversation);
+          }}
           draggable="true"
           onDrop={handleDrop}
           onDragEnter={highlightDrop}
           onDragLeave={removeHighlight}
           onDragStart={handleDragStart}
           onDragEnd={removeDragData}
+          onKeyDown={handleButtonFocusKeyDown}
+          tabIndex={0}
         >
           <IconMessage size={18} />
           <div
@@ -159,7 +175,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
           >
             {conversation.name}
           </div>
-        </button>
+        </div>
       )}
 
       {(isDeleting || isRenaming) &&

@@ -5,7 +5,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import {
-  DragEvent,
+  KeyboardEvent,
   MouseEventHandler,
   useContext,
   useEffect,
@@ -27,6 +27,7 @@ interface Props {
 
 export const PromptComponent = ({ prompt }: Props) => {
   const {
+    state: { currentDrag },
     setDragData,
     removeDragData,
   } = useContext(HomeContext);
@@ -68,6 +69,13 @@ export const PromptComponent = ({ prompt }: Props) => {
     setIsDeleting(true);
   };
 
+  const handleButtonFocusKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (["Space", "Enter"].includes(e.code)) {
+      setShowModal(true);
+    }
+    e.stopPropagation();
+  }
+
   const handleDragStart = () => {
     setDragData({ data: prompt, type: 'prompt' });
   };
@@ -81,9 +89,12 @@ export const PromptComponent = ({ prompt }: Props) => {
   }, [isRenaming, isDeleting]);
 
   return (
-    <div className="relative flex items-center">
-      <button
-        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 translate-x-0"
+    <div className={`
+      relative flex items-center
+      ${ !currentDrag || currentDrag.type === 'prompt' && currentDrag.data.id ===  prompt.id ? 'pointer-events-auto' : 'pointer-events-none' }
+    `}>
+      <div
+        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 translate-x-0 z-10"
         draggable="true"
         onClick={(e) => {
           e.stopPropagation();
@@ -91,11 +102,13 @@ export const PromptComponent = ({ prompt }: Props) => {
         }}
         onDragStart={handleDragStart}
         onDragEnd={removeDragData}
+        onKeyDown={handleButtonFocusKeyDown}
         onMouseLeave={() => {
           setIsDeleting(false);
           setIsRenaming(false);
           setRenameValue('');
         }}
+        tabIndex={0}
       >
         <IconBulbFilled size={18} />
 
@@ -106,7 +119,7 @@ export const PromptComponent = ({ prompt }: Props) => {
         >
           {prompt.name}
         </div>
-      </button>
+      </div>
 
       {(isDeleting || isRenaming) && (
         <div className="absolute right-1 z-10 flex text-gray-300">
