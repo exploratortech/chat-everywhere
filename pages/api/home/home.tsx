@@ -550,7 +550,8 @@ const Home = () => {
     let cleanedConversationHistory: Conversation[] = [];
     if (conversationHistory) {
       const parsedConversationHistory: Conversation[] =
-        JSON.parse(conversationHistory);
+        JSON.parse(conversationHistory)
+        .sort(sortByRank);
       cleanedConversationHistory = cleanConversationHistory(
         parsedConversationHistory,
       );

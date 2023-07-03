@@ -62,7 +62,7 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
     return [];
   }
 
-  return history.reduce((acc: any[], conversation) => {
+  return history.reduce((acc: any[], conversation: any, index: number) => {
     try {
       if (!conversation.model) {
         conversation.model = OpenAIModels[OpenAIModelID.GPT_3_5];
@@ -82,6 +82,10 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
 
       if(!conversation.lastUpdateAtUTC) {
         conversation.lastUpdateAtUTC = dayjs().valueOf();
+      }
+
+      if (!conversation.rank) {
+        conversation.rank = (index + 1) * RANK_INTERVAL;
       }
 
       acc.push(conversation);
