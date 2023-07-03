@@ -45,7 +45,7 @@ export const Conversations = ({ conversations }: Props) => {
   console.log('conversations', conversations);
 
   return (
-    <div className="flex w-full gap-1 flex-col rounded-lg">
+    <div className="flex w-full flex-col rounded-lg">
       <DropArea
         allowedDragTypes={['conversation']}
         canDrop={handleCanDrop}

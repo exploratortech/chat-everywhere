@@ -86,7 +86,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
   };
 
   return (
-    <div className="flex w-full flex-col pt-2">
+    <div className="flex w-full flex-col">
       <DropArea
         allowedDragTypes={['folder']}
         canDrop={handleCanDrop}

@@ -43,7 +43,7 @@ export const Prompts: FC<Props> = ({ prompts }) => {
   };
 
   return (
-    <div className="flex w-full flex-col gap-1 rounded-lg">
+    <div className="flex w-full flex-col rounded-lg">
       <DropArea
         allowedDragTypes={['prompt']}
         canDrop={handleCanDrop}
