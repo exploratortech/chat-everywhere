@@ -185,6 +185,7 @@ export const syncData = async (
     localConversations,
     remoteConversations,
   ) as Conversation[];
+  mergedHistory.sort(sortByRank);
 
   // Merge folders
   let remoteFolders: FolderInterface[] = [];

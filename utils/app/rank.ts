@@ -119,7 +119,7 @@ export const reorderItem = (
 ): any[] => {
   let updatedCollection = collection.map((item) => {
     if (item.id === itemId) {
-      return { ...item, rank, lastUpdatedAtUTC: dayjs().valueOf() };
+      return { ...item, rank, lastUpdateAtUTC: dayjs().valueOf() };
     }
     return item;
   });
