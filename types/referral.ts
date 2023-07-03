@@ -13,7 +13,8 @@ export interface RawRefereeProfile {
 
 export interface RefereeProfile {
   plan: SubscriptionPlan;
-  pro_plan_expiration_date: string | null;
   email: string;
-  referral_date: string;
+  referralDate: string;
+  isInTrial: string;
+  hasPaidForPro: string;
 }

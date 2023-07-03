@@ -79,5 +79,12 @@
   "Expires in": "剩余时间",
   "Regenerate code": "重新生成",
   "A new referral code has been regenerated": "成功生成新的推广码",
-  "Copied to clipboard": "已复制到剪贴板"
+  "Copied to clipboard": "已复制到剪贴板",
+  "Referral Data": "推广数据",
+  "Number of Paid user": "付费用户数量",
+  "Email": "电邮",
+  "Plan": "套餐",
+  "Referral Date": "推广日期",
+  "Is in Trial": "是否在试用期",
+  "User has paid": "用户已付费"
 }

@@ -406,7 +406,7 @@ export const userProfileQuery = async (
   const isInReferralTrial = (() => {
     if (!referrerRecords) return false;
     const referrerDate = dayjs(referrerRecords.referral_date);
-    const trailDays = +process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS!;
+    const trailDays = +(process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS || '3');
     const trailExpirationDate = referrerDate.add(trailDays, 'days');
 
     return dayjs().isBefore(trailExpirationDate);

@@ -6,7 +6,8 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 
 import { trackEvent } from '@/utils/app/eventTracking';
@@ -23,6 +24,8 @@ export default function ReferralProgramData() {
     state: { user },
     dispatch,
   } = useContext(HomeContext);
+  const [numberOfPaidUser, setNumberOfPaidUser] = useState(0);
+  const { t } = useTranslation('model');
 
   const {
     data,
@@ -43,20 +46,21 @@ export default function ReferralProgramData() {
       });
       if (!response.ok) {
         trackEvent('get referees failed');
-        throw new Error('Get referees failed, please contact your referrer');
+        throw new Error('Get referees failed, please contact administration');
       }
 
-      const { referees } = (await response.json()) as {
+      const { referees, numberOfPaidUser } = (await response.json()) as {
         referees: RefereeProfile[];
+        numberOfPaidUser: number;
       };
+      setNumberOfPaidUser(numberOfPaidUser);
       const formattedReferees = referees.map((referee) => ({
         ...referee,
         plan: (referee.plan.charAt(0).toUpperCase() +
           referee.plan.slice(1)) as SubscriptionPlan,
-        pro_plan_expiration_date: dayjs(
-          referee.pro_plan_expiration_date,
-        ).format('ll'),
-        referral_date: dayjs(referee.referral_date).format('ll'),
+        referralDate: dayjs(referee.referralDate).format('ll'),
+        isInTrial: referee.isInTrial ? '✅' : '❌',
+        hasPaidForPro: referee.hasPaidForPro ? '✅' : '❌',
       }));
 
       return { referees: formattedReferees };
@@ -68,9 +72,14 @@ export default function ReferralProgramData() {
   );
   return (
     <div className="text-center my-4 select-none">
-      <h1 className="text-xl">Referral Data</h1>
+      <h1 className="text-xl">{t('Referral Data')}</h1>
       {isSuccess && data.referees.length > 0 && (
-        <RefereesTable referees={data.referees} />
+        <>
+          <div className="text-start">
+            {`${t('Number of Paid user')}: ${numberOfPaidUser}`}
+          </div>
+          <RefereesTable referees={data.referees} />
+        </>
       )}
       {isSuccess && data.referees.length === 0 && (
         <div className="my-10 text-neutral-500">No referees yet</div>
@@ -82,21 +91,26 @@ export default function ReferralProgramData() {
 const RefereesTable = ({ referees }: { referees: RefereeProfile[] }) => {
   const columnHelper = createColumnHelper<RefereeProfile>();
 
+  const { t } = useTranslation('model');
   const columns = [
     columnHelper.accessor('email', {
-      header: 'Email',
+      header: `${t('Email')}`,
       footer: (prop) => prop.column.id,
     }),
     columnHelper.accessor('plan', {
-      header: 'Plan',
+      header: `${t('Plan')}`,
       footer: (prop) => prop.column.id,
     }),
-    columnHelper.accessor('pro_plan_expiration_date', {
-      header: 'Pro Plan Expiration Date',
+    columnHelper.accessor('referralDate', {
+      header: `${t('Referral Date')}`,
       footer: (prop) => prop.column.id,
     }),
-    columnHelper.accessor('referral_date', {
-      header: 'Referral Date',
+    columnHelper.accessor('isInTrial', {
+      header: `${t('Is in Trial')}`,
+      footer: (prop) => prop.column.id,
+    }),
+    columnHelper.accessor('hasPaidForPro', {
+      header: `${t('User has paid')}`,
       footer: (prop) => prop.column.id,
     }),
   ];

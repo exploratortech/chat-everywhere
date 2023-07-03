@@ -1,5 +1,7 @@
 import { getRefereesProfile, getUserProfile } from '@/utils/server/supabase';
 
+import dayjs from 'dayjs';
+
 export const config = {
   runtime: 'edge',
 };
@@ -16,18 +18,32 @@ const handler = async (req: Request): Promise<Response> => {
 
     const referees = await getRefereesProfile(userId);
 
-    const newR = referees.map((referee) => {
-      const {
-        id,
-        stripe_subscription_id,
-        referral_code,
-        referral_code_expiration_date,
-        ...rest
-      } = referee;
-      return rest;
+    const formattedReferees = referees.map((referee) => {
+      const { email, plan, referral_date } = referee;
+
+      const trialDay = process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS || '3';
+      const isInTrial = dayjs(referral_date)
+        .add(+trialDay, 'day')
+        .isAfter(dayjs());
+      const hasPaidForPro = plan === 'pro' && !isInTrial;
+
+      return {
+        email,
+        plan,
+        referralDate: referral_date,
+        isInTrial,
+        hasPaidForPro,
+      };
     });
 
-    return new Response(JSON.stringify({ referees: newR }), { status: 200 });
+    const numberOfPaidUser = formattedReferees.filter(
+      (referee) => referee.hasPaidForPro,
+    ).length;
+
+    return new Response(
+      JSON.stringify({ referees: formattedReferees, numberOfPaidUser }),
+      { status: 200 },
+    );
   } catch (error) {
     console.error(error);
     return new Response('Error', { status: 500 });
