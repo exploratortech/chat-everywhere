@@ -141,6 +141,7 @@ const Folder = ({
           <div
             className={`flex cursor-pointer w-full items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90 translate-x-0 z-10`}
             draggable="true"
+            onClick={() => setIsOpen(!isOpen)}
             onDrop={dropHandler}
             onDragStart={handleDragStart}
             onDragEnd={removeDragData}
