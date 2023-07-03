@@ -42,8 +42,6 @@ export const Conversations = ({ conversations }: Props) => {
     e.stopPropagation();
   };
 
-  console.log('conversations', conversations);
-
   return (
     <div className="flex w-full flex-col rounded-lg">
       <DropArea
