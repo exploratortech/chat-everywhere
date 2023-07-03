@@ -49,7 +49,7 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
     >
       <div
         className={`
-          absolute h-3 my-auto top-0 bottom-0 left-0 right-0 rounded-lg bg-red-300
+          absolute h-3 my-auto top-0 bottom-0 left-0 right-0 rounded-lg
           ${ isDragTypeAllowed ? 'z-50' : '-z-10' }
         `}
         ref={indicatorRef}
