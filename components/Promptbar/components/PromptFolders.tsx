@@ -1,6 +1,6 @@
 import { Fragment, useContext, useMemo } from 'react';
 
-import { getNonDeletedCollection } from '@/utils/app/conversation';
+import { getNonDeletedCollection, updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { saveFolders } from '@/utils/app/folders';
 import { generateRank, reorderItem } from '@/utils/app/rank';
 
@@ -14,19 +14,23 @@ import { PromptComponent } from '@/components/Promptbar/components/Prompt';
 
 import PromptbarContext from '../PromptBar.context';
 import DropArea from '@/components/DropArea/DropArea';
+import { savePrompts } from '@/utils/app/prompts';
 
 export const PromptFolders = () => {
   const {
     state: {
       currentDrag,
+      prompts,
       folders,
     },
     dispatch,
   } = useContext(HomeContext);
 
   const {
-    state: { searchTerm, filteredPrompts },
-    handleUpdatePrompt,
+    state: {
+      searchTerm,
+      filteredPrompts,
+    },
   } = useContext(PromptbarContext);
 
   const filteredFolders = useMemo(() => {
@@ -34,17 +38,32 @@ export const PromptFolders = () => {
       .filter((folder) => folder.type === 'prompt');
   }, [folders]);
 
-  const handlePromptDrop = (folder: FolderInterface) => {
+  const handlePromptDrop = (folder: FolderInterface, index?: number) => {
     if (currentDrag && currentDrag.type === 'prompt') {
       const prompt = currentDrag.data as Prompt;
 
-      const updatedPrompt = {
-        ...prompt,
-        folderId: folder.id,
-      };
+      // Filter for prompts that are in the folder
+      const filter = (otherPrompt: Prompt) => otherPrompt.folderId === folder.id;
+      const refinedFilteredPrompts = filteredPrompts.filter(filter);
 
-      handleUpdatePrompt(updatedPrompt);
+      const updatedPrompts = reorderItem(
+        prompts,
+        prompt.id,
+        generateRank(refinedFilteredPrompts, index),
+        {
+          filter,
+          updates: { folderId: folder.id },
+        },
+      );
+
+      dispatch({ field: 'prompts', value: updatedPrompts });
+      savePrompts(updatedPrompts);
+      updateConversationLastUpdatedAtTimeStamp();
     }
+  };
+
+  const handleCanDropPrompt = (): boolean => {
+    return (!!currentDrag && currentDrag.type === 'prompt');
   };
 
   const handleFolderDrop = (e: React.DragEvent<HTMLElement>, index: number) => {
@@ -55,7 +74,7 @@ export const PromptFolders = () => {
         folders,
         folder.id,
         generateRank(filteredFolders, index),
-        (folder: FolderInterface) => folder.type === 'prompt',
+        { filter: (folder: FolderInterface) => folder.type === 'prompt' },
       );
       dispatch({ field: 'folders', value: reorderedFolders });
       saveFolders(reorderedFolders);
@@ -63,7 +82,7 @@ export const PromptFolders = () => {
     e.stopPropagation();
   };
 
-  const handleCanDrop = (): boolean => {
+  const handleCanDropFolder = (): boolean => {
     return (
       !!currentDrag &&
       currentDrag.type === 'folder' &&
@@ -71,24 +90,42 @@ export const PromptFolders = () => {
     );
   };
 
-  const PromptFolders = (currentFolder: FolderInterface) =>
-    filteredPrompts
-      .filter((p) => p.folderId)
-      .map((prompt) => {
-        if (prompt.folderId === currentFolder.id) {
-          return (
-            <div key={prompt.id} className="ml-5 gap-2 border-l pl-2">
-              <PromptComponent prompt={prompt} />
-            </div>
-          );
+  const PromptFolders = (currentFolder: FolderInterface) => (
+    <>
+      <DropArea
+        allowedDragTypes={['prompt']}
+        canDrop={handleCanDropPrompt}
+        index={0}
+        onDrop={() => handlePromptDrop(currentFolder, 0)}
+      />
+      {filteredPrompts
+        .filter((p) => p.folderId)
+        .map((prompt, index) => {
+          if (prompt.folderId === currentFolder.id) {
+            return (
+              <Fragment key={prompt.id}>
+                <div key={prompt.id} className="ml-5 border-l pl-2">
+                  <PromptComponent prompt={prompt} />
+                </div>
+                <DropArea
+                  allowedDragTypes={['prompt']}
+                  canDrop={handleCanDropPrompt}
+                  index={index + 1}
+                  onDrop={() => handlePromptDrop(currentFolder, index + 1)}
+                />
+              </Fragment>
+            );
+          }
         }
-      });
+      )}
+    </>
+  );
 
   return (
     <div className="flex w-full flex-col pt-2">
       <DropArea
         allowedDragTypes={['folder']}
-        canDrop={handleCanDrop}
+        canDrop={handleCanDropFolder}
         index={0}
         onDrop={(e) => handleFolderDrop(e, 0)}
       />
@@ -102,7 +139,7 @@ export const PromptFolders = () => {
           />
           <DropArea
             allowedDragTypes={['folder']}
-            canDrop={handleCanDrop}
+            canDrop={handleCanDropFolder}
             index={index + 1}
             onDrop={(e) => handleFolderDrop(e, index + 1)}
           />

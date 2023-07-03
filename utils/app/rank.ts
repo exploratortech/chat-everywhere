@@ -12,36 +12,36 @@ export const sortByRank = (a: any, b: any): number => {
 };
 
 // Calculates the new rank of an item given the index of where to move it.
-export const generateRank = (collection: any[], insertAt?: number): number => {
+export const generateRank = (filteredCollection: any[], insertAt?: number): number => {
   // Set the default insertAt value to the length of the filtered items
-  if (insertAt == null || insertAt < 0 || insertAt > collection.length) {
-    insertAt = collection.length;
+  if (insertAt == null || insertAt < 0 || insertAt > filteredCollection.length) {
+    insertAt = filteredCollection.length;
   }
 
   // Inserting an item at the beginning
   if (insertAt === 0) {
-    const bottomItem = collection[insertAt];
+    const bottomItem = filteredCollection[insertAt];
     if (!bottomItem || !bottomItem.rank) return RANK_INTERVAL;
     return Math.floor(bottomItem.rank / 2);
   }
   
   // Appending an item to the end
-  if (insertAt === collection.length) {
-    const topItem = collection[insertAt - 1];
-    if (!topItem || !topItem.rank) (collection.length + 1) * RANK_INTERVAL;
+  if (insertAt === filteredCollection.length) {
+    const topItem = filteredCollection[insertAt - 1];
+    if (!topItem || !topItem.rank) (filteredCollection.length + 1) * RANK_INTERVAL;
     return topItem.rank + RANK_INTERVAL;
   }
 
   // Inserting an item in the middle
-  const topItem = collection[insertAt - 1];
-  const bottomItem = collection[insertAt];
+  const topItem = filteredCollection[insertAt - 1];
+  const bottomItem = filteredCollection[insertAt];
 
   if (!topItem.rank && !bottomItem.rank) {
-    return Math.floor((collection.length * RANK_INTERVAL) / 2);
+    return Math.floor((filteredCollection.length * RANK_INTERVAL) / 2);
   } else if (!topItem.rank) {
     return Math.floor(bottomItem.rank / 2);
   } else if (!bottomItem.rank) {
-    return Math.floor((topItem.rank + collection.length * RANK_INTERVAL) / 2);
+    return Math.floor((topItem.rank + filteredCollection.length * RANK_INTERVAL) / 2);
   }
 
   return Math.floor((topItem.rank + bottomItem.rank) / 2);
@@ -115,20 +115,28 @@ export const reorderItem = (
   collection: any[],
   itemId: string,
   rank: number,
-  additionalFilterPredicate?: (item: any) => boolean,
+  options?: {
+    filter?: (item: any) => boolean, // additional filter
+    updates?: any, // updates that you might want to apply while reordering
+  }
 ): any[] => {
   let updatedCollection = collection.map((item) => {
     if (item.id === itemId) {
-      return { ...item, rank, lastUpdateAtUTC: dayjs().valueOf() };
+      return {
+        ...item,
+        ...(options?.updates || {}),
+        rank,
+        lastUpdateAtUTC: dayjs().valueOf()
+      };
     }
     return item;
   });
 
   updatedCollection.sort(sortByRank);
 
-  const filteredCollection = getNonDeletedCollection(updatedCollection)
-  if (additionalFilterPredicate) {
-    filteredCollection.filter(additionalFilterPredicate);
+  let filteredCollection = getNonDeletedCollection(updatedCollection)
+  if (options?.filter) {
+    filteredCollection = filteredCollection.filter(options.filter);
   }
 
   if (!areRanksBalanced(filteredCollection)) {

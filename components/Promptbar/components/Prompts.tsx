@@ -34,6 +34,7 @@ export const Prompts: FC<Props> = ({ prompts }) => {
         unfilteredPrompts,
         prompt.id,
         generateRank(prompts, index),
+        { updates: { folderId: null } },
       );
       dispatch({ field: 'prompts', value: reorderedPrompts });
       savePrompts(reorderedPrompts);
