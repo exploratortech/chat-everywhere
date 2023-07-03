@@ -20,6 +20,7 @@ import { FolderInterface } from '@/types/folder';
 import HomeContext from '@/pages/api/home/home.context';
 
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
+import { getNonDeletedCollection } from '@/utils/app/conversation';
 
 interface Props {
   currentFolder: FolderInterface;
@@ -35,7 +36,7 @@ const Folder = ({
   folderComponent,
 }: Props) => {
   const {
-    state: { currentDrag },
+    state: { currentDrag, folders },
     handleDeleteFolder,
     handleUpdateFolder,
     setDragData,
@@ -47,7 +48,7 @@ const Folder = ({
   const [renameValue, setRenameValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
   const dragEnterTarget = useRef<HTMLElement>();
 
   const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -62,6 +63,12 @@ const Folder = ({
     setRenameValue('');
     setIsRenaming(false);
   };
+
+  const handleButtonFocusKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (["Space", "Enter"].includes(e.code)) {
+      setIsOpen(!isOpen);
+    }
+  }
 
   const dropHandler = (e: any) => {
     if (currentDrag && currentDrag.type !== 'folder') {
@@ -110,7 +117,10 @@ const Folder = ({
 
   return (
     <>
-      <div className="relative flex items-center">
+      <div className={`
+        relative flex items-center
+        ${ !currentDrag || currentDrag.type !== 'folder' || currentDrag.data.id === currentFolder.id ? 'pointer-events-auto' : 'pointer-events-none' }
+      `}>
         {isRenaming ? (
           <div className="flex w-full items-center gap-3 bg-[#343541]/90 p-3">
             {isOpen ? (
@@ -128,17 +138,18 @@ const Folder = ({
             />
           </div>
         ) : (
-          <button
-            className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90 translate-x-0`}
-            draggable
-            onClick={() => setIsOpen(!isOpen)}
+          <div
+            className={`flex cursor-pointer w-full items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90 translate-x-0 z-10`}
+            draggable="true"
             onDrop={dropHandler}
             onDragStart={handleDragStart}
             onDragEnd={removeDragData}
             onDragOver={allowDrop}
             onDragEnter={highlightDrop}
             onDragLeave={removeHighlight}
+            onKeyDown={handleButtonFocusKeyDown}
             ref={buttonRef}
+            tabIndex={0}
           >
             {isOpen ? (
               <IconCaretDown size={18} />
@@ -149,7 +160,7 @@ const Folder = ({
             <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 pr-12">
               {currentFolder.name}
             </div>
-          </button>
+          </div>
         )}
 
         <div
