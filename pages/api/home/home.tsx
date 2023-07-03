@@ -53,6 +53,7 @@ import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
 import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
 import ReferralModel from '@/components/User/ReferralModel';
+import SettingsModel from '@/components/User/Settings/SettingsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
@@ -88,6 +89,7 @@ const Home = () => {
       selectedConversation,
       prompts,
       temperature,
+      showSettingsModel,
       showLoginSignUpModel,
       showProfileModel,
       showReferralModel,
@@ -646,6 +648,13 @@ const Home = () => {
             <div className="flex flex-1">
               <Chat stopConversationRef={stopConversationRef} />
             </div>
+            {showSettingsModel && (
+              <SettingsModel
+                onClose={() =>
+                  dispatch({ field: 'showSettingsModel', value: false })
+                }
+              />
+            )}
             {showLoginSignUpModel && (
               <AuthModel
                 supabase={supabase}

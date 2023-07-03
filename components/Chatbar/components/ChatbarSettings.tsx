@@ -6,6 +6,7 @@ import {
   IconLogin,
   IconMoon,
   IconNews,
+  IconSettings,
   IconSun,
 } from '@tabler/icons-react';
 import { useContext } from 'react';
@@ -101,6 +102,16 @@ export const ChatbarSettings = () => {
           <ClearConversations onClearConversations={handleClearConversations} />
         ) : null}
 
+        <SidebarButton
+          text={t('Settings')}
+          icon={<IconSettings size={18} />}
+          onClick={() => {
+            homeDispatch({
+              field: 'showSettingsModel',
+              value: true,
+            });
+          }}
+        />
         <Import onImport={handleImportConversations} />
 
         <SidebarButton
