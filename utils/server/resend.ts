@@ -9,8 +9,7 @@ const receiverEmail = process.env.RESEND_EMAIL_RECEIVER!;
 
 export async function sendReport(subject = '', html = '') {
   await resend.emails.send({
-    // TODO: need to change this to a verified email domain
-    from: 'report@resend.dev',
+    from: 'team@chateverywhere.app',
     to: receiverEmail,
     subject,
     html,
