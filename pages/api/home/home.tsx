@@ -598,6 +598,9 @@ const Home = () => {
   useEffect(() => {
     dispatch({ field: 'creditUsage', value: creditUsage });
   }, [creditUsage]);
+  useEffect(() => {
+    document.body.className = lightMode;
+  }, [lightMode]);
 
   return (
     <HomeContext.Provider
@@ -631,7 +634,7 @@ const Home = () => {
       </Head>
       {selectedConversation && (
         <main
-          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
+          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white `}
           style={{ height: containerHeight }}
         >
           <div className="w-full lg:hidden">
