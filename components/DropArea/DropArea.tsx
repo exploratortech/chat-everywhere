@@ -26,7 +26,7 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
   const onDragEnter = (e: any) => {
     if (canDrop() && isDragTypeAllowed) {
       if (indicatorRef.current)
-        indicatorRef.current.style.background = '#343541';
+        indicatorRef.current.style.background = '#818df8';
     }
   };
 
@@ -48,7 +48,7 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
       className="relative"
     >
       <div
-        className="absolute h-3 my-auto top-0 bottom-0 left-0 right-0 rounded-lg pointer-events-none"
+        className="absolute h-2 my-auto top-0 bottom-0 left-0 right-0 rounded-lg pointer-events-none z-20"
         ref={indicatorRef}
       />
       <div
