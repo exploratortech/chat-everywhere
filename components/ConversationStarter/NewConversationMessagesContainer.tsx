@@ -42,7 +42,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   };
 
   const bannerOnClick = () => {
-    dispatch({ field: 'showProfileModel', value: true });
+    dispatch({ field: 'showSettingsModel', value: true });
 
     event('Support banner clicked', {
       category: 'Engagement',

@@ -83,7 +83,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
   };
 
   const changePasswordOnClick = () => {
-    dispatch({ field: 'showProfileModel', value: false });
+    dispatch({ field: 'showSettingsModel', value: false });
     dispatch({ field: 'showLoginSignUpModel', value: true });
   };
 
@@ -120,118 +120,114 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-md md:max-w-lg transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-white">
-                <Dialog.Description>
-                  <div className="rounded-2xl flex flex-col">
-                    {!isPaidUser && (
+                <div className="rounded-2xl flex flex-col">
+                  {!isPaidUser && (
+                    <span className="text-sm mb-2">
+                      {t(
+                        'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime! Please make sure you registered before upgrading to avoid wait time.',
+                      )}
+                    </span>
+                  )}
+                  {isPaidUser && user?.hasReferrer && (
+                    <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
+                      <IconCircleCheck className="text-green-500" size={19} />
+                      <p className="flex items-center">
+                        {t('Enjoy our pro plan experience during your trial!')}
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex flex-col md:flex-row justify-evenly mb-3">
+                    <div className="flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
+                      <span className="text-2xl font-bold">Free</span>
+                      <div className="text-xs leading-5">
+                        {PlanDetail.free.features.map((feature, index) => (
+                          <FeatureItem key={index} featureName={t(feature)} />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
+                      <span className="text-2xl font-bold">Pro</span>
                       <span className="text-sm mb-2">
-                        {t(
-                          'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime! Please make sure you registered before upgrading to avoid wait time.',
-                        )}
+                        {t('USD$9.99 / month')}
                       </span>
-                    )}
-                    {isPaidUser && user?.hasReferrer && (
-                      <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
-                        <IconCircleCheck className="text-green-500" size={19} />
-                        <p className="flex items-center">
-                          {t(
-                            'Enjoy our pro plan experience during your trial!',
-                          )}
-                        </p>
+                      <div className="text-xs leading-5">
+                        <FeatureItem
+                          featureName={t('Everything in free plan')}
+                        />
+                        <FeatureItem
+                          featureName={t('Priority response time')}
+                        />
+                        {PlanDetail.pro.features.map((feature, index) => (
+                          <FeatureItem key={index} featureName={t(feature)} />
+                        ))}
                       </div>
-                    )}
-                    <div className="flex flex-col md:flex-row justify-evenly mb-3">
-                      <div className="flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
-                        <span className="text-2xl font-bold">Free</span>
-                        <div className="text-xs leading-5">
-                          {PlanDetail.free.features.map((feature, index) => (
-                            <FeatureItem key={index} featureName={t(feature)} />
-                          ))}
+                      {(!user || !isPaidUser) && (
+                        <div className="flex flex-col">
+                          <a
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => upgradeLinkOnClick()}
+                            className="px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
+                          >
+                            {t('Upgrade')}
+                          </a>
+                          <a
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => upgradeForOneMonthLinkOnClick()}
+                            className="px-4 py-2 text-xs border rounded-lg bg-neutral-300 shadow border-none text-neutral-700 hover:bg-white focus:outline-none mt-2 text-center cursor-pointer"
+                          >
+                            {t('Upgrade for one month only')}
+                          </a>
                         </div>
-                      </div>
-                      <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
-                        <span className="text-2xl font-bold">Pro</span>
-                        <span className="text-sm mb-2">
-                          {t('USD$9.99 / month')}
-                        </span>
-                        <div className="text-xs leading-5">
-                          <FeatureItem
-                            featureName={t('Everything in free plan')}
-                          />
-                          <FeatureItem
-                            featureName={t('Priority response time')}
-                          />
-                          {PlanDetail.pro.features.map((feature, index) => (
-                            <FeatureItem key={index} featureName={t(feature)} />
-                          ))}
-                        </div>
-                        {(!user || !isPaidUser) && (
-                          <div className="flex flex-col">
-                            <a
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={() => upgradeLinkOnClick()}
-                              className="px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
-                            >
-                              {t('Upgrade')}
-                            </a>
-                            <a
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={() => upgradeForOneMonthLinkOnClick()}
-                              className="px-4 py-2 text-xs border rounded-lg bg-neutral-300 shadow border-none text-neutral-700 hover:bg-white focus:outline-none mt-2 text-center cursor-pointer"
-                            >
-                              {t('Upgrade for one month only')}
-                            </a>
-                          </div>
-                        )}
-                        {user?.plan === 'pro' && user.proPlanExpirationDate && (
-                          <div className="text-left text-neutral-500 p-2 text-xs">
-                            {`${t('Expires on')}: 
+                      )}
+                      {user?.plan === 'pro' && user.proPlanExpirationDate && (
+                        <div className="text-left text-neutral-500 p-2 text-xs">
+                          {`${t('Expires on')}: 
                             ${dayjs(user.proPlanExpirationDate).format(
                               'll',
                             )}`}{' '}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    {displayReferralCodeEnterer && <ReferralCodeEnter />}
-                    <div>
-                      {user?.plan === 'pro' && !user?.hasReferrer && (
-                        <p className="text-xs text-neutral-400">
-                          {t(
-                            'Thank you for supporting us! If you want to cancel your subscription, please visit ',
-                          )}
-                          <a
-                            href={subscriptionManagementLink()}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="underline cursor-pointer"
-                          >
-                            {t('here')}
-                          </a>
-                          {t(' and cancel your subscription.')}
-                        </p>
-                      )}
-
-                      <p className="text-xs text-neutral-400 mt-2">
-                        {t('If you have any questions, please contact us at ')}
-                        <a
-                          target="_blank"
-                          rel="noreferrer"
-                          className="underline cursor-pointer"
-                          href="mailto:jack@exploratorlabs.com"
-                        >
-                          jack@exploratorlabs.com
-                        </a>
-                      </p>
-                      {user && (
-                        <p className="text-xs text-neutral-400 mt-2">
-                          {t('Your registration email is')} {user?.email}
-                        </p>
+                        </div>
                       )}
                     </div>
                   </div>
-                </Dialog.Description>
+                  {displayReferralCodeEnterer && <ReferralCodeEnter />}
+                  <div>
+                    {user?.plan === 'pro' && !user?.hasReferrer && (
+                      <p className="text-xs text-neutral-400">
+                        {t(
+                          'Thank you for supporting us! If you want to cancel your subscription, please visit ',
+                        )}
+                        <a
+                          href={subscriptionManagementLink()}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline cursor-pointer"
+                        >
+                          {t('here')}
+                        </a>
+                        {t(' and cancel your subscription.')}
+                      </p>
+                    )}
+
+                    <p className="text-xs text-neutral-400 mt-2">
+                      {t('If you have any questions, please contact us at ')}
+                      <a
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline cursor-pointer"
+                        href="mailto:jack@exploratorlabs.com"
+                      >
+                        jack@exploratorlabs.com
+                      </a>
+                    </p>
+                    {user && (
+                      <p className="text-xs text-neutral-400 mt-2">
+                        {t('Your registration email is')} {user?.email}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                 <div className="flex justify-between mt-4">
                   <button

@@ -18,6 +18,7 @@ import { trackEvent } from '@/utils/app/eventTracking';
 import HomeContext from '@/pages/api/home/home.context';
 
 import CloudSyncStatusComponent from '../../Sidebar/components/CloudSyncComponent';
+import UserAccountBadge from '@/components/User/UserAccountBadge';
 
 import { Import } from '../../Settings/Import';
 import { SidebarButton } from '../../Sidebar/SidebarButton';
@@ -41,20 +42,12 @@ export const ChatbarSettings = () => {
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
 
-  const signInAccountOnClick = () => {
-    if (user) {
-      trackEvent('Account button clicked');
-      homeDispatch({
-        field: 'showProfileModel',
-        value: true,
-      });
-    } else {
-      trackEvent('Sign in button clicked');
-      homeDispatch({
-        field: 'showLoginSignUpModel',
-        value: true,
-      });
-    }
+  const signInOnClick = () => {
+    trackEvent('Sign in button clicked');
+    homeDispatch({
+      field: 'showLoginSignUpModel',
+      value: true,
+    });
   };
 
   const referralBtnOnClick = () => {
@@ -63,34 +56,6 @@ export const ChatbarSettings = () => {
         field: 'showReferralModel',
         value: true,
       });
-    }
-  };
-
-  const getAccountButtonSuffixBadge = () => {
-    if (user) {
-      if (user.plan === 'pro') {
-        return (
-          <span className="bg-indigo-100 text-indigo-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-indigo-400 border border-indigo-400">
-            Pro
-          </span>
-        );
-      } else if (user.plan === 'edu') {
-        return (
-          <span className="text-xs font-medium mr-2 px-2.5 py-0.5 rounded bg-gray-700 text-green-400 border border-green-400">
-            Edu
-          </span>
-        );
-      } else {
-        return (
-          <span className="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500">
-            Free
-          </span>
-        );
-      }
-    } else {
-      <span className="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">
-        New
-      </span>;
     }
   };
 
@@ -105,6 +70,7 @@ export const ChatbarSettings = () => {
         <SidebarButton
           text={t('Settings')}
           icon={<IconSettings size={18} />}
+          suffixIcon={<UserAccountBadge />}
           onClick={() => {
             homeDispatch({
               field: 'showSettingsModel',
@@ -112,36 +78,15 @@ export const ChatbarSettings = () => {
             });
           }}
         />
-        <Import onImport={handleImportConversations} />
 
-        <SidebarButton
-          text={t('Export data')}
-          icon={<IconFileExport size={18} />}
-          onClick={() => handleExportData()}
-        />
+        {!user && (
+          <SidebarButton
+            text={t('Sign in')}
+            icon={<IconLogin size={18} />}
+            onClick={signInOnClick}
+          />
+        )}
 
-        <SidebarButton
-          text={lightMode === 'light' ? t('Dark mode') : t('Light mode')}
-          icon={
-            lightMode === 'light' ? (
-              <IconMoon size={18} />
-            ) : (
-              <IconSun size={18} />
-            )
-          }
-          onClick={() =>
-            homeDispatch({
-              field: 'lightMode',
-              value: lightMode === 'light' ? 'dark' : 'light',
-            })
-          }
-        />
-        <SidebarButton
-          text={user ? t('Account') : t('Sign in')}
-          icon={user ? <IconArticle size={18} /> : <IconLogin size={18} />}
-          suffixIcon={getAccountButtonSuffixBadge()}
-          onClick={signInAccountOnClick}
-        />
         {isEduUser && (
           <SidebarButton
             text={t('Referral Program')}

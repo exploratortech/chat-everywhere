@@ -2,7 +2,10 @@ import { IconFileExport } from '@tabler/icons-react';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { handleImportConversations } from '@/utils/app/importExport';
+import {
+  handleExportData,
+  handleImportConversations,
+} from '@/utils/app/importExport';
 
 import { SupportedExportFormats } from '@/types/export';
 
@@ -28,11 +31,11 @@ export default function Settings_Data() {
     <div>
       <h1 className="font-bold my-4">Data</h1>
       <Import onImport={handleImport} />
-      {/* <SidebarButton
+      <SidebarButton
         text={t('Export data')}
         icon={<IconFileExport size={18} />}
-        onClick={() => {}}
-      /> */}
+        onClick={handleExportData}
+      />
     </div>
   );
 }

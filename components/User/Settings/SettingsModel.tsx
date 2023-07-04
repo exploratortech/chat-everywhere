@@ -1,7 +1,15 @@
 import { Dialog, Transition } from '@headlessui/react';
-import React, { Dispatch, Fragment, createContext } from 'react';
+import React, {
+  Dispatch,
+  Fragment,
+  createContext,
+  useContext,
+  useEffect,
+} from 'react';
 
 import { ActionType, useCreateReducer } from '@/hooks/useCreateReducer';
+
+import HomeContext from '@/pages/api/home/home.context';
 
 import Settings_Account from './Settings_Account';
 import Settings_App from './Settings_App';
@@ -12,22 +20,27 @@ type Props = {
   onClose: () => void;
 };
 const settingsState = {
-  showing: 'app' as 'app' | 'account' | 'data',
+  showing: 'account' as 'account' | 'app' | 'data',
 };
 
 interface SettingsContext {
   state: typeof settingsState;
   dispatch: Dispatch<ActionType<typeof settingsState>>;
+  closeModel: () => void;
 }
 
 export const SettingsModelContext = createContext<SettingsContext>(undefined!);
 export default function SettingsModel({ onClose }: Props) {
-  const contextValue = useCreateReducer({
+  const settingsContext = useCreateReducer({
     initialState: settingsState,
   });
   const {
     state: { showing },
-  } = contextValue;
+    dispatch,
+  } = settingsContext;
+  const {
+    state: { user },
+  } = useContext(HomeContext);
 
   return (
     <Transition appear show={true} as={Fragment}>
@@ -45,7 +58,9 @@ export default function SettingsModel({ onClose }: Props) {
           <div className="fixed inset-0 bg-black bg-opacity-25" />
         </Transition.Child>
 
-        <SettingsModelContext.Provider value={contextValue}>
+        <SettingsModelContext.Provider
+          value={{ ...settingsContext, closeModel: onClose }}
+        >
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center text-center mobile:block">
               <Transition.Child

@@ -91,7 +91,6 @@ const Home = () => {
       temperature,
       showSettingsModel,
       showLoginSignUpModel,
-      showProfileModel,
       showReferralModel,
       showUsageModel,
       showSurveyModel,
@@ -454,7 +453,7 @@ const Home = () => {
   const handleUserLogout = async () => {
     await supabase.auth.signOut();
     dispatch({ field: 'user', value: null });
-    dispatch({ field: 'showProfileModel', value: false });
+    dispatch({ field: 'showSettingsModel', value: false });
     toast.success(t('You have been logged out'));
   };
 
@@ -663,13 +662,7 @@ const Home = () => {
                 }
               />
             )}
-            {showProfileModel && (
-              <ProfileUpgradeModel
-                onClose={() =>
-                  dispatch({ field: 'showProfileModel', value: false })
-                }
-              />
-            )}
+
             {showReferralModel && (
               <ReferralModel
                 onClose={() =>
