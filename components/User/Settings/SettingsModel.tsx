@@ -1,4 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
+import { IconX } from '@tabler/icons-react';
 import React, {
   Dispatch,
   Fragment,
@@ -72,12 +73,18 @@ export default function SettingsModel({ onClose }: Props) {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className=" w-full max-w-[1150px] tablet:max-w-[90vw] h-[calc(100vh-100px)] transform overflow-hidden rounded-2xl  text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-cols-[240px_auto] mobile:h-[100dvh] max-h-[750px] mobile:!max-w-[unset] mobile:!rounded-none">
-                  <Sidebar className="bg-neutral-800" />
-                  <div className="p-6 bg-neutral-900">
+                <Dialog.Panel className=" w-full max-w-[1150px] tablet:max-w-[90vw] h-[calc(100vh-100px)] transform overflow-hidden rounded-2xl  text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
+                  <Sidebar className="bg-neutral-800 flex-shrink-0 flex-grow-0" />
+                  <div className="p-6 bg-neutral-900 flex-grow relative">
                     {showing === 'account' && <Settings_Account />}
                     {showing === 'app' && <Settings_App />}
                     {showing === 'data' && <Settings_Data />}
+                    <button
+                      className="w-max min-h-[34px] p-4 absolute top-0 right-0"
+                      onClick={onClose}
+                    >
+                      <IconX />
+                    </button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

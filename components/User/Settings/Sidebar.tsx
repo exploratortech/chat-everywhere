@@ -70,15 +70,19 @@ export default function Sidebar({ className = '' }: Props) {
   return (
     <div className={`${className} flex justify-between flex-col`}>
       <div>
-        <b className="pt-6 px-6 block select-none">{t('Settings')}</b>
+        <b className="pt-6 px-6 block select-none tablet:hidden">
+          {t('Settings')}
+        </b>
         <div className="py-6 flex flex-col">
           {items.map((item, i) => {
             return (
               <a
                 key={`${i} ${item.name}`}
                 href="#"
-                className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 ${
-                  item.suffixIcon ? 'flex items-center justify-between' : ''
+                className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900  tablet:px-2 tablet:py-4 ${
+                  item.suffixIcon
+                    ? 'flex gap-4 items-center justify-between'
+                    : ''
                 } ${
                   showing === item.value
                     ? 'bg-neutral-900 text-neutral-100'
@@ -88,9 +92,12 @@ export default function Sidebar({ className = '' }: Props) {
                 onClick={item.callback}
               >
                 <div className="flex gap-2 items-center">
-                  {item.icon} {item.name}
+                  {item.icon}
+                  <div className="tablet:hidden"> {item.name}</div>
                 </div>
-                {!!item.suffixIcon && item.suffixIcon}
+                <div className="tablet:hidden">
+                  {!!item.suffixIcon && item.suffixIcon}
+                </div>
               </a>
             );
           })}
@@ -99,7 +106,7 @@ export default function Sidebar({ className = '' }: Props) {
 
       <a
         href="#"
-        className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center"
+        className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"
         onClick={() => {
           closeModel();
           if (user) {
@@ -113,7 +120,10 @@ export default function Sidebar({ className = '' }: Props) {
         }}
       >
         {user ? <IconLogout height={18} /> : <IconLogin height={18} />}
-        <div> {user ? t('Sign out') : t('Sign in')}</div>
+        <div className="tablet:hidden">
+          {' '}
+          {user ? t('Sign out') : t('Sign in')}
+        </div>
       </a>
     </div>
   );

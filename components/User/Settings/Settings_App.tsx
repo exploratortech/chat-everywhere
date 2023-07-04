@@ -14,7 +14,7 @@ export default function Settings_App() {
   } = useContext(HomeContext);
   return (
     <div>
-      <h1 className="font-bold my-4">App</h1>
+      <h1 className="font-bold mb-4">App</h1>
       <SidebarButton
         text={lightMode === 'light' ? t('Dark mode') : t('Light mode')}
         icon={

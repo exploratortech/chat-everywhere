@@ -101,7 +101,7 @@ export const initialState: HomeInitialState = {
 
   // User Auth
 
-  showSettingsModel: false,
+  showSettingsModel: true,
   showLoginSignUpModel: false,
   showReferralModel: false,
   showUsageModel: false,

@@ -29,7 +29,7 @@ export default function Settings_Data() {
 
   return (
     <div>
-      <h1 className="font-bold my-4">Data</h1>
+      <h1 className="font-bold mb-4">Data</h1>
       <Import onImport={handleImport} />
       <SidebarButton
         text={t('Export data')}
