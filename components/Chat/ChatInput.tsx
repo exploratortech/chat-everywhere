@@ -26,6 +26,7 @@ import HomeContext from '@/pages/api/home/home.context';
 import TokenCounter from './components/TokenCounter';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
+import VoiceInputButton from '../VoiceInput/VoiceInputButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
@@ -50,6 +51,8 @@ export const ChatInput = ({
       messageIsStreaming,
       prompts: originalPrompts,
       currentMessage,
+      speechContent,
+      isSpeechRecognitionActive,
     },
 
     dispatch: homeDispatch,
@@ -79,6 +82,10 @@ export const ChatInput = ({
   const enhancedMenuDisplayValue = useDisplayAttribute(menuRef);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (isSpeechRecognitionActive) {
+      e.preventDefault();
+      return;
+    }
     const value = e.target.value;
 
     setContent(value);
@@ -86,7 +93,7 @@ export const ChatInput = ({
   };
 
   const handleSend = () => {
-    if (messageIsStreaming) {
+    if (messageIsStreaming || isSpeechRecognitionActive) {
       return;
     }
 
@@ -273,6 +280,10 @@ export const ChatInput = ({
     };
   }, []);
 
+  useEffect(() => {
+    setContent(speechContent);
+  }, [speechContent]);
+
   const isAiImagePluginSelected = useMemo(
     () => currentMessage?.pluginId === PluginID.IMAGE_GEN,
     [currentMessage?.pluginId],
@@ -286,8 +297,8 @@ export const ChatInput = ({
             ? 'mt-[1.5rem] md:mt-[3rem]'
             : `${
                 isAiImagePluginSelected
-                  ? 'mt-[13.7rem] md:mt-[9.5rem]'
-                  : 'mt-[10.7rem] md:mt-[6.7rem]'
+                  ? 'mt-[16.9rem] md:mt-[12.8rem]'
+                  : 'mt-[14rem] md:mt-[10rem]'
               }`
         } stretch mx-2 mt-4 mb-4 flex flex-row gap-3 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-3xl transition-all ease-in-out`}
       >
@@ -318,7 +329,7 @@ export const ChatInput = ({
             border bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] 
             dark:bg-[#40414F] dark:text-white 
             dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4 
-            ${isOverTokenLimit ? '!border-red-500 dark:!border-red-600' : ''}
+            ${isOverTokenLimit && !isSpeechRecognitionActive ? '!border-red-500 dark:!border-red-600' : ''}
             ${
               !currentMessage || currentMessage.pluginId === null
                 ? 'border-black/10 dark:border-gray-900/50'
@@ -326,12 +337,6 @@ export const ChatInput = ({
             }
           `}
         >
-          <button
-            className="absolute left-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 cursor-default"
-            onKeyDown={(e) => {}}
-          >
-            {getPluginIcon(currentMessage?.pluginId)}
-          </button>
 
           <EnhancedMenu
             ref={menuRef}
@@ -339,36 +344,52 @@ export const ChatInput = ({
             setIsFocused={setIsFocused}
           />
 
-          <textarea
-            ref={textareaRef}
-            className={`m-0 w-full transition-all resize-none border-0 bg-transparent pt-3 pr-8 pl-10 text-black dark:bg-transparent dark:text-white outline-none`}
-            style={{
-              marginBottom: `${
-                isCloseToTokenLimit || isOverTokenLimit ? '2.2' : '0.75'
-              }rem `,
-              resize: 'none',
-              bottom: `${textareaRef?.current?.scrollHeight}px`,
-              maxHeight: '400px',
-              overflow: `${
-                textareaRef.current && textareaRef.current.scrollHeight > 400
-                  ? 'auto'
-                  : 'hidden'
-              }`,
-            }}
-            placeholder={t('Type a message ...') || ''}
-            value={content}
-            rows={1}
-            onKeyUp={(e) => setIsTyping(e.nativeEvent.isComposing)}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-          />
+          <div className="flex items-start">
+            <div className="flex items-center pt-1 pl-1">
+              <VoiceInputButton />
+              <button
+                className="rounded-sm p-1 text-zinc-500 dark:text-zinc-400 cursor-default"
+              >
+                {getPluginIcon(currentMessage?.pluginId)}
+              </button>
+            </div>
+
+            <textarea
+              ref={textareaRef}
+              className={`
+                m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md
+                ${ isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : '' }
+                ${ isOverTokenLimit && isSpeechRecognitionActive ? 'border !border-red-500 dark:!border-red-600' : 'border-0' }
+              `}
+              style={{
+                paddingBottom: `${
+                  isCloseToTokenLimit || isOverTokenLimit ? '2.2' : '0.75'
+                }rem `,
+                resize: 'none',
+                bottom: `${textareaRef?.current?.scrollHeight}px`,
+                maxHeight: '400px',
+                overflow: `${
+                  textareaRef.current && textareaRef.current.scrollHeight > 400
+                    ? 'auto'
+                    : 'hidden'
+                }`,
+              }}
+              placeholder={t('Type a message ...') || ''}
+              value={content}
+              rows={1}
+              onKeyUp={(e) => setIsTyping(e.nativeEvent.isComposing)}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
 
           <TokenCounter
-            className={` ${
-              isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''
-            } ${
-              isCloseToTokenLimit || isOverTokenLimit ? 'visible' : 'invisible'
-            } absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400`}
+            className={`
+              ${isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''}
+              ${isCloseToTokenLimit || isOverTokenLimit ? 'visible' : 'invisible'}
+              ${ isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : '' }
+              absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400
+            `}
             value={content}
             setIsOverLimit={setIsOverTokenLimit}
             setIsCloseToLimit={setIsCloseToTokenLimit}
@@ -379,7 +400,7 @@ export const ChatInput = ({
             onClick={handleSend}
           >
             {messageIsStreaming ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-t-2 border-neutral-800 opacity-60 dark:border-neutral-100"></div>
+              <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
             ) : (
               <IconSend size={18} />
             )}

@@ -20,6 +20,7 @@ import {
 } from '@/utils/app/const';
 import { saveConversation, saveConversations } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
+import { trackEvent } from '@/utils/app/eventTracking';
 import { removeSecondLastLine } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 import { throttle } from '@/utils/data/throttle';
@@ -32,7 +33,6 @@ import HomeContext from '@/pages/api/home/home.context';
 import { NewConversationMessagesContainer } from '../ConversationStarter/NewConversationMessagesContainer';
 import Spinner from '../Spinner';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
-import AdMessage from './AdMessage';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import { ChatMessage } from './ChatMessage';
@@ -218,6 +218,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let done = false;
         let isFirst = true;
         let text = '';
+        let largeContextResponse = false;
+        let showHintForLargeContextResponse = false;
+
         while (!done) {
           if (stopConversationRef.current === true) {
             controller.abort();
@@ -234,6 +237,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             done = true;
           }
 
+          if (text.includes('[16K]')) {
+            text = text.replace('[16K]', '');
+            largeContextResponse = true;
+          }
+
+          if (text.includes('[16K-Optional]')) {
+            text = text.replace('[16K-Optional]', '');
+            showHintForLargeContextResponse = true;
+          }
+
           if (text.includes('[REMOVE_LAST_LINE]')) {
             text = text.replace('[REMOVE_LAST_LINE]', '');
             text = removeSecondLastLine(text);
@@ -246,6 +259,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               {
                 role: 'assistant',
                 content: chunkValue,
+                largeContextResponse,
+                showHintForLargeContextResponse,
                 pluginId: plugin?.id || null,
               },
             ];
@@ -265,6 +280,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   return {
                     ...message,
                     content: text,
+                    largeContextResponse,
+                    showHintForLargeContextResponse,
                   };
                 }
                 return message;
@@ -311,6 +328,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         updateConversationLastUpdatedAtTimeStamp();
         logGaEvent(text.length);
+        trackEvent('Send message', {
+          Length: text.length,
+          PluginId: plugin?.id || null,
+          LargeContextModel: largeContextResponse,
+        });
       }
     },
     [
@@ -439,7 +461,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   className="justify-center border hidden lg:flex
                   border-b-neutral-300 bg-neutral-100 py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 sticky top-0 z-10"
                 >
-                  {selectedConversation?.name} 
+                  {selectedConversation?.name}
 
                   <button
                     className="ml-2 cursor-pointer hover:opacity-50"

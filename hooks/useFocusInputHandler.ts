@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef, RefObject } from 'react';
+import { useState, useEffect, useRef, RefObject, useContext } from 'react';
+
+import HomeContext from '@/pages/api/home/home.context';
 
 interface FocusHandlerResult {
   isFocused: boolean;

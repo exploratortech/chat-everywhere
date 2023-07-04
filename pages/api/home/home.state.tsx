@@ -42,10 +42,12 @@ export interface HomeInitialState {
   // User Auth
   showLoginSignUpModel: boolean;
   showProfileModel: boolean;
+  showReferralModel: boolean;
   showUsageModel: boolean;
   showSurveyModel: boolean;
   showNewsModel: boolean;
   showFeaturesModel: boolean;
+  showFeaturePageOnLoad: string | null;
   user: User | null;
   isPaidUser: boolean;
   isSurveyFilled: boolean;
@@ -59,6 +61,11 @@ export interface HomeInitialState {
   speechRegion: null | string;
   isPlaying: boolean;
   isLoading: boolean;
+
+  // Speech to Text
+  speechContent: string;
+  isSpeechRecognitionActive: boolean;
+  speechRecognitionLanguage: string;
 }
 
 export const initialState: HomeInitialState = {
@@ -95,10 +102,12 @@ export const initialState: HomeInitialState = {
   // User Auth
   showLoginSignUpModel: false,
   showProfileModel: false,
+  showReferralModel: false,
   showUsageModel: false,
   showSurveyModel: false,
   showNewsModel: false,
   showFeaturesModel: false,
+  showFeaturePageOnLoad: null,
   user: null,
   isPaidUser: false,
   isSurveyFilled: false,
@@ -112,4 +121,9 @@ export const initialState: HomeInitialState = {
   speechRegion: null,
   isPlaying: false,
   isLoading: false,
+
+  // Speech to Text
+  speechContent: '',
+  isSpeechRecognitionActive: false,
+  speechRecognitionLanguage: 'en-US',
 };

@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/update-referral-codes",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/update-pro-accounts-plan",
+      "schedule": "0 16 * * *"
+    }
+  ]
+}

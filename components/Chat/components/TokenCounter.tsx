@@ -31,7 +31,7 @@ function TokenCounter({
   const debouncedValue = useDebounce<string>(value, 500);
 
   const {
-    state: { currentMessage },
+    state: { currentMessage, isPaidUser },
   } = useContext(HomeContext);
 
   const modelMaxTokenLength = useMemo(() => {
@@ -39,10 +39,13 @@ function TokenCounter({
       case 'gpt-4':
         return OpenAIModels[OpenAIModelID.GPT_4].tokenLimit;
       default:
-        // The Chat endpoint will automatically use the 16k content window model if the prompt is longer than 2048 tokens
-        return OpenAIModels[OpenAIModelID.GPT_3_5_16K].tokenLimit;
+        // Only enable 16k model for pro users
+        const defaultModel = isPaidUser
+          ? OpenAIModels[OpenAIModelID.GPT_3_5_16K]
+          : OpenAIModels[OpenAIModelID.GPT_3_5];
+        return defaultModel.tokenLimit;
     }
-  }, [currentMessage?.pluginId]);
+  }, [currentMessage?.pluginId, isPaidUser]);
 
   const maxToken = useMemo(() => {
     return modelMaxTokenLength - promptTokensLength;

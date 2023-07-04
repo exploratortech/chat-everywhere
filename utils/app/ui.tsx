@@ -12,6 +12,7 @@ export const PlanDetail = {
   free: {
     features: [
       'Online mode',
+      'Voice input',
       'Share conversations',
       'Folder manager',
       'Prompt manager',
@@ -23,13 +24,15 @@ export const PlanDetail = {
       'AI speech',
       'GPT-4 (50 response/month + credit)',
       'MidJourney generation (50 images/month + credit)',
+      '16K model',
     ],
   },
   combinedSimplify: [
     'Cloud sync',
     'GPT-4',
     'MidJourney image generation',
-    'AI speech'
+    'AI speech',
+    '16K model'
   ]
 };
 
