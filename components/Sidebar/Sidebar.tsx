@@ -92,11 +92,9 @@ const Sidebar = <T,>({
         />
 
         <div className="flex-1 overflow-auto">
-          {items?.length > 0 && (
-            <div className="flex border-b border-white/20 pb-2">
-              {folderComponent}
-            </div>
-          )}
+          <div className="flex border-b border-white/20 pb-2">
+            {folderComponent}
+          </div>
 
           {itemsIsImporting && (
             <div className="mt-8 select-none text-center text-white opacity-50">
