@@ -18,6 +18,7 @@ export interface UserConversation {
 
 export interface UserProfile {
   id: string;
+  email: string;
   plan: SubscriptionPlan;
   referralCode: string | undefined;
   referralCodeExpirationDate: string | undefined;

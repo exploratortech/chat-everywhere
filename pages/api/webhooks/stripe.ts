@@ -1,10 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
+import { sendReportForStripeWebhookError } from '@/utils/server/resend';
 import updateUserAccount from '@/utils/server/stripe/updateUserAccount';
 import {
   getAdminSupabaseClient,
   userProfileQuery,
 } from '@/utils/server/supabase';
+
+import { SubscriptionPlan } from './../../../types/user';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -55,12 +58,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       stripeSubscriptionId = session.subscription as string;
 
       if (!planCode && !planGivingWeeks) {
+        await sendReportForStripeWebhookError(
+          'no plan code or plan giving weeks from Stripe webhook',
+          event,
+        );
         throw new Error(
           'no plan code or plan giving weeks from Stripe webhook',
         );
       }
 
       if (!email) {
+        await sendReportForStripeWebhookError(
+          'missing Email from Stripe webhook',
+          event,
+        );
         throw new Error('missing Email from Stripe webhook');
       }
 
@@ -80,9 +91,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             return dayjs(userProPlanExpirationDate)
               .add(+planGivingWeeks, 'week')
               .toDate();
+          } else if (user.plan === 'pro' && !user.proPlanExpirationDate) {
+            // when user is pro monthly subscriber
+            await sendReportForStripeWebhookError(
+              'Monthly Pro subscriber bought one-time pro plan',
+              event,
+              user,
+            );
+
+            throw new Error(
+              'Monthly Pro subscriber bought one-time pro plan, should not happen',
+            );
           } else {
-            // when user is not pro yet or user is pro monthly subscriber
-            // TODO: handle adding from monthly pro plan
+            // when user is not pro yet
             return dayjs(sinceDate).add(+planGivingWeeks, 'week').toDate();
           }
         } else if (planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH) {
@@ -118,7 +139,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       stripeSubscriptionId = session.id;
 
       if (!stripeSubscriptionId) {
-        console.error(session);
+        await sendReportForStripeWebhookError(
+          'Subscription id not found from Stripe webhook',
+          event,
+        );
         throw new Error('Subscription id not found from Stripe webhook');
       }
 
@@ -151,7 +175,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       stripeSubscriptionId = session.id;
 
       if (!stripeSubscriptionId) {
-        console.error(session);
+        await sendReportForStripeWebhookError(
+          'Subscription id not found from Stripe webhook',
+          event,
+        );
         throw new Error('Subscription id not found from Stripe webhook');
       }
 

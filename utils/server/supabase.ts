@@ -8,7 +8,7 @@ import {
   generateReferralCodeAndExpirationDate,
 } from './referralCode';
 
-import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
 
 export const getAdminSupabaseClient = () => {
@@ -432,6 +432,7 @@ export const userProfileQuery = async ({
 
   return {
     id: userProfile.id,
+    email: userProfile.email,
     plan: userProfile.plan,
     referralCode: userProfile.referral_code,
     proPlanExpirationDate: userProfile.pro_plan_expiration_date,
