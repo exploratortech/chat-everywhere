@@ -7,12 +7,9 @@ import { ChatBody } from '@/types/chat';
 import { OpenAIModelID } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
 
-import { AgentExecutor, ZeroShotAgent } from 'langchain/agents';
-import { CallbackManager } from 'langchain/callbacks';
-import { LLMChain } from 'langchain/chains';
+import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { BingSerpAPI } from 'langchain/tools';
-import { DynamicTool } from 'langchain/tools';
+import { BingSerpAPI, DynamicTool } from 'langchain/tools';
 import { all, create } from 'mathjs';
 
 export const config = {
@@ -44,8 +41,8 @@ const webBrowser = (webSummaryEndpoint: string) =>
       const requestURL = new URL(webSummaryEndpoint);
       requestURL.searchParams.append('browserQuery', input);
       const response = await fetch(requestURL.toString());
-      const { summary } = await response.json();
-      return summary;
+      const { content } = await response.json();
+      return content;
     },
   });
 
@@ -69,19 +66,25 @@ const handler = async (req: NextRequest, res: any) => {
     await writer.write(encoder.encode(text));
   };
 
-  const callbackManager = CallbackManager.fromHandlers({
-    handleChainStart: async () => {
+  const callbackHandlers = {
+    handleChainStart: async (chain: any) => {
       console.log('handleChainStart');
       await writer.ready;
       await writeToStream('```Online \n');
       await writeToStream('Thinking ... \n\n');
     },
-    handleAgentAction: async (action) => {
+    handleChainEnd: async (outputs: any) => {
+      console.log('handleChainEnd', outputs);
+    },
+    handleAgentAction: async (action: any) => {
       console.log('handleAgentAction', action);
       await writer.ready;
       await writeToStream(`${action.log}\n\n`);
     },
-    handleAgentEnd: async (action) => {
+    handleToolStart: async (tool: any) => {
+      console.log('handleToolStart', { tool });
+    },
+    handleAgentEnd: async (action: any) => {
       console.log('handleAgentEnd', action);
       await writer.ready;
       await writeToStream('``` \n\n');
@@ -100,16 +103,7 @@ const handler = async (req: NextRequest, res: any) => {
       console.log('Done');
       writer.close();
     },
-    handleChainEnd: async (outputs) => {
-      console.log('handleChainEnd', outputs);
-    },
-    handleLLMError: async (e) => {
-      await writer.ready;
-      await writeToStream('``` \n\n');
-      await writeToStream('Sorry, I am not able to answer your question. \n\n');
-      await writer.abort(e);
-    },
-    handleChainError: async (err, verbose) => {
+    handleChainError: async (err: any, verbose: any) => {
       await writer.ready;
       await writeToStream('``` \n\n');
       // This is a hack to get the output from the LLM
@@ -124,17 +118,13 @@ const handler = async (req: NextRequest, res: any) => {
       }
       await writer.abort(err);
     },
-    handleToolError: async (err, verbose) => {
-      console.log('Tool Error: ', truncateLogMessage(err.message));
-    },
-  });
+  };
 
   const model = new ChatOpenAI({
     temperature: 0,
-    callbackManager,
     modelName: OpenAIModelID.GPT_3_5_16K,
     openAIApiKey: process.env.OPENAI_API_KEY,
-    streaming: false,
+    streaming: true,
   });
 
   const BingAPIKey = process.env.BingApiKey;
@@ -148,60 +138,36 @@ const handler = async (req: NextRequest, res: any) => {
     calculator,
     webBrowser(webSummaryEndpoint),
   ];
-  const toolNames = tools.map((tool) => tool.name);
 
-  const prompt = ZeroShotAgent.createPrompt(tools, {
-    prefix: `You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format.
-      
-      Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
-      ${requestBody.messages
-        .map((message, index) => {
-          return `${index + 1}) ${
-            message.role === 'assistant' ? 'You' : 'User'
-          } ${normalizeTextAnswer(message.content)}`;
-        })
-        .join('\n')}
-
-      The current date and time is ${new Date().toLocaleString()}.
-      
-      Make sure you include the reference links to the websites you used to answer the user's question in your response using Markdown syntax. You MUST use the following Markdown syntax to include a link in your response:
-      [Link Text](https://www.example.com)
-
-      Use the following format:
-
-      Question: the input question you must answer
-      Thought: you should always think about what to do
-      Action: the action to take, should be one of ${toolNames}
-      Action Input: the input to the action
-      Observation: the result of the action
-      ... (this Thought/Action/Action Input/Observation can repeat N times)
-      Thought: I now know the final answer
-      Final Answer: the final answer to the original input question
-    `,
-  });
-
-  const llmChain = new LLMChain({
-    llm: model,
-    prompt: prompt,
-  });
-
-  const agent = new ZeroShotAgent({
-    llmChain,
-    allowedTools: ['bing-search', 'calculator'],
-  });
-
-  const agentExecutor = AgentExecutor.fromAgentAndTools({
-    agent,
-    tools,
-    callbackManager,
+  const executor = await initializeAgentExecutorWithOptions(tools, model, {
+    agentType: 'openai-functions',
+    // verbose: true,
   });
 
   try {
-    agentExecutor.verbose = true;
+    executor.verbose = true;
 
-    agentExecutor.call({
-      input: `${selectedOutputLanguage} ${latestUserPrompt}`,
-    });
+    executor.call(
+      {
+        input: `${selectedOutputLanguage} Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
+        ${requestBody.messages
+          .map((message, index) => {
+            return `${index + 1}) ${
+              message.role === 'assistant' ? 'You' : 'User'
+            } ${normalizeTextAnswer(message.content)}`;
+          })
+          .join('\n')}
+
+        The current date and time is ${new Date().toLocaleString()}.
+        
+        Make sure you include the reference links to the websites you used to answer the user's question in your response using Markdown syntax. You MUST use the following Markdown syntax to include a link in your response:
+        [Link Text](https://www.example.com)
+        
+        Let's begin by answering my question below. You can use the information above to answer my question if needed.
+        ${latestUserPrompt}`,
+      },
+      [callbackHandlers],
+    );
 
     return new NextResponse(stream.readable, {
       headers: {

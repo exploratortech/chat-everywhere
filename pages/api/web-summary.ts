@@ -4,7 +4,7 @@ import { OpenAIModelID } from '@/types/openai';
 
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { WebBrowser } from 'langchain/tools/webbrowser';
+import { WebBrowser, getText } from 'langchain/tools/webbrowser';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { browserQuery } = req.query;
@@ -21,11 +21,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     embeddings,
   });
 
-  const result = await browser.call(browserQuery as string);
+  // Get the HTML of the webpage
+  const html = await browser.call(browserQuery as string);
 
-  console.log('Output: ', result);
+  // Parse the HTML to get the text content
+  const content = getText(html, browserQuery as string, false);
 
-  res.status(200).json({ summary: result });
+  console.log('Output: ', content);
+
+  res.status(200).json({ content });
 };
 
 export default handler;
