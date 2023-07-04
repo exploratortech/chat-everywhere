@@ -92,32 +92,37 @@ export const ChatFolders = ({ searchTerm }: Props) => {
   };
 
   const ChatFolders = (currentFolder: FolderInterface) => {
+    const refinedFilteredConversations = filteredConversations
+      .filter((conversation) =>
+        conversation.folderId && conversation.folderId === currentFolder.id
+      );
+
+    if (!refinedFilteredConversations.length) {
+      return null;
+    }
+
     return (
-      <>
+      <div className="flex flex-col ml-5 pl-2 border-l pt-1">
         <DropArea
           allowedDragTypes={['conversation']}
           canDrop={handleCanDropConversation}
           index={0}
           onDrop={() => handleConversationDrop(currentFolder, 0)}
         />
-        {filteredConversations
-          .filter((conversation) =>
-            conversation.folderId && conversation.folderId === currentFolder.id
-          ).map((conversation, index) => (
-            <Fragment key={conversation.id}>
-              <div className="ml-5 gap-2 border-l pl-2 item">
-                <ConversationComponent conversation={conversation} />
-              </div>
-              <DropArea
-                allowedDragTypes={['conversation']}
-                canDrop={handleCanDropConversation}
-                index={index + 1}
-                onDrop={() => handleConversationDrop(currentFolder, index + 1)}
-              />
-            </Fragment>
-          ))
-        }
-      </>
+        {refinedFilteredConversations.map((conversation, index) => (
+          <Fragment key={conversation.id}>
+            <div className="mb-1">
+              <ConversationComponent conversation={conversation} />
+            </div>
+            <DropArea
+              allowedDragTypes={['conversation']}
+              canDrop={handleCanDropConversation}
+              index={index + 1}
+              onDrop={() => handleConversationDrop(currentFolder, index + 1)}
+            />
+          </Fragment>
+        ))}
+      </div>
     );
   };
 

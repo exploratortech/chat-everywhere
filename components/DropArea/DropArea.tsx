@@ -45,7 +45,7 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
 
   return (
     <div
-      className="relative h-1"
+      className="relative"
     >
       <div
         className="absolute h-3 my-auto top-0 bottom-0 left-0 right-0 rounded-lg pointer-events-none"

@@ -90,36 +90,43 @@ export const PromptFolders = () => {
     );
   };
 
-  const PromptFolders = (currentFolder: FolderInterface) => (
-    <>
-      <DropArea
-        allowedDragTypes={['prompt']}
-        canDrop={handleCanDropPrompt}
-        index={0}
-        onDrop={() => handlePromptDrop(currentFolder, 0)}
-      />
-      {filteredPrompts
-        .filter((p) => p.folderId)
-        .map((prompt, index) => {
-          if (prompt.folderId === currentFolder.id) {
-            return (
-              <Fragment key={prompt.id}>
-                <div key={prompt.id} className="ml-5 border-l pl-2">
-                  <PromptComponent prompt={prompt} />
-                </div>
-                <DropArea
-                  allowedDragTypes={['prompt']}
-                  canDrop={handleCanDropPrompt}
-                  index={index + 1}
-                  onDrop={() => handlePromptDrop(currentFolder, index + 1)}
-                />
-              </Fragment>
-            );
+  const PromptFolders = (currentFolder: FolderInterface) => {
+    const refinedFilteredPrompts = filteredPrompts
+      .filter((p) => p.folderId === currentFolder.id);
+
+    if (!refinedFilteredPrompts.length) {
+      return null;
+    }
+
+    return (
+      <div className="flex flex-col ml-5 pl-2 border-l pt-1">
+        <DropArea
+          allowedDragTypes={['prompt']}
+          canDrop={handleCanDropPrompt}
+          index={0}
+          onDrop={() => handlePromptDrop(currentFolder, 0)}
+        />
+        {refinedFilteredPrompts.map((prompt, index) => {
+            if (prompt.folderId === currentFolder.id) {
+              return (
+                <Fragment key={prompt.id}>
+                  <div className="mb-1">
+                    <PromptComponent prompt={prompt} />
+                  </div>
+                  <DropArea
+                    allowedDragTypes={['prompt']}
+                    canDrop={handleCanDropPrompt}
+                    index={index + 1}
+                    onDrop={() => handlePromptDrop(currentFolder, index + 1)}
+                  />
+                </Fragment>
+              );
+            }
           }
-        }
-      )}
-    </>
-  );
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="flex w-full flex-col pt-2">
