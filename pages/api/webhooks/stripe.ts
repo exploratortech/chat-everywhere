@@ -69,8 +69,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // Takes plan_giving_weeks priority over plan_code
         if (planGivingWeeks && typeof planGivingWeeks === 'string') {
           // Get users' pro expiration date
-
-          return dayjs(sinceDate).add(+planGivingWeeks, 'week').toDate();
+          const supabase = getAdminSupabaseClient();
+          const user = await userProfileQuery({
+            client: supabase,
+            email,
+          });
+          const userProPlanExpirationDate = user?.proPlanExpirationDate;
+          if (userProPlanExpirationDate) {
+            // when user bought one-time pro plan previously or user has referral trial
+            return dayjs(userProPlanExpirationDate)
+              .add(+planGivingWeeks, 'week')
+              .toDate();
+          } else {
+            // when user is not pro yet or user is pro monthly subscriber
+            // TODO: handle adding from monthly pro plan
+            return dayjs(sinceDate).add(+planGivingWeeks, 'week').toDate();
+          }
         } else if (planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH) {
           // Only store expiration for one month plan
           return dayjs(sinceDate).add(1, 'month').toDate();
