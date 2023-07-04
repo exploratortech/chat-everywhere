@@ -1,7 +1,7 @@
 import { DefaultMonthlyCredits } from '@/utils/config';
 
 import { PluginID } from '@/types/plugin';
-import { UserProfile } from '@/types/user';
+import { UserProfile, UserProfileQueryProps } from '@/types/user';
 
 import {
   CodeGenerationPayloadType,
@@ -23,7 +23,10 @@ export const getAdminSupabaseClient = () => {
 
 export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   const supabase = getAdminSupabaseClient();
-  return await userProfileQuery(supabase, userId);
+  return await userProfileQuery({
+    client: supabase,
+    userId,
+  });
 };
 
 export const addUsageEntry = async (
@@ -358,32 +361,65 @@ export const redeemReferralCode = async ({
   }
 };
 
-export const userProfileQuery = async (
-  client: SupabaseClient,
-  userId: string,
-) => {
-  const { data: user, error } = await client
-    .from('profiles')
-    .select(
-      'id, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date',
-    )
-    .eq('id', userId)
-    .single();
-
-  if (error) {
-    throw error;
+export const userProfileQuery = async ({
+  client,
+  userId,
+  email,
+}: UserProfileQueryProps) => {
+  if (!userId && !email) {
+    throw new Error('Either userId or email must be provided');
   }
+  let userProfile: {
+    id: any;
+    email: any;
+    plan: any;
+    pro_plan_expiration_date: any;
+    referral_code: any;
+    referral_code_expiration_date: any;
+  } | null = null;
+  if (userId) {
+    const { data: user, error } = await client
+      .from('profiles')
+      .select(
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date',
+      )
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+    userProfile = user;
+  } else if (email) {
+    const { data: user, error } = await client
+      .from('profiles')
+      .select(
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date',
+      )
+      .eq('email', email)
+      .single();
+    if (error) {
+      throw error;
+    }
+    userProfile = user;
+  }
+
+  if (!userProfile) throw new Error('User not found');
 
   const { data: referralTable, error: refereeError } = await client
     .from('referral')
     .select('*')
-    .or(`referee_id.eq.${userId},referrer_id.eq.${userId}`);
+    .or(`referee_id.eq.${userProfile.id},referrer_id.eq.${userProfile.id}`);
   if (refereeError) {
     throw refereeError;
   }
 
-  const referrerRecords = referralTable?.find((r) => r.referee_id === userId);
-  const refereeRecords = referralTable?.find((r) => r.referrer_id === userId);
+  const referrerRecords = referralTable?.find(
+    (r) => userProfile && r.referee_id === userProfile.id,
+  );
+  const refereeRecords = referralTable?.find(
+    (r) => userProfile && r.referrer_id === userProfile.id,
+  );
 
   const isInReferralTrial = (() => {
     if (!referrerRecords) return false;
@@ -395,11 +431,11 @@ export const userProfileQuery = async (
   })();
 
   return {
-    id: user.id,
-    plan: user.plan,
-    referralCode: user.referral_code,
-    proPlanExpirationDate: user.pro_plan_expiration_date,
-    referralCodeExpirationDate: user.referral_code_expiration_date,
+    id: userProfile.id,
+    plan: userProfile.plan,
+    referralCode: userProfile.referral_code,
+    proPlanExpirationDate: userProfile.pro_plan_expiration_date,
+    referralCodeExpirationDate: userProfile.referral_code_expiration_date,
     hasReferrer: !!referrerRecords,
     hasReferee: !!refereeRecords,
     isInReferralTrial: isInReferralTrial,
