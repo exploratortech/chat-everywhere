@@ -51,7 +51,6 @@ import { Navbar } from '@/components/Mobile/Navbar';
 import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
-import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
 import ReferralModel from '@/components/User/ReferralModel';
 import SettingsModel from '@/components/User/Settings/SettingsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
