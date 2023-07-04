@@ -304,6 +304,7 @@ const Home = () => {
       },
       prompt: DEFAULT_SYSTEM_PROMPT,
       temperature: DEFAULT_TEMPERATURE,
+      rank: generateRank(getNonDeletedCollection(conversations)),
       folderId: null,
       lastUpdateAtUTC: dayjs().valueOf(),
     };

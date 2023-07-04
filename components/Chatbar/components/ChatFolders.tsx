@@ -1,6 +1,6 @@
 import React, { Fragment, useContext, useMemo } from 'react';
 
-import { getNonDeletedCollection } from '@/utils/app/conversation';
+import { getNonDeletedCollection, saveConversations, updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { saveFolders } from '@/utils/app/folders';
 import { generateRank, reorderItem } from '@/utils/app/rank';
 
@@ -10,9 +10,9 @@ import { Conversation } from '@/types/chat';
 import HomeContext from '@/pages/api/home/home.context';
 
 import Folder from '@/components/Folder';
+import DropArea from '@/components/DropArea/DropArea';
 
 import { ConversationComponent } from './Conversation';
-import DropArea from '@/components/DropArea/DropArea';
 import ChatbarContext from '../Chatbar.context';
 
 interface Props {
@@ -22,8 +22,9 @@ interface Props {
 export const ChatFolders = ({ searchTerm }: Props) => {
   const {
     state: {
-      folders,
+      conversations,
       currentDrag,
+      folders,
     },
     dispatch,
     handleUpdateConversation,
@@ -38,14 +39,32 @@ export const ChatFolders = ({ searchTerm }: Props) => {
       .filter((folder) => folder.type === 'chat');
   }, [folders]);
 
-  const handleConversationDrop = (folder: FolderInterface) => {
+  const handleConversationDrop = (folder: FolderInterface, index?: number): void => {
     if (currentDrag && currentDrag.type === 'conversation') {
       const conversation = currentDrag.data as Conversation;
-      handleUpdateConversation(conversation, {
-        key: 'folderId',
-        value: folder.id,
-      });
+
+      const filter = (otherConversation: Conversation) =>
+        otherConversation.folderId === folder.id;
+      const refinedFilteredConversations = filteredConversations.filter(filter);
+
+      const updatedConversations = reorderItem(
+        conversations,
+        conversation.id,
+        generateRank(refinedFilteredConversations, index),
+        {
+          filter,
+          updates: { folderId: folder.id },
+        }
+      );
+
+      dispatch({ field: 'conversations', value: updatedConversations });
+      saveConversations(updatedConversations);
+      updateConversationLastUpdatedAtTimeStamp();
     }
+  };
+
+  const handleCanDropConversation = (): boolean => {
+    return (!!currentDrag && currentDrag.type === 'conversation');
   };
 
   const handleFolderDrop = (e: React.DragEvent<HTMLElement>, index: number) => {
@@ -56,7 +75,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
         folders,
         folder.id,
         generateRank(filteredFolders, index),
-        (folder: FolderInterface) => folder.type === 'chat',
+        { filter: (folder: FolderInterface) => folder.type === 'chat' },
       );
       dispatch({ field: 'folders', value: reorderedFolders });
       saveFolders(reorderedFolders);
@@ -64,7 +83,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
     e.stopPropagation();
   };
 
-  const handleCanDrop = (): boolean => {
+  const handleCanDropFolder = (): boolean => {
     return (
       !!currentDrag &&
       currentDrag.type === 'folder' &&
@@ -74,14 +93,31 @@ export const ChatFolders = ({ searchTerm }: Props) => {
 
   const ChatFolders = (currentFolder: FolderInterface) => {
     return (
-      filteredConversations
-        .filter((conversation) =>
-          conversation.folderId && conversation.folderId === currentFolder.id
-        ).map((conversation) => (
-          <div key={conversation.id} className="ml-5 gap-2 border-l pl-2 item">
-            <ConversationComponent conversation={conversation} />
-          </div>
-        ))
+      <>
+        <DropArea
+          allowedDragTypes={['conversation']}
+          canDrop={handleCanDropConversation}
+          index={0}
+          onDrop={() => handleConversationDrop(currentFolder, 0)}
+        />
+        {filteredConversations
+          .filter((conversation) =>
+            conversation.folderId && conversation.folderId === currentFolder.id
+          ).map((conversation, index) => (
+            <Fragment key={conversation.id}>
+              <div className="ml-5 gap-2 border-l pl-2 item">
+                <ConversationComponent conversation={conversation} />
+              </div>
+              <DropArea
+                allowedDragTypes={['conversation']}
+                canDrop={handleCanDropConversation}
+                index={index + 1}
+                onDrop={() => handleConversationDrop(currentFolder, index + 1)}
+              />
+            </Fragment>
+          ))
+        }
+      </>
     );
   };
 
@@ -89,7 +125,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
     <div className="flex w-full flex-col">
       <DropArea
         allowedDragTypes={['folder']}
-        canDrop={handleCanDrop}
+        canDrop={handleCanDropFolder}
         index={0}
         onDrop={(e) => handleFolderDrop(e, 0)}
       />
@@ -104,7 +140,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
           />
           <DropArea
             allowedDragTypes={['folder']}
-            canDrop={handleCanDrop}
+            canDrop={handleCanDropFolder}
             index={index + 1}
             onDrop={(e) => handleFolderDrop(e, index + 1)}
           />
