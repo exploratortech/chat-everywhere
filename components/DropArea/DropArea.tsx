@@ -54,7 +54,7 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
       <div
         className={`
           absolute h-8 my-auto top-0 left-0 right-0 -translate-y-1/2
-          ${ isDragTypeAllowed ? 'pointer-events-auto h-14' : 'pointer-events-none h-8' }
+          ${ isDragTypeAllowed ? 'pointer-events-auto h-[3rem]' : 'pointer-events-none h-8' }
         `}
         onDrop={handleDrop}
         onDragEnter={onDragEnter}

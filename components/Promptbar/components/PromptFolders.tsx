@@ -99,7 +99,7 @@ export const PromptFolders = () => {
     }
 
     return (
-      <div className="flex flex-col ml-5 pl-2 border-l pt-1">
+      <div className="flex flex-col ml-5 pl-2 border-l py-1">
         <DropArea
           allowedDragTypes={['prompt']}
           canDrop={handleCanDropPrompt}
@@ -110,9 +110,7 @@ export const PromptFolders = () => {
             if (prompt.folderId === currentFolder.id) {
               return (
                 <Fragment key={prompt.id}>
-                  <div className="mb-1">
-                    <PromptComponent prompt={prompt} />
-                  </div>
+                  <PromptComponent prompt={prompt} />
                   <DropArea
                     allowedDragTypes={['prompt']}
                     canDrop={handleCanDropPrompt}

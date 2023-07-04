@@ -102,7 +102,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
     }
 
     return (
-      <div className="flex flex-col ml-5 pl-2 border-l pt-1">
+      <div className="flex flex-col ml-5 pl-2 border-l py-1">
         <DropArea
           allowedDragTypes={['conversation']}
           canDrop={handleCanDropConversation}
@@ -111,9 +111,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
         />
         {refinedFilteredConversations.map((conversation, index) => (
           <Fragment key={conversation.id}>
-            <div className="mb-1">
-              <ConversationComponent conversation={conversation} />
-            </div>
+            <ConversationComponent conversation={conversation} />
             <DropArea
               allowedDragTypes={['conversation']}
               canDrop={handleCanDropConversation}
