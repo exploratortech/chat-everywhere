@@ -1,6 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import updateUserAccount from '@/utils/server/stripe/updateUserAccount';
+import {
+  getAdminSupabaseClient,
+  userProfileQuery,
+} from '@/utils/server/supabase';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -60,15 +64,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         throw new Error('missing Email from Stripe webhook');
       }
 
-      const proPlanExpirationDate = (() => {
+      const sinceDate = dayjs.unix(session.created).utc().toDate();
+      const proPlanExpirationDate = await (async () => {
         // Takes plan_giving_weeks priority over plan_code
         if (planGivingWeeks && typeof planGivingWeeks === 'string') {
-          const currentDate = dayjs().utc().toDate();
-          return dayjs(currentDate).add(+planGivingWeeks, 'week').toDate();
+          // Get users' pro expiration date
+
+          return dayjs(sinceDate).add(+planGivingWeeks, 'week').toDate();
         } else if (planCode === ONE_TIME_PRO_PLAN_FOR_1_MONTH) {
           // Only store expiration for one month plan
-          const currentDate = dayjs().utc().toDate();
-          return dayjs(currentDate).add(1, 'month').toDate();
+          return dayjs(sinceDate).add(1, 'month').toDate();
         } else {
           return undefined;
         }
