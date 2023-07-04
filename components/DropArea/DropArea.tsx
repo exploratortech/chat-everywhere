@@ -26,7 +26,7 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
   const onDragEnter = (e: any) => {
     if (canDrop() && isDragTypeAllowed) {
       if (indicatorRef.current)
-        indicatorRef.current.style.background = '#818df8';
+        indicatorRef.current.style.height = '2rem';
     }
   };
 
@@ -40,21 +40,21 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
 
   const removeHighlight = (e: any) => {
     if (indicatorRef.current)
-      indicatorRef.current.style.background = 'none';
+      indicatorRef.current.style.height = '0px';
   }
 
   return (
     <div
-      className="relative"
+      className="relative transition-[height] ease-out duration-200 h-0"
+      ref={indicatorRef}
     >
-      <div
-        className="absolute h-2 my-auto top-0 bottom-0 left-0 right-0 rounded-lg pointer-events-none z-20"
-        ref={indicatorRef}
-      />
+      <div className="w-full h-full overflow-hidden">
+        <div className="w-full h-full rounded-lg border-2 border-indigo-400" />
+      </div>
       <div
         className={`
-          absolute h-8 my-auto top-0 bottom-0 left-0 right-0
-          ${ isDragTypeAllowed ? 'pointer-events-auto' : 'pointer-events-none' }
+          absolute h-8 my-auto top-0 left-0 right-0 -translate-y-1/2
+          ${ isDragTypeAllowed ? 'pointer-events-auto h-14' : 'pointer-events-none h-8' }
         `}
         onDrop={handleDrop}
         onDragEnter={onDragEnter}
