@@ -11,6 +11,8 @@ import { UserProfile } from '@/types/user';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import { SettingsModelContext } from './Settings/SettingsModel';
+
 export const ReferralCodeEnter = () => {
   const { t } = useTranslation('model');
   const [referralCode, setReferralCode] = useState('');
@@ -20,6 +22,8 @@ export const ReferralCodeEnter = () => {
     state: { user },
     dispatch,
   } = useContext(HomeContext);
+
+  const { closeModel } = useContext(SettingsModelContext);
 
   const {
     isLoading,
@@ -73,18 +77,17 @@ export const ReferralCodeEnter = () => {
             isInReferralTrial: profile.isInReferralTrial,
           },
         });
-        dispatch({
-          field: 'showProfileModel',
-          value: false,
-        });
+
         dispatch({
           field: 'isPaidUser',
           value: true,
         });
+
         toast.success(t('Referral code has been redeemed'));
         trackEvent('Referral code redemption success', {
           ReferralCode: referralCode,
         });
+        closeModel();
       },
     },
   );

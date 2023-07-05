@@ -40,8 +40,8 @@ export interface HomeInitialState {
   syncSuccess: boolean | null; // null = not yet synced
 
   // User Auth
+  showSettingsModel: boolean;
   showLoginSignUpModel: boolean;
-  showProfileModel: boolean;
   showReferralModel: boolean;
   showUsageModel: boolean;
   showSurveyModel: boolean;
@@ -100,8 +100,9 @@ export const initialState: HomeInitialState = {
   syncSuccess: null,
 
   // User Auth
+
+  showSettingsModel: false,
   showLoginSignUpModel: false,
-  showProfileModel: false,
   showReferralModel: false,
   showUsageModel: false,
   showSurveyModel: false,
