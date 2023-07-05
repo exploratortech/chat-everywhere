@@ -95,6 +95,8 @@ const Home = () => {
       showSurveyModel,
       showNewsModel,
       showFeaturesModel,
+      showChatbar,
+      showPromptbar,
       user,
       isPaidUser,
       conversationLastSyncAt,
@@ -296,6 +298,17 @@ const Home = () => {
       lastUpdateAtUTC: dayjs().valueOf(),
     };
     return newConversation;
+  };
+
+  // SIDEBAR ---------------------------------------------
+  const toggleChatbar = (): void => {
+    dispatch({ field: 'showChatbar', value: !showChatbar });
+    localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
+  };
+
+  const togglePromptbar = () => {
+    dispatch({ field: 'showPromptbar', value: !showPromptbar });
+    localStorage.setItem('showPromptbar', JSON.stringify(!showPromptbar));
   };
 
   // EFFECTS  --------------------------------------------
@@ -618,6 +631,8 @@ const Home = () => {
             speechRecognitionLanguage,
           ),
         stopPlaying,
+        toggleChatbar,
+        togglePromptbar,
       }}
     >
       <Head>
@@ -634,12 +649,10 @@ const Home = () => {
           className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
           style={{ height: containerHeight }}
         >
-          <div className="w-full lg:hidden">
-            <Navbar
-              selectedConversation={selectedConversation}
-              onNewConversation={handleNewConversation}
-            />
-          </div>
+          <Navbar
+            selectedConversation={selectedConversation}
+            onNewConversation={handleNewConversation}
+          />
 
           <div className="flex h-full w-full overflow-x-hidden">
             <Chatbar />

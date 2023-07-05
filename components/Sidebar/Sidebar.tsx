@@ -62,21 +62,36 @@ const Sidebar = <T,>({
 
   return (
     <div
-      className={`${isOpen ? 'w-[260px]' : 'w-0'} ${
-        side === 'left' ? 'tablet:left-0' : 'tablet:right-0'
-      }
-        transition-all ease-linear relative box-content tablet:fixed tablet:h-[calc(100%-48px)] tablet:z-10`}
+      className={`
+        ${ isOpen ? 'w-[260px]' : 'w-0' }
+        ${ side === 'left' ? 'tablet:left-0' : 'tablet:right-0' }
+        transition-all ease-linear relative h-full box-content bg-[#202123] tablet:fixed tablet:z-10
+      `}
     >
       <div
-        className={`${
-          isOpen ? 'tablet:visible !bg-[#202123]/90' : ''
-        } fixed invisible left-0 w-full h-full bg-transparent transition-all ease-linear`}
+        className={`
+          ${ isOpen ? 'tablet:visible !bg-[#202123]/90' : '' }
+          fixed invisible left-0 w-full h-full bg-transparent transition-all ease-linear -z-10
+        `}
         onClick={toggleOpen}
-      ></div>
+      />
       <div
-        className={`${side === 'left' && !isOpen ? '-translate-x-full' : ''} ${
-          side === 'right' && !isOpen ? 'translate-x-full' : ''
-        } absolute z-10 top-0 ${side}-0 flex transition-all ease-linear w-[260px] h-full flex-none flex-col p-2 space-y-2 bg-[#202123] text-[14px]`}
+        className={`
+          absolute block tablet:hidden z-50
+          ${ side === 'left' ? 'right-0 translate-x-full' : 'left-0 -translate-x-full' }
+        `}
+      >
+        <SidebarToggleButton
+          onClick={toggleOpen}
+          isOpen={isOpen}
+        />
+      </div>
+      <div
+        className={`
+          ${ side === 'left' && !isOpen ? '-translate-x-full' : '' }
+          ${ side === 'right' && !isOpen ? 'translate-x-full' : '' }
+          z-10 top-0 ${side}-0 flex transition-all ease-linear w-[260px] h-full flex-none flex-col p-2 space-y-2 text-[14px]
+        `}
       >
         <div className="flex items-center">
           <button
@@ -143,13 +158,6 @@ const Sidebar = <T,>({
         </div>
         {footerComponent}
       </div>
-
-      <SidebarToggleButton
-        onClick={toggleOpen}
-        isOpen={isOpen}
-        side={side}
-        className={`${showMobileButton ? '' : ''}`}
-      />
     </div>
   );
 };

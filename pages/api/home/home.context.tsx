@@ -23,6 +23,8 @@ export interface HomeContextProps {
   handleUserLogout: () => void;
   playMessage: (message: string, speechId: string) => void;
   stopPlaying: () => void;
+  toggleChatbar: () => void;
+  togglePromptbar: () => void;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

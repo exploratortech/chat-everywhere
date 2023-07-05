@@ -113,11 +113,11 @@ export const StoreConversationButton: FC<Props> = ({ conversation }) => {
   return (
     <>
       {loading ? (
-        <IconLoader size={18} className="ml-2" />
+        <IconLoader size={18} />
       ) : (
         <IconBrandStackshare
           size={18}
-          className="ml-2 cursor-pointer hover:opacity-50"
+          className="cursor-pointer hover:opacity-50"
           onClick={storeConversation}
         />
       )}
