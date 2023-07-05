@@ -466,8 +466,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             ) : (
               <>
                 <div
-                  className="justify-center border hidden lg:flex
-                  border-b-neutral-300 bg-neutral-100 py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 sticky top-0 z-10"
+                  className="justify-center border flex tablet:hidden
+                  border-b-neutral-300 bg-neutral-100 py-[0.625rem] text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 sticky top-0 z-10"
                 >
                   {selectedConversation?.name}
 
