@@ -59,8 +59,8 @@ import { Navbar } from '@/components/Mobile/Navbar';
 import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
-import { ProfileUpgradeModel } from '@/components/User/ProfileUpgradeModel';
 import ReferralModel from '@/components/User/ReferralModel';
+import SettingsModel from '@/components/User/Settings/SettingsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
@@ -96,8 +96,8 @@ const Home = () => {
       selectedConversation,
       prompts,
       temperature,
+      showSettingsModel,
       showLoginSignUpModel,
-      showProfileModel,
       showReferralModel,
       showUsageModel,
       showSurveyModel,
@@ -413,7 +413,10 @@ const Home = () => {
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
-      userProfileQuery(supabase, session.user.id)
+      userProfileQuery({
+        client: supabase,
+        userId: session.user.id,
+      })
         .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
@@ -430,6 +433,7 @@ const Home = () => {
               proPlanExpirationDate: userProfile.proPlanExpirationDate,
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
+              isInReferralTrial: userProfile.isInReferralTrial,
             },
           });
           if (enableTracking) {
@@ -475,7 +479,7 @@ const Home = () => {
   const handleUserLogout = async () => {
     await supabase.auth.signOut();
     dispatch({ field: 'user', value: null });
-    dispatch({ field: 'showProfileModel', value: false });
+    dispatch({ field: 'showSettingsModel', value: false });
     toast.success(t('You have been logged out'));
   };
 
@@ -626,6 +630,9 @@ const Home = () => {
   useEffect(() => {
     dispatch({ field: 'creditUsage', value: creditUsage });
   }, [creditUsage]);
+  useEffect(() => {
+    document.body.className = lightMode;
+  }, [lightMode]);
 
   return (
     <HomeContext.Provider
@@ -661,10 +668,10 @@ const Home = () => {
       </Head>
       {selectedConversation && (
         <main
-          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
+          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white `}
           style={{ height: containerHeight }}
         >
-          <div className="w-full lg:hidden">
+          <div className="w-full md:hidden">
             <Navbar
               selectedConversation={selectedConversation}
               onNewConversation={handleNewConversation}
@@ -676,6 +683,13 @@ const Home = () => {
             <div className="flex flex-1">
               <Chat stopConversationRef={stopConversationRef} />
             </div>
+            {showSettingsModel && (
+              <SettingsModel
+                onClose={() =>
+                  dispatch({ field: 'showSettingsModel', value: false })
+                }
+              />
+            )}
             {showLoginSignUpModel && (
               <AuthModel
                 supabase={supabase}
@@ -684,13 +698,7 @@ const Home = () => {
                 }
               />
             )}
-            {showProfileModel && (
-              <ProfileUpgradeModel
-                onClose={() =>
-                  dispatch({ field: 'showProfileModel', value: false })
-                }
-              />
-            )}
+
             {showReferralModel && (
               <ReferralModel
                 onClose={() =>

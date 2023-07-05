@@ -79,5 +79,13 @@
   "Expires in": "剩余时间",
   "Regenerate code": "重新生成",
   "A new referral code has been regenerated": "成功生成新的推广码",
-  "Copied to clipboard": "已复制到剪贴板"
+  "Copied to clipboard": "已复制到剪贴板",
+  "Account": "帐户",
+  "App": "介面设定",
+  "Data": "资料管理",
+  "Sign out": "登出",
+  "Sign in": "登入",
+  "Export data": "导出对话",
+  "Dark mode": "深色模式",
+  "Light mode": "浅色模式"
 }
