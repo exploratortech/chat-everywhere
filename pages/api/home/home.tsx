@@ -660,7 +660,7 @@ const Home = () => {
             onNewConversation={handleNewConversation}
           />
 
-          <div className="flex h-full w-full overflow-x-hidden">
+          <div className="flex items-stretch flex-1 w-full overflow-x-hidden">
             <Chatbar />
             <div className="flex flex-1">
               <Chat stopConversationRef={stopConversationRef} />
