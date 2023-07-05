@@ -107,27 +107,30 @@ export const ChatbarSettings = () => {
             }}
           />
         )}
-        <SidebarButton
-          text={t('Latest Updates')}
-          icon={<IconNews size={18} />}
-          onClick={() => {
-            trackEvent('Latest updates clicked');
-            homeDispatch({
-              field: 'showNewsModel',
-              value: true,
-            });
-          }}
-        />
-        <SidebarButton
-          text={t('Follow for updates!')}
-          icon={<IconBrandFacebook size={18} />}
-          onClick={() => {
-            window.open(
-              'https://www.facebook.com/groups/621367689441014',
-              '_blank',
-            );
-          }}
-        />
+        <div className="flex w-full">
+          <SidebarButton
+            className="flex-grow"
+            text={t('Latest Updates')}
+            icon={<IconNews size={18} />}
+            onClick={() => {
+              trackEvent('Latest updates clicked');
+              homeDispatch({
+                field: 'showNewsModel',
+                value: true,
+              });
+            }}
+          />
+          <SidebarButton
+            className="w-min"
+            icon={<IconBrandFacebook size={18} />}
+            onClick={() => {
+              window.open(
+                'https://www.facebook.com/groups/621367689441014',
+                '_blank',
+              );
+            }}
+          />
+        </div>
       </div>
     </div>
   );
