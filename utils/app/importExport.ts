@@ -15,7 +15,7 @@ import {
 import { HomeInitialState } from '@/pages/api/home/home.state';
 
 import { RANK_INTERVAL } from './const';
-import { cleanConversationHistory, cleanFolders } from './clean';
+import { cleanConversationHistory, cleanFolders, cleanPrompts } from './clean';
 import { trackEvent } from './eventTracking';
 
 import dayjs from 'dayjs';
@@ -67,6 +67,7 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
     return {
       ...data,
       version: 4,
+      history: cleanConversationHistory(data.history),
       folders: cleanFolders(data.folders),
       prompts: [],
     };
@@ -75,7 +76,9 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
   if (isExportFormatV4(data)) {
     return {
       ...data,
+      history: cleanConversationHistory(data.history),
       folders: cleanFolders(data.folders),
+      prompts: cleanPrompts(data.prompts),
     };
   }
 
