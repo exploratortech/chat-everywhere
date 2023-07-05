@@ -73,16 +73,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           ? (error.cause.user as UserProfile)
           : undefined;
 
-      console.log("webhook catch errors, send report");
-      
-      sendReportForStripeWebhookError(error.message, event, user)
-        .then(() => {
-          console.log('webhook catch errors, send report success');
-        })
-        .catch((error) => {
-          console.error(error);
-          throw error;
-        });
+      console.log('webhook catch errors, send report');
+
+      try {
+        await sendReportForStripeWebhookError(error.message, event, user);
+        console.log('webhook catch errors, send report success');
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
       return res.json({ received: true, error: error.message });
     }
     throw error;
