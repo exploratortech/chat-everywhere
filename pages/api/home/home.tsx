@@ -96,6 +96,8 @@ const Home = () => {
       showSurveyModel,
       showNewsModel,
       showFeaturesModel,
+      showChatbar,
+      showPromptbar,
       user,
       isPaidUser,
       conversationLastSyncAt,
@@ -297,6 +299,16 @@ const Home = () => {
 
   const removeDragData = (): void => {
     dispatch({ field: 'currentDrag', value: undefined });
+  };
+  // SIDEBAR ---------------------------------------------
+  const toggleChatbar = (): void => {
+    dispatch({ field: 'showChatbar', value: !showChatbar });
+    localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
+  };
+
+  const togglePromptbar = () => {
+    dispatch({ field: 'showPromptbar', value: !showPromptbar });
+    localStorage.setItem('showPromptbar', JSON.stringify(!showPromptbar));
   };
 
   // EFFECTS  --------------------------------------------
@@ -637,6 +649,8 @@ const Home = () => {
         setDragData,
         removeDragData,
         stopConversationRef,
+        toggleChatbar,
+        togglePromptbar,
       }}
     >
       <Head>
@@ -653,12 +667,10 @@ const Home = () => {
           className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white `}
           style={{ height: containerHeight }}
         >
-          <div className="w-full md:hidden">
-            <Navbar
-              selectedConversation={selectedConversation}
-              onNewConversation={handleNewConversation}
-            />
-          </div>
+          <Navbar
+            selectedConversation={selectedConversation}
+            onNewConversation={handleNewConversation}
+          />
 
           <div className="flex h-full w-full overflow-x-hidden">
             <Chatbar />

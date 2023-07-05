@@ -27,6 +27,8 @@ export interface HomeContextProps {
   setDragData: (dragData: DragData) => void;
   removeDragData: () => void;
   stopConversationRef: MutableRefObject<boolean>;
+  toggleChatbar: () => void;
+  togglePromptbar: () => void;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);
