@@ -53,7 +53,7 @@ const Sidebar = <T,>({
       className={`
         ${isOpen ? 'w-[260px]' : 'w-0'}
         ${side === 'left' ? 'tablet:left-0' : 'tablet:right-0'}
-        transition-all ease-linear relative h-full box-content bg-[#202123] tablet:fixed tablet:z-10
+        transition-all ease-linear relative box-content bg-[#202123] tablet:h-[calc(100%-48px)] tablet:fixed tablet:z-10
       `}
     >
       <div
@@ -79,7 +79,7 @@ const Sidebar = <T,>({
         className={`
           ${side === 'left' && !isOpen ? '-translate-x-full' : ''}
           ${side === 'right' && !isOpen ? 'translate-x-full' : ''}
-          z-10 top-0 ${side}-0 flex transition-all ease-linear w-[260px] h-full flex-none flex-col p-2 space-y-2 text-[14px]
+          transition-all ease-linear flex w-[260px] h-full flex-none flex-col p-2 space-y-2 text-[14px]
         `}
       >
         <div className="flex items-center">
