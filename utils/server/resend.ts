@@ -1,19 +1,29 @@
 import { UserProfile } from '@/types/user';
 
 import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import { Resend } from 'resend';
 import Stripe from 'stripe';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
 const receiverEmail = process.env.RESEND_EMAIL_RECEIVER!;
 
 export async function sendReport(subject = '', html = '') {
-  await resend.emails.send({
-    from: 'team@chateverywhere.app',
-    to: receiverEmail,
-    subject,
-    html,
-  });
+  try {
+    await resend.emails.send({
+      from: 'team@chateverywhere.app',
+      to: receiverEmail,
+      subject,
+      html,
+    });
+  } catch (error) {
+    console.error(error);
+    throw new Error(`sendReport failed: ${error}`);
+  }
 }
 
 export async function sendReportForStripeWebhookError(
