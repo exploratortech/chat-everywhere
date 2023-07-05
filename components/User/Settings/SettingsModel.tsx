@@ -1,16 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconX } from '@tabler/icons-react';
-import React, {
-  Dispatch,
-  Fragment,
-  createContext,
-  useContext,
-  useEffect,
-} from 'react';
+import React, { Dispatch, Fragment, createContext } from 'react';
 
 import { ActionType, useCreateReducer } from '@/hooks/useCreateReducer';
-
-import HomeContext from '@/pages/api/home/home.context';
 
 import Settings_Account from './Settings_Account';
 import Settings_App from './Settings_App';
@@ -20,6 +12,7 @@ import Sidebar from './Sidebar';
 type Props = {
   onClose: () => void;
 };
+
 const settingsState = {
   showing: 'account' as 'account' | 'app' | 'data',
 };
@@ -37,11 +30,7 @@ export default function SettingsModel({ onClose }: Props) {
   });
   const {
     state: { showing },
-    dispatch,
   } = settingsContext;
-  const {
-    state: { user },
-  } = useContext(HomeContext);
 
   return (
     <Transition appear show={true} as={Fragment}>

@@ -84,7 +84,7 @@ export default function Settings_Account() {
       : 'https://billing.stripe.com/p/login/test_28o4jFe6GaqK1UY5kk';
   return (
     <div>
-      <h1 className="font-bold mb-4">Account</h1>
+      <h1 className="font-bold mb-4">{t("Account")}</h1>
 
       <div className="mx-auto max-w-2xl">
         <div className="rounded-2xl flex flex-col">

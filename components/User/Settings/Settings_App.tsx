@@ -7,14 +7,14 @@ import HomeContext from '@/pages/api/home/home.context';
 import { SidebarButton } from '@/components/Sidebar/SidebarButton';
 
 export default function Settings_App() {
-  const { t } = useTranslation('sidebar');
+  const { t } = useTranslation('model');
   const {
     state: { lightMode },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
   return (
     <div>
-      <h1 className="font-bold mb-4">App</h1>
+      <h1 className="font-bold mb-4">{t("App")}</h1>
       <SidebarButton
         text={lightMode === 'light' ? t('Dark mode') : t('Light mode')}
         icon={

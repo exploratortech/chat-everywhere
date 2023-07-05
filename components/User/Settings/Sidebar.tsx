@@ -8,13 +8,10 @@ import {
 import React, { cloneElement, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import useMediaQuery from '@/hooks/useMediaQuery';
-
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import UserAccountBadge from '../UserAccountBadge';
 import { SettingsModelContext } from './SettingsModel';
 
 type Props = {
@@ -39,7 +36,6 @@ export default function Sidebar({ className = '' }: Props) {
       icon: <IconUser />,
       name: t('Account'),
       value: 'account',
-      suffixIcon: <UserAccountBadge />,
       callback: () => {
         trackEvent('Account button clicked');
         dispatch({
@@ -82,11 +78,8 @@ export default function Sidebar({ className = '' }: Props) {
               <a
                 key={`${i} ${item.name}`}
                 href="#"
-                className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900  tablet:px-2 tablet:py-4 ${
-                  item.suffixIcon
-                    ? 'flex gap-4 items-center justify-between'
-                    : ''
-                } ${
+                className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 tablet:px-2 tablet:py-4 
+                ${
                   showing === item.value
                     ? 'bg-neutral-900 text-neutral-100'
                     : ''
@@ -99,9 +92,6 @@ export default function Sidebar({ className = '' }: Props) {
                     className: iconClass,
                   })}
                   <div className="tablet:hidden"> {item.name}</div>
-                </div>
-                <div className="tablet:hidden">
-                  {!!item.suffixIcon && item.suffixIcon}
                 </div>
               </a>
             );

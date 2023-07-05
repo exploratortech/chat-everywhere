@@ -1,13 +1,9 @@
 import {
-  IconArticle,
   IconBrandFacebook,
   IconCurrencyDollar,
-  IconFileExport,
   IconLogin,
-  IconMoon,
   IconNews,
   IconSettings,
-  IconSun,
 } from '@tabler/icons-react';
 import { useContext } from 'react';
 
@@ -20,7 +16,6 @@ import HomeContext from '@/pages/api/home/home.context';
 import CloudSyncStatusComponent from '../../Sidebar/components/CloudSyncComponent';
 import UserAccountBadge from '@/components/User/UserAccountBadge';
 
-import { Import } from '../../Settings/Import';
 import { SidebarButton } from '../../Sidebar/SidebarButton';
 import ChatbarContext from '../Chatbar.context';
 import { ClearConversations } from './ClearConversations';
@@ -29,14 +24,12 @@ export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
 
   const {
-    state: { lightMode, conversations, user },
+    state: { conversations, user },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const {
     handleClearConversations,
-    handleImportConversations,
-    handleExportData,
   } = useContext(ChatbarContext);
 
   const isProUser = user && user.plan === 'pro';
