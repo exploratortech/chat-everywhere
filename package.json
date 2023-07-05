@@ -10,7 +10,7 @@
     "format": "prettier --write .",
     "test": "vitest",
     "coverage": "vitest run --coverage",
-    "postinstall": "playwright install"
+    "postinstall": "npx playwright install"
   },
   "dependencies": {
     "@ctrl/react-adsense": "^1.6.2",
