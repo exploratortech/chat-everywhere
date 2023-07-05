@@ -5,8 +5,10 @@ import {
   IconSettings,
   IconUser,
 } from '@tabler/icons-react';
-import React, { useContext } from 'react';
+import React, { cloneElement, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import useMediaQuery from '@/hooks/useMediaQuery';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
@@ -31,9 +33,10 @@ export default function Sidebar({ className = '' }: Props) {
     handleUserLogout,
   } = useContext(HomeContext);
   const { t } = useTranslation('model');
+  const iconClass = 'h-[18px] tablet:h-[22px] tablet:w-[36px]';
   const items = [
     {
-      icon: <IconUser height={18} />,
+      icon: <IconUser />,
       name: t('Account'),
       value: 'account',
       suffixIcon: <UserAccountBadge />,
@@ -46,7 +49,7 @@ export default function Sidebar({ className = '' }: Props) {
       },
     },
     {
-      icon: <IconSettings height={18} />,
+      icon: <IconSettings />,
       name: t('App'),
       value: 'app',
       callback: () =>
@@ -56,7 +59,7 @@ export default function Sidebar({ className = '' }: Props) {
         }),
     },
     {
-      icon: <IconFileCode height={18} />,
+      icon: <IconFileCode />,
       name: t('Data'),
       value: 'data',
       callback: () =>
@@ -91,8 +94,10 @@ export default function Sidebar({ className = '' }: Props) {
                 `}
                 onClick={item.callback}
               >
-                <div className="flex gap-2 items-center">
-                  {item.icon}
+                <div className="flex gap-2 items-center ">
+                  {cloneElement(item.icon, {
+                    className: iconClass,
+                  })}
                   <div className="tablet:hidden"> {item.name}</div>
                 </div>
                 <div className="tablet:hidden">
@@ -119,9 +124,12 @@ export default function Sidebar({ className = '' }: Props) {
           }
         }}
       >
-        {user ? <IconLogout height={18} /> : <IconLogin height={18} />}
+        {user ? (
+          <IconLogout className={iconClass} />
+        ) : (
+          <IconLogin className={iconClass} />
+        )}
         <div className="tablet:hidden">
-          {' '}
           {user ? t('Sign out') : t('Sign in')}
         </div>
       </a>
