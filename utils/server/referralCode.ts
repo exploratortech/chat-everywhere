@@ -9,7 +9,7 @@ export type CodeGenerationPayloadType = {
 export const generateReferralCodeAndExpirationDate =
   (): CodeGenerationPayloadType => {
     const expirationDateCount = parseInt(
-      process.env.REFERRAL_TRIAL_DAYS || '3',
+      process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS || '3',
     );
     const newReferralCode = voucher_codes
       .generate({ length: 8, count: 1 })

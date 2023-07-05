@@ -390,7 +390,10 @@ const Home = () => {
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
-      userProfileQuery(supabase, session.user.id)
+      userProfileQuery({
+        client: supabase,
+        userId: session.user.id,
+      })
         .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
@@ -407,6 +410,7 @@ const Home = () => {
               proPlanExpirationDate: userProfile.proPlanExpirationDate,
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
+              isInReferralTrial: userProfile.isInReferralTrial,
             },
           });
           if (enableTracking) {

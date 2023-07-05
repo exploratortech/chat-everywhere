@@ -129,7 +129,7 @@ export const ProfileUpgradeModel: FC<Props> = ({ onClose }) => {
                         )}
                       </span>
                     )}
-                    {isPaidUser && user?.hasReferrer && (
+                    {isPaidUser && user?.isInReferralTrial && (
                       <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
                         <IconCircleCheck className="text-green-500" size={19} />
                         <p className="flex items-center">
