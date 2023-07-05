@@ -64,8 +64,7 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
   };
 
   const renderActionButtons = (): JSX.Element | null => {
-    if (disableButtonsForLanguageTags.includes(language))
-      return null;
+    if (disableButtonsForLanguageTags.includes(language)) return null;
 
     return (
       <div className="flex items-center">
@@ -73,8 +72,14 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
           className="flex gap-1.5 items-center rounded bg-none p-1 text-xs text-white"
           onClick={copyToClipboard}
         >
-          {isCopied ? <IconCheck size={18} /> : <IconClipboard size={18} />}
-          {isCopied ? t('Copied!') : t('Copy code')}
+          {isCopied ? (
+            <IconCheck
+              className="text-green-500 dark:text-green-400"
+              size={18}
+            />
+          ) : (
+            <IconClipboard size={18} />
+          )}
         </button>
         <button
           className="flex items-center rounded bg-none p-1 text-xs text-white"
@@ -88,7 +93,7 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
 
   return (
     <div className="codeblock relative font-sans text-[16px]">
-      <div className="flex items-center justify-between py-1.5 px-4">
+      <div className="flex items-center justify-between py-1 px-4">
         <span className="text-xs lowercase text-white">{language}</span>
         {renderActionButtons()}
       </div>
@@ -101,9 +106,11 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
         {value}
       </SyntaxHighlighter>
 
-      <div className="flex justify-end pt-1.5 px-4">
-        {renderActionButtons()}
-      </div>
+      {value.length > 500 && (
+        <div className="flex justify-end py-1 px-4">
+          {renderActionButtons()}
+        </div>
+      )}
     </div>
   );
 });
