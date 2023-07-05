@@ -53,7 +53,10 @@ export const ReferralCodeEnter = () => {
           'Invalid or referral code has already expired, please contact your referrer',
         );
       }
-      const profile = await userProfileQuery(supabase, user!.id);
+      const profile = await userProfileQuery({
+        client: supabase,
+        userId: user!.id,
+      });
       return { profile };
     },
     {
@@ -71,6 +74,7 @@ export const ReferralCodeEnter = () => {
             proPlanExpirationDate: profile.proPlanExpirationDate,
             hasReferrer: profile.hasReferrer,
             hasReferee: profile.hasReferee,
+            isInReferralTrial: profile.isInReferralTrial,
           },
         });
 
