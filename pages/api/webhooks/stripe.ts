@@ -72,6 +72,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         error.cause && typeof error.cause === 'object' && 'user' in error.cause
           ? (error.cause.user as UserProfile)
           : undefined;
+
+      console.log("webhook catch errors, send report");
+      
       sendReportForStripeWebhookError(error.message, event, user)
         .then(() => {
           console.log('webhook catch errors, send report success');
