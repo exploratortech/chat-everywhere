@@ -311,6 +311,12 @@ const Home = () => {
     localStorage.setItem('showPromptbar', JSON.stringify(!showPromptbar));
   };
 
+  useEffect(() => {
+    document.documentElement.style.overflow = (showChatbar || showPromptbar)
+      ? 'hidden'
+      : 'auto';
+  }, [showChatbar, showPromptbar]);
+
   // EFFECTS  --------------------------------------------
 
   useEffect(() => {
