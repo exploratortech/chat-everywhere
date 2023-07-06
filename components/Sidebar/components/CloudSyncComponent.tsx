@@ -42,7 +42,7 @@ const CloudSyncComponent = () => {
     if (!isCloudSyncEnabled) {
       if (user) {
         dispatch({
-          field: 'showProfileModel',
+          field: 'showSettingsModel',
           value: true,
         });
       } else {
@@ -61,7 +61,9 @@ const CloudSyncComponent = () => {
 
   return (
     <div
-      className={`flex w-full cursor-pointer select-none items-center gap-3py-3 px-3 mb-2 text-[14px] leading-3 ${!isCloudSyncEnabled ? "text-neutral-400" : "text-white"}`}
+      className={`flex w-full cursor-pointer select-none items-center gap-3py-3 px-3 mb-2 text-[14px] leading-3 ${
+        !isCloudSyncEnabled ? 'text-neutral-400' : 'text-white'
+      }`}
       onClick={cloudSyncBlockOnClick}
     >
       <div className="pr-3">

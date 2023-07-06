@@ -11,6 +11,7 @@ import {
   MouseEventHandler,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -27,9 +28,15 @@ interface Props {
 
 export const ConversationComponent = ({ conversation }: Props) => {
   const {
-    state: { selectedConversation, messageIsStreaming },
+    state: {
+      currentDrag,
+      selectedConversation,
+      messageIsStreaming,
+    },
     handleSelectConversation,
     handleUpdateConversation,
+    setDragData,
+    removeDragData,
   } = useContext(HomeContext);
 
   const { handleDeleteConversation } = useContext(ChatbarContext);
@@ -38,6 +45,8 @@ export const ConversationComponent = ({ conversation }: Props) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
 
+  const enterTarget = useRef<HTMLElement>();
+
   const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -45,13 +54,34 @@ export const ConversationComponent = ({ conversation }: Props) => {
     }
   };
 
-  const handleDragStart = (
-    e: DragEvent<HTMLButtonElement>,
-    conversation: Conversation,
-  ) => {
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('conversation', JSON.stringify(conversation));
+  const handleButtonFocusKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (["Space", "Enter"].includes(e.code)) {
+      if (!messageIsStreaming)
+        handleSelectConversation(conversation);
     }
+  }
+
+  const handleDrop = (e: any) => {
+    e.currentTarget.style.background = 'none';
+    e.preventDefault();
+  };
+
+  const handleDragStart = () => {
+    setDragData({ data: conversation, type: 'conversation'});
+  };
+
+  const highlightDrop = (e: any) => {
+    enterTarget.current = e.target;
+    e.currentTarget.style.background = '#343541';
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const removeHighlight = (e: any) => {
+    if (enterTarget.current === e.target)
+      e.currentTarget.style.background = 'none';
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleRename = (conversation: Conversation) => {
@@ -101,7 +131,10 @@ export const ConversationComponent = ({ conversation }: Props) => {
   }, [isRenaming, isDeleting]);
 
   return (
-    <div className="relative flex items-center">
+    <div className={`
+      relative flex items-center
+      ${ !currentDrag || currentDrag.type === 'conversation' && currentDrag.data.id === conversation.id ? 'pointer-events-auto' : 'pointer-events-none' }
+    `}>
       {isRenaming && selectedConversation?.id === conversation.id ? (
         <div className="flex w-full items-center gap-3 rounded-lg bg-[#343541]/90 p-3">
           <IconMessage size={18} />
@@ -115,28 +148,34 @@ export const ConversationComponent = ({ conversation }: Props) => {
           />
         </div>
       ) : (
-        <button
-          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 ${
-            messageIsStreaming ? 'disabled:cursor-not-allowed' : ''
-          } ${
-            selectedConversation?.id === conversation.id
-              ? 'bg-[#343541]/90'
-              : ''
-          }`}
-          onClick={() => handleSelectConversation(conversation)}
-          disabled={messageIsStreaming}
+        <div
+          className={
+            `flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90 translate-x-0 z-10
+            ${ messageIsStreaming ? 'disabled:cursor-not-allowed' : '' }
+            ${ selectedConversation?.id === conversation.id ? '!bg-[#343541]/90' : '' }
+          `}
+          onClick={() => {
+            if (!messageIsStreaming)
+              handleSelectConversation(conversation);
+          }}
           draggable="true"
-          onDragStart={(e) => handleDragStart(e, conversation)}
+          onDrop={handleDrop}
+          onDragEnter={highlightDrop}
+          onDragLeave={removeHighlight}
+          onDragStart={handleDragStart}
+          onDragEnd={removeDragData}
+          onKeyDown={handleButtonFocusKeyDown}
+          tabIndex={0}
         >
           <IconMessage size={18} />
           <div
-            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 ${
+            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3 ${
               selectedConversation?.id === conversation.id ? 'pr-12' : 'pr-1'
             }`}
           >
             {conversation.name}
           </div>
-        </button>
+        </div>
       )}
 
       {(isDeleting || isRenaming) &&

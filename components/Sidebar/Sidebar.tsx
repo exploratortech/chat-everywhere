@@ -48,18 +48,6 @@ const Sidebar = <T,>({
 }: Props<T>) => {
   const { t } = useTranslation('promptbar');
 
-  const allowDrop = (e: any) => {
-    e.preventDefault();
-  };
-
-  const highlightDrop = (e: any) => {
-    e.target.style.background = '#343541';
-  };
-
-  const removeHighlight = (e: any) => {
-    e.target.style.background = 'none';
-  };
-
   return (
     <div
       className={`
@@ -119,11 +107,9 @@ const Sidebar = <T,>({
         />
 
         <div className="flex-1 overflow-auto">
-          {items?.length > 0 && (
-            <div className="flex border-b border-white/20 pb-2">
-              {folderComponent}
-            </div>
-          )}
+          <div className="flex border-b border-white/20 pb-2">
+            {folderComponent}
+          </div>
 
           {itemsIsImporting && (
             <div className="mt-8 select-none text-center text-white opacity-50">
@@ -143,15 +129,11 @@ const Sidebar = <T,>({
             </div>
           )}
           <div
-            className={`pt-2 transition-all duration-500 ${
+            className={`mt-2 transition-all duration-500 rounded-lg ${
               !itemsIsImporting && items?.length > 0
                 ? 'visible opacity-100'
                 : 'invisible opacity-0'
             }`}
-            onDrop={handleDrop}
-            onDragOver={allowDrop}
-            onDragEnter={highlightDrop}
-            onDragLeave={removeHighlight}
           >
             {itemComponent}
           </div>

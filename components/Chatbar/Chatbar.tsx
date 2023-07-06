@@ -15,7 +15,10 @@ import {
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { saveFolders } from '@/utils/app/folders';
-import { exportData, importData } from '@/utils/app/importExport';
+import {
+  handleExportData,
+  handleImportConversations,
+} from '@/utils/app/importExport';
 
 import { Conversation } from '@/types/chat';
 import { LatestExportFormat, SupportedExportFormats } from '@/types/export';
@@ -50,6 +53,7 @@ export const Chatbar = () => {
       pluginKeys,
       showPromptbar,
       selectedConversation,
+      currentDrag,
     },
     dispatch: homeDispatch,
     handleCreateFolder,
@@ -117,41 +121,6 @@ export const Chatbar = () => {
     homeDispatch({ field: 'pluginKeys', value: updatedPluginKeys });
 
     localStorage.setItem('pluginKeys', JSON.stringify(updatedPluginKeys));
-  };
-
-  const handleExportData = () => {
-    exportData();
-    trackEvent('Export conversation clicked');
-  };
-
-  const handleImportConversations = (data: SupportedExportFormats) => {
-    setIsImportingData(true);
-    try {
-      const { history, folders, prompts }: LatestExportFormat =
-        importData(data);
-      homeDispatch({ field: 'conversations', value: history });
-      // skip if selected conversation is already in history
-      if (
-        selectedConversation &&
-        !history.some(
-          (conversation) => conversation.id === selectedConversation.id,
-        )
-      ) {
-        homeDispatch({
-          field: 'selectedConversation',
-          value: history[history.length - 1],
-        });
-      }
-      homeDispatch({ field: 'folders', value: folders });
-      homeDispatch({ field: 'prompts', value: prompts });
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setTimeout(() => {
-        setIsImportingData(false);
-      }, 500);
-      trackEvent('Import conversation clicked');
-    }
   };
 
   const handleClearConversations = () => {
@@ -238,11 +207,11 @@ export const Chatbar = () => {
   };
 
   const handleDrop = (e: any) => {
-    if (e.dataTransfer) {
-      const conversation = JSON.parse(e.dataTransfer.getData('conversation'));
+    if (currentDrag) {
+      const conversation = currentDrag.data as Conversation;
       handleUpdateConversation(conversation, { key: 'folderId', value: 0 });
       chatDispatch({ field: 'searchTerm', value: '' });
-      e.target.style.background = 'none';
+      e.currentTarget.style.background = 'none';
     }
   };
 
@@ -274,7 +243,14 @@ export const Chatbar = () => {
         ...chatBarContextValue,
         handleDeleteConversation,
         handleClearConversations,
-        handleImportConversations,
+        handleImportConversations: (data: SupportedExportFormats) => {
+          handleImportConversations(
+            data,
+            homeDispatch,
+            selectedConversation,
+            setIsImportingData,
+          );
+        },
         handleExportData,
         handlePluginKeyChange,
         handleClearPluginKey,
@@ -285,7 +261,13 @@ export const Chatbar = () => {
         side={'left'}
         isOpen={showChatbar}
         addItemButtonTitle={t('New chat')}
-        itemComponent={<Conversations conversations={filteredConversations} />}
+        itemComponent={
+          <Conversations
+            conversations={
+              filteredConversations.filter((conversation) => conversation.folderId == null)
+            }
+          />
+        }
         itemsIsImporting={isImportingData}
         folderComponent={<ChatFolders searchTerm={searchTerm} />}
         items={filteredConversations}

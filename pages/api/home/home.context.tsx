@@ -7,6 +7,7 @@ import { KeyValuePair } from '@/types/data';
 import { FolderType } from '@/types/folder';
 
 import { HomeInitialState } from './home.state';
+import { DragData } from '@/types/drag';
 
 export interface HomeContextProps {
   state: HomeInitialState;
@@ -25,6 +26,8 @@ export interface HomeContextProps {
   stopPlaying: () => void;
   toggleChatbar: () => void;
   togglePromptbar: () => void;
+  setDragData: (dragData: DragData) => void;
+  removeDragData: () => void;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

@@ -3,6 +3,7 @@ export interface FolderInterface {
   name: string;
   type: FolderType;
   lastUpdateAtUTC: number; // timestamp in UTC in milliseconds
+  rank: number;
   deleted?: boolean;
 }
 

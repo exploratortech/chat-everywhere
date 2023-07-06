@@ -5,6 +5,7 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
 import { savePrompts } from '@/utils/app/prompts';
+import { generateRank } from '@/utils/app/rank';
 
 import { OpenAIModels } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
@@ -31,7 +32,13 @@ const Promptbar = () => {
   });
 
   const {
-    state: { prompts, defaultModelId, showChatbar, showPromptbar },
+    state: {
+      prompts,
+      defaultModelId,
+      showChatbar,
+      showPromptbar,
+      currentDrag,
+    },
     dispatch: homeDispatch,
     handleCreateFolder,
     togglePromptbar,
@@ -58,6 +65,7 @@ const Promptbar = () => {
         model: OpenAIModels[defaultModelId],
         folderId: null,
         lastUpdateAtUTC: dayjs().valueOf(),
+        rank: generateRank(filteredPrompts),
       };
 
       const updatedPrompts = [...prompts, newPrompt];
@@ -106,8 +114,8 @@ const Promptbar = () => {
   };
 
   const handleDrop = (e: any) => {
-    if (e.dataTransfer) {
-      const prompt = JSON.parse(e.dataTransfer.getData('prompt'));
+    if (currentDrag) {
+      const prompt = currentDrag.data as Prompt;
 
       const updatedPrompt = {
         ...prompt,
@@ -154,7 +162,9 @@ const Promptbar = () => {
         addItemButtonTitle={t('New prompt')}
         itemComponent={
           <Prompts
-            prompts={filteredPrompts.filter((prompt) => !prompt.folderId)}
+            prompts={
+              filteredPrompts.filter((prompt) => prompt.folderId == null)
+            }
           />
         }
         folderComponent={<PromptFolders />}

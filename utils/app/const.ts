@@ -18,3 +18,5 @@ export const OPENAI_ORGANIZATION =
 export const DEFAULT_IMAGE_GENERATION_STYLE = "Default";
 
 export const DEFAULT_IMAGE_GENERATION_QUALITY = "high";
+
+export const RANK_INTERVAL = 100;
