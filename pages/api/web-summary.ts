@@ -2,7 +2,11 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import { getMDContentOfArticle } from '@/utils/server/webbrowser-tools';
 
-import * as playwright from 'playwright-aws-lambda';
+import chromium from '@sparticuz/chromium-min';
+import puppeteer from 'puppeteer-core';
+
+const chromeTar =
+  'https://github.com/Sparticuz/chromium/releases/download/v114.0.0/chromium-v114.0.0-pack.tar';
 
 const prompt =
   'You are acting as a summarization AI, and for the input text please summarize it to the most important 3 to 5 bullet points for brevity: ';
@@ -13,12 +17,16 @@ export default async function handler(
 ) {
   const { browserQuery } = req.query;
   const url = browserQuery as string;
+
   // Launch a new browser and open a new page
-  const browser = await playwright.launchChromium({
-    headless: true,
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(chromeTar),
+    headless: chromium.headless,
   });
-  const context = await browser.newContext();
-  const page = await context.newPage();
+
+  const page = await browser.newPage();
 
   try {
     // Navigate to the url

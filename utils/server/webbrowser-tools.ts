@@ -1,13 +1,12 @@
 import html2md from 'html-to-md';
 import DOMPurify from 'isomorphic-dompurify';
-import { Page } from 'playwright';
 
-export async function getMDContentOfArticle(page: Page) {
+export async function getMDContentOfArticle(page: any) {
   const content = await getContentOfArticle(page);
   const mdContent = html2md(content);
   return mdContent;
 }
-async function getContentOfArticle(page: Page) {
+async function getContentOfArticle(page: any) {
   const articleHTML = await page.evaluate(() => {
     function getContainer() {
       let selectedContainer;
