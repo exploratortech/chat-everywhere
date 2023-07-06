@@ -51,9 +51,7 @@ export const Conversations = ({ conversations }: Props) => {
         index={0}
         onDrop={(e) => handleDrop(e, 0)}
       />
-      {conversations
-        .filter((conversation) => !conversation.folderId)
-        .map((conversation, index) => (
+      {conversations.map((conversation, index) => (
           <Fragment key={conversation.id}>
             <ConversationComponent conversation={conversation} />
             <DropArea

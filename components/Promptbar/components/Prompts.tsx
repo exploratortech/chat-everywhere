@@ -51,9 +51,7 @@ export const Prompts: FC<Props> = ({ prompts }) => {
         index={0}
         onDrop={(e) => handleDrop(e, 0)}
       />
-      {prompts
-        .slice()
-        .map((prompt, index) => (
+      {prompts.map((prompt, index) => (
           <Fragment key={prompt.id}>
             <PromptComponent prompt={prompt} />
             <DropArea

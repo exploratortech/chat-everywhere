@@ -265,7 +265,13 @@ export const Chatbar = () => {
         side={'left'}
         isOpen={showChatbar}
         addItemButtonTitle={t('New chat')}
-        itemComponent={<Conversations conversations={filteredConversations} />}
+        itemComponent={
+          <Conversations
+            conversations={
+              filteredConversations.filter((conversation) => conversation.folderId == null)
+            }
+          />
+        }
         itemsIsImporting={isImportingData}
         folderComponent={<ChatFolders searchTerm={searchTerm} />}
         items={filteredConversations}

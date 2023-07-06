@@ -166,7 +166,9 @@ const Promptbar = () => {
         addItemButtonTitle={t('New prompt')}
         itemComponent={
           <Prompts
-            prompts={filteredPrompts.filter((prompt) => !prompt.folderId)}
+            prompts={
+              filteredPrompts.filter((prompt) => prompt.folderId == null)
+            }
           />
         }
         folderComponent={<PromptFolders />}
