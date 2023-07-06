@@ -5,8 +5,8 @@ import { getMDContentOfArticle } from '@/utils/server/webbrowser-tools';
 import chromium from '@sparticuz/chromium-min';
 import puppeteer from 'puppeteer-core';
 
-const chromeTar =
-  'https://github.com/Sparticuz/chromium/releases/download/v114.0.0/chromium-v114.0.0-pack.tar';
+const chromeTarPath =
+  'https://github.com/Sparticuz/chromium/releases/download/v112.0.2/chromium-v112.0.2-pack.tar';
 
 const prompt =
   'You are acting as a summarization AI, and for the input text please summarize it to the most important 3 to 5 bullet points for brevity: ';
@@ -22,7 +22,7 @@ export default async function handler(
   const browser = await puppeteer.launch({
     args: chromium.args,
     defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath(chromeTar),
+    executablePath: await chromium.executablePath(chromeTarPath),
     headless: chromium.headless,
   });
 
