@@ -42,11 +42,39 @@ const webBrowser = (webSummaryEndpoint: string) =>
       requestURL.searchParams.append('browserQuery', input);
       const response = await fetch(requestURL.toString());
       const { content } = await response.json();
+
       return content;
     },
   });
 
 const handler = async (req: NextRequest, res: any) => {
+  const logger = (function () {
+    let oldConsoleLog: {
+      (...data: any[]): void;
+      (message?: any, ...optionalParams: any[]): void;
+      (...data: any[]): void;
+      (message?: any, ...optionalParams: any[]): void;
+    } | null = null;
+    let pub: { enableLogger: () => void; disableLogger: () => void } = {
+      enableLogger: () => {},
+      disableLogger: () => {},
+    };
+
+    pub.enableLogger = function enableLogger() {
+      if (oldConsoleLog == null) return;
+
+      console.log = oldConsoleLog;
+    };
+
+    pub.disableLogger = function disableLogger() {
+      oldConsoleLog = console.log;
+      console.log = function () {};
+    };
+
+    return pub;
+  })();
+
+  logger.disableLogger();
   retrieveUserSessionAndLogUsages(req, PluginID.LANGCHAIN_CHAT);
 
   const requestBody = (await req.json()) as ChatBody;
@@ -184,6 +212,7 @@ const handler = async (req: NextRequest, res: any) => {
     console.error(e);
     console.log(typeof e);
   }
+  logger.enableLogger();
 };
 
 const normalizeTextAnswer = (text: string) => {
