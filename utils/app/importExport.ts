@@ -14,7 +14,8 @@ import {
 
 import { HomeInitialState } from '@/pages/api/home/home.state';
 
-import { cleanConversationHistory } from './clean';
+import { RANK_INTERVAL } from './const';
+import { cleanConversationHistory, cleanFolders, cleanPrompts } from './clean';
 import { trackEvent } from './eventTracking';
 
 import dayjs from 'dayjs';
@@ -51,10 +52,11 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
     return {
       version: 4,
       history: cleanConversationHistory(data.history || []),
-      folders: (data.folders || []).map((chatFolder) => ({
+      folders: (data.folders || []).map((chatFolder, index) => ({
         id: chatFolder.id.toString(),
         name: chatFolder.name,
         type: 'chat',
+        rank: index * RANK_INTERVAL,
         lastUpdateAtUTC: dayjs().valueOf(),
       })),
       prompts: [],
@@ -62,11 +64,22 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
   }
 
   if (isExportFormatV3(data)) {
-    return { ...data, version: 4, prompts: [] };
+    return {
+      ...data,
+      version: 4,
+      history: cleanConversationHistory(data.history),
+      folders: cleanFolders(data.folders),
+      prompts: [],
+    };
   }
 
   if (isExportFormatV4(data)) {
-    return data;
+    return {
+      ...data,
+      history: cleanConversationHistory(data.history),
+      folders: cleanFolders(data.folders),
+      prompts: cleanPrompts(data.prompts),
+    };
   }
 
   throw new Error('Unsupported data format');

@@ -53,6 +53,7 @@ export const Chatbar = () => {
       pluginKeys,
       showPromptbar,
       selectedConversation,
+      currentDrag,
     },
     dispatch: homeDispatch,
     handleCreateFolder,
@@ -210,11 +211,11 @@ export const Chatbar = () => {
   };
 
   const handleDrop = (e: any) => {
-    if (e.dataTransfer) {
-      const conversation = JSON.parse(e.dataTransfer.getData('conversation'));
+    if (currentDrag) {
+      const conversation = currentDrag.data as Conversation;
       handleUpdateConversation(conversation, { key: 'folderId', value: 0 });
       chatDispatch({ field: 'searchTerm', value: '' });
-      e.target.style.background = 'none';
+      e.currentTarget.style.background = 'none';
     }
   };
 
@@ -264,7 +265,13 @@ export const Chatbar = () => {
         side={'left'}
         isOpen={showChatbar}
         addItemButtonTitle={t('New chat')}
-        itemComponent={<Conversations conversations={filteredConversations} />}
+        itemComponent={
+          <Conversations
+            conversations={
+              filteredConversations.filter((conversation) => conversation.folderId == null)
+            }
+          />
+        }
         itemsIsImporting={isImportingData}
         folderComponent={<ChatFolders searchTerm={searchTerm} />}
         items={filteredConversations}

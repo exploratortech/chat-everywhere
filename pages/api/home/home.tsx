@@ -17,22 +17,28 @@ import useErrorService from '@/services/errorService';
 import useApiService from '@/services/useApiService';
 
 import { fetchShareableConversation } from '@/utils/app/api';
-import { cleanConversationHistory } from '@/utils/app/clean';
+import {
+  cleanConversationHistory,
+  cleanFolders,
+  cleanPrompts,
+} from '@/utils/app/clean';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import {
+  getNonDeletedCollection,
   saveConversation,
   saveConversations,
   updateConversation,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
+import { saveFolders } from '@/utils/app/folders';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { enableTracking } from '@/utils/app/eventTracking';
-import { saveFolders } from '@/utils/app/folders';
 import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
+import { generateRank, sortByRank } from '@/utils/app/rank';
 import { userProfileQuery } from '@/utils/server/supabase';
 
 import { Conversation } from '@/types/chat';
@@ -41,6 +47,8 @@ import { LatestExportFormat } from '@/types/export';
 import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModelID, OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
+import { UserProfile } from '@/types/user';
+import { DragData } from '@/types/drag';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
@@ -158,6 +166,10 @@ const Home = () => {
       name,
       type,
       lastUpdateAtUTC: dayjs().valueOf(),
+      rank: generateRank(
+        getNonDeletedCollection(folders)
+          .filter((folder) => folder.type === type)
+      ),
     };
 
     const updatedFolders = [...folders, newFolder];
@@ -292,10 +304,21 @@ const Home = () => {
       },
       prompt: DEFAULT_SYSTEM_PROMPT,
       temperature: DEFAULT_TEMPERATURE,
+      rank: generateRank(getNonDeletedCollection(conversations)),
       folderId: null,
       lastUpdateAtUTC: dayjs().valueOf(),
     };
     return newConversation;
+  };
+
+  // DRAGGING ITEMS --------------------------------------
+
+  const setDragData = (dragData: DragData): void => {
+    dispatch({ field: 'currentDrag', value: dragData });
+  };
+
+  const removeDragData = (): void => {
+    dispatch({ field: 'currentDrag', value: undefined });
   };
 
   // EFFECTS  --------------------------------------------
@@ -501,12 +524,16 @@ const Home = () => {
 
     const folders = localStorage.getItem('folders');
     if (folders) {
-      dispatch({ field: 'folders', value: JSON.parse(folders) });
+      const parsedFolders: FolderInterface[] = JSON.parse(folders).sort(sortByRank);
+      const cleanedFolders: FolderInterface[] = cleanFolders(parsedFolders);
+      dispatch({ field: 'folders', value: cleanedFolders });
     }
 
     const prompts = localStorage.getItem('prompts');
     if (prompts) {
-      dispatch({ field: 'prompts', value: JSON.parse(prompts) });
+      const parsedPrompts: Prompt[] = JSON.parse(prompts).sort(sortByRank);
+      const cleanedPrompts: Prompt[] = cleanPrompts(parsedPrompts);
+      dispatch({ field: 'prompts', value: cleanedPrompts });
     }
 
     const outputLanguage = localStorage.getItem('outputLanguage');
@@ -528,7 +555,8 @@ const Home = () => {
     let cleanedConversationHistory: Conversation[] = [];
     if (conversationHistory) {
       const parsedConversationHistory: Conversation[] =
-        JSON.parse(conversationHistory);
+        JSON.parse(conversationHistory)
+        .sort(sortByRank);
       cleanedConversationHistory = cleanConversationHistory(
         parsedConversationHistory,
       );
@@ -625,6 +653,8 @@ const Home = () => {
             speechRecognitionLanguage,
           ),
         stopPlaying,
+        setDragData,
+        removeDragData,
       }}
     >
       <Head>

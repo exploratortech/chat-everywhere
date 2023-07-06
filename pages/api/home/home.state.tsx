@@ -5,6 +5,7 @@ import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 import { PluginKey } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
 import { CreditUsage, User } from '@/types/user';
+import { DragData } from '@/types/drag';
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -29,6 +30,7 @@ export interface HomeInitialState {
   searchTerm: string;
   defaultModelId: OpenAIModelID | undefined;
   outputLanguage: string;
+  currentDrag: DragData | undefined;
 
   // Supabase / Cloud Sync
   supabaseClient: SupabaseClient | null;
@@ -89,6 +91,7 @@ export const initialState: HomeInitialState = {
   searchTerm: '',
   defaultModelId: undefined,
   outputLanguage: '',
+  currentDrag: undefined,
 
   // Supabase / Cloud Sync
   supabaseClient: null,
