@@ -1,4 +1,3 @@
-import { IconPlanet } from '@tabler/icons-react';
 import {
   createColumnHelper,
   flexRender,
@@ -22,19 +21,11 @@ import dayjs from 'dayjs';
 export default function ReferralProgramData() {
   const {
     state: { user },
-    dispatch,
   } = useContext(HomeContext);
   const [numberOfPaidUser, setNumberOfPaidUser] = useState(0);
   const { t } = useTranslation('model');
 
-  const {
-    data,
-    isLoading,
-    isSuccess,
-    isError,
-    error: queryError,
-    refetch: getReferrals,
-  } = useQuery(
+  const { data, isSuccess } = useQuery(
     'referrals',
     async () => {
       const response = await fetch('/api/referral/referees', {
