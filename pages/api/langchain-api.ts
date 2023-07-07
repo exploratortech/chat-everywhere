@@ -57,10 +57,12 @@ const handler = async (req: NextRequest, res: any) => {
   new DynamicTool({
     name: 'web-browser',
     description:
-      'useful for when you need to find something on or summarize a webpage. input should be a comma separated list of "ONE valid http URL including protocol","what you want to find on the page or empty string for a detail summary".',
+      'useful for when you need to find something on or summarize a webpage. input should be a valid http URL (including the protocol)',
     func: async (input) => {
       const requestURL = new URL(webSummaryEndpoint);
-      requestURL.searchParams.append('browserQuery', input);
+      const inputURL = new URL(input);
+      console.log('inputURL', inputURL.toString());
+      requestURL.searchParams.append('browserQuery',inputURL.toString());
       await writeToStream(`Browsing (${input})... \n\n`);
       const response = await fetch(requestURL.toString());
       await writeToStream(`Done browsing...\n\n`);
