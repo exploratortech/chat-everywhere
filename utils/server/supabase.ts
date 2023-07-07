@@ -1,6 +1,7 @@
 import { DefaultMonthlyCredits } from '@/utils/config';
 
 import { PluginID } from '@/types/plugin';
+import { RawRefereeProfile } from '@/types/referral';
 import { UserProfile, UserProfileQueryProps } from '@/types/user';
 
 import {
@@ -266,6 +267,23 @@ export const getReferralCode = async (
   }
 };
 
+export const getRefereesProfile = async (userId: string) => {
+  try {
+    const supabase = getAdminSupabaseClient();
+
+    const { data, error } = await supabase.rpc(
+      'get_referees_profile_by_referrer_id',
+      { referrer: userId },
+    );
+
+    if (error) throw error;
+    return data as RawRefereeProfile[];
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
+
 export const regenerateReferralCode = async (
   userId: string,
 ): Promise<CodeGenerationPayloadType> => {
@@ -424,7 +442,7 @@ export const userProfileQuery = async ({
   const isInReferralTrial = (() => {
     if (!referrerRecords) return false;
     const referrerDate = dayjs(referrerRecords.referral_date);
-    const trailDays = +process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS!;
+    const trailDays = +(process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS || '3');
     const trailExpirationDate = referrerDate.add(trailDays, 'days');
 
     return dayjs().isBefore(trailExpirationDate);
