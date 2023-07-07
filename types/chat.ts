@@ -31,6 +31,7 @@ export interface Conversation {
   temperature: number;
   folderId: string | null;
   lastUpdateAtUTC: number; // timestamp in UTC in milliseconds
+  rank: number;
   deleted?: boolean;
   // Image generations parameters
   imageStyle?: string;

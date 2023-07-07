@@ -66,6 +66,24 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
     console.log(
       `User subscription ${props.stripeSubscriptionId} downgrade back to free`,
     );
+  } else if (isDowngradeUserAccountByEmailProps(props)) {
+    // Downgrade user account
+    const { data: userProfile } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('email', props.email)
+      .single();
+
+    if (userProfile?.plan === 'edu') return;
+
+    const { error: updatedUserError } = await supabase
+      .from('profiles')
+      .update({
+        plan: 'free',
+      })
+      .eq('email', props.email);
+    if (updatedUserError) throw updatedUserError;
+    console.log(`User subscription ${props.email} downgrade back to free`);
   } else if (isExtendProPlanProps(props)) {
     // Extend pro plan
 
@@ -111,6 +129,11 @@ interface DowngradeUserAccountProps {
   stripeSubscriptionId: string;
   proPlanExpirationDate?: Date;
 }
+interface DowngradeUserAccountByEmailProps {
+  upgrade: false;
+  email: string;
+  proPlanExpirationDate?: Date;
+}
 
 interface ExtendProPlanProps {
   upgrade: true;
@@ -122,6 +145,7 @@ type UpdateUserAccountProps =
   | UpgradeUserAccountProps
   | UpgradeUserAccountByEmailProps
   | DowngradeUserAccountProps
+  | DowngradeUserAccountByEmailProps
   | ExtendProPlanProps;
 
 // Type Assertion functions
@@ -154,7 +178,20 @@ function isDowngradeUserAccountProps(
 ): props is DowngradeUserAccountProps {
   return (
     props.upgrade === false &&
+    'stripeSubscriptionId' in props &&
     typeof props.stripeSubscriptionId === 'string' &&
+    (props.proPlanExpirationDate === undefined ||
+      props.proPlanExpirationDate instanceof Date)
+  );
+}
+
+function isDowngradeUserAccountByEmailProps(
+  props: UpdateUserAccountProps,
+): props is DowngradeUserAccountByEmailProps {
+  return (
+    props.upgrade === false &&
+    'email' in props &&
+    typeof props.email === 'string' &&
     (props.proPlanExpirationDate === undefined ||
       props.proPlanExpirationDate instanceof Date)
   );

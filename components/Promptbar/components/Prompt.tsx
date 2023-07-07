@@ -5,7 +5,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import {
-  DragEvent,
+  KeyboardEvent,
   MouseEventHandler,
   useContext,
   useEffect,
@@ -16,6 +16,8 @@ import { Prompt } from '@/types/prompt';
 
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 
+import HomeContext from '@/pages/api/home/home.context';
+
 import PromptbarContext from '../PromptBar.context';
 import { PromptModal } from './PromptModal';
 
@@ -24,6 +26,12 @@ interface Props {
 }
 
 export const PromptComponent = ({ prompt }: Props) => {
+  const {
+    state: { currentDrag },
+    setDragData,
+    removeDragData,
+  } = useContext(HomeContext);
+
   const {
     dispatch: promptDispatch,
     handleUpdatePrompt,
@@ -61,10 +69,15 @@ export const PromptComponent = ({ prompt }: Props) => {
     setIsDeleting(true);
   };
 
-  const handleDragStart = (e: DragEvent<HTMLButtonElement>, prompt: Prompt) => {
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('prompt', JSON.stringify(prompt));
+  const handleButtonFocusKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (["Space", "Enter"].includes(e.code)) {
+      setShowModal(true);
     }
+    e.stopPropagation();
+  }
+
+  const handleDragStart = () => {
+    setDragData({ data: prompt, type: 'prompt' });
   };
 
   useEffect(() => {
@@ -76,27 +89,37 @@ export const PromptComponent = ({ prompt }: Props) => {
   }, [isRenaming, isDeleting]);
 
   return (
-    <div className="relative flex items-center">
-      <button
-        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90"
+    <div className={`
+      relative flex items-center
+      ${ !currentDrag || currentDrag.type === 'prompt' && currentDrag.data.id ===  prompt.id ? 'pointer-events-auto' : 'pointer-events-none' }
+    `}>
+      <div
+        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 translate-x-0 z-10"
         draggable="true"
         onClick={(e) => {
           e.stopPropagation();
           setShowModal(true);
         }}
-        onDragStart={(e) => handleDragStart(e, prompt)}
+        onDragStart={handleDragStart}
+        onDragEnd={removeDragData}
+        onKeyDown={handleButtonFocusKeyDown}
         onMouseLeave={() => {
           setIsDeleting(false);
           setIsRenaming(false);
           setRenameValue('');
         }}
+        tabIndex={0}
       >
         <IconBulbFilled size={18} />
 
-        <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all pr-4 text-left text-[12.5px] leading-4">
+        <div
+          className={`${
+            isDeleting || isRenaming ? 'pr-12' : 'pr-4'
+          } relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3`}
+        >
           {prompt.name}
         </div>
-      </button>
+      </div>
 
       {(isDeleting || isRenaming) && (
         <div className="absolute right-1 z-10 flex text-gray-300">

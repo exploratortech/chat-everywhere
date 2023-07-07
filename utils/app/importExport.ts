@@ -1,3 +1,8 @@
+import { Dispatch } from 'react';
+
+import { ActionType } from '@/hooks/useCreateReducer';
+
+import { Conversation } from '@/types/chat';
 import {
   ExportFormatV1,
   ExportFormatV2,
@@ -7,7 +12,11 @@ import {
   SupportedExportFormats,
 } from '@/types/export';
 
-import { cleanConversationHistory } from './clean';
+import { HomeInitialState } from '@/pages/api/home/home.state';
+
+import { RANK_INTERVAL } from './const';
+import { cleanConversationHistory, cleanFolders, cleanPrompts } from './clean';
+import { trackEvent } from './eventTracking';
 
 import dayjs from 'dayjs';
 
@@ -43,10 +52,11 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
     return {
       version: 4,
       history: cleanConversationHistory(data.history || []),
-      folders: (data.folders || []).map((chatFolder) => ({
+      folders: (data.folders || []).map((chatFolder, index) => ({
         id: chatFolder.id.toString(),
         name: chatFolder.name,
         type: 'chat',
+        rank: index * RANK_INTERVAL,
         lastUpdateAtUTC: dayjs().valueOf(),
       })),
       prompts: [],
@@ -54,11 +64,22 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
   }
 
   if (isExportFormatV3(data)) {
-    return { ...data, version: 4, prompts: [] };
+    return {
+      ...data,
+      version: 4,
+      history: cleanConversationHistory(data.history),
+      folders: cleanFolders(data.folders),
+      prompts: [],
+    };
   }
 
   if (isExportFormatV4(data)) {
-    return data;
+    return {
+      ...data,
+      history: cleanConversationHistory(data.history),
+      folders: cleanFolders(data.folders),
+      prompts: cleanPrompts(data.prompts),
+    };
   }
 
   throw new Error('Unsupported data format');
@@ -139,4 +160,46 @@ export const importData = (
   localStorage.setItem('prompts', JSON.stringify(prompts));
 
   return cleanedData;
+};
+export const handleImportConversations = (
+  data: SupportedExportFormats,
+  homeDispatch: Dispatch<ActionType<HomeInitialState>>,
+  selectedConversation: Conversation | undefined,
+  setIsLoading?: (value: boolean) => void,
+) => {
+  if (setIsLoading) {
+    setIsLoading(true);
+  }
+  try {
+    const { history, folders, prompts }: LatestExportFormat = importData(data);
+    homeDispatch({ field: 'conversations', value: history });
+    // skip if selected conversation is already in history
+    if (
+      selectedConversation &&
+      !history.some(
+        (conversation) => conversation.id === selectedConversation.id,
+      )
+    ) {
+      homeDispatch({
+        field: 'selectedConversation',
+        value: history[history.length - 1],
+      });
+    }
+    homeDispatch({ field: 'folders', value: folders });
+    homeDispatch({ field: 'prompts', value: prompts });
+  } catch (err) {
+    console.log(err);
+  } finally {
+    if (setIsLoading) {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+    }
+    trackEvent('Import conversation clicked');
+  }
+};
+
+export const handleExportData = () => {
+  exportData();
+  trackEvent('Export conversation clicked');
 };

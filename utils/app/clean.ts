@@ -1,8 +1,14 @@
 import { Conversation } from '@/types/chat';
+import { FolderInterface } from '@/types/folder';
+import { Prompt } from '@/types/prompt';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import dayjs from 'dayjs';
 
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from './const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_TEMPERATURE,
+  RANK_INTERVAL,
+} from './const';
 
 export const cleanSelectedConversation = (conversation: Conversation) => {
   // added model for each conversation (3/20/23)
@@ -56,7 +62,7 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
     return [];
   }
 
-  return history.reduce((acc: any[], conversation) => {
+  return history.reduce((acc: any[], conversation: any, index: number) => {
     try {
       if (!conversation.model) {
         conversation.model = OpenAIModels[OpenAIModelID.GPT_3_5];
@@ -78,6 +84,10 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
         conversation.lastUpdateAtUTC = dayjs().valueOf();
       }
 
+      if (!conversation.rank) {
+        conversation.rank = (index + 1) * RANK_INTERVAL;
+      }
+
       acc.push(conversation);
       return acc;
     } catch (error) {
@@ -86,6 +96,26 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
         error,
       );
     }
+    return acc;
+  }, []);
+};
+
+export const cleanFolders = (folders: FolderInterface[]): FolderInterface[] => {
+  return folders.reduce((acc: FolderInterface[], folder: FolderInterface, index) => {
+    if (!folder.rank) {
+      folder.rank = (index + 1) * RANK_INTERVAL;
+    }
+    acc.push(folder);
+    return acc;
+  }, []);
+};
+
+export const cleanPrompts = (prompts: Prompt[]): Prompt[] => {
+  return prompts.reduce((acc: Prompt[], prompt: Prompt, index) => {
+    if (!prompt.rank) {
+      prompt.rank = (index + 1) * RANK_INTERVAL;
+    }
+    acc.push(prompt);
     return acc;
   }, []);
 };
