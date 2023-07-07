@@ -6,6 +6,7 @@ import * as functions from "firebase-functions";
 
 
 export const webContent = functions.runWith({
+  minInstances: 1,
   memory: "1GB",
 }).region("asia-east1").https.onRequest(async (request, response) => {
   logger.info("webContent logs!", {structuredData: true});
@@ -32,18 +33,24 @@ export const webContent = functions.runWith({
       return chromium.launch({executablePath});
     }
   })();
+  console.log("Starting browser...");
   const context = await browser.newContext();
   const page = await context.newPage();
 
   try {
     // Navigate to the url
+    console.log(`Going to url (${url})...`);
+
     await page.goto(url);
 
+    console.log("Converting content...");
     const content = await getMDContentOfArticle(page);
 
     // Close the page and the browser
     await page.close();
+    console.log("Closing browser...");
     await browser.close();
+    console.log("Done!");
 
     response.json({content});
   } catch (error) {
