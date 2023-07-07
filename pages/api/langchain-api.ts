@@ -32,49 +32,9 @@ const calculator = new DynamicTool({
   },
 });
 
-const webBrowser = (webSummaryEndpoint: string) =>
-  new DynamicTool({
-    name: 'web-browser',
-    description:
-      'useful for when you need to find something on or summarize a webpage. input should be a comma separated list of "ONE valid http URL including protocol","what you want to find on the page or empty string for a detail summary".',
-    func: async (input) => {
-      const requestURL = new URL(webSummaryEndpoint);
-      requestURL.searchParams.append('browserQuery', input);
-      const response = await fetch(requestURL.toString());
-      const { content } = await response.json();
 
-      return content;
-    },
-  });
 
 const handler = async (req: NextRequest, res: any) => {
-  const logger = (function () {
-    let oldConsoleLog: {
-      (...data: any[]): void;
-      (message?: any, ...optionalParams: any[]): void;
-      (...data: any[]): void;
-      (message?: any, ...optionalParams: any[]): void;
-    } | null = null;
-    let pub: { enableLogger: () => void; disableLogger: () => void } = {
-      enableLogger: () => {},
-      disableLogger: () => {},
-    };
-
-    pub.enableLogger = function enableLogger() {
-      if (oldConsoleLog == null) return;
-
-      console.log = oldConsoleLog;
-    };
-
-    pub.disableLogger = function disableLogger() {
-      oldConsoleLog = console.log;
-      console.log = function () {};
-    };
-
-    return pub;
-  })();
-
-  logger.disableLogger();
   retrieveUserSessionAndLogUsages(req, PluginID.LANGCHAIN_CHAT);
 
   const requestBody = (await req.json()) as ChatBody;
@@ -93,6 +53,22 @@ const handler = async (req: NextRequest, res: any) => {
   const writeToStream = async (text: string) => {
     await writer.write(encoder.encode(text));
   };
+  const webBrowser = (webSummaryEndpoint: string,) =>
+  new DynamicTool({
+    name: 'web-browser',
+    description:
+      'useful for when you need to find something on or summarize a webpage. input should be a comma separated list of "ONE valid http URL including protocol","what you want to find on the page or empty string for a detail summary".',
+    func: async (input) => {
+      const requestURL = new URL(webSummaryEndpoint);
+      requestURL.searchParams.append('browserQuery', input);
+      await writeToStream(`Browsing (${input})... \n\n`);
+      const response = await fetch(requestURL.toString());
+      await writeToStream(`Done browsing...\n\n`);
+      const { content } = await response.json();
+
+      return content;
+    },
+  });
 
   const callbackHandlers = {
     handleChainStart: async (chain: any) => {
@@ -107,7 +83,11 @@ const handler = async (req: NextRequest, res: any) => {
     handleAgentAction: async (action: any) => {
       console.log('handleAgentAction', action);
       await writer.ready;
+      if (action.log){
       await writeToStream(`${action.log}\n\n`);
+      } else if (action.tool && typeof action.tool === 'string') {
+        await writeToStream(`Using tools ${action.tool}... \n\n`);
+      }
     },
     handleToolStart: async (tool: any) => {
       console.log('handleToolStart', { tool });
@@ -212,7 +192,6 @@ const handler = async (req: NextRequest, res: any) => {
     console.error(e);
     console.log(typeof e);
   }
-  logger.enableLogger();
 };
 
 const normalizeTextAnswer = (text: string) => {
