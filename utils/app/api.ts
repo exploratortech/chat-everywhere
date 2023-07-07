@@ -51,6 +51,7 @@ export async function fetchShareableConversation(
       prompt: DEFAULT_SYSTEM_PROMPT,
       folderId: null,
       temperature: DEFAULT_TEMPERATURE,
+      rank: 0,
       lastUpdateAtUTC: dayjs().valueOf(),
     };
   } catch (error) {
