@@ -33,7 +33,7 @@ export const ReferralCodeEnter = () => {
   } = useQuery<{ profile: UserProfile }, Error>(
     'redeemReferralCode',
     async () => {
-      const response = await fetch('/api/referral/referees', {
+      const response = await fetch('/api/referral/redeem-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,8 +44,14 @@ export const ReferralCodeEnter = () => {
         }),
       });
       if (!response.ok) {
-        trackEvent('get referees failed');
-        throw new Error('Get referees failed, please contact your referrer');
+        trackEvent('Referral code redemption failed');
+        if (response.status === 403) {
+          throw new Error('User has already redeemed referral code before');
+        }
+
+        throw new Error(
+          'Invalid or referral code has already expired, please contact your referrer',
+        );
       }
       const profile = await userProfileQuery({
         client: supabase,
