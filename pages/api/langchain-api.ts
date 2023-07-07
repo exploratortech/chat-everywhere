@@ -9,6 +9,8 @@ import { PluginID } from '@/types/plugin';
 
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { Serialized } from 'langchain/dist/load/serializable';
+import { BaseChatMessage, LLMResult } from 'langchain/dist/schema';
 import { BingSerpAPI, DynamicTool } from 'langchain/tools';
 import { all, create } from 'mathjs';
 
@@ -32,8 +34,6 @@ const calculator = new DynamicTool({
   },
 });
 
-
-
 const handler = async (req: NextRequest, res: any) => {
   retrieveUserSessionAndLogUsages(req, PluginID.LANGCHAIN_CHAT);
 
@@ -53,31 +53,35 @@ const handler = async (req: NextRequest, res: any) => {
   const writeToStream = async (text: string) => {
     await writer.write(encoder.encode(text));
   };
-  const webBrowser = (webSummaryEndpoint: string,) =>
-  new DynamicTool({
-    name: 'web-browser',
-    description:
-      'useful for when you need to find something on or summarize a webpage. input should be a valid http URL (including the protocol)',
-    func: async (input) => {
-      const requestURL = new URL(webSummaryEndpoint);
-      const inputURL = new URL(input);
-      console.log('inputURL', inputURL.toString());
-      requestURL.searchParams.append('browserQuery',inputURL.toString());
-      await writeToStream(`Browsing (${input})... \n\n`);
-      const response = await fetch(requestURL.toString());
-      await writeToStream(`Done browsing...\n\n`);
-      const { content } = await response.json();
 
-      return content;
-    },
-  });
+  const writePluginsActions = async (input: string) => {
+    await writeToStream('ONLINE MODE ACTION:' + ` ${input} ` + '\n');
+  };
+
+  const webBrowser = (webSummaryEndpoint: string) =>
+    new DynamicTool({
+      name: 'web-browser',
+      description:
+        'useful for when you need to find something on or summarize a webpage. input should be a valid http URL (including the protocol)',
+      func: async (input) => {
+        const requestURL = new URL(webSummaryEndpoint);
+        const inputURL = new URL(input);
+        console.log('inputURL', inputURL.toString());
+        requestURL.searchParams.append('browserQuery', inputURL.toString());
+        await writePluginsActions(`Browsing (${input})... \n\n`);
+        const response = await fetch(requestURL.toString());
+        await writePluginsActions(`Done browsing \n\n`);
+        const { content } = await response.json();
+
+        return content;
+      },
+    });
 
   const callbackHandlers = {
     handleChainStart: async (chain: any) => {
       console.log('handleChainStart');
       await writer.ready;
-      await writeToStream('```Online \n');
-      await writeToStream('Thinking ... \n\n');
+      await writePluginsActions('Thinking ... \n\n');
     },
     handleChainEnd: async (outputs: any) => {
       console.log('handleChainEnd', outputs);
@@ -85,10 +89,10 @@ const handler = async (req: NextRequest, res: any) => {
     handleAgentAction: async (action: any) => {
       console.log('handleAgentAction', action);
       await writer.ready;
-      if (action.log){
-      await writeToStream(`${action.log}\n\n`);
+      if (action.log) {
+        await writePluginsActions(`${action.log}\n\n`);
       } else if (action.tool && typeof action.tool === 'string') {
-        await writeToStream(`Using tools ${action.tool}... \n\n`);
+        await writePluginsActions(`Using tools ${action.tool} \n\n`);
       }
     },
     handleToolStart: async (tool: any) => {
@@ -97,31 +101,60 @@ const handler = async (req: NextRequest, res: any) => {
     handleAgentEnd: async (action: any) => {
       console.log('handleAgentEnd', action);
       await writer.ready;
-      await writeToStream('``` \n\n');
       if (
         action.returnValues.output.includes(
           'Agent stopped due to max iterations.',
         )
       ) {
-        await writeToStream(
+        await writePluginsActions(
           'Sorry, I ran out of time to think (TnT) Please try again with a more detailed question.',
         );
-      } else {
-        await writeToStream(action.returnValues.output);
       }
       await writeToStream('[DONE]');
       console.log('Done');
       writer.close();
     },
+    handleChatModelStart: async (
+      llm: Serialized,
+      messages: BaseChatMessage[][],
+      runId: string,
+      parentRunId?: string | undefined,
+      extraParams?: Record<string, unknown> | undefined,
+      tags?: string[] | undefined,
+    ) => {
+      console.log('handleChatModelStart');
+    },
+    handleLLMEnd: async (
+      output: LLMResult,
+      runId: string,
+      parentRunId?: string,
+    ) => {
+      console.log('handleLLMEnd');
+    },
+    handleToolEnd: async (
+      output: string,
+      runId: string,
+      parentRunId?: string | undefined,
+    ) => {
+      console.log('handleToolEnd');
+    },
+    handleText: async (text: string) => {
+      console.log('handleText', text);
+    },
+    handleLLMNewToken: async (token: any) => {
+      console.log('handleLLMNewToken', token);
+      if (token) {
+        await writer.ready;
+        await writeToStream(token);
+      }
+    },
     handleChainError: async (err: any, verbose: any) => {
       await writer.ready;
-      await writeToStream('``` \n\n');
       // This is a hack to get the output from the LLM
       if (err.message.includes('Could not parse LLM output: ')) {
-        const output = err.message.split('Could not parse LLM output: ')[1];
-        await writeToStream(`${output} \n\n`);
+        await writePluginsActions(err.message);
       } else {
-        await writeToStream(
+        await writePluginsActions(
           `Sorry, I am not able to answer your question. \n\n`,
         );
         console.log('Chain Error: ', truncateLogMessage(err.message));
@@ -174,6 +207,8 @@ const handler = async (req: NextRequest, res: any) => {
         [Link Text](https://www.example.com)
         
         Let's begin by answering my question below. You can use the information above to answer my question if needed.
+        And remember must not overuse the tools i have provided you with, and only use them when needed. Each of the tool can only use up to 3 times per conversation.
+
         ${latestUserPrompt}`,
       },
       [callbackHandlers],
@@ -187,8 +222,9 @@ const handler = async (req: NextRequest, res: any) => {
     });
   } catch (e) {
     await writer.ready;
-    await writeToStream('``` \n\n');
-    await writeToStream('Sorry, I am not able to answer your question. \n\n');
+    await writePluginsActions(
+      'Sorry, I am not able to answer your question. \n\n',
+    );
     await writer.abort(e);
     console.log('Request closed');
     console.error(e);
