@@ -18,7 +18,7 @@ import useApiService from '@/services/useApiService';
 
 import { fetchShareableConversation } from '@/utils/app/api';
 import { cleanConversationHistory } from '@/utils/app/clean';
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { DEFAULT_SYSTEM_PROMPT, SYSTEM_PROMPT_FOR_AFFILIATE_LINKS , DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import {
   saveConversation,
   saveConversations,
@@ -290,7 +290,7 @@ const Home = () => {
         maxLength: OpenAIModels[defaultModelId].maxLength,
         tokenLimit: OpenAIModels[defaultModelId].tokenLimit,
       },
-      prompt: DEFAULT_SYSTEM_PROMPT,
+      prompt: isPaidUser? DEFAULT_SYSTEM_PROMPT: SYSTEM_PROMPT_FOR_AFFILIATE_LINKS, //Add affiliate links for free users
       temperature: DEFAULT_TEMPERATURE,
       folderId: null,
       lastUpdateAtUTC: dayjs().valueOf(),
@@ -536,7 +536,7 @@ const Home = () => {
       name: 'New conversation',
       messages: [],
       model: OpenAIModels[defaultModelId],
-      prompt: DEFAULT_SYSTEM_PROMPT,
+      prompt: isPaidUser? DEFAULT_SYSTEM_PROMPT: SYSTEM_PROMPT_FOR_AFFILIATE_LINKS, //Add affiliate links for free users
       temperature: DEFAULT_TEMPERATURE,
       folderId: null,
     };
