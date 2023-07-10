@@ -18,6 +18,14 @@ export const webContent = https.onRequest({
 }, async (request, response) => {
   logger.info("webContent logs!", {structuredData: true});
 
+  // get secret from header and check
+  const secret = request.headers["x-secret"];
+  if (secret !== process.env.WEB_CONTENT_FUNCTION_SECRET) {
+    response.status(401).json({
+      error: "Unauthorized",
+    });
+    return;
+  }
   // get request
   const {url} = request.query;
   if (!url || typeof url !== "string") {
