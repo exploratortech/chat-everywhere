@@ -194,33 +194,38 @@ const handler = async (req: Request): Promise<Response> => {
           const imageAlt = latestUserPromptMessage
             .replace(/\s+/g, '-')
             .slice(0, 20);
-          writeToStream(`imageURL = ${imageUrl} \n imageAlt = ${imageAlt} \n`);
+
           if (!imageUrl) {
-            if (
-              imageGenerationProgressResponseJson.response.content &&
-              invalidUserActionList.includes(
-                imageGenerationProgressResponseJson.response.content,
-              )
-            ) {
-              writeToStream(
-                `Error: ${imageGenerationProgressResponseJson.response.content} \n`,
-              );
+            // run when image url is available
+            const mjResponseContent =
+              imageGenerationProgressResponseJson.response.content;
+            const isInvalidUserAction =
+              mjResponseContent &&
+              invalidUserActionList.includes(mjResponseContent);
+            if (isInvalidUserAction) {
+              writeToStream(`Error: ${mjResponseContent} \n`);
               writer.close();
               return;
             }
-            throw new Error('Unable to fetch image generation progress');
+            throw new Error(
+              `Internal error during image generation process {${
+                mjResponseContent || 'No response content'
+              }}`,
+            );
+          } else {
+            // run when image url is available
+            writeToStream(
+              `![${imageAlt}](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationProgressResponseJson.response.buttonMessageId}") \n`,
+            );
+            await addUsageEntry(PluginID.IMAGE_GEN, user.id);
+            await subtractCredit(user.id, PluginID.IMAGE_GEN);
+
+            imageGenerationProgress = 100;
+
+            await writeToStream('[DONE]');
+            writer.close();
+            return;
           }
-          writeToStream(
-            `![${imageAlt}](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationProgressResponseJson.response.buttonMessageId}") \n`,
-          );
-          await addUsageEntry(PluginID.IMAGE_GEN, user.id);
-          await subtractCredit(user.id, PluginID.IMAGE_GEN);
-
-          imageGenerationProgress = 100;
-
-          await writeToStream('[DONE]');
-          writer.close();
-          return;
         } else {
           if (imageGenerationProgress === null) {
             writeToStream(`Start to generate \n`);
