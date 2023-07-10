@@ -1,7 +1,6 @@
-import {Page} from "playwright-core";
 import html2md from "html-to-md";
 import {sanitize} from "isomorphic-dompurify";
-
+import {Page} from "playwright-core";
 
 export async function getMDContentOfArticle(page: Page): Promise<string> {
   const content = await getContentOfArticle(page);
@@ -10,10 +9,11 @@ export async function getMDContentOfArticle(page: Page): Promise<string> {
 }
 
 async function getContentOfArticle(page: Page) {
+  // wait for 2 seconds to make sure the page is fully loaded
+  await page.waitForTimeout(2000);
   const articleHTML = await page.evaluate(() => {
     function getContainer() {
-      const numWordsOnPage =
-          document.body.innerText.match(/\S+/g)?.length ?? 0;
+      const numWordsOnPage = document.body.innerText.match(/\S+/g)?.length ?? 0;
       let ps = document.body.querySelectorAll("p");
 
       // Find the paragraphs with the most words in it
@@ -38,24 +38,23 @@ async function getContentOfArticle(page: Page) {
         }
       });
 
-      let selectedContainer:HTMLElement | null = pWithMostWords;
+      let selectedContainer: HTMLElement | null = pWithMostWords;
       let wordCountSelected = highestWordCount;
 
       while (
         wordCountSelected / numWordsOnPage < 0.4 &&
-          selectedContainer != document.body &&
-          selectedContainer.parentElement?.innerText
+        selectedContainer != document.body &&
+        selectedContainer.parentElement?.innerText
       ) {
         selectedContainer = selectedContainer.parentElement;
         wordCountSelected =
-            selectedContainer.innerText.match(/\S+/g)?.length ?? 0;
+          selectedContainer.innerText.match(/\S+/g)?.length ?? 0;
       }
 
       // Make sure a single p tag is not selected
       if (selectedContainer.tagName === "P") {
         selectedContainer = selectedContainer.parentElement;
       }
-
 
       return selectedContainer;
     }
@@ -68,6 +67,12 @@ async function getContentOfArticle(page: Page) {
     return pageSelectedContainer.innerHTML;
   });
 
+  console.log("========articleHTML start ==========");
+  console.log(articleHTML);
+  console.log("========articleHTML end ==========");
+  console.log("========  sanitizeHtml articleHTML start ==========");
+  console.log(sanitizeHtml(articleHTML));
+  console.log("========  sanitizeHtml articleHTML end ==========");
   return sanitizeHtml(articleHTML);
 }
 
