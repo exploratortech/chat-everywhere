@@ -8,6 +8,7 @@ import { cleanConversationHistory } from './clean';
 import { cleanData, getExportableData } from './importExport';
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import { sortByRank } from './rank';
 
 type MergeableObjectCollectionHash = {
   [id: string]: MergeableObject;
@@ -184,6 +185,7 @@ export const syncData = async (
     localConversations,
     remoteConversations,
   ) as Conversation[];
+  mergedHistory.sort(sortByRank);
 
   // Merge folders
   let remoteFolders: FolderInterface[] = [];
@@ -197,6 +199,7 @@ export const syncData = async (
     localFolders,
     remoteFolders,
   ) as FolderInterface[];
+  mergedFolders.sort(sortByRank);
 
   // Merge prompts
   let remotePrompts: Prompt[] = [];
@@ -210,6 +213,7 @@ export const syncData = async (
     localPrompts,
     remotePrompts,
   ) as Prompt[];
+  mergedPrompts.sort(sortByRank);
 
   const storableConversationExport: LatestExportFormat = {
     history: mergedHistory,

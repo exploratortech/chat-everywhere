@@ -77,5 +77,21 @@
   "Expires in": "有效期限",
   "Regenerate code": "重新生成",
   "A new referral code has been regenerated": "成功生成新的推廣碼",
-  "Copied to clipboard": "已複製到剪貼簿"
+  "Copied to clipboard": "已複製到剪貼簿",
+  "Referral Data": "推廣數據",
+  "Number of Paid user": "付費用戶數",
+  "Email": "電郵地址",
+  "Plan": "方案",
+  "Referral Date": "推廣日期",
+  "Is in Trial": "試用中",
+  "User has paid": "已付費",
+  "Settings": "設定",
+  "Account": "帳戶",
+  "App": "介面設定",
+  "Data": "數據管理",
+  "Sign out": "登出",
+  "Sign in": "登入",
+  "Export data": "導出對話",
+  "Dark mode": "深夜模式",
+  "Light mode": "白天模式"
 }
