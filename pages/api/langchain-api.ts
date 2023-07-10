@@ -148,7 +148,8 @@ const handler = async (req: NextRequest, res: any) => {
       await writer.ready;
       // This is a hack to get the output from the LLM
       if (err.message.includes('Could not parse LLM output: ')) {
-        await writePluginsActions(err.message);
+        const output = err.message.split('Could not parse LLM output: ')[1];
+        await writeToStream(`${output} \n\n`);
       } else {
         await writePluginsActions(
           `Sorry, I am not able to answer your question. \n\n`,
@@ -195,12 +196,14 @@ const handler = async (req: NextRequest, res: any) => {
         Make sure you include the reference links to the websites you used to answer the user's question in your response using Markdown syntax. You MUST use the following Markdown syntax to include a link in your response:
         [Link Text](https://www.example.com)
         
+        Following the rules below will help you get a better score:
+        1) Do not use any external tool for translation, you must translate the text yourself.
+        2) Output your final answer in the same language as the user's question.
+        3) Do not use any tools for more than 3 times.
+        4) For simple questions, like weather, facts, definitions, use the bing-search tool to find the answer.
+        5) Always use bing-search tool to find the website url you need to access if the URL is not provided from user, and then use the web-browser tool to access the website url you found from the bing-search tool.
+
         Let's begin by answering my question below. You can use the information above to answer my question if needed.
-        And remember must not overuse the tools i have provided you with, and only use them when needed. Each of the tool can only use up to 3 times per conversation.
-
-        If the website you accessing via the web browser tool is 404 or not found, please try to find the website url using the Bing search tool, and then use the web browser tool to access the website using the url you found from the Bing search tool.
-
-        If the website you accessing via the web browser tool is not providing the information you need, please try to find the website url using the Bing search tool, and then use the web browser tool to access the website using the url you found from the Bing search tool.
 
         ${latestUserPrompt}`,
       },
