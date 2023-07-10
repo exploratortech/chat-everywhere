@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { truncateLogMessage } from '@/utils/server';
+import fetchWebSummary from '@/utils/server/fetchWebSummary';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
@@ -50,6 +51,7 @@ const handler = async (req: NextRequest, res: any) => {
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
 
+
   const writeToStream = async (text: string) => {
     await writer.write(encoder.encode(text));
   };
@@ -58,24 +60,18 @@ const handler = async (req: NextRequest, res: any) => {
     await writeToStream('ONLINE MODE ACTION:' + ` ${input} ` + '\n');
   };
 
-  const webBrowser = (webSummaryEndpoint: string) =>
-    new DynamicTool({
-      name: 'web-browser',
-      description:
-        'useful for when you need to find something on or summarize a webpage. input should be a valid http URL (including the protocol)',
-      func: async (input) => {
-        const requestURL = new URL(webSummaryEndpoint);
-        const inputURL = new URL(input);
-        console.log('inputURL', inputURL.toString());
-        requestURL.searchParams.append('browserQuery', inputURL.toString());
-        await writePluginsActions(`Browsing (${input})... \n\n`);
-        const response = await fetch(requestURL.toString());
-        await writePluginsActions(`Done browsing \n\n`);
-        const { content } = await response.json();
-
-        return content;
-      },
-    });
+  const webBrowser = new DynamicTool({
+    name: 'web-browser',
+    description:
+      'useful for when you need to find something on or summarize a webpage. input should be a valid http URL (including the protocol)',
+    func: async (input) => {
+      const inputURL = new URL(input);
+      await writePluginsActions(`Browsing (${input})... \n\n`);
+      const { content } = await fetchWebSummary(inputURL.toString());
+      await writePluginsActions(`Done browsing \n\n`);
+      return content;
+    },
+  });
 
   const callbackHandlers = {
     handleChainStart: async (chain: any) => {
@@ -172,15 +168,8 @@ const handler = async (req: NextRequest, res: any) => {
 
   const BingAPIKey = process.env.BingApiKey;
   const isHttps = req.headers.get('x-forwarded-proto') === 'https';
-  const webSummaryEndpoint = `${isHttps ? 'https' : 'http'}://${req.headers.get(
-    'host',
-  )}/api/web-summary`;
 
-  const tools = [
-    new BingSerpAPI(BingAPIKey),
-    calculator,
-    webBrowser(webSummaryEndpoint),
-  ];
+  const tools = [new BingSerpAPI(BingAPIKey), calculator, webBrowser];
 
   const executor = await initializeAgentExecutorWithOptions(tools, model, {
     agentType: 'openai-functions',
@@ -208,6 +197,10 @@ const handler = async (req: NextRequest, res: any) => {
         
         Let's begin by answering my question below. You can use the information above to answer my question if needed.
         And remember must not overuse the tools i have provided you with, and only use them when needed. Each of the tool can only use up to 3 times per conversation.
+
+        If the website you accessing via the web browser tool is 404 or not found, please try to find the website url using the Bing search tool, and then use the web browser tool to access the website using the url you found from the Bing search tool.
+
+        If the website you accessing via the web browser tool is not providing the information you need, please try to find the website url using the Bing search tool, and then use the web browser tool to access the website using the url you found from the Bing search tool.
 
         ${latestUserPrompt}`,
       },
