@@ -8,9 +8,10 @@ import {https} from "firebase-functions/v2";
 
 let browser = null as null | Browser;
 let browserTimeout = null as null | NodeJS.Timeout;
+const envProjectId = JSON.parse(process.env.FIREBASE_CONFIG || "{}").projectId;
 
 export const webContent = https.onRequest({
-  minInstances: 1,
+  minInstances: envProjectId === "chat-everywhere-api" ? 1 : 0,
   region: "asia-east1",
   memory: "1GiB",
   concurrency: 5,

@@ -9,7 +9,9 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "deploy-firebase-function": "npm run deploy --prefix firebase/functions/",
+    "deploy-firebase-function-production": "npm run deploy-production --prefix firebase/functions/"
   },
   "dependencies": {
     "@ctrl/react-adsense": "^1.6.2",
