@@ -10,7 +10,9 @@ export function modifyParagraphs(input: string): string {
     if (startsWithPrefix[index]) {
       let content = line.replace('ONLINE MODE ACTION: ', '');
 
-      if (index === firstIndex) {
+      if (index === firstIndex && firstIndex === lastIndex) {
+        return '```Online\n' + content + '\n ``` \n';
+      } else if (index === firstIndex) {
         return '```Online\n' + content;
       } else if (index === lastIndex) {
         return content + '\n ``` \n';
