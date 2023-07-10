@@ -189,7 +189,27 @@ const handler = async (req: Request): Promise<Response> => {
           writeToStream(`Completed in ${getTotalGenerationTime()}s \n`);
           writeToStream('``` \n');
 
-          const imageAlt = latestUserPromptMessage.replace(/\s+/g, '-').slice(0, 20);
+          const imageUrl =
+            imageGenerationProgressResponseJson.response.imageUrl;
+          const imageAlt = latestUserPromptMessage
+            .replace(/\s+/g, '-')
+            .slice(0, 20);
+          writeToStream(`imageURL = ${imageUrl} \n imageAlt = ${imageAlt} \n`);
+          if (!imageUrl) {
+            if (
+              imageGenerationProgressResponseJson.response.content &&
+              invalidUserActionList.includes(
+                imageGenerationProgressResponseJson.response.content,
+              )
+            ) {
+              writeToStream(
+                `Error: ${imageGenerationProgressResponseJson.response.content} \n`,
+              );
+              writer.close();
+              return;
+            }
+            throw new Error('Unable to fetch image generation progress');
+          }
           writeToStream(
             `![${imageAlt}](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationProgressResponseJson.response.buttonMessageId}") \n`,
           );
@@ -248,3 +268,34 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 export default handler;
+
+const codeList = [
+  'ALREADY_REQUESTED_UPSCALE',
+  'BOT_TOOK_TOO_LONG_TO_PROCESS_YOUR_COMMAND',
+  'APPEAL_ACCEPTED',
+  'APPEAL_REJECTED',
+  'BANNED_PROMPT',
+  'BLOCKED',
+  'BUTTON_NOT_FOUND',
+  'FAILED_TO_PROCESS_YOUR_COMMAND',
+  'FAILED_TO_REQUEST',
+  'IMAGE_BLOCKED',
+  'INTERNAL_ERROR',
+  'INVALID_LINK',
+  'INVALID_PARAMETER',
+  'JOB_ACTION_RESTRICTED',
+  'JOB_QUEUED',
+  'MODERATION_OUTAGE',
+  'NO_FAST_HOURS',
+  'PLEASE_SUBSCRIBE_TO_MJ_IN_YOUR_DASHBOARD',
+  'QUEUE_FULL',
+];
+const invalidUserActionList = [
+  'BANNED_PROMPT',
+  'BLOCKED',
+  'IMAGE_BLOCKED',
+  'INVALID_LINK',
+  'INVALID_PARAMETER',
+  'JOB_ACTION_RESTRICTED',
+  'MODERATION_OUTAGE',
+];

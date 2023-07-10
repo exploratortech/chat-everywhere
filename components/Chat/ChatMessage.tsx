@@ -194,7 +194,17 @@ export const ChatMessage: FC<Props> = memo(
         React.ImgHTMLAttributes<HTMLImageElement>,
         HTMLImageElement
       >) => {
+        const isValidUrl = (url: string) => {
+          try {
+            new URL(url);
+            return true;
+          } catch (e) {
+            return false;
+          }
+        };
+
         if (!src) return <></>;
+        if (!isValidUrl(src)) return <b>{`{InValid IMAGE URL}`}</b>;
         if (message.pluginId !== PluginID.IMAGE_GEN) {
           return (
             // eslint-disable-next-line @next/next/no-img-element
