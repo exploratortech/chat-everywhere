@@ -13,7 +13,6 @@ export interface HomeInitialState {
   lightMode: 'light' | 'dark';
   messageIsStreaming: boolean;
   modelError: ErrorMessage | null;
-  models: OpenAIModel[];
   folders: FolderInterface[];
   conversations: Conversation[];
   selectedConversation: Conversation | undefined;
@@ -72,7 +71,6 @@ export const initialState: HomeInitialState = {
   lightMode: 'dark',
   messageIsStreaming: false,
   modelError: null,
-  models: [],
   folders: [],
   conversations: [],
   selectedConversation: undefined,
