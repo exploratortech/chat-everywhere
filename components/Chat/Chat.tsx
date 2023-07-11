@@ -51,7 +51,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     state: {
       selectedConversation,
       conversations,
-      models,
       modelError,
       loading,
       user,
@@ -430,28 +429,22 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               <>
                 <div className="mx-auto flex max-w-[350px] flex-col space-y-10 pt-12 md:px-4 sm:max-w-[600px] ">
                   <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
-                    {models.length === 0 ? (
-                      <div>
-                        <Spinner size="16px" className="mx-auto" />
-                      </div>
-                    ) : (
-                      <NewConversationMessagesContainer
-                        promptOnClick={(prompt: string) => {
-                          const message: Message = {
-                            role: 'user',
-                            content: prompt,
-                            pluginId: null,
-                          };
+                    <NewConversationMessagesContainer
+                      promptOnClick={(prompt: string) => {
+                        const message: Message = {
+                          role: 'user',
+                          content: prompt,
+                          pluginId: null,
+                        };
 
-                          setCurrentMessage(message);
-                          handleSend(0, message);
-                          event('interaction', {
-                            category: 'Prompt',
-                            label: 'Click on sample prompt',
-                          });
-                        }}
-                      />
-                    )}
+                        setCurrentMessage(message);
+                        handleSend(0, message);
+                        event('interaction', {
+                          category: 'Prompt',
+                          label: 'Click on sample prompt',
+                        });
+                      }}
+                    />
                   </div>
                 </div>
               </>
