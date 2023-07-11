@@ -184,7 +184,7 @@ const handler = async (req: NextRequest, res: any) => {
         .join('\n')}
 
       Here are the rules you must follow:
-      - Language Consistency: Respond in the same language as the user's query, do not use any tool for translation, do it yourself.
+      - Language Consistency: Respond in the same language as the user's query. Do not use any tool for translation, do it yourself.
       - Tool Usage Limit: Do not use any single tool more than three times.
       - Search Before Answering: Before responding, use the Bing-search tool to gather related information. Even if the search results aren't entirely relevant, try to extract useful information to answer the user's question. EXCEPT for translation.
       - Web Browser Tool: Only use the web browser tool if the Bing-search tool doesn't provide the necessary information. Use the URL found through Bing-search.

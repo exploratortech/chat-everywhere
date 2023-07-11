@@ -13,8 +13,8 @@ export const webContent = https.onRequest(
   {
     minInstances: envProjectId === "chat-everywhere-api" ? 1 : 0,
     region: "asia-east1",
-    memory: "1GiB",
-    concurrency: 5,
+    memory: "2GiB",
+    concurrency: 2,
     timeoutSeconds: 540,
   },
 
@@ -73,7 +73,20 @@ export const webContent = https.onRequest(
       // Navigate to the url
       console.log(`Going to url (${url})...`);
 
-      await page.goto(url);
+      const MAX_RETRIES = 3;
+      for (let i = 0; i < MAX_RETRIES; i++) {
+        try {
+          await page.goto(url, {timeout: 60000});  // 2 minutes
+          break;  // If the page loads successfully, break out of the loop
+        } catch (error) {
+          console.error(`Failed to load page (attempt ${i + 1}):`, error);
+          if (i < MAX_RETRIES - 1) {
+            console.log('Retrying...');
+          } else {
+            console.log('Failed after several retries.');
+          }
+        }
+      }
 
       console.log('Converting content...');
       const content = await getMDContentOfArticle(page);
@@ -81,6 +94,7 @@ export const webContent = https.onRequest(
       // Close the page and the browser
       await page.close();
       console.log('Done!');
+
       // Reset the timer
       if (browserTimeout) {
         clearTimeout(browserTimeout);
