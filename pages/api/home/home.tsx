@@ -103,6 +103,8 @@ const Home = () => {
       showSurveyModel,
       showNewsModel,
       showFeaturesModel,
+      showChatbar,
+      showPromptbar,
       user,
       isPaidUser,
       conversationLastSyncAt,
@@ -310,6 +312,24 @@ const Home = () => {
     };
     return newConversation;
   };
+
+  // SIDEBAR ---------------------------------------------
+
+  const toggleChatbar = (): void => {
+    dispatch({ field: 'showChatbar', value: !showChatbar });
+    localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
+  };
+
+  const togglePromptbar = () => {
+    dispatch({ field: 'showPromptbar', value: !showPromptbar });
+    localStorage.setItem('showPromptbar', JSON.stringify(!showPromptbar));
+  };
+
+  useEffect(() => {
+    document.documentElement.style.overflow = (showChatbar || showPromptbar)
+      ? 'hidden'
+      : 'auto';
+  }, [showChatbar, showPromptbar]);
 
   // DRAGGING ITEMS --------------------------------------
 
@@ -653,6 +673,8 @@ const Home = () => {
             speechRecognitionLanguage,
           ),
         stopPlaying,
+        toggleChatbar,
+        togglePromptbar,
         setDragData,
         removeDragData,
       }}
@@ -671,14 +693,12 @@ const Home = () => {
           className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white `}
           style={{ height: containerHeight }}
         >
-          <div className="w-full md:hidden">
-            <Navbar
-              selectedConversation={selectedConversation}
-              onNewConversation={handleNewConversation}
-            />
-          </div>
+          <Navbar
+            selectedConversation={selectedConversation}
+            onNewConversation={handleNewConversation}
+          />
 
-          <div className="flex h-full w-full overflow-x-hidden">
+          <div className="flex items-stretch flex-1 w-full overflow-x-hidden">
             <Chatbar />
             <div className="flex flex-1">
               <Chat stopConversationRef={stopConversationRef} />
