@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "chat-everywhere-api-staging",
+    "production": "chat-everywhere-api"
+  }
+}
