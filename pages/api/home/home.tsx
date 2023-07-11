@@ -1,7 +1,6 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useQuery } from 'react-query';
 
 import { GetServerSideProps } from 'next';
 import { useTranslation } from 'next-i18next';
@@ -12,9 +11,6 @@ import { event } from 'nextjs-google-analytics';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
-
-import useErrorService from '@/services/errorService';
-import useApiService from '@/services/useApiService';
 
 import { fetchShareableConversation } from '@/utils/app/api';
 import {
@@ -45,9 +41,8 @@ import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
 import { LatestExportFormat } from '@/types/export';
 import { FolderInterface, FolderType } from '@/types/folder';
-import { OpenAIModelID, OpenAIModels, fallbackModelID } from '@/types/openai';
+import { OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
-import { UserProfile } from '@/types/user';
 import { DragData } from '@/types/drag';
 
 import { Chat } from '@/components/Chat/Chat';
@@ -75,8 +70,6 @@ import { v4 as uuidv4 } from 'uuid';
 const Home = () => {
   const defaultModelId = fallbackModelID;
   const { t } = useTranslation('chat');
-  const { getModels } = useApiService();
-  const { getModelsError } = useErrorService();
   const { isLoading, isPlaying, currentSpeechId, speak, stopPlaying } =
     useAzureTts();
   const [containerHeight, setContainerHeight] = useState('100vh');
@@ -117,22 +110,6 @@ const Home = () => {
   } = contextValue;
 
   const stopConversationRef = useRef<boolean>(false);
-
-  const { data, error } = useQuery(
-    ['GetModels'],
-    ({ signal }) => {
-      return getModels(signal);
-    },
-    { enabled: true, refetchOnMount: false },
-  );
-
-  useEffect(() => {
-    if (data) dispatch({ field: 'models', value: data });
-  }, [data, dispatch]);
-
-  useEffect(() => {
-    dispatch({ field: 'modelError', value: getModelsError(error) });
-  }, [dispatch, error, getModelsError]);
 
   // FETCH MODELS ----------------------------------------------
 
@@ -428,6 +405,9 @@ const Home = () => {
     isPaidUser,
     forceSyncConversation,
     conversationLastSyncAt,
+    messageIsStreaming,
+    replaceRemoteData,
+    selectedConversation,
   ]);
 
   // USER AUTH ------------------------------------------

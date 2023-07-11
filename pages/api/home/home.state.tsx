@@ -2,7 +2,6 @@ import { Conversation, Message } from '@/types/chat';
 import { ErrorMessage } from '@/types/error';
 import { FolderInterface } from '@/types/folder';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
-import { PluginKey } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
 import { CreditUsage, User } from '@/types/user';
 import { DragData } from '@/types/drag';
@@ -10,13 +9,10 @@ import { DragData } from '@/types/drag';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface HomeInitialState {
-  apiKey: string;
-  pluginKeys: PluginKey[];
   loading: boolean;
   lightMode: 'light' | 'dark';
   messageIsStreaming: boolean;
   modelError: ErrorMessage | null;
-  models: OpenAIModel[];
   folders: FolderInterface[];
   conversations: Conversation[];
   selectedConversation: Conversation | undefined;
@@ -71,13 +67,10 @@ export interface HomeInitialState {
 }
 
 export const initialState: HomeInitialState = {
-  apiKey: '',
   loading: false,
-  pluginKeys: [],
   lightMode: 'dark',
   messageIsStreaming: false,
   modelError: null,
-  models: [],
   folders: [],
   conversations: [],
   selectedConversation: undefined,
