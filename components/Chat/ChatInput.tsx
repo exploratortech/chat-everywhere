@@ -1,4 +1,8 @@
-import { IconPlayerStop, IconRepeat, IconSend } from '@tabler/icons-react';
+import {
+  IconPlayerStop,
+  IconRepeat,
+  IconSend,
+} from '@tabler/icons-react';
 import {
   KeyboardEvent,
   MutableRefObject,
@@ -27,6 +31,7 @@ import TokenCounter from './components/TokenCounter';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../VoiceInput/VoiceInputButton';
+import AttachFilesButton from '../Assistant/AttachFilesButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
@@ -347,9 +352,10 @@ export const ChatInput = ({
           <div className="flex items-start">
             <div className="flex items-center pt-1 pl-1">
               <VoiceInputButton />
-              <button
-                className="rounded-sm p-1 text-zinc-500 dark:text-zinc-400 cursor-default"
-              >
+              {currentMessage?.pluginId === PluginID.ASSISTANT && (
+                <AttachFilesButton />
+              )}
+              <button className="rounded-sm p-1 text-zinc-500 dark:text-zinc-400 cursor-default">
                 {getPluginIcon(currentMessage?.pluginId)}
               </button>
             </div>
