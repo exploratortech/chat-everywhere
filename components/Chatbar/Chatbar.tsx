@@ -57,6 +57,7 @@ export const Chatbar = () => {
     handleCreateFolder,
     handleNewConversation,
     handleUpdateConversation,
+    toggleChatbar,
   } = useContext(HomeContext);
 
   const isMobileLayout = useMediaQuery('(max-width: 640px)');
@@ -155,11 +156,6 @@ export const Chatbar = () => {
     });
   };
 
-  const handleToggleChatbar = () => {
-    homeDispatch({ field: 'showChatbar', value: !showChatbar });
-    localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
-  };
-
   const handleDrop = (e: any) => {
     if (currentDrag) {
       const conversation = currentDrag.data as Conversation;
@@ -226,7 +222,7 @@ export const Chatbar = () => {
         handleSearchTerm={(searchTerm: string) =>
           chatDispatch({ field: 'searchTerm', value: searchTerm })
         }
-        toggleOpen={handleToggleChatbar}
+        toggleOpen={toggleChatbar}
         handleCreateItem={handleNewConversation}
         handleCreateFolder={() => handleCreateFolder(t('New folder'), 'chat')}
         handleDrop={handleDrop}

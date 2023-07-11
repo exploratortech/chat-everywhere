@@ -41,6 +41,7 @@ const Promptbar = () => {
     },
     dispatch: homeDispatch,
     handleCreateFolder,
+    togglePromptbar,
   } = useContext(HomeContext);
 
   const isMobileLayout = useMediaQuery('(max-width: 640px)');
@@ -53,11 +54,6 @@ const Promptbar = () => {
     state: { searchTerm, filteredPrompts },
     dispatch: promptDispatch,
   } = promptBarContextValue;
-
-  const handleTogglePromptbar = () => {
-    homeDispatch({ field: 'showPromptbar', value: !showPromptbar });
-    localStorage.setItem('showPromptbar', JSON.stringify(!showPromptbar));
-  };
 
   const handleCreatePrompt = () => {
     if (defaultModelId) {
@@ -177,7 +173,7 @@ const Promptbar = () => {
         handleSearchTerm={(searchTerm: string) =>
           promptDispatch({ field: 'searchTerm', value: searchTerm })
         }
-        toggleOpen={handleTogglePromptbar}
+        toggleOpen={togglePromptbar}
         handleCreateItem={handleCreatePrompt}
         handleCreateFolder={() => handleCreateFolder(t('New folder'), 'prompt')}
         handleDrop={handleDrop}
