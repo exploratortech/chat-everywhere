@@ -312,9 +312,8 @@ const Home = () => {
   };
 
   useEffect(() => {
-    document.documentElement.style.overflow = (showChatbar || showPromptbar)
-      ? 'hidden'
-      : 'auto';
+    document.documentElement.style.overflow =
+      showChatbar || showPromptbar ? 'hidden' : 'auto';
   }, [showChatbar, showPromptbar]);
 
   // EFFECTS  --------------------------------------------
