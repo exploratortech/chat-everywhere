@@ -170,8 +170,7 @@ const handler = async (req: NextRequest, res: any) => {
   const executor = await initializeAgentExecutorWithOptions(tools, model, {
     agentType: 'openai-functions',
     agentArgs: {
-      prefix: `
-      ${selectedOutputLanguage}
+      prefix: `${selectedOutputLanguage}
       You are a helpful AI assistant, who has access to the internet and can answer any question the user asks. You can use the following tools to help you answer the user's question:
       
       The current date and time is ${new Date().toLocaleString()}.
@@ -184,19 +183,17 @@ const handler = async (req: NextRequest, res: any) => {
         })
         .join('\n')}
 
-        Here are the rules you must follow:
-        - Translate Text: You must translate text independently without using external tools.
-        - Language Consistency: Respond in the same language as the user's query.
-        - Tool Usage Limit: Do not use any single tool more than three times.
-        - Simple Queries: Use the Bing-search tool for straightforward queries like weather, facts, and definitions.
-        - Search Before Answering: Before responding, use the Bing-search tool to gather related information. Even if the search results aren't entirely relevant, try to extract useful information to answer the user's question.
-        - Web Browser Tool: Only use the web browser tool if the Bing-search tool doesn't provide the necessary information. Use the URL found through Bing-search.
-        - Reference Links: Include links to the sources used in your response. Format links using Markdown syntax: [Link Text](https://www.example.com). Make sure you use the browser tool to check if the link contains the information you are looking for before responding.
-        
-        Remember, not adhering to these rules may result in a shutdown.
+      Here are the rules you must follow:
+      - Language Consistency: Respond in the same language as the user's query, do not use any tool for translation, do it yourself.
+      - Tool Usage Limit: Do not use any single tool more than three times.
+      - Search Before Answering: Before responding, use the Bing-search tool to gather related information. Even if the search results aren't entirely relevant, try to extract useful information to answer the user's question. EXCEPT for translation.
+      - Web Browser Tool: Only use the web browser tool if the Bing-search tool doesn't provide the necessary information. Use the URL found through Bing-search.
+      - Reference Links: Include links to the sources used in your response. Format links using Markdown syntax: [Link Text](https://www.example.com). Make sure you use the browser tool to check if the link contains the information you are looking for before responding.
+      
+      Remember, not adhering to these rules may result in a shutdown.
 
-      Let's begin!`
-    }
+      Let's begin!`,
+    },
   });
 
   try {

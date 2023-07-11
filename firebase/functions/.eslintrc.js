@@ -32,5 +32,6 @@ module.exports = {
     "require-jsdoc": 0,
     "no-control-regex": 0,
     "max-len": 0,
+    "@typescript-eslint/no-empty-function": 0,
   },
 };

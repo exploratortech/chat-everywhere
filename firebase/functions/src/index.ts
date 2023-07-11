@@ -15,32 +15,34 @@ export const webContent = https.onRequest(
     region: "asia-east1",
     memory: "1GiB",
     concurrency: 5,
+    timeoutSeconds: 540,
   },
 
+  /* eslint-disable */
   async (request, response) => {
-    logger.info("webContent logs!", {structuredData: true});
+    logger.info('webContent logs!', { structuredData: true });
 
     // get secret from header and check
-    const secret = request.headers["x-web-content-function-secret"];
+    const secret = request.headers['x-web-content-function-secret'];
     if (secret !== process.env.WEB_CONTENT_FUNCTION_SECRET) {
       response.status(401).json({
-        error: "Unauthorized",
+        error: 'Unauthorized',
       });
       return;
     }
     // get request
-    const {url} = request.query;
-    if (!url || typeof url !== "string") {
+    const { url } = request.query;
+    if (!url || typeof url !== 'string') {
       response.status(400).json({
-        error: "url is required",
+        error: 'url is required',
       });
       return;
     }
     // Launch a new browser and open a new page
     if (process.env.FUNCTIONS_EMULATOR) {
-      console.log("Running function locally.");
+      console.log('Running function locally.');
     } else {
-      console.log("Running function on Firebase.");
+      console.log('Running function on Firebase.');
     }
     const hasBrowser = !!browser;
     if (!browser) {
@@ -51,7 +53,7 @@ export const webContent = https.onRequest(
           const executablePath = await Promise.resolve(
             bundledChromium.executablePath,
           );
-          return chromium.launch({executablePath});
+          return chromium.launch({ executablePath });
         }
       })();
       // Start the timer
@@ -61,9 +63,9 @@ export const webContent = https.onRequest(
           browser = null;
         }
         browserTimeout = null;
-      }, 300000); // 5 minutes = 300000
+      }, 300000); // 5 minutes = 5*60*1000
     }
-    console.log("Starting browser...");
+    console.log('Starting browser...');
     const context = await browser.newContext();
     const page = await context.newPage();
 
@@ -73,12 +75,12 @@ export const webContent = https.onRequest(
 
       await page.goto(url);
 
-      console.log("Converting content...");
+      console.log('Converting content...');
       const content = await getMDContentOfArticle(page);
 
       // Close the page and the browser
       await page.close();
-      console.log("Done!");
+      console.log('Done!');
       // Reset the timer
       if (browserTimeout) {
         clearTimeout(browserTimeout);
@@ -91,13 +93,23 @@ export const webContent = https.onRequest(
         }, 300000);
       }
 
-      response.json({content, hasBrowser});
+      response.json({ content, hasBrowser });
     } catch (error) {
       console.error(error);
       // Close the page and the browser in case of an error
       await page.close();
-      await browser.close();
-      response.status(500).json({error});
+      if (browser) {
+        await browser.close();
+        browser = null;
+      }
+      response.status(500).json({ error });
+
+      console.error(error);
+    } finally {
+      // Don't close the browser; instead, just close the context
+      if (context) {
+        await context.close();
+      }
     }
   },
 );
