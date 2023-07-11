@@ -51,7 +51,6 @@ const handler = async (req: NextRequest, res: any) => {
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
 
-
   const writeToStream = async (text: string) => {
     await writer.write(encoder.encode(text));
   };
@@ -63,12 +62,12 @@ const handler = async (req: NextRequest, res: any) => {
   const webBrowser = new DynamicTool({
     name: 'web-browser',
     description:
-      'useful for when you need to find something on or summarize a webpage. input should be a valid http URL (including the protocol)',
+      'Use this tool to access the content of a website or check if a website contain the information you are looking for. The output of this tool is the Markdown format of the website content. Input must be a valid http URL (including the protocol).',
     func: async (input) => {
       const inputURL = new URL(input);
-      await writePluginsActions(`Browsing (${input})... \n\n`);
+      await writePluginsActions(`Browsing (${input})... \n`);
       const { content } = await fetchWebSummary(inputURL.toString());
-      await writePluginsActions(`Done browsing \n\n`);
+      await writePluginsActions(`Done browsing \n`);
       return content;
     },
   });
@@ -77,7 +76,7 @@ const handler = async (req: NextRequest, res: any) => {
     handleChainStart: async (chain: any) => {
       console.log('handleChainStart');
       await writer.ready;
-      await writePluginsActions('Thinking ... \n\n');
+      await writePluginsActions('Thinking ... \n');
     },
     handleChainEnd: async (outputs: any) => {
       console.log('handleChainEnd', outputs);
@@ -86,9 +85,9 @@ const handler = async (req: NextRequest, res: any) => {
       console.log('handleAgentAction', action);
       await writer.ready;
       if (action.log) {
-        await writePluginsActions(`${action.log}\n\n`);
+        await writePluginsActions(`${action.log}\n`);
       } else if (action.tool && typeof action.tool === 'string') {
-        await writePluginsActions(`Using tools ${action.tool} \n\n`);
+        await writePluginsActions(`Using tools ${action.tool} \n`);
       }
     },
     handleToolStart: async (tool: any) => {
@@ -134,9 +133,6 @@ const handler = async (req: NextRequest, res: any) => {
     ) => {
       console.log('handleToolEnd');
     },
-    handleText: async (text: string) => {
-      console.log('handleText', text);
-    },
     handleLLMNewToken: async (token: any) => {
       console.log('handleLLMNewToken', token);
       if (token) {
@@ -152,7 +148,7 @@ const handler = async (req: NextRequest, res: any) => {
         await writeToStream(`${output} \n\n`);
       } else {
         await writePluginsActions(
-          `Sorry, I am not able to answer your question. \n\n`,
+          `Sorry, I am not able to answer your question. \n`,
         );
         console.log('Chain Error: ', truncateLogMessage(err.message));
       }
@@ -168,13 +164,39 @@ const handler = async (req: NextRequest, res: any) => {
   });
 
   const BingAPIKey = process.env.BingApiKey;
-  const isHttps = req.headers.get('x-forwarded-proto') === 'https';
 
   const tools = [new BingSerpAPI(BingAPIKey), calculator, webBrowser];
 
   const executor = await initializeAgentExecutorWithOptions(tools, model, {
     agentType: 'openai-functions',
-    // verbose: true,
+    agentArgs: {
+      prefix: `
+      ${selectedOutputLanguage}
+      You are a helpful AI assistant, who has access to the internet and can answer any question the user asks. You can use the following tools to help you answer the user's question:
+      
+      The current date and time is ${new Date().toLocaleString()}.
+      Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
+      ${requestBody.messages
+        .map((message, index) => {
+          return `${index + 1}) ${
+            message.role === 'assistant' ? 'You' : 'User'
+          } ${normalizeTextAnswer(message.content)}`;
+        })
+        .join('\n')}
+
+        Here are the rules you must follow:
+        - Translate Text: You must translate text independently without using external tools.
+        - Language Consistency: Respond in the same language as the user's query.
+        - Tool Usage Limit: Do not use any single tool more than three times.
+        - Simple Queries: Use the Bing-search tool for straightforward queries like weather, facts, and definitions.
+        - Search Before Answering: Before responding, use the Bing-search tool to gather related information. Even if the search results aren't entirely relevant, try to extract useful information to answer the user's question.
+        - Web Browser Tool: Only use the web browser tool if the Bing-search tool doesn't provide the necessary information. Use the URL found through Bing-search.
+        - Reference Links: Include links to the sources used in your response. Format links using Markdown syntax: [Link Text](https://www.example.com). Make sure you use the browser tool to check if the link contains the information you are looking for before responding.
+        
+        Remember, not adhering to these rules may result in a shutdown.
+
+      Let's begin!`
+    }
   });
 
   try {
@@ -182,30 +204,7 @@ const handler = async (req: NextRequest, res: any) => {
 
     executor.call(
       {
-        input: `${selectedOutputLanguage} Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
-        ${requestBody.messages
-          .map((message, index) => {
-            return `${index + 1}) ${
-              message.role === 'assistant' ? 'You' : 'User'
-            } ${normalizeTextAnswer(message.content)}`;
-          })
-          .join('\n')}
-
-        The current date and time is ${new Date().toLocaleString()}.
-        
-        Make sure you include the reference links to the websites you used to answer the user's question in your response using Markdown syntax. You MUST use the following Markdown syntax to include a link in your response:
-        [Link Text](https://www.example.com)
-        
-        Following the rules below will help you get a better score:
-        1) Do not use any external tool for translation, you must translate the text yourself.
-        2) Output your final answer in the same language as the user's question.
-        3) Do not use any tools for more than 3 times.
-        4) For simple questions, like weather, facts, definitions, use the bing-search tool to find the answer.
-        5) Always use bing-search tool to find the website url you need to access if the URL is not provided from user, and then use the web-browser tool to access the website url you found from the bing-search tool.
-
-        Let's begin by answering my question below. You can use the information above to answer my question if needed.
-
-        ${latestUserPrompt}`,
+        input: `${latestUserPrompt}`,
       },
       [callbackHandlers],
     );
@@ -219,7 +218,7 @@ const handler = async (req: NextRequest, res: any) => {
   } catch (e) {
     await writer.ready;
     await writePluginsActions(
-      'Sorry, I am not able to answer your question. \n\n',
+      'Sorry, I am not able to answer your question. \n',
     );
     await writer.abort(e);
     console.log('Request closed');
