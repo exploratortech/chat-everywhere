@@ -10,12 +10,14 @@ export enum PluginID {
   LANGCHAIN_CHAT = 'langchain-chat',
   GPT4 = 'gpt-4',
   IMAGE_GEN = 'image-gen',
+  ASSISTANT = 'assistant'
 }
 
 export enum PluginName {
   LANGCHAIN_CHAT = 'Enhance Mode',
   GPT4 = 'GPT-4',
   IMAGE_GEN = 'image-gen',
+  ASSISTANT = 'Assistant Mode',
 }
 
 export const Plugins: Record<PluginID, Plugin> = {
@@ -33,6 +35,11 @@ export const Plugins: Record<PluginID, Plugin> = {
     id: PluginID.IMAGE_GEN,
     name: PluginName.IMAGE_GEN,
     requiredKeys: []
+  },
+  [PluginID.ASSISTANT]: {
+    id: PluginID.ASSISTANT,
+    name: PluginName.ASSISTANT,
+    requiredKeys: [],
   },
 };
 

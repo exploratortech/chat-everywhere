@@ -4,7 +4,7 @@ import { PluginID } from './plugin';
 export interface Message {
   role: Role;
   content: string;
-  pluginId: PluginID.LANGCHAIN_CHAT | PluginID.GPT4 | PluginID.IMAGE_GEN | null;
+  pluginId: PluginID.LANGCHAIN_CHAT | PluginID.GPT4 | PluginID.IMAGE_GEN | PluginID.ASSISTANT | null;
   largeContextResponse?: boolean // Use to indicate if the response is from a gpt3.5 16k model
   showHintForLargeContextResponse?: boolean // Use to indicate if the response can be improved by using a gpt3.5 16k model
 }

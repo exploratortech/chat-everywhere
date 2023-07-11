@@ -66,6 +66,12 @@ const ModeSelector = () => {
           >
             {t('Online mode')}
           </option>
+          <option
+            value={PluginID.ASSISTANT}
+            className="dark:bg-[#343541] dark:text-white"
+          >
+            {t('Assistant mode')}
+          </option>
           {isPaidUser && (
             <>
               <option
