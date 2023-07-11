@@ -24,19 +24,20 @@ const handler = async (req: Request): Promise<Response> => {
     if (userProfile.plan !== 'free')
       return new Response('User must be on free plan', { status: 400 });
 
+    // Disable for now
     // Check if user has already redeemed a referral code before
-    const supabase = getAdminSupabaseClient();
-    const { data: userReferralCodeHistory } = await supabase
-      .from('referral')
-      .select('id')
-      .eq('referee_id', userId)
-      .single();
+    // const supabase = getAdminSupabaseClient();
+    // const { data: userReferralCodeHistory } = await supabase
+    //   .from('referral')
+    //   .select('id')
+    //   .eq('referee_id', userId)
+    //   .single();
 
-    if (userReferralCodeHistory) {
-      return new Response('User has already redeemed a referral code', {
-        status: 403,
-      });
-    }
+    // if (userReferralCodeHistory) {
+    //   return new Response('User has already redeemed a referral code', {
+    //     status: 403,
+    //   });
+    // }
 
     const { referralCode } = (await req.json()) as {
       referralCode: string;
