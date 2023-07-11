@@ -5,7 +5,22 @@ import {Page} from "playwright-core";
 export async function getMDContentOfArticle(page: Page): Promise<string> {
   const content = await getContentOfArticle(page);
   const mdContent = html2md(content);
-  return mdContent;
+
+  let filterMd = "";
+  // filter out the html tags from the content
+  const htmlTagPattern = /<[^>]*>/g;
+  filterMd = (mdContent.replace(htmlTagPattern, ""));
+
+  // filter out image links from the content
+  const imageLinkPattern = /!\[[^\]]*\]\([^)]*\)/g;
+  filterMd = (filterMd.replace(imageLinkPattern, ""));
+
+  // filter out bold text from the content or italic text from the content
+  const boldTextPattern = /\*\*([^*]+)\*\*/g;
+  filterMd = (filterMd.replace(boldTextPattern, "$1"));
+
+  console.log( filterMd);
+  return filterMd;
 }
 
 async function getContentOfArticle(page: Page) {
@@ -67,12 +82,12 @@ async function getContentOfArticle(page: Page) {
     return pageSelectedContainer.innerHTML;
   });
 
-  console.log("========articleHTML start ==========");
-  console.log(articleHTML);
-  console.log("========articleHTML end ==========");
-  console.log("========  sanitizeHtml articleHTML start ==========");
-  console.log(sanitizeHtml(articleHTML));
-  console.log("========  sanitizeHtml articleHTML end ==========");
+  // console.log("========articleHTML start ==========");
+  // console.log(articleHTML);
+  // console.log("========articleHTML end ==========");
+  // console.log("========  sanitizeHtml articleHTML start ==========");
+  // console.log(sanitizeHtml(articleHTML));
+  // console.log("========  sanitizeHtml articleHTML end ==========");
   return sanitizeHtml(articleHTML);
 }
 
