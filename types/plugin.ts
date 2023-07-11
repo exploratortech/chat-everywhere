@@ -6,11 +6,6 @@ export interface Plugin {
   requiredKeys: KeyValuePair[];
 }
 
-export interface PluginKey {
-  pluginId: PluginID;
-  requiredKeys: KeyValuePair[];
-}
-
 export enum PluginID {
   LANGCHAIN_CHAT = 'langchain-chat',
   GPT4 = 'gpt-4',
