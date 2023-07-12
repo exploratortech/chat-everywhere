@@ -5,4 +5,5 @@ export const DefaultMonthlyCredits = {
   [PluginID.LANGCHAIN_CHAT]: 0,
   [PluginID.GPT4]: 50,
   [PluginID.IMAGE_GEN]: 50,
+  [PluginID.ASSISTANT]: 0,
 }
