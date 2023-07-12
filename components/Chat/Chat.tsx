@@ -147,6 +147,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           messages: updatedConversation.messages,
           prompt: updatedConversation.prompt,
           temperature: updatedConversation.temperature,
+          assistantMode: message.pluginId === PluginID.ASSISTANT,
         };
         const endpoint = getEndpoint(plugin);
 

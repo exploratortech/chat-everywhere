@@ -6,7 +6,12 @@ export interface Message {
   content: string;
   pluginId: PluginID.LANGCHAIN_CHAT | PluginID.GPT4 | PluginID.IMAGE_GEN | PluginID.ASSISTANT | null;
   largeContextResponse?: boolean // Use to indicate if the response is from a gpt3.5 16k model
-  showHintForLargeContextResponse?: boolean // Use to indicate if the response can be improved by using a gpt3.5 16k model
+  showHintForLargeContextResponse?: boolean, // Use to indicate if the response can be improved by using a gpt3.5 16k model
+  name?: string,
+  functionCall?: {
+    name: string,
+    arguments: string,
+  },
 }
 
 export type Role = 'assistant' | 'user';
@@ -20,6 +25,9 @@ export interface ChatBody {
   // Image generations parameters
   imageStyle?: string;
   imageQuality?: string;
+
+  // Assistant mode
+  assistantMode?: boolean;
 }
 
 export interface Conversation {

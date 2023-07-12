@@ -22,7 +22,7 @@ const handler = async (req: Request): Promise<Response> => {
     const selectedOutputLanguage = req.headers.get('Output-Language')
       ? `{lang=${req.headers.get('Output-Language')}}`
       : '';
-    const { messages, prompt, temperature } = (await req.json()) as ChatBody;
+    const { messages, prompt, temperature, assistantMode } = (await req.json()) as ChatBody;
 
     let promptToSend = prompt;
     if (!promptToSend) {
@@ -69,13 +69,14 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const stream = await OpenAIStream(
-      useLargerContextWindowModel
+      useLargerContextWindowModel && !assistantMode
         ? OpenAIModels[OpenAIModelID.GPT_3_5_16K]
         : OpenAIModels[OpenAIModelID.GPT_3_5],
       promptToSend,
       temperatureToUse,
       messagesToSend,
-      messageToStreamBack
+      messageToStreamBack,
+      assistantMode,
     );
 
     return new Response(stream);
