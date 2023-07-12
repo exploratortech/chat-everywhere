@@ -1,41 +1,51 @@
-import { readFromFile, writeToFile } from "./file";
+import { getTimeStamp } from '@/types/misc';
+import { readFromFile, writeToFile } from './file';
 
 export const CALLABLE_FUNCTIONS = [
   {
-    name: "readFromFile",
-    description: "Read the content of a given file",
+    name: 'readFromFile',
+    description: 'Read the content of a given file',
     parameters: {
-      type: "object",
+      type: 'object',
       properties: {
         filename: {
-          type: "string",
-          description: "The name of the file",
+          type: 'string',
+          description: 'The name of the file',
         },
       },
-      required: ["filename"],
+      required: ['filename'],
     }
   },
   {
-    name: "writeToFile",
-    description: "Write to a specified file",
+    name: 'writeToFile',
+    description: 'Write to a specified file',
     parameters: {
-      type: "object",
+      type: 'object',
       properties: {
         filename: {
-          type: "string",
-          description: "The name of the file",
+          type: 'string',
+          description: 'The name of the file',
         },
         content: {
-          type: "string",
-          description: "The content that's to be written to the file"
+          type: 'string',
+          description: 'The content that\'s to be written to the file'
         },
       },
-      required: ["filename", "content"],
+      required: ['filename', 'content'],
+    }
+  },
+  {
+    name: 'getTimeStamp',
+    description: 'Get the current time stamp',
+    parameters: {
+      type: 'object',
+      properties: {},
     }
   }
 ];
 
 export const AVAILABLE_FUNCTIONS: { [functionName: string]: Function} = {
-  "readFromFile": readFromFile,
-  "writeToFile": writeToFile,
+  'readFromFile': readFromFile,
+  'writeToFile': writeToFile,
+  'getTimeStamp': getTimeStamp,
 };
