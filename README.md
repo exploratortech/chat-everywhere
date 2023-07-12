@@ -65,3 +65,10 @@ npm run dev
 **5. Use It**
 
 Start chatting and enjoy!
+
+
+# Set up the web browser tool endpoint for Online mode (Work in progress)
+
+1. Ensure that the environment variable `WEB_CONTENT_FUNCTION_SECRET` is set in the project's root folder and in `./firebase/functions/`.
+2. Deploy the Firebase functions using `npm run deploy`.
+3. Update the `WEB_CONTENT_FUNCTION_ENDPOINT` after completing the initial deployment.

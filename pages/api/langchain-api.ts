@@ -1,15 +1,19 @@
-import { BingSerpAPI } from 'langchain/tools';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { CallbackManager } from 'langchain/callbacks';
-import { AgentExecutor, ZeroShotAgent } from 'langchain/agents';
-import { LLMChain } from 'langchain/chains';
-import { ChatBody } from '@/types/chat';
 import { NextRequest, NextResponse } from 'next/server';
-import { DynamicTool } from 'langchain/tools';
-import { create, all } from 'mathjs';
-import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
-import { PluginID } from '@/types/plugin';
+
 import { truncateLogMessage } from '@/utils/server';
+import fetchWebSummary from '@/utils/server/fetchWebSummary';
+import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
+
+import { ChatBody } from '@/types/chat';
+import { OpenAIModelID } from '@/types/openai';
+import { PluginID } from '@/types/plugin';
+
+import { initializeAgentExecutorWithOptions } from 'langchain/agents';
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { Serialized } from 'langchain/dist/load/serializable';
+import { BaseChatMessage, LLMResult } from 'langchain/dist/schema';
+import { BingSerpAPI, DynamicTool } from 'langchain/tools';
+import { all, create } from 'mathjs';
 
 export const config = {
   runtime: 'edge',
@@ -39,7 +43,9 @@ const handler = async (req: NextRequest, res: any) => {
   const latestUserPrompt =
     requestBody.messages[requestBody.messages.length - 1].content;
 
-  const selectedOutputLanguage = req.headers.get('Output-Language') ? `(lang=${req.headers.get('Output-Language')})` : '';
+  const selectedOutputLanguage = req.headers.get('Output-Language')
+    ? `(lang=${req.headers.get('Output-Language')})`
+    : '';
 
   const encoder = new TextEncoder();
   const stream = new TransformStream();
@@ -49,79 +55,125 @@ const handler = async (req: NextRequest, res: any) => {
     await writer.write(encoder.encode(text));
   };
 
-  const callbackManager = CallbackManager.fromHandlers({
-    handleChainStart: async () => {
+  const writePluginsActions = async (input: string) => {
+    await writeToStream('ONLINE MODE ACTION:' + ` ${input} ` + '\n');
+  };
+
+  const webBrowser = new DynamicTool({
+    name: 'web-browser',
+    description:
+      'Use this tool to access the content of a website or check if a website contain the information you are looking for. The output of this tool is the Markdown format of the website content. Input must be a valid http URL (including the protocol).',
+    func: async (input) => {
+      const inputURL = new URL(input);
+      await writePluginsActions(`Browsing (${input})... \n`);
+      const { content } = await fetchWebSummary(inputURL.toString());
+      await writePluginsActions(`Done browsing \n`);
+      return content;
+    },
+  });
+
+  const callbackHandlers = {
+    handleChainStart: async (chain: any) => {
       console.log('handleChainStart');
       await writer.ready;
-      await writeToStream('```Online \n');
-      await writeToStream('Thinking ... \n\n');
+      await writePluginsActions('Thinking ... \n');
     },
-    handleAgentAction: async (action) => {
+    handleChainEnd: async (outputs: any) => {
+      console.log('handleChainEnd', outputs);
+    },
+    handleAgentAction: async (action: any) => {
       console.log('handleAgentAction', action);
       await writer.ready;
-      await writeToStream(`${action.log}\n\n`);
+      if (action.log) {
+        await writePluginsActions(`${action.log}\n`);
+      } else if (action.tool && typeof action.tool === 'string') {
+        await writePluginsActions(`Using tools ${action.tool} \n`);
+      }
     },
-    handleAgentEnd: async (action) => {
+    handleToolStart: async (tool: any) => {
+      console.log('handleToolStart', { tool });
+    },
+    handleAgentEnd: async (action: any) => {
       console.log('handleAgentEnd', action);
       await writer.ready;
-      await writeToStream('``` \n\n');
       if (
         action.returnValues.output.includes(
           'Agent stopped due to max iterations.',
         )
       ) {
-        await writeToStream(
+        await writePluginsActions(
           'Sorry, I ran out of time to think (TnT) Please try again with a more detailed question.',
         );
-      } else {
-        await writeToStream(action.returnValues.output);
       }
       await writeToStream('[DONE]');
       console.log('Done');
       writer.close();
     },
-    handleChainEnd: async (outputs) => {
-      console.log('handleChainEnd', outputs);
+    handleChatModelStart: async (
+      llm: Serialized,
+      messages: BaseChatMessage[][],
+      runId: string,
+      parentRunId?: string | undefined,
+      extraParams?: Record<string, unknown> | undefined,
+      tags?: string[] | undefined,
+    ) => {
+      console.log('handleChatModelStart');
     },
-    handleLLMError: async (e) => {
-      await writer.ready;
-      await writeToStream('``` \n\n');
-      await writeToStream('Sorry, I am not able to answer your question. \n\n');
-      await writer.abort(e);
+    handleLLMEnd: async (
+      output: LLMResult,
+      runId: string,
+      parentRunId?: string,
+    ) => {
+      console.log('handleLLMEnd');
     },
-    handleChainError: async (err, verbose) => {
+    handleToolEnd: async (
+      output: string,
+      runId: string,
+      parentRunId?: string | undefined,
+    ) => {
+      console.log('handleToolEnd');
+    },
+    handleLLMNewToken: async (token: any) => {
+      console.log('handleLLMNewToken', token);
+      if (token) {
+        await writer.ready;
+        await writeToStream(token);
+      }
+    },
+    handleChainError: async (err: any, verbose: any) => {
       await writer.ready;
-      await writeToStream('``` \n\n');
       // This is a hack to get the output from the LLM
       if (err.message.includes('Could not parse LLM output: ')) {
         const output = err.message.split('Could not parse LLM output: ')[1];
         await writeToStream(`${output} \n\n`);
       } else {
-        await writeToStream(
-          `Sorry, I am not able to answer your question. \n\n`,
+        await writePluginsActions(
+          `Sorry, I am not able to answer your question. \n`,
         );
         console.log('Chain Error: ', truncateLogMessage(err.message));
       }
       await writer.abort(err);
     },
-    handleToolError: async (err, verbose) => {
-      console.log('Tool Error: ', truncateLogMessage(err.message));
-    },
-  });
+  };
 
   const model = new ChatOpenAI({
     temperature: 0,
-    callbackManager,
+    modelName: OpenAIModelID.GPT_3_5_16K,
     openAIApiKey: process.env.OPENAI_API_KEY,
-    streaming: false,
+    streaming: true,
   });
 
-  const tools = [new BingSerpAPI(), calculator];
-  const toolNames = tools.map((tool) => tool.name);
-  
-  const prompt = ZeroShotAgent.createPrompt(tools, {
-    prefix: `You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format.
+  const BingAPIKey = process.env.BingApiKey;
+
+  const tools = [new BingSerpAPI(BingAPIKey), calculator, webBrowser];
+
+  const executor = await initializeAgentExecutorWithOptions(tools, model, {
+    agentType: 'openai-functions',
+    agentArgs: {
+      prefix: `${selectedOutputLanguage}
+      You are a helpful AI assistant, who has access to the internet and can answer any question the user asks. You can use the following tools to help you answer the user's question:
       
+      The current date and time is ${new Date().toLocaleString()}.
       Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
       ${requestBody.messages
         .map((message, index) => {
@@ -131,46 +183,28 @@ const handler = async (req: NextRequest, res: any) => {
         })
         .join('\n')}
 
-      The current date and time is ${new Date().toLocaleString()}.
+      Here are the rules you must follow:
+      - Language Consistency: Respond in the same language as the user's query. Do not use any tool for translation, do it yourself.
+      - Tool Usage Limit: Do not use any single tool more than three times.
+      - Search Before Answering: Before responding, use the Bing-search tool to gather related information. Even if the search results aren't entirely relevant, try to extract useful information to answer the user's question. EXCEPT for translation.
+      - Web Browser Tool: Only use the web browser tool if the Bing-search tool doesn't provide the necessary information. Use the URL found through Bing-search.
+      - Reference Links: Include links to the sources used in your response. Format links using Markdown syntax: [Link Text](https://www.example.com). Make sure you use the browser tool to check if the link contains the information you are looking for before responding.
       
-      Make sure you include the reference links to the websites you used to answer the user's question in your response using Markdown syntax. You MUST use the following Markdown syntax to include a link in your response:
-      [Link Text](https://www.example.com)
+      Remember, not adhering to these rules may result in a shutdown.
 
-      Use the following format:
-
-      Question: the input question you must answer
-      Thought: you should always think about what to do
-      Action: the action to take, should be one of ${toolNames}
-      Action Input: the input to the action
-      Observation: the result of the action
-      ... (this Thought/Action/Action Input/Observation can repeat N times)
-      Thought: I now know the final answer
-      Final Answer: the final answer to the original input question
-    `,
-  });  
-
-  const llmChain = new LLMChain({
-    llm: model,
-    prompt: prompt,
-  });
-
-  const agent = new ZeroShotAgent({
-    llmChain,
-    allowedTools: ['bing-search', 'calculator'],
-  });
-
-  const agentExecutor = AgentExecutor.fromAgentAndTools({
-    agent,
-    tools,
-    callbackManager,
+      Let's begin!`,
+    },
   });
 
   try {
-    agentExecutor.verbose = true;
+    executor.verbose = true;
 
-    agentExecutor.call({
-        input:  `${selectedOutputLanguage} ${latestUserPrompt}`,
-      })
+    executor.call(
+      {
+        input: `${latestUserPrompt}`,
+      },
+      [callbackHandlers],
+    );
 
     return new NextResponse(stream.readable, {
       headers: {
@@ -180,8 +214,9 @@ const handler = async (req: NextRequest, res: any) => {
     });
   } catch (e) {
     await writer.ready;
-    await writeToStream('``` \n\n');
-    await writeToStream('Sorry, I am not able to answer your question. \n\n');
+    await writePluginsActions(
+      'Sorry, I am not able to answer your question. \n',
+    );
     await writer.abort(e);
     console.log('Request closed');
     console.error(e);
@@ -191,7 +226,7 @@ const handler = async (req: NextRequest, res: any) => {
 
 const normalizeTextAnswer = (text: string) => {
   const mindlogRegex = /```Online \n(.|\n)*```/g;
-  return text.replace(mindlogRegex, '').replace("{", "{{").replace("}", "}}");
+  return text.replace(mindlogRegex, '').replace('{', '{{').replace('}', '}}');
 };
 
 export default handler;

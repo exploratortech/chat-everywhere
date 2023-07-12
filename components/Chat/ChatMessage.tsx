@@ -21,6 +21,7 @@ import { event } from 'nextjs-google-analytics';
 
 import { updateConversation } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
+import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 
 import { Conversation, Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
@@ -250,6 +251,10 @@ export const ChatMessage: FC<Props> = memo(
       return Component;
     }, [messageIndex]);
 
+    const formattedMessage = useMemo(
+      () => modifyParagraphs(message.content),
+      [message.content],
+    );
     return (
       <div
         className={`group px-4 ${
@@ -378,7 +383,6 @@ export const ChatMessage: FC<Props> = memo(
                 )}
               </div>
             ) : (
-              // DOING: change from flex to grid
               <div className="flex w-full flex-col md:justify-between">
                 <div className="flex flex-row justify-between">
                   <MemoizedReactMarkdown
@@ -423,7 +427,8 @@ export const ChatMessage: FC<Props> = memo(
                       img: ImgComponent,
                     }}
                   >
-                    {message.content}
+                    {/* {message.content} */}
+                    {formattedMessage}
                   </MemoizedReactMarkdown>
                   <div className="flex m-1 tablet:hidden">
                     <CopyButton />
