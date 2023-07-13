@@ -198,7 +198,9 @@ export const ChatMessage: FC<Props> = memo(
         React.ImgHTMLAttributes<HTMLImageElement> & { node?: any },
         HTMLImageElement
       >) => {
-        const aiImageButtons = node?.properties?.dataAiImageButtons;
+        const aiImageButtons =
+          node?.properties?.dataAiImageButtons &&
+          (node?.properties?.dataAiImageButtons).split(',');
         const aiImageButtonMessageId =
           node?.properties?.dataAiImageButtonMessageId;
         const isValidUrl = (url: string) => {
@@ -224,7 +226,7 @@ export const ChatMessage: FC<Props> = memo(
             // eslint-disable-next-line @next/next/no-img-element
             <MjImageComponent
               src={src}
-              buttons={JSON.parse(aiImageButtons) as string[]}
+              buttons={aiImageButtons}
               buttonMessageId={aiImageButtonMessageId}
             />
           );

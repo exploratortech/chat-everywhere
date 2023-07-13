@@ -224,9 +224,11 @@ const handler = async (req: Request): Promise<Response> => {
               `\n\n<div class="grid grid-cols-2 gap-0">${imageUrlList
                 .map(
                   (imageUrl: string, index: number) =>
-                    `<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="${JSON.stringify(
-                      [`U${index + 1}`, `V${index + 1}`],
-                    )}" data-ai-image-button-message-id="${buttonMessageId}" />`,
+                    `<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="U${
+                      index + 1
+                    },V${
+                      index + 1
+                    }" data-ai-image-button-message-id="${buttonMessageId}" />`,
                 )
                 .join('')}</div>\n\n`,
             );
