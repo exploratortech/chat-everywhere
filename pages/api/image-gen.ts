@@ -144,6 +144,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       const imageGenerationResponseJson = await imageGenerationResponse.json();
+      console.log({ imageGenerationResponseJson });
 
       if (
         imageGenerationResponseJson.success !== true ||
@@ -185,17 +186,22 @@ const handler = async (req: Request): Promise<Response> => {
 
         const generationProgress = imageGenerationProgressResponseJson.progress;
 
+        console.log({ imageGenerationProgressResponseJson });
         if (generationProgress === 100) {
+          const buttonMessageId =
+            imageGenerationProgressResponseJson.response.buttonMessageId;
           writeToStream(`Completed in ${getTotalGenerationTime()}s \n`);
           writeToStream('``` \n');
 
           const imageUrl =
             imageGenerationProgressResponseJson.response.imageUrl;
+          const imageUrlList =
+            imageGenerationProgressResponseJson.response.imageUrls;
           const imageAlt = latestUserPromptMessage
             .replace(/\s+/g, '-')
             .slice(0, 20);
 
-          if (!imageUrl) {
+          if (!imageUrl || !imageUrlList.length) {
             // run when image url is available
             const mjResponseContent =
               imageGenerationProgressResponseJson.response.content;
@@ -215,7 +221,14 @@ const handler = async (req: Request): Promise<Response> => {
           } else {
             // run when image url is available
             writeToStream(
-              `![${imageAlt}](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationProgressResponseJson.response.buttonMessageId}") \n`,
+              `\n\n<div class="grid grid-cols-2 gap-0">${imageUrlList
+                .map(
+                  (imageUrl: string, index: number) =>
+                    `<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="${JSON.stringify(
+                      [`U${index + 1}`, `V${index + 1}`],
+                    )}" data-ai-image-button-message-id="${buttonMessageId}" />`,
+                )
+                .join('')}</div>\n\n`,
             );
             await addUsageEntry(PluginID.IMAGE_GEN, user.id);
             await subtractCredit(user.id, PluginID.IMAGE_GEN);
