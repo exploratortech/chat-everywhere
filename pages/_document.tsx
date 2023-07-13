@@ -22,6 +22,8 @@ export default function Document(props: Props) {
         <meta property="og:image" content="https://mugshotbot.com/m/hxYqn5DH" />
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="og:url" content={`https://chateverywhere.app`} />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="shortcut icon" href="/favicon.ico" />
         {/* Ad Verification tag for Propellerads*/}
         <meta name="monetag" content="b0996adc439888b4590068e1e29a5696"/>
       </Head>
