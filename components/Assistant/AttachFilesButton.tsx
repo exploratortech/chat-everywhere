@@ -1,8 +1,12 @@
 import React, { useRef } from "react";
 import { IconPaperclip } from "@tabler/icons-react";
-import { Attachment, AttachmentCollection } from "@/types/attachment";
+import { toast } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+
+import { AttachmentCollection } from "@/types/attachment";
 
 const AttachFilesButton = () => {
+  const { t } = useTranslation('chat');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = (e: React.MouseEvent): void => {
@@ -15,12 +19,26 @@ const AttachFilesButton = () => {
     const files = e.target.files;
     if (!files) return;
 
-    createAttachments(files, (attachments: AttachmentCollection) => {
-      console.log(attachments);
-      const jsonString = JSON.stringify(attachments);
-      localStorage.setItem('attachments', jsonString);
-      console.log('Files saved locally');
-    });
+    try {
+      createAttachments(files, (newAttachments: AttachmentCollection) => {
+        const data = localStorage.getItem('attachments');
+        let updatedData = '{}';
+        if (data) {
+          const existingAttachments = JSON.parse(data) as AttachmentCollection;
+          const updatedAttachments = {
+            ...existingAttachments,
+            ...newAttachments,
+          };
+          updatedData = JSON.stringify(updatedAttachments);
+        } else {
+          updatedData = JSON.stringify(newAttachments);
+        }
+        localStorage.setItem('attachments', updatedData);
+        toast.success(t('Files uploaded successfully'));
+      });
+    } catch (error) {
+      toast.error(t('Unable to upload files'));
+    }
   };
 
   const createAttachments = (files: FileList, onDone: (attachments: AttachmentCollection) => void) => {
