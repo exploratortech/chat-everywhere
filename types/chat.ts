@@ -14,7 +14,7 @@ export interface Message {
   },
 }
 
-export type Role = 'assistant' | 'user';
+export type Role = 'assistant' | 'user' | 'function';
 
 export interface ChatBody {
   model: OpenAIModel;

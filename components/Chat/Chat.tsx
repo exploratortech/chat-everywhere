@@ -18,7 +18,7 @@ import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
 } from '@/utils/app/const';
-import { saveConversation, saveConversations } from '@/utils/app/conversation';
+import { saveConversation, saveConversations, updateConversation } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { removeSecondLastLine } from '@/utils/app/ui';
@@ -39,6 +39,7 @@ import { ChatMessage } from './ChatMessage';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
 
 import dayjs from 'dayjs';
+import { AVAILABLE_FUNCTIONS } from '@/utils/app/callableFunctions';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -142,162 +143,216 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         });
         homeDispatch({ field: 'loading', value: true });
         homeDispatch({ field: 'messageIsStreaming', value: true });
-        const chatBody: ChatBody = {
-          model: updatedConversation.model,
-          messages: updatedConversation.messages,
-          prompt: updatedConversation.prompt,
-          temperature: updatedConversation.temperature,
-          assistantMode: message.pluginId === PluginID.ASSISTANT,
-        };
-        const endpoint = getEndpoint(plugin);
 
-        if (plugin?.id === PluginID.IMAGE_GEN) {
-          chatBody.imageQuality =
-            selectedConversation.imageQuality ||
-            DEFAULT_IMAGE_GENERATION_QUALITY;
-          chatBody.imageStyle =
-            selectedConversation.imageStyle || DEFAULT_IMAGE_GENERATION_STYLE;
-        }
+        let isSending = false;
+        do {
+          isSending = false; // Make sure to set it to false on every iteration.
 
-        const body = JSON.stringify(chatBody);
-        const controller = new AbortController();
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Output-Language': outputLanguage,
-            'user-token': user?.token || '',
-          },
-          signal: controller.signal,
-          body,
-        });
-        if (!response.ok) {
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-          if (response.status === 429) {
-            toast.error(
-              t(
-                'We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.',
-              ),
-            );
-          } else {
-            toast.error(
-              response.statusText || t('Unknown error, please contact support'),
-            );
-          }
-
-          // remove the last message from the conversation
-          homeDispatch({
-            field: 'selectedConversation',
-            value: {
-              ...selectedConversation,
-              messages: [...selectedConversation.messages],
-            },
-          });
-          return;
-        }
-        const data = response.body;
-        if (!data) {
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-          return;
-        }
-
-        if (updatedConversation.messages.length === 1) {
-          const { content } = message;
-          const customName =
-            content.length > 30 ? content.substring(0, 30) + '...' : content;
-          updatedConversation = {
-            ...updatedConversation,
-            name: customName,
+          const chatBody: ChatBody = {
+            model: updatedConversation.model,
+            messages: updatedConversation.messages,
+            prompt: updatedConversation.prompt,
+            temperature: updatedConversation.temperature,
+            assistantMode: message.pluginId === PluginID.ASSISTANT,
           };
-        }
-        homeDispatch({ field: 'loading', value: false });
-        const reader = data.getReader();
-        const decoder = new TextDecoder();
-        let done = false;
-        let isFirst = true;
-        let text = '';
-        let largeContextResponse = false;
-        let showHintForLargeContextResponse = false;
+          const endpoint = getEndpoint(plugin);
 
-        while (!done) {
-          if (stopConversationRef.current === true) {
-            controller.abort();
-            done = true;
-            break;
-          }
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
-          const chunkValue = decoder.decode(value);
-          text += chunkValue;
-
-          if (text.includes('[DONE]')) {
-            text = text.replace('[DONE]', '');
-            done = true;
+          if (plugin?.id === PluginID.IMAGE_GEN) {
+            chatBody.imageQuality =
+              selectedConversation.imageQuality ||
+              DEFAULT_IMAGE_GENERATION_QUALITY;
+            chatBody.imageStyle =
+              selectedConversation.imageStyle || DEFAULT_IMAGE_GENERATION_STYLE;
           }
 
-          if (text.includes('[16K]')) {
-            text = text.replace('[16K]', '');
-            largeContextResponse = true;
-          }
+          const body = JSON.stringify(chatBody);
+          const controller = new AbortController();
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Output-Language': outputLanguage,
+              'user-token': user?.token || '',
+            },
+            signal: controller.signal,
+            body,
+          });
+          if (!response.ok) {
+            homeDispatch({ field: 'loading', value: false });
+            homeDispatch({ field: 'messageIsStreaming', value: false });
+            if (response.status === 429) {
+              toast.error(
+                t(
+                  'We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.',
+                ),
+              );
+            } else {
+              toast.error(
+                response.statusText || t('Unknown error, please contact support'),
+              );
+            }
 
-          if (text.includes('[16K-Optional]')) {
-            text = text.replace('[16K-Optional]', '');
-            showHintForLargeContextResponse = true;
-          }
-
-          if (text.includes('[REMOVE_LAST_LINE]')) {
-            text = text.replace('[REMOVE_LAST_LINE]', '');
-            text = removeSecondLastLine(text);
-          }
-
-          if (isFirst) {
-            isFirst = false;
-            const updatedMessages: Message[] = [
-              ...updatedConversation.messages,
-              {
-                role: 'assistant',
-                content: chunkValue,
-                largeContextResponse,
-                showHintForLargeContextResponse,
-                pluginId: plugin?.id || null,
-              },
-            ];
-            updatedConversation = {
-              ...updatedConversation,
-              messages: updatedMessages,
-              lastUpdateAtUTC: dayjs().valueOf(),
-            };
+            // remove the last message from the conversation
             homeDispatch({
               field: 'selectedConversation',
-              value: updatedConversation,
-            });
-          } else {
-            const updatedMessages: Message[] = updatedConversation.messages.map(
-              (message, index) => {
-                if (index === updatedConversation.messages.length - 1) {
-                  return {
-                    ...message,
-                    content: text,
-                    largeContextResponse,
-                    showHintForLargeContextResponse,
-                  };
-                }
-                return message;
+              value: {
+                ...selectedConversation,
+                messages: [...selectedConversation.messages],
               },
-            );
+            });
+            return;
+          }
+          const data = response.body;
+          if (!data) {
+            homeDispatch({ field: 'loading', value: false });
+            homeDispatch({ field: 'messageIsStreaming', value: false });
+            return;
+          }
+
+          if (updatedConversation.messages.length === 1) {
+            const { content } = message;
+            const customName =
+              content.length > 30 ? content.substring(0, 30) + '...' : content;
             updatedConversation = {
               ...updatedConversation,
-              messages: updatedMessages,
-              lastUpdateAtUTC: dayjs().valueOf(),
+              name: customName,
             };
-            homeDispatch({
-              field: 'selectedConversation',
-              value: updatedConversation,
-            });
           }
-        }
+          homeDispatch({ field: 'loading', value: false });
+          const reader = data.getReader();
+          const decoder = new TextDecoder();
+          let done = false;
+          let isFirst = true;
+          let text = '';
+          let largeContextResponse = false;
+          let showHintForLargeContextResponse = false;
+
+          console.log('updated conversation before:', updatedConversation);
+
+          while (!done) {
+            if (stopConversationRef.current === true) {
+              controller.abort();
+              done = true;
+              break;
+            }
+            const { value, done: doneReading } = await reader.read();
+            done = doneReading;
+            const chunkValue = decoder.decode(value);
+            text += chunkValue;
+
+            if (text.includes('[DONE]')) {
+              text = text.replace('[DONE]', '');
+              done = true;
+            }
+
+            if (text.includes('[16K]')) {
+              text = text.replace('[16K]', '');
+              largeContextResponse = true;
+            }
+
+            if (text.includes('[16K-Optional]')) {
+              text = text.replace('[16K-Optional]', '');
+              showHintForLargeContextResponse = true;
+            }
+
+            if (text.includes('[REMOVE_LAST_LINE]')) {
+              text = text.replace('[REMOVE_LAST_LINE]', '');
+              text = removeSecondLastLine(text);
+            }
+
+            if (isFirst) {
+              isFirst = false;
+              const updatedMessages: Message[] = [...updatedConversation.messages];
+
+              let parsedChunkValue = null;
+              try {
+                parsedChunkValue = JSON.parse(chunkValue);
+              } catch (error) { /* Not a JSON string, so ignore */}
+
+              if (parsedChunkValue?.function_call) {
+                const functionName = parsedChunkValue.function_call.name;
+                const functionArgs = parsedChunkValue.function_call.arguments;
+                const functionToCall = AVAILABLE_FUNCTIONS[functionName];
+                const parsedFunctionArgs = JSON.parse(functionArgs);
+                const functionResponse: string = functionToCall(...Object.values(parsedFunctionArgs));
+
+                updatedMessages.push({
+                  role: 'assistant',
+                  content: '',
+                  largeContextResponse,
+                  showHintForLargeContextResponse,
+                  pluginId: plugin?.id || null,
+                  functionCall: {
+                    name: functionName,
+                    arguments: functionArgs,
+                  },
+                });
+
+                updatedMessages.push({
+                  role: 'function',
+                  name: functionName,
+                  content: functionResponse,
+                  pluginId: plugin?.id || null,
+                });
+
+                isSending = true;
+              } else {
+                updatedMessages.push({
+                  role: 'assistant',
+                  content: chunkValue,
+                  largeContextResponse,
+                  showHintForLargeContextResponse,
+                  pluginId: plugin?.id || null,
+                });
+              }
+              updatedConversation = {
+                ...updatedConversation,
+                messages: updatedMessages,
+                lastUpdateAtUTC: dayjs().valueOf(),
+              };
+              homeDispatch({
+                field: 'selectedConversation',
+                value: updatedConversation,
+              });
+            } else {
+              const updatedMessages: Message[] = updatedConversation.messages.map(
+                (message, index) => {
+                  if (index === updatedConversation.messages.length - 1) {
+                    if (message.functionCall || message.role === 'function') {
+                      return message;
+                    }
+                    return {
+                      ...message,
+                      content: text,
+                      largeContextResponse,
+                      showHintForLargeContextResponse,
+                    };
+                  }
+                  return message;
+                },
+              );
+              updatedConversation = {
+                ...updatedConversation,
+                messages: updatedMessages,
+                lastUpdateAtUTC: dayjs().valueOf(),
+              };
+              homeDispatch({
+                field: 'selectedConversation',
+                value: updatedConversation,
+              });
+            }
+          }
+
+          console.log('updated conversation after:', updatedConversation);
+
+          updateConversationLastUpdatedAtTimeStamp();
+          logGaEvent(text.length);
+          trackEvent('Send message', {
+            Length: text.length,
+            PluginId: plugin?.id || null,
+            LargeContextModel: largeContextResponse,
+          });
+        } while (isSending);
 
         saveConversation(updatedConversation);
         const updatedConversations: Conversation[] = conversations.map(
@@ -325,14 +380,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: 'conversations', value: updatedConversations });
         saveConversations(updatedConversations);
         homeDispatch({ field: 'messageIsStreaming', value: false });
-
-        updateConversationLastUpdatedAtTimeStamp();
-        logGaEvent(text.length);
-        trackEvent('Send message', {
-          Length: text.length,
-          PluginId: plugin?.id || null,
-          LargeContextModel: largeContextResponse,
-        });
       }
     },
     [
