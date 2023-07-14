@@ -4,7 +4,7 @@ import { deleteFiles, listFiles, readFromFile, writeToFile } from './file';
 export const CALLABLE_FUNCTIONS = [
   {
     name: 'readFromFile',
-    description: 'Read the content of a given file',
+    description: 'Read the content of a given file.',
     parameters: {
       type: 'object',
       properties: {
@@ -18,7 +18,7 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'writeToFile',
-    description: 'Write to a specified file',
+    description: 'Write to a specified file.',
     parameters: {
       type: 'object',
       properties: {
@@ -36,7 +36,7 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'deleteFiles',
-    description: 'Deletes a list of ',
+    description: 'Deletes the specified files.',
     parameters: {
       type: 'object',
       properties: {
