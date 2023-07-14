@@ -134,7 +134,6 @@ export const OpenAIStream = async (
           try {
             const json = JSON.parse(data);
             const choice = json.choices[0];
-            console.log('choice:', choice);
 
             if (choice.delta.function_call) {
               if (choice.delta.function_call.name) {

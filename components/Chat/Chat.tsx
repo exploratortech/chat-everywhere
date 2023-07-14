@@ -227,8 +227,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           let largeContextResponse = false;
           let showHintForLargeContextResponse = false;
 
-          console.log('updated conversation before:', updatedConversation);
-
           while (!done) {
             if (stopConversationRef.current === true) {
               controller.abort();
@@ -346,8 +344,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               });
             }
           }
-
-          console.log('updated conversation after:', updatedConversation);
 
           updateConversationLastUpdatedAtTimeStamp();
           logGaEvent(text.length);
