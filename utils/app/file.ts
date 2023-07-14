@@ -45,6 +45,23 @@ export const writeToFile = (filename: string, content: string): string => {
   }
 };
 
+export const deleteFiles = (filenames: string[]): string => {
+  try {
+    const data = localStorage.getItem('attachments');
+    if (data) {
+      const attachments = JSON.parse(data) as AttachmentCollection;
+      const updatedAttachments: AttachmentCollection = {...attachments};
+      for (const filename of filenames) {
+        delete updatedAttachments[filename];
+      }
+      localStorage.setItem('attachments', JSON.stringify(updatedAttachments))
+    }
+    return '';
+  } catch (error) {
+    return 'deleteFiles:error';
+  }
+};
+
 export const listFiles = (): string => {
   try {
     const data = localStorage.getItem('attachments');

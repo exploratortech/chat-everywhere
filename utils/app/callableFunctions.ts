@@ -1,5 +1,5 @@
 import { getTimeStamp } from '@/types/misc';
-import { listFiles, readFromFile, writeToFile } from './file';
+import { deleteFiles, listFiles, readFromFile, writeToFile } from './file';
 
 export const CALLABLE_FUNCTIONS = [
   {
@@ -35,6 +35,21 @@ export const CALLABLE_FUNCTIONS = [
     },
   },
   {
+    name: 'deleteFiles',
+    description: 'Deletes a list of ',
+    parameters: {
+      type: 'object',
+      properties: {
+        filenames: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'The names of the files to be deleted',
+        },
+      },
+      required: ['filenames'],
+    },
+  },
+  {
     name: 'listFiles',
     description: 'Lists the names of all stored files. It returns an array of filenames.',
     parameters: {
@@ -55,6 +70,7 @@ export const CALLABLE_FUNCTIONS = [
 export const AVAILABLE_FUNCTIONS: { [functionName: string]: Function} = {
   'readFromFile': readFromFile,
   'writeToFile': writeToFile,
+  'deleteFiles': deleteFiles,
   'listFiles': listFiles,
   'getTimeStamp': getTimeStamp,
 };
