@@ -1,5 +1,5 @@
 import { getTimeStamp } from '@/types/misc';
-import { readFromFile, writeToFile } from './file';
+import { listFiles, readFromFile, writeToFile } from './file';
 
 export const CALLABLE_FUNCTIONS = [
   {
@@ -14,7 +14,7 @@ export const CALLABLE_FUNCTIONS = [
         },
       },
       required: ['filename'],
-    }
+    },
   },
   {
     name: 'writeToFile',
@@ -32,7 +32,15 @@ export const CALLABLE_FUNCTIONS = [
         },
       },
       required: ['filename', 'content'],
-    }
+    },
+  },
+  {
+    name: 'listFiles',
+    description: 'Lists the names of all stored files. It returns an array of filenames.',
+    parameters: {
+      type: 'object',
+      properties: {},
+    },
   },
   {
     name: 'getTimeStamp',
@@ -40,12 +48,13 @@ export const CALLABLE_FUNCTIONS = [
     parameters: {
       type: 'object',
       properties: {},
-    }
+    },
   }
 ];
 
 export const AVAILABLE_FUNCTIONS: { [functionName: string]: Function} = {
   'readFromFile': readFromFile,
   'writeToFile': writeToFile,
+  'listFiles': listFiles,
   'getTimeStamp': getTimeStamp,
 };

@@ -44,3 +44,18 @@ export const writeToFile = (filename: string, content: string): string => {
     return 'writeToFile:error';
   }
 };
+
+export const listFiles = (): string => {
+  try {
+    const data = localStorage.getItem('attachments');
+    if (data) {
+      const attachments = JSON.parse(data) as AttachmentCollection;
+      const filenames = Object.keys(attachments);
+      return JSON.stringify(filenames);
+    } else {
+      return '[]';
+    }
+  } catch (error) {
+    return 'listFiles:error';
+  }
+};
