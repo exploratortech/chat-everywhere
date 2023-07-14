@@ -518,7 +518,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   )}
                 </div>
 
-                {selectedConversation?.messages.map((message, index) => (
+                {selectedConversation?.messages
+                  .filter((message) => !(message.functionCall || message.role === 'function'))
+                  .map((message, index) => (
                   <div key={index}>
                     <ChatMessage
                       key={index}
