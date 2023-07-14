@@ -270,32 +270,36 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               } catch (error) { /* Not a JSON string, so ignore */}
 
               if (parsedChunkValue?.function_call) {
-                const functionName = parsedChunkValue.function_call.name;
-                const functionArgs = parsedChunkValue.function_call.arguments;
-                const functionToCall = AVAILABLE_FUNCTIONS[functionName];
-                const parsedFunctionArgs = JSON.parse(functionArgs);
-                const functionResponse: string = functionToCall(...Object.values(parsedFunctionArgs));
-
-                updatedMessages.push({
-                  role: 'assistant',
-                  content: '',
-                  largeContextResponse,
-                  showHintForLargeContextResponse,
-                  pluginId: plugin?.id || null,
-                  functionCall: {
+                try {
+                  const functionName = parsedChunkValue.function_call.name;
+                  const functionArgs = parsedChunkValue.function_call.arguments;
+                  const functionToCall = AVAILABLE_FUNCTIONS[functionName];
+                  const parsedFunctionArgs = JSON.parse(functionArgs);
+                  const functionResponse: string = functionToCall(...Object.values(parsedFunctionArgs));
+  
+                  updatedMessages.push({
+                    role: 'assistant',
+                    content: '',
+                    largeContextResponse,
+                    showHintForLargeContextResponse,
+                    pluginId: plugin?.id || null,
+                    functionCall: {
+                      name: functionName,
+                      arguments: functionArgs,
+                    },
+                  });
+  
+                  updatedMessages.push({
+                    role: 'function',
                     name: functionName,
-                    arguments: functionArgs,
-                  },
-                });
-
-                updatedMessages.push({
-                  role: 'function',
-                  name: functionName,
-                  content: functionResponse,
-                  pluginId: plugin?.id || null,
-                });
-
-                isSending = true;
+                    content: functionResponse,
+                    pluginId: plugin?.id || null,
+                  });
+  
+                  isSending = true;
+                } catch (error) {
+                  console.error(error);
+                }
               } else {
                 updatedMessages.push({
                   role: 'assistant',

@@ -1,5 +1,5 @@
 // This endpoint only allow GPT-3.5 and GPT-3.5 16K models
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE, PERSISTENT_SYSTEM_PROMPT } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
   getMessagesTokenCount,
@@ -28,6 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (!promptToSend) {
       promptToSend = DEFAULT_SYSTEM_PROMPT;
     }
+    promptToSend += PERSISTENT_SYSTEM_PROMPT;
 
     let temperatureToUse = temperature;
     if (temperatureToUse == null) {

@@ -11,7 +11,7 @@ export const readFromFile = (filename: string): string => {
     const attachment: Attachment = attachments[filename];
     return attachment.content;
   } catch (error) {
-    throw `The file '${filename}' doesn't exist.`;
+    return `readFromFile:error`;
   }
 };
 
@@ -41,6 +41,6 @@ export const writeToFile = (filename: string, content: string): string => {
     localStorage.setItem('attachments', JSON.stringify(updatedAttachments));
     return content;
   } catch (error) {
-    throw `Unable to write to the file ${filename}`;
+    return 'writeToFile:error';
   }
 };
