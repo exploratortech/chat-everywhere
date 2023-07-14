@@ -1,5 +1,16 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useQuery } from 'react-query';
+
+import { updateConversation } from '@/utils/app/conversation';
+import { getUpdatedAssistantMjConversation } from '@/utils/app/mjImage';
+
+import { Conversation } from '@/types/chat';
 
 import HomeContext from '@/pages/api/home/home.context';
 
@@ -7,6 +18,7 @@ interface MjImageComponentProps {
   src: string;
   buttons: string[];
   buttonMessageId: string;
+  buttonCommandExecuted: boolean;
 }
 type Command = 'upscale' | '🔍 Zoom Out 2x' | '🔍 Zoom Out 1.5x';
 
@@ -14,6 +26,7 @@ export default function MjImageComponent({
   src,
   buttons,
   buttonMessageId,
+  buttonCommandExecuted,
 }: MjImageComponentProps) {
   const {
     state: { user, isPaidUser, selectedConversation, conversations },
@@ -62,26 +75,44 @@ export default function MjImageComponent({
   }, [buttons]);
 
   const upscaleImageButtonOnClick = async () => {
+    const updatedConversation = getUpdatedAssistantMjConversation(
+      selectedConversation!,
+      buttonMessageId,
+    );
+    if (!updatedConversation) return;
+    handleUpdateConversation(updatedConversation);
     setIsUpscaled(true);
   };
+  const handleUpdateConversation = useCallback(
+    (updatedConversation: Conversation) => {
+      const { single, all } = updateConversation(
+        updatedConversation,
+        conversations,
+      );
+      homeDispatch({ field: 'selectedConversation', value: single });
+      homeDispatch({ field: 'conversations', value: all });
+    },
+    [conversations, homeDispatch],
+  );
 
   return (
-    <div className="group">
-      <div className={`group/image relative hover:z-10`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt=""
-          className={`${
-            user ? `group-hover/image:scale-110` : ''
-          } w-full m-0 transition-all duration-500 `}
-          data-ai-image-selection={JSON.stringify(buttons)}
-          data-ai-image-message-id={buttonMessageId}
-        />
+    <div className={`group/image relative hover:z-10`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        className={`${
+          user && !buttonCommandExecuted ? `group-hover/image:scale-110` : ''
+        } w-full m-0 transition-all duration-500 `}
+      />
+
+      {buttonCommandExecuted ? (
+        <div className="absolute top-0 bg-black/50 backdrop-blur-sm left-0 w-full h-full"></div>
+      ) : (
         <div
           className={`${
             user ? `group-hover/image:scale-110` : ''
-          } group-hover/image:drop-shadow-lg group-hover/image:bg-black/75 transition-all duration-500 absolute top-0 left-0 w-full h-full`}
+          } group-hover/image:drop-shadow-2xl group-hover/image:bg-black/75 transition-all duration-500 absolute top-0 left-0 w-full h-full`}
         >
           {/*  Button selections  */}
           <div className="hidden group-hover/image:flex flex-col justify-center items-center h-full">
@@ -98,7 +129,7 @@ export default function MjImageComponent({
             })}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

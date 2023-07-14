@@ -116,7 +116,6 @@ export const ChatMessage: FC<Props> = memo(
         ...selectedConversation,
         messages,
       };
-
       const { single, all } = updateConversation(
         updatedConversation,
         conversations,
@@ -203,6 +202,8 @@ export const ChatMessage: FC<Props> = memo(
           (node?.properties?.dataAiImageButtons).split(',');
         const aiImageButtonMessageId =
           node?.properties?.dataAiImageButtonMessageId;
+        const buttonCommandExecuted =
+          node?.properties?.dataAiImageButtonCommandsExecuted === '1';
         const isValidUrl = (url: string) => {
           try {
             new URL(url);
@@ -228,6 +229,7 @@ export const ChatMessage: FC<Props> = memo(
               src={src}
               buttons={aiImageButtons}
               buttonMessageId={aiImageButtonMessageId}
+              buttonCommandExecuted={buttonCommandExecuted}
             />
           );
         }
