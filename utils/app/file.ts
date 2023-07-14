@@ -1,9 +1,46 @@
+import { Attachment, AttachmentCollection } from "@/types/attachment";
+
 export const readFromFile = (filename: string): string => {
-  console.warn('TODO: Implement "readFromFile()"');
-  return 'Yearly Goals:\n1. Increase revenue by 10%\n2. Expand into new markets\n\nMonthly Goals:\n1. Achieve sales target\n2. Improve customer satisfaction\n\nWeekly Goals:\n1. Complete project tasks\n2. Conduct team meetings';
+  try {
+    const data = localStorage.getItem('attachments');
+    if (!data) throw new Error();
+
+    const attachments = JSON.parse(data);
+    if (!attachments[filename]) throw new Error();
+
+    const attachment: Attachment = attachments[filename];
+    return attachment.content;
+  } catch (error) {
+    throw `The file '${filename}' doesn't exist.`;
+  }
 };
 
 export const writeToFile = (filename: string, content: string): string => {
-  console.warn('TODO: Implement "writeToFile()"');
-  return content;
+  try {
+    const data = localStorage.getItem('attachments');
+    let updatedAttachments: AttachmentCollection = {};
+
+    if (data) {
+      const attachments = JSON.parse(data) as AttachmentCollection;
+      updatedAttachments = {
+        ...attachments,
+        [filename]: {
+          name: filename,
+          content,
+        },
+      };
+    } else {
+      updatedAttachments = {
+        [filename]: {
+          name: filename,
+          content,
+        },
+      };
+    }
+
+    localStorage.setItem('attachments', JSON.stringify(updatedAttachments));
+    return content;
+  } catch (error) {
+    throw `Unable to write to the file ${filename}`;
+  }
 };
