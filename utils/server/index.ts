@@ -43,7 +43,7 @@ export const OpenAIStream = async (
   customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
 ) => {
   // let url = `${OPENAI_API_HOST}/v1/chat/completions`;
-  let url = `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/gpt35-16k/chat/completions?api-version=2023-06-01-preview`;
+  let url = `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/gpt-35/chat/completions?api-version=2023-05-15`;
 
   // Ensure you have the OPENAI_API_GPT_4_KEY set in order to use the GPT-4 model
   const apiKey =
@@ -141,13 +141,14 @@ export const OpenAIStream = async (
           const data = buffer.shift();
           controller.enqueue(data);
         }
+
         if (stop) {
           if (buffer.length === 0) {
             controller.close();
             clearInterval(interval);
           }
         }
-      }, 25);
+      }, 45);
     },
   });
 
