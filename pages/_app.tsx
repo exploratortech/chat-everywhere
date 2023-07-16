@@ -11,6 +11,9 @@ import { GoogleAnalytics } from 'nextjs-google-analytics';
 
 import { initializeMixpanel } from '@/utils/app/eventTracking';
 
+import { AppInsightsContext } from '@microsoft/applicationinsights-react-js';
+import { reactPlugin } from '@/utils/app/azureAppInsights';
+
 import '@/styles/globals.css';
 import '@/styles/transitionGroup.css';
 import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
@@ -28,18 +31,20 @@ function App({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
   }, []);
 
   return (
-    <SessionContextProvider
-      supabaseClient={supabase}
-      initialSession={pageProps.initialSession}
-    >
-      <div className={inter.className}>
-        <Toaster />
-        <QueryClientProvider client={queryClient}>
-          <Component {...pageProps} />
-          <GoogleAnalytics trackPageViews strategy="lazyOnload" />
-        </QueryClientProvider>
-      </div>
-    </SessionContextProvider>
+    <AppInsightsContext.Provider value={reactPlugin}>
+      <SessionContextProvider
+        supabaseClient={supabase}
+        initialSession={pageProps.initialSession}
+      >
+        <div className={inter.className}>
+          <Toaster />
+          <QueryClientProvider client={queryClient}>
+            <Component {...pageProps} />
+            <GoogleAnalytics trackPageViews strategy="lazyOnload" />
+          </QueryClientProvider>
+        </div>
+      </SessionContextProvider>
+    </AppInsightsContext.Provider> 
   );
 }
 
