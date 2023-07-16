@@ -40,9 +40,11 @@ export const OpenAIStream = async (
   systemPrompt: string,
   temperature: number,
   messages: Message[],
-  customMessageToStreamBack?: string | null // Stream this string at the end of the streaming
+  customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
 ) => {
-  let url = `${OPENAI_API_HOST}/v1/chat/completions`;
+  // let url = `${OPENAI_API_HOST}/v1/chat/completions`;
+  let url = `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/gpt35-16k/chat/completions?api-version=2023-06-01-preview`;
+
   // Ensure you have the OPENAI_API_GPT_4_KEY set in order to use the GPT-4 model
   const apiKey =
     model.id === OpenAIModelID.GPT_4
@@ -52,7 +54,6 @@ export const OpenAIStream = async (
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
 
   const bodyToSend = {
-    ...(OPENAI_API_TYPE === 'openai' && { model: model.id }),
     messages: [
       {
         role: 'system',
@@ -69,7 +70,7 @@ export const OpenAIStream = async (
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
+      'api-key': process.env.AZURE_OPENAI_KEY || '',
     },
     method: 'POST',
     body: JSON.stringify(bodyToSend),
@@ -99,24 +100,28 @@ export const OpenAIStream = async (
 
   const stream = new ReadableStream({
     async start(controller) {
+      let buffer: Uint8Array[] = [];
+      let stop = false;
+
       const onParse = (event: ParsedEvent | ReconnectInterval) => {
         if (event.type === 'event') {
           const data = event.data;
 
           try {
             const json = JSON.parse(data);
-            if (json.choices[0].finish_reason != null) {
-              if (customMessageToStreamBack) {
-                const queue = encoder.encode(customMessageToStreamBack);
-                controller.enqueue(queue);
-              }
 
-              controller.close();
-              return;
+            if (json.choices[0]) {
+              if (json.choices[0].finish_reason != null) {
+                if (customMessageToStreamBack) {
+                  buffer.push(encoder.encode(customMessageToStreamBack));
+                }
+
+                stop = true;
+                return;
+              }
+              const text = json.choices[0].delta.content;
+              buffer.push(encoder.encode(text));
             }
-            const text = json.choices[0].delta.content;
-            const queue = encoder.encode(text);
-            controller.enqueue(queue);
           } catch (e) {
             controller.error(e);
           }
@@ -125,9 +130,24 @@ export const OpenAIStream = async (
 
       const parser = createParser(onParse);
 
-      for await (const chunk of res.body as any) {
-        parser.feed(decoder.decode(chunk));
-      }
+      (async function () {
+        for await (const chunk of res.body as any) {
+          parser.feed(decoder.decode(chunk));
+        }
+      })();
+
+      const interval = setInterval(() => {
+        if (buffer.length > 0) {
+          const data = buffer.shift();
+          controller.enqueue(data);
+        }
+        if (stop) {
+          if (buffer.length === 0) {
+            controller.close();
+            clearInterval(interval);
+          }
+        }
+      }, 25);
     },
   });
 
