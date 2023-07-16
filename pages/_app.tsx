@@ -1,5 +1,6 @@
+import { AppInsightsContext } from '@microsoft/applicationinsights-react-js';
 import { Session, SessionContextProvider } from '@supabase/auth-helpers-react';
-import { useEffect, useState, ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import 'react-notion-x/src/styles.css';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -9,10 +10,8 @@ import type { AppProps } from 'next/app';
 import { Inter } from 'next/font/google';
 import { GoogleAnalytics } from 'nextjs-google-analytics';
 
+import { enableAzureTracking, reactPlugin } from '@/utils/app/azureAppInsights';
 import { initializeMixpanel } from '@/utils/app/eventTracking';
-
-import { AppInsightsContext } from '@microsoft/applicationinsights-react-js';
-import { reactPlugin, enableAzureTracking } from '@/utils/app/azureAppInsights';
 
 import '@/styles/globals.css';
 import '@/styles/transitionGroup.css';
@@ -29,9 +28,12 @@ interface WrapWithProviderProps {
 
 const WrapWithProvider: React.FC<WrapWithProviderProps> = ({ children }) => {
   if (enableAzureTracking)
-    return <AppInsightsContext.Provider value={reactPlugin}>{children}</AppInsightsContext.Provider>
-  else
-    return <>{children}</>
+    return (
+      <AppInsightsContext.Provider value={reactPlugin}>
+        {children}
+      </AppInsightsContext.Provider>
+    );
+  else return <>{children}</>;
 };
 
 function App({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
