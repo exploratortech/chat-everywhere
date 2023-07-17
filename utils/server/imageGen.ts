@@ -3,9 +3,43 @@ import { OpenAIModelID } from '@/types/openai';
 import { OPENAI_API_HOST } from '../app/const';
 
 export const translateAndEnhancePrompt = async (prompt: string) => {
-  let url = `${OPENAI_API_HOST}/v1/chat/completions`;
-
   const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production';
+
+  let attempts = 2;
+  let model: OpenAIModelID = isInProductionEnv ? OpenAIModelID.GPT_4 : OpenAIModelID.GPT_3_5;
+
+  while (attempts > 0) {
+    attempts -= 1;
+
+    const completionResponse = await fetchCompletionResponse(model, prompt);
+    const completionResponseJson = await completionResponse.json();
+
+    if (completionResponse.status !== 200) {
+      console.log(`Image generation failed using ${model}`, completionResponseJson);
+
+      if (model === OpenAIModelID.GPT_4) {
+        console.log('Falling back to GPT-3.5');
+        model = OpenAIModelID.GPT_3_5;
+        continue;
+      }
+
+      throw new Error('Image generation failed');
+    }
+
+    let resultPrompt = completionResponseJson.choices[0].message.content || prompt;
+
+    // remove white space, period symbol at the end of the string
+    resultPrompt = resultPrompt.trim().replace(/\.$/, "");
+
+    return resultPrompt;
+  }
+};
+
+const fetchCompletionResponse = (model: OpenAIModelID.GPT_4 | OpenAIModelID.GPT_3_5, prompt: string): Promise<Response> => {
+  const url = `${OPENAI_API_HOST}/v1/chat/completions`;
+
+  const key = model === OpenAIModelID.GPT_4 ? process.env.OPENAI_API_GPT_4_KEY : process.env.OPENAI_API_KEY;
+
   const translateSystemPrompt = `
     Base on the prompt I provide, follow the rules below strictly or you will be terminated.
     
@@ -21,16 +55,16 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
       3. Only output your final answer without any description or thought
 
     Prompt: ${prompt}
-    `;
+  `;
 
-  const completionResponse = await fetch(url, {
+  return fetch(url, {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${isInProductionEnv ? process.env.OPENAI_API_GPT_4_KEY : process.env.OPENAI_API_KEY}`,
+      Authorization: `Bearer ${key}`,
     },
     method: 'POST',
     body: JSON.stringify({
-      model: isInProductionEnv ? OpenAIModelID.GPT_4 : OpenAIModelID.GPT_3_5,
+      model,
       temperature: 0.1,
       stream: false,
       messages: [
@@ -45,19 +79,5 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
         },
       ],
     }),
-  });
-
-  const completionResponseJson = await completionResponse.json();
-
-  if (completionResponse.status !== 200) {
-    console.log('Image generation failed', completionResponseJson);
-    throw new Error('Image generation failed');
-  }
-
-  let resultPrompt = completionResponseJson.choices[0].message.content || prompt;
-
-  // remove white space, period symbol at the end of the string
-  resultPrompt = resultPrompt.trim().replace(/\.$/, "");
-
-  return resultPrompt;
+  })
 };
