@@ -48,3 +48,6 @@ pnpm-lock.yaml
 
 # Script
 scripts
+
+# Sentry Auth Token
+.sentryclirc
