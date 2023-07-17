@@ -5,7 +5,6 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { useQuery } from 'react-query';
 
 import {
   saveConversation,
@@ -14,6 +13,7 @@ import {
   updateConversationLastUpdatedAtTimeStamp,
 } from '@/utils/app/conversation';
 import { getUpdatedAssistantMjConversation } from '@/utils/app/mjImage';
+import { MJ_ALLOWED_COMMAND_LIST } from '@/utils/app/mj_const';
 import { removeSecondLastLine } from '@/utils/app/ui';
 
 import { Conversation, Message } from '@/types/chat';
@@ -150,20 +150,9 @@ export default function MjImageComponent({
   };
 
   const availableCommands = useMemo(() => {
-    let commands: string[] = [];
-    // if buttons list has a element with text like "U{number}" then it is a upscale command
-    // const upscaleCommand = buttons.find((button) => button.match(/^U\d+$/));
-    // const zoomOutCommands = buttons.filter((button) =>
-    //   button.match(/^🔍 Zoom Out/),
-    // );
-    // if (upscaleCommand) {
-    //   commands.push('upscale');
-    // }
-    // if (zoomOutCommands.length > 0) {
-    //   commands.push(...(zoomOutCommands as Command[]));
-    // }
-    // return commands;
-    return buttons;
+    return MJ_ALLOWED_COMMAND_LIST.filter((command) =>
+      buttons.includes(command),
+    );
   }, [buttons]);
 
   const imageButtonOnClick = async (button: string) => {
@@ -204,12 +193,18 @@ export default function MjImageComponent({
         } group-hover/image:drop-shadow-2xl group-hover/image:bg-black/75 transition-all duration-500 absolute top-0 left-0 w-full h-full`}
       >
         {/*  Button selections  */}
-        <div className="hidden group-hover/image:flex flex-col justify-center items-center h-full">
+        <div className="hidden group-hover/image:flex flex-col gap-2 justify-center items-center h-full">
+          <button
+            className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
+            onClick={openImage(src)}
+          >
+            View Image
+          </button>
           {availableCommands.map((command, index) => {
             return (
               <button
                 key={`${command}-${index}`}
-                className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4"
+                className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
                 onClick={() => imageButtonOnClick(command)}
               >
                 {command}
@@ -220,4 +215,11 @@ export default function MjImageComponent({
       </div>
     </div>
   );
+}
+
+function openImage(src: string) {
+  return () => {
+    const win = window.open(src, '_blank');
+    win?.focus();
+  };
 }
