@@ -13,6 +13,8 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
 import { fetchShareableConversation } from '@/utils/app/api';
+import { appInsights, enableAzureTracking } from '@/utils/app/azureAppInsights';
+import { trackError } from '@/utils/app/azureTelemetry';
 import {
   cleanConversationHistory,
   cleanFolders,
@@ -66,10 +68,6 @@ import { HomeInitialState, initialState } from './home.state';
 import dayjs from 'dayjs';
 import mixpanel from 'mixpanel-browser';
 import { v4 as uuidv4 } from 'uuid';
-
-import { appInsights, enableAzureTracking } from '@/utils/app/azureAppInsights';
-
-import { trackError } from '@/utils/app/azureTelemetry';
 
 const Home = () => {
   const defaultModelId = fallbackModelID;
@@ -447,8 +445,11 @@ const Home = () => {
             });
           }
           // Set authenticated user context for Application Insights
-          if (enableAzureTracking){
-            appInsights.setAuthenticatedUserContext(session.user.id, session.user.email);
+          if (enableAzureTracking) {
+            appInsights.setAuthenticatedUserContext(
+              session.user.id,
+              session.user.email,
+            );
           }
         })
         .catch((error) => {
