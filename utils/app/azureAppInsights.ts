@@ -66,4 +66,6 @@ if (typeof window !== "undefined") {
     appInsights.loadAppInsights();
 }
 
-export { appInsights, reactPlugin };
+const enableAzureTracking = process.env.NEXT_PUBLIC_ENV === 'production';
+
+export { appInsights, reactPlugin, enableAzureTracking };

@@ -67,7 +67,7 @@ import dayjs from 'dayjs';
 import mixpanel from 'mixpanel-browser';
 import { v4 as uuidv4 } from 'uuid';
 
-import { appInsights } from '@/utils/app/azureAppInsights';
+import { appInsights, enableAzureTracking } from '@/utils/app/azureAppInsights';
 
 const Home = () => {
   const defaultModelId = fallbackModelID;
@@ -446,7 +446,9 @@ const Home = () => {
             });
           }
           // Set authenticated user context for Application Insights
-          appInsights.setAuthenticatedUserContext(session.user.id, session.user.email);
+          if (enableAzureTracking){
+            appInsights.setAuthenticatedUserContext(session.user.id, session.user.email);
+          }
         })
         .catch((error) => {
           console.log(error);
