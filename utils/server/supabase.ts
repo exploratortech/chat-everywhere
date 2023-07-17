@@ -126,6 +126,14 @@ export const addUserCreditsEntry = async (
   }
 };
 
+// Reset user credits
+export const resetUserCredits = async (
+  userId: string,
+  apiType: PluginID,
+): Promise<void> => {
+  updateUserCredits(userId, apiType, DefaultMonthlyCredits[apiType]);
+};
+
 // Check if user has run out of credits
 export const hasUserRunOutOfCredits = async (
   userId: string,
