@@ -13,9 +13,6 @@ import { GoogleAnalytics } from 'nextjs-google-analytics';
 import { enableAzureTracking, reactPlugin } from '@/utils/app/azureAppInsights';
 import { initializeMixpanel } from '@/utils/app/eventTracking';
 
-import { AppInsightsContext } from '@microsoft/applicationinsights-react-js';
-import { reactPlugin } from '@/utils/app/azureAppInsights';
-
 import '@/styles/globals.css';
 import '@/styles/transitionGroup.css';
 import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
