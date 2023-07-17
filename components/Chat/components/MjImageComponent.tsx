@@ -26,14 +26,12 @@ interface MjImageComponentProps {
   src: string;
   buttons: string[];
   buttonMessageId: string;
-  buttonCommandExecuted: boolean;
 }
 
 export default function MjImageComponent({
   src,
   buttons,
   buttonMessageId,
-  buttonCommandExecuted,
 }: MjImageComponentProps) {
   const {
     state: {
@@ -196,35 +194,30 @@ export default function MjImageComponent({
         src={src}
         alt=""
         className={`${
-          user && !buttonCommandExecuted ? `group-hover/image:scale-110` : ''
+          user ? `group-hover/image:scale-110` : ''
         } w-full m-0 transition-all duration-500 `}
       />
 
-      {/* {buttonCommandExecuted ? ( */}
-      {false ? (
-        <div className="absolute top-0 bg-black/50 backdrop-blur-sm left-0 w-full h-full"></div>
-      ) : (
-        <div
-          className={`${
-            user ? `group-hover/image:scale-110` : ''
-          } group-hover/image:drop-shadow-2xl group-hover/image:bg-black/75 transition-all duration-500 absolute top-0 left-0 w-full h-full`}
-        >
-          {/*  Button selections  */}
-          <div className="hidden group-hover/image:flex flex-col justify-center items-center h-full">
-            {availableCommands.map((command, index) => {
-              return (
-                <button
-                  key={`${command}-${index}`}
-                  className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4"
-                  onClick={() => imageButtonOnClick(command)}
-                >
-                  {command}
-                </button>
-              );
-            })}
-          </div>
+      <div
+        className={`${
+          user ? `group-hover/image:scale-110` : ''
+        } group-hover/image:drop-shadow-2xl group-hover/image:bg-black/75 transition-all duration-500 absolute top-0 left-0 w-full h-full`}
+      >
+        {/*  Button selections  */}
+        <div className="hidden group-hover/image:flex flex-col justify-center items-center h-full">
+          {availableCommands.map((command, index) => {
+            return (
+              <button
+                key={`${command}-${index}`}
+                className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4"
+                onClick={() => imageButtonOnClick(command)}
+              >
+                {command}
+              </button>
+            );
+          })}
         </div>
-      )}
+      </div>
     </div>
   );
 }

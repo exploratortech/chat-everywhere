@@ -229,7 +229,6 @@ export const ChatMessage: FC<Props> = memo(
               src={src}
               buttons={aiImageButtons}
               buttonMessageId={aiImageButtonMessageId}
-              buttonCommandExecuted={buttonCommandExecuted}
             />
           );
         }

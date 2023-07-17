@@ -31,11 +31,13 @@ const handler = async (req: Request): Promise<Response> => {
 
   const { button, buttonMessageId } = requestBody;
 
-  // const requestHeader = {
-  //   Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
-  //   'Content-Type': 'application/json',
-  // };
+  const upscalePattern = /^U\d$/i;
+  const isUpscaleCommand = upscalePattern.test(button);
 
+  console.log({
+    button,
+    isUpscaleCommand: isUpscaleCommand,
+  });
   const buttonCommandResponse = await buttonCommand(button, buttonMessageId);
   const messageId = buttonCommandResponse.messageId;
   console.log({
@@ -99,6 +101,8 @@ const handler = async (req: Request): Promise<Response> => {
 
         const imageUrl = imageGenerationProgressResponseJson.response.imageUrl;
         const buttons = imageGenerationProgressResponseJson.response.buttons;
+        const imageUrlList =
+          imageGenerationProgressResponseJson.response.imageUrls;
 
         const imageAlt = 'Upscaled image';
 
@@ -126,11 +130,26 @@ const handler = async (req: Request): Promise<Response> => {
           );
         } else {
           // run when image url is available
-          writeToStream(
-            `\n\n<div id="mj-image-upscaled">${`<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="${buttons.join(
-              ',',
-            )}" data-ai-image-button-message-id="${buttonMessageId}" data-ai-image-button-commands-executed="0" />`}</div>\n\n`,
-          );
+          if (isUpscaleCommand) {
+            writeToStream(
+              `\n\n<div id="mj-image-upscaled">${`<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="${buttons.join(
+                ',',
+              )}" data-ai-image-button-message-id="${buttonMessageId}" data-ai-image-button-commands-executed="0" />`}</div>\n\n`,
+            );
+          } else {
+            writeToStream(
+              `\n\n<div id="mj-image-selection" class="grid grid-cols-2 gap-0">${imageUrlList
+                .map(
+                  (imageUrl: string, index: number) =>
+                    `<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="U${
+                      index + 1
+                    },V${
+                      index + 1
+                    }" data-ai-image-button-message-id="${buttonMessageId}" data-ai-image-button-commands-executed="0" />`,
+                )
+                .join('')}</div>\n\n`,
+            );
+          }
 
           imageGenerationProgress = 100;
 
