@@ -67,6 +67,8 @@ import dayjs from 'dayjs';
 import mixpanel from 'mixpanel-browser';
 import { v4 as uuidv4 } from 'uuid';
 
+import { appInsights } from '@/utils/app/azureAppInsights';
+
 const Home = () => {
   const defaultModelId = fallbackModelID;
   const { t } = useTranslation('chat');
@@ -443,6 +445,8 @@ const Home = () => {
               Plan: userProfile.plan || 'free',
             });
           }
+          // Set authenticated user context for Application Insights
+          appInsights.setAuthenticatedUserContext(session.user.id, session.user.email);
         })
         .catch((error) => {
           console.log(error);
