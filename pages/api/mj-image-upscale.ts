@@ -1,10 +1,10 @@
+import { NextResponse } from 'next/server';
+
 import buttonCommand from '@/utils/server/next-lag/buttonCommands';
 import {
   getAdminSupabaseClient,
   getUserProfile,
 } from '@/utils/server/supabase';
-
-import { v4 } from 'uuid';
 
 const supabase = getAdminSupabaseClient();
 
@@ -13,6 +13,10 @@ export const config = {
 };
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+const MAX_TIMEOUT = 600; // 10 minutes
 
 const handler = async (req: Request): Promise<Response> => {
   const userToken = req.headers.get('user-token');
@@ -27,19 +31,161 @@ const handler = async (req: Request): Promise<Response> => {
 
   const { button, buttonMessageId } = requestBody;
 
-  const requestHeader = {
-    Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
-    'Content-Type': 'application/json',
+  // const requestHeader = {
+  //   Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
+  //   'Content-Type': 'application/json',
+  // };
+
+  const buttonCommandResponse = await buttonCommand(button, buttonMessageId);
+  const messageId = buttonCommandResponse.messageId;
+  console.log({
+    buttonCommandResponse,
+  });
+
+  // GET PROGRESS AND STREAM IT BACK TO THE USER
+  // ==================== STREAM CONFIG START ====================
+  const encoder = new TextEncoder();
+  const stream = new TransformStream();
+  const writer = stream.writable.getWriter();
+
+  let jobTerminated = false;
+  const writeToStream = async (text: string, removeLastLine?: boolean) => {
+    if (removeLastLine) {
+      await writer.write(encoder.encode('[REMOVE_LAST_LINE]'));
+    }
+    await writer.write(encoder.encode(text));
+  };
+  // ==================== STREAM CONFIG END ====================
+
+  const generationStartedAt = Date.now();
+  let imageGenerationProgress: null | number = null;
+  const getTotalGenerationTime = () =>
+    Math.round((Date.now() - generationStartedAt) / 1000);
+  writeToStream('```MJImage \n');
+  writeToStream(`Command: ${button} ... \n`);
+  writeToStream(
+    'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
+  );
+
+  const imageGeneration = async () => {
+    while (
+      !jobTerminated &&
+      (Date.now() - generationStartedAt < MAX_TIMEOUT * 1000 ||
+        (imageGenerationProgress && imageGenerationProgress < 100))
+    ) {
+      await sleep(3500);
+      const imageGenerationProgressResponse = await fetch(
+        `https://api.thenextleg.io/v2/message/${messageId}?authToken=${process.env.THE_NEXT_LEG_API_KEY}`,
+        { method: 'GET' },
+      );
+
+      if (!imageGenerationProgressResponse.ok) {
+        console.log(await imageGenerationProgressResponse.status);
+        console.log(await imageGenerationProgressResponse.text());
+        throw new Error('Unable to fetch image generation progress');
+      }
+
+      const imageGenerationProgressResponseJson =
+        await imageGenerationProgressResponse.json();
+
+      const generationProgress = imageGenerationProgressResponseJson.progress;
+
+      console.log({ imageGenerationProgressResponseJson });
+      if (generationProgress === 100) {
+        const buttonMessageId =
+          imageGenerationProgressResponseJson.response.buttonMessageId;
+        writeToStream(`Completed in ${getTotalGenerationTime()}s \n`);
+        writeToStream('``` \n');
+
+        const imageUrl = imageGenerationProgressResponseJson.response.imageUrl;
+        const buttons = imageGenerationProgressResponseJson.response.buttons;
+
+        const imageAlt = 'Upscaled image';
+
+        if (
+          !imageUrl ||
+          !buttons ||
+          !Array.isArray(buttons) ||
+          !buttons.length
+        ) {
+          // run when image url is available
+          const mjResponseContent =
+            imageGenerationProgressResponseJson.response.content;
+          const isInvalidUserAction =
+            mjResponseContent &&
+            invalidUserActionList.includes(mjResponseContent);
+          if (isInvalidUserAction) {
+            writeToStream(`Error: ${mjResponseContent} \n`);
+            writer.close();
+            return;
+          }
+          throw new Error(
+            `Internal error during image generation process {${
+              mjResponseContent || 'No response content'
+            }}`,
+          );
+        } else {
+          // run when image url is available
+          writeToStream(
+            `\n\n<div id="mj-image-upscaled">${`<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="${buttons.join(
+              ',',
+            )}" data-ai-image-button-message-id="${buttonMessageId}" data-ai-image-button-commands-executed="0" />`}</div>\n\n`,
+          );
+
+          imageGenerationProgress = 100;
+
+          await writeToStream('[DONE]');
+          writer.close();
+          return;
+        }
+      } else {
+        if (imageGenerationProgress === null) {
+          writeToStream(`Start to generate \n`);
+        } else {
+          writeToStream(
+            `${
+              generationProgress === 0
+                ? 'Waiting to be processed'
+                : `${generationProgress}% complete`
+            } ... ${getTotalGenerationTime()}s \n`,
+            true,
+          );
+        }
+        imageGenerationProgress = generationProgress;
+      }
+    }
   };
 
   try {
-    const buttonCommandResponse = await buttonCommand(button, buttonMessageId);
+    imageGeneration();
 
-    return new Response(JSON.stringify(buttonCommandResponse));
+    // Check every 3.5 seconds if the image generation is done
   } catch (error) {
+    jobTerminated = true;
+
     console.error(error);
-    return new Response((error as Error).message, { status: 500 });
+    writeToStream(
+      'Error occurred while generating image, please try again later.',
+    );
+    writeToStream('[DONE]');
+    writer.close();
   }
+  return new NextResponse(stream.readable, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+    },
+  });
 };
 
 export default handler;
+
+const invalidUserActionList = [
+  'BANNED_PROMPT',
+  'BLOCKED',
+  'IMAGE_BLOCKED',
+  'INVALID_LINK',
+  'INVALID_PARAMETER',
+  'JOB_ACTION_RESTRICTED',
+  'MODERATION_OUTAGE',
+];
