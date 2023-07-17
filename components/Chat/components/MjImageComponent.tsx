@@ -53,7 +53,7 @@ export default function MjImageComponent({
     homeDispatch({ field: 'messageIsStreaming', value: true });
 
     const controller = new AbortController();
-    const response = await fetch('api/mj-image-upscale', {
+    const response = await fetch('api/mj-image-command', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
