@@ -9,7 +9,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { BingSerpAPI, DynamicTool } from 'langchain/tools';
 import { all, create } from 'mathjs';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const calculator = new DynamicTool({
   name: 'calculator',
@@ -87,6 +87,7 @@ const handler = async (req: NextRequest, res: any) => {
     console.log('Request closed');
     console.error(e);
     console.log(typeof e);
+    captureException(e);
   }
 };
 

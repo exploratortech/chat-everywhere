@@ -1,4 +1,4 @@
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { NotionAPI } from 'notion-client';
@@ -27,6 +27,7 @@ async function handler(
     });
   } catch (error) {
     console.error(error);
+    captureException(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 }

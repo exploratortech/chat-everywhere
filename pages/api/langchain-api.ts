@@ -14,7 +14,7 @@ import { Serialized } from 'langchain/dist/load/serializable';
 import { BingSerpAPI, DynamicTool,} from 'langchain/tools';
 import { all, create } from 'mathjs';
 import { BaseChatMessage, LLMResult } from 'langchain/dist/schema';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 export const config = {
   runtime: 'edge',
@@ -225,6 +225,7 @@ const handler = async (req: NextRequest, res: any) => {
     console.log('Request closed');
     console.error(e);
     console.log(typeof e);
+    captureException(e);
   }
 };
 

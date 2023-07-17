@@ -4,7 +4,7 @@ import { ChatEverywhereFeatures } from '@/types/notion';
 
 import { Client } from '@notionhq/client';
 import { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const featuresDatabaseID = process.env.NOTION_FEATURES_DATABASE_ID as string;
 const notionKey = process.env.NOTION_SECRET_KEY as string;
@@ -80,6 +80,7 @@ const handler = async (req: NextRequest): Promise<Response> => {
     });
   } catch (error) {
     console.error(error);
+    captureException(error);
     return new Response('Error', {
       status: 500,
       statusText: 'Internal server error',

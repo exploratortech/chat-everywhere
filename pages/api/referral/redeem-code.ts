@@ -8,7 +8,7 @@ import {
   getUserProfile,
   resetUserCredits
 } from '@/utils/server/supabase';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 export const config = {
   runtime: 'edge',
@@ -63,6 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
+    captureException(error);
     return new Response('Invalid Code', { status: 500 });
   }
 };

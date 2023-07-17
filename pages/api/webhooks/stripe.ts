@@ -9,7 +9,7 @@ import { UserProfile } from './../../../types/user';
 
 import getRawBody from 'raw-body';
 import Stripe from 'stripe';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2022-11-15',
@@ -68,6 +68,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Return a response to acknowledge receipt of the event
     res.json({ received: true });
   } catch (error) {
+    captureException(error);
     if (error instanceof Error) {
       const user =
         error.cause && typeof error.cause === 'object' && 'user' in error.cause
@@ -78,6 +79,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         await sendReportForStripeWebhookError(error.message, event, user);
       } catch (error) {
         console.error(error);
+        captureException(error);
         throw error;
       }
       return res.json({ received: true, error: error.message });

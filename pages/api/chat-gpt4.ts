@@ -13,7 +13,7 @@ import {
 import { ChatBody } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const supabase = getAdminSupabaseClient();
 
@@ -87,6 +87,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(stream);
   } catch (error) {
     console.error(error);
+    captureException(error);
     if (error instanceof OpenAIError) {
       switch (error.httpCode) {
         case 429:

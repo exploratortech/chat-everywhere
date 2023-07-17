@@ -1,5 +1,5 @@
 import { updateProAccountsPlan } from '@/utils/server/supabase';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
@@ -18,6 +18,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
     console.error(error);
+    captureException(error);
     return new Response('Error', { status: 500 });
   }
 };

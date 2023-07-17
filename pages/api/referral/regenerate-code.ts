@@ -2,7 +2,7 @@ import {
   getUserProfile,
   regenerateReferralCode,
 } from '@/utils/server/supabase';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 export const config = {
   runtime: 'edge',
@@ -26,6 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ code, expiresAt }), { status: 200 });
   } catch (error) {
     console.error(error);
+    captureException(error);
     return new Response('Error', { status: 500 });
   }
 };

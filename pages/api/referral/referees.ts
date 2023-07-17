@@ -1,5 +1,5 @@
 import { getRefereesProfile, getUserProfile } from '@/utils/server/supabase';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 import dayjs from 'dayjs';
 
@@ -47,6 +47,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error) {
     console.error(error);
+    captureException(error);
     return new Response('Error', { status: 500 });
   }
 };

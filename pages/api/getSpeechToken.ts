@@ -2,7 +2,7 @@ import {
   getAdminSupabaseClient,
   getUserProfile,
 } from '@/utils/server/supabase';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const supabase = getAdminSupabaseClient();
 
@@ -55,6 +55,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     } catch (err) {
       console.error(err);
+      captureException(err);
       return new Response('Unable to fetch speech token', {
         status: 401,
       });

@@ -11,7 +11,7 @@ import model from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 // @ts-expect-error
 import wasm from '@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 import {
   ParsedEvent,
   ReconnectInterval,
@@ -143,6 +143,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(stream);
   } catch (error) {
     console.error(error);
+    captureException(error);
     if (error instanceof OpenAIError) {
       return new Response('Error', { status: 500, statusText: error.message });
     } else {

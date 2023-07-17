@@ -1,4 +1,4 @@
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -52,6 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     } catch (error) {
       console.error(error);
+      captureException(error);
       return new Response(JSON.stringify({ error: 'Error fetching data' }), {
         status: 500,
       });

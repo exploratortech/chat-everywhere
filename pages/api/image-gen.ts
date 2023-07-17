@@ -16,7 +16,7 @@ import {
 
 import { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const supabase = getAdminSupabaseClient();
 
@@ -229,6 +229,7 @@ const handler = async (req: Request): Promise<Response> => {
       jobTerminated = true;
 
       console.log(error);
+      captureException(error);
       await writeToStream(
         'Error occurred while generating image, please try again later.',
       );

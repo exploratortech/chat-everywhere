@@ -10,7 +10,7 @@ import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 export const config = {
   runtime: 'edge',
@@ -82,6 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(stream);
   } catch (error) {
     console.error(error);
+    captureException(error);
     if (error instanceof OpenAIError) {
       return new Response('Error', { status: 500, statusText: error.message });
     } else {

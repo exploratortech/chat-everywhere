@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
-import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -42,6 +42,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       res.status(200).json({ message: 'Conversation stored successfully', accessible_id });
     } catch (error) {
+      captureException(error);
       res.status(500).json({ error: 'Error storing data' });
     }
   } else {
