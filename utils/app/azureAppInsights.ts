@@ -21,6 +21,8 @@ if (typeof window !== "undefined") {
     browserHistory.location.pathname = (browserHistory as any)?.state?.url || "";
 }
 
+const enableAzureTracking = process.env.NEXT_PUBLIC_ENV === 'production';
+
 const reactPlugin: ReactPlugin = new ReactPlugin();
 const appInsights = new ApplicationInsights({
     config: {
@@ -62,10 +64,10 @@ const appInsights = new ApplicationInsights({
         }
     } as any
 });
-if (typeof window !== "undefined") {
+
+//Load insights only in production
+if (enableAzureTracking && typeof window !== "undefined") {
     appInsights.loadAppInsights();
 }
-
-const enableAzureTracking = process.env.NEXT_PUBLIC_ENV === 'production';
 
 export { appInsights, reactPlugin, enableAzureTracking };
