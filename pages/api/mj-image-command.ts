@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+import { IMAGE_GEN_MAX_TIMEOUT } from '@/utils/app/const';
+import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import buttonCommand from '@/utils/server/next-lag/buttonCommands';
 import {
   getAdminSupabaseClient,
@@ -15,8 +17,6 @@ export const config = {
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-const MAX_TIMEOUT = 600; // 10 minutes
 
 const handler = async (req: Request): Promise<Response> => {
   const userToken = req.headers.get('user-token');
@@ -72,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
   const imageGeneration = async () => {
     while (
       !jobTerminated &&
-      (Date.now() - generationStartedAt < MAX_TIMEOUT * 1000 ||
+      (Date.now() - generationStartedAt < IMAGE_GEN_MAX_TIMEOUT * 1000 ||
         (imageGenerationProgress && imageGenerationProgress < 100))
     ) {
       await sleep(3500);
@@ -117,7 +117,7 @@ const handler = async (req: Request): Promise<Response> => {
             imageGenerationProgressResponseJson.response.content;
           const isInvalidUserAction =
             mjResponseContent &&
-            invalidUserActionList.includes(mjResponseContent);
+            MJ_INVALID_USER_ACTION_LIST.includes(mjResponseContent);
           if (isInvalidUserAction) {
             writeToStream(`Error: ${mjResponseContent} \n`);
             writer.close();
@@ -198,13 +198,3 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 export default handler;
-
-const invalidUserActionList = [
-  'BANNED_PROMPT',
-  'BLOCKED',
-  'IMAGE_BLOCKED',
-  'INVALID_LINK',
-  'INVALID_PARAMETER',
-  'JOB_ACTION_RESTRICTED',
-  'MODERATION_OUTAGE',
-];

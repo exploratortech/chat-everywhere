@@ -3,7 +3,9 @@ import { NextResponse } from 'next/server';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
+  IMAGE_GEN_MAX_TIMEOUT,
 } from '@/utils/app/const';
+import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
 import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
 import {
@@ -26,8 +28,6 @@ export const config = {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
-
-const MAX_TIMEOUT = 600; // 10 minutes
 
 const generateMjPrompt = (
   userInputText: string,
@@ -166,7 +166,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       while (
         !jobTerminated &&
-        (Date.now() - generationStartedAt < MAX_TIMEOUT * 1000 ||
+        (Date.now() - generationStartedAt < IMAGE_GEN_MAX_TIMEOUT * 1000 ||
           imageGenerationProgress < 100)
       ) {
         await sleep(3500);
@@ -207,7 +207,7 @@ const handler = async (req: Request): Promise<Response> => {
               imageGenerationProgressResponseJson.response.content;
             const isInvalidUserAction =
               mjResponseContent &&
-              invalidUserActionList.includes(mjResponseContent);
+              MJ_INVALID_USER_ACTION_LIST.includes(mjResponseContent);
             if (isInvalidUserAction) {
               writeToStream(`Error: ${mjResponseContent} \n`);
               writer.close();
@@ -288,34 +288,3 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 export default handler;
-
-const codeList = [
-  'ALREADY_REQUESTED_UPSCALE',
-  'BOT_TOOK_TOO_LONG_TO_PROCESS_YOUR_COMMAND',
-  'APPEAL_ACCEPTED',
-  'APPEAL_REJECTED',
-  'BANNED_PROMPT',
-  'BLOCKED',
-  'BUTTON_NOT_FOUND',
-  'FAILED_TO_PROCESS_YOUR_COMMAND',
-  'FAILED_TO_REQUEST',
-  'IMAGE_BLOCKED',
-  'INTERNAL_ERROR',
-  'INVALID_LINK',
-  'INVALID_PARAMETER',
-  'JOB_ACTION_RESTRICTED',
-  'JOB_QUEUED',
-  'MODERATION_OUTAGE',
-  'NO_FAST_HOURS',
-  'PLEASE_SUBSCRIBE_TO_MJ_IN_YOUR_DASHBOARD',
-  'QUEUE_FULL',
-];
-const invalidUserActionList = [
-  'BANNED_PROMPT',
-  'BLOCKED',
-  'IMAGE_BLOCKED',
-  'INVALID_LINK',
-  'INVALID_PARAMETER',
-  'JOB_ACTION_RESTRICTED',
-  'MODERATION_OUTAGE',
-];
