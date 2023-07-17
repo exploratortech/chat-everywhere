@@ -1,4 +1,5 @@
 import { getRefereesProfile, getUserProfile } from '@/utils/server/supabase';
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 import dayjs from 'dayjs';
 
@@ -50,4 +51,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/referral/referees',
+);

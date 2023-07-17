@@ -9,6 +9,7 @@ import { UserProfile } from './../../../types/user';
 
 import getRawBody from 'raw-body';
 import Stripe from 'stripe';
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2022-11-15',
@@ -91,4 +92,7 @@ export const config = {
   },
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/webhooks',
+);

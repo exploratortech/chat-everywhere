@@ -10,6 +10,7 @@ import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 export const config = {
   runtime: 'edge',
@@ -89,4 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/chat',
+);

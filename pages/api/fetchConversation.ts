@@ -1,3 +1,4 @@
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -62,4 +63,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/fetchConversation',
+);

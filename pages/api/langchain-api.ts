@@ -14,6 +14,7 @@ import { Serialized } from 'langchain/dist/load/serializable';
 import { BingSerpAPI, DynamicTool,} from 'langchain/tools';
 import { all, create } from 'mathjs';
 import { BaseChatMessage, LLMResult } from 'langchain/dist/schema';
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 export const config = {
   runtime: 'edge',
@@ -232,4 +233,7 @@ const normalizeTextAnswer = (text: string) => {
   return text.replace(mindlogRegex, '').replace('{', '{{').replace('}', '}}');
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/langchain-api',
+);

@@ -4,6 +4,7 @@ import { ChatEverywhereNews } from '@/types/notion';
 
 import { Client } from '@notionhq/client';
 import { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const newsDatabaseID = process.env.NOTION_NEWS_DATABASE_ID as string;
 const notionKey = process.env.NOTION_SECRET_KEY as string;
@@ -82,4 +83,7 @@ const handler = async (req: NextRequest): Promise<Response> => {
   }
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/notion/news',
+);

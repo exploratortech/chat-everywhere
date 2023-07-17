@@ -1,3 +1,4 @@
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 import { batchRefreshReferralCodes } from '../../../utils/server/supabase';
 
 import dayjs from 'dayjs';
@@ -21,4 +22,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/cron/update-referral-codes',
+);

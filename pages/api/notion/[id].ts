@@ -1,8 +1,9 @@
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { NotionAPI } from 'notion-client';
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
@@ -29,3 +30,8 @@ export default async function handler(
     res.status(500).json({ message: 'Internal server error' });
   }
 }
+
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/notion/[id]',
+);

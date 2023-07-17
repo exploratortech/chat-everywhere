@@ -11,6 +11,7 @@ import model from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 // @ts-expect-error
 import wasm from '@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 import {
   ParsedEvent,
   ReconnectInterval,
@@ -162,4 +163,7 @@ const getTokenLength = (value: string) => {
   return tokens.length;
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/v1/completion-api',
+);

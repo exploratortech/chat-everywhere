@@ -2,6 +2,7 @@ import {
   getUserProfile,
   regenerateReferralCode,
 } from '@/utils/server/supabase';
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 export const config = {
   runtime: 'edge',
@@ -29,4 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/referral/regenerate-code',
+);

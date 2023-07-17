@@ -16,6 +16,7 @@ import {
 
 import { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const supabase = getAdminSupabaseClient();
 
@@ -247,4 +248,7 @@ const handler = async (req: Request): Promise<Response> => {
   });
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/image-gen',
+);

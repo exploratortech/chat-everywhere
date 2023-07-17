@@ -2,6 +2,7 @@ import {
   getAdminSupabaseClient,
   getUserProfile,
 } from '@/utils/server/supabase';
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const supabase = getAdminSupabaseClient();
 
@@ -61,4 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/getSpeechToken',
+);

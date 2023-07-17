@@ -2,6 +2,7 @@ import {
   getAdminSupabaseClient,
   getUserProfile,
 } from '@/utils/server/supabase';
+import { wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 import { v4 } from 'uuid';
 
@@ -70,4 +71,7 @@ const handler = async (req: Request): Promise<Response> => {
   );
 };
 
-export default handler;
+export default wrapApiHandlerWithSentry(
+  handler,
+  '/api/image-upscale',
+);
