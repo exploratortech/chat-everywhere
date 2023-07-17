@@ -1,6 +1,6 @@
 import { AppInsightsContext } from '@microsoft/applicationinsights-react-js';
 import { Session, SessionContextProvider } from '@supabase/auth-helpers-react';
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState, ReactNode } from 'react';
 import { Toaster } from 'react-hot-toast';
 import 'react-notion-x/src/styles.css';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -12,6 +12,7 @@ import { GoogleAnalytics } from 'nextjs-google-analytics';
 
 import { enableAzureTracking, reactPlugin } from '@/utils/app/azureAppInsights';
 import { initializeMixpanel } from '@/utils/app/eventTracking';
+
 
 import '@/styles/globals.css';
 import '@/styles/transitionGroup.css';
