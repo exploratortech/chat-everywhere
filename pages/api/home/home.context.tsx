@@ -1,4 +1,4 @@
-import { Dispatch, createContext } from 'react';
+import { Dispatch, MutableRefObject, createContext } from 'react';
 
 import { ActionType } from '@/hooks/useCreateReducer';
 
@@ -26,7 +26,7 @@ export interface HomeContextProps {
   stopPlaying: () => void;
   setDragData: (dragData: DragData) => void;
   removeDragData: () => void;
-  stopConversationRefValue: boolean;
+  stopConversationRef: MutableRefObject<boolean>;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

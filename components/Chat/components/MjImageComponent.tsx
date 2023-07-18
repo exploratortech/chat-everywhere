@@ -48,7 +48,7 @@ export default function MjImageComponent({
       currentMessage,
     },
     dispatch: homeDispatch,
-    stopConversationRefValue,
+    stopConversationRef,
   } = useContext(HomeContext);
   const { t: commonT } = useTranslation('common');
   const { t: mjImageT } = useTranslation('mjImage');
@@ -100,7 +100,7 @@ export default function MjImageComponent({
         updatedConversation.messages[updatedConversation.messages.length - 1]
           .content;
       while (!done) {
-        if (stopConversationRefValue === true) {
+        if (stopConversationRef.current === true) {
           controller.abort();
           done = true;
           break;
@@ -169,8 +169,8 @@ export default function MjImageComponent({
       conversations,
       homeDispatch,
       selectedConversation,
-      stopConversationRefValue,
       user,
+      stopConversationRef,
     ],
   );
 

@@ -656,7 +656,7 @@ const Home = () => {
         stopPlaying,
         setDragData,
         removeDragData,
-        stopConversationRefValue: stopConversationRef.current,
+        stopConversationRef,
       }}
     >
       <Head>
