@@ -1,7 +1,7 @@
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
-import { OPENAI_API_HOST, OPENAI_API_TYPE } from '../app/const';
+import { AZURE_OPENAI_ENDPOINTS, AZURE_OPENAI_KEYS, OPENAI_API_HOST } from '../app/const';
 
 import {
   ParsedEvent,
@@ -42,119 +42,165 @@ export const OpenAIStream = async (
   messages: Message[],
   customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
 ) => {
-  // let url = `${OPENAI_API_HOST}/v1/chat/completions`;
-  let url = `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/gpt-35/chat/completions?api-version=2023-05-15`;
+  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys();
+  let attempt = 0;
 
-  // Ensure you have the OPENAI_API_GPT_4_KEY set in order to use the GPT-4 model
-  const apiKey =
-    model.id === OpenAIModelID.GPT_4
-      ? process.env.OPENAI_API_GPT_4_KEY
-      : process.env.OPENAI_API_KEY;
+  while (attempt < openAIEndpoints.length) {
+    const openAIEndpoint = openAIEndpoints[attempt];
+    const openAIKey = openAIKeys[attempt];
 
-  const isGPT4Model = model.id === OpenAIModelID.GPT_4;
+    try {
+      if (!openAIEndpoint || !openAIKey) throw new Error('Missing endpoint/key');
 
-  const bodyToSend = {
-    messages: [
-      {
-        role: 'system',
-        content: systemPrompt,
-      },
-      ...normalizeMessages(messages),
-    ],
-    max_tokens: isGPT4Model ? 2000 : 800,
-    temperature,
-    stream: true,
-    presence_penalty: 0,
-    frequency_penalty: 0,
-  };
-  const res = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      'api-key': process.env.AZURE_OPENAI_KEY || '',
-    },
-    method: 'POST',
-    body: JSON.stringify(bodyToSend),
-  });
+      let url = `${openAIEndpoint}/openai/deployments/gpt-35/chat/completions?api-version=2023-05-15`;
+      if (openAIEndpoint.includes('openai.com')) {
+        url = `${openAIEndpoint}/v1/chat/completions`;
+      }
 
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
+      const isGPT4Model = model.id === OpenAIModelID.GPT_4;
 
-  if (res.status !== 200) {
-    const result = await res.json();
-    if (result.error) {
-      throw new OpenAIError(
-        result.error.message,
-        result.error.type,
-        result.error.param,
-        result.error.code,
-        res.status,
-      );
-    } else {
-      throw new Error(
-        `OpenAI API returned an error: ${
-          decoder.decode(result?.value) || result.statusText
-        }`,
-      );
+      const bodyToSend = {
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          ...normalizeMessages(messages),
+        ],
+        max_tokens: isGPT4Model ? 2000 : 800,
+        temperature,
+        stream: true,
+        presence_penalty: 0,
+        frequency_penalty: 0,
+      };
+
+      const requestHeaders: { [header: string]: string } = {
+        'Content-Type': 'application/json',
+      };
+
+      if (openAIEndpoint.includes('openai.com')) {
+        requestHeaders.Authorization = `Bearer ${openAIKey}`;
+      } else {
+        requestHeaders['api-key'] = openAIKey;
+      }
+
+      const res = await fetch(url, {
+        headers: requestHeaders,
+        method: 'POST',
+        body: JSON.stringify(bodyToSend),
+      });
+
+      const encoder = new TextEncoder();
+      const decoder = new TextDecoder();
+
+      if (res.status !== 200) {
+        const result = await res.json();
+        if (result.error) {
+          console.error(new OpenAIError(
+            result.error.message,
+            result.error.type,
+            result.error.param,
+            result.error.code,
+            res.status,
+          ));
+        } else {
+          console.error(new Error(
+            `OpenAI API returned an error: ${
+              decoder.decode(result?.value) || result.statusText
+            }`,
+          ));
+        }
+
+        attempt += 1;
+        continue;
+      }
+
+      const stream = new ReadableStream({
+        async start(controller) {
+          let buffer: Uint8Array[] = [];
+          let stop = false;
+    
+          const onParse = (event: ParsedEvent | ReconnectInterval) => {
+            if (event.type === 'event') {
+              const data = event.data;
+    
+              try {
+                const json = JSON.parse(data);
+    
+                if (json.choices[0]) {
+                  if (json.choices[0].finish_reason != null) {
+                    if (customMessageToStreamBack) {
+                      buffer.push(encoder.encode(customMessageToStreamBack));
+                    }
+    
+                    stop = true;
+                    return;
+                  }
+                  const text = json.choices[0].delta.content;
+                  buffer.push(encoder.encode(text));
+                }
+              } catch (e) {
+                controller.error(e);
+              }
+            }
+          };
+    
+          const parser = createParser(onParse);
+    
+          (async function () {
+            for await (const chunk of res.body as any) {
+              parser.feed(decoder.decode(chunk));
+            }
+          })();
+    
+          const interval = setInterval(() => {
+            if (buffer.length > 0) {
+              const data = buffer.shift();
+              controller.enqueue(data);
+            }
+    
+            if (stop) {
+              if (buffer.length === 0) {
+                controller.close();
+                clearInterval(interval);
+              }
+            }
+          }, 45);
+        },
+      });
+    
+      return stream;
+    } catch (error) {
+      attempt += 1;
+      console.error(error);
     }
   }
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      let buffer: Uint8Array[] = [];
-      let stop = false;
-
-      const onParse = (event: ParsedEvent | ReconnectInterval) => {
-        if (event.type === 'event') {
-          const data = event.data;
-
-          try {
-            const json = JSON.parse(data);
-
-            if (json.choices[0]) {
-              if (json.choices[0].finish_reason != null) {
-                if (customMessageToStreamBack) {
-                  buffer.push(encoder.encode(customMessageToStreamBack));
-                }
-
-                stop = true;
-                return;
-              }
-              const text = json.choices[0].delta.content;
-              buffer.push(encoder.encode(text));
-            }
-          } catch (e) {
-            controller.error(e);
-          }
-        }
-      };
-
-      const parser = createParser(onParse);
-
-      (async function () {
-        for await (const chunk of res.body as any) {
-          parser.feed(decoder.decode(chunk));
-        }
-      })();
-
-      const interval = setInterval(() => {
-        if (buffer.length > 0) {
-          const data = buffer.shift();
-          controller.enqueue(data);
-        }
-
-        if (stop) {
-          if (buffer.length === 0) {
-            controller.close();
-            clearInterval(interval);
-          }
-        }
-      }, 45);
-    },
-  });
-
-  return stream;
+  throw new Error('Error: Unable to make requests to OpenAI');
 };
 
 // Truncate log message to 4000 characters
 export const truncateLogMessage = (message: string) =>
   message.length > 4000 ? `${message.slice(0, 4000)}...` : message;
+
+// Returns a list of shuffled endpoints and keys. They should be used based
+// on their order in the list.
+const getRandomOpenAIEndpointsAndKeys = (): [(string | undefined)[], (string | undefined)[]] => {
+  const endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
+  const keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
+
+  for (let i = endpoints.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tempEndpoint = endpoints[i];
+    const tempKey = keys[i];
+    endpoints[i] = endpoints[j];
+    keys[i] = keys[j];
+    endpoints[j] = tempEndpoint;
+    keys[j] = tempKey;
+  }
+
+  endpoints.push(OPENAI_API_HOST);
+  keys.push(process.env.OPENAI_API_KEY);
+
+  return [endpoints, keys];
+};
