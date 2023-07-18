@@ -30,25 +30,25 @@ import {
   updateConversation,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import { saveFolders } from '@/utils/app/folders';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { enableTracking } from '@/utils/app/eventTracking';
+import { saveFolders } from '@/utils/app/folders';
 import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
+import { generateRank, sortByRank } from '@/utils/app/rank';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
-import { generateRank, sortByRank } from '@/utils/app/rank';
 import { userProfileQuery } from '@/utils/server/supabase';
 
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
+import { DragData } from '@/types/drag';
 import { LatestExportFormat } from '@/types/export';
 import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModelID, OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 import { UserProfile } from '@/types/user';
-import { DragData } from '@/types/drag';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
@@ -167,8 +167,9 @@ const Home = () => {
       type,
       lastUpdateAtUTC: dayjs().valueOf(),
       rank: generateRank(
-        getNonDeletedCollection(folders)
-          .filter((folder) => folder.type === type)
+        getNonDeletedCollection(folders).filter(
+          (folder) => folder.type === type,
+        ),
       ),
     };
 
@@ -524,7 +525,8 @@ const Home = () => {
 
     const folders = localStorage.getItem('folders');
     if (folders) {
-      const parsedFolders: FolderInterface[] = JSON.parse(folders).sort(sortByRank);
+      const parsedFolders: FolderInterface[] =
+        JSON.parse(folders).sort(sortByRank);
       const cleanedFolders: FolderInterface[] = cleanFolders(parsedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
@@ -555,8 +557,7 @@ const Home = () => {
     let cleanedConversationHistory: Conversation[] = [];
     if (conversationHistory) {
       const parsedConversationHistory: Conversation[] =
-        JSON.parse(conversationHistory)
-        .sort(sortByRank);
+        JSON.parse(conversationHistory).sort(sortByRank);
       cleanedConversationHistory = cleanConversationHistory(
         parsedConversationHistory,
       );
@@ -655,6 +656,7 @@ const Home = () => {
         stopPlaying,
         setDragData,
         removeDragData,
+        stopConversationRefValue: stopConversationRef.current,
       }}
     >
       <Head>

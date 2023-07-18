@@ -5,6 +5,8 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 import {
   saveConversation,
@@ -46,118 +48,130 @@ export default function MjImageComponent({
       currentMessage,
     },
     dispatch: homeDispatch,
+    stopConversationRefValue,
   } = useContext(HomeContext);
-  const runButtonCommand = async (button: string) => {
-    if (!user) return;
-    let updatedConversation: Conversation;
-    if (!selectedConversation) return;
-    updatedConversation = selectedConversation;
+  const { t: commonT } = useTranslation('common');
 
-    homeDispatch({ field: 'loading', value: true });
-    homeDispatch({ field: 'messageIsStreaming', value: true });
+  const runButtonCommand = useCallback(
+    async (button: string) => {
+      if (!user) return;
+      let updatedConversation: Conversation;
+      if (!selectedConversation) return;
+      updatedConversation = selectedConversation;
 
-    const controller = new AbortController();
-    const response = await fetch('api/mj-image-command', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'user-token': user?.token || '',
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        button: button,
-        buttonMessageId,
-      }),
-    });
-    if (!response.ok) {
+      homeDispatch({ field: 'loading', value: true });
+      homeDispatch({ field: 'messageIsStreaming', value: true });
+
+      const controller = new AbortController();
+      const response = await fetch('api/mj-image-command', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'user-token': user?.token || '',
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          button: button,
+          buttonMessageId,
+        }),
+      });
+      if (!response.ok) {
+        homeDispatch({ field: 'loading', value: false });
+        homeDispatch({ field: 'messageIsStreaming', value: false });
+        throw new Error('Network response was not ok');
+      }
+
+      const data = response.body;
+      if (!data) {
+        homeDispatch({ field: 'loading', value: false });
+        homeDispatch({ field: 'messageIsStreaming', value: false });
+        return;
+      }
+      // response is ok, continue
       homeDispatch({ field: 'loading', value: false });
-      homeDispatch({ field: 'messageIsStreaming', value: false });
-      throw new Error('Network response was not ok');
-    }
+      const reader = data.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let text = '';
+      let largeContextResponse = false;
+      let showHintForLargeContextResponse = false;
+      const originalMessages =
+        updatedConversation.messages[updatedConversation.messages.length - 1]
+          .content;
+      while (!done) {
+        if (stopConversationRefValue === true) {
+          controller.abort();
+          done = true;
+          break;
+        }
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value);
+        text += chunkValue;
 
-    const data = response.body;
-    if (!data) {
-      homeDispatch({ field: 'loading', value: false });
-      homeDispatch({ field: 'messageIsStreaming', value: false });
-      return;
-    }
-    // response is ok, continue
-    homeDispatch({ field: 'loading', value: false });
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let text = '';
-    let largeContextResponse = false;
-    let showHintForLargeContextResponse = false;
-    const originalMessages =
-      updatedConversation.messages[updatedConversation.messages.length - 1]
-        .content;
-    while (!done) {
-      // TODO: need a way to stop the conversation
-      // if (stopConversationRef.current === true) {
-      //   controller.abort();
-      //   done = true;
-      //   break;
-      // }
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      text += chunkValue;
+        if (text.includes('[DONE]')) {
+          text = text.replace('[DONE]', '');
+          done = true;
+        }
+        if (text.includes('[REMOVE_TEMP_HTML]')) {
+          text = removeTempHtmlString(text);
+        }
 
-      if (text.includes('[DONE]')) {
-        text = text.replace('[DONE]', '');
-        done = true;
+        if (text.includes('[REMOVE_LAST_LINE]')) {
+          text = text.replace('[REMOVE_LAST_LINE]', '');
+          text = removeSecondLastLine(text);
+        }
+
+        const updatedMessages: Message[] = updatedConversation.messages.map(
+          (message, index) => {
+            if (index === updatedConversation.messages.length - 1) {
+              return {
+                ...message,
+                content:
+                  removeTempHtmlString(originalMessages) +
+                  removeRedundantTempHtmlString(text),
+                largeContextResponse,
+                showHintForLargeContextResponse,
+              };
+            }
+            return message;
+          },
+        );
+        updatedConversation = {
+          ...updatedConversation,
+          messages: updatedMessages,
+          lastUpdateAtUTC: dayjs().valueOf(),
+        };
+        homeDispatch({
+          field: 'selectedConversation',
+          value: updatedConversation,
+        });
       }
-      if (text.includes('[REMOVE_TEMP_HTML]')) {
-        text = removeTempHtmlString(text);
-      }
-
-      if (text.includes('[REMOVE_LAST_LINE]')) {
-        text = text.replace('[REMOVE_LAST_LINE]', '');
-        text = removeSecondLastLine(text);
-      }
-
-      const updatedMessages: Message[] = updatedConversation.messages.map(
-        (message, index) => {
-          if (index === updatedConversation.messages.length - 1) {
-            return {
-              ...message,
-              content:
-                removeTempHtmlString(originalMessages) +
-                removeRedundantTempHtmlString(text),
-              largeContextResponse,
-              showHintForLargeContextResponse,
-            };
+      const updatedConversations: Conversation[] = conversations.map(
+        (conversation) => {
+          if (conversation.id === selectedConversation.id) {
+            return updatedConversation;
           }
-          return message;
+          return conversation;
         },
       );
-      updatedConversation = {
-        ...updatedConversation,
-        messages: updatedMessages,
-        lastUpdateAtUTC: dayjs().valueOf(),
-      };
-      homeDispatch({
-        field: 'selectedConversation',
-        value: updatedConversation,
-      });
-    }
-    const updatedConversations: Conversation[] = conversations.map(
-      (conversation) => {
-        if (conversation.id === selectedConversation.id) {
-          return updatedConversation;
-        }
-        return conversation;
-      },
-    );
-    saveConversation(updatedConversation);
+      saveConversation(updatedConversation);
 
-    homeDispatch({ field: 'conversations', value: updatedConversations });
-    saveConversations(updatedConversations);
+      homeDispatch({ field: 'conversations', value: updatedConversations });
+      saveConversations(updatedConversations);
 
-    homeDispatch({ field: 'messageIsStreaming', value: false });
-    updateConversationLastUpdatedAtTimeStamp();
-  };
+      homeDispatch({ field: 'messageIsStreaming', value: false });
+      updateConversationLastUpdatedAtTimeStamp();
+    },
+    [
+      buttonMessageId,
+      conversations,
+      homeDispatch,
+      selectedConversation,
+      stopConversationRefValue,
+      user,
+    ],
+  );
 
   const availableCommands = useMemo(() => {
     return MJ_ALLOWED_COMMAND_LIST.filter((command) =>
@@ -166,6 +180,9 @@ export default function MjImageComponent({
   }, [buttons]);
 
   const imageButtonOnClick = async (button: string) => {
+    if (!user) {
+      toast.error(commonT('Please sign in to use ai image feature'));
+    }
     const updatedConversation = getUpdatedAssistantMjConversation(
       selectedConversation!,
       buttonMessageId,
