@@ -168,13 +168,13 @@ const handler = async (req: Request): Promise<Response> => {
           // run when image url is available
           if (isUpscaleCommand) {
             writeToStream(
-              `\n\n<div id="mj-image-upscaled">${`<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="${buttons.join(
+              `\n\n<div id="mj-image-upscaled" class="my-4">${`<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="${buttons.join(
                 ',',
               )}" data-ai-image-button-message-id="${buttonMessageId}" data-ai-image-button-commands-executed="0" />`}</div>\n\n`,
             );
           } else {
             writeToStream(
-              `\n\n<div id="mj-image-selection" class="grid grid-cols-2 gap-0">${imageUrlList
+              `\n\n<div id="mj-image-selection" class="grid grid-cols-2 gap-0 my-4">${imageUrlList
                 .map(
                   (imageUrl: string, index: number) =>
                     `<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="U${
