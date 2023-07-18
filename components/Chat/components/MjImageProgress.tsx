@@ -1,3 +1,4 @@
+import ProgressBar from '@ramonak/react-progress-bar';
 import {
   IconArrowDown,
   IconArrowUp,
@@ -13,10 +14,12 @@ import Spinner from '@/components/Spinner/Spinner';
 interface MjImageProgressProps {
   content: string;
   state: 'loading' | 'completed' | 'error';
+  percentage?: `${number}`;
 }
 export default function MjImageProgress({
   content,
   state,
+  percentage,
 }: MjImageProgressProps) {
   return (
     <div className="group relative my-4" tabIndex={0}>
@@ -29,11 +32,20 @@ export default function MjImageProgress({
         } block text-black rounded-lg cursor-pointer`}
       >
         <div className="p-2 flex gap-2 items-center justify-between">
-          <div className="flex gap-2 items-center font-bold">
+          <div className="flex gap-2 items-center flex-grow font-bold">
             {state === 'loading' && <Spinner size="16px" />}
             {state === 'error' && <IconX size="16px" />}
             {state === 'completed' && <IconCheck size="16px" />}
             {state === 'loading' && 'Loading...'}
+            {state === 'loading' && percentage && (
+              <ProgressBar
+                completed={+percentage}
+                className="basis-[50%]"
+                bgColor="#70cc60"
+                height="10px"
+              />
+            )}
+
             {state !== 'loading' &&
               state.charAt(0).toUpperCase() + state.slice(1)}
           </div>

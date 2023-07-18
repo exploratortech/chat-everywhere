@@ -73,16 +73,14 @@ const handler = async (req: Request): Promise<Response> => {
     content,
     state = 'loading',
     removeLastLine = false,
+    percentage,
   }: {
     content: string;
     state?: 'loading' | 'completed' | 'error';
     removeLastLine?: boolean;
+    percentage?: `${number}`;
   }) {
     if (removeLastLine) {
-      console.log({
-        before: progressContent,
-        after: removeLastLineF(progressContent),
-      });
       progressContent = removeLastLineF(progressContent);
     }
     progressContent += content;
@@ -91,6 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
       props: {
         content: progressContent,
         state,
+        percentage,
       },
     });
     await writeToStream(html);
@@ -207,6 +206,10 @@ const handler = async (req: Request): Promise<Response> => {
                 : `${generationProgress}% complete`
             } ... ${getTotalGenerationTime()}s \n`,
             removeLastLine: true,
+            percentage:
+              typeof generationProgress === 'number'
+                ? `${generationProgress}`
+                : undefined,
           });
         }
         imageGenerationProgress = generationProgress;

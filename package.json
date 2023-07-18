@@ -18,6 +18,7 @@
     "@dqbd/tiktoken": "^1.0.2",
     "@headlessui/react": "^1.7.14",
     "@notionhq/client": "^1.0.4",
+    "@ramonak/react-progress-bar": "^5.0.3",
     "@sparticuz/chromium-min": "^112.0.2",
     "@supabase/auth-helpers-nextjs": "^0.6.1",
     "@supabase/auth-helpers-react": "^0.3.1",
