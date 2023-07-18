@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server';
 
+import { removeLastLine as removeLastLineF } from './../../utils/app/ui';
 import { IMAGE_GEN_MAX_TIMEOUT } from '@/utils/app/const';
+import { generateTempComponentHTML } from '@/utils/app/htmlStringHandler';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import buttonCommand from '@/utils/server/next-lag/buttonCommands';
 import {
   getAdminSupabaseClient,
   getUserProfile,
 } from '@/utils/server/supabase';
+
+import MjImageProgress from '@/components/Chat/components/MjImageProgress';
 
 const supabase = getAdminSupabaseClient();
 
@@ -63,11 +67,39 @@ const handler = async (req: Request): Promise<Response> => {
   let imageGenerationProgress: null | number = null;
   const getTotalGenerationTime = () =>
     Math.round((Date.now() - generationStartedAt) / 1000);
-  writeToStream('```MJImage \n');
-  writeToStream(`Command: ${button} ... \n`);
-  writeToStream(
-    'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
-  );
+  let progressContent = '';
+
+  async function updateProgress({
+    content,
+    state = 'loading',
+    removeLastLine = false,
+  }: {
+    content: string;
+    state?: 'loading' | 'completed' | 'error';
+    removeLastLine?: boolean;
+  }) {
+    if (removeLastLine) {
+      console.log({
+        before: progressContent,
+        after: removeLastLineF(progressContent),
+      });
+      progressContent = removeLastLineF(progressContent);
+    }
+    progressContent += content;
+    const html = await generateTempComponentHTML({
+      component: MjImageProgress,
+      props: {
+        content: progressContent,
+        state,
+      },
+    });
+    await writeToStream(html);
+  }
+  updateProgress({ content: `Command: ${button} ... \n` });
+  updateProgress({
+    content:
+      'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
+  });
 
   const imageGeneration = async () => {
     while (
@@ -96,8 +128,10 @@ const handler = async (req: Request): Promise<Response> => {
       if (generationProgress === 100) {
         const buttonMessageId =
           imageGenerationProgressResponseJson.response.buttonMessageId;
-        writeToStream(`Completed in ${getTotalGenerationTime()}s \n`);
-        writeToStream('``` \n');
+        updateProgress({
+          content: `Completed in ${getTotalGenerationTime()}s \n`,
+          state: 'completed',
+        });
 
         const imageUrl = imageGenerationProgressResponseJson.response.imageUrl;
         const buttons = imageGenerationProgressResponseJson.response.buttons;
@@ -119,7 +153,10 @@ const handler = async (req: Request): Promise<Response> => {
             mjResponseContent &&
             MJ_INVALID_USER_ACTION_LIST.includes(mjResponseContent);
           if (isInvalidUserAction) {
-            writeToStream(`Error: ${mjResponseContent} \n`);
+            updateProgress({
+              content: `Upscale failed, please try again with a different image. \n`,
+              state: 'error',
+            });
             writer.close();
             return;
           }
@@ -159,16 +196,18 @@ const handler = async (req: Request): Promise<Response> => {
         }
       } else {
         if (imageGenerationProgress === null) {
-          writeToStream(`Start to generate \n`);
+          updateProgress({
+            content: `Start to generate \n`,
+          });
         } else {
-          writeToStream(
-            `${
+          updateProgress({
+            content: `${
               generationProgress === 0
                 ? 'Waiting to be processed'
                 : `${generationProgress}% complete`
             } ... ${getTotalGenerationTime()}s \n`,
-            true,
-          );
+            removeLastLine: true,
+          });
         }
         imageGenerationProgress = generationProgress;
       }
@@ -183,9 +222,10 @@ const handler = async (req: Request): Promise<Response> => {
     jobTerminated = true;
 
     console.error(error);
-    writeToStream(
-      'Error occurred while generating image, please try again later.',
-    );
+    updateProgress({
+      content: 'Error occurred while generating image, please try again later.',
+      state: 'error',
+    });
     writeToStream('[DONE]');
     writer.close();
   }

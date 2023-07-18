@@ -12,6 +12,10 @@ import {
   updateConversation,
   updateConversationLastUpdatedAtTimeStamp,
 } from '@/utils/app/conversation';
+import {
+  removeRedundantTempHtmlString,
+  removeTempHtmlString,
+} from '@/utils/app/htmlStringHandler';
 import { getUpdatedAssistantMjConversation } from '@/utils/app/mjImage';
 import { MJ_ALLOWED_COMMAND_LIST } from '@/utils/app/mj_const';
 import { removeSecondLastLine } from '@/utils/app/ui';
@@ -104,6 +108,10 @@ export default function MjImageComponent({
         text = text.replace('[DONE]', '');
         done = true;
       }
+      if (text.includes('[REMOVE_TEMP_HTML]')) {
+        text = removeTempHtmlString(text);
+      }
+
       if (text.includes('[REMOVE_LAST_LINE]')) {
         text = text.replace('[REMOVE_LAST_LINE]', '');
         text = removeSecondLastLine(text);
@@ -114,7 +122,9 @@ export default function MjImageComponent({
           if (index === updatedConversation.messages.length - 1) {
             return {
               ...message,
-              content: originalMessages + text,
+              content:
+                removeTempHtmlString(originalMessages) +
+                removeRedundantTempHtmlString(text),
               largeContextResponse,
               showHintForLargeContextResponse,
             };
