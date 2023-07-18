@@ -42,7 +42,8 @@ export default function MjImageProgress({
                 completed={+percentage}
                 className="basis-[50%]"
                 bgColor="#70cc60"
-                height="10px"
+                height="15px"
+                labelSize="12px"
               />
             )}
 
