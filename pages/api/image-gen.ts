@@ -221,7 +221,7 @@ const handler = async (req: Request): Promise<Response> => {
           } else {
             // run when image url is available
             writeToStream(
-              `\n\n<div id="mj-image-selection" class="grid grid-cols-2 gap-0">${imageUrlList
+              `\n\n<div id="mj-image-selection" class="grid grid-cols-2 gap-0 my-4">${imageUrlList
                 .map(
                   (imageUrl: string, index: number) =>
                     `<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="U${
