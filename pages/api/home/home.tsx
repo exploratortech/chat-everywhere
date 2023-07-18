@@ -763,6 +763,7 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
         'news',
         'features',
         'auth',
+        'mjImage',
       ])),
     },
   };

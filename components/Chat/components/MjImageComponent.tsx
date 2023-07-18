@@ -51,6 +51,7 @@ export default function MjImageComponent({
     stopConversationRefValue,
   } = useContext(HomeContext);
   const { t: commonT } = useTranslation('common');
+  const { t: mjImageT } = useTranslation('mjImage');
 
   const runButtonCommand = useCallback(
     async (button: string) => {
@@ -225,7 +226,7 @@ export default function MjImageComponent({
             className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
             onClick={openImage(src)}
           >
-            View Image
+            {mjImageT('View Image')}
           </button>
           {availableCommands.map((command, index) => {
             return (
@@ -234,7 +235,7 @@ export default function MjImageComponent({
                 className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
                 onClick={() => imageButtonOnClick(command)}
               >
-                {command}
+                {mjImageT(command)}
               </button>
             );
           })}
