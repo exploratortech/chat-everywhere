@@ -5,8 +5,10 @@ import {
   DEFAULT_IMAGE_GENERATION_STYLE,
   IMAGE_GEN_MAX_TIMEOUT,
 } from '@/utils/app/const';
+import { generateTempComponentHTML } from '@/utils/app/htmlStringHandler';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
+import { removeLastLine as removeLastLineF } from '@/utils/app/ui';
 import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
 import {
   addUsageEntry,
@@ -18,6 +20,8 @@ import {
 
 import { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
+
+import MjImageProgress from '@/components/Chat/components/MjImageProgress';
 
 const supabase = getAdminSupabaseClient();
 
@@ -94,15 +98,45 @@ const handler = async (req: Request): Promise<Response> => {
     }
     await writer.write(encoder.encode(text));
   };
+  let progressContent = '';
+
+  async function updateProgress({
+    content,
+    state = 'loading',
+    removeLastLine = false,
+    percentage,
+  }: {
+    content: string;
+    state?: 'loading' | 'completed' | 'error';
+    removeLastLine?: boolean;
+    percentage?: `${number}`;
+  }) {
+    if (removeLastLine) {
+      progressContent = removeLastLineF(progressContent);
+    }
+    progressContent += content;
+    const html = await generateTempComponentHTML({
+      component: MjImageProgress,
+      props: {
+        content: progressContent,
+        state,
+        percentage,
+      },
+    });
+    await writeToStream(html);
+  }
 
   const requestBody = (await req.json()) as ChatBody;
 
   // Do not modity this line, it is used by front-end to detect if the message is for image generation
-  writeToStream('```MJImage \n');
-  writeToStream('Initializing ... \n');
-  writeToStream(
-    'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
-  );
+
+  updateProgress({
+    content: 'Initializing ... \n',
+  });
+  updateProgress({
+    content:
+      'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
+  });
 
   const latestUserPromptMessage =
     requestBody.messages[requestBody.messages.length - 1].content;
@@ -115,7 +149,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     try {
       // Translate and enhance the prompt
-      writeToStream(`Enhancing and translating user input prompt ... \n`);
+      updateProgress({
+        content: `Enhancing and translating user input prompt ... \n`,
+      });
       generationPrompt = await translateAndEnhancePrompt(
         latestUserPromptMessage,
       );
@@ -127,7 +163,10 @@ const handler = async (req: Request): Promise<Response> => {
         requestBody.temperature,
       );
 
-      writeToStream(`Prompt: ${generationPrompt} \n`, true);
+      updateProgress({
+        content: `Prompt: ${generationPrompt} \n`,
+        removeLastLine: true,
+      });
       const imageGenerationResponse = await fetch(
         `https://api.thenextleg.io/v2/imagine`,
         {
@@ -190,8 +229,10 @@ const handler = async (req: Request): Promise<Response> => {
         if (generationProgress === 100) {
           const buttonMessageId =
             imageGenerationProgressResponseJson.response.buttonMessageId;
-          writeToStream(`Completed in ${getTotalGenerationTime()}s \n`);
-          writeToStream('``` \n');
+          updateProgress({
+            content: `Completed in ${getTotalGenerationTime()}s \n`,
+            state: 'completed',
+          });
 
           const imageUrl =
             imageGenerationProgressResponseJson.response.imageUrl;
@@ -209,7 +250,11 @@ const handler = async (req: Request): Promise<Response> => {
               mjResponseContent &&
               MJ_INVALID_USER_ACTION_LIST.includes(mjResponseContent);
             if (isInvalidUserAction) {
-              writeToStream(`Error: ${mjResponseContent} \n`);
+              updateProgress({
+                content: `Error: ${mjResponseContent} \n`,
+                state: 'error',
+              });
+
               writer.close();
               return;
             }
@@ -243,16 +288,22 @@ const handler = async (req: Request): Promise<Response> => {
           }
         } else {
           if (imageGenerationProgress === null) {
-            writeToStream(`Start to generate \n`);
+            updateProgress({
+              content: `Start to generate \n`,
+            });
           } else {
-            writeToStream(
-              `${
+            updateProgress({
+              content: `${
                 generationProgress === 0
                   ? 'Waiting to be processed'
                   : `${generationProgress}% complete`
               } ... ${getTotalGenerationTime()}s \n`,
-              true,
-            );
+              removeLastLine: true,
+              percentage:
+                typeof generationProgress === 'number'
+                  ? `${generationProgress}`
+                  : undefined,
+            });
           }
           imageGenerationProgress = generationProgress;
         }
@@ -268,9 +319,11 @@ const handler = async (req: Request): Promise<Response> => {
       jobTerminated = true;
 
       console.log(error);
-      await writeToStream(
-        'Error occurred while generating image, please try again later.',
-      );
+      await updateProgress({
+        content:
+          'Error occurred while generating image, please try again later.',
+        state: 'error',
+      });
       await writeToStream('[DONE]');
       writer.close();
       return;
