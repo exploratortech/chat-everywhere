@@ -657,8 +657,6 @@ const Home = () => {
         setDragData,
         removeDragData,
         stopConversationRef,
-        toggleChatbar,
-        togglePromptbar,
       }}
     >
       <Head>
