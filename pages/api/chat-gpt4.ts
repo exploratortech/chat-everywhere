@@ -29,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
   if (!data || error) return unauthorizedResponse;
 
   const user = await getUserProfile(data.user.id);
-  if (!user || user.plan !== 'pro') return unauthorizedResponse;
+  if (!user || user.plan === 'free') return unauthorizedResponse;
 
   if (await hasUserRunOutOfCredits(data.user.id, PluginID.GPT4)) {
     return new Response('Error', {

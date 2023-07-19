@@ -83,7 +83,9 @@ export const OpenAIStream = async (
       };
 
       if (openAIEndpoint.includes('openai.com')) {
-        bodyToSend.model = model.id;
+        // Use the model the user specified on the first attempt, otherwise, use
+        // a fallback model.
+        bodyToSend.model = attempt === 0 ? model.id : OpenAIModelID.GPT_3_5;
         requestHeaders.Authorization = `Bearer ${openAIKey}`;
       } else {
         requestHeaders['api-key'] = openAIKey;
