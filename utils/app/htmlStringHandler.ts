@@ -5,10 +5,12 @@ import { renderToReadableStream } from 'react-dom/server';
 interface GetHtmlStringProps {
   component: string | FunctionComponent<any> | ComponentClass<any, any>;
   props?: any;
+  temp?: boolean;
 }
-export async function generateTempComponentHTML({
+export async function generateComponentHTML({
   component,
   props,
+  temp = false,
 }: GetHtmlStringProps) {
   const htmlStream = await renderToReadableStream(
     createElement(component, props),
@@ -25,9 +27,13 @@ export async function generateTempComponentHTML({
     if (done) break;
     html += decoder.decode(value); // Decode the Uint8Array chunk to a string and append it
   }
-  return (
-    '\n\n <!-- Temp HTML start --> ' + html + '<!-- Temp HTML end --> \n\n'
-  );
+  if (temp) {
+    return (
+      '\n\n <!-- Temp HTML start --> ' + html + '<!-- Temp HTML end --> \n\n'
+    );
+  } else {
+    return '\n\n ' + html + ' \n\n';
+  }
 }
 
 export function removeTempHtmlString(

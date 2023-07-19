@@ -5,13 +5,12 @@ import {
   IconCheck,
   IconX,
 } from '@tabler/icons-react';
-import { useEffect } from 'react';
 
 import Spinner from '@/components/Spinner/Spinner';
 
 // THE COMPONENT IS USED FOR STATIC HTML GENERATION, SO DON'T USE HOOKS OR STATE
 
-interface MjImageProgressProps {
+export interface MjImageProgressProps {
   content: string;
   state: 'loading' | 'completed' | 'error';
   percentage?: `${number}`;

@@ -2,8 +2,13 @@ import { NextResponse } from 'next/server';
 
 import { removeLastLine as removeLastLineF } from './../../utils/app/ui';
 import { IMAGE_GEN_MAX_TIMEOUT } from '@/utils/app/const';
-import { generateTempComponentHTML } from '@/utils/app/htmlStringHandler';
+import { generateComponentHTML } from '@/utils/app/htmlStringHandler';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
+import {
+  ProgressHandler,
+  makeCreateImageSelector,
+  makeWriteToStream,
+} from '@/utils/app/streamHandler';
 import buttonCommand from '@/utils/server/next-lag/buttonCommands';
 import {
   getAdminSupabaseClient,
@@ -11,6 +16,9 @@ import {
 } from '@/utils/server/supabase';
 
 import MjImageProgress from '@/components/Chat/components/MjImageProgress';
+import MjImageSelector, {
+  MjImageSelectorProps,
+} from '@/components/Chat/components/MjImageSelector';
 
 const supabase = getAdminSupabaseClient();
 
@@ -55,47 +63,20 @@ const handler = async (req: Request): Promise<Response> => {
   const writer = stream.writable.getWriter();
 
   let jobTerminated = false;
-  const writeToStream = async (text: string, removeLastLine?: boolean) => {
-    if (removeLastLine) {
-      await writer.write(encoder.encode('[REMOVE_LAST_LINE]'));
-    }
-    await writer.write(encoder.encode(text));
-  };
+  const writeToStream = makeWriteToStream(writer, encoder);
+
   // ==================== STREAM CONFIG END ====================
 
   const generationStartedAt = Date.now();
   let imageGenerationProgress: null | number = null;
   const getTotalGenerationTime = () =>
     Math.round((Date.now() - generationStartedAt) / 1000);
-  let progressContent = '';
 
-  async function updateProgress({
-    content,
-    state = 'loading',
-    removeLastLine = false,
-    percentage,
-  }: {
-    content: string;
-    state?: 'loading' | 'completed' | 'error';
-    removeLastLine?: boolean;
-    percentage?: `${number}`;
-  }) {
-    if (removeLastLine) {
-      progressContent = removeLastLineF(progressContent);
-    }
-    progressContent += content;
-    const html = await generateTempComponentHTML({
-      component: MjImageProgress,
-      props: {
-        content: progressContent,
-        state,
-        percentage,
-      },
-    });
-    await writeToStream(html);
-  }
-  updateProgress({ content: `Command: ${button} ... \n` });
-  updateProgress({
+  const createImageSelector = makeCreateImageSelector(writeToStream);
+  const progressHandler = new ProgressHandler(writeToStream);
+
+  progressHandler.updateProgress({ content: `Command: ${button} ... \n` });
+  progressHandler.updateProgress({
     content:
       'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
   });
@@ -127,7 +108,7 @@ const handler = async (req: Request): Promise<Response> => {
       if (generationProgress === 100) {
         const buttonMessageId =
           imageGenerationProgressResponseJson.response.buttonMessageId;
-        updateProgress({
+        progressHandler.updateProgress({
           content: `Completed in ${getTotalGenerationTime()}s \n`,
           state: 'completed',
         });
@@ -152,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
             mjResponseContent &&
             MJ_INVALID_USER_ACTION_LIST.includes(mjResponseContent);
           if (isInvalidUserAction) {
-            updateProgress({
+            progressHandler.updateProgress({
               content: `Upscale failed, please try again with a different image. \n`,
               state: 'error',
             });
@@ -167,24 +148,29 @@ const handler = async (req: Request): Promise<Response> => {
         } else {
           // run when image url is available
           if (isUpscaleCommand) {
-            writeToStream(
-              `\n\n<div id="mj-image-upscaled" class="my-4">${`<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="${buttons.join(
-                ',',
-              )}" data-ai-image-button-message-id="${buttonMessageId}" data-ai-image-button-commands-executed="0" />`}</div>\n\n`,
-            );
+            await createImageSelector({
+              previousButtonCommand: button,
+              buttonMessageId,
+              imageList: [
+                {
+                  imageUrl: imageUrl,
+                  imageAlt: imageAlt,
+                  buttons: buttons,
+                },
+              ],
+            });
           } else {
-            writeToStream(
-              `\n\n<div id="mj-image-selection" class="grid grid-cols-2 gap-0 my-4">${imageUrlList
-                .map(
-                  (imageUrl: string, index: number) =>
-                    `<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="U${
-                      index + 1
-                    },V${
-                      index + 1
-                    }" data-ai-image-button-message-id="${buttonMessageId}" data-ai-image-button-commands-executed="0" />`,
-                )
-                .join('')}</div>\n\n`,
-            );
+            await createImageSelector({
+              previousButtonCommand: button,
+              buttonMessageId,
+              imageList: imageUrlList.map(
+                (imageUrl: string, index: number) => ({
+                  imageUrl: imageUrl,
+                  imageAlt: imageAlt,
+                  buttons: [`U${index + 1}`, `V${index + 1}`],
+                }),
+              ),
+            });
           }
 
           imageGenerationProgress = 100;
@@ -195,11 +181,11 @@ const handler = async (req: Request): Promise<Response> => {
         }
       } else {
         if (imageGenerationProgress === null) {
-          updateProgress({
+          progressHandler.updateProgress({
             content: `Start to generate \n`,
           });
         } else {
-          updateProgress({
+          progressHandler.updateProgress({
             content: `${
               generationProgress === 0
                 ? 'Waiting to be processed'
@@ -225,7 +211,7 @@ const handler = async (req: Request): Promise<Response> => {
     jobTerminated = true;
 
     console.error(error);
-    updateProgress({
+    progressHandler.updateProgress({
       content: 'Error occurred while generating image, please try again later.',
       state: 'error',
     });

@@ -5,8 +5,13 @@ import {
   DEFAULT_IMAGE_GENERATION_STYLE,
   IMAGE_GEN_MAX_TIMEOUT,
 } from '@/utils/app/const';
-import { generateTempComponentHTML } from '@/utils/app/htmlStringHandler';
+import { generateComponentHTML } from '@/utils/app/htmlStringHandler';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
+import {
+  ProgressHandler,
+  makeCreateImageSelector,
+  makeWriteToStream,
+} from '@/utils/app/streamHandler';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
 import { removeLastLine as removeLastLineF } from '@/utils/app/ui';
 import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
@@ -92,48 +97,18 @@ const handler = async (req: Request): Promise<Response> => {
 
   let jobTerminated = false;
 
-  const writeToStream = async (text: string, removeLastLine?: boolean) => {
-    if (removeLastLine) {
-      await writer.write(encoder.encode('[REMOVE_LAST_LINE]'));
-    }
-    await writer.write(encoder.encode(text));
-  };
-  let progressContent = '';
-
-  async function updateProgress({
-    content,
-    state = 'loading',
-    removeLastLine = false,
-    percentage,
-  }: {
-    content: string;
-    state?: 'loading' | 'completed' | 'error';
-    removeLastLine?: boolean;
-    percentage?: `${number}`;
-  }) {
-    if (removeLastLine) {
-      progressContent = removeLastLineF(progressContent);
-    }
-    progressContent += content;
-    const html = await generateTempComponentHTML({
-      component: MjImageProgress,
-      props: {
-        content: progressContent,
-        state,
-        percentage,
-      },
-    });
-    await writeToStream(html);
-  }
+  const writeToStream = makeWriteToStream(writer, encoder);
+  const createImageSelector = makeCreateImageSelector(writeToStream);
+  const progressHandler = new ProgressHandler(writeToStream);
 
   const requestBody = (await req.json()) as ChatBody;
 
   // Do not modity this line, it is used by front-end to detect if the message is for image generation
 
-  updateProgress({
+  progressHandler.updateProgress({
     content: 'Initializing ... \n',
   });
-  updateProgress({
+  progressHandler.updateProgress({
     content:
       'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
   });
@@ -149,7 +124,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     try {
       // Translate and enhance the prompt
-      updateProgress({
+      progressHandler.updateProgress({
         content: `Enhancing and translating user input prompt ... \n`,
       });
       generationPrompt = await translateAndEnhancePrompt(
@@ -163,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
         requestBody.temperature,
       );
 
-      updateProgress({
+      progressHandler.updateProgress({
         content: `Prompt: ${generationPrompt} \n`,
         removeLastLine: true,
       });
@@ -229,7 +204,7 @@ const handler = async (req: Request): Promise<Response> => {
         if (generationProgress === 100) {
           const buttonMessageId =
             imageGenerationProgressResponseJson.response.buttonMessageId;
-          updateProgress({
+          progressHandler.updateProgress({
             content: `Completed in ${getTotalGenerationTime()}s \n`,
             state: 'completed',
           });
@@ -250,7 +225,7 @@ const handler = async (req: Request): Promise<Response> => {
               mjResponseContent &&
               MJ_INVALID_USER_ACTION_LIST.includes(mjResponseContent);
             if (isInvalidUserAction) {
-              updateProgress({
+              progressHandler.updateProgress({
                 content: `Error: ${mjResponseContent} \n`,
                 state: 'error',
               });
@@ -265,18 +240,17 @@ const handler = async (req: Request): Promise<Response> => {
             );
           } else {
             // run when image url is available
-            writeToStream(
-              `\n\n<div id="mj-image-selection" class="grid grid-cols-2 gap-0 my-4">${imageUrlList
-                .map(
-                  (imageUrl: string, index: number) =>
-                    `<image src="${imageUrl}" alt="${imageAlt}" data-ai-image-buttons="U${
-                      index + 1
-                    },V${
-                      index + 1
-                    }" data-ai-image-button-message-id="${buttonMessageId}" data-ai-image-button-commands-executed="0" />`,
-                )
-                .join('')}</div>\n\n`,
-            );
+            await createImageSelector({
+              previousButtonCommand: '',
+              buttonMessageId,
+              imageList: imageUrlList.map(
+                (imageUrl: string, index: number) => ({
+                  imageUrl: imageUrl,
+                  imageAlt: imageAlt,
+                  buttons: [`U${index + 1}`, `V${index + 1}`],
+                }),
+              ),
+            });
             await addUsageEntry(PluginID.IMAGE_GEN, user.id);
             await subtractCredit(user.id, PluginID.IMAGE_GEN);
 
@@ -288,11 +262,11 @@ const handler = async (req: Request): Promise<Response> => {
           }
         } else {
           if (imageGenerationProgress === null) {
-            updateProgress({
+            progressHandler.updateProgress({
               content: `Start to generate \n`,
             });
           } else {
-            updateProgress({
+            progressHandler.updateProgress({
               content: `${
                 generationProgress === 0
                   ? 'Waiting to be processed'
@@ -319,7 +293,7 @@ const handler = async (req: Request): Promise<Response> => {
       jobTerminated = true;
 
       console.log(error);
-      await updateProgress({
+      await progressHandler.updateProgress({
         content:
           'Error occurred while generating image, please try again later.',
         state: 'error',
