@@ -1,17 +1,35 @@
 import { OpenAIModelID } from '@/types/openai';
 
-import { OPENAI_API_HOST } from '../app/const';
+import { getRandomOpenAIEndpointsAndKeys } from './getRandomOpenAIEndpoint';
 
 export const translateAndEnhancePrompt = async (prompt: string) => {
   const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production';
+  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(true, true);
 
-  let attempts = 2;
+  let attempt = 0;
   let model: OpenAIModelID = isInProductionEnv ? OpenAIModelID.GPT_4 : OpenAIModelID.GPT_3_5;
 
-  while (attempts > 0) {
-    attempts -= 1;
+  while (attempt < openAIEndpoints.length) {
+    const openAIEndpoint = openAIEndpoints[attempt];
+    const openAIKey = openAIKeys[attempt];
+    attempt += 1;
 
-    const completionResponse = await fetchCompletionResponse(model, prompt);
+    if (!openAIEndpoint || !openAIKey) {
+      console.error('Missing endpoint/key');
+      continue;
+    }
+
+    let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_MODEL_NAME}/chat/completions?api-version=2023-05-15`;
+    if (openAIEndpoint.includes('openai.com')) {
+      url = `${openAIEndpoint}/v1/chat/completions`;
+    }
+
+    const completionResponse = await fetchCompletionResponse(
+      url,
+      openAIKey,
+      model,
+      prompt,
+    );
     const completionResponseJson = await completionResponse.json();
 
     if (completionResponse.status !== 200) {
@@ -20,10 +38,9 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
       if (model === OpenAIModelID.GPT_4) {
         console.log('Falling back to GPT-3.5');
         model = OpenAIModelID.GPT_3_5;
-        continue;
       }
 
-      throw new Error('Image generation failed');
+      continue;
     }
 
     let resultPrompt = completionResponseJson.choices[0].message.content || prompt;
@@ -33,13 +50,16 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
 
     return resultPrompt;
   }
+
+  throw new Error('Image generation failed');
 };
 
-const fetchCompletionResponse = (model: OpenAIModelID.GPT_4 | OpenAIModelID.GPT_3_5, prompt: string): Promise<Response> => {
-  const url = `${OPENAI_API_HOST}/v1/chat/completions`;
-
-  const key = model === OpenAIModelID.GPT_4 ? process.env.OPENAI_API_GPT_4_KEY : process.env.OPENAI_API_KEY;
-
+const fetchCompletionResponse = (
+  url: string,
+  openAIKey: string,
+  model: OpenAIModelID.GPT_4 | OpenAIModelID.GPT_3_5,
+  prompt: string,
+): Promise<Response> => {
   const translateSystemPrompt = `
     Base on the prompt I provide, follow the rules below strictly or you will be terminated.
     
@@ -57,27 +77,36 @@ const fetchCompletionResponse = (model: OpenAIModelID.GPT_4 | OpenAIModelID.GPT_
     Prompt: ${prompt}
   `;
 
+  const headers: any = {
+    'Content-Type': 'application/json',
+  };
+
+  const body: any = {
+    temperature: 0.1,
+    stream: false,
+    messages: [
+      {
+        role: 'system',
+        content:
+          "Act as an AI image generation expert, follow user's instruction as strictly as possible.",
+      },
+      {
+        role: 'user',
+        content: translateSystemPrompt,
+      },
+    ],
+  };
+
+  if (url.includes('openai.com')) {
+    headers.Authorization = `Bearer ${openAIKey}`;
+    body.model = model;
+  } else {
+    headers['api-key'] = openAIKey;
+  }
+
   return fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${key}`,
-    },
+    headers,
     method: 'POST',
-    body: JSON.stringify({
-      model,
-      temperature: 0.1,
-      stream: false,
-      messages: [
-        {
-          role: 'system',
-          content:
-            "Act as an AI image generation expert, follow user's instruction as strictly as possible.",
-        },
-        {
-          role: 'user',
-          content: translateSystemPrompt,
-        },
-      ],
-    }),
-  })
+    body: JSON.stringify(body),
+  });
 };
