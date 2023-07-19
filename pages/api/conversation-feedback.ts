@@ -1,3 +1,4 @@
+import { trackError } from '@/utils/app/azureTelemetry';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -31,6 +32,8 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('Success', { status: 201 });
   } catch (err) {
     console.error(err)
+    //Log error to Azure App Insights
+    trackError(err as string);
     return new Response('Error', { status: 500 });
   }
 }
