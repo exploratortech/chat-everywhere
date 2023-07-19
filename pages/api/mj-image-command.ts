@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { removeLastLine as removeLastLineF } from './../../utils/app/ui';
 import { IMAGE_GEN_MAX_TIMEOUT } from '@/utils/app/const';
-import { generateComponentHTML } from '@/utils/app/htmlStringHandler';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import {
   ProgressHandler,
@@ -14,11 +12,6 @@ import {
   getAdminSupabaseClient,
   getUserProfile,
 } from '@/utils/server/supabase';
-
-import MjImageProgress from '@/components/Chat/components/MjImageProgress';
-import MjImageSelector, {
-  MjImageSelectorProps,
-} from '@/components/Chat/components/MjImageSelector';
 
 const supabase = getAdminSupabaseClient();
 
@@ -46,10 +39,6 @@ const handler = async (req: Request): Promise<Response> => {
   const upscalePattern = /^U\d$/i;
   const isUpscaleCommand = upscalePattern.test(button);
 
-  console.log({
-    button,
-    isUpscaleCommand: isUpscaleCommand,
-  });
   const buttonCommandResponse = await buttonCommand(button, buttonMessageId);
   const messageId = buttonCommandResponse.messageId;
   console.log({

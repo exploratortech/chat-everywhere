@@ -5,7 +5,6 @@ import {
   DEFAULT_IMAGE_GENERATION_STYLE,
   IMAGE_GEN_MAX_TIMEOUT,
 } from '@/utils/app/const';
-import { generateComponentHTML } from '@/utils/app/htmlStringHandler';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import {
   ProgressHandler,
@@ -13,7 +12,6 @@ import {
   makeWriteToStream,
 } from '@/utils/app/streamHandler';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
-import { removeLastLine as removeLastLineF } from '@/utils/app/ui';
 import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
 import {
   addUsageEntry,
@@ -25,8 +23,6 @@ import {
 
 import { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
-
-import MjImageProgress from '@/components/Chat/components/MjImageProgress';
 
 const supabase = getAdminSupabaseClient();
 

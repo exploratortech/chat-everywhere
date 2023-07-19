@@ -10,6 +10,8 @@ export interface MjImageSelectorProps {
   imageList: MjImageItem[];
   buttonMessageId: string;
 }
+// THE COMPONENT IS USED FOR STATIC HTML GENERATION, SO DON'T USE HOOKS OR STATE
+
 export default function MjImageSelector({
   previousButtonCommand,
   imageList,

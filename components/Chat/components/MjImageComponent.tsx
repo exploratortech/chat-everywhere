@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -40,13 +34,7 @@ export default function MjImageComponent({
   buttonMessageId,
 }: MjImageComponentProps) {
   const {
-    state: {
-      user,
-      isPaidUser,
-      selectedConversation,
-      conversations,
-      currentMessage,
-    },
+    state: { user, selectedConversation, conversations },
     dispatch: homeDispatch,
     stopConversationRef,
   } = useContext(HomeContext);
