@@ -24,3 +24,15 @@ export const DEFAULT_IMAGE_GENERATION_QUALITY = 'high';
 export const RANK_INTERVAL = 100;
 
 export const IMAGE_GEN_MAX_TIMEOUT = 60;
+
+export const AZURE_OPENAI_ENDPOINTS = [
+  process.env.AZURE_OPENAI_ENDPOINT_1,
+  process.env.AZURE_OPENAI_ENDPOINT_2,
+  process.env.AZURE_OPENAI_ENDPOINT_3,
+];
+
+export const AZURE_OPENAI_KEYS = [
+  process.env.AZURE_OPENAI_KEY_1,
+  process.env.AZURE_OPENAI_KEY_2,
+  process.env.AZURE_OPENAI_KEY_3,
+];
