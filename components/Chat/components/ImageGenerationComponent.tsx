@@ -18,6 +18,8 @@ import HomeContext from '@/pages/api/home/home.context';
 
 import dayjs from 'dayjs';
 
+import { trackError } from '@/utils/app/azureTelemetry';
+
 type Props = {
   src: string;
   messageIndex: number;
@@ -145,6 +147,8 @@ export const ImageGenerationComponent: FC<Props> = ({
     } catch (e) {
       console.log(e);
       toast.error(t('Upscale image failed') || 'Upscale image failed');
+      //Log error to Azure App Insights
+      trackError(e as string);
     }
 
     setImageOperationInProgress(false);

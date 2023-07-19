@@ -6,6 +6,8 @@ import { TFunction, useTranslation } from 'next-i18next';
 
 import { Conversation } from '@/types/chat';
 
+import { trackError } from '@/utils/app/azureTelemetry';
+
 type FeedbackContainerProps = {
   conversation: Conversation;
 };
@@ -32,6 +34,8 @@ export const FeedbackContainer: React.FC<FeedbackContainerProps> = ({
 
     if (!response.ok) {
       toast.error(t('Something went wrong. Please try again later.'));
+      //Log error to Azure App Insights
+      trackError(response.statusText);
       return;
     }
 
