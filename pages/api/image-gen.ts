@@ -99,8 +99,6 @@ const handler = async (req: Request): Promise<Response> => {
 
   const requestBody = (await req.json()) as ChatBody;
 
-  // Do not modity this line, it is used by front-end to detect if the message is for image generation
-
   progressHandler.updateProgress({
     content: 'Initializing ... \n',
   });

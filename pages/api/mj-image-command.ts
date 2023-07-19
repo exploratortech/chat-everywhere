@@ -9,9 +9,13 @@ import {
 } from '@/utils/app/streamHandler';
 import buttonCommand from '@/utils/server/next-lag/buttonCommands';
 import {
+  addUsageEntry,
   getAdminSupabaseClient,
   getUserProfile,
+  subtractCredit,
 } from '@/utils/server/supabase';
+
+import { PluginID } from '@/types/plugin';
 
 const supabase = getAdminSupabaseClient();
 
@@ -160,6 +164,12 @@ const handler = async (req: Request): Promise<Response> => {
                 }),
               ),
             });
+          }
+
+          // only upscale command will not be charged
+          if (!isUpscaleCommand) {
+            await addUsageEntry(PluginID.IMAGE_GEN, user.id);
+            await subtractCredit(user.id, PluginID.IMAGE_GEN);
           }
 
           imageGenerationProgress = 100;
