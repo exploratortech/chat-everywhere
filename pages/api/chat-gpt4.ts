@@ -81,6 +81,8 @@ const handler = async (req: Request): Promise<Response> => {
       promptToSend,
       temperatureToUse,
       messagesToSend,
+      null,
+      true,
     );
 
     return new Response(stream);
