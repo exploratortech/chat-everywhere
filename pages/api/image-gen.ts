@@ -24,6 +24,7 @@ import {
 
 import { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
+import { trackError } from '@/utils/app/azureTelemetry';
 
 const supabase = getAdminSupabaseClient();
 
