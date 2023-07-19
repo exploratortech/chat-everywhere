@@ -41,9 +41,13 @@ export const OpenAIStream = async (
   temperature: number,
   messages: Message[],
   customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
+  openAIPriority: boolean = false,
 ) => {
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
-  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(isGPT4Model);
+  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
+    isGPT4Model,
+    openAIPriority,
+  );
 
   let attempt = 0;
 
@@ -195,7 +199,10 @@ export const truncateLogMessage = (message: string) =>
 
 // Returns a list of shuffled endpoints and keys. They should be used based
 // on their order in the list.
-const getRandomOpenAIEndpointsAndKeys = (includeGPT4: boolean = false): [(string | undefined)[], (string | undefined)[]] => {
+const getRandomOpenAIEndpointsAndKeys = (
+  includeGPT4: boolean = false,
+  openAIPriority: boolean,
+): [(string | undefined)[], (string | undefined)[]] => {
   const endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
   const keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
 
@@ -209,13 +216,19 @@ const getRandomOpenAIEndpointsAndKeys = (includeGPT4: boolean = false): [(string
     keys[j] = tempKey;
   }
 
+  if (openAIPriority) {
+    // Prioritize OpenAI endpoint
+    endpoints.splice(0, 0, OPENAI_API_HOST);
+    keys.splice(0, 0, process.env.OPENAI_API_KEY);
+  } else {
+    endpoints.push(OPENAI_API_HOST);
+    keys.push(process.env.OPENAI_API_KEY);
+  }
+
   if (includeGPT4) {
     endpoints.splice(0, 0, OPENAI_API_HOST);
     keys.splice(0, 0, process.env.OPENAI_API_GPT_4_KEY);
   }
-
-  endpoints.push(OPENAI_API_HOST);
-  keys.push(process.env.OPENAI_API_KEY);
 
   return [endpoints, keys];
 };
