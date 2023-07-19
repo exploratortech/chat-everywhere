@@ -169,7 +169,6 @@ export const OpenAIStream = async (
               } else {
                 controller.close();
               }
-              console.log('controller closed');
               clearInterval(interval);
             }
           }, 45);
