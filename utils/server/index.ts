@@ -41,12 +41,12 @@ export const OpenAIStream = async (
   temperature: number,
   messages: Message[],
   customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
-  openAIPriority: boolean = false,
+  prioritizeOpenAI: boolean = false,
 ) => {
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
   const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
     isGPT4Model,
-    openAIPriority,
+    prioritizeOpenAI,
   );
 
   let attempt = 0;

@@ -4,7 +4,7 @@ import { AZURE_OPENAI_ENDPOINTS, AZURE_OPENAI_KEYS, OPENAI_API_HOST } from "../a
 // on their order in the list.
 export const getRandomOpenAIEndpointsAndKeys = (
   includeGPT4: boolean = false,
-  openAIPriority: boolean,
+  prioritizeOpenAI: boolean,
 ): [(string | undefined)[], (string | undefined)[]] => {
   const endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
   const keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
@@ -19,8 +19,7 @@ export const getRandomOpenAIEndpointsAndKeys = (
     keys[j] = tempKey;
   }
 
-  if (openAIPriority) {
-    // Prioritize OpenAI endpoint
+  if (prioritizeOpenAI) {
     endpoints.splice(0, 0, OPENAI_API_HOST);
     keys.splice(0, 0, process.env.OPENAI_API_KEY);
   } else {
