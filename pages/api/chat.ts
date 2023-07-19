@@ -42,9 +42,9 @@ const handler = async (req: Request): Promise<Response> => {
     const requireToUseLargerContextWindowModel =
       (await getMessagesTokenCount(messages)) + 1000 > defaultTokenLimit; // Add buffer token to take system prompt into account
 
+    const isPaidUser = await isPaidUserByAuthToken(req.headers.get('user-token'));
     const useLargerContextWindowModel =
-      requireToUseLargerContextWindowModel &&
-      (await isPaidUserByAuthToken(req.headers.get('user-token')));
+      requireToUseLargerContextWindowModel && isPaidUser;
 
     const messagesToSend = await shortenMessagesBaseOnTokenLimit(
       prompt,
@@ -76,7 +76,8 @@ const handler = async (req: Request): Promise<Response> => {
       promptToSend,
       temperatureToUse,
       messagesToSend,
-      messageToStreamBack
+      messageToStreamBack,
+      isPaidUser,
     );
 
     return new Response(stream);
