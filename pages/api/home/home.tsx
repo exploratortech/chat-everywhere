@@ -291,16 +291,8 @@ const Home = () => {
     return newConversation;
   };
 
-  // DRAGGING ITEMS --------------------------------------
-
-  const setDragData = (dragData: DragData): void => {
-    dispatch({ field: 'currentDrag', value: dragData });
-  };
-
-  const removeDragData = (): void => {
-    dispatch({ field: 'currentDrag', value: undefined });
-  };
   // SIDEBAR ---------------------------------------------
+
   const toggleChatbar = (): void => {
     dispatch({ field: 'showChatbar', value: !showChatbar });
     localStorage.setItem('showChatbar', JSON.stringify(!showChatbar));
@@ -316,6 +308,15 @@ const Home = () => {
       showChatbar || showPromptbar ? 'hidden' : 'auto';
   }, [showChatbar, showPromptbar]);
 
+  // DRAGGING ITEMS --------------------------------------
+
+  const setDragData = (dragData: DragData): void => {
+    dispatch({ field: 'currentDrag', value: dragData });
+  };
+
+  const removeDragData = (): void => {
+    dispatch({ field: 'currentDrag', value: undefined });
+  };
   // EFFECTS  --------------------------------------------
 
   useEffect(() => {
@@ -651,6 +652,8 @@ const Home = () => {
             speechRecognitionLanguage,
           ),
         stopPlaying,
+        toggleChatbar,
+        togglePromptbar,
         setDragData,
         removeDragData,
         stopConversationRef,
