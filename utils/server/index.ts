@@ -1,7 +1,7 @@
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
-import { AZURE_OPENAI_ENDPOINTS, AZURE_OPENAI_KEYS, OPENAI_API_HOST } from '../app/const';
+import { AZURE_OPENAI_ENDPOINTS, AZURE_OPENAI_KEYS, OPENAI_API_HOST, OPENAI_API_TYPE } from '../app/const';
 
 import {
   ParsedEvent,
@@ -42,12 +42,19 @@ export const OpenAIStream = async (
   messages: Message[],
   customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
 ) => {
-  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys();
+  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
+    model.id === OpenAIModelID.GPT_4,
+  );
+
+  console.log('endpoints:', openAIEndpoints);
+
   let attempt = 0;
 
   while (attempt < openAIEndpoints.length) {
     const openAIEndpoint = openAIEndpoints[attempt];
     const openAIKey = openAIKeys[attempt];
+
+    console.log('attempting endpoint:', openAIEndpoint);
 
     try {
       if (!openAIEndpoint || !openAIKey) throw new Error('Missing endpoint/key');
@@ -59,7 +66,7 @@ export const OpenAIStream = async (
 
       const isGPT4Model = model.id === OpenAIModelID.GPT_4;
 
-      const bodyToSend = {
+      const bodyToSend: any = {
         messages: [
           {
             role: 'system',
@@ -79,6 +86,7 @@ export const OpenAIStream = async (
       };
 
       if (openAIEndpoint.includes('openai.com')) {
+        bodyToSend.model = model.id;
         requestHeaders.Authorization = `Bearer ${openAIKey}`;
       } else {
         requestHeaders['api-key'] = openAIKey;
@@ -115,14 +123,18 @@ export const OpenAIStream = async (
         continue;
       }
 
-      const stream = new ReadableStream({
+      return new ReadableStream({
         async start(controller) {
           let buffer: Uint8Array[] = [];
-          let stop = false;
+          let error: any = null;
     
           const onParse = (event: ParsedEvent | ReconnectInterval) => {
             if (event.type === 'event') {
               const data = event.data;
+
+              if (data === '[DONE]') {
+                return;
+              }
     
               try {
                 const json = JSON.parse(data);
@@ -132,44 +144,46 @@ export const OpenAIStream = async (
                     if (customMessageToStreamBack) {
                       buffer.push(encoder.encode(customMessageToStreamBack));
                     }
-    
-                    stop = true;
+
                     return;
                   }
                   const text = json.choices[0].delta.content;
                   buffer.push(encoder.encode(text));
                 }
               } catch (e) {
-                controller.error(e);
+                if (!(e instanceof SyntaxError)) {
+                  error = e;
+                  console.error(e);
+                }
               }
             }
           };
     
           const parser = createParser(onParse);
-    
-          (async function () {
-            for await (const chunk of res.body as any) {
-              parser.feed(decoder.decode(chunk));
-            }
-          })();
-    
+
           const interval = setInterval(() => {
             if (buffer.length > 0) {
               const data = buffer.shift();
               controller.enqueue(data);
             }
-    
-            if (stop) {
-              if (buffer.length === 0) {
+            
+            if (buffer.length === 0) {
+              if (error) {
+                controller.error(error);
+              } else {
                 controller.close();
-                clearInterval(interval);
               }
+              clearInterval(interval);
             }
           }, 45);
+
+          (async function () {
+            for await (const chunk of res.body as any) {
+              parser.feed(decoder.decode(chunk));
+            }
+          })();
         },
       });
-    
-      return stream;
     } catch (error) {
       attempt += 1;
       console.error(error);
@@ -185,7 +199,7 @@ export const truncateLogMessage = (message: string) =>
 
 // Returns a list of shuffled endpoints and keys. They should be used based
 // on their order in the list.
-const getRandomOpenAIEndpointsAndKeys = (): [(string | undefined)[], (string | undefined)[]] => {
+const getRandomOpenAIEndpointsAndKeys = (includeGPT4: boolean = false): [(string | undefined)[], (string | undefined)[]] => {
   const endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
   const keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
 
@@ -197,6 +211,11 @@ const getRandomOpenAIEndpointsAndKeys = (): [(string | undefined)[], (string | u
     keys[i] = keys[j];
     endpoints[j] = tempEndpoint;
     keys[j] = tempKey;
+  }
+
+  if (includeGPT4) {
+    endpoints.splice(0, 0, OPENAI_API_HOST);
+    keys.splice(0, 0, process.env.OPENAI_API_GPT_4_KEY);
   }
 
   endpoints.push(OPENAI_API_HOST);
