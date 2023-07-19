@@ -42,11 +42,8 @@ export const OpenAIStream = async (
   messages: Message[],
   customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
 ) => {
-  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
-    model.id === OpenAIModelID.GPT_4,
-  );
-
-  console.log('endpoints:', openAIEndpoints);
+  const isGPT4Model = model.id === OpenAIModelID.GPT_4;
+  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(isGPT4Model);
 
   let attempt = 0;
 
@@ -54,17 +51,13 @@ export const OpenAIStream = async (
     const openAIEndpoint = openAIEndpoints[attempt];
     const openAIKey = openAIKeys[attempt];
 
-    console.log('attempting endpoint:', openAIEndpoint);
-
     try {
       if (!openAIEndpoint || !openAIKey) throw new Error('Missing endpoint/key');
 
-      let url = `${openAIEndpoint}/openai/deployments/gpt-35/chat/completions?api-version=2023-05-15`;
+      let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_MODEL_NAME}/chat/completions?api-version=2023-05-15`;
       if (openAIEndpoint.includes('openai.com')) {
         url = `${openAIEndpoint}/v1/chat/completions`;
       }
-
-      const isGPT4Model = model.id === OpenAIModelID.GPT_4;
 
       const bodyToSend: any = {
         messages: [
@@ -126,6 +119,7 @@ export const OpenAIStream = async (
       return new ReadableStream({
         async start(controller) {
           let buffer: Uint8Array[] = [];
+          let stop = false;
           let error: any = null;
     
           const onParse = (event: ParsedEvent | ReconnectInterval) => {
@@ -145,6 +139,7 @@ export const OpenAIStream = async (
                       buffer.push(encoder.encode(customMessageToStreamBack));
                     }
 
+                    stop = true;
                     return;
                   }
                   const text = json.choices[0].delta.content;
@@ -152,6 +147,7 @@ export const OpenAIStream = async (
                 }
               } catch (e) {
                 if (!(e instanceof SyntaxError)) {
+                  stop = true;
                   error = e;
                   console.error(e);
                 }
@@ -167,12 +163,13 @@ export const OpenAIStream = async (
               controller.enqueue(data);
             }
             
-            if (buffer.length === 0) {
+            if (buffer.length === 0 && stop) {
               if (error) {
                 controller.error(error);
               } else {
                 controller.close();
               }
+              console.log('controller closed');
               clearInterval(interval);
             }
           }, 45);
