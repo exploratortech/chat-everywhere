@@ -1,3 +1,4 @@
+import { IconHelp } from '@tabler/icons-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -191,6 +192,23 @@ export default function MjImageComponent({
     },
     [conversations, homeDispatch],
   );
+  const { i18n } = useTranslation();
+
+  const helpButtonOnClick = () => {
+    const displayChineseVersion = /^zh/.test(i18n.language);
+
+    const aiImageFeaturePageId = displayChineseVersion
+      ? '9f0f23a1-97d6-4323-92d5-9915bdef299b'
+      : '0fbc9e16-86e2-4908-af06-d8b278d250db';
+    homeDispatch({
+      field: 'showFeaturePageOnLoad',
+      value: aiImageFeaturePageId,
+    });
+    homeDispatch({
+      field: 'showFeaturesModel',
+      value: true,
+    });
+  };
 
   return (
     <div className={`group/image relative hover:z-10`}>
@@ -228,6 +246,12 @@ export default function MjImageComponent({
             );
           })}
         </div>
+        <button
+          className="hidden group-hover/image:block absolute top-0 right-0 p-2 cursor-pointer"
+          onClick={helpButtonOnClick}
+        >
+          <IconHelp />
+        </button>
       </div>
     </div>
   );
