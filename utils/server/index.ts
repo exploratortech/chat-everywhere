@@ -57,14 +57,16 @@ export const OpenAIStream = async (
   systemPrompt: string,
   temperature: number,
   messages: Message[],
-  customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
-  assistantMode: boolean = false,
-  openAIPriority: boolean = false,
+  options: {
+    customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
+    assistantMode?: boolean,
+    prioritizeOpenAI?: boolean,
+  }
 ) => {
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
   const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
     isGPT4Model,
-    openAIPriority,
+    !!options.prioritizeOpenAI,
   );
 
   let attempt = 0;
@@ -95,7 +97,7 @@ export const OpenAIStream = async (
         presence_penalty: 0,
         frequency_penalty: 0,
         // NOTE: For now, don't call functions unless we're in assistant mode
-        function_call: assistantMode ? 'auto' : 'none',
+        function_call: options.assistantMode ? 'auto' : 'none',
         functions: CALLABLE_FUNCTIONS,
       };
 
@@ -185,8 +187,8 @@ export const OpenAIStream = async (
     
                 if (choice) {
                   if (choice.finish_reason != null) {
-                    if (customMessageToStreamBack) {
-                      buffer.push(encoder.encode(customMessageToStreamBack));
+                    if (options.customMessageToStreamBack) {
+                      buffer.push(encoder.encode(options.customMessageToStreamBack));
                     }
 
                     stop = true;

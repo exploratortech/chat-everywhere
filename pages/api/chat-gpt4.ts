@@ -81,8 +81,9 @@ const handler = async (req: Request): Promise<Response> => {
       promptToSend,
       temperatureToUse,
       messagesToSend,
-      null,
-      true,
+      {
+        prioritizeOpenAI: true,
+      }
     );
 
     return new Response(stream);
