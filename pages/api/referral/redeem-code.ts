@@ -1,3 +1,4 @@
+import { PluginID } from '@/types/plugin';
 import {
   getReferralCodeDetail,
   redeemReferralCode,
@@ -5,6 +6,7 @@ import {
 import {
   getAdminSupabaseClient,
   getUserProfile,
+  resetUserCredits
 } from '@/utils/server/supabase';
 
 export const config = {
@@ -54,6 +56,9 @@ const handler = async (req: Request): Promise<Response> => {
       referrerId,
       refereeId: userId,
     });
+
+    await resetUserCredits(userId, PluginID.GPT4);
+    await resetUserCredits(userId, PluginID.IMAGE_GEN);
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
