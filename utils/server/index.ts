@@ -65,8 +65,11 @@ export const OpenAIStream = async (
 ) => {
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
   const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
-    isGPT4Model,
-    !!options.prioritizeOpenAI,
+    {
+      includeGPT4: isGPT4Model,
+      includeFunctionCalling: !!options.assistantMode,
+      prioritizeOpenAI: !!options.prioritizeOpenAI,
+    }
   );
 
   let attempt = 0;
@@ -77,11 +80,6 @@ export const OpenAIStream = async (
 
     try {
       if (!openAIEndpoint || !openAIKey) throw new Error('Missing endpoint/key');
-
-      let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_MODEL_NAME}/chat/completions?api-version=2023-05-15`;
-      if (openAIEndpoint.includes('openai.com')) {
-        url = `${openAIEndpoint}/v1/chat/completions`;
-      }
 
       const bodyToSend: any = {
         messages: [
@@ -105,14 +103,35 @@ export const OpenAIStream = async (
         'Content-Type': 'application/json',
       };
 
+      let resource = '';
+      let modelId = model.id;
+
       if (openAIEndpoint.includes('openai.com')) {
-        // Use the model the user specified on the first attempt, otherwise, use
-        // a fallback model.
-        bodyToSend.model = attempt === 0 ? model.id : OpenAIModelID.GPT_3_5;
         requestHeaders.Authorization = `Bearer ${openAIKey}`;
+        resource = '/v1/chat/completions';
+
+        // Fallback model
+        if (attempt > 0 && !options.assistantMode) {
+          modelId = OpenAIModelID.GPT_3_5;
+        }
+
+        if (options.assistantMode) {
+          modelId = OpenAIModelID.GPT_3_5_16K_0613;
+        }
+
+        bodyToSend.model = modelId;
       } else {
+        modelId = OpenAIModelID.GPT_3_5_AZ;;
         requestHeaders['api-key'] = openAIKey;
+
+        if (options.assistantMode && openAIEndpoint === process.env.AZURE_OPENAI_ENDPOINT_2) {
+          modelId = OpenAIModelID.GPT_3_5_16K_AZ;
+        }
+
+        resource = `/openai/deployments/${modelId}/chat/completions?api-version=2023-07-01-preview`;
       }
+
+      const url = `${openAIEndpoint}${resource}`;
 
       const res = await fetch(url, {
         headers: requestHeaders,
@@ -126,6 +145,7 @@ export const OpenAIStream = async (
       if (res.status !== 200) {
         const result = await res.json();
         if (result.error) {
+          console.error('OpenAIError for the endpoint:', openAIEndpoint);
           console.error(new OpenAIError(
             result.error.message,
             result.error.type,
@@ -163,6 +183,7 @@ export const OpenAIStream = async (
               try {
                 const json = JSON.parse(data);
                 const choice = json.choices[0];
+                if (choice == null) return;
 
                 if (choice.delta.function_call) {
                   if (choice.delta.function_call.name) {
@@ -170,18 +191,18 @@ export const OpenAIStream = async (
                   } else {
                     functionCallData = {
                       ...functionCallData,
-                      arguments: functionCallData.arguments + choice.delta.function_call.arguments,
+                      arguments: (functionCallData.arguments || '') + choice.delta.function_call.arguments,
                     };
                   }
                   return;
                 }
     
                 if (choice.finish_reason === 'function_call') {
-                  const queue = encoder.encode(JSON.stringify({
-                    function_call: functionCallData
-                  }));
-                  controller.enqueue(queue);
-                  controller.close();
+                  const jsonString = JSON.stringify({ function_call: functionCallData });
+                  const queue = encoder.encode(jsonString);
+
+                  buffer.push(queue);
+                  stop = true;
                   return;
                 }
     
@@ -248,11 +269,14 @@ export const truncateLogMessage = (message: string) =>
 // Returns a list of shuffled endpoints and keys. They should be used based
 // on their order in the list.
 const getRandomOpenAIEndpointsAndKeys = (
-  includeGPT4: boolean = false,
-  openAIPriority: boolean,
+  options: {
+    includeGPT4?: boolean,
+    includeFunctionCalling?: boolean,
+    prioritizeOpenAI?: boolean,
+  }
 ): [(string | undefined)[], (string | undefined)[]] => {
-  const endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
-  const keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
+  let endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
+  let keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
 
   for (let i = endpoints.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -264,7 +288,17 @@ const getRandomOpenAIEndpointsAndKeys = (
     keys[j] = tempKey;
   }
 
-  if (openAIPriority) {
+  if (options.includeFunctionCalling) {
+    // Remove the endpoints that we can't use for function calls
+    endpoints = endpoints.filter(
+      (endpoint) => endpoint === process.env.AZURE_OPENAI_ENDPOINT_2
+    );
+    keys = keys.filter(
+      (key) => key === process.env.AZURE_OPENAI_KEY_2
+    );
+  }
+
+  if (options.prioritizeOpenAI && !options.includeFunctionCalling) {
     // Prioritize OpenAI endpoint
     endpoints.splice(0, 0, OPENAI_API_HOST);
     keys.splice(0, 0, process.env.OPENAI_API_KEY);
@@ -273,7 +307,7 @@ const getRandomOpenAIEndpointsAndKeys = (
     keys.push(process.env.OPENAI_API_KEY);
   }
 
-  if (includeGPT4) {
+  if (options.includeGPT4) {
     endpoints.splice(0, 0, OPENAI_API_HOST);
     keys.splice(0, 0, process.env.OPENAI_API_GPT_4_KEY);
   }
