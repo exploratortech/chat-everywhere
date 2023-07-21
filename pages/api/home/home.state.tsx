@@ -64,6 +64,9 @@ export interface HomeInitialState {
   speechContent: string;
   isSpeechRecognitionActive: boolean;
   speechRecognitionLanguage: string;
+
+  // Assistant
+  showFilesModel: boolean;
 }
 
 export const initialState: HomeInitialState = {
@@ -123,4 +126,7 @@ export const initialState: HomeInitialState = {
   speechContent: '',
   isSpeechRecognitionActive: false,
   speechRecognitionLanguage: 'en-US',
+
+  // Assistant
+  showFilesModel: false,
 };

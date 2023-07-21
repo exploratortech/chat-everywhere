@@ -18,6 +18,7 @@ import { Prompts } from './components/Prompts';
 import Sidebar from '../Sidebar';
 import PromptbarContext from './PromptBar.context';
 import { PromptbarInitialState, initialState } from './Promptbar.state';
+import { PromptbarSettings } from './components/PromptbarSettings';
 
 import { updateConversationLastUpdatedAtTimeStamp, getNonDeletedCollection } from '@/utils/app/conversation';
 
@@ -178,6 +179,7 @@ const Promptbar = () => {
         handleCreateFolder={() => handleCreateFolder(t('New folder'), 'prompt')}
         handleDrop={handleDrop}
         showMobileButton={showMobileButtons}
+        footerComponent={<PromptbarSettings />}
       />
     </PromptbarContext.Provider>
   );
