@@ -55,10 +55,12 @@ export const OpenAIStream = async (
     const openAIEndpoint = openAIEndpoints[attempt];
     const openAIKey = openAIKeys[attempt];
 
+    console.log('attempting:', openAIEndpoint);
+
     try {
       if (!openAIEndpoint || !openAIKey) throw new Error('Missing endpoint/key');
 
-      let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_MODEL_NAME}/chat/completions?api-version=2023-05-15`;
+      let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_MODEL_NAME}/chat/completions?api-version=2023-06-01-preview`;
       if (openAIEndpoint.includes('openai.com')) {
         url = `${openAIEndpoint}/v1/chat/completions`;
       }
@@ -91,10 +93,14 @@ export const OpenAIStream = async (
         requestHeaders['api-key'] = openAIKey;
       }
 
+      const abortController = new AbortController();
+      const timeout = setTimeout(() => abortController.abort(), 10000);
+
       const res = await fetch(url, {
         headers: requestHeaders,
         method: 'POST',
         body: JSON.stringify(bodyToSend),
+        signal: abortController.signal,
       });
 
       const encoder = new TextEncoder();
@@ -121,6 +127,8 @@ export const OpenAIStream = async (
         attempt += 1;
         continue;
       }
+
+      clearTimeout(timeout);
 
       return new ReadableStream({
         async start(controller) {
@@ -183,6 +191,7 @@ export const OpenAIStream = async (
             for await (const chunk of res.body as any) {
               parser.feed(decoder.decode(chunk));
             }
+            stop = true;
           })();
         },
       });
