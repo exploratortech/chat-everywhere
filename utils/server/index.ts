@@ -55,6 +55,8 @@ export const OpenAIStream = async (
     const openAIEndpoint = openAIEndpoints[attempt];
     const openAIKey = openAIKeys[attempt];
 
+    console.log('attempting:', openAIEndpoint);
+
     try {
       if (!openAIEndpoint || !openAIKey) throw new Error('Missing endpoint/key');
 
