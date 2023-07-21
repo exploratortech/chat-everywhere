@@ -10,6 +10,7 @@ import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
+import { trackError } from '@/utils/app/azureTelemetry';
 
 export const config = {
   runtime: 'edge',
@@ -82,6 +83,8 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(stream);
   } catch (error) {
     console.error(error);
+    //Log error to Azure App Insights
+    trackError(error as string);
     if (error instanceof OpenAIError) {
       return new Response('Error', { status: 500, statusText: error.message });
     } else {

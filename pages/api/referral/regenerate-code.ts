@@ -1,3 +1,4 @@
+import { trackError } from '@/utils/app/azureTelemetry';
 import {
   getUserProfile,
   regenerateReferralCode,
@@ -25,6 +26,8 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(JSON.stringify({ code, expiresAt }), { status: 200 });
   } catch (error) {
     console.error(error);
+    //Log error to Azure App Insights
+    trackError(error as string);
     return new Response('Error', { status: 500 });
   }
 };

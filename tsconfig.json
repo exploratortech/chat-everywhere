@@ -31,7 +31,8 @@
     "notion-compat.d.ts",
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx", 
+    "utils/app/azureAppInsights.ts"  
   ],
   "exclude": [
     "node_modules",
