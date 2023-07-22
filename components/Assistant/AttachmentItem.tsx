@@ -2,7 +2,6 @@ import { IconCheck, IconDownload, IconFile, IconPencil, IconTrash, IconX } from 
 import { KeyboardEvent, MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
 
 import SidebarActionButton from "../Buttons/SidebarActionButton/SidebarActionButton";
-
 import AttachmentsModelContext from "./AttachmentsModel.context";
 import { Attachment } from "@/types/attachment";
 import prettyBytes from "pretty-bytes";
@@ -127,10 +126,10 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
       )}
 
       {!isDeleting && !isRenaming && (
-        <div className="absolute right-2 z-10 flex flex-row align-middle space-x-2 text-gray-300">
-          <div className="flex flex-row items-center mr-5 text-sm text-neutral-400">
+        <div className="absolute right-2 z-10 flex flex-row items-center space-x-2 text-gray-300">
+          <p className="text-sm text-neutral-400">
             {prettyBytes(attachment.size) || '--'}
-          </div>
+          </p>
           <SidebarActionButton handleClick={downloadFile}>
             <IconDownload size={18} />
           </SidebarActionButton>

@@ -13,6 +13,7 @@ export interface AttachmentsModelContextProps {
   closeModel: () => void;
   deleteAttachment: (attachmentName: string) => boolean;
   renameAttachment: (oldName: string, newName: string) => boolean;
+  uploadAttachments: (files: FileList | File[]) => Promise<boolean>;
 }
 
 const AttachmentsModelContext = createContext<AttachmentsModelContextProps>(undefined!);
