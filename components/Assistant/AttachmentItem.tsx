@@ -34,12 +34,9 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
 
   const handleConfirmButtonClick: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
-    if (isDeleting) {
-      deleteAttachment(attachment.name);
+    if (isDeleting && deleteAttachment(attachment.name)) {
       setIsDeleting(false);
-    } else if (isRenaming) {
-      renameAttachment(attachment.name, renameValue);
-      setRenameValue('');
+    } else if (isRenaming && renameAttachment(attachment.name, renameValue)) {
       setIsRenaming(false);
     }
   };
@@ -48,21 +45,21 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
     e.stopPropagation();
     setIsDeleting(false);
     setIsRenaming(false);
+    setRenameValue(attachment.name);
   };
 
   const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.code === 'Enter') {
-      renameAttachment(attachment.name, renameValue);
-      setRenameValue('');
+    e.stopPropagation();
+    if (e.code === 'Enter' && renameAttachment(attachment.name, renameValue)) {
       setIsRenaming(false);
     }
   };
 
   const handleButtonFocusKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     if (["Space", "Enter"].includes(e.code)) {
       downloadFile();
     }
-    e.stopPropagation();
   };
 
   const downloadFile = (): void => {
@@ -75,6 +72,10 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
       inputRef.current.setSelectionRange(0, filename?.length || 0);
     }
   }, [isRenaming, attachment.name]);
+
+  useEffect(() => {
+    setRenameValue(attachment.name);
+  }, [attachment.name]);
 
   return (
     <div className="relative flex items-center">

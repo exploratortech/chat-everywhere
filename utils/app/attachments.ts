@@ -4,7 +4,14 @@ const remove = (...attachmentNames: string[]): AttachmentCollection => {
   const data = localStorage.getItem('attachments');
   if (!data) return {};
 
-  const attachments: AttachmentCollection = JSON.parse(data);
+  let attachments!: AttachmentCollection;
+  
+  try {
+    attachments = JSON.parse(data);
+  } catch (error) {
+    throw new Error('Unable to remove file');
+  }
+  
   const updatedAttachments =  { ...attachments };
 
   for (const attachmentName of attachmentNames) {
@@ -21,10 +28,27 @@ const rename = (oldName: string, newName: string): AttachmentCollection => {
   const data = localStorage.getItem('attachments');
   if (!data) return {};
 
-  const attachments: AttachmentCollection = JSON.parse(data);
-  const updatedAttachments = { ...attachments };
+  let attachments!: AttachmentCollection;
+  
+  try {
+    attachments = JSON.parse(data);
+  } catch (error) {
+    throw new Error('Unable to rename file');
+  }
 
-  // TODO: Check for conflicting names
+  if (newName === oldName) {
+    return attachments;
+  }
+
+  if (newName.length === 0) {
+    throw new Error('Filename cannot be empty');
+  }
+
+  if (newName !== oldName && attachments[newName]) {
+    throw new Error('Another file with that name already exists');
+  }
+
+  const updatedAttachments = { ...attachments };
 
   updatedAttachments[newName] = {
     ...attachments[oldName],

@@ -11,8 +11,8 @@ export interface AttachmentsModelContextProps {
   state: AttachmentsModelState;
   dispatch: Dispatch<ActionType<AttachmentsModelState>>;
   closeModel: () => void;
-  deleteAttachment: (attachmentName: string) => void;
-  renameAttachment: (oldName: string, newName: string) => void;
+  deleteAttachment: (attachmentName: string) => boolean;
+  renameAttachment: (oldName: string, newName: string) => boolean;
 }
 
 const AttachmentsModelContext = createContext<AttachmentsModelContextProps>(undefined!);

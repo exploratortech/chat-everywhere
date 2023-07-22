@@ -28,13 +28,18 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
 
   const { t } = useTranslation('model');
 
-  const handleDeleteAttachment = useCallback((attachmentName: string): void => {
+  const handleDeleteAttachment = useCallback((attachmentName: string): boolean => {
     try {
       const updatedAttachments = Attachments.remove(attachmentName);
       dispatch({ field: 'attachments', value: updatedAttachments });
+      return true;
     } catch (error) {
       console.error(error);
-      toast.error("Unable to delete file");
+      if (error instanceof Error)
+        toast.error(error.message);
+      else
+        toast.error('Unable to remove file');
+      return false;
     }
   }, [dispatch]);
 
@@ -42,8 +47,14 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
     try {
       const updatedAttachments = Attachments.rename(oldName, newName);
       dispatch({ field: 'attachments', value: updatedAttachments });
+      return true;
     } catch (error) {
-      toast.error("Unable to rename file");
+      console.error(error);
+      if (error instanceof Error)
+        toast.error(error.message);
+      else
+        toast.error('Unable to rename file');
+      return false;
     }
   }, [dispatch]);
 
