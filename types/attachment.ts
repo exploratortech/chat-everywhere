@@ -2,6 +2,7 @@ export interface Attachment {
   name: string;
   content: string;
   size: number;
+  type: string;
   createdAt: string;
   updatedAt: string;
 }

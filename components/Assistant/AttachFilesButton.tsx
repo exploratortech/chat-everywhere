@@ -60,6 +60,7 @@ const AttachFilesButton = () => {
             name: file.name,
             content: reader.result as string,
             size: file.size,
+            type: file.type,
             createdAt: now,
             updatedAt: now,
           };
