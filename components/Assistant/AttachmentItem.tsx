@@ -63,7 +63,11 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
   };
 
   const downloadFile = (): void => {
-
+    const link = document.createElement('a');
+    const blob = new Blob([attachment.content], { type: attachment.type });
+    link.href = window.URL.createObjectURL(blob);
+    link.download = attachment.name;
+    link.click();
   };
 
   useEffect(() => {
@@ -97,6 +101,7 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
           className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90"
           onClick={(e) => {
             e.stopPropagation();
+            downloadFile();
           }}
           onKeyDown={handleButtonFocusKeyDown}
           tabIndex={0}
@@ -127,7 +132,7 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
 
       {!isDeleting && !isRenaming && (
         <div className="absolute right-2 z-10 flex flex-row space-x-2 text-gray-300">
-          <SidebarActionButton handleClick={() => null}>
+          <SidebarActionButton handleClick={downloadFile}>
             <IconDownload size={18} />
           </SidebarActionButton>
           <SidebarActionButton handleClick={handleRenameButtonClick}>
