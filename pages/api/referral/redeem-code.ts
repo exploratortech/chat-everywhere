@@ -1,4 +1,3 @@
-import { trackError } from '@/utils/app/azureTelemetry';
 import {
   getReferralCodeDetail,
   redeemReferralCode,
