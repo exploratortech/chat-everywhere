@@ -69,6 +69,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { appInsights, enableAzureTracking } from '@/utils/app/azureAppInsights';
 
+import { trackError } from '@/utils/app/azureTelemetry';
+
 const Home = () => {
   const defaultModelId = fallbackModelID;
   const { t } = useTranslation('chat');
@@ -454,6 +456,8 @@ const Home = () => {
           toast.error(
             t('Unable to load your information, please try again later.'),
           );
+          //Log error to Azure App Insights
+          trackError(error.message as string);
         });
 
       //Check if survey is filled by logged in user
@@ -606,6 +610,8 @@ const Home = () => {
             field: 'selectedConversation',
             value: newConversation,
           });
+          //Log error to Azure App Insights
+          trackError(error.message as string);
         })
         .finally(() => {
           dispatch({ field: 'loading', value: false });

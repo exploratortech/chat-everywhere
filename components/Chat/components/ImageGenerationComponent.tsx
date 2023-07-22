@@ -1,8 +1,10 @@
 import { IconCloudDownload } from '@tabler/icons-react';
-import { FC, useState } from 'react';
+import React, { FC, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 import Image from 'next/image';
+
+import { trackError } from '@/utils/app/azureTelemetry';
 
 import dayjs from 'dayjs';
 

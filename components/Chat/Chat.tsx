@@ -44,6 +44,8 @@ import { ErrorMessageDiv } from './ErrorMessageDiv';
 
 import dayjs from 'dayjs';
 
+import { trackError } from '@/utils/app/azureTelemetry';
+
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -197,6 +199,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               messages: [...selectedConversation.messages],
             },
           });
+          //Log error to Azure App Insights
+          trackError(response.statusText);
           return;
         }
         const data = response.body;
