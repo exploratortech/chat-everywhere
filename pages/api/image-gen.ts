@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { trackError } from '@/utils/app/azureTelemetry';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
@@ -167,7 +168,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       // Check every 3.5 seconds if the image generation is done
       let generationStartedAt = Date.now();
-      let imageGenerationProgress = null;
+      let imageGenerationProgress: null | number = null;
 
       const getTotalGenerationTime = () =>
         Math.round((Date.now() - generationStartedAt) / 1000);
@@ -175,7 +176,7 @@ const handler = async (req: Request): Promise<Response> => {
       while (
         !jobTerminated &&
         (Date.now() - generationStartedAt < IMAGE_GEN_MAX_TIMEOUT * 1000 ||
-          imageGenerationProgress < 100)
+          (imageGenerationProgress && imageGenerationProgress < 100))
       ) {
         await sleep(3500);
         const imageGenerationProgressResponse = await fetch(
@@ -287,11 +288,14 @@ const handler = async (req: Request): Promise<Response> => {
       jobTerminated = true;
 
       console.log(error);
+      //Log error to Azure App Insights
+      trackError(error as string);
       await progressHandler.updateProgress({
         content:
           'Error occurred while generating image, please try again later.',
         state: 'error',
       });
+
       await writeToStream('[DONE]');
       writer.close();
       return;
