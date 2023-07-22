@@ -5,6 +5,7 @@ import SidebarActionButton from "../Buttons/SidebarActionButton/SidebarActionBut
 
 import AttachmentsModelContext from "./AttachmentsModel.context";
 import { Attachment } from "@/types/attachment";
+import prettyBytes from "pretty-bytes";
 
 type Props = {
   attachment: Attachment;
@@ -87,7 +88,7 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
         <div className="flex w-full items-center gap-3 rounded-lg bg-[#343541]/90 p-3">
           <IconFile size={18} />
           <input
-            className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 text-white outline-none focus:border-neutral-100"
+            className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-sm text-white outline-none focus:border-neutral-100"
             type="text"
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
@@ -98,7 +99,7 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
         </div>
       ) : (
         <div
-          className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90"
+          className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 transition-colors duration-200 hover:bg-[#343541]/90"
           onClick={(e) => {
             e.stopPropagation();
             downloadFile();
@@ -107,12 +108,7 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
           tabIndex={0}
         >
           <IconFile size={18} />
-          <div
-            className={`
-              ${ isRenaming ? 'pr-12' : 'pr-4' }
-              relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px]`
-            }
-          >
+          <div className="relative max-h-5 flex-1 pr-4 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-sm">
             {attachment.name}
           </div>
         </div>
@@ -131,7 +127,10 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
       )}
 
       {!isDeleting && !isRenaming && (
-        <div className="absolute right-2 z-10 flex flex-row space-x-2 text-gray-300">
+        <div className="absolute right-2 z-10 flex flex-row align-middle space-x-2 text-gray-300">
+          <div className="flex flex-row items-center mr-5 text-sm text-neutral-400">
+            {prettyBytes(attachment.size) || '--'}
+          </div>
           <SidebarActionButton handleClick={downloadFile}>
             <IconDownload size={18} />
           </SidebarActionButton>
