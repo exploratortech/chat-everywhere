@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 
 import { AttachmentCollection } from "@/types/attachment";
+import dayjs from "dayjs";
 
 const AttachFilesButton = () => {
   const { t } = useTranslation('chat');
@@ -23,9 +24,10 @@ const AttachFilesButton = () => {
       createAttachments(files, (newAttachments: AttachmentCollection) => {
         const data = localStorage.getItem('attachments');
         let updatedData = '{}';
+
         if (data) {
           const existingAttachments = JSON.parse(data) as AttachmentCollection;
-          const updatedAttachments = {
+          const updatedAttachments: AttachmentCollection = {
             ...existingAttachments,
             ...newAttachments,
           };
@@ -33,6 +35,7 @@ const AttachFilesButton = () => {
         } else {
           updatedData = JSON.stringify(newAttachments);
         }
+
         localStorage.setItem('attachments', updatedData);
         toast.success(t('Files uploaded successfully'));
       });
@@ -51,11 +54,17 @@ const AttachFilesButton = () => {
 
       reader.onload = () => {
         if (reader.result != null) {
+          const now = dayjs().toISOString();
+
           attachments[file.name] = {
             name: file.name,
             content: reader.result as string,
+            size: file.size,
+            createdAt: now,
+            updatedAt: now,
           };
         }
+
         filesToRead -= 1;
         if (filesToRead <= 0) onDone(attachments);
       };

@@ -56,7 +56,7 @@ import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
 import ReferralModel from '@/components/User/ReferralModel';
 import SettingsModel from '@/components/User/Settings/SettingsModel';
-import { FilesModel } from '@/components/Assistant/FilesModel';
+import { AttachmentsModel } from '@/components/Assistant/AttachmentsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
@@ -91,7 +91,7 @@ const Home = () => {
       prompts,
       temperature,
       showSettingsModel,
-      showFilesModel,
+      showAttachmentsModel,
       showLoginSignUpModel,
       showReferralModel,
       showUsageModel,
@@ -692,10 +692,10 @@ const Home = () => {
                 }
               />
             )}
-            {showFilesModel && (
-              <FilesModel
+            {showAttachmentsModel && (
+              <AttachmentsModel
                 onClose={() =>
-                  dispatch({ field: 'showFilesModel', value: false })
+                  dispatch({ field: 'showAttachmentsModel', value: false })
                 }
               />
             )}
