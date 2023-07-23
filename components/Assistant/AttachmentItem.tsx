@@ -59,13 +59,6 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
     }
   };
 
-  const handleButtonFocusKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    if (["Space", "Enter"].includes(e.code)) {
-      downloadFile();
-    }
-  };
-
   const downloadFile = (): void => {
     const link = document.createElement('a');
     const blob = new Blob([attachment.content], { type: attachment.type });
@@ -89,14 +82,6 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
     <Menu
       as="div"
       className="relative block text-left"
-      onClick={(e) => {
-        e.stopPropagation();
-        if (!isDeleting && !isRenaming) {
-          downloadFile();
-        }
-      }}
-      onKeyDown={handleButtonFocusKeyDown}
-      tabIndex={0}
     >
       <div className="relative w-full h-full rounded-lg bg-transparent hover:bg-[#343541]/90 transition-colors duration-200" />
       <div className="relative -top-1/2 -translate-y-1/2 flex flex-row flex-grow flex-shrink items-center min-w-0 gap-3 p-3 pointer-events-none">
