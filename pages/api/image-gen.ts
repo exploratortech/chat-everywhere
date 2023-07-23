@@ -16,6 +16,7 @@ import {
 
 import { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
+import { trackError } from '@/utils/app/azureTelemetry';
 
 const supabase = getAdminSupabaseClient();
 
@@ -228,6 +229,8 @@ const handler = async (req: Request): Promise<Response> => {
       jobTerminated = true;
 
       console.log(error);
+      //Log error to Azure App Insights
+      trackError(error as string);
       await writeToStream(
         'Error occurred while generating image, please try again later.',
       );

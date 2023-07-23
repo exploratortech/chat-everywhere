@@ -1,4 +1,7 @@
+import { trackError } from '@/utils/app/azureTelemetry';
+
 import { PluginID } from '@/types/plugin';
+
 import {
   getReferralCodeDetail,
   redeemReferralCode,
@@ -62,6 +65,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
+    //Log error to Azure App Insights
+    trackError(error as string);
     return new Response('Invalid Code', { status: 500 });
   }
 };

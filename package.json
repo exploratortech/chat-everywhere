@@ -17,6 +17,8 @@
     "@ctrl/react-adsense": "^1.6.2",
     "@dqbd/tiktoken": "^1.0.2",
     "@headlessui/react": "^1.7.14",
+    "@microsoft/applicationinsights-react-js": "^3.4.3",
+    "@microsoft/applicationinsights-web": "^3.0.2",
     "@notionhq/client": "^1.0.4",
     "@sparticuz/chromium-min": "^112.0.2",
     "@supabase/auth-helpers-nextjs": "^0.6.1",

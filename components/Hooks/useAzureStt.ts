@@ -12,6 +12,8 @@ import {
   SpeechRecognizer,
 } from 'microsoft-cognitiveservices-speech-sdk';
 
+import { trackError } from '@/utils/app/azureTelemetry';
+
 export const useAzureStt = () => {
   const { t } = useTranslation('common');
 
@@ -54,6 +56,8 @@ export const useAzureStt = () => {
       setIsMicrophoneDisabled(true);
       dispatch({ field: 'isSpeechRecognitionActive', value: false });
       toast.error(t('Unable to access microphone'));
+      //Log error to Azure App Insights
+      trackError(error as string);
       return;
     }
 
@@ -72,6 +76,8 @@ export const useAzureStt = () => {
         ),
       );
       console.error(error);
+      //Log error to Azure App Insights
+      trackError(error as string);
     }
 
     const speechConfig = SpeechConfig.fromAuthorizationToken(
@@ -141,6 +147,8 @@ export const useAzureStt = () => {
           ),
         );
         console.error(error);
+        //Log error to Azure App Insights
+        trackError(error as string);
       },
     );
   };
@@ -156,6 +164,8 @@ export const useAzureStt = () => {
           ),
         );
         console.error(error);
+        //Log error to Azure App Insights
+        trackError(error as string);
       },
     );
   };

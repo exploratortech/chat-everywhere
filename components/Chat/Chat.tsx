@@ -41,6 +41,8 @@ import { ErrorMessageDiv } from './ErrorMessageDiv';
 import dayjs from 'dayjs';
 import { AVAILABLE_FUNCTIONS } from '@/utils/app/callableFunctions';
 
+import { trackError } from '@/utils/app/azureTelemetry';
+
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }

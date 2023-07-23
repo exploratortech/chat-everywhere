@@ -133,10 +133,14 @@ export const OpenAIStream = async (
 
       const url = `${openAIEndpoint}${resource}`;
 
+      const abortController = new AbortController();
+      const timeout = setTimeout(() => abortController.abort(), 10000);
+
       const res = await fetch(url, {
         headers: requestHeaders,
         method: 'POST',
         body: JSON.stringify(bodyToSend),
+        signal: abortController.signal,
       });
 
       const encoder = new TextEncoder();
@@ -164,6 +168,8 @@ export const OpenAIStream = async (
         attempt += 1;
         continue;
       }
+
+      clearTimeout(timeout);
 
       return new ReadableStream({
         async start(controller) {
@@ -250,6 +256,7 @@ export const OpenAIStream = async (
             for await (const chunk of res.body as any) {
               parser.feed(decoder.decode(chunk));
             }
+            stop = true;
           })();
         },
       });
