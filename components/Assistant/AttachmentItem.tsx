@@ -122,11 +122,11 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
 
         {!isDeleting && !isRenaming && (
           <div className="flex flex-row flex-shrink-0 items-center gap-2 text-gray-300">
-            <p className="block mobile:hidden mr-2 text-sm text-neutral-400 whitespace-nowrap">
+            <p className="block mobile:hidden text-sm text-neutral-400 whitespace-nowrap">
               {dayjs(attachment.updatedAt).fromNow()}
             </p>
             <p className="w-20 mr-2 text-sm text-right text-neutral-400 whitespace-nowrap">
-              {prettyBytes(attachment.size) || '--'}
+              {prettyBytes(attachment.size, { minimumFractionDigits: 0, maximumFractionDigits: 1 }) || '--'}
             </p>
             <div className="flex tablet:hidden flex-row items-center gap-2 pointer-events-auto">
               <SidebarActionButton handleClick={(e) => {
