@@ -17,5 +17,5 @@ export interface LocalStorage {
   showChatbar: boolean;
   showPromptbar: boolean;
   // added files (7/21/23)
-  attachment: AttachmentCollection;
+  attachments: AttachmentCollection;
 }
