@@ -85,72 +85,69 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
   return (
     <Menu
       as="div"
-      className="relative block text-left select-none"
+      className="relative flex flex-row flex-grow flex-shrink items-center min-w-0 gap-3 p-3 select-none"
     >
-      <div className="relative w-full h-full rounded-lg bg-transparent hover:bg-[#343541]/90 transition-colors duration-200" />
-      <div className="relative -top-1/2 -translate-y-1/2 flex flex-row flex-grow flex-shrink items-center min-w-0 gap-3 p-3 pointer-events-none">
-        <IconFile
-          className="flex-shrink-0"
-          size={18}
+      <IconFile
+        className="flex-shrink-0"
+        size={18}
+      />
+      {isRenaming ? (
+        <input
+          className="flex-1 min-w-0 border-neutral-400 bg-transparent text-left text-sm text-white outline-none focus:border-neutral-100 pointer-events-auto"
+          type="text"
+          value={renameValue}
+          onChange={(e) => setRenameValue(e.target.value)}
+          onKeyDown={handleInputKeyDown}
+          autoFocus
+          ref={inputRef}
         />
-        {isRenaming ? (
-          <input
-            className="flex-1 min-w-0 border-neutral-400 bg-transparent text-left text-sm text-white outline-none focus:border-neutral-100 pointer-events-auto"
-            type="text"
-            value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
-            onKeyDown={handleInputKeyDown}
-            autoFocus
-            ref={inputRef}
-          />
-        ) : (
-          <p className="flex-1 text-sm text-left text-ellipsis overflow-hidden">
-            {attachment.name}
-          </p>
-        )}
-        
-        {(isDeleting || isRenaming) && (
-          <div className="flex flex-row flex-shrink-0 items-center space-x-2 text-gray-300 pointer-events-auto">
-            <SidebarActionButton handleClick={handleConfirmButtonClick}>
-              <IconCheck size={18} />
-            </SidebarActionButton>
-            <SidebarActionButton handleClick={handleCancelButtonClick}>
-              <IconX size={18} />
-            </SidebarActionButton>
-          </div>
-        )}
+      ) : (
+        <p className="flex-1 text-sm text-left text-ellipsis overflow-hidden">
+          {attachment.name}
+        </p>
+      )}
+      
+      {(isDeleting || isRenaming) && (
+        <div className="flex flex-row flex-shrink-0 items-center space-x-2 text-gray-300 pointer-events-auto">
+          <SidebarActionButton handleClick={handleConfirmButtonClick}>
+            <IconCheck size={18} />
+          </SidebarActionButton>
+          <SidebarActionButton handleClick={handleCancelButtonClick}>
+            <IconX size={18} />
+          </SidebarActionButton>
+        </div>
+      )}
 
-        {!isDeleting && !isRenaming && (
-          <div className="flex flex-row flex-shrink-0 items-center gap-2 text-gray-300">
-            <p className="block mobile:hidden text-sm text-neutral-400 whitespace-nowrap">
-              {dayjs(attachment.updatedAt).fromNow()}
-            </p>
-            <p className="w-20 mr-2 text-sm text-right text-neutral-400 whitespace-nowrap">
-              {prettyBytes(attachment.size, { minimumFractionDigits: 0, maximumFractionDigits: 1 }) || '--'}
-            </p>
-            <div className="flex tablet:hidden flex-row items-center gap-2 pointer-events-auto">
-              <SidebarActionButton handleClick={(e) => {
-                e.stopPropagation();
-                downloadFile();
-              }}>
-                <IconDownload size={18} />
-              </SidebarActionButton>
-              <SidebarActionButton handleClick={handleRenameButtonClick}>
-                <IconPencil size={18} />
-              </SidebarActionButton>
-              <SidebarActionButton handleClick={handleDeleteButtonClick}>
-                <IconTrash size={18} />
-              </SidebarActionButton>
-            </div>
-            <Menu.Button
-              className="hidden tablet:block p-1 pointer-events-auto"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <IconDotsVertical size={18} />
-            </Menu.Button>
+      {!isDeleting && !isRenaming && (
+        <div className="flex flex-row flex-shrink-0 items-center gap-2 text-gray-300">
+          <p className="block mobile:hidden text-sm text-neutral-400 whitespace-nowrap">
+            {dayjs(attachment.updatedAt).fromNow()}
+          </p>
+          <p className="w-20 mr-2 text-sm text-right text-neutral-400 whitespace-nowrap">
+            {prettyBytes(attachment.size, { minimumFractionDigits: 0, maximumFractionDigits: 1 }) || '--'}
+          </p>
+          <div className="flex tablet:hidden flex-row items-center gap-2 pointer-events-auto">
+            <SidebarActionButton handleClick={(e) => {
+              e.stopPropagation();
+              downloadFile();
+            }}>
+              <IconDownload size={18} />
+            </SidebarActionButton>
+            <SidebarActionButton handleClick={handleRenameButtonClick}>
+              <IconPencil size={18} />
+            </SidebarActionButton>
+            <SidebarActionButton handleClick={handleDeleteButtonClick}>
+              <IconTrash size={18} />
+            </SidebarActionButton>
           </div>
-        )}
-      </div>
+          <Menu.Button
+            className="hidden tablet:block p-1 pointer-events-auto"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <IconDotsVertical size={18} />
+          </Menu.Button>
+        </div>
+      )}
       <Transition
         as={Fragment}
         enter="transition ease-out duration-100"

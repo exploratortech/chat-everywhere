@@ -83,26 +83,28 @@ export const AttachmentsList = (): JSX.Element => {
           <p className="w-20 text-right">{t('Size')}</p>
         </div>
       </div>
-      <div
-        className="relative flex flex-col flex-1 overflow-y-auto"
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
+      <div className="relative flex flex-col overflow-hidden">
         <div
-          className="absolute top-0 right-0 bottom-0 left-0 rounded-md border-2 bg-indigo-300/30 border-indigo-400 opacity-0 transition-opacity ease-out duration-200"
+          className="absolute left-0 w-full h-full rounded-md border-2 bg-indigo-300/30 border-indigo-400 opacity-0 transition-opacity ease-out duration-200"
           ref={dropAreaRef}
         />
-        {sortedAttachments.map((attachmentName) => {
-          const attachment = attachments[attachmentName];
-          return (
-            <AttachmentItem
-              attachment={attachment}
-              key={attachment.name}
-            />
-          );
-        })}
+        <div
+          className="flex-1 overflow-y-auto"
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
+          {sortedAttachments.map((attachmentName) => {
+            const attachment = attachments[attachmentName];
+            return (
+              <AttachmentItem
+                attachment={attachment}
+                key={attachment.name}
+              />
+            );
+          })}
+        </div>
       </div>
     </>
   );
