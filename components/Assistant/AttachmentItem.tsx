@@ -82,12 +82,25 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
   }, [attachment.name]);
 
   return (
-    <div className="relative flex items-center">
-      {isRenaming ? (
-        <div className="flex w-full items-center gap-3 rounded-lg bg-[#343541]/90 p-3">
-          <IconFile size={18} />
+    <div
+      className="relative flex flex-row justify-between items-center gap-3 p-3 cursor-pointer rounded-lg bg-transparent hover:bg-[#343541]/90 transition-colors duration-200"
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!isDeleting && !isRenaming) {
+          downloadFile();
+        }
+      }}
+      onKeyDown={handleButtonFocusKeyDown}
+      tabIndex={0}
+    >
+      <div className="flex flex-row flex-grow flex-shrink items-center min-w-0 gap-3">
+        <IconFile
+          className="flex-shrink-0"
+          size={18}
+        />
+        {isRenaming ? (
           <input
-            className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-sm text-white outline-none focus:border-neutral-100"
+            className="flex-1 flex-shrink min-w-0 border-neutral-400 bg-transparent text-left text-sm text-white outline-none focus:border-neutral-100"
             type="text"
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
@@ -95,26 +108,15 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
             autoFocus
             ref={inputRef}
           />
-        </div>
-      ) : (
-        <div
-          className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 transition-colors duration-200 hover:bg-[#343541]/90"
-          onClick={(e) => {
-            e.stopPropagation();
-            downloadFile();
-          }}
-          onKeyDown={handleButtonFocusKeyDown}
-          tabIndex={0}
-        >
-          <IconFile size={18} />
-          <div className="relative max-h-5 flex-1 pr-4 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-sm">
+        ) : (
+          <p className="text-sm text-left text-ellipsis overflow-hidden select-none">
             {attachment.name}
-          </div>
-        </div>
-      )}
+          </p>
+        )}
+      </div>
 
       {(isDeleting || isRenaming) && (
-        <div className="absolute right-2 z-10 flex flex-row space-x-2 text-gray-300">
+        <div className="flex flex-row flex-shrink-0 items-center space-x-2 text-gray-300">
           <SidebarActionButton handleClick={handleConfirmButtonClick}>
             <IconCheck size={18} />
           </SidebarActionButton>
@@ -126,19 +128,24 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
       )}
 
       {!isDeleting && !isRenaming && (
-        <div className="absolute right-2 z-10 flex flex-row items-center space-x-2 text-gray-300">
-          <p className="text-sm text-neutral-400">
+        <div className="flex flex-row flex-shrink-0 items-center gap-2 mr-2 text-gray-300">
+          <p className="mr-2 text-sm text-neutral-400 whitespace-nowrap">
             {prettyBytes(attachment.size) || '--'}
           </p>
-          <SidebarActionButton handleClick={downloadFile}>
-            <IconDownload size={18} />
-          </SidebarActionButton>
-          <SidebarActionButton handleClick={handleRenameButtonClick}>
-            <IconPencil size={18} />
-          </SidebarActionButton>
-          <SidebarActionButton handleClick={handleDeleteButtonClick}>
-            <IconTrash size={18} />
-          </SidebarActionButton>
+          <div className="flex flex-row items-center gap-2">
+            <SidebarActionButton handleClick={(e) => {
+              e.stopPropagation();
+              downloadFile();
+            }}>
+              <IconDownload size={18} />
+            </SidebarActionButton>
+            <SidebarActionButton handleClick={handleRenameButtonClick}>
+              <IconPencil size={18} />
+            </SidebarActionButton>
+            <SidebarActionButton handleClick={handleDeleteButtonClick}>
+              <IconTrash size={18} />
+            </SidebarActionButton>
+          </div>
         </div>
       )}
     </div>

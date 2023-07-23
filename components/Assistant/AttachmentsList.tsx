@@ -72,7 +72,7 @@ export const AttachmentsList = (): JSX.Element => {
 
   return (
     <div
-      className="relative flex-1 overflow-y-auto"
+      className="relative flex flex-col flex-1 overflow-y-auto"
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
