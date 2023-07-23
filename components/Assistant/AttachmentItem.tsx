@@ -27,6 +27,7 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
   const [renameValue, setRenameValue] = useState<string>(attachment.name);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const { t } = useTranslation('model');
 
@@ -142,7 +143,14 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
           </div>
           <Menu.Button
             className="hidden tablet:block p-1 pointer-events-auto"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) => {
+              event.stopPropagation();
+              setTimeout(() => {
+                if (menuRef.current) {
+                  menuRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }, 100);
+            }}
           >
             <IconDotsVertical size={18} />
           </Menu.Button>
@@ -161,27 +169,29 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
           className="absolute top-full right-0 w-56 p-2 rounded-md bg-[#202123] drop-shadow-xl focus:outline-none z-10"
           onClick={(event) => event.stopPropagation()}
         >
-          <MenuItemButton
-            onClick={(event) => {
-              event.stopPropagation();
-              downloadFile();
-            }}
-          >
-            <IconDownload size={18} />
-            {t('Download')}
-          </MenuItemButton>
-          <MenuItemButton
-            onClick={handleRenameButtonClick}
-          >
-            <IconPencil size={18} />
-            {t('Rename')}
-          </MenuItemButton>
-          <MenuItemButton
-            onClick={handleDeleteButtonClick}
-          >
-            <IconTrash size={18} />
-            {t('Delete')}
-          </MenuItemButton>
+          <div ref={menuRef}>
+            <MenuItemButton
+              onClick={(event) => {
+                event.stopPropagation();
+                downloadFile();
+              }}
+            >
+              <IconDownload size={18} />
+              {t('Download')}
+            </MenuItemButton>
+            <MenuItemButton
+              onClick={handleRenameButtonClick}
+            >
+              <IconPencil size={18} />
+              {t('Rename')}
+            </MenuItemButton>
+            <MenuItemButton
+              onClick={handleDeleteButtonClick}
+            >
+              <IconTrash size={18} />
+              {t('Delete')}
+            </MenuItemButton>
+          </div>
         </Menu.Items>
       </Transition>
     </Menu>
