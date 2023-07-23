@@ -1,16 +1,18 @@
-import { IconCheck, IconDownload, IconFile, IconPencil, IconTrash, IconX } from "@tabler/icons-react";
-import { KeyboardEvent, MouseEventHandler, useContext, useEffect, useRef, useState } from "react";
+import { IconCheck, IconDotsVertical, IconDownload, IconFile, IconPencil, IconTrash, IconX } from "@tabler/icons-react";
+import { Fragment, KeyboardEvent, MouseEvent, MouseEventHandler, PropsWithChildren, useContext, useEffect, useRef, useState } from "react";
+import { Menu, Transition } from "@headlessui/react";
 
 import SidebarActionButton from "../Buttons/SidebarActionButton/SidebarActionButton";
 import AttachmentsModelContext from "./AttachmentsModel.context";
 import { Attachment } from "@/types/attachment";
 import prettyBytes from "pretty-bytes";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   attachment: Attachment;
 }
 
-export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
+export function AttachmentItem({ attachment }: Props): JSX.Element {
   const {
     deleteAttachment,
     renameAttachment,
@@ -21,6 +23,8 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
   const [renameValue, setRenameValue] = useState<string>(attachment.name);
 
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { t } = useTranslation('model');
 
   const handleDeleteButtonClick: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
@@ -82,8 +86,9 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
   }, [attachment.name]);
 
   return (
-    <div
-      className="relative flex flex-row justify-between items-center gap-3 p-3 cursor-pointer rounded-lg bg-transparent hover:bg-[#343541]/90 transition-colors duration-200"
+    <Menu
+      as="div"
+      className="relative block text-left"
       onClick={(e) => {
         e.stopPropagation();
         if (!isDeleting && !isRenaming) {
@@ -93,14 +98,15 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
       onKeyDown={handleButtonFocusKeyDown}
       tabIndex={0}
     >
-      <div className="flex flex-row flex-grow flex-shrink items-center min-w-0 gap-3">
+      <div className="relative w-full h-full rounded-lg bg-transparent hover:bg-[#343541]/90 transition-colors duration-200" />
+      <div className="relative -top-1/2 -translate-y-1/2 flex flex-row flex-grow flex-shrink items-center min-w-0 gap-3 p-3 pointer-events-none">
         <IconFile
           className="flex-shrink-0"
           size={18}
         />
         {isRenaming ? (
           <input
-            className="flex-1 flex-shrink min-w-0 border-neutral-400 bg-transparent text-left text-sm text-white outline-none focus:border-neutral-100"
+            className="flex-1 min-w-0 border-neutral-400 bg-transparent text-left text-sm text-white outline-none focus:border-neutral-100 pointer-events-auto"
             type="text"
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
@@ -109,45 +115,110 @@ export const AttachmentItem = ({ attachment }: Props): JSX.Element => {
             ref={inputRef}
           />
         ) : (
-          <p className="text-sm text-left text-ellipsis overflow-hidden select-none">
+          <p className="flex-1 text-sm text-left text-ellipsis overflow-hidden select-none">
             {attachment.name}
           </p>
         )}
-      </div>
-
-      {(isDeleting || isRenaming) && (
-        <div className="flex flex-row flex-shrink-0 items-center space-x-2 text-gray-300">
-          <SidebarActionButton handleClick={handleConfirmButtonClick}>
-            <IconCheck size={18} />
-          </SidebarActionButton>
-
-          <SidebarActionButton handleClick={handleCancelButtonClick}>
-            <IconX size={18} />
-          </SidebarActionButton>
-        </div>
-      )}
-
-      {!isDeleting && !isRenaming && (
-        <div className="flex flex-row flex-shrink-0 items-center gap-2 mr-2 text-gray-300">
-          <p className="mr-2 text-sm text-neutral-400 whitespace-nowrap">
-            {prettyBytes(attachment.size) || '--'}
-          </p>
-          <div className="flex flex-row items-center gap-2">
-            <SidebarActionButton handleClick={(e) => {
-              e.stopPropagation();
-              downloadFile();
-            }}>
-              <IconDownload size={18} />
+        
+        {(isDeleting || isRenaming) && (
+          <div className="flex flex-row flex-shrink-0 items-center space-x-2 text-gray-300 pointer-events-auto">
+            <SidebarActionButton handleClick={handleConfirmButtonClick}>
+              <IconCheck size={18} />
             </SidebarActionButton>
-            <SidebarActionButton handleClick={handleRenameButtonClick}>
-              <IconPencil size={18} />
-            </SidebarActionButton>
-            <SidebarActionButton handleClick={handleDeleteButtonClick}>
-              <IconTrash size={18} />
+            <SidebarActionButton handleClick={handleCancelButtonClick}>
+              <IconX size={18} />
             </SidebarActionButton>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        {!isDeleting && !isRenaming && (
+          <div className="flex flex-row flex-shrink-0 items-center gap-2 text-gray-300">
+            <p className="mr-2 text-sm text-neutral-400 whitespace-nowrap">
+              {prettyBytes(attachment.size) || '--'}
+            </p>
+            <div className="flex tablet:hidden flex-row items-center gap-2 pointer-events-auto">
+              <SidebarActionButton handleClick={(e) => {
+                e.stopPropagation();
+                downloadFile();
+              }}>
+                <IconDownload size={18} />
+              </SidebarActionButton>
+              <SidebarActionButton handleClick={handleRenameButtonClick}>
+                <IconPencil size={18} />
+              </SidebarActionButton>
+              <SidebarActionButton handleClick={handleDeleteButtonClick}>
+                <IconTrash size={18} />
+              </SidebarActionButton>
+            </div>
+            <Menu.Button
+              className="hidden tablet:block p-1 pointer-events-auto"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <IconDotsVertical size={18} />
+            </Menu.Button>
+          </div>
+        )}
+      </div>
+      <Transition
+        as={Fragment}
+        enter="transition ease-out duration-100"
+        enterFrom="transform opacity-0 scale-95"
+        enterTo="transform opacity-100 scale-100"
+        leave="transition ease-in duration-75"
+        leaveFrom="transform opacity-100 scale-100"
+        leaveTo="transform opacity-0 scale-95"
+      >
+        <Menu.Items
+          className="absolute top-full right-0 w-56 p-2 rounded-md bg-[#202123] drop-shadow-xl focus:outline-none z-10"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <MenuItemButton
+            onClick={(event) => {
+              event.stopPropagation();
+              downloadFile();
+            }}
+          >
+            <IconDownload size={18} />
+            {t('Download')}
+          </MenuItemButton>
+          <MenuItemButton
+            onClick={handleRenameButtonClick}
+          >
+            <IconPencil size={18} />
+            {t('Rename')}
+          </MenuItemButton>
+          <MenuItemButton
+            onClick={handleDeleteButtonClick}
+          >
+            <IconTrash size={18} />
+            {t('Delete')}
+          </MenuItemButton>
+        </Menu.Items>
+      </Transition>
+    </Menu>
   );
+}
+
+type MenuItemButtonProps = {
+  onClick: (event: MouseEvent<HTMLButtonElement>) => void;
+} & PropsWithChildren;
+
+function MenuItemButton({ children, onClick }: MenuItemButtonProps): JSX.Element {
+  return (
+    <Menu.Item>
+      {({ active }) => (
+        <button
+          className={`
+            ${ active ? 'bg-[#343541]/90 text-white' : 'text-gray-300' }
+            flex w-full items-center rounded-md p-2 text-sm `
+          }
+          onClick={onClick}
+        >
+          <div className="flex flex-row items-center gap-2">
+            {children}
+          </div>
+        </button>
+      )}
+    </Menu.Item>
+  )
 }
