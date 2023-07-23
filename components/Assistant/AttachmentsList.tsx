@@ -1,4 +1,6 @@
 import { useContext, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
+
 import FilesModelContext from "./AttachmentsModel.context";
 import { AttachmentItem } from "./AttachmentItem";
 
@@ -10,6 +12,8 @@ export const AttachmentsList = (): JSX.Element => {
 
   const enterTarget = useRef<HTMLElement | null>(null);
   const dropAreaRef = useRef<HTMLDivElement>(null);
+
+  const { t } = useTranslation('models');
 
   const sortedAttachments = useMemo((): string[] => {
     return Object.keys(attachments).sort(
@@ -71,26 +75,35 @@ export const AttachmentsList = (): JSX.Element => {
   };
 
   return (
-    <div
-      className="relative flex flex-col flex-1 overflow-y-auto"
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-    >
+    <>
+      <div className="flex flex-row justify-between text-sm text-neutral-400 py-2 pl-10 pr-[120px] tablet:pr-[54px]">
+        <p>{t('Name')}</p>
+        <div className="flex flex-row gap-2">
+          <p className="block mobile:hidden">{t('Updated At')}</p>
+          <p className="w-20 text-right">{t('Size')}</p>
+        </div>
+      </div>
       <div
-        className="absolute top-0 right-0 bottom-0 left-0 rounded-md border-2 bg-indigo-300/30 border-indigo-400 opacity-0 transition-opacity ease-out duration-200"
-        ref={dropAreaRef}
-      />
-      {sortedAttachments.map((attachmentName) => {
-        const attachment = attachments[attachmentName];
-        return (
-          <AttachmentItem
-            attachment={attachment}
-            key={attachment.name}
-          />
-        );
-      })}
-    </div>
+        className="relative flex flex-col flex-1 overflow-y-auto"
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+      >
+        <div
+          className="absolute top-0 right-0 bottom-0 left-0 rounded-md border-2 bg-indigo-300/30 border-indigo-400 opacity-0 transition-opacity ease-out duration-200"
+          ref={dropAreaRef}
+        />
+        {sortedAttachments.map((attachmentName) => {
+          const attachment = attachments[attachmentName];
+          return (
+            <AttachmentItem
+              attachment={attachment}
+              key={attachment.name}
+            />
+          );
+        })}
+      </div>
+    </>
   );
 };
