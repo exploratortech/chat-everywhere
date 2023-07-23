@@ -77,6 +77,7 @@ export const OpenAIStream = async (
   while (attempt < openAIEndpoints.length) {
     const openAIEndpoint = openAIEndpoints[attempt];
     const openAIKey = openAIKeys[attempt];
+    console.log('attempting', openAIEndpoint);
 
     try {
       if (!openAIEndpoint || !openAIKey) throw new Error('Missing endpoint/key');
@@ -181,6 +182,7 @@ export const OpenAIStream = async (
           const onParse = (event: ParsedEvent | ReconnectInterval) => {
             if (event.type === 'event') {
               const data = event.data;
+              console.log(data);
 
               if (data === '[DONE]') {
                 return;

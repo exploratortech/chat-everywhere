@@ -1,10 +1,10 @@
 import { getTimeStamp } from '@/types/misc';
-import { deleteFiles, listFiles, readFromFile, writeToFile } from './file';
+import { Attachments } from "@/utils/app/attachments";
 
 export const CALLABLE_FUNCTIONS = [
   {
     name: 'readFromFile',
-    description: 'Read the content of a given file.',
+    description: 'Read the contents of a given file.',
     parameters: {
       type: 'object',
       properties: {
@@ -18,7 +18,7 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'writeToFile',
-    description: 'Write to a specified file.',
+    description: 'Create a new file or write to a specified file.',
     parameters: {
       type: 'object',
       properties: {
@@ -66,6 +66,58 @@ export const CALLABLE_FUNCTIONS = [
     },
   }
 ];
+
+const readFromFile = (filename: string): string => {
+  try {
+    const content = Attachments.read(filename);
+    return content;
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      return `readFromFile:error:${error.message}`;
+    }
+    return `readFromFile:error:Unable to read file`;
+  }
+};
+
+const writeToFile = (filename: string, content: string): string => {
+  try {
+    Attachments.write(filename, content);
+    return content;
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      return `writeToFile:error:${error.message}`;
+    }
+    return `writeToFile:error:Unable to write to file`;
+  }
+};
+
+const deleteFiles = (filenames: string[]): string => {
+  try {
+    Attachments.remove(...filenames);
+    return '';
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      return `deleteFiles:error:${error.message}`;
+    }
+    return `deleteFiles:error:Unable to delete files`;
+  }
+};
+
+const listFiles = (): string => {
+  try {
+    const filenames = Attachments.list();
+    return JSON.stringify(filenames);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      return `listFiles:error:${error.message}`;
+    }
+    return `listFiles:error:Unable to retrieve files`;
+  }
+};
 
 export const AVAILABLE_FUNCTIONS: { [functionName: string]: Function} = {
   'readFromFile': readFromFile,

@@ -2,6 +2,21 @@ import dayjs from "dayjs";
 
 import { AttachmentCollection } from "@/types/attachment";
 
+const list = (): string[] => {
+  const data = localStorage.getItem('attachments');
+  if (!data) return [];
+
+  let attachments!: AttachmentCollection;
+  try {
+    attachments = JSON.parse(data) as AttachmentCollection;
+  } catch (error) {
+    throw new Error('Unable to retrieve files');
+  }
+
+  const filenames = Object.keys(attachments);
+  return filenames.sort((a, b) => a.toUpperCase() < b.toUpperCase() ? -1 : 1);
+};
+
 const openUploadWindow = async (): Promise<FileList> => {
   return new Promise((resolve) => {
     const input = document.createElement('input');
@@ -18,6 +33,23 @@ const openUploadWindow = async (): Promise<FileList> => {
     };
     input.click();
   })
+};
+
+const read = (attachmentName: string): string => {
+  const data = localStorage.getItem('attachments');
+  if (!data) throw new Error('Couldn\'t find file');
+  
+  let attachments!: AttachmentCollection;
+  try {
+    attachments = JSON.parse(data);
+  } catch (error) {
+    throw new Error('Unable to retrieve file');
+  }
+
+  const attachment = attachments[attachmentName];
+  if (!attachment) throw new Error('Couldn\'t find file');
+
+  return attachment.content;
 };
 
 const remove = (...attachmentNames: string[]): AttachmentCollection => {
@@ -106,6 +138,39 @@ const upload = async (files: FileList | File[]): Promise<AttachmentCollection> =
   return updatedAttachments;
 };
 
+const write = (attachmentName: string, content: string): string => {
+  const data = localStorage.getItem('attachments') || '{}';
+
+  let existingAttachments!: AttachmentCollection;
+  try {
+    existingAttachments = JSON.parse(data) as AttachmentCollection;
+  } catch (error) {
+    existingAttachments = {};
+  }
+  
+  const blob = new Blob([content]);
+  const now = dayjs().toISOString();
+
+  const updatedAttachments: AttachmentCollection = {
+    ...existingAttachments,
+    [attachmentName]: {
+      name: attachmentName,
+      content,
+      size: blob.size,
+      type: blob.type,
+      createdAt: existingAttachments[attachmentName]
+        ? existingAttachments[attachmentName].createdAt
+        : now,
+      updatedAt: now,
+    },
+  };
+
+  const jsonString = JSON.stringify(updatedAttachments);
+  localStorage.setItem('attachments', jsonString);
+
+  return content;
+};
+
 const createAttachment = async (files: FileList | File[]): Promise<AttachmentCollection> => {
   return new Promise<AttachmentCollection>((resolve) => {
     const attachments: AttachmentCollection = {};
@@ -143,8 +208,11 @@ const createAttachment = async (files: FileList | File[]): Promise<AttachmentCol
 };
 
 export const Attachments = {
+  list,
   openUploadWindow,
+  read,
   remove,
   rename,
   upload,
+  write,
 };
