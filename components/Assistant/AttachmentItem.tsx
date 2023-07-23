@@ -1,12 +1,16 @@
 import { IconCheck, IconDotsVertical, IconDownload, IconFile, IconPencil, IconTrash, IconX } from "@tabler/icons-react";
 import { Fragment, KeyboardEvent, MouseEvent, MouseEventHandler, PropsWithChildren, useContext, useEffect, useRef, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
+import prettyBytes from "pretty-bytes";
+import { useTranslation } from "react-i18next";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import SidebarActionButton from "../Buttons/SidebarActionButton/SidebarActionButton";
 import AttachmentsModelContext from "./AttachmentsModel.context";
 import { Attachment } from "@/types/attachment";
-import prettyBytes from "pretty-bytes";
-import { useTranslation } from "react-i18next";
+
+dayjs.extend(relativeTime);
 
 type Props = {
   attachment: Attachment;
@@ -81,7 +85,7 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
   return (
     <Menu
       as="div"
-      className="relative block text-left"
+      className="relative block text-left select-none"
     >
       <div className="relative w-full h-full rounded-lg bg-transparent hover:bg-[#343541]/90 transition-colors duration-200" />
       <div className="relative -top-1/2 -translate-y-1/2 flex flex-row flex-grow flex-shrink items-center min-w-0 gap-3 p-3 pointer-events-none">
@@ -100,7 +104,7 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
             ref={inputRef}
           />
         ) : (
-          <p className="flex-1 text-sm text-left text-ellipsis overflow-hidden select-none">
+          <p className="flex-1 text-sm text-left text-ellipsis overflow-hidden">
             {attachment.name}
           </p>
         )}
@@ -118,7 +122,10 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
 
         {!isDeleting && !isRenaming && (
           <div className="flex flex-row flex-shrink-0 items-center gap-2 text-gray-300">
-            <p className="mr-2 text-sm text-neutral-400 whitespace-nowrap">
+            <p className="block mobile:hidden mr-2 text-sm text-neutral-400 whitespace-nowrap">
+              {dayjs(attachment.updatedAt).fromNow()}
+            </p>
+            <p className="w-20 mr-2 text-sm text-right text-neutral-400 whitespace-nowrap">
               {prettyBytes(attachment.size) || '--'}
             </p>
             <div className="flex tablet:hidden flex-row items-center gap-2 pointer-events-auto">
