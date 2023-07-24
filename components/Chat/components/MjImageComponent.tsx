@@ -3,6 +3,8 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
+import useMediaQuery from '@/hooks/useMediaQuery';
+
 import {
   saveConversation,
   saveConversations,
@@ -224,6 +226,7 @@ export default function MjImageComponent({
       setShowButtons(false);
     }, 300);
   };
+  const isMobileLayout = useMediaQuery('(max-width: 640px)');
 
   return (
     <div
@@ -293,7 +296,7 @@ export default function MjImageComponent({
           } absolute top-0 right-0 p-1 cursor-pointer`}
           onClick={helpButtonOnClick}
         >
-          <IconHelp size={16} />
+          <IconHelp size={isMobileLayout ? 16 : undefined} />
         </button>
       </div>
     </div>
