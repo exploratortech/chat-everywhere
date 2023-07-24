@@ -11,6 +11,8 @@ import HomeContext from '@/pages/api/home/home.context';
 
 import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
+import { trackError } from '@/utils/app/azureTelemetry';
+
 type Props = {
   onClose: () => void;
 };
@@ -164,6 +166,8 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
       });
       if (error) {
         toast.error(t('Something went wrong. Please try again.'));
+        //Log error to Azure App Insights
+        trackError(error.message as string);
         return;
       }
       toast.success(t('Thanks for completing the survey!'), {

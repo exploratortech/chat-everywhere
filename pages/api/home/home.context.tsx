@@ -1,13 +1,13 @@
-import { Dispatch, createContext } from 'react';
+import { Dispatch, MutableRefObject, createContext } from 'react';
 
 import { ActionType } from '@/hooks/useCreateReducer';
 
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
+import { DragData } from '@/types/drag';
 import { FolderType } from '@/types/folder';
 
 import { HomeInitialState } from './home.state';
-import { DragData } from '@/types/drag';
 
 export interface HomeContextProps {
   state: HomeInitialState;
@@ -28,6 +28,7 @@ export interface HomeContextProps {
   togglePromptbar: () => void;
   setDragData: (dragData: DragData) => void;
   removeDragData: () => void;
+  stopConversationRef: MutableRefObject<boolean>;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

@@ -14,6 +14,7 @@ import { Serialized } from 'langchain/dist/load/serializable';
 import { BingSerpAPI, DynamicTool,} from 'langchain/tools';
 import { all, create } from 'mathjs';
 import { BaseChatMessage, LLMResult } from 'langchain/dist/schema';
+import { trackError } from '@/utils/app/azureTelemetry';
 
 export const config = {
   runtime: 'edge',
@@ -30,6 +31,8 @@ const calculator = new DynamicTool({
       const value = math.evaluate(input);
       return value.toString();
     } catch (e) {
+      //Log error to Azure App Insights
+      trackError(e as string);
       return 'Unable to evaluate expression, please make sure it is a valid mathematical expression with no unit';
     }
   },
@@ -224,6 +227,8 @@ const handler = async (req: NextRequest, res: any) => {
     console.log('Request closed');
     console.error(e);
     console.log(typeof e);
+    //Log error to Azure App Insights
+    trackError(e as string);
   }
 };
 

@@ -10,6 +10,7 @@ import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
+import { trackError } from '@/utils/app/azureTelemetry';
 
 export const config = {
   runtime: 'edge',
@@ -41,9 +42,9 @@ const handler = async (req: Request): Promise<Response> => {
     const requireToUseLargerContextWindowModel =
       (await getMessagesTokenCount(messages)) + 1000 > defaultTokenLimit; // Add buffer token to take system prompt into account
 
+    const isPaidUser = await isPaidUserByAuthToken(req.headers.get('user-token'));
     const useLargerContextWindowModel =
-      requireToUseLargerContextWindowModel &&
-      (await isPaidUserByAuthToken(req.headers.get('user-token')));
+      requireToUseLargerContextWindowModel && isPaidUser;
 
     const messagesToSend = await shortenMessagesBaseOnTokenLimit(
       prompt,
@@ -75,12 +76,15 @@ const handler = async (req: Request): Promise<Response> => {
       promptToSend,
       temperatureToUse,
       messagesToSend,
-      messageToStreamBack
+      messageToStreamBack,
+      isPaidUser,
     );
 
     return new Response(stream);
   } catch (error) {
     console.error(error);
+    //Log error to Azure App Insights
+    trackError(error as string);
     if (error instanceof OpenAIError) {
       return new Response('Error', { status: 500, statusText: error.message });
     } else {

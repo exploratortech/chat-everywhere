@@ -1,9 +1,17 @@
 import { NextResponse } from 'next/server';
 
+import { trackError } from '@/utils/app/azureTelemetry';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
+  IMAGE_GEN_MAX_TIMEOUT,
 } from '@/utils/app/const';
+import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
+import {
+  ProgressHandler,
+  makeCreateImageSelector,
+  makeWriteToStream,
+} from '@/utils/app/streamHandler';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
 import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
 import {
@@ -26,8 +34,6 @@ export const config = {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
-
-const MAX_TIMEOUT = 600; // 10 minutes
 
 const generateMjPrompt = (
   userInputText: string,
@@ -88,21 +94,19 @@ const handler = async (req: Request): Promise<Response> => {
 
   let jobTerminated = false;
 
-  const writeToStream = async (text: string, removeLastLine?: boolean) => {
-    if (removeLastLine) {
-      await writer.write(encoder.encode('[REMOVE_LAST_LINE]'));
-    }
-    await writer.write(encoder.encode(text));
-  };
+  const writeToStream = makeWriteToStream(writer, encoder);
+  const createImageSelector = makeCreateImageSelector(writeToStream);
+  const progressHandler = new ProgressHandler(writeToStream);
 
   const requestBody = (await req.json()) as ChatBody;
 
-  // Do not modity this line, it is used by front-end to detect if the message is for image generation
-  writeToStream('```MJImage \n');
-  writeToStream('Initializing ... \n');
-  writeToStream(
-    'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
-  );
+  progressHandler.updateProgress({
+    content: 'Initializing ... \n',
+  });
+  progressHandler.updateProgress({
+    content:
+      'This feature is still in Beta, please expect some non-ideal images and report any issue to admin. Thanks. \n',
+  });
 
   const latestUserPromptMessage =
     requestBody.messages[requestBody.messages.length - 1].content;
@@ -115,7 +119,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     try {
       // Translate and enhance the prompt
-      writeToStream(`Enhancing and translating user input prompt ... \n`);
+      progressHandler.updateProgress({
+        content: `Enhancing and translating user input prompt ... \n`,
+      });
       generationPrompt = await translateAndEnhancePrompt(
         latestUserPromptMessage,
       );
@@ -127,7 +133,10 @@ const handler = async (req: Request): Promise<Response> => {
         requestBody.temperature,
       );
 
-      writeToStream(`Prompt: ${generationPrompt} \n`, true);
+      progressHandler.updateProgress({
+        content: `Prompt: ${generationPrompt} \n`,
+        removeLastLine: true,
+      });
       const imageGenerationResponse = await fetch(
         `https://api.thenextleg.io/v2/imagine`,
         {
@@ -144,6 +153,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       const imageGenerationResponseJson = await imageGenerationResponse.json();
+      console.log({ imageGenerationResponseJson });
 
       if (
         imageGenerationResponseJson.success !== true ||
@@ -158,15 +168,15 @@ const handler = async (req: Request): Promise<Response> => {
 
       // Check every 3.5 seconds if the image generation is done
       let generationStartedAt = Date.now();
-      let imageGenerationProgress = null;
+      let imageGenerationProgress: null | number = null;
 
       const getTotalGenerationTime = () =>
         Math.round((Date.now() - generationStartedAt) / 1000);
 
       while (
         !jobTerminated &&
-        (Date.now() - generationStartedAt < MAX_TIMEOUT * 1000 ||
-          imageGenerationProgress < 100)
+        (Date.now() - generationStartedAt < IMAGE_GEN_MAX_TIMEOUT * 1000 ||
+          (imageGenerationProgress && imageGenerationProgress < 100))
       ) {
         await sleep(3500);
         const imageGenerationProgressResponse = await fetch(
@@ -185,34 +195,85 @@ const handler = async (req: Request): Promise<Response> => {
 
         const generationProgress = imageGenerationProgressResponseJson.progress;
 
+        console.log({ imageGenerationProgressResponseJson });
         if (generationProgress === 100) {
-          writeToStream(`Completed in ${getTotalGenerationTime()}s \n`);
-          writeToStream('``` \n');
+          const buttonMessageId =
+            imageGenerationProgressResponseJson.response.buttonMessageId;
+          progressHandler.updateProgress({
+            content: `Completed in ${getTotalGenerationTime()}s \n`,
+            state: 'completed',
+          });
 
-          const imageAlt = latestUserPromptMessage.replace(/\s+/g, '-').slice(0, 20);
-          writeToStream(
-            `![${imageAlt}](${imageGenerationProgressResponseJson.response.imageUrl} "${imageGenerationProgressResponseJson.response.buttonMessageId}") \n`,
-          );
-          await addUsageEntry(PluginID.IMAGE_GEN, user.id);
-          await subtractCredit(user.id, PluginID.IMAGE_GEN);
+          const imageUrl =
+            imageGenerationProgressResponseJson.response.imageUrl;
+          const imageUrlList =
+            imageGenerationProgressResponseJson.response.imageUrls;
+          const imageAlt = latestUserPromptMessage
+            .replace(/\s+/g, '-')
+            .slice(0, 20);
 
-          imageGenerationProgress = 100;
+          if (!imageUrl || !imageUrlList.length) {
+            // run when image url is available
+            const mjResponseContent =
+              imageGenerationProgressResponseJson.response.content;
+            const isInvalidUserAction =
+              mjResponseContent &&
+              MJ_INVALID_USER_ACTION_LIST.includes(mjResponseContent);
+            if (isInvalidUserAction) {
+              progressHandler.updateProgress({
+                content: `Error: ${mjResponseContent} \n`,
+                state: 'error',
+              });
 
-          await writeToStream('[DONE]');
-          writer.close();
-          return;
+              writer.close();
+              return;
+            }
+            throw new Error(
+              `Internal error during image generation process {${
+                mjResponseContent || 'No response content'
+              }}`,
+            );
+          } else {
+            // run when image url is available
+            await createImageSelector({
+              previousButtonCommand: '',
+              buttonMessageId,
+              imageList: imageUrlList.map(
+                (imageUrl: string, index: number) => ({
+                  imageUrl: imageUrl,
+                  imageAlt: imageAlt,
+                  buttons: [`U${index + 1}`, `V${index + 1}`],
+                }),
+              ),
+              prompt: generationPrompt,
+            });
+            await addUsageEntry(PluginID.IMAGE_GEN, user.id);
+            await subtractCredit(user.id, PluginID.IMAGE_GEN);
+
+            imageGenerationProgress = 100;
+
+            await writeToStream('[DONE]');
+            writer.close();
+            return;
+          }
         } else {
           if (imageGenerationProgress === null) {
-            writeToStream(`Start to generate \n`);
+            progressHandler.updateProgress({
+              content: `Start to generate \n`,
+            });
           } else {
-            writeToStream(
-              `${
+            progressHandler.updateProgress({
+              content: `${
                 generationProgress === 0
                   ? 'Waiting to be processed'
                   : `${generationProgress}% complete`
               } ... ${getTotalGenerationTime()}s \n`,
-              true,
-            );
+              removeLastLine: true,
+              percentage:
+                typeof generationProgress === 'number'
+                  ? `${generationProgress}`
+                  : undefined,
+            });
           }
           imageGenerationProgress = generationProgress;
         }
@@ -228,9 +289,14 @@ const handler = async (req: Request): Promise<Response> => {
       jobTerminated = true;
 
       console.log(error);
-      await writeToStream(
-        'Error occurred while generating image, please try again later.',
-      );
+      //Log error to Azure App Insights
+      trackError(error as string);
+      await progressHandler.updateProgress({
+        content:
+          'Error occurred while generating image, please try again later.',
+        state: 'error',
+      });
+
       await writeToStream('[DONE]');
       writer.close();
       return;

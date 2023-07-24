@@ -2,10 +2,10 @@ import {
   getReferralCodeDetail,
   redeemReferralCode,
 } from '../../../utils/server/supabase';
-import {
-  getAdminSupabaseClient,
-  getUserProfile,
-} from '@/utils/server/supabase';
+import { trackError } from '@/utils/app/azureTelemetry';
+import { getUserProfile, resetUserCredits } from '@/utils/server/supabase';
+
+import { PluginID } from '@/types/plugin';
 
 export const config = {
   runtime: 'edge',
@@ -55,8 +55,13 @@ const handler = async (req: Request): Promise<Response> => {
       refereeId: userId,
     });
 
+    await resetUserCredits(userId, PluginID.GPT4);
+    await resetUserCredits(userId, PluginID.IMAGE_GEN);
+
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
+    //Log error to Azure App Insights
+    trackError(error as string);
     return new Response('Invalid Code', { status: 500 });
   }
 };
