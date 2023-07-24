@@ -1,16 +1,11 @@
-import { trackError } from '@/utils/app/azureTelemetry';
-
-import { PluginID } from '@/types/plugin';
-
 import {
   getReferralCodeDetail,
   redeemReferralCode,
 } from '../../../utils/server/supabase';
-import {
-  getAdminSupabaseClient,
-  getUserProfile,
-  resetUserCredits
-} from '@/utils/server/supabase';
+import { trackError } from '@/utils/app/azureTelemetry';
+import { getUserProfile, resetUserCredits } from '@/utils/server/supabase';
+
+import { PluginID } from '@/types/plugin';
 
 export const config = {
   runtime: 'edge',

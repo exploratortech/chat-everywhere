@@ -13,6 +13,8 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
 import { fetchShareableConversation } from '@/utils/app/api';
+import { appInsights, enableAzureTracking } from '@/utils/app/azureAppInsights';
+import { trackError } from '@/utils/app/azureTelemetry';
 import {
   cleanConversationHistory,
   cleanFolders,
@@ -26,24 +28,24 @@ import {
   updateConversation,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import { saveFolders } from '@/utils/app/folders';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { enableTracking } from '@/utils/app/eventTracking';
+import { saveFolders } from '@/utils/app/folders';
 import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
+import { generateRank, sortByRank } from '@/utils/app/rank';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
-import { generateRank, sortByRank } from '@/utils/app/rank';
 import { userProfileQuery } from '@/utils/server/supabase';
 
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
+import { DragData } from '@/types/drag';
 import { LatestExportFormat } from '@/types/export';
 import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
-import { DragData } from '@/types/drag';
 
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
@@ -66,10 +68,6 @@ import { HomeInitialState, initialState } from './home.state';
 import dayjs from 'dayjs';
 import mixpanel from 'mixpanel-browser';
 import { v4 as uuidv4 } from 'uuid';
-
-import { appInsights, enableAzureTracking } from '@/utils/app/azureAppInsights';
-
-import { trackError } from '@/utils/app/azureTelemetry';
 
 const Home = () => {
   const defaultModelId = fallbackModelID;
@@ -150,8 +148,9 @@ const Home = () => {
       type,
       lastUpdateAtUTC: dayjs().valueOf(),
       rank: generateRank(
-        getNonDeletedCollection(folders)
-          .filter((folder) => folder.type === type)
+        getNonDeletedCollection(folders).filter(
+          (folder) => folder.type === type,
+        ),
       ),
     };
 
@@ -307,9 +306,8 @@ const Home = () => {
   };
 
   useEffect(() => {
-    document.documentElement.style.overflow = (showChatbar || showPromptbar)
-      ? 'hidden'
-      : 'auto';
+    document.documentElement.style.overflow =
+      showChatbar || showPromptbar ? 'hidden' : 'auto';
   }, [showChatbar, showPromptbar]);
 
   // DRAGGING ITEMS --------------------------------------
@@ -321,7 +319,6 @@ const Home = () => {
   const removeDragData = (): void => {
     dispatch({ field: 'currentDrag', value: undefined });
   };
-
   // EFFECTS  --------------------------------------------
 
   useEffect(() => {
@@ -448,8 +445,11 @@ const Home = () => {
             });
           }
           // Set authenticated user context for Application Insights
-          if (enableAzureTracking){
-            appInsights.setAuthenticatedUserContext(session.user.id, session.user.email);
+          if (enableAzureTracking) {
+            appInsights.setAuthenticatedUserContext(
+              session.user.id,
+              session.user.email,
+            );
           }
         })
         .catch((error) => {
@@ -534,7 +534,8 @@ const Home = () => {
 
     const folders = localStorage.getItem('folders');
     if (folders) {
-      const parsedFolders: FolderInterface[] = JSON.parse(folders).sort(sortByRank);
+      const parsedFolders: FolderInterface[] =
+        JSON.parse(folders).sort(sortByRank);
       const cleanedFolders: FolderInterface[] = cleanFolders(parsedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
@@ -565,8 +566,7 @@ const Home = () => {
     let cleanedConversationHistory: Conversation[] = [];
     if (conversationHistory) {
       const parsedConversationHistory: Conversation[] =
-        JSON.parse(conversationHistory)
-        .sort(sortByRank);
+        JSON.parse(conversationHistory).sort(sortByRank);
       cleanedConversationHistory = cleanConversationHistory(
         parsedConversationHistory,
       );
@@ -669,6 +669,7 @@ const Home = () => {
         togglePromptbar,
         setDragData,
         removeDragData,
+        stopConversationRef,
       }}
     >
       <Head>
@@ -773,6 +774,7 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
         'news',
         'features',
         'auth',
+        'mjImage',
       ])),
     },
   };

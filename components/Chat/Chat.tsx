@@ -21,6 +21,10 @@ import {
 import { saveConversation, saveConversations } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { trackEvent } from '@/utils/app/eventTracking';
+import {
+  removeRedundantTempHtmlString,
+  removeTempHtmlString,
+} from '@/utils/app/htmlStringHandler';
 import { removeSecondLastLine } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 import { throttle } from '@/utils/data/throttle';
@@ -250,6 +254,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             showHintForLargeContextResponse = true;
           }
 
+          if (text.includes('[REMOVE_TEMP_HTML]')) {
+            text = removeTempHtmlString(text);
+          }
+
           if (text.includes('[REMOVE_LAST_LINE]')) {
             text = text.replace('[REMOVE_LAST_LINE]', '');
             text = removeSecondLastLine(text);
@@ -261,7 +269,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               ...updatedConversation.messages,
               {
                 role: 'assistant',
-                content: chunkValue,
+                content: removeRedundantTempHtmlString(chunkValue),
                 largeContextResponse,
                 showHintForLargeContextResponse,
                 pluginId: plugin?.id || null,
@@ -282,7 +290,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 if (index === updatedConversation.messages.length - 1) {
                   return {
                     ...message,
-                    content: text,
+                    content: removeRedundantTempHtmlString(text),
                     largeContextResponse,
                     showHintForLargeContextResponse,
                   };

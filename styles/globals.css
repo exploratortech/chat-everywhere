@@ -43,3 +43,30 @@ pre:has(div.codeblock) {
     display: none;
   }
 }
+
+details {
+  & summary svg.toggle-arrow {
+    transform: rotate(180deg);
+  }
+  height: auto;
+  max-height: 44px; /* set to line height */
+  transition: all 0.1s ease;
+  overflow: hidden;
+}
+details[open] {
+  max-height: 99rem;
+  transition: all 1s ease;
+  height: max-content;
+  & summary svg.toggle-arrow {
+    transform: rotate(0);
+  }
+}
+details[disabled] summary,
+details.disabled summary {
+  pointer-events: none; /* prevents click events */
+  user-select: none; /* prevents text selection */
+}
+
+svg.toggle-arrow {
+  transition: transform 0.2s ease-in-out;
+}
