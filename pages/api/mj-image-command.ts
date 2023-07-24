@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   const requestBody = await req.json();
 
-  const { button, buttonMessageId } = requestBody;
+  const { button, buttonMessageId, prompt } = requestBody;
 
   const upscalePattern = /^U\d$/i;
   const isUpscaleCommand = upscalePattern.test(button);
@@ -151,6 +151,7 @@ const handler = async (req: Request): Promise<Response> => {
                   buttons: buttons,
                 },
               ],
+              prompt: prompt || '',
             });
           } else {
             await createImageSelector({
@@ -163,6 +164,7 @@ const handler = async (req: Request): Promise<Response> => {
                   buttons: [`U${index + 1}`, `V${index + 1}`],
                 }),
               ),
+              prompt: prompt || '',
             });
           }
 

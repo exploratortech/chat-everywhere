@@ -9,6 +9,7 @@ export interface MjImageSelectorProps {
   previousButtonCommand: string;
   imageList: MjImageItem[];
   buttonMessageId: string;
+  prompt: string;
 }
 // THE COMPONENT IS USED FOR STATIC HTML GENERATION, SO DON'T USE HOOKS OR STATE
 
@@ -16,6 +17,7 @@ export default function MjImageSelector({
   previousButtonCommand,
   imageList,
   buttonMessageId,
+  prompt,
 }: MjImageSelectorProps) {
   const upscalePattern = /^U\d$/i;
   const isPreviousUpscaleCommand = upscalePattern.test(previousButtonCommand);
@@ -32,6 +34,7 @@ export default function MjImageSelector({
             alt={image.imageAlt}
             data-ai-image-buttons={image.buttons.join(',')}
             data-ai-image-button-message-id={buttonMessageId}
+            data-ai-image-prompt={prompt}
           />
         ))}
       </div>
@@ -48,6 +51,7 @@ export default function MjImageSelector({
             alt={image.imageAlt}
             data-ai-image-buttons={image.buttons.join(',')}
             data-ai-image-button-message-id={buttonMessageId}
+            data-ai-image-prompt={prompt}
           />
         ))}
       </div>

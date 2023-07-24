@@ -245,6 +245,7 @@ const handler = async (req: Request): Promise<Response> => {
                   buttons: [`U${index + 1}`, `V${index + 1}`],
                 }),
               ),
+              prompt: generationPrompt,
             });
             await addUsageEntry(PluginID.IMAGE_GEN, user.id);
             await subtractCredit(user.id, PluginID.IMAGE_GEN);

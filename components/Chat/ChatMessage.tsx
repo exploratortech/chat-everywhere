@@ -200,10 +200,12 @@ export const ChatMessage: FC<Props> = memo(
         const aiImageButtons =
           node?.properties?.dataAiImageButtons &&
           (node?.properties?.dataAiImageButtons).split(',');
+        const aiImagePrompt =
+          node?.properties?.dataAiImagePrompt &&
+          (node?.properties?.dataAiImagePrompt).split(',');
         const aiImageButtonMessageId =
           node?.properties?.dataAiImageButtonMessageId;
-        const buttonCommandExecuted =
-          node?.properties?.dataAiImageButtonCommandsExecuted === '1';
+
         const isValidUrl = (url: string) => {
           try {
             new URL(url);
@@ -229,6 +231,7 @@ export const ChatMessage: FC<Props> = memo(
               src={src}
               buttons={aiImageButtons}
               buttonMessageId={aiImageButtonMessageId}
+              prompt={aiImagePrompt}
             />
           );
         }

@@ -27,12 +27,14 @@ interface MjImageComponentProps {
   src: string;
   buttons: string[];
   buttonMessageId: string;
+  prompt: string;
 }
 
 export default function MjImageComponent({
   src,
   buttons,
   buttonMessageId,
+  prompt,
 }: MjImageComponentProps) {
   const {
     state: { user, selectedConversation, conversations, messageIsStreaming },
@@ -63,6 +65,7 @@ export default function MjImageComponent({
         body: JSON.stringify({
           button: button,
           buttonMessageId,
+          prompt,
         }),
       });
       if (!response.ok) {
@@ -219,7 +222,7 @@ export default function MjImageComponent({
   const handleDivBlur = () => {
     setTimeout(() => {
       setShowButtons(false);
-    }, 100);
+    }, 500);
   };
 
   return (
@@ -261,9 +264,14 @@ export default function MjImageComponent({
           >
             <button
               className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
-              onClick={openImage(src)}
+              onClick={() => {
+                downloadFile(
+                  src,
+                  'chateverywhere-' + prompt + dayjs().valueOf() + '.png',
+                );
+              }}
             >
-              {mjImageT('View Image')}
+              {mjImageT('Download Image')}
             </button>
             {availableCommands.map((command, index) => {
               return (
@@ -292,9 +300,19 @@ export default function MjImageComponent({
   );
 }
 
-function openImage(src: string) {
-  return () => {
-    const win = window.open(src, '_blank');
-    win?.focus();
-  };
-}
+const downloadFile = async (url: string, filename: string) => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+
+  const href = URL.createObjectURL(blob);
+
+  // Create a "hidden" anchor tag with the download attribute and simulate a click.
+  const link = document.createElement('a');
+  link.href = href;
+  link.download = filename;
+  link.style.display = 'none';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
