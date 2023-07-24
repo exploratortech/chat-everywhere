@@ -35,7 +35,7 @@ export default function MjImageComponent({
   buttonMessageId,
 }: MjImageComponentProps) {
   const {
-    state: { user, selectedConversation, conversations },
+    state: { user, selectedConversation, conversations, messageIsStreaming },
     dispatch: homeDispatch,
     stopConversationRef,
   } = useContext(HomeContext);
@@ -226,26 +226,34 @@ export default function MjImageComponent({
           user ? `group-hover/image:scale-110` : ''
         } group-hover/image:drop-shadow-2xl group-hover/image:bg-black/75 transition-all duration-500 absolute top-0 left-0 w-full h-full`}
       >
-        {/*  Button selections  */}
-        <div className="hidden group-hover/image:flex flex-col gap-2 justify-center items-center h-full">
-          <button
-            className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
-            onClick={openImage(src)}
-          >
-            {mjImageT('View Image')}
-          </button>
-          {availableCommands.map((command, index) => {
-            return (
-              <button
-                key={`${command}-${index}`}
-                className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
-                onClick={() => imageButtonOnClick(command)}
-              >
-                {mjImageT(command)}
-              </button>
-            );
-          })}
-        </div>
+        {messageIsStreaming ? (
+          // Button selections
+          <div className="hidden group-hover/image:flex flex-col gap-2 justify-center items-center h-full">
+            {mjImageT('Image processing... ')}
+          </div>
+        ) : (
+          // Button selections
+          <div className="hidden group-hover/image:flex flex-col gap-2 justify-center items-center h-full">
+            <button
+              className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
+              onClick={openImage(src)}
+            >
+              {mjImageT('View Image')}
+            </button>
+            {availableCommands.map((command, index) => {
+              return (
+                <button
+                  key={`${command}-${index}`}
+                  className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
+                  onClick={() => imageButtonOnClick(command)}
+                >
+                  {mjImageT(command)}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         <button
           className="hidden group-hover/image:block absolute top-0 right-0 p-2 cursor-pointer"
           onClick={helpButtonOnClick}
