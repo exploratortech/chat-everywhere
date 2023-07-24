@@ -209,31 +209,56 @@ export default function MjImageComponent({
       value: true,
     });
   };
+  const [showButtons, setShowButtons] = React.useState(false);
+  // Function to show the buttons
+  const handleDivFocus = () => {
+    setShowButtons(true);
+  };
+
+  // Function to hide the buttons
+  const handleDivBlur = () => {
+    setTimeout(() => {
+      setShowButtons(false);
+    }, 100);
+  };
 
   return (
-    <div className={`group/image relative hover:z-10`}>
+    <div
+      className={`group/image relative focus:z-10 cursor-pointer`}
+      tabIndex={1}
+      onFocus={handleDivFocus}
+      onBlur={handleDivBlur}
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt=""
         className={`${
-          user ? `group-hover/image:scale-110` : ''
+          showButtons ? `scale-110` : ''
         } w-full m-0 transition-all duration-500 `}
       />
 
       <div
         className={`${
-          user ? `group-hover/image:scale-110` : ''
-        } group-hover/image:drop-shadow-2xl group-hover/image:bg-black/75 transition-all duration-500 absolute top-0 left-0 w-full h-full`}
+          showButtons ? `scale-110 drop-shadow-2xl bg-black/75` : ''
+        } transition-all duration-500 absolute top-0 left-0 w-full h-full`}
       >
         {messageIsStreaming ? (
           // Button selections
-          <div className="hidden group-hover/image:flex flex-col gap-2 justify-center items-center h-full">
+          <div
+            className={`${
+              showButtons ? 'flex' : 'hidden'
+            } flex-col gap-2 justify-center items-center h-full`}
+          >
             {mjImageT('Image processing... ')}
           </div>
         ) : (
           // Button selections
-          <div className="hidden group-hover/image:flex flex-col gap-2 justify-center items-center h-full">
+          <div
+            className={`${
+              showButtons ? 'flex' : 'hidden'
+            } mobile:scale-[.75] flex-col gap-2 justify-center items-center h-full`}
+          >
             <button
               className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
               onClick={openImage(src)}
@@ -255,7 +280,9 @@ export default function MjImageComponent({
         )}
 
         <button
-          className="hidden group-hover/image:block absolute top-0 right-0 p-2 cursor-pointer"
+          className={`${
+            showButtons ? 'block' : 'hidden'
+          } absolute top-0 right-0 p-2 cursor-pointer`}
           onClick={helpButtonOnClick}
         >
           <IconHelp />
