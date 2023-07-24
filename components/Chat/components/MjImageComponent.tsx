@@ -222,7 +222,7 @@ export default function MjImageComponent({
   const handleDivBlur = () => {
     setTimeout(() => {
       setShowButtons(false);
-    }, 500);
+    }, 300);
   };
 
   return (
@@ -260,7 +260,7 @@ export default function MjImageComponent({
           <div
             className={`${
               showButtons ? 'flex' : 'hidden'
-            } mobile:scale-[.75] flex-col gap-2 justify-center items-center h-full`}
+            } mobile:scale-[.75] flex-col gap-2 justify-center items-center h-full mobile:text-sm`}
           >
             <button
               className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
@@ -290,10 +290,10 @@ export default function MjImageComponent({
         <button
           className={`${
             showButtons ? 'block' : 'hidden'
-          } absolute top-0 right-0 p-2 cursor-pointer`}
+          } absolute top-0 right-0 p-1 cursor-pointer`}
           onClick={helpButtonOnClick}
         >
-          <IconHelp />
+          <IconHelp size={16} />
         </button>
       </div>
     </div>
