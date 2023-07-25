@@ -101,12 +101,13 @@ export const subtractCredit = async (
   await updateUserCredits(userId, apiType, newBalance);
 };
 
-export const addBackCreditBy1 = async (
+export const addCredit = async (
   userId: string,
   apiType: PluginID,
+  credit: number,
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
-  const newBalance = userCredits.balance + 1;
+  const newBalance = userCredits.balance + credit;
   await updateUserCredits(userId, apiType, newBalance);
 };
 
