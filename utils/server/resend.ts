@@ -22,6 +22,9 @@ export async function sendReport(subject = '', html = '') {
     });
   } catch (error) {
     console.error(error);
+    if (error instanceof Error) {
+      throw new Error(`sendReport failed: ${error.message}`);
+    }
     throw new Error(`sendReport failed: ${error}`);
   }
 }
