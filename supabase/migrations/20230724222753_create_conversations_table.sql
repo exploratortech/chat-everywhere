@@ -1,5 +1,3 @@
-drop function if exists "public"."get_referees_profile_by_referrer_id"(referrer uuid);
-
 create table "public"."conversations" (
     "id" uuid not null,
     "created_at" timestamp with time zone default now(),
