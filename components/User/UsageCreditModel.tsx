@@ -18,11 +18,9 @@ const gpt4CreditPurchaseLinks = {
   '150': 'https://buy.stripe.com/cN2dUP6U2dgV0JqcMW',
   '300': 'https://buy.stripe.com/dR6g2Xemu5Otcs83cn',
 };
-// TODO: update the links below
 const aiImageCreditPurchaseLinks = {
-  '50': 'https://buy.stripe.com/test_9AQ01v8fabrccp228b',
-  '150': 'https://buy.stripe.com/test_9AQ01v8fabrccp228b',
-  '300': 'https://buy.stripe.com/test_9AQ01v8fabrccp228b',
+  '100': 'https://buy.stripe.com/fZeg2Xdiq4Kp8bS9AT',
+  '500': 'https://buy.stripe.com/8wMg2XcemccR2Ry8wQ',
 };
 
 export const UsageCreditModel: FC<Props> = ({ onClose }) => {
