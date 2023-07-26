@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { DefaultMonthlyCredits } from '@/utils/config';
 
 import { PluginID } from '@/types/plugin';
@@ -485,5 +487,73 @@ export const updateProAccountsPlan = async (): Promise<void> => {
 
   if (updateError) {
     throw updateError;
+  }
+};
+
+export const getConversationByApp = async (userId: string) => {
+  const supabase = getAdminSupabaseClient();
+  const { data, error } = await supabase
+    .from('conversations')
+    .select('*')
+    .eq('app_user_id', userId)
+    .maybeSingle();
+  
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    id: data.id,
+    userId: data.user_id,
+    appUserId: data.app_user_id,
+    content: data.content,
+    createdAt: data.created_at,
+  };
+};
+
+export const createConversationByApp = async (userId: string) => {
+  const supabase = getAdminSupabaseClient();
+  const { data, error } = await supabase
+    .from('conversations')
+    .insert({
+      id: uuidv4(),
+      app_user_id: userId,
+      content: [],
+    })
+    .select()
+    .single();
+  
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  if (!data) {
+    throw new Error('Unable to create conversation');
+  }
+
+  return {
+    id: data.id,
+    userId: data.user_id,
+    appUserId: data.app_user_id,
+    content: data.content,
+    createdAt: data.created_at,
+  }
+};
+
+export const saveConversationByApp = async (userId: string, params: any) => {
+  const supabase = getAdminSupabaseClient();
+  const { error } = await supabase
+    .from('conversations')
+    .update(params)
+    .eq('app_user_id', userId);
+  
+  if (error) {
+    throw new Error('Unable to save conversation');
   }
 };
