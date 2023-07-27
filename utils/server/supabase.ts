@@ -45,10 +45,7 @@ export const addUsageEntry = async (
 };
 
 // Get user credits
-export const getUserCredits = async (
-  userId: string,
-  apiType: PluginID,
-): Promise<any> => {
+export const getUserCredits = async (userId: string, apiType: PluginID) => {
   const supabase = getAdminSupabaseClient();
   const { data, error } = await supabase
     .from('user_credits')
@@ -64,7 +61,20 @@ export const getUserCredits = async (
     return data[0];
   } else {
     await addUserCreditsEntry(userId, apiType);
-    return DefaultMonthlyCredits[apiType];
+    const { data, error } = await supabase
+      .from('user_credits')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('api_type', apiType);
+    if (error || !(data && data.length > 0)) {
+      throw (
+        error ||
+        new Error(
+          `No User Credit found after adding ${apiType} credit entry for user ${userId}`,
+        )
+      );
+    }
+    return data[0];
   }
 };
 
@@ -101,12 +111,13 @@ export const subtractCredit = async (
   await updateUserCredits(userId, apiType, newBalance);
 };
 
-export const addBackCreditBy1 = async (
+export const addCredit = async (
   userId: string,
   apiType: PluginID,
+  credit: number,
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
-  const newBalance = userCredits.balance + 1;
+  const newBalance = userCredits.balance + credit;
   await updateUserCredits(userId, apiType, newBalance);
 };
 
