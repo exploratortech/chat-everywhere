@@ -36,3 +36,8 @@ export const AZURE_OPENAI_KEYS = [
   process.env.AZURE_OPENAI_KEY_2,
   process.env.AZURE_OPENAI_KEY_3,
 ];
+
+export const PAIR_CODE_LENGTH = 6;
+export const PAIR_CODE_CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+export const PAIR_CODE_LIFETIME = 600;
+export const PAIR_CODE_COOL_DOWN = 120;

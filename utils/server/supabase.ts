@@ -32,6 +32,22 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
   });
 };
 
+export const getUserIdByEmail = async (email: string): Promise<string | null> => {
+  const supabase = getAdminSupabaseClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, email')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return data?.id || null;
+};
+
 export const addUsageEntry = async (
   apiType: PluginID | 'gpt-3.5',
   userId: string,

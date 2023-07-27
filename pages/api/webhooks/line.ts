@@ -6,6 +6,7 @@ import { OpenAIStream } from '@/utils/server';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { createConversationByApp, getConversationByApp, saveConversationByApp } from '@/utils/server/supabase';
+import { executeCommand, isCommand } from '@/utils/app/commands';
 
 const lineConfig = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN!,
@@ -46,23 +47,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse): Promise<void>
 
   switch (event.type) {
     case 'message': {
-      
-      const lineId = event.source.userId!;
-      // 1. Fetch conversation by LINE user id
-      // TODO: Check if the user has consented to sharing their user id
-      let conversation = await getConversationByApp(lineId);
-      if (!conversation) {
-        conversation = await createConversationByApp(lineId);
-      }
-
-      if (!conversation) {
-        console.error('Unable to create conversation');
-        res.status(500).end('Internal Server Error');
-        return;
-      }
-
-      const messages = conversation.content;
-
       if (event.message.type !== "text") {
         client.replyMessage(event.replyToken, {
           emojis: [{
@@ -74,48 +58,74 @@ const handler = async (req: NextApiRequest, res: NextApiResponse): Promise<void>
           type: 'text',
         });
       } else {
-        messages.push({
-          role: 'user',
-          content: event.message.text,
-          pluginId: null,
-        });
-
-        const stream = await OpenAIStream(
-          OpenAIModels[OpenAIModelID.GPT_3_5],
-          'You are a helpful chatbot part of the Chat Everywhere app created by Explorator Labs.',
-          DEFAULT_TEMPERATURE,
-          messages,
-          null,
-        );
-
-        const reader = stream.getReader();
-        const decoder = new TextDecoder();
-
-        let doneReading = false;
-        let content = '';
-
-        while (!doneReading) {
-          const { value, done } = await reader.read();
-          const chunk = decoder.decode(value);
-          doneReading = done;
-          content += chunk;
-        }
+        if (isCommand(event.message.text)) {
+          const result = await executeCommand(event.message.text);
+          // TODO: Tell user about the result of their command
+          client.replyMessage(event.replyToken, {
+            text: result.message,
+            type: 'text',
+          });
+        } else {
+          const lineId = event.source.userId!;
+          // 1. Fetch conversation by LINE user id
+          // TODO: Check if the user has consented to sharing their user id
+          let conversation = await getConversationByApp(lineId);
   
-        const replyMessage: Message = {
-          text: content,
-          type: 'text',
-        };
-
-        messages.push({
-          role: 'assistant',
-          content: replyMessage.text,
-          pluginId: null,
-        });
-
-        client.replyMessage(event.replyToken, replyMessage);
-        await saveConversationByApp(lineId, {
-          content: messages,
-        });
+          if (!conversation) {
+            conversation = await createConversationByApp(lineId);
+          }
+  
+          if (!conversation) {
+            console.error('Unable to create conversation');
+            res.status(500).end('Internal Server Error');
+            return;
+          }
+  
+          const messages = conversation.content;
+  
+          messages.push({
+            role: 'user',
+            content: event.message.text,
+            pluginId: null,
+          });
+  
+          const stream = await OpenAIStream(
+            OpenAIModels[OpenAIModelID.GPT_3_5],
+            'You are a helpful chatbot part of the Chat Everywhere app created by Explorator Labs.',
+            DEFAULT_TEMPERATURE,
+            messages,
+            null,
+          );
+  
+          const reader = stream.getReader();
+          const decoder = new TextDecoder();
+  
+          let doneReading = false;
+          let content = '';
+  
+          while (!doneReading) {
+            const { value, done } = await reader.read();
+            const chunk = decoder.decode(value);
+            doneReading = done;
+            content += chunk;
+          }
+    
+          const replyMessage: Message = {
+            text: content,
+            type: 'text',
+          };
+  
+          messages.push({
+            role: 'assistant',
+            content: replyMessage.text,
+            pluginId: null,
+          });
+  
+          client.replyMessage(event.replyToken, replyMessage);
+          await saveConversationByApp(lineId, {
+            content: messages,
+          });
+        }
       }
       break;
     }
