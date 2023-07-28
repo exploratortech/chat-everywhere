@@ -16,6 +16,11 @@ const generatePairCode = (): string => {
   return code.toUpperCase();
 };
 
+export const didPairCodeExpire = (pairCodeExpiresAt: string): boolean => {
+  const expirationTimestamp = dayjs(pairCodeExpiresAt);
+  return expirationTimestamp.isSameOrBefore(dayjs());
+};
+
 export const getPairCodeCoolDown = async (userId: string): Promise<number> => {
   const supabase = getAdminSupabaseClient();
   const { data, error } = await supabase
@@ -70,5 +75,29 @@ export const assignPairCode = async (userId: string): Promise<any> => {
 
   return {
     
+  };
+};
+
+export const getPairCodeData = async (userId: string): Promise<Record<string, any> | null> => {
+  const supabase = getAdminSupabaseClient();
+  const { data, error } = await supabase
+    .from('instant_message_app_users')
+    .select('pair_code, pair_code_expires_at, pair_code_generated_at')
+    .eq('user_id', userId)
+    .maybeSingle();
+  
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    pairCode: data.pair_code,
+    pairCodeExpiresAt: data.pair_code_expires_at,
+    pairCodeGeneratedAt: data.pair_code_generated_at,
   };
 };

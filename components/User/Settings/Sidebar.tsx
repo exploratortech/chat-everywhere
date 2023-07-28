@@ -2,6 +2,7 @@ import {
   IconFileCode,
   IconLogin,
   IconLogout,
+  IconPlugConnected,
   IconSettings,
   IconUser,
 } from '@tabler/icons-react';
@@ -62,6 +63,16 @@ export default function Sidebar({ className = '' }: Props) {
         dispatch({
           field: 'showing',
           value: 'data',
+        }),
+    },
+    {
+      icon: <IconPlugConnected />,
+      name: t('Connections'),
+      value: 'connections',
+      callback: () =>
+        dispatch({
+          field: 'showing',
+          value: 'connections',
         }),
     },
   ];
