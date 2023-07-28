@@ -1,5 +1,5 @@
 import { CommandResult } from "@/types/command";
-import { assignPairCode, getPairCodeCoolDown } from "../server/pairing";
+import { assignPairCode, getPairCodeCoolDown, pair, validatePairCode } from "../server/pairing";
 import { getUserIdByEmail } from "../server/supabase";
 import { isEmailValid } from "./validation";
 
@@ -12,12 +12,12 @@ function parseCommand(input: string): string[] {
   return formattedCommand.split(' ');
 };
 
-export async function executeCommand(input: string): Promise<CommandResult> {
+export async function executeCommand(input: string, data?: any): Promise<CommandResult> {
   const [command, ...args] = parseCommand(input);
 
   try {
     switch (command) {
-      case '/pair': return await handlePairCommand(args);
+      case '/pair': return await handlePairCommand(args, data);
       default:
         return {
           message: `Unknown command '${command}'`,
@@ -26,21 +26,14 @@ export async function executeCommand(input: string): Promise<CommandResult> {
     }
   } catch (error) {
     console.error(error);
-    if (error instanceof Error) {
-      return {
-        message: error.message,
-        error: true,
-      };
-    } else {
-      return {
-        message: 'Unable to complete request. Please try again later',
-        error: true,
-      };
-    }
+    return {
+      message: 'Unable to complete request. Please try again later',
+      error: true,
+    };
   }
 };
 
-export async function handlePairCommand (args: string[]): Promise<CommandResult> {
+export async function handlePairCommand (args: string[], data: any): Promise<CommandResult> {
   const [email, pairCode] = args;
 
   if (args.length === 1) {
@@ -72,7 +65,55 @@ export async function handlePairCommand (args: string[]): Promise<CommandResult>
     };
   } else if (args.length === 2) {
     // args: <email> <pair_code>
-    return { message: 'Need to implement' };
+    // data: { lineId: string }
+    if (!email || !isEmailValid(email)) {
+      return {
+        message: 'Invalid email',
+        error: true,
+      };
+    }
+
+    if (!data || !data.lineId) {
+      throw new Error('Missing data.lineId for /pair command');
+    }
+
+    const userId = await getUserIdByEmail(email);
+    if (!userId) {
+      return { message: 'Invalid pair code', error: true };
+    }
+
+    try {
+      await validatePairCode(userId, pairCode);
+    } catch (error) {
+      if (error instanceof Error) {
+        return {
+          message: error.message,
+          error: true,
+        };
+      }
+      return {
+        message: 'Unable to validate code. Please try again later.',
+        error: true,
+      };
+    }
+
+    try {
+      await pair(userId, data.lineId, 'line');
+      return {
+        message: 'Success! Your account is now paired.',
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        return {
+          message: error.message,
+          error: true,
+        };
+      }
+      return {
+        message: 'Unable to pair your account. Please try again later.',
+        error: true,
+      };
+    }
   } else {
     // Error, show usage
     return { message: 'The command you entered is invalid. The proper usage is \'/pair <email>\' for generating a new pairing code or \'/pair <email> <code>\' to pair your account' };

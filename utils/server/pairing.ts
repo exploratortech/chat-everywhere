@@ -102,3 +102,63 @@ export const getInstantMessageAppUser = async (userId: string): Promise<Record<s
     pairCodeGeneratedAt: data.pair_code_generated_at,
   };
 };
+
+export const validatePairCode = async (userId: string, pairCode: string): Promise<void> => {
+  const supabase = getAdminSupabaseClient();
+  const { data, error } = await supabase
+    .from('instant_message_app_users')
+    .select('pair_code, pair_code_expires_at')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    throw new Error('Unable to validate code. Please try again later.');
+  }
+
+  if (
+    !data
+    || didPairCodeExpire(data.pair_code_expires_at)
+    || data.pair_code !== pairCode.toUpperCase()
+  ) {
+    throw new Error('Invalid pair code');
+  }
+};
+
+export const pair = async (
+  userId: string,
+  appUserId: string,
+  app: 'line',
+): Promise<void> => {
+  const supabase = getAdminSupabaseClient();
+
+  const results = await Promise.all([
+    supabase
+      .from('instant_message_app_users')
+      .update({ [`${app}_id`]: appUserId })
+      .eq('user_id', userId),
+    supabase
+      .from('conversations')
+      .update({ user_id: userId })
+      .eq('app_user_id', appUserId)
+  ]);
+
+  for (const result of results) {
+    if (result.error) {
+      // Revert changes
+      await Promise.all([
+        supabase
+          .from('instant_message_app_users')
+          .update({ [`${app}_id`]: null })
+          .eq('user_id', userId),
+        supabase
+          .from('conversations')
+          .update({ user_id: null })
+          .eq('app_user_id', appUserId)
+      ]);
+      
+      console.error(result.error);
+      throw new Error('Unable to pair your account. Please try again later');
+    }
+  }
+};

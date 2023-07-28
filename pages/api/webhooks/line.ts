@@ -59,8 +59,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse): Promise<void>
         });
       } else {
         if (isCommand(event.message.text)) {
-          const result = await executeCommand(event.message.text);
-          // TODO: Tell user about the result of their command
+          const result = await executeCommand(
+            event.message.text,
+            { lineId: event.source.userId },
+          );
           client.replyMessage(event.replyToken, {
             text: result.message,
             type: 'text',
