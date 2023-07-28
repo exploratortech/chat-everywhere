@@ -39,31 +39,22 @@ export default function Settings_Connections() {
     <div>
       <h1 className="font-bold mb-4">{t("Connections")}</h1>
       <div className="flex flex-col items-center mb-4 p-3 border rounded-lg text-sm">
-        <div className="flex flex-row items-center">
-          {pairCodeData && !didPairCodeExpire(pairCodeData.pairCodeExpiresAt) ? (
-            <>
+        {pairCodeData && !didPairCodeExpire(pairCodeData.pairCodeExpiresAt) ? (
+          <>
+            <div className="flex flex-row items-center gap-2">
               <h1 className="font-mono text-center text-xl font-bold">{pairCodeData.pairCode}</h1>
-              <p className="text-center">
-                {t(`Use "/pair <email> <code>" to pair your account`)} | <Trans i18nKey="Expires in" t={t} defaults="Expires in {{time}}" values={{ time: dayjs(pairCodeData.pairCodeExpiresAt).fromNow() }} />
-              </p>
-            </>
-          ) : (
-            <p className="text-center">{t(`Use "/pair <email>" to generate a new pair code`)}</p>
-          )}
-          <button
-            className="p-2"
-            disabled={loading}
-            onClick={() => {
-              !loading && fetchPairCodeData();
-            }}
-          >
-            {loading ? (
-              <IconDots size={20} />
-            ) : (
-              <IconRefresh size={20} />
-            )}
-          </button>
-        </div>
+              <RefreshButton loading={loading} onClick={fetchPairCodeData} />
+            </div>
+            <p className="text-center text-neutral-400">
+              {t(`Use "/pair <email> <code>" to pair your account`)} | <Trans i18nKey="Expires in" t={t} defaults="Expires in {{time}}" values={{ time: dayjs(pairCodeData.pairCodeExpiresAt).fromNow() }} />
+            </p>
+          </>
+        ) : (
+          <div className="flex flex-row items-center">
+            <p className="text-center text-neutral-400">{t(`Use "/pair <email>" to generate a new pair code`)}</p>
+            <RefreshButton loading={loading} onClick={fetchPairCodeData} />
+          </div>
+        )}
       </div>
       <div className="grid grid-cols-3 mobile:grid-cols-1 mobile:px-20 gap-10">
         <Connection
@@ -74,6 +65,29 @@ export default function Settings_Connections() {
         />
       </div>
     </div>
+  );
+}
+
+type RefreshButtonProps = {
+  loading: boolean;
+  onClick: () => void;
+}
+
+function RefreshButton({ loading, onClick }: RefreshButtonProps): JSX.Element {
+  return (
+    <button
+      className="p-2"
+      disabled={loading}
+      onClick={() => {
+        !loading && onClick();
+      }}
+    >
+      {loading ? (
+        <IconDots size={20} />
+      ) : (
+        <IconRefresh size={20} />
+      )}
+    </button>
   );
 }
 
