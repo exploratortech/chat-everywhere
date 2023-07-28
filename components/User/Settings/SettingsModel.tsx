@@ -7,7 +7,7 @@ import { ActionType, useCreateReducer } from '@/hooks/useCreateReducer';
 import Settings_Account from './Settings_Account';
 import Settings_App from './Settings_App';
 import Settings_Data from './Settings_Data';
-import Settings_Connection from './Settings_Connection';
+import Settings_Connections from './Settings_Connections';
 import Sidebar from './Sidebar';
 
 type Props = {
@@ -69,7 +69,7 @@ export default function SettingsModel({ onClose }: Props) {
                     {showing === 'account' && <Settings_Account />}
                     {showing === 'app' && <Settings_App />}
                     {showing === 'data' && <Settings_Data />}
-                    {showing === 'connections' && <Settings_Connection />}
+                    {showing === 'connections' && <Settings_Connections />}
                     <button
                       className="w-max min-h-[34px] p-4 absolute top-0 right-0"
                       onClick={onClose}

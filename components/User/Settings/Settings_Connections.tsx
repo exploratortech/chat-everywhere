@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import HomeContext from '@/pages/api/home/home.context';
 import { didPairCodeExpire } from '@/utils/server/pairing';
 
-export default function Settings_Connection() {
+export default function Settings_Connections() {
   const { t } = useTranslation('model');
 
   const {
@@ -52,7 +52,7 @@ export default function Settings_Connection() {
           name="LINE"
           image="/assets/images/line_icon.png"
           qrCode="/assets/images/line_qr_code.png"
-          connected={pairCodeData.lineId}
+          connected={pairCodeData?.lineId}
         />
       </div>
     </div>
