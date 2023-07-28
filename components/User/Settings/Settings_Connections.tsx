@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import Image from 'next/image';
-import { IconCircleCheckFilled } from '@tabler/icons-react';
+import { IconCircleCheckFilled, IconDots, IconRefresh } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -15,14 +15,17 @@ export default function Settings_Connections() {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
+  const [loading, setLoading] = useState<boolean>(false);
   const [pairCodeData, setPairCodeData] = useState<any>(null);
 
   const fetchPairCodeData = useCallback(async () => {
     if (!user) return;
+    setLoading(true);
     const res = await fetch('/api/getConnections', {
       headers: { 'user-token': user.token },
       method: 'GET',
     });
+    setLoading(false);
     if (res.ok) {
       setPairCodeData(await res.json());
     }
@@ -35,17 +38,32 @@ export default function Settings_Connections() {
   return (
     <div>
       <h1 className="font-bold mb-4">{t("Connections")}</h1>
-      <div className="flex flex-col mb-4 p-3 border rounded-lg text-sm">
-        {pairCodeData && !didPairCodeExpire(pairCodeData.pairCodeExpiresAt) ? (
-          <>
-            <h1 className="font-mono text-center text-xl font-bold">{pairCodeData.pairCode}</h1>
-            <p className="text-center">
-              {t(`Use "/pair <email> <code>" to pair your account`)} | <Trans i18nKey="Expires in" t={t} defaults="Expires in {{time}}" values={{ time: dayjs(pairCodeData.pairCodeExpiresAt).fromNow() }} />
-            </p>
-          </>
-        ) : (
-          <p className="text-center">{t(`Use "/pair <email>" to generate a new pair code`)}</p>
-        )}
+      <div className="flex flex-col items-center mb-4 p-3 border rounded-lg text-sm">
+        <div className="flex flex-row items-center">
+          {pairCodeData && !didPairCodeExpire(pairCodeData.pairCodeExpiresAt) ? (
+            <>
+              <h1 className="font-mono text-center text-xl font-bold">{pairCodeData.pairCode}</h1>
+              <p className="text-center">
+                {t(`Use "/pair <email> <code>" to pair your account`)} | <Trans i18nKey="Expires in" t={t} defaults="Expires in {{time}}" values={{ time: dayjs(pairCodeData.pairCodeExpiresAt).fromNow() }} />
+              </p>
+            </>
+          ) : (
+            <p className="text-center">{t(`Use "/pair <email>" to generate a new pair code`)}</p>
+          )}
+          <button
+            className="p-2"
+            disabled={loading}
+            onClick={() => {
+              !loading && fetchPairCodeData();
+            }}
+          >
+            {loading ? (
+              <IconDots size={20} />
+            ) : (
+              <IconRefresh size={20} />
+            )}
+          </button>
+        </div>
       </div>
       <div className="grid grid-cols-3 mobile:grid-cols-1 mobile:px-20 gap-10">
         <Connection
