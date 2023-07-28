@@ -1,9 +1,10 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import Image from 'next/image';
+import { IconCircleCheckFilled } from '@tabler/icons-react';
+import dayjs from 'dayjs';
 
 import HomeContext from '@/pages/api/home/home.context';
-import dayjs from 'dayjs';
 import { didPairCodeExpire } from '@/utils/server/pairing';
 
 export default function Settings_Connection() {
@@ -18,10 +19,13 @@ export default function Settings_Connection() {
 
   const fetchPairCodeData = useCallback(async () => {
     if (!user) return;
-    const res = await fetch('/api/getPairCode', {
+    const res = await fetch('/api/getConnections', {
       headers: { 'user-token': user.token },
+      method: 'GET',
     });
-    setPairCodeData(await res.json());
+    if (res.ok) {
+      setPairCodeData(await res.json());
+    }
   }, [user]);
 
   useEffect(() => {
@@ -48,26 +52,7 @@ export default function Settings_Connection() {
           name="LINE"
           image="/assets/images/line_icon.png"
           qrCode="/assets/images/line_qr_code.png"
-        />
-        <Connection
-          name="LINE"
-          image="/assets/images/line_icon.png"
-          qrCode="/assets/images/line_qr_code.png"
-        />
-        <Connection
-          name="LINE"
-          image="/assets/images/line_icon.png"
-          qrCode="/assets/images/line_qr_code.png"
-        />
-        <Connection
-          name="LINE"
-          image="/assets/images/line_icon.png"
-          qrCode="/assets/images/line_qr_code.png"
-        />
-        <Connection
-          name="LINE"
-          image="/assets/images/line_icon.png"
-          qrCode="/assets/images/line_qr_code.png"
+          connected={pairCodeData.lineId}
         />
       </div>
     </div>
@@ -78,9 +63,15 @@ type ConnectionProps = {
   name: string;
   image: string;
   qrCode: string;
+  connected?: boolean;
 }
 
-function Connection({ name, image, qrCode }: ConnectionProps): JSX.Element {
+function Connection({
+  name,
+  image,
+  qrCode,
+  connected = false,
+}: ConnectionProps): JSX.Element {
   const { t } = useTranslation('model');
 
   return (
@@ -103,6 +94,16 @@ function Connection({ name, image, qrCode }: ConnectionProps): JSX.Element {
           alt="LINE QR Code"
           fill
         />
+      </div>
+      <div className="flex flex-row items-center mt-1 text-neutral-400">
+        {connected ? (
+          <>
+            <p className="text-sm">{t('Connected')}</p>
+            <IconCircleCheckFilled className="m-1 text-green-400" size={20} />
+          </>
+        ) : (
+          <p className="py-1 text-sm">{t('Not Connected')}</p>
+        )}
       </div>
     </div>
   );

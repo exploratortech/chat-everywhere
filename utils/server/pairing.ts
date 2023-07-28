@@ -78,11 +78,11 @@ export const assignPairCode = async (userId: string): Promise<any> => {
   };
 };
 
-export const getPairCodeData = async (userId: string): Promise<Record<string, any> | null> => {
+export const getInstantMessageAppUser = async (userId: string): Promise<Record<string, any> | null> => {
   const supabase = getAdminSupabaseClient();
   const { data, error } = await supabase
     .from('instant_message_app_users')
-    .select('pair_code, pair_code_expires_at, pair_code_generated_at')
+    .select('line_id, pair_code, pair_code_expires_at, pair_code_generated_at')
     .eq('user_id', userId)
     .maybeSingle();
   
@@ -96,6 +96,7 @@ export const getPairCodeData = async (userId: string): Promise<Record<string, an
   }
 
   return {
+    lineId: data.line_id,
     pairCode: data.pair_code,
     pairCodeExpiresAt: data.pair_code_expires_at,
     pairCodeGeneratedAt: data.pair_code_generated_at,
