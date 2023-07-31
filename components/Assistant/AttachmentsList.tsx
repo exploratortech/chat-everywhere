@@ -95,15 +95,19 @@ export const AttachmentsList = (): JSX.Element => {
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
-          {sortedAttachments.map((attachmentName) => {
-            const attachment = attachments[attachmentName];
-            return (
-              <AttachmentItem
-                attachment={attachment}
-                key={attachment.name}
-              />
-            );
-          })}
+          {sortedAttachments.length <= 0 ? (
+            <p className="text-[14px] leading-normal text-center text-white opacity-50">{t('No files')}</p>
+          ) : (
+            sortedAttachments.map((attachmentName) => {
+              const attachment = attachments[attachmentName];
+              return (
+                <AttachmentItem
+                  attachment={attachment}
+                  key={attachment.name}
+                />
+              );
+            })
+          )}
         </div>
       </div>
     </>
