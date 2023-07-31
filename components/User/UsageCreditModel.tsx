@@ -18,6 +18,10 @@ const gpt4CreditPurchaseLinks = {
   '150': 'https://buy.stripe.com/cN2dUP6U2dgV0JqcMW',
   '300': 'https://buy.stripe.com/dR6g2Xemu5Otcs83cn',
 };
+const aiImageCreditPurchaseLinks = {
+  '100': 'https://buy.stripe.com/fZeg2Xdiq4Kp8bS9AT',
+  '500': 'https://buy.stripe.com/8wMg2XcemccR2Ry8wQ',
+};
 
 export const UsageCreditModel: FC<Props> = ({ onClose }) => {
   const { t } = useTranslation('model');
@@ -27,7 +31,8 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
   } = useContext(HomeContext);
 
   const gpt4Credit = creditUsage && creditUsage[PluginID.GPT4].remainingCredits;
-  const aiImageCredit = creditUsage && creditUsage[PluginID.IMAGE_GEN].remainingCredits;
+  const aiImageCredit =
+    creditUsage && creditUsage[PluginID.IMAGE_GEN].remainingCredits;
 
   const userEmail = user?.email;
 
@@ -129,7 +134,9 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                         </td>
                         <td
                           className={`px-6 py-4 ${
-                            aiImageCredit === 0 ? 'text-red-400 font-semibold' : ''
+                            aiImageCredit === 0
+                              ? 'text-red-400 font-semibold'
+                              : ''
                           }`}
                         >
                           {aiImageCredit === null
@@ -137,7 +144,19 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                             : aiImageCredit}
                         </td>
                         <td className="px-6 py-4 flex flex-col text-left">
-                          N/A
+                          {Object.entries(aiImageCreditPurchaseLinks).map(
+                            ([key, value]) => (
+                              <a
+                                href={`${value}?prefilled_email=${userEmail}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-medium text-blue-600 dark:text-blue-500 hover:underline mb-1.5"
+                                key={key}
+                              >
+                                {t('Buy')} {key} {t('credit')}
+                              </a>
+                            ),
+                          )}
                         </td>
                       </tr>
                     </tbody>

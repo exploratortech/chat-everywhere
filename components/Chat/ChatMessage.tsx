@@ -29,6 +29,7 @@ import { PluginID } from '@/types/plugin';
 import HomeContext from '@/pages/api/home/home.context';
 
 import { ImageGenerationComponent } from './components/ImageGenerationComponent';
+import MjImageComponent from './components/MjImageComponent';
 import TokenCounter from './components/TokenCounter';
 
 import { CodeBlock } from '../Markdown/CodeBlock';
@@ -38,6 +39,7 @@ import { FeedbackContainer } from './FeedbackContainer';
 import { SpeechButton } from './SpeechButton';
 
 import rehypeMathjax from 'rehype-mathjax';
+import rehypeRaw from 'rehype-raw';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
@@ -114,7 +116,6 @@ export const ChatMessage: FC<Props> = memo(
         ...selectedConversation,
         messages,
       };
-
       const { single, all } = updateConversation(
         updatedConversation,
         conversations,
@@ -191,17 +192,50 @@ export const ChatMessage: FC<Props> = memo(
         src,
         title,
         alt,
+        node,
       }: React.DetailedHTMLProps<
-        React.ImgHTMLAttributes<HTMLImageElement>,
+        React.ImgHTMLAttributes<HTMLImageElement> & { node?: any },
         HTMLImageElement
       >) => {
+        const aiImageButtons =
+          node?.properties?.dataAiImageButtons &&
+          (node?.properties?.dataAiImageButtons).split(',');
+        const aiImagePrompt =
+          node?.properties?.dataAiImagePrompt &&
+          (node?.properties?.dataAiImagePrompt).split(',');
+        const aiImageButtonMessageId =
+          node?.properties?.dataAiImageButtonMessageId;
+
+        const isValidUrl = (url: string) => {
+          try {
+            new URL(url);
+            return true;
+          } catch (e) {
+            return false;
+          }
+        };
+
         if (!src) return <></>;
+        if (!isValidUrl(src)) return <b>{`{InValid IMAGE URL}`}</b>;
+
         if (message.pluginId !== PluginID.IMAGE_GEN) {
           return (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={src} alt="" className="w-full" />
           );
         }
+        if (aiImageButtons) {
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <MjImageComponent
+              src={src}
+              buttons={aiImageButtons}
+              buttonMessageId={aiImageButtonMessageId}
+              prompt={aiImagePrompt}
+            />
+          );
+        }
+
         return (
           <ImageGenerationComponent
             src={src}
@@ -378,7 +412,7 @@ export const ChatMessage: FC<Props> = memo(
                   <MemoizedReactMarkdown
                     className="prose dark:prose-invert min-w-full"
                     remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-                    rehypePlugins={[rehypeMathjax]}
+                    rehypePlugins={[rehypeMathjax, rehypeRaw]}
                     components={{
                       a({ node, children, href, ...props }) {
                         return (

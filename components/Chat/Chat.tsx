@@ -21,6 +21,10 @@ import {
 import { saveConversation, saveConversations, updateConversation } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { trackEvent } from '@/utils/app/eventTracking';
+import {
+  removeRedundantTempHtmlString,
+  removeTempHtmlString,
+} from '@/utils/app/htmlStringHandler';
 import { removeSecondLastLine } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 import { throttle } from '@/utils/data/throttle';

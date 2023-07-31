@@ -33,8 +33,8 @@ export const PlanDetail = {
     'GPT-4',
     'MidJourney image generation',
     'AI speech',
-    '16K model'
-  ]
+    '16K model',
+  ],
 };
 
 export const FeatureItem = ({ featureName }: { featureName: string }) => (
@@ -122,4 +122,15 @@ export const removeSecondLastLine = (originalText: string): string => {
 
 export const capitalizeFirstLetter = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+export const removeLastLine = (originalText: string): string => {
+  const lastNewLineIndex = originalText.lastIndexOf('\n');
+  const toBeRemovedLineBeginAt = originalText.lastIndexOf(
+    '\n',
+    lastNewLineIndex - 1,
+  );
+  const toBeRemovedString = originalText.substring(toBeRemovedLineBeginAt);
+
+  return originalText.replace(toBeRemovedString, '\n');
 };

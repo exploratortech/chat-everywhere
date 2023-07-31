@@ -1,8 +1,9 @@
+import { trackError } from '@/utils/app/azureTelemetry';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import {
-  addBackCreditBy1,
+  addCredit,
   addUsageEntry,
   getAdminSupabaseClient,
   getUserProfile,
@@ -13,7 +14,6 @@ import {
 import { ChatBody } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
-import { trackError } from '@/utils/app/azureTelemetry';
 
 const supabase = getAdminSupabaseClient();
 
@@ -97,7 +97,7 @@ const handler = async (req: Request): Promise<Response> => {
         case 429:
           try {
             // Add credit back to user's account
-            await addBackCreditBy1(data.user.id, PluginID.GPT4);
+            await addCredit(data.user.id, PluginID.GPT4, 1);
           } catch (error) {
             //Log error to Azure App Insights
             trackError(error as string);
