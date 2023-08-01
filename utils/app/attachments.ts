@@ -32,7 +32,7 @@ const openUploadWindow = async (): Promise<FileList> => {
       }
     };
     input.click();
-  })
+  });
 };
 
 const read = (attachmentName: string): string => {
@@ -114,28 +114,53 @@ const rename = (oldName: string, newName: string): AttachmentCollection => {
   return updatedAttachments;
 };
 
-const upload = async (files: FileList | File[]): Promise<AttachmentCollection> => {
-  const uploadedAttachments = await createAttachment(files);
-  
-  const data = localStorage.getItem('attachments');
-  let updatedAttachments: AttachmentCollection = {};
+const upload = async (files: FileList | File[], userToken?: string): Promise<[AttachmentCollection, any[]]> => {
+  let uploadedAttachments = await createAttachments(files);
+  let errors: any[] = [];
 
-  if (data) {
-    const existingAttachments = JSON.parse(data) as AttachmentCollection;
-    updatedAttachments = {
-      ...existingAttachments,
-      ...uploadedAttachments,
-    };
+  if (userToken) {
+    const formData = new FormData();
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      formData.append('attachments[]', file, file.name);
+    }
+  
+    const res = await fetch('/api/attachments/', {
+      method: 'POST',
+      body: formData,
+      headers: { 'user-token': userToken },
+    });
+
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+
+    const json = await res.json();
+    for (const error of json.errors) {
+      delete uploadedAttachments[error.filename];
+    }
   } else {
-    updatedAttachments = {
-      ...uploadedAttachments,
-    };
+    const data = localStorage.getItem('attachments');
+    let updatedAttachments: AttachmentCollection = {};
+  
+    if (data) {
+      const existingAttachments = JSON.parse(data) as AttachmentCollection;
+      updatedAttachments = {
+        ...existingAttachments,
+        ...uploadedAttachments,
+      };
+    } else {
+      updatedAttachments = {
+        ...uploadedAttachments,
+      };
+    }
+  
+    const jsonString = JSON.stringify(updatedAttachments);
+    localStorage.setItem('attachments', jsonString);
   }
 
-  const jsonString = JSON.stringify(updatedAttachments);
-  localStorage.setItem('attachments', jsonString);
-
-  return updatedAttachments;
+  return [uploadedAttachments, errors];
 };
 
 const write = (attachmentName: string, content: string): string => {
@@ -171,7 +196,7 @@ const write = (attachmentName: string, content: string): string => {
   return content;
 };
 
-const createAttachment = async (files: FileList | File[]): Promise<AttachmentCollection> => {
+const createAttachments = async (files: FileList | File[]): Promise<AttachmentCollection> => {
   return new Promise<AttachmentCollection>((resolve) => {
     const attachments: AttachmentCollection = {};
     let filesToRead: number = files?.length || 0;

@@ -498,3 +498,36 @@ export const updateProAccountsPlan = async (): Promise<void> => {
     throw updateError;
   }
 };
+
+export const uploadAttachments = async (userId: string, files: File[]): Promise<any> => {
+  const supabase = getAdminSupabaseClient();
+
+  const uploads = [];
+  const errors: { filename: string, error: string }[] = [];
+
+  for (const file of files) {
+    uploads.push(
+      new Promise(async (resolve) => {
+        const { error } = await supabase
+          .storage
+          .from('attachments')
+          .upload(
+            `${userId}/${file.name}`,
+            file,
+            { contentType: 'text/plain', upsert: true },
+          );
+        
+        if (error) {
+          console.error(error);
+          errors.push({ filename: file.name, error: error.message });
+        }
+
+        resolve(null);
+      })
+    );
+  }
+
+  await Promise.all(uploads);
+
+  return errors;
+};

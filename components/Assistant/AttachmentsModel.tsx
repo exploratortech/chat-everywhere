@@ -1,19 +1,23 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
-import { Fragment, useCallback, useEffect } from "react";
+import { Fragment, useCallback, useContext, useEffect } from "react";
 import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { toast } from "react-hot-toast";
 
 import AttachmentsModelContext, { AttachmentsModelState } from "./AttachmentsModel.context";
 import { AttachmentsList } from "./AttachmentsList";
 import { Attachments } from "@/utils/app/attachments";
+import HomeContext from "@/pages/api/home/home.context";
 
 type Props = {
   onClose: () => void;
 }
 
 export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
+  const {
+    state: { user },
+  } = useContext(HomeContext);
 
   const contextValue = useCreateReducer<AttachmentsModelState>({
     initialState: {
@@ -22,6 +26,7 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
   });
 
   const {
+    state: { attachments },
     dispatch,
   } = contextValue;
 
@@ -29,8 +34,14 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
 
   const handleUploadAttachments = async (files: FileList | File[]): Promise<boolean> => {
     try {
-      const updatedAttachments = await Attachments.upload(files);
-      dispatch({ field: 'attachments', value: updatedAttachments });
+      const [uploadedAttachments, errors] = await Attachments.upload(files, user?.token);
+      for (const error of errors) {
+        toast.error(`Unable to upload file: ${error.filename}`);
+      }
+      dispatch({
+        field: 'attachments',
+        value: { ...attachments, ...uploadedAttachments },
+      });
       return true;
     } catch (error) {
       console.error(error);
