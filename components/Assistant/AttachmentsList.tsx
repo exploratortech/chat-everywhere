@@ -83,9 +83,9 @@ export const AttachmentsList = (): JSX.Element => {
           <p className="w-20 text-right">{t('Size')}</p>
         </div>
       </div>
-      <div className="relative flex flex-col overflow-hidden">
+      <div className="relative flex flex-col flex-1 overflow-hidden">
         <div
-          className="absolute left-0 w-full h-full rounded-md border-2 bg-indigo-300/30 border-indigo-400 opacity-0 transition-opacity ease-out duration-200"
+          className="absolute left-0 w-full h-full rounded-md border-2 bg-indigo-300/30 border-indigo-400 opacity-0 transition-opacity ease-out duration-200 pointer-events-none"
           ref={dropAreaRef}
         />
         <div
