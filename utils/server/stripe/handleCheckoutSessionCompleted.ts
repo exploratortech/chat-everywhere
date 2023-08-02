@@ -1,4 +1,10 @@
-import { getAdminSupabaseClient, userProfileQuery } from '../supabase';
+import { PluginID } from '@/types/plugin';
+
+import {
+  addCredit,
+  getAdminSupabaseClient,
+  userProfileQuery,
+} from '../supabase';
 import updateUserAccount from './updateUserAccount';
 
 import dayjs from 'dayjs';
@@ -9,6 +15,9 @@ const MONTHLY_PRO_PLAN_SUBSCRIPTION =
 const ONE_TIME_PRO_PLAN_FOR_1_MONTH =
   process.env.STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH;
 
+const IMAGE_CREDIT = process.env.STRIPE_PLAN_CODE_IMAGE_CREDIT;
+const GPT4_CREDIT = process.env.STRIPE_PLAN_CODE_GPT4_CREDIT;
+
 export default async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
 ): Promise<void> {
@@ -17,6 +26,7 @@ export default async function handleCheckoutSessionCompleted(
 
   const planCode = session.metadata?.plan_code;
   const planGivingWeeks = session.metadata?.plan_giving_weeks;
+  const credit = session.metadata?.credit;
   const stripeSubscriptionId = session.subscription as string;
 
   if (!planCode && !planGivingWeeks) {
@@ -25,6 +35,17 @@ export default async function handleCheckoutSessionCompleted(
 
   if (!email) {
     throw new Error('missing Email from Stripe webhook');
+  }
+
+  const isTopUpCreditRequest =
+    (planCode === IMAGE_CREDIT || planCode === GPT4_CREDIT) && credit;
+  // Handle TopUp Image Credit / GPT4 Credit
+  if (isTopUpCreditRequest) {
+    return await addCreditToUser(
+      email,
+      +credit,
+      planCode === IMAGE_CREDIT ? PluginID.IMAGE_GEN : PluginID.GPT4,
+    );
   }
 
   const sinceDate = dayjs.unix(session.created).utc().toDate();
@@ -96,4 +117,31 @@ async function getProPlanExpirationDate(
   } else {
     return undefined;
   }
+}
+
+async function addCreditToUser(
+  email: string,
+  credit: number,
+  creditType: Omit<PluginID, PluginID.LANGCHAIN_CHAT>,
+) {
+  // Get user id by email address
+  const supabase = getAdminSupabaseClient();
+  const user = await userProfileQuery({
+    client: supabase,
+    email,
+  });
+  // Check is Pro user
+  if (user.plan === 'free') {
+    throw Error(`A free user try to top up ${creditType}}`, {
+      cause: {
+        user,
+      },
+    });
+  }
+
+  // Add usage entry by user id
+  const userId = user?.id;
+
+  // add credit to user account
+  await addCredit(userId, creditType as PluginID, credit);
 }
