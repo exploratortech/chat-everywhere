@@ -1,5 +1,4 @@
 import { DocumentProps, Head, Html, Main, NextScript } from 'next/document';
-import Script from 'next/script';
 
 import i18nextConfig from '../next-i18next.config';
 
@@ -17,16 +16,15 @@ export default function Document(props: Props) {
     <Html lang={currentLocale}>
       <Head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta
           name="apple-mobile-web-app-title"
-          content="Chat Everywhere - ChatGPT for power users"
+          content="Chat Everywhere - ChatGPT for everyone"
         />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#202123" />
         <meta
           property="og:title"
-          content="Chat Everywhere - ChatGPT for power users"
+          content="Chat Everywhere - ChatGPT for everyone"
         />
         <meta
           property="og:description"

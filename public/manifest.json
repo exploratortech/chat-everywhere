@@ -11,6 +11,12 @@
       "src": "/icons/icon_512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/icons/maskable_icon_384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "theme_color": "#202123",
