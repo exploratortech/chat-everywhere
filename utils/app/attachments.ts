@@ -2,6 +2,13 @@ import dayjs from "dayjs";
 
 import { AttachmentCollection } from "@/types/attachment";
 
+// Extracts the file name from a path
+const filenameFromPath = (path: string): string | null => {
+  const substrings = path.split('/');
+  if (substrings.length === 0) return null;
+  return substrings[substrings.length - 1];
+};
+
 const list = (): string[] => {
   const data = localStorage.getItem('attachments');
   if (!data) return [];
@@ -52,28 +59,43 @@ const read = (attachmentName: string): string => {
   return attachment.content;
 };
 
-const remove = (...attachmentNames: string[]): AttachmentCollection => {
-  const data = localStorage.getItem('attachments');
-  if (!data) return {};
+const remove = async (attachmentNames: string[], userToken?: string): Promise<string[]> => {
+  if (userToken) {
+    const params = encodeURIComponent(attachmentNames.join(','));
+    const res = await fetch(`/api/attachments?names=${params}`, {
+      headers: { 'user-token': userToken },
+      method: 'DELETE',
+    });
 
-  let attachments!: AttachmentCollection;
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+
+    const json = await res.json();
+    return json.filenames;
+  } else {
+    const data = localStorage.getItem('attachments');
+    if (!data) return [];
   
-  try {
-    attachments = JSON.parse(data);
-  } catch (error) {
-    throw new Error('Unable to remove file');
-  }
+    let attachments!: AttachmentCollection;
+    
+    try {
+      attachments = JSON.parse(data);
+    } catch (error) {
+      throw new Error('Unable to remove file');
+    }
+    
+    const updatedAttachments =  { ...attachments };
   
-  const updatedAttachments =  { ...attachments };
-
-  for (const attachmentName of attachmentNames) {
-    delete updatedAttachments[attachmentName];
+    for (const attachmentName of attachmentNames) {
+      delete updatedAttachments[attachmentName];
+    }
+  
+    const jsonString = JSON.stringify(updatedAttachments);
+    localStorage.setItem('attachments', jsonString);
+  
+    return attachmentNames;
   }
-
-  const jsonString = JSON.stringify(updatedAttachments);
-  localStorage.setItem('attachments', jsonString);
-
-  return updatedAttachments;
 };
 
 const rename = (oldName: string, newName: string): AttachmentCollection => {
@@ -233,6 +255,7 @@ const createAttachments = async (files: FileList | File[]): Promise<AttachmentCo
 };
 
 export const Attachments = {
+  filenameFromPath,
   list,
   openUploadWindow,
   read,

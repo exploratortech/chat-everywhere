@@ -11,7 +11,7 @@ export interface AttachmentsModelContextProps {
   state: AttachmentsModelState;
   dispatch: Dispatch<ActionType<AttachmentsModelState>>;
   closeModel: () => void;
-  deleteAttachment: (attachmentName: string) => boolean;
+  deleteAttachment: (attachmentName: string) => Promise<boolean>;
   renameAttachment: (oldName: string, newName: string) => boolean;
   uploadAttachments: (files: FileList | File[]) => Promise<boolean>;
 }

@@ -10,6 +10,7 @@ import {
 } from './referralCode';
 
 import { createClient } from '@supabase/supabase-js';
+import { Attachments } from '../app/attachments';
 import dayjs from 'dayjs';
 
 export const getAdminSupabaseClient = () => {
@@ -530,4 +531,24 @@ export const uploadAttachments = async (userId: string, files: File[]): Promise<
   await Promise.all(uploads);
 
   return errors;
+};
+
+// Returns a list of the filenames that were deleted
+export const deleteAttachments = async (userId: string, filenames: string[]): Promise<string[]> => {
+  const supabase = getAdminSupabaseClient();
+
+  const { data, error } = await supabase
+    .storage
+    .from('attachments')
+    .remove(filenames.map((filename) => `${userId}/${filename}`));
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  return data.map((file) => Attachments.filenameFromPath(file.name) || '');
 };

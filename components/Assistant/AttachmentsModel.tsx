@@ -32,7 +32,7 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
 
   const { t } = useTranslation('model');
 
-  const handleUploadAttachments = async (files: FileList | File[]): Promise<boolean> => {
+  const handleUploadAttachments = useCallback(async (files: FileList | File[]): Promise<boolean> => {
     try {
       const [uploadedAttachments, errors] = await Attachments.upload(files, user?.token);
       for (const error of errors) {
@@ -52,12 +52,19 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
       }}
       return false;
     }
-  };
+  }, [attachments, user?.token, dispatch]);
 
-  const handleDeleteAttachment = useCallback((attachmentName: string): boolean => {
+  const handleDeleteAttachment = useCallback(async (attachmentName: string): Promise<boolean> => {
     try {
-      const updatedAttachments = Attachments.remove(attachmentName);
-      dispatch({ field: 'attachments', value: updatedAttachments });
+      const deletedFilenames = await Attachments.remove([attachmentName], user?.token);
+      const updatedAttachments = { ...attachments };
+      for (const filename of deletedFilenames) {
+        delete updatedAttachments[filename];
+      }
+      dispatch({
+        field: 'attachments',
+        value: updatedAttachments,
+      });
       return true;
     } catch (error) {
       console.error(error);
@@ -67,7 +74,7 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
         toast.error('Unable to remove file');
       return false;
     }
-  }, [dispatch]);
+  }, [attachments, user?.token, dispatch]);
 
   const handleRenameAttachment = useCallback((oldName: string, newName: string) => {
     try {
