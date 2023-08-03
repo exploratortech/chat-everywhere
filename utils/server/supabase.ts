@@ -12,6 +12,7 @@ import {
 import { createClient } from '@supabase/supabase-js';
 import { Attachments } from '../app/attachments';
 import dayjs from 'dayjs';
+import { Attachment } from '@/types/attachment';
 
 export const getAdminSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -498,6 +499,44 @@ export const updateProAccountsPlan = async (): Promise<void> => {
   if (updateError) {
     throw updateError;
   }
+};
+
+export const fetchAttachments = async (userId: string, options: { limit?: number, page?: number }): Promise<Attachment[]> => {
+  const limit = options.limit || 25;
+  const page = options.page || 0;
+
+  const supabase = getAdminSupabaseClient();
+
+  const { data, error } = await supabase
+    .storage
+    .from('attachments')
+    .list(userId, {
+      limit: limit,
+      offset: page * limit,
+      sortBy: { column: 'name', order: 'asc'},
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  const filteredAttachments: Attachment[] = [];
+
+  if (!data) return filteredAttachments;
+  for (const file of data) {
+    // Skip the placeholder file created by supabase for empty directories
+    if (file.name === '.emptyFolderPlaceholder') continue;
+    filteredAttachments.push({
+      name: Attachments.filenameFromPath(file.name)!,
+      content: '',
+      type: file.metadata['type'],
+      size: file.metadata['size'],
+      createdAt: file.created_at,
+      updatedAt: file.updated_at,
+    });
+  }
+
+  return filteredAttachments;
 };
 
 export const uploadAttachments = async (userId: string, files: File[]): Promise<any> => {

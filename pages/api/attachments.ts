@@ -2,6 +2,7 @@ import { trackError } from '@/utils/app/azureTelemetry';
 
 import {
   deleteAttachments,
+  fetchAttachments,
   getAdminSupabaseClient,
   getUserProfile,
   uploadAttachments,
@@ -26,6 +27,21 @@ export default async function handler(req: Request): Promise<Response> {
     if (!user) return unauthorizedResponse;
   
     switch (req.method) {
+      case 'GET': {
+        try {
+          const url = new URL(req.url);
+          const searchParams = new URLSearchParams(url.search);
+
+          let page: number = parseInt(searchParams.get('page') || '0');
+          if (isNaN(page)) page = 0;
+
+          const attachments = await fetchAttachments(user.id, { page });
+          return new Response(JSON.stringify({ attachments }), { status: 200 });
+        } catch (error) {
+          console.error(error);
+          return new Response('Unable to retrieve files', { status: 400 });
+        }
+      };
       case 'POST': {
         const formData = await req.formData();
         const entries = formData.getAll('attachments[]');

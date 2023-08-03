@@ -1,12 +1,21 @@
-import { useContext, useMemo, useRef } from "react";
+import { UIEvent, useContext, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import FilesModelContext from "./AttachmentsModel.context";
 import { AttachmentItem } from "./AttachmentItem";
+import Spinner from "../Spinner/Spinner";
 
 export const AttachmentsList = (): JSX.Element => {
   const {
-    state: { attachments },
+    state: {
+      attachments,
+      attachmentNames,
+      loading,
+      currentPage,
+      endReached,
+    },
+    dispatch,
+    loadAttachments,
     uploadAttachments,
   } = useContext(FilesModelContext);
 
@@ -14,12 +23,6 @@ export const AttachmentsList = (): JSX.Element => {
   const dropAreaRef = useRef<HTMLDivElement>(null);
 
   const { t } = useTranslation('models');
-
-  const sortedAttachments = useMemo((): string[] => {
-    return Object.keys(attachments).sort(
-      (a, b) => a.toUpperCase() < b.toUpperCase() ? -1 : 1
-    );
-  }, [attachments]);
 
   const handleDragEnter = (event: React.DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
@@ -74,6 +77,20 @@ export const AttachmentsList = (): JSX.Element => {
     await uploadAttachments(files);
   };
 
+  const handleScroll = async (event: UIEvent<HTMLDivElement>): Promise<void> => {
+    if (endReached) return;
+
+    const target = event.currentTarget;
+
+    // Load more attachments when we reach the bottom of the scroll element
+    if (Math.abs(target.scrollHeight - target.clientHeight - target.scrollTop) < 1) {
+      if (!loading) {
+        loadAttachments(currentPage + 1);
+        dispatch({ field: 'currentPage', value: currentPage + 1 });
+      }
+    }
+  };
+
   return (
     <>
       <div className="flex flex-row justify-between text-sm text-neutral-400 py-2 pl-10 pr-[120px] tablet:pr-[54px]">
@@ -94,11 +111,12 @@ export const AttachmentsList = (): JSX.Element => {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
+          onScroll={handleScroll}
         >
-          {sortedAttachments.length <= 0 ? (
+          {!loading && attachmentNames.length <= 0 && (
             <p className="text-[14px] leading-normal text-center text-white opacity-50">{t('No files')}</p>
-          ) : (
-            sortedAttachments.map((attachmentName) => {
+          )}
+          {(attachmentNames.map((attachmentName) => {
               const attachment = attachments[attachmentName];
               return (
                 <AttachmentItem
@@ -107,6 +125,11 @@ export const AttachmentsList = (): JSX.Element => {
                 />
               );
             })
+          )}
+          {loading && (
+            <div className="flex py-2">
+              <Spinner size="16px" className="mx-auto" />
+            </div>
           )}
         </div>
       </div>

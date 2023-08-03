@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
-import { Fragment, useCallback, useContext, useEffect } from "react";
+import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { toast } from "react-hot-toast";
 
@@ -22,15 +22,63 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
   const contextValue = useCreateReducer<AttachmentsModelState>({
     initialState: {
       attachments: {},
+      attachmentNames: [],
+      loading: false,
+      currentPage: 0,
+      endReached: false,
     },
   });
 
   const {
-    state: { attachments },
+    state: {
+      attachments,
+      attachmentNames,
+      loading,
+      endReached,
+    },
     dispatch,
   } = contextValue;
 
   const { t } = useTranslation('model');
+
+  const loadAttachments =  useCallback(async (page: number): Promise<void> => {
+    if (endReached || loading) return;
+    dispatch({ field: 'loading', value: true });
+
+    try {
+      const loadedAttachments = await Attachments.load(user?.token, page);
+      if (loadedAttachments.length === 0) {
+        dispatch({ field: 'endReached', value: true });
+      }
+
+      const updatedAttachments = { ...attachments };
+      const updatedAttachmentNames = [...attachmentNames];
+
+      for (const attachment of loadedAttachments) {
+        updatedAttachments[attachment.name] = attachment;
+        updatedAttachmentNames.push(attachment.name);
+      }
+
+      dispatch({
+        field: 'attachments',
+        value: updatedAttachments,
+      });
+
+      dispatch({
+        field: 'attachmentNames',
+        value: updatedAttachmentNames,
+      });
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Unable to load files');
+      }
+    } finally {
+      dispatch({ field: 'loading', value: false });
+    }
+  }, [attachments, attachmentNames, loading, endReached, user?.token, dispatch]);
 
   const handleUploadAttachments = useCallback(async (files: FileList | File[]): Promise<boolean> => {
     try {
@@ -92,12 +140,9 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
   }, [dispatch]);
 
   useEffect(() => {
-    const data = localStorage.getItem('attachments');
-    if (!data) return;
-
-    const attachments = JSON.parse(data);
-    dispatch({ field: 'attachments', value: attachments });
-  }, [dispatch]);
+    if (attachmentNames.length <= 0)
+      loadAttachments(0);
+  }, [loadAttachments, attachmentNames, user?.token]);
 
   return (
     <Transition appear show={true} as={Fragment}>
@@ -119,6 +164,7 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
           value={{
             ...contextValue,
             closeModel: onClose,
+            loadAttachments,
             deleteAttachment: handleDeleteAttachment,
             renameAttachment: handleRenameAttachment,
             uploadAttachments: handleUploadAttachments,

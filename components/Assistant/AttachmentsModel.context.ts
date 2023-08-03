@@ -5,12 +5,17 @@ import { AttachmentCollection } from "@/types/attachment";
 
 export interface AttachmentsModelState {
   attachments: AttachmentCollection;
+  attachmentNames: string[];
+  loading: boolean;
+  currentPage: number;
+  endReached: boolean;
 }
 
 export interface AttachmentsModelContextProps {
   state: AttachmentsModelState;
   dispatch: Dispatch<ActionType<AttachmentsModelState>>;
   closeModel: () => void;
+  loadAttachments: (page: number) => Promise<void>;
   deleteAttachment: (attachmentName: string) => Promise<boolean>;
   renameAttachment: (oldName: string, newName: string) => boolean;
   uploadAttachments: (files: FileList | File[]) => Promise<boolean>;

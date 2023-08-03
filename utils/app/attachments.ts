@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 
-import { AttachmentCollection } from "@/types/attachment";
+import { Attachment, AttachmentCollection } from "@/types/attachment";
 
 // Extracts the file name from a path
 const filenameFromPath = (path: string): string | null => {
@@ -22,6 +22,30 @@ const list = (): string[] => {
 
   const filenames = Object.keys(attachments);
   return filenames.sort((a, b) => a.toUpperCase() < b.toUpperCase() ? -1 : 1);
+};
+
+const load = async (userToken?: string, page: number = 0): Promise<Attachment[]> => {
+  if (userToken) {
+    const res = await fetch(`/api/attachments?page=${page}`, {
+      headers: { 'user-token': userToken },
+      method: 'GET',
+    });
+
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+
+    const json = await res.json();
+    return json.attachments;
+  } else {
+    const data = localStorage.getItem('attachments');
+    if (!data) return [];
+
+    const attachmentCollection: AttachmentCollection = JSON.parse(data);
+    const sortedAttachments = Object.values(attachmentCollection)
+      .sort((a, b) => a.name.toUpperCase() < b.name.toUpperCase() ? -1 : 1);
+    return sortedAttachments;
+  }
 };
 
 const openUploadWindow = async (): Promise<FileList> => {
@@ -257,6 +281,7 @@ const createAttachments = async (files: FileList | File[]): Promise<AttachmentCo
 export const Attachments = {
   filenameFromPath,
   list,
+  load,
   openUploadWindow,
   read,
   remove,
