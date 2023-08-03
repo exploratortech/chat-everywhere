@@ -9,7 +9,6 @@ import AttachmentsModelContext, { AttachmentsModelState } from "./AttachmentsMod
 import { AttachmentsList } from "./AttachmentsList";
 import { Attachments } from "@/utils/app/attachments";
 import HomeContext from "@/pages/api/home/home.context";
-import { Attachment } from "@/types/attachment";
 
 type Props = {
   onClose: () => void;
