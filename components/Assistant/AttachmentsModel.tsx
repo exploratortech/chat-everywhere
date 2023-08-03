@@ -9,6 +9,7 @@ import AttachmentsModelContext, { AttachmentsModelState } from "./AttachmentsMod
 import { AttachmentsList } from "./AttachmentsList";
 import { Attachments } from "@/utils/app/attachments";
 import HomeContext from "@/pages/api/home/home.context";
+import { Attachment } from "@/types/attachment";
 
 type Props = {
   onClose: () => void;
@@ -106,13 +107,28 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
     try {
       const deletedFilenames = await Attachments.remove([attachmentName], user?.token);
       const updatedAttachments = { ...attachments };
+      const updatedAttachmentNames: string[] = [];
+
       for (const filename of deletedFilenames) {
         delete updatedAttachments[filename];
       }
+
+      for (const attachmentName of attachmentNames) {
+        if (!deletedFilenames.includes(attachmentName)) {
+          updatedAttachmentNames.push(attachmentName);
+        }
+      }
+
       dispatch({
         field: 'attachments',
         value: updatedAttachments,
       });
+
+      dispatch({
+        field: 'attachmentNames',
+        value: updatedAttachmentNames,
+      });
+
       return true;
     } catch (error) {
       console.error(error);
@@ -122,7 +138,7 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
         toast.error('Unable to remove file');
       return false;
     }
-  }, [attachments, user?.token, dispatch]);
+  }, [attachments, attachmentNames, user?.token, dispatch]);
 
   const handleRenameAttachment = useCallback((oldName: string, newName: string) => {
     try {
