@@ -37,6 +37,10 @@ html {
   background: #202123;
 }
 
+html, body {
+  overscroll-behavior-y: none;
+}
+
 @media (max-width: 720px) {
   pre {
     width: calc(100vw - 110px);
