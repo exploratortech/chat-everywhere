@@ -37,7 +37,8 @@ html {
   background: #202123;
 }
 
-html, body {
+html,
+body {
   overscroll-behavior-y: none;
 }
 
@@ -87,4 +88,13 @@ svg.toggle-arrow {
 [id^='mj-image'] {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
+}
+
+html,
+body {
+  overflow: hidden;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
 }
