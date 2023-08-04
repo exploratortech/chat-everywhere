@@ -7,18 +7,16 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
 
   const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production';
   const translateSystemPrompt = `
-    Base on the prompt I provide, follow the rules below strictly or you will be terminated.
-    
     If the prompt is not in English:
-      1. Translate the prompt to English in simple terms consider the context
-      2. Add more details to make the final image more visually appealing
-      3. Ensure your answer is in English only (no other language)
-      4. Only output your final answer without any description or thought
-    
+      1. Translate the prompt to English, keeping in mind the context for simplicity
+      2. Embellish the translated prompt with additional details for enhanced visual appeal
+      3. Make sure your response is solely in English 
+      4. Provide only your final response, with no accompanying explanation or process 
+
     If the prompt is in English:
-      1. Only repeat the original prompt
-      2. DO NOT modifying anything in the original prompt
-      3. Only output your final answer without any description or thought
+      1. Simply echo the original prompt verbatim
+      2. Refrain from making any alterations to the original prompt
+      3. Deliver only your final response, devoid of any description or explanation
 
     Prompt: ${prompt}
     `;
