@@ -515,9 +515,7 @@ export const fetchAttachments = async (userId: string, next?: string | null): Pr
 
   let result!: any;
   if (next) {
-    result = await query
-      .gte('name', next)
-      .limit(limit + 1);
+    result = await query.gte('name', next).limit(limit + 1);
   } else {
     result = await query.limit(limit + 1);
   }
@@ -526,11 +524,10 @@ export const fetchAttachments = async (userId: string, next?: string | null): Pr
     throw result.error;
   }
 
-  const files: Attachment[] = [];
-
-  if (!result.data) return { files, next: null };
+  if (!result.data) return { files: [], next: null };
 
   // Return up to the `limit` number of rows
+  const files: Attachment[] = [];
   for (let i = 0; i < limit; i++) {
     const file = result.data[i];
 

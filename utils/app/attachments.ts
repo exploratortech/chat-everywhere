@@ -35,8 +35,7 @@ const load = async (userToken?: string, next?: string | null): Promise<{ files: 
       throw new Error(await res.text());
     }
 
-    const json = await res.json();
-    return json;
+    return await res.json();
   } else {
     const data = localStorage.getItem('attachments');
     if (!data) return { files: [], next: null };
