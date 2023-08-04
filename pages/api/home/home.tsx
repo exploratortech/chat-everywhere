@@ -368,7 +368,11 @@ const Home = () => {
           ) {
             dispatch({
               field: 'selectedConversation',
-              value: selectedConversationFromRemote,
+              value: {
+                ...selectedConversationFromRemote,
+                imageStyle: selectedConversation.imageStyle,
+                imageQuality: selectedConversation.imageQuality,
+              },
             });
           }
         }
