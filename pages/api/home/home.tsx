@@ -681,7 +681,7 @@ const Home = () => {
         <meta name="description" content="Use ChatGPT anywhere" />
         <meta
           name="viewport"
-          content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"
+          content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1"
         />
       </Head>
       {selectedConversation && (
