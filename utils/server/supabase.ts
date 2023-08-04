@@ -1,3 +1,6 @@
+import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
+
 import { DefaultMonthlyCredits } from '@/utils/config';
 
 import { PluginID } from '@/types/plugin';
@@ -11,7 +14,6 @@ import {
 
 import { createClient } from '@supabase/supabase-js';
 import { Attachments } from '../app/attachments';
-import dayjs from 'dayjs';
 import { Attachment } from '@/types/attachment';
 
 export const getAdminSupabaseClient = () => {
@@ -545,12 +547,14 @@ export const uploadAttachments = async (userId: string, files: File[]): Promise<
   const uploads = [];
   const errors: { filename: string, error: string }[] = [];
 
+  // 1. Upload files to storage. Files that fail to upload are added to
+  // `errors`
   for (const file of files) {
     uploads.push(
-      new Promise(async (resolve) => {
+      new Promise<File | null>(async (resolve) => {
         const { error } = await supabase
           .storage
-          .from('attachments')
+          .from('files')
           .upload(
             `${userId}/${file.name}`,
             file,
@@ -560,14 +564,55 @@ export const uploadAttachments = async (userId: string, files: File[]): Promise<
         if (error) {
           console.error(error);
           errors.push({ filename: file.name, error: error.message });
+          resolve(null);
         }
 
-        resolve(null);
+        resolve(file);
       })
     );
   }
 
-  await Promise.all(uploads);
+  const results = await Promise.all(uploads);
+  const uploadedFiles = results.filter((result) => result != null) as File[];
+
+  // 2. Create table entries for the files that were successfully uploaded
+  const filesToUpsert: any[] = [];
+
+  for (const file of uploadedFiles) {
+    const now = dayjs().toISOString();
+    filesToUpsert.push({
+      id: uuidv4(),
+      user_id: userId,
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      path: `${userId}/${file.name}`,
+      created_at: now,
+      updated_at: now,
+    });
+  }
+
+  const upsert = await supabase
+    .from('files')
+    .upsert(filesToUpsert, {
+      onConflict: 'path',
+      ignoreDuplicates: false,
+    });
+
+  if (upsert.error) {
+    console.error(upsert.error.message);
+
+    const remove = await supabase
+      .storage
+      .from('files')
+      .remove(uploadedFiles.map((file) => `${userId}/${file.name}`));
+    
+    if (remove.error) {
+      console.error(remove.error);
+    }
+
+    throw new Error('Unable to upload file(s)');
+  }
 
   return errors;
 };
