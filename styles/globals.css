@@ -74,3 +74,12 @@ details.disabled summary {
 svg.toggle-arrow {
   transition: transform 0.2s ease-in-out;
 }
+
+html,
+body {
+  overflow: hidden;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+}

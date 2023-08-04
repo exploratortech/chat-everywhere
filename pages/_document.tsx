@@ -29,6 +29,10 @@ export default function Document(props: Props) {
           content="Chat Everywhere - ChatGPT for everyone"
         />
         <meta
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+          name="viewport"
+        />
+        <meta
           property="og:description"
           content="Revolutionize your ChatGPT experience with our app that boasts advanced front-end features like folder organization and easily shareable chats. Keep your conversations secured by locally storing data and enjoy collaborating with anyone from around the world, without any limitations."
         />
