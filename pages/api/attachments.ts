@@ -32,7 +32,6 @@ export default async function handler(req: Request): Promise<Response> {
           const url = new URL(req.url);
           const searchParams = new URLSearchParams(url.search);
           const next: string | null = searchParams.get('next');
-          console.log('next', next);
           const data = await fetchAttachments(user.id, next || null);
           return new Response(JSON.stringify(data), { status: 200 });
         } catch (error) {

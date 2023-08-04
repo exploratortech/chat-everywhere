@@ -549,8 +549,6 @@ export const fetchAttachments = async (userId: string, next?: string | null): Pr
     });
   }
 
-  console.log('files length', files.length);
-
   return { files, next: result.data[limit]?.name || null };
 };
 

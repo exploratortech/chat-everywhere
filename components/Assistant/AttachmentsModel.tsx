@@ -45,7 +45,6 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
 
   const loadFiles = useCallback(async (): Promise<{ files: Attachment[], next: string | null }> => {
     try {
-      console.log('loading files', user?.token);
       return await Attachments.load(user?.token, nextFile);
     } catch (error) {
       console.error(error);
