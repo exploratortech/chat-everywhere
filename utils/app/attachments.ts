@@ -24,9 +24,9 @@ const list = (): string[] => {
   return filenames.sort((a, b) => a.toUpperCase() < b.toUpperCase() ? -1 : 1);
 };
 
-const load = async (userToken?: string, page: number = 0): Promise<Attachment[]> => {
+const load = async (userToken?: string, next?: string | null): Promise<{ files: Attachment[], next: string | null }> => {
   if (userToken) {
-    const res = await fetch(`/api/attachments?page=${page}`, {
+    const res = await fetch(`/api/attachments?next=${next || ''}`, {
       headers: { 'user-token': userToken },
       method: 'GET',
     });
@@ -36,15 +36,15 @@ const load = async (userToken?: string, page: number = 0): Promise<Attachment[]>
     }
 
     const json = await res.json();
-    return json.attachments;
+    return json;
   } else {
     const data = localStorage.getItem('attachments');
-    if (!data) return [];
+    if (!data) return { files: [], next: null };
 
     const attachmentCollection: AttachmentCollection = JSON.parse(data);
     const sortedAttachments = Object.values(attachmentCollection)
       .sort((a, b) => a.name.toUpperCase() < b.name.toUpperCase() ? -1 : 1);
-    return sortedAttachments;
+    return { files: sortedAttachments, next: null };
   }
 };
 

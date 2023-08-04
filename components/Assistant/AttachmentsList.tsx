@@ -1,4 +1,4 @@
-import { UIEvent, useContext, useMemo, useRef } from "react";
+import { UIEvent, useCallback, useContext, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import FilesModelContext from "./AttachmentsModel.context";
@@ -11,11 +11,10 @@ export const AttachmentsList = (): JSX.Element => {
       attachments,
       attachmentNames,
       loading,
-      currentPage,
-      endReached,
+      nextFile,
     },
     dispatch,
-    loadAttachments,
+    loadFiles,
     uploadAttachments,
   } = useContext(FilesModelContext);
 
@@ -77,19 +76,31 @@ export const AttachmentsList = (): JSX.Element => {
     await uploadAttachments(files);
   };
 
-  const handleScroll = async (event: UIEvent<HTMLDivElement>): Promise<void> => {
-    if (endReached) return;
-
+  const handleScroll = useCallback(async (event: UIEvent<HTMLDivElement>): Promise<void> => {
+    if (!nextFile || loading) return;
+    // Load more files when we reach the bottom of the scroll element
     const target = event.currentTarget;
-
-    // Load more attachments when we reach the bottom of the scroll element
     if (Math.abs(target.scrollHeight - target.clientHeight - target.scrollTop) < 1) {
-      if (!loading) {
-        loadAttachments(currentPage + 1);
-        dispatch({ field: 'currentPage', value: currentPage + 1 });
-      }
+      dispatch({ field: 'loading', value: true });
+      loadFiles()
+        .then(({ files, next }) => {
+          const updatedFiles = { ...attachments };
+          const updatedFileNames = [...attachmentNames];
+
+          for (const file of files) {
+            updatedFiles[file.name] = file;
+            updatedFileNames.push(file.name);
+          }
+
+          dispatch({ field: 'nextFile', value: next });
+          dispatch({ field: 'attachments', value: updatedFiles });
+          dispatch({ field: 'attachmentNames', value: updatedFileNames });
+        })
+        .finally(() => {
+          dispatch({ field: 'loading', value: false });
+        });
     }
-  };
+  }, [attachments, attachmentNames, loading, nextFile, loadFiles, dispatch]);
 
   return (
     <>

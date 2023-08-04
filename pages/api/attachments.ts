@@ -31,12 +31,10 @@ export default async function handler(req: Request): Promise<Response> {
         try {
           const url = new URL(req.url);
           const searchParams = new URLSearchParams(url.search);
-
-          let page: number = parseInt(searchParams.get('page') || '0');
-          if (isNaN(page)) page = 0;
-
-          const attachments = await fetchAttachments(user.id, { page });
-          return new Response(JSON.stringify({ attachments }), { status: 200 });
+          const next: string | null = searchParams.get('next');
+          console.log('next', next);
+          const data = await fetchAttachments(user.id, next || null);
+          return new Response(JSON.stringify(data), { status: 200 });
         } catch (error) {
           console.error(error);
           return new Response('Unable to retrieve files', { status: 400 });

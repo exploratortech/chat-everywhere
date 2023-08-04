@@ -503,42 +503,55 @@ export const updateProAccountsPlan = async (): Promise<void> => {
   }
 };
 
-export const fetchAttachments = async (userId: string, options: { limit?: number, page?: number }): Promise<Attachment[]> => {
-  const limit = options.limit || 25;
-  const page = options.page || 0;
-
+export const fetchAttachments = async (userId: string, next?: string | null): Promise<{ files: Attachment[], next: string | null }> => {
+  const limit = 25;
   const supabase = getAdminSupabaseClient();
 
-  const { data, error } = await supabase
-    .storage
-    .from('attachments')
-    .list(userId, {
-      limit: limit,
-      offset: page * limit,
-      sortBy: { column: 'name', order: 'asc'},
-    });
+  const query = supabase
+    .from('files')
+    .select()
+    .eq('user_id', userId)
+    .order('name', { ascending: true });
 
-  if (error) {
-    throw error;
+  let result!: any;
+  if (next) {
+    result = await query
+      .gte('name', next)
+      .limit(limit + 1);
+  } else {
+    result = await query.limit(limit + 1);
   }
 
-  const filteredAttachments: Attachment[] = [];
+  if (result.error) {
+    throw result.error;
+  }
 
-  if (!data) return filteredAttachments;
-  for (const file of data) {
+  const files: Attachment[] = [];
+
+  if (!result.data) return { files, next: null };
+
+  // Return up to the `limit` number of rows
+  for (let i = 0; i < limit; i++) {
+    const file = result.data[i];
+
+    if (file == null) break;
+
     // Skip the placeholder file created by supabase for empty directories
     if (file.name === '.emptyFolderPlaceholder') continue;
-    filteredAttachments.push({
+
+    files.push({
       name: Attachments.filenameFromPath(file.name)!,
       content: '',
-      type: file.metadata['type'],
-      size: file.metadata['size'],
+      type: file.type,
+      size: file.size,
       createdAt: file.created_at,
       updatedAt: file.updated_at,
     });
   }
 
-  return filteredAttachments;
+  console.log('files length', files.length);
+
+  return { files, next: result.data[limit]?.name || null };
 };
 
 export const uploadAttachments = async (userId: string, files: File[]): Promise<any> => {

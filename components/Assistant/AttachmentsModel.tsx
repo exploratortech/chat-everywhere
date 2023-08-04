@@ -9,6 +9,7 @@ import AttachmentsModelContext, { AttachmentsModelState } from "./AttachmentsMod
 import { AttachmentsList } from "./AttachmentsList";
 import { Attachments } from "@/utils/app/attachments";
 import HomeContext from "@/pages/api/home/home.context";
+import { Attachment, AttachmentCollection } from "@/types/attachment";
 
 type Props = {
   onClose: () => void;
@@ -24,8 +25,7 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
       attachments: {},
       attachmentNames: [],
       loading: false,
-      currentPage: 0,
-      endReached: false,
+      nextFile: null,
     },
   });
 
@@ -34,40 +34,19 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
       attachments,
       attachmentNames,
       loading,
-      endReached,
+      nextFile,
     },
     dispatch,
   } = contextValue;
 
+  const [didInitialFetch, setDidInitialFetch] = useState<boolean>(true);
+
   const { t } = useTranslation('model');
 
-  const loadAttachments =  useCallback(async (page: number): Promise<void> => {
-    if (endReached || loading) return;
-    dispatch({ field: 'loading', value: true });
-
+  const loadFiles = useCallback(async (): Promise<{ files: Attachment[], next: string | null }> => {
     try {
-      const loadedAttachments = await Attachments.load(user?.token, page);
-      if (loadedAttachments.length === 0) {
-        dispatch({ field: 'endReached', value: true });
-      }
-
-      const updatedAttachments = { ...attachments };
-      const updatedAttachmentNames = [...attachmentNames];
-
-      for (const attachment of loadedAttachments) {
-        updatedAttachments[attachment.name] = attachment;
-        updatedAttachmentNames.push(attachment.name);
-      }
-
-      dispatch({
-        field: 'attachments',
-        value: updatedAttachments,
-      });
-
-      dispatch({
-        field: 'attachmentNames',
-        value: updatedAttachmentNames,
-      });
+      console.log('loading files', user?.token);
+      return await Attachments.load(user?.token, nextFile);
     } catch (error) {
       console.error(error);
       if (error instanceof Error) {
@@ -75,10 +54,9 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
       } else {
         toast.error('Unable to load files');
       }
-    } finally {
-      dispatch({ field: 'loading', value: false });
+      return { files: [], next: null };
     }
-  }, [attachments, attachmentNames, loading, endReached, user?.token, dispatch]);
+  }, [nextFile, user?.token]);
 
   const handleUploadAttachments = useCallback(async (files: FileList | File[]): Promise<boolean> => {
     try {
@@ -155,9 +133,32 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (attachmentNames.length <= 0)
-      loadAttachments(0);
-  }, [loadAttachments, attachmentNames, user?.token]);
+    if (!didInitialFetch && !loading) {
+      setDidInitialFetch(true);
+      dispatch({ field: 'loading', value: true });
+      loadFiles()
+        .then(({ files, next }) => {
+          const updatedFiles: AttachmentCollection = {};
+          const updatedFileNames: string[] = [];
+
+          for (const file of files) {
+            updatedFiles[file.name] = file;
+            updatedFileNames.push(file.name);
+          }
+
+          dispatch({ field: 'nextFile', value: next });
+          dispatch({ field: 'attachments', value: updatedFiles });
+          dispatch({ field: 'attachmentNames', value: updatedFileNames });
+        })
+        .finally(() => {
+          dispatch({ field: 'loading', value: false });
+        });
+    }
+  }, [didInitialFetch, loadFiles, loading, dispatch]);
+
+  useEffect(() => {
+    setDidInitialFetch(false);
+  }, [user?.token]);
 
   return (
     <Transition appear show={true} as={Fragment}>
@@ -179,7 +180,7 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
           value={{
             ...contextValue,
             closeModel: onClose,
-            loadAttachments,
+            loadFiles,
             deleteAttachment: handleDeleteAttachment,
             renameAttachment: handleRenameAttachment,
             uploadAttachments: handleUploadAttachments,
