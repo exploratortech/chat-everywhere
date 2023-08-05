@@ -28,7 +28,8 @@ html {
   background: #202123;
 }
 
-html, body {
+html,
+body {
   overscroll-behavior-y: none;
 }
 
@@ -78,8 +79,25 @@ svg.toggle-arrow {
 html,
 body {
   overflow: hidden;
-  height: 100%;
   position: fixed;
   left: 0;
   top: 0;
+  transform-origin: 0 0;
+}
+
+body.rotation-90 {
+  transform: rotate(90deg) translateY(-100%);
+}
+
+body.rotation90 {
+  transform: rotate(-90deg) translateX(-100%);
+}
+
+body.rotation-90 .h-screen,
+body.rotation90 .h-screen {
+  height: 100dvw !important;
+}
+body.rotation-90 .w-screen,
+body.rotation90 .w-screen {
+  width: 100dvh !important;
 }

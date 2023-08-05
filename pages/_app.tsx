@@ -13,6 +13,8 @@ import { GoogleAnalytics } from 'nextjs-google-analytics';
 import { enableAzureTracking, reactPlugin } from '@/utils/app/azureAppInsights';
 import { initializeMixpanel } from '@/utils/app/eventTracking';
 
+import PreventOrientationChange from '@/components/Mobile/PreventOrientationChange';
+
 import '@/styles/globals.css';
 import '@/styles/transitionGroup.css';
 import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
@@ -53,7 +55,9 @@ function App({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
         <div className={inter.className}>
           <Toaster />
           <QueryClientProvider client={queryClient}>
-            <Component {...pageProps} />
+            <PreventOrientationChange>
+              <Component {...pageProps} />
+            </PreventOrientationChange>
             <GoogleAnalytics trackPageViews strategy="lazyOnload" />
           </QueryClientProvider>
         </div>
