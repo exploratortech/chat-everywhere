@@ -2,6 +2,12 @@ import dayjs from "dayjs";
 
 import { UploadedFile, UploadedFileMap } from "@/types/uploadedFile";
 
+export const sortByName = (a: UploadedFile | string, b: UploadedFile | string): number => {
+  const nameA: string = typeof a === 'string' ? a : a.name;
+  const nameB: string = typeof b === 'string' ? b : b.name;
+  return nameA.toUpperCase() < nameB.toUpperCase() ? -1 : 1;
+};
+
 // Extracts the file name from a path
 const filenameFromPath = (path: string): string | null => {
   const substrings = path.split('/');
@@ -21,7 +27,7 @@ const list = (): string[] => {
   }
 
   const filenames = Object.keys(uploadedFiles);
-  return filenames.sort((a, b) => a.toUpperCase() < b.toUpperCase() ? -1 : 1);
+  return filenames.sort(sortByName);
 };
 
 const load = async (userToken?: string, next?: string | null): Promise<{ files: UploadedFile[], next: string | null }> => {
@@ -41,8 +47,7 @@ const load = async (userToken?: string, next?: string | null): Promise<{ files: 
     if (!data) return { files: [], next: null };
 
     const uploadedFiles: UploadedFileMap = JSON.parse(data);
-    const sortedUploadedFiles = Object.values(uploadedFiles)
-      .sort((a, b) => a.name.toUpperCase() < b.name.toUpperCase() ? -1 : 1);
+    const sortedUploadedFiles = Object.values(uploadedFiles).sort(sortByName);
     return { files: sortedUploadedFiles, next: null };
   }
 };
@@ -82,6 +87,8 @@ const read = (filename: string): string => {
   return file.content;
 };
 
+// Returns a list of the filenames that were successfully delete. Ignoring
+// files that don't exist already.
 const remove = async (filenames: string[], userToken?: string): Promise<string[]> => {
   if (userToken) {
     const params = encodeURIComponent(filenames.join(','));

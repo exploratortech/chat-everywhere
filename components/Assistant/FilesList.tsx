@@ -15,7 +15,7 @@ export const FilesList = (): JSX.Element => {
     },
     dispatch,
     loadFiles,
-    uploadAttachments,
+    uploadFiles,
   } = useContext(FilesModelContext);
 
   const enterTarget = useRef<HTMLElement | null>(null);
@@ -73,7 +73,7 @@ export const FilesList = (): JSX.Element => {
       dropAreaRef.current.style.opacity = '0';
     }
 
-    await uploadAttachments(files);
+    await uploadFiles(files);
   };
 
   const handleScroll = useCallback(async (event: UIEvent<HTMLDivElement>): Promise<void> => {

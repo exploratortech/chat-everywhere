@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 
 import FilesModalContext, { FilesModalState } from "./FilesModal.context";
 import { FilesList } from "./FilesList";
-import { UploadedFiles } from "@/utils/app/uploadedFiles";
+import { UploadedFiles, sortByName } from "@/utils/app/uploadedFiles";
 import HomeContext from "@/pages/api/home/home.context";
 import { UploadedFile, UploadedFileMap } from "@/types/uploadedFile";
 
@@ -60,14 +60,23 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
   const handleUploadFiles = useCallback(async (files: FileList | File[]): Promise<boolean> => {
     try {
       const [newUploadedFiles, errors] = await UploadedFiles.upload(files, user?.token);
-      console.log()
+      const updatedUploadedFilenames = [...uploadedFilenames, ...Object.keys(newUploadedFiles)];
+      updatedUploadedFilenames.sort(sortByName);
+
       for (const error of errors) {
         toast.error(`Unable to upload file: ${error.filename}`);
       }
+
       dispatch({
         field: 'uploadedFiles',
         value: { ...uploadedFiles, ...newUploadedFiles },
       });
+
+      dispatch({
+        field: 'uploadedFilenames',
+        value: updatedUploadedFilenames,
+      });
+
       return true;
     } catch (error) {
       console.error(error);
@@ -78,7 +87,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
       }}
       return false;
     }
-  }, [uploadedFiles, user?.token, dispatch]);
+  }, [uploadedFiles, uploadedFilenames, user?.token, dispatch]);
 
   const handleDeleteFile = useCallback(async (filename: string): Promise<boolean> => {
     try {
@@ -90,6 +99,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
         delete updatedUploadedFiles[filename];
       }
 
+      // Retain the files that weren't deleted
       for (const filename of uploadedFilenames) {
         if (!deletedFilenames.includes(filename)) {
           updatedUploadedFilenames.push(filename);
