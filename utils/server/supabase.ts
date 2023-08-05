@@ -629,18 +629,25 @@ export const uploadFiles = async (userId: string, files: File[]): Promise<any> =
 export const deleteFiles = async (userId: string, filenames: string[]): Promise<string[]> => {
   const supabase = getAdminSupabaseClient();
 
-  const { data, error } = await supabase
+  const storageResult = await supabase
     .storage
     .from('files')
     .remove(filenames.map((filename) => `${userId}/${filename}`));
 
-  if (error) {
-    throw error;
+  if (storageResult.error) {
+    console.error(storageResult.error);
+    throw storageResult.error;
   }
 
-  if (!data) {
-    return [];
+  const databaseResult = await supabase
+    .from('files')
+    .delete()
+    .in('path', storageResult.data.map((file) => file.name));
+
+  if (databaseResult.error) {
+    console.error(databaseResult.error);
+    throw databaseResult.error;
   }
 
-  return data.map((file) => UploadedFiles.filenameFromPath(file.name) || '');
+  return storageResult.data.map((file) => UploadedFiles.filenameFromPath(file.name) || '');
 };
