@@ -20,6 +20,7 @@ import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
 
 import { updateConversation } from '@/utils/app/conversation';
+import { hasMjImageMessage } from '@/utils/app/mjImage';
 import { getPluginIcon } from '@/utils/app/ui';
 import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 
@@ -28,7 +29,7 @@ import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import { ImageGenerationComponent } from './components/ImageGenerationComponent';
+import ImageGallery from './components/ImageGallery';
 import MjImageComponent from './components/MjImageComponent';
 import TokenCounter from './components/TokenCounter';
 
@@ -190,22 +191,11 @@ export const ChatMessage: FC<Props> = memo(
     const ImgComponent = useMemo(() => {
       const Component = ({
         src,
-        title,
-        alt,
         node,
       }: React.DetailedHTMLProps<
         React.ImgHTMLAttributes<HTMLImageElement> & { node?: any },
         HTMLImageElement
       >) => {
-        const aiImageButtons =
-          node?.properties?.dataAiImageButtons &&
-          (node?.properties?.dataAiImageButtons).split(',');
-        const aiImagePrompt =
-          node?.properties?.dataAiImagePrompt &&
-          (node?.properties?.dataAiImagePrompt).split(',');
-        const aiImageButtonMessageId =
-          node?.properties?.dataAiImageButtonMessageId;
-
         const isValidUrl = (url: string) => {
           try {
             new URL(url);
@@ -218,36 +208,19 @@ export const ChatMessage: FC<Props> = memo(
         if (!src) return <></>;
         if (!isValidUrl(src)) return <b>{`{InValid IMAGE URL}`}</b>;
 
-        if (message.pluginId !== PluginID.IMAGE_GEN) {
+        if (message.pluginId === PluginID.IMAGE_GEN) {
+          // The IMAGE_GEN plugin will render by Image Gallery
+          return <></>;
+        } else {
           return (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={src} alt="" className="w-full" />
           );
         }
-        if (aiImageButtons) {
-          return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <MjImageComponent
-              src={src}
-              buttons={aiImageButtons}
-              buttonMessageId={aiImageButtonMessageId}
-              prompt={aiImagePrompt}
-            />
-          );
-        }
-
-        return (
-          <ImageGenerationComponent
-            src={src}
-            title={title}
-            messageIndex={messageIndex}
-            generationPrompt={alt || ''}
-          />
-        );
       };
       Component.displayName = 'ImgComponent';
       return Component;
-    }, [message.pluginId, messageIndex]);
+    }, [message.pluginId]);
 
     const CodeComponent = useMemo(() => {
       const Component: React.FC<any> = ({
@@ -408,6 +381,9 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
+                {hasMjImageMessage(formattedMessage) && (
+                  <ImageGallery message={formattedMessage} />
+                )}
                 <div className="flex flex-row justify-between">
                   <MemoizedReactMarkdown
                     className="prose dark:prose-invert min-w-full"

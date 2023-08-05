@@ -58,3 +58,17 @@ export const getUpdatedAssistantMjConversation = (
   );
   return selectedConversation;
 };
+
+export function hasMjImageMessage(message: string) {
+  const regex = /<div id="mj-image-.*"><\/div>/;
+  return regex.test(message);
+}
+
+export function getMjImageTags(message: string) {
+  const regex = /<div.*?id="mj-image-.*?".*?>(.*?)<\/div>/gs;
+  const matches = [...message.matchAll(regex)];
+
+  const result = matches.map((match) => match[0]);
+  console.log(result);
+  return result;
+}

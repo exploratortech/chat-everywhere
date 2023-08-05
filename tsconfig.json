@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "downlevelIteration": true,
     "lib": [
       "dom",
       "dom.iterable",
@@ -31,8 +32,8 @@
     "notion-compat.d.ts",
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx", 
-    "utils/app/azureAppInsights.ts"  
+    "**/*.tsx",
+    "utils/app/azureAppInsights.ts"
   ],
   "exclude": [
     "node_modules",
