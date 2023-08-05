@@ -47,7 +47,6 @@
     "notion-compat": "^6.16.0",
     "notion-utils": "^6.16.0",
     "openai": "^3.2.1",
-    "puppeteer": "^19.11.1",
     "raw-body": "^2.5.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
