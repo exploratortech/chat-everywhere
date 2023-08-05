@@ -120,10 +120,26 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
     }
   }, [uploadedFiles, uploadedFilenames, user?.token, dispatch]);
 
-  const handleRenameFile= useCallback((oldName: string, newName: string) => {
+  const handleRenameFile= useCallback(async (oldName: string, newName: string): Promise<boolean> => {
     try {
-      const updatedUploadedFiles = UploadedFiles.rename(oldName, newName);
+      await UploadedFiles.rename(oldName, newName, user?.token);
+
+      const updatedUploadedFiles = { ...uploadedFiles };
+      updatedUploadedFiles[newName] = {
+        ...updatedUploadedFiles[oldName],
+        name: newName,
+      };
+      delete updatedUploadedFiles[oldName];
+
+      const updatedUploadedFilenames = uploadedFilenames.filter(
+        (filename) => filename !== oldName
+      );
+      updatedUploadedFilenames.push(newName);
+      updatedUploadedFilenames.sort(sortByName);
+
       dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
+      dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
+
       return true;
     } catch (error) {
       console.error(error);
@@ -133,7 +149,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
         toast.error('Unable to rename file');
       return false;
     }
-  }, [dispatch]);
+  }, [uploadedFiles, uploadedFilenames, user?.token, dispatch]);
 
   useEffect(() => {
     if (!didInitialFetch && !loading) {

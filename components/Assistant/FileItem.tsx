@@ -19,7 +19,7 @@ type Props = {
 export function FileItem({ file }: Props): JSX.Element {
   const {
     deleteFile,
-    renameAttachment,
+    renameFile,
   } = useContext(AttachmentsModelContext);
 
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -41,12 +41,12 @@ export function FileItem({ file }: Props): JSX.Element {
     setIsRenaming(true);
   };
 
-  const handleConfirmButtonClick: MouseEventHandler<HTMLButtonElement> = (e) => {
+  const handleConfirmButtonClick: MouseEventHandler<HTMLButtonElement> = async (e) => {
     e.stopPropagation();
     if (isDeleting) {
       deleteFile(file.name);
       setIsDeleting(false);
-    } else if (isRenaming && renameAttachment(file.name, renameValue)) {
+    } else if (isRenaming && await renameFile(file.name, renameValue)) {
       setIsRenaming(false);
     }
   };
@@ -58,9 +58,9 @@ export function FileItem({ file }: Props): JSX.Element {
     setRenameValue(file.name);
   };
 
-  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleInputKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
     e.stopPropagation();
-    if (e.code === 'Enter' && renameAttachment(file.name, renameValue)) {
+    if (e.code === 'Enter' && await renameFile(file.name, renameValue)) {
       setIsRenaming(false);
     }
   };

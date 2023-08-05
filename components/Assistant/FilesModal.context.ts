@@ -16,7 +16,7 @@ export interface FilesModelContextProps {
   closeModel: () => void;
   loadFiles: () => Promise<{ files: UploadedFile[], next: string | null }>;
   deleteFile: (filename: string) => Promise<boolean>;
-  renameFile: (oldName: string, newName: string) => boolean;
+  renameFile: (oldName: string, newName: string) => Promise<boolean>;
   uploadFiles: (files: FileList | File[]) => Promise<boolean>;
 }
 

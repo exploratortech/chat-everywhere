@@ -128,42 +128,52 @@ const remove = async (filenames: string[], userToken?: string): Promise<string[]
   }
 };
 
-const rename = (oldName: string, newName: string): UploadedFileMap => {
-  const data = localStorage.getItem('files');
-  if (!data) return {};
-
-  let uploadedFiles!: UploadedFileMap;
-  
-  try {
-    uploadedFiles = JSON.parse(data);
-  } catch (error) {
-    throw new Error('Unable to rename file');
-  }
-
+const rename = async (oldName: string, newName: string, userToken?: string): Promise<string> => {
   if (newName === oldName) {
-    return uploadedFiles;
+    return oldName;
   }
 
-  if (newName.length === 0) {
-    throw new Error('Filename cannot be empty');
+  if (userToken) {
+    throw new Error('Not Implemented');
+  } else {
+    const data = localStorage.getItem('files');
+    if (!data) {
+      throw new Error('File doesn\'t exist');
+    }
+  
+    let uploadedFiles!: UploadedFileMap;
+    
+    try {
+      uploadedFiles = JSON.parse(data);
+    } catch (error) {
+      throw new Error('Unable to rename file');
+    }
+  
+    if (newName.length === 0) {
+      throw new Error('Filename cannot be empty');
+    }
+
+    if (!uploadedFiles[oldName]) {
+      throw new Error('File doesn\'t exist');
+    }
+  
+    if (newName !== oldName && uploadedFiles[newName]) {
+      throw new Error('Another file with that name already exists');
+    }
+  
+    const updatedUploadedFiles = { ...uploadedFiles };
+  
+    updatedUploadedFiles[newName] = {
+      ...uploadedFiles[oldName],
+      name: newName,
+    };
+    delete updatedUploadedFiles[oldName];
+  
+    const jsonString = JSON.stringify(updatedUploadedFiles);
+    localStorage.setItem('files', jsonString);
+
+    return newName;
   }
-
-  if (newName !== oldName && uploadedFiles[newName]) {
-    throw new Error('Another file with that name already exists');
-  }
-
-  const updatedUploadedFiles = { ...uploadedFiles };
-
-  updatedUploadedFiles[newName] = {
-    ...uploadedFiles[oldName],
-    name: newName,
-  };
-  delete updatedUploadedFiles[oldName];
-
-  const jsonString = JSON.stringify(updatedUploadedFiles);
-  localStorage.setItem('files', jsonString);
-
-  return updatedUploadedFiles;
 };
 
 const upload = async (files: FileList | File[], userToken?: string): Promise<[UploadedFileMap, any[]]> => {
