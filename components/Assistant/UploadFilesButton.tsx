@@ -1,17 +1,17 @@
-import React, { useRef } from "react";
+import React from "react";
 import { IconPaperclip } from "@tabler/icons-react";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 
-import { Attachments } from "@/utils/app/attachments";
+import { UploadedFiles } from "@/utils/app/uploadedFiles";
 
-const AttachFilesButton = () => {
+const UploadFilesButton = () => {
   const { t } = useTranslation('chat');
 
-  const handleClick = async (e: any): Promise<void> => {
-    const files = await Attachments.openUploadWindow();
+  const handleClick = async (): Promise<void> => {
+    const files = await UploadedFiles.openUploadWindow();
     try {
-      await Attachments.upload(files);
+      await UploadedFiles.upload(files);
       toast.success(t('Files uploaded successfully'));
     } catch (error) {
       toast.error(t('Unable to upload files'));
@@ -30,4 +30,4 @@ const AttachFilesButton = () => {
   );
 };
 
-export default AttachFilesButton;
+export default UploadFilesButton;

@@ -1,4 +1,4 @@
-export interface Attachment {
+export interface UploadedFile {
   name: string;
   content: string;
   size: number;
@@ -7,6 +7,6 @@ export interface Attachment {
   updatedAt: string;
 }
 
-export interface AttachmentCollection {
-  [fileName: string]: Attachment;
+export interface UploadedFileMap {
+  [fileName: string]: UploadedFile;
 }

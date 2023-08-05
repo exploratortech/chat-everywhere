@@ -5,25 +5,25 @@ import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { toast } from "react-hot-toast";
 
-import AttachmentsModelContext, { AttachmentsModelState } from "./AttachmentsModel.context";
-import { AttachmentsList } from "./AttachmentsList";
-import { Attachments } from "@/utils/app/attachments";
+import AttachmentsModelContext, { FilesModalState } from "./FilesModal.context";
+import { FilesList } from "./FilesList";
+import { UploadedFiles } from "@/utils/app/uploadedFiles";
 import HomeContext from "@/pages/api/home/home.context";
-import { Attachment, AttachmentCollection } from "@/types/attachment";
+import { UploadedFile, UploadedFileMap } from "@/types/uploadedFile";
 
 type Props = {
   onClose: () => void;
 }
 
-export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
+export const FilesModal = ({ onClose }: Props): JSX.Element => {
   const {
     state: { user },
   } = useContext(HomeContext);
 
-  const contextValue = useCreateReducer<AttachmentsModelState>({
+  const contextValue = useCreateReducer<FilesModalState>({
     initialState: {
-      attachments: {},
-      attachmentNames: [],
+      uploadedFiles: {},
+      uploadedFilenames: [],
       loading: false,
       nextFile: null,
     },
@@ -31,8 +31,8 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
 
   const {
     state: {
-      attachments,
-      attachmentNames,
+      uploadedFiles,
+      uploadedFilenames,
       loading,
       nextFile,
     },
@@ -43,9 +43,9 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
 
   const { t } = useTranslation('model');
 
-  const loadFiles = useCallback(async (): Promise<{ files: Attachment[], next: string | null }> => {
+  const loadFiles = useCallback(async (): Promise<{ files: UploadedFile[], next: string | null }> => {
     try {
-      return await Attachments.load(user?.token, nextFile);
+      return await UploadedFiles.load(user?.token, nextFile);
     } catch (error) {
       console.error(error);
       if (error instanceof Error) {
@@ -59,13 +59,13 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
 
   const handleUploadAttachments = useCallback(async (files: FileList | File[]): Promise<boolean> => {
     try {
-      const [uploadedAttachments, errors] = await Attachments.upload(files, user?.token);
+      const [uploadedAttachments, errors] = await UploadedFiles.upload(files, user?.token);
       for (const error of errors) {
         toast.error(`Unable to upload file: ${error.filename}`);
       }
       dispatch({
-        field: 'attachments',
-        value: { ...attachments, ...uploadedAttachments },
+        field: 'uploadedFiles',
+        value: { ...uploadedFiles, ...uploadedAttachments },
       });
       return true;
     } catch (error) {
@@ -77,33 +77,26 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
       }}
       return false;
     }
-  }, [attachments, user?.token, dispatch]);
+  }, [uploadedFiles, user?.token, dispatch]);
 
-  const handleDeleteAttachment = useCallback(async (attachmentName: string): Promise<boolean> => {
+  const handleDeleteFile = useCallback(async (filename: string): Promise<boolean> => {
     try {
-      const deletedFilenames = await Attachments.remove([attachmentName], user?.token);
-      const updatedAttachments = { ...attachments };
-      const updatedAttachmentNames: string[] = [];
+      const deletedFilenames = await UploadedFiles.remove([filename], user?.token);
+      const updatedUploadedFiles = { ...uploadedFiles };
+      const updatedUploadedFilenames: string[] = [];
 
       for (const filename of deletedFilenames) {
-        delete updatedAttachments[filename];
+        delete updatedUploadedFiles[filename];
       }
 
-      for (const attachmentName of attachmentNames) {
-        if (!deletedFilenames.includes(attachmentName)) {
-          updatedAttachmentNames.push(attachmentName);
+      for (const filename of uploadedFilenames) {
+        if (!deletedFilenames.includes(filename)) {
+          updatedUploadedFilenames.push(filename);
         }
       }
 
-      dispatch({
-        field: 'attachments',
-        value: updatedAttachments,
-      });
-
-      dispatch({
-        field: 'attachmentNames',
-        value: updatedAttachmentNames,
-      });
+      dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
+      dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
 
       return true;
     } catch (error) {
@@ -114,12 +107,12 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
         toast.error('Unable to remove file');
       return false;
     }
-  }, [attachments, attachmentNames, user?.token, dispatch]);
+  }, [uploadedFiles, uploadedFilenames, user?.token, dispatch]);
 
   const handleRenameAttachment = useCallback((oldName: string, newName: string) => {
     try {
-      const updatedAttachments = Attachments.rename(oldName, newName);
-      dispatch({ field: 'attachments', value: updatedAttachments });
+      const updatedAttachments = UploadedFiles.rename(oldName, newName);
+      dispatch({ field: 'uploadedFiles', value: updatedAttachments });
       return true;
     } catch (error) {
       console.error(error);
@@ -137,17 +130,17 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
       dispatch({ field: 'loading', value: true });
       loadFiles()
         .then(({ files, next }) => {
-          const updatedFiles: AttachmentCollection = {};
-          const updatedFileNames: string[] = [];
+          const updatedUploadedFiles: UploadedFileMap = {};
+          const updatedUploadedFilenames: string[] = [];
 
           for (const file of files) {
-            updatedFiles[file.name] = file;
-            updatedFileNames.push(file.name);
+            updatedUploadedFiles[file.name] = file;
+            updatedUploadedFilenames.push(file.name);
           }
 
           dispatch({ field: 'nextFile', value: next });
-          dispatch({ field: 'attachments', value: updatedFiles });
-          dispatch({ field: 'attachmentNames', value: updatedFileNames });
+          dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
+          dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
         })
         .finally(() => {
           dispatch({ field: 'loading', value: false });
@@ -180,7 +173,7 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
             ...contextValue,
             closeModel: onClose,
             loadFiles,
-            deleteAttachment: handleDeleteAttachment,
+            deleteFile: handleDeleteFile,
             renameAttachment: handleRenameAttachment,
             uploadAttachments: handleUploadAttachments,
           }}
@@ -202,14 +195,14 @@ export const AttachmentsModel = ({ onClose }: Props): JSX.Element => {
                   <button
                     className="flex flex-row items-center self-start gap-x-3 mb-4 p-3 rounded-md border border-white/20 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10 select-none"
                     onClick={async (): Promise<void> => {
-                      const files = await Attachments.openUploadWindow();
+                      const files = await UploadedFiles.openUploadWindow();
                       await handleUploadAttachments(files);
                     }}
                   >
                     <IconPlus size={16} />
                     {t('Drag and drop or choose files to upload')}
                   </button>
-                  <AttachmentsList />
+                  <FilesList />
                   <button
                     className="w-max min-h-[34px] p-4 absolute top-0 right-0"
                     onClick={onClose}

@@ -1,7 +1,7 @@
 import { Conversation } from './chat';
 import { FolderInterface } from './folder';
 import { Prompt } from './prompt';
-import { AttachmentCollection } from './attachment';
+import { UploadedFileMap } from './uploadedFile';
 
 // keep track of local storage schema
 export interface LocalStorage {
@@ -17,5 +17,5 @@ export interface LocalStorage {
   showChatbar: boolean;
   showPromptbar: boolean;
   // added files (7/21/23)
-  attachments: AttachmentCollection;
+  files: UploadedFileMap;
 }

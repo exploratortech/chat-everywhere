@@ -1,5 +1,5 @@
 import { getTimeStamp } from '@/types/misc';
-import { Attachments } from "@/utils/app/attachments";
+import { UploadedFiles } from "@/utils/app/uploadedFiles";
 
 export const CALLABLE_FUNCTIONS = [
   {
@@ -69,7 +69,7 @@ export const CALLABLE_FUNCTIONS = [
 
 const readFromFile = (filename: string): string => {
   try {
-    const content = Attachments.read(filename);
+    const content = UploadedFiles.read(filename);
     return content;
   } catch (error) {
     console.error(error);
@@ -82,7 +82,7 @@ const readFromFile = (filename: string): string => {
 
 const writeToFile = (filename: string, content: string): string => {
   try {
-    Attachments.write(filename, content);
+    UploadedFiles.write(filename, content);
     return content;
   } catch (error) {
     console.error(error);
@@ -95,7 +95,7 @@ const writeToFile = (filename: string, content: string): string => {
 
 const deleteFiles = (filenames: string[]): string => {
   try {
-    Attachments.remove(...filenames);
+    UploadedFiles.remove(filenames);
     return '';
   } catch (error) {
     console.error(error);
@@ -108,7 +108,7 @@ const deleteFiles = (filenames: string[]): string => {
 
 const listFiles = (): string => {
   try {
-    const filenames = Attachments.list();
+    const filenames = UploadedFiles.list();
     return JSON.stringify(filenames);
   } catch (error) {
     console.error(error);

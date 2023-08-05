@@ -1,15 +1,15 @@
-import { UIEvent, useCallback, useContext, useMemo, useRef } from "react";
+import { UIEvent, useCallback, useContext, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import FilesModelContext from "./AttachmentsModel.context";
-import { AttachmentItem } from "./AttachmentItem";
+import FilesModelContext from "./FilesModal.context";
+import { FileItem } from "./FileItem";
 import Spinner from "../Spinner/Spinner";
 
-export const AttachmentsList = (): JSX.Element => {
+export const FilesList = (): JSX.Element => {
   const {
     state: {
-      attachments,
-      attachmentNames,
+      uploadedFiles,
+      uploadedFilenames,
       loading,
       nextFile,
     },
@@ -84,8 +84,8 @@ export const AttachmentsList = (): JSX.Element => {
       dispatch({ field: 'loading', value: true });
       loadFiles()
         .then(({ files, next }) => {
-          const updatedFiles = { ...attachments };
-          const updatedFileNames = [...attachmentNames];
+          const updatedFiles = { ...uploadedFiles };
+          const updatedFileNames = [...uploadedFilenames];
 
           for (const file of files) {
             updatedFiles[file.name] = file;
@@ -93,14 +93,14 @@ export const AttachmentsList = (): JSX.Element => {
           }
 
           dispatch({ field: 'nextFile', value: next });
-          dispatch({ field: 'attachments', value: updatedFiles });
-          dispatch({ field: 'attachmentNames', value: updatedFileNames });
+          dispatch({ field: 'uploadedFiles', value: updatedFiles });
+          dispatch({ field: 'uploadedFilenames', value: updatedFileNames });
         })
         .finally(() => {
           dispatch({ field: 'loading', value: false });
         });
     }
-  }, [attachments, attachmentNames, loading, nextFile, loadFiles, dispatch]);
+  }, [uploadedFiles, uploadedFilenames, loading, nextFile, loadFiles, dispatch]);
 
   return (
     <>
@@ -124,15 +124,15 @@ export const AttachmentsList = (): JSX.Element => {
           onDragOver={handleDragOver}
           onScroll={handleScroll}
         >
-          {!loading && attachmentNames.length <= 0 && (
+          {!loading && uploadedFilenames.length <= 0 && (
             <p className="text-[14px] leading-normal text-center text-white opacity-50">{t('No files')}</p>
           )}
-          {(attachmentNames.map((attachmentName) => {
-              const attachment = attachments[attachmentName];
+          {(uploadedFilenames.map((filename) => {
+              const file = uploadedFiles[filename];
               return (
-                <AttachmentItem
-                  attachment={attachment}
-                  key={attachment.name}
+                <FileItem
+                  file={file}
+                  key={file.name}
                 />
               );
             })

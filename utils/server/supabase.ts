@@ -13,8 +13,8 @@ import {
 } from './referralCode';
 
 import { createClient } from '@supabase/supabase-js';
-import { Attachments } from '../app/attachments';
-import { Attachment } from '@/types/attachment';
+import { UploadedFiles } from '../app/uploadedFiles';
+import { UploadedFile } from '@/types/uploadedFile';
 
 export const getAdminSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -503,7 +503,7 @@ export const updateProAccountsPlan = async (): Promise<void> => {
   }
 };
 
-export const fetchAttachments = async (userId: string, next?: string | null): Promise<{ files: Attachment[], next: string | null }> => {
+export const fetchFiles = async (userId: string, next?: string | null): Promise<{ files: UploadedFile[], next: string | null }> => {
   const limit = 25;
   const supabase = getAdminSupabaseClient();
 
@@ -527,7 +527,7 @@ export const fetchAttachments = async (userId: string, next?: string | null): Pr
   if (!result.data) return { files: [], next: null };
 
   // Return up to the `limit` number of rows
-  const files: Attachment[] = [];
+  const files: UploadedFile[] = [];
   for (let i = 0; i < limit; i++) {
     const file = result.data[i];
 
@@ -537,7 +537,7 @@ export const fetchAttachments = async (userId: string, next?: string | null): Pr
     if (file.name === '.emptyFolderPlaceholder') continue;
 
     files.push({
-      name: Attachments.filenameFromPath(file.name)!,
+      name: UploadedFiles.filenameFromPath(file.name)!,
       content: '',
       type: file.type,
       size: file.size,
@@ -549,7 +549,7 @@ export const fetchAttachments = async (userId: string, next?: string | null): Pr
   return { files, next: result.data[limit]?.name || null };
 };
 
-export const uploadAttachments = async (userId: string, files: File[]): Promise<any> => {
+export const uploadFiles = async (userId: string, files: File[]): Promise<any> => {
   const supabase = getAdminSupabaseClient();
 
   const uploads = [];
@@ -626,12 +626,12 @@ export const uploadAttachments = async (userId: string, files: File[]): Promise<
 };
 
 // Returns a list of the filenames that were deleted
-export const deleteAttachments = async (userId: string, filenames: string[]): Promise<string[]> => {
+export const deleteFiles = async (userId: string, filenames: string[]): Promise<string[]> => {
   const supabase = getAdminSupabaseClient();
 
   const { data, error } = await supabase
     .storage
-    .from('attachments')
+    .from('files')
     .remove(filenames.map((filename) => `${userId}/${filename}`));
 
   if (error) {
@@ -642,5 +642,5 @@ export const deleteAttachments = async (userId: string, filenames: string[]): Pr
     return [];
   }
 
-  return data.map((file) => Attachments.filenameFromPath(file.name) || '');
+  return data.map((file) => UploadedFiles.filenameFromPath(file.name) || '');
 };

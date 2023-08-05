@@ -7,24 +7,24 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 import SidebarActionButton from "../Buttons/SidebarActionButton/SidebarActionButton";
-import AttachmentsModelContext from "./AttachmentsModel.context";
-import { Attachment } from "@/types/attachment";
+import AttachmentsModelContext from "./FilesModal.context";
+import { UploadedFile } from "@/types/uploadedFile";
 
 dayjs.extend(relativeTime);
 
 type Props = {
-  attachment: Attachment;
+  file: UploadedFile;
 }
 
-export function AttachmentItem({ attachment }: Props): JSX.Element {
+export function FileItem({ file }: Props): JSX.Element {
   const {
-    deleteAttachment,
+    deleteFile,
     renameAttachment,
   } = useContext(AttachmentsModelContext);
 
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
-  const [renameValue, setRenameValue] = useState<string>(attachment.name);
+  const [renameValue, setRenameValue] = useState<string>(file.name);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -43,9 +43,10 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
 
   const handleConfirmButtonClick: MouseEventHandler<HTMLButtonElement> = (e) => {
     e.stopPropagation();
-    if (isDeleting && deleteAttachment(attachment.name)) {
+    if (isDeleting) {
+      deleteFile(file.name);
       setIsDeleting(false);
-    } else if (isRenaming && renameAttachment(attachment.name, renameValue)) {
+    } else if (isRenaming && renameAttachment(file.name, renameValue)) {
       setIsRenaming(false);
     }
   };
@@ -54,34 +55,34 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
     e.stopPropagation();
     setIsDeleting(false);
     setIsRenaming(false);
-    setRenameValue(attachment.name);
+    setRenameValue(file.name);
   };
 
   const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     e.stopPropagation();
-    if (e.code === 'Enter' && renameAttachment(attachment.name, renameValue)) {
+    if (e.code === 'Enter' && renameAttachment(file.name, renameValue)) {
       setIsRenaming(false);
     }
   };
 
   const downloadFile = (): void => {
     const link = document.createElement('a');
-    const blob = new Blob([attachment.content], { type: attachment.type });
+    const blob = new Blob([file.content], { type: file.type });
     link.href = window.URL.createObjectURL(blob);
-    link.download = attachment.name;
+    link.download = file.name;
     link.click();
   };
 
   useEffect(() => {
     if (isRenaming && inputRef.current) {
-      const filename: string | undefined = attachment.name.match(/(.+?)\.[^.]*$|$/)![1];
+      const filename: string | undefined = file.name.match(/(.+?)\.[^.]*$|$/)![1];
       inputRef.current.setSelectionRange(0, filename?.length || 0);
     }
-  }, [isRenaming, attachment.name]);
+  }, [isRenaming, file.name]);
 
   useEffect(() => {
-    setRenameValue(attachment.name);
-  }, [attachment.name]);
+    setRenameValue(file.name);
+  }, [file.name]);
 
   return (
     <Menu
@@ -104,7 +105,7 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
         />
       ) : (
         <p className="flex-1 text-sm text-left text-ellipsis overflow-hidden">
-          {attachment.name}
+          {file.name}
         </p>
       )}
       
@@ -122,10 +123,10 @@ export function AttachmentItem({ attachment }: Props): JSX.Element {
       {!isDeleting && !isRenaming && (
         <div className="flex flex-row flex-shrink-0 items-center gap-2 text-gray-300">
           <p className="block mobile:hidden text-sm text-neutral-400 whitespace-nowrap">
-            {dayjs(attachment.updatedAt).fromNow()}
+            {dayjs(file.updatedAt).fromNow()}
           </p>
           <p className="w-20 mr-2 text-sm text-right text-neutral-400 whitespace-nowrap">
-            {prettyBytes(attachment.size, { minimumFractionDigits: 0, maximumFractionDigits: 1 }) || '--'}
+            {prettyBytes(file.size, { minimumFractionDigits: 0, maximumFractionDigits: 1 }) || '--'}
           </p>
           <div className="flex tablet:hidden flex-row items-center gap-2 pointer-events-auto">
             <SidebarActionButton handleClick={(e) => {

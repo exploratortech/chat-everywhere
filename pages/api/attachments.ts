@@ -1,11 +1,11 @@
 import { trackError } from '@/utils/app/azureTelemetry';
 
 import {
-  deleteAttachments,
-  fetchAttachments,
+  deleteFiles,
+  fetchFiles,
   getAdminSupabaseClient,
   getUserProfile,
-  uploadAttachments,
+  uploadFiles,
 } from '@/utils/server/supabase';
 
 const supabase = getAdminSupabaseClient();
@@ -32,7 +32,7 @@ export default async function handler(req: Request): Promise<Response> {
           const url = new URL(req.url);
           const searchParams = new URLSearchParams(url.search);
           const next: string | null = searchParams.get('next');
-          const data = await fetchAttachments(user.id, next || null);
+          const data = await fetchFiles(user.id, next || null);
           return new Response(JSON.stringify(data), { status: 200 });
         } catch (error) {
           console.error(error);
@@ -41,7 +41,7 @@ export default async function handler(req: Request): Promise<Response> {
       };
       case 'POST': {
         const formData = await req.formData();
-        const entries = formData.getAll('attachments[]');
+        const entries = formData.getAll('files[]');
   
         const files: File[] = [];
         for (const entry of entries) {
@@ -49,7 +49,7 @@ export default async function handler(req: Request): Promise<Response> {
         }
   
         try {
-          const errors = await uploadAttachments(user.id, files);
+          const errors = await uploadFiles(user.id, files);
           return new Response(JSON.stringify({ errors }), { status: 200 });
         } catch (error) {
           console.error(error);
@@ -67,7 +67,7 @@ export default async function handler(req: Request): Promise<Response> {
   
         try {
           const filenames: string[] = csv.split(',');
-          const deletedFilenames = await deleteAttachments(user.id, filenames);
+          const deletedFilenames = await deleteFiles(user.id, filenames);
           return new Response(JSON.stringify({ filenames: deletedFilenames }), { status: 200 });
         } catch (error) {
           console.error(error);
