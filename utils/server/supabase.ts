@@ -651,3 +651,35 @@ export const deleteFiles = async (userId: string, filenames: string[]): Promise<
 
   return storageResult.data.map((file) => UploadedFiles.filenameFromPath(file.name) || '');
 };
+
+export const renameFile = async (
+  userId: string,
+  oldName: string,
+  newName: string,
+): Promise<string> => {
+  const supabase = getAdminSupabaseClient();
+
+  const storageResult = await supabase
+    .storage
+    .from('files')
+    .move(`${userId}/${oldName}`, `${userId}/${newName}`);
+  
+  if (storageResult.error) {
+    throw storageResult.error;
+  }
+
+  const databaseResult = await supabase
+    .from('files')
+    .update({
+      path: `${userId}/${newName}`,
+      name: newName,
+      updated_at: dayjs().toISOString(),
+    })
+    .eq('path', `${userId}/${oldName}`);
+
+  if (databaseResult.error) {
+    throw databaseResult.error;
+  }
+
+  return newName;
+};

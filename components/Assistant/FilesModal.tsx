@@ -4,12 +4,13 @@ import { useTranslation } from "react-i18next";
 import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { toast } from "react-hot-toast";
+import dayjs from "dayjs";
 
 import FilesModalContext, { FilesModalState } from "./FilesModal.context";
 import { FilesList } from "./FilesList";
 import { UploadedFiles, sortByName } from "@/utils/app/uploadedFiles";
 import HomeContext from "@/pages/api/home/home.context";
-import { UploadedFile, UploadedFileMap } from "@/types/uploadedFile";
+import { UploadedFileMap } from "@/types/uploadedFile";
 
 type Props = {
   onClose: () => void;
@@ -43,113 +44,125 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
 
   const { t } = useTranslation('model');
 
-  const loadFiles = useCallback(async (): Promise<{ files: UploadedFile[], next: string | null }> => {
-    try {
-      return await UploadedFiles.load(user?.token, nextFile);
-    } catch (error) {
-      console.error(error);
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error('Unable to load files');
+  const checkLoading = useCallback(async (callback: () => Promise<any>): Promise<any> => {
+    if (loading) return;
+    dispatch({ field: 'loading', value: true });
+    const res = await callback();
+    dispatch({ field: 'loading', value: false });
+    return res;
+  }, [loading, dispatch]);
+
+  const loadFiles = useCallback(async () => {// checkLoading<{ files: UploadedFile[], next: string | null }>(async () => {
+      try {
+        return await UploadedFiles.load(user?.token, nextFile);
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('Unable to load files');
+        }
+        return { files: [], next: null };
       }
-      return { files: [], next: null };
-    }
   }, [nextFile, user?.token]);
 
   const handleUploadFiles = useCallback(async (files: FileList | File[]): Promise<boolean> => {
-    try {
-      const [newUploadedFiles, errors] = await UploadedFiles.upload(files, user?.token);
-      const updatedUploadedFilenames = [...uploadedFilenames, ...Object.keys(newUploadedFiles)];
-      updatedUploadedFilenames.sort(sortByName);
-
-      for (const error of errors) {
-        toast.error(`Unable to upload file: ${error.filename}`);
+    return await checkLoading(async () => {
+      try {
+        const [newUploadedFiles, errors] = await UploadedFiles.upload(files, user?.token);
+        const updatedUploadedFilenames = [...uploadedFilenames, ...Object.keys(newUploadedFiles)];
+        updatedUploadedFilenames.sort(sortByName);
+  
+        for (const error of errors) {
+          toast.error(`Unable to upload file: ${error.filename}`);
+        }
+  
+        dispatch({
+          field: 'uploadedFiles',
+          value: { ...uploadedFiles, ...newUploadedFiles },
+        });
+  
+        dispatch({
+          field: 'uploadedFilenames',
+          value: updatedUploadedFilenames,
+        });
+  
+        return true;
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {{
+          toast.error('Unable to upload file(s)');
+        }}
+        return false;
       }
-
-      dispatch({
-        field: 'uploadedFiles',
-        value: { ...uploadedFiles, ...newUploadedFiles },
-      });
-
-      dispatch({
-        field: 'uploadedFilenames',
-        value: updatedUploadedFilenames,
-      });
-
-      return true;
-    } catch (error) {
-      console.error(error);
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {{
-        toast.error('Unable to upload file(s)');
-      }}
-      return false;
-    }
-  }, [uploadedFiles, uploadedFilenames, user?.token, dispatch]);
+    });
+  }, [checkLoading, uploadedFiles, uploadedFilenames, user?.token, dispatch]);
 
   const handleDeleteFile = useCallback(async (filename: string): Promise<boolean> => {
-    try {
-      const deletedFilenames = await UploadedFiles.remove([filename], user?.token);
-      const updatedUploadedFiles = { ...uploadedFiles };
-      const updatedUploadedFilenames: string[] = [];
-
-      for (const filename of deletedFilenames) {
-        delete updatedUploadedFiles[filename];
-      }
-
-      // Retain the files that weren't deleted
-      for (const filename of uploadedFilenames) {
-        if (!deletedFilenames.includes(filename)) {
-          updatedUploadedFilenames.push(filename);
+    return await checkLoading(async () => {
+      try {
+        const deletedFilenames = await UploadedFiles.remove([filename], user?.token);
+        const updatedUploadedFiles = { ...uploadedFiles };
+        const updatedUploadedFilenames: string[] = [];
+  
+        for (const filename of deletedFilenames) {
+          delete updatedUploadedFiles[filename];
         }
+  
+        // Retain the files that weren't deleted
+        for (const filename of uploadedFilenames) {
+          if (!deletedFilenames.includes(filename)) {
+            updatedUploadedFilenames.push(filename);
+          }
+        }
+  
+        dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
+        dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
+  
+        return true;
+      } catch (error) {
+        if (error instanceof Error)
+          toast.error(error.message);
+        else
+          toast.error('Unable to remove file');
+        return false;
       }
-
-      dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
-      dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
-
-      return true;
-    } catch (error) {
-      console.error(error);
-      if (error instanceof Error)
-        toast.error(error.message);
-      else
-        toast.error('Unable to remove file');
-      return false;
-    }
-  }, [uploadedFiles, uploadedFilenames, user?.token, dispatch]);
+    });
+  }, [checkLoading, uploadedFiles, uploadedFilenames, user?.token, dispatch]);
 
   const handleRenameFile= useCallback(async (oldName: string, newName: string): Promise<boolean> => {
-    try {
-      await UploadedFiles.rename(oldName, newName, user?.token);
-
-      const updatedUploadedFiles = { ...uploadedFiles };
-      updatedUploadedFiles[newName] = {
-        ...updatedUploadedFiles[oldName],
-        name: newName,
-      };
-      delete updatedUploadedFiles[oldName];
-
-      const updatedUploadedFilenames = uploadedFilenames.filter(
-        (filename) => filename !== oldName
-      );
-      updatedUploadedFilenames.push(newName);
-      updatedUploadedFilenames.sort(sortByName);
-
-      dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
-      dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
-
-      return true;
-    } catch (error) {
-      console.error(error);
-      if (error instanceof Error)
-        toast.error(error.message);
-      else
-        toast.error('Unable to rename file');
-      return false;
-    }
-  }, [uploadedFiles, uploadedFilenames, user?.token, dispatch]);
+    return await checkLoading(async () => {
+      try {
+        await UploadedFiles.rename(oldName, newName, user?.token);
+  
+        const updatedUploadedFiles = { ...uploadedFiles };
+        updatedUploadedFiles[newName] = {
+          ...updatedUploadedFiles[oldName],
+          name: newName,
+          updatedAt: dayjs().toISOString(),
+        };
+        delete updatedUploadedFiles[oldName];
+  
+        const updatedUploadedFilenames = uploadedFilenames.filter(
+          (filename) => filename !== oldName
+        );
+        updatedUploadedFilenames.push(newName);
+        updatedUploadedFilenames.sort(sortByName);
+  
+        dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
+        dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
+  
+        return true;
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('Unable to rename file');
+        }
+        return false;
+      }
+    });
+  }, [checkLoading, uploadedFiles, uploadedFilenames, user?.token, dispatch]);
 
   useEffect(() => {
     if (!didInitialFetch && !loading) {

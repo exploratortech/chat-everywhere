@@ -8,6 +8,10 @@ export const sortByName = (a: UploadedFile | string, b: UploadedFile | string): 
   return nameA.toUpperCase() < nameB.toUpperCase() ? -1 : 1;
 };
 
+export const validateFilename = (filename: string): boolean => {
+  return !filename.match(/[\\/:"*?<>|]+/);
+};
+
 // Extracts the file name from a path
 const filenameFromPath = (path: string): string | null => {
   const substrings = path.split('/');
@@ -133,8 +137,29 @@ const rename = async (oldName: string, newName: string, userToken?: string): Pro
     return oldName;
   }
 
+  if (newName.length === 0) {
+    throw new Error('Filename cannot be empty');
+  }
+
+  if (!validateFilename(newName)) {
+    throw new Error('Filename cannot contain the following characters: \\/:"*?<>|');
+  }
+
   if (userToken) {
-    throw new Error('Not Implemented');
+    const res = await fetch('/api/files', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-token': userToken,
+      },
+      body: JSON.stringify({ old_name: oldName, new_name: newName }),
+    });
+
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+
+    return newName;
   } else {
     const data = localStorage.getItem('files');
     if (!data) {
@@ -147,10 +172,6 @@ const rename = async (oldName: string, newName: string, userToken?: string): Pro
       uploadedFiles = JSON.parse(data);
     } catch (error) {
       throw new Error('Unable to rename file');
-    }
-  
-    if (newName.length === 0) {
-      throw new Error('Filename cannot be empty');
     }
 
     if (!uploadedFiles[oldName]) {
@@ -166,6 +187,7 @@ const rename = async (oldName: string, newName: string, userToken?: string): Pro
     updatedUploadedFiles[newName] = {
       ...uploadedFiles[oldName],
       name: newName,
+      updatedAt: dayjs().toISOString(),
     };
     delete updatedUploadedFiles[oldName];
   

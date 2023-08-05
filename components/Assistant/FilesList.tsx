@@ -137,12 +137,12 @@ export const FilesList = (): JSX.Element => {
               );
             })
           )}
-          {loading && (
-            <div className="flex py-2">
-              <Spinner size="16px" className="mx-auto" />
-            </div>
-          )}
         </div>
+        {loading && (
+          <div className="absolute left-0 w-full h-full flex justify-center items-center rounded-md bg-black/30">
+            <Spinner size="16px" className="mx-auto" />
+          </div>
+        )}
       </div>
     </>
   );
