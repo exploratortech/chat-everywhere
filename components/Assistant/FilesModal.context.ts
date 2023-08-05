@@ -16,8 +16,8 @@ export interface FilesModelContextProps {
   closeModel: () => void;
   loadFiles: () => Promise<{ files: UploadedFile[], next: string | null }>;
   deleteFile: (filename: string) => Promise<boolean>;
-  renameAttachment: (oldName: string, newName: string) => boolean;
-  uploadAttachments: (files: FileList | File[]) => Promise<boolean>;
+  renameFile: (oldName: string, newName: string) => boolean;
+  uploadFiles: (files: FileList | File[]) => Promise<boolean>;
 }
 
 const FilesModelContext = createContext<FilesModelContextProps>(undefined!);

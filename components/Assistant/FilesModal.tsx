@@ -5,7 +5,7 @@ import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { toast } from "react-hot-toast";
 
-import AttachmentsModelContext, { FilesModalState } from "./FilesModal.context";
+import FilesModalContext, { FilesModalState } from "./FilesModal.context";
 import { FilesList } from "./FilesList";
 import { UploadedFiles } from "@/utils/app/uploadedFiles";
 import HomeContext from "@/pages/api/home/home.context";
@@ -57,15 +57,16 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
     }
   }, [nextFile, user?.token]);
 
-  const handleUploadAttachments = useCallback(async (files: FileList | File[]): Promise<boolean> => {
+  const handleUploadFiles = useCallback(async (files: FileList | File[]): Promise<boolean> => {
     try {
-      const [uploadedAttachments, errors] = await UploadedFiles.upload(files, user?.token);
+      const [newUploadedFiles, errors] = await UploadedFiles.upload(files, user?.token);
+      console.log()
       for (const error of errors) {
         toast.error(`Unable to upload file: ${error.filename}`);
       }
       dispatch({
         field: 'uploadedFiles',
-        value: { ...uploadedFiles, ...uploadedAttachments },
+        value: { ...uploadedFiles, ...newUploadedFiles },
       });
       return true;
     } catch (error) {
@@ -109,10 +110,10 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
     }
   }, [uploadedFiles, uploadedFilenames, user?.token, dispatch]);
 
-  const handleRenameAttachment = useCallback((oldName: string, newName: string) => {
+  const handleRenameFile= useCallback((oldName: string, newName: string) => {
     try {
-      const updatedAttachments = UploadedFiles.rename(oldName, newName);
-      dispatch({ field: 'uploadedFiles', value: updatedAttachments });
+      const updatedUploadedFiles = UploadedFiles.rename(oldName, newName);
+      dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
       return true;
     } catch (error) {
       console.error(error);
@@ -168,14 +169,14 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
           <div className="fixed inset-0 bg-black bg-opacity-25" />
         </Transition.Child>
 
-        <AttachmentsModelContext.Provider
+        <FilesModalContext.Provider
           value={{
             ...contextValue,
             closeModel: onClose,
             loadFiles,
             deleteFile: handleDeleteFile,
-            renameAttachment: handleRenameAttachment,
-            uploadAttachments: handleUploadAttachments,
+            renameFile: handleRenameFile,
+            uploadFiles: handleUploadFiles,
           }}
         >
           <div className="fixed inset-0 overflow-y-auto">
@@ -196,7 +197,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
                     className="flex flex-row items-center self-start gap-x-3 mb-4 p-3 rounded-md border border-white/20 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10 select-none"
                     onClick={async (): Promise<void> => {
                       const files = await UploadedFiles.openUploadWindow();
-                      await handleUploadAttachments(files);
+                      await handleUploadFiles(files);
                     }}
                   >
                     <IconPlus size={16} />
@@ -214,7 +215,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
               </Transition.Child>
             </div>
           </div>
-        </AttachmentsModelContext.Provider>
+        </FilesModalContext.Provider>
       </Dialog>
     </Transition>
   );
