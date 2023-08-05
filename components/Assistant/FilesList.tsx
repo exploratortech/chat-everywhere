@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import FilesModelContext from "./FilesModal.context";
 import { FileItem } from "./FileItem";
 import Spinner from "../Spinner/Spinner";
+import { sortByName } from "@/utils/app/uploadedFiles";
 
 export const FilesList = (): JSX.Element => {
   const {
@@ -84,17 +85,20 @@ export const FilesList = (): JSX.Element => {
       dispatch({ field: 'loading', value: true });
       loadFiles()
         .then(({ files, next }) => {
-          const updatedFiles = { ...uploadedFiles };
-          const updatedFileNames = [...uploadedFilenames];
+          const updatedUploadedFiles = { ...uploadedFiles };
+          const updatedUploadedFilenames = [...uploadedFilenames];
 
           for (const file of files) {
-            updatedFiles[file.name] = file;
-            updatedFileNames.push(file.name);
+            if (!uploadedFiles[file.name]) // Prevents duplicate files
+              updatedUploadedFilenames.push(file.name);
+            updatedUploadedFiles[file.name] = file;
           }
 
+          updatedUploadedFilenames.sort(sortByName);
+
           dispatch({ field: 'nextFile', value: next });
-          dispatch({ field: 'uploadedFiles', value: updatedFiles });
-          dispatch({ field: 'uploadedFilenames', value: updatedFileNames });
+          dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
+          dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
         })
         .finally(() => {
           dispatch({ field: 'loading', value: false });

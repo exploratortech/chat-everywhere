@@ -10,7 +10,7 @@ import FilesModalContext, { FilesModalState } from "./FilesModal.context";
 import { FilesList } from "./FilesList";
 import { UploadedFiles, sortByName } from "@/utils/app/uploadedFiles";
 import HomeContext from "@/pages/api/home/home.context";
-import { UploadedFileMap } from "@/types/uploadedFile";
+import { UploadedFile, UploadedFileMap } from "@/types/uploadedFile";
 
 type Props = {
   onClose: () => void;
@@ -52,17 +52,17 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
     return res;
   }, [loading, dispatch]);
 
-  const loadFiles = useCallback(async () => {// checkLoading<{ files: UploadedFile[], next: string | null }>(async () => {
-      try {
-        return await UploadedFiles.load(user?.token, nextFile);
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error(error.message);
-        } else {
-          toast.error('Unable to load files');
-        }
-        return { files: [], next: null };
+  const loadFiles = useCallback(async (): Promise<{ files: UploadedFile[], next: string | null }> => {
+    try {
+      return await UploadedFiles.load(user?.token, nextFile);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Unable to load files');
       }
+      return { files: [], next: null };
+    }
   }, [nextFile, user?.token]);
 
   const handleUploadFiles = useCallback(async (files: FileList | File[]): Promise<boolean> => {
@@ -186,7 +186,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
           dispatch({ field: 'loading', value: false });
         });
     }
-  }, [didInitialFetch, loadFiles, loading, dispatch]);
+  }, [uploadedFiles, didInitialFetch, loadFiles, loading, dispatch]);
 
   useEffect(() => {
     setDidInitialFetch(false);
