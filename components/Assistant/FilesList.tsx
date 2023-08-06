@@ -83,7 +83,7 @@ export const FilesList = (): JSX.Element => {
     const target = event.currentTarget;
     if (Math.abs(target.scrollHeight - target.clientHeight - target.scrollTop) < 1) {
       dispatch({ field: 'loading', value: true });
-      loadFiles()
+      loadFiles(nextFile)
         .then(({ files, next }) => {
           const updatedUploadedFiles = { ...uploadedFiles };
           const updatedUploadedFilenames = [...uploadedFilenames];
@@ -93,7 +93,6 @@ export const FilesList = (): JSX.Element => {
               updatedUploadedFilenames.push(file.name);
             updatedUploadedFiles[file.name] = file;
           }
-
           updatedUploadedFilenames.sort(sortByName);
 
           dispatch({ field: 'nextFile', value: next });

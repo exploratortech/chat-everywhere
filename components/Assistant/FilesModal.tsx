@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { IconPlus, IconX } from "@tabler/icons-react";
+import { IconPlus, IconRefresh, IconX } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { useCreateReducer } from "@/hooks/useCreateReducer";
@@ -52,9 +52,9 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
     return res;
   }, [loading, dispatch]);
 
-  const loadFiles = useCallback(async (): Promise<{ files: UploadedFile[], next: string | null }> => {
+  const loadFiles = useCallback(async (next?: string): Promise<{ files: UploadedFile[], next: string | null }> => {
     try {
-      return await UploadedFiles.load(user?.token, nextFile);
+      return await UploadedFiles.load(user?.token, next);
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -63,7 +63,31 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
       }
       return { files: [], next: null };
     }
-  }, [nextFile, user?.token]);
+  }, [user?.token]);
+
+  const refreshFiles = useCallback(async (): Promise<void> => {
+    await checkLoading(async (): Promise<void> => {
+      return new Promise((resolve) => {
+        loadFiles()
+          .then(({ files, next }) => {
+            const updatedUploadedFiles: UploadedFileMap = {};
+            const updatedUploadedFilenames: string[] = [];
+
+            for (const file of files) {
+              updatedUploadedFiles[file.name] = file;
+              updatedUploadedFilenames.push(file.name);
+            }
+
+            dispatch({ field: 'nextFile', value: next });
+            dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
+            dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
+          })
+          .finally(() => {
+            resolve();
+          });
+      });
+    });
+  }, [checkLoading, loadFiles, dispatch]);
 
   const handleUploadFiles = useCallback(async (files: FileList | File[]): Promise<boolean> => {
     return await checkLoading(async () => {
@@ -182,26 +206,9 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
   useEffect(() => {
     if (!didInitialFetch && !loading) {
       setDidInitialFetch(true);
-      dispatch({ field: 'loading', value: true });
-      loadFiles()
-        .then(({ files, next }) => {
-          const updatedUploadedFiles: UploadedFileMap = {};
-          const updatedUploadedFilenames: string[] = [];
-
-          for (const file of files) {
-            updatedUploadedFiles[file.name] = file;
-            updatedUploadedFilenames.push(file.name);
-          }
-
-          dispatch({ field: 'nextFile', value: next });
-          dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
-          dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
-        })
-        .finally(() => {
-          dispatch({ field: 'loading', value: false });
-        });
+      refreshFiles();
     }
-  }, [uploadedFiles, didInitialFetch, loadFiles, loading, dispatch]);
+  }, [didInitialFetch, loading, refreshFiles]);
 
   useEffect(() => {
     setDidInitialFetch(false);
@@ -247,16 +254,27 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
                 <Dialog.Panel className=" w-full max-w-[1150px] tablet:max-w-[90vw] h-[calc(100vh-100px)] transform overflow-hidden rounded-2xl  text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
                 <div className="relative flex flex-col flex-grow p-6 bg-neutral-900 overflow-y-auto">
                   <h1 className="font-bold mb-4">{t("Files")}</h1>
-                  <button
-                    className="flex flex-row items-center self-start gap-x-3 mb-4 p-3 rounded-md border border-white/20 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10 select-none"
-                    onClick={async (): Promise<void> => {
-                      const files = await UploadedFiles.openUploadWindow();
-                      await handleUploadFiles(files);
-                    }}
-                  >
-                    <IconPlus size={16} />
-                    {t('Drag and drop or choose files to upload')}
-                  </button>
+                  <div className="flex flex-row items-center gap-2">
+                    <button
+                      className="flex flex-row items-center self-start gap-x-3 mb-4 p-3 rounded-md border border-white/20 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10 select-none"
+                      disabled={loading}
+                      onClick={async (): Promise<void> => {
+                        const files = await UploadedFiles.openUploadWindow();
+                        await handleUploadFiles(files);
+                      }}
+                    >
+                      <IconPlus size={16} />
+                      {t('Drag and drop or choose files to upload')}
+                    </button>
+                    <button
+                      className="flex flex-row items-center self-start gap-x-3 mb-4 p-3 rounded-md border border-white/20 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10 select-none"
+                      disabled={loading}
+                      onClick={refreshFiles}
+                    >
+                      <IconRefresh size={16} />
+                      {t('Refresh')}
+                    </button>
+                  </div>
                   <FilesList />
                   <button
                     className="w-max min-h-[34px] p-4 absolute top-0 right-0"
