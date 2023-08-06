@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { IconPlus, IconRefresh, IconX } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
-import { Fragment, useCallback, useContext, useEffect, useState } from "react";
+import { Fragment, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { toast } from "react-hot-toast";
 import dayjs from "dayjs";
@@ -42,6 +42,8 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
 
   const [didInitialFetch, setDidInitialFetch] = useState<boolean>(true);
 
+  const filesListRef = useRef<HTMLDivElement>(null);
+
   const { t } = useTranslation('model');
 
   const checkLoading = useCallback(async (callback: () => Promise<any>): Promise<any> => {
@@ -70,6 +72,8 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
       return new Promise((resolve) => {
         loadFiles()
           .then(({ files, next }) => {
+            filesListRef.current?.scrollTo({ top: 0 });
+
             const updatedUploadedFiles: UploadedFileMap = {};
             const updatedUploadedFilenames: string[] = [];
 
@@ -275,7 +279,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
                       {t('Refresh')}
                     </button>
                   </div>
-                  <FilesList />
+                  <FilesList ref={filesListRef} />
                   <button
                     className="w-max min-h-[34px] p-4 absolute top-0 right-0"
                     onClick={onClose}

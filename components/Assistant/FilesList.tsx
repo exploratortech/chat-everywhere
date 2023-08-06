@@ -1,4 +1,4 @@
-import { UIEvent, useCallback, useContext, useRef } from "react";
+import { ForwardedRef, UIEvent, forwardRef, useCallback, useContext, useImperativeHandle, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import FilesModelContext from "./FilesModal.context";
@@ -6,7 +6,7 @@ import { FileItem } from "./FileItem";
 import Spinner from "../Spinner/Spinner";
 import { sortByName } from "@/utils/app/uploadedFiles";
 
-export const FilesList = (): JSX.Element => {
+const Component = (props: unknown, ref: ForwardedRef<HTMLDivElement>): JSX.Element => {
   const {
     state: {
       uploadedFiles,
@@ -126,6 +126,7 @@ export const FilesList = (): JSX.Element => {
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onScroll={handleScroll}
+          ref={ref}
         >
           {!loading && uploadedFilenames.length <= 0 && (
             <p className="text-[14px] leading-normal text-center text-white opacity-50">{t('No files')}</p>
@@ -150,3 +151,5 @@ export const FilesList = (): JSX.Element => {
     </>
   );
 };
+
+export const FilesList = forwardRef<HTMLDivElement, unknown>(Component);
