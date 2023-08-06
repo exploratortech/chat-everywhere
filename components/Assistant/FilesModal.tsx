@@ -83,7 +83,9 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
           // new files when paginating. This is to ensure consistent pagination behaviour.
           if (!nextFile || filename.toUpperCase() < nextFile.toUpperCase()) {
             updatedUploadedFiles[filename] = newUploadedFiles[filename];
-            updatedUploadedFilenames.push(filename);
+
+            if (!uploadedFiles[filename]) // Prevent duplicates
+              updatedUploadedFilenames.push(filename);
           }
         }
 
@@ -109,7 +111,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
         return false;
       }
     });
-  }, [checkLoading, uploadedFiles, uploadedFilenames, user?.token, dispatch]);
+  }, [checkLoading, uploadedFiles, uploadedFilenames, nextFile, user?.token, dispatch]);
 
   const handleDeleteFile = useCallback(async (filename: string): Promise<boolean> => {
     return await checkLoading(async () => {
