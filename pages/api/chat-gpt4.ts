@@ -71,19 +71,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     await addUsageEntry(PluginID.GPT4, data.user.id);
     await subtractCredit(data.user.id, PluginID.GPT4);
-    // Only enable GPT-4 in production
-    const modelToUse =
-      process.env.NEXT_PUBLIC_ENV === 'production'
-        ? OpenAIModels[OpenAIModelID.GPT_4]
-        : OpenAIModels[OpenAIModelID.GPT_3_5];
 
     const stream = await OpenAIStream(
-      modelToUse,
+      OpenAIModels[OpenAIModelID.GPT_4],
       promptToSend,
       temperatureToUse,
       messagesToSend,
-      null,
-      true,
+      null
     );
 
     return new Response(stream);
