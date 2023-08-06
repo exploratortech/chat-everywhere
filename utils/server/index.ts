@@ -1,7 +1,14 @@
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
-import { AZURE_OPENAI_ENDPOINTS, AZURE_OPENAI_KEYS, OPENAI_API_HOST, OPENAI_API_TYPE } from '../app/const';
+import {
+  AZURE_OPENAI_ENDPOINTS,
+  AZURE_OPENAI_GPT_4_ENDPOINTS,
+  AZURE_OPENAI_GPT_4_KEYS,
+  AZURE_OPENAI_KEYS,
+  OPENAI_API_HOST,
+  OPENAI_API_TYPE,
+} from '../app/const';
 
 import {
   ParsedEvent,
@@ -48,7 +55,7 @@ export const OpenAIStream = async (
     isGPT4Model,
     openAIPriority,
   );
-
+  
   let attempt = 0;
 
   while (attempt < openAIEndpoints.length) {
@@ -56,9 +63,11 @@ export const OpenAIStream = async (
     const openAIKey = openAIKeys[attempt];
 
     try {
-      if (!openAIEndpoint || !openAIKey) throw new Error('Missing endpoint/key');
+      if (!openAIEndpoint || !openAIKey)
+        throw new Error('Missing endpoint/key');
 
-      let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_MODEL_NAME}/chat/completions?api-version=2023-06-01-preview`;
+      const modelName = isGPT4Model ? process.env.AZURE_OPENAI_GPT_4_MODEL_NAME : process.env.AZURE_OPENAI_MODEL_NAME;
+      let url = `${openAIEndpoint}/openai/deployments/${modelName}/chat/completions?api-version=2023-06-01-preview`;
       if (openAIEndpoint.includes('openai.com')) {
         url = `${openAIEndpoint}/v1/chat/completions`;
       }
@@ -94,6 +103,8 @@ export const OpenAIStream = async (
       const abortController = new AbortController();
       const timeout = setTimeout(() => abortController.abort(), 10000);
 
+      console.log(`Sending request to ${url}`);
+      
       const res = await fetch(url, {
         headers: requestHeaders,
         method: 'POST',
@@ -107,19 +118,23 @@ export const OpenAIStream = async (
       if (res.status !== 200) {
         const result = await res.json();
         if (result.error) {
-          console.error(new OpenAIError(
-            result.error.message,
-            result.error.type,
-            result.error.param,
-            result.error.code,
-            res.status,
-          ));
+          console.error(
+            new OpenAIError(
+              result.error.message,
+              result.error.type,
+              result.error.param,
+              result.error.code,
+              res.status,
+            ),
+          );
         } else {
-          console.error(new Error(
-            `OpenAI API returned an error: ${
-              decoder.decode(result?.value) || result.statusText
-            }`,
-          ));
+          console.error(
+            new Error(
+              `OpenAI API returned an error: ${
+                decoder.decode(result?.value) || result.statusText
+              }`,
+            ),
+          );
         }
 
         attempt += 1;
@@ -133,7 +148,7 @@ export const OpenAIStream = async (
           let buffer: Uint8Array[] = [];
           let stop = false;
           let error: any = null;
-    
+
           const onParse = (event: ParsedEvent | ReconnectInterval) => {
             if (event.type === 'event') {
               const data = event.data;
@@ -141,10 +156,10 @@ export const OpenAIStream = async (
               if (data === '[DONE]') {
                 return;
               }
-    
+
               try {
                 const json = JSON.parse(data);
-    
+
                 if (json.choices[0]) {
                   if (json.choices[0].finish_reason != null) {
                     if (customMessageToStreamBack) {
@@ -166,7 +181,7 @@ export const OpenAIStream = async (
               }
             }
           };
-    
+
           const parser = createParser(onParse);
 
           const interval = setInterval(() => {
@@ -174,7 +189,7 @@ export const OpenAIStream = async (
               const data = buffer.shift();
               controller.enqueue(data);
             }
-            
+
             if (buffer.length === 0 && stop) {
               if (error) {
                 controller.error(error);
@@ -212,8 +227,13 @@ const getRandomOpenAIEndpointsAndKeys = (
   includeGPT4: boolean = false,
   openAIPriority: boolean,
 ): [(string | undefined)[], (string | undefined)[]] => {
-  const endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
-  const keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
+  let endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
+  let keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
+
+  if (includeGPT4) {
+    endpoints = [...AZURE_OPENAI_GPT_4_ENDPOINTS];
+    keys = [...AZURE_OPENAI_GPT_4_KEYS];
+  }
 
   for (let i = endpoints.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -232,11 +252,6 @@ const getRandomOpenAIEndpointsAndKeys = (
   } else {
     endpoints.push(OPENAI_API_HOST);
     keys.push(process.env.OPENAI_API_KEY);
-  }
-
-  if (includeGPT4) {
-    endpoints.splice(0, 0, OPENAI_API_HOST);
-    keys.splice(0, 0, process.env.OPENAI_API_GPT_4_KEY);
   }
 
   return [endpoints, keys];
