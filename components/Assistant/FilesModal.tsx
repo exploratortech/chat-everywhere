@@ -69,16 +69,29 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
     return await checkLoading(async () => {
       try {
         const [newUploadedFiles, errors] = await UploadedFiles.upload(files, user?.token);
-        const updatedUploadedFilenames = [...uploadedFilenames, ...Object.keys(newUploadedFiles)];
-        updatedUploadedFilenames.sort(sortByName);
-  
+
         for (const error of errors) {
           toast.error(`Unable to upload file: ${error.filename}`);
         }
+
+        const updatedUploadedFiles = { ...uploadedFiles };
+        const updatedUploadedFilenames = [...uploadedFilenames];
+        
+        for (const filename of Object.keys(newUploadedFiles)) {
+          // Add the uploaded files to the local collection if the already fetched
+          // files would've included them. Otherwise, don't add them and fetch the
+          // new files when paginating. This is to ensure consistent pagination behaviour.
+          if (!nextFile || filename.toUpperCase() < nextFile.toUpperCase()) {
+            updatedUploadedFiles[filename] = newUploadedFiles[filename];
+            updatedUploadedFilenames.push(filename);
+          }
+        }
+
+        updatedUploadedFilenames.sort(sortByName);
   
         dispatch({
           field: 'uploadedFiles',
-          value: { ...uploadedFiles, ...newUploadedFiles },
+          value: updatedUploadedFiles,
         });
   
         dispatch({
