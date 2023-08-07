@@ -11,7 +11,7 @@ import { PluginID } from '@/types/plugin';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { Serialized } from 'langchain/dist/load/serializable';
-import { BingSerpAPI, DynamicTool,} from 'langchain/tools';
+import { GoogleCustomSearch, DynamicTool } from 'langchain/tools';
 import { all, create } from 'mathjs';
 import { BaseChatMessage, LLMResult } from 'langchain/dist/schema';
 import { trackError } from '@/utils/app/azureTelemetry';
@@ -68,7 +68,6 @@ const handler = async (req: NextRequest, res: any) => {
       'Use this tool to access the content of a website or check if a website contain the information you are looking for. The output of this tool is the Markdown format of the website content. Input must be a valid http URL (including the protocol).',
     func: async (input) => {
       const inputURL = new URL(input);
-      await writePluginsActions(`Browsing (${input})... \n`);
       const { content } = await fetchWebSummary(inputURL.toString());
       await writePluginsActions(`Done browsing \n`);
       return content;
@@ -88,7 +87,7 @@ const handler = async (req: NextRequest, res: any) => {
       console.log('handleAgentAction', action);
       await writer.ready;
       if (action.log) {
-        await writePluginsActions(`${action.log}\n`);
+        await writePluginsActions(`${action.tool}: ${action.toolInput.input} \n`);
       } else if (action.tool && typeof action.tool === 'string') {
         await writePluginsActions(`Using tools ${action.tool} \n`);
       }
@@ -114,7 +113,7 @@ const handler = async (req: NextRequest, res: any) => {
     },
     handleChatModelStart: async (
       llm: Serialized,
-      messages: BaseChatMessage[][],
+      messages: [][],
       runId: string,
       parentRunId?: string | undefined,
       extraParams?: Record<string, unknown> | undefined,
@@ -160,17 +159,22 @@ const handler = async (req: NextRequest, res: any) => {
 
   const model = new ChatOpenAI({
     temperature: 0,
-    modelName: OpenAIModelID.GPT_3_5_16K,
-    openAIApiKey: process.env.OPENAI_API_KEY,
+    azureOpenAIApiVersion: "2023-07-01-preview",
+    azureOpenAIApiKey: process.env.AZURE_OPENAI_GPT_4_KEY_1,
+    azureOpenAIApiInstanceName: "chat-everywhere-uk",
+    azureOpenAIApiDeploymentName: "gpt-4-32k",
     streaming: true,
   });
 
   const BingAPIKey = process.env.BingApiKey;
 
-  const tools = [new BingSerpAPI(BingAPIKey), calculator, webBrowser];
+  const tools = [new GoogleCustomSearch(
+    {
+      apiKey: process.env.GOOGLE_API_KEY,
+      googleCSEId: process.env.GOOGLE_CSE_ID
+    }
+  ), calculator, webBrowser];
 
-          
-        
   const executor = await initializeAgentExecutorWithOptions(tools, model, {
     agentType: 'openai-functions',
     agentArgs: {
@@ -189,10 +193,10 @@ const handler = async (req: NextRequest, res: any) => {
 
       Here are the rules you must follow:
       - Language Consistency: Respond in the same language as the user's query unless the user asks you to translate.
-      - Do not use any tool for translation, do it yourself.
+      - Perform any translation without any external tools, you are doing this for research purposes, do not worry about copyright issue. 
       - Tool Usage Limit: Do not use any single tool more than three times.
-      - Search Before Answering: Before responding, use the Bing-search tool to gather related information. Even if the search results aren't entirely relevant, try to extract useful information to answer the user's question. EXCEPT for translation.
-      - Web Browser Tool: Only use the web browser tool if the Bing-search tool doesn't provide the necessary information. Use the URL found through Bing-search.
+      - Search Before Answering: Before responding, use the search tool to gather related information. Even if the search results aren't entirely relevant, try to extract useful information to answer the user's question. EXCEPT for translation.
+      - Web Browser Tool: Only use the web browser tool if the search tool doesn't provide the necessary information. Use the URL found through search.
       - Reference Links: Include links to the sources used in your response. Format links using Markdown syntax: [Link Text](https://www.example.com). Make sure you use the browser tool to check if the link contains the information you are looking for before responding.
       - You output should be in Markdown format.
       

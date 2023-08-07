@@ -35,7 +35,7 @@
     "html-to-md": "^0.8.3",
     "i18next": "^22.4.13",
     "isomorphic-dompurify": "^1.7.0",
-    "langchain": "^0.0.94",
+    "langchain": "^0.0.123",
     "markdown-to-txt": "^2.0.1",
     "mathjs": "^11.8.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.28.0",
