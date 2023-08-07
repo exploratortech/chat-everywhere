@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { trackError } from '@/utils/app/azureTelemetry';
 import { truncateLogMessage } from '@/utils/server';
 import fetchWebSummary from '@/utils/server/fetchWebSummary';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
-import { OpenAIModelID } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
 
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { Serialized } from 'langchain/dist/load/serializable';
-import { GoogleCustomSearch, DynamicTool } from 'langchain/tools';
+import { LLMResult } from 'langchain/dist/schema';
+import { DynamicTool, GoogleCustomSearch } from 'langchain/tools';
 import { all, create } from 'mathjs';
-import { BaseChatMessage, LLMResult } from 'langchain/dist/schema';
-import { trackError } from '@/utils/app/azureTelemetry';
 
 export const config = {
   runtime: 'edge',
@@ -87,7 +86,9 @@ const handler = async (req: NextRequest, res: any) => {
       console.log('handleAgentAction', action);
       await writer.ready;
       if (action.log) {
-        await writePluginsActions(`${action.tool}: ${action.toolInput.input} \n`);
+        await writePluginsActions(
+          `${action.tool}: ${action.toolInput.input} \n`,
+        );
       } else if (action.tool && typeof action.tool === 'string') {
         await writePluginsActions(`Using tools ${action.tool} \n`);
       }
@@ -159,21 +160,23 @@ const handler = async (req: NextRequest, res: any) => {
 
   const model = new ChatOpenAI({
     temperature: 0,
-    azureOpenAIApiVersion: "2023-07-01-preview",
+    azureOpenAIApiVersion: '2023-07-01-preview',
     azureOpenAIApiKey: process.env.AZURE_OPENAI_GPT_4_KEY_1,
-    azureOpenAIApiInstanceName: "chat-everywhere-uk",
-    azureOpenAIApiDeploymentName: "gpt-4-32k",
+    azureOpenAIApiInstanceName: 'chat-everywhere-uk',
+    azureOpenAIApiDeploymentName: 'gpt-4-32k',
     streaming: true,
   });
 
   const BingAPIKey = process.env.BingApiKey;
 
-  const tools = [new GoogleCustomSearch(
-    {
+  const tools = [
+    new GoogleCustomSearch({
       apiKey: process.env.GOOGLE_API_KEY,
-      googleCSEId: process.env.GOOGLE_CSE_ID
-    }
-  ), calculator, webBrowser];
+      googleCSEId: process.env.GOOGLE_CSE_ID,
+    }),
+    calculator,
+    webBrowser,
+  ];
 
   const executor = await initializeAgentExecutorWithOptions(tools, model, {
     agentType: 'openai-functions',
