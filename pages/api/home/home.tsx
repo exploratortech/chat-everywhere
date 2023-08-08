@@ -11,6 +11,7 @@ import { event } from 'nextjs-google-analytics';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
+import useOrientation from '@/hooks/useOrientation';
 
 import { fetchShareableConversation } from '@/utils/app/api';
 import { appInsights, enableAzureTracking } from '@/utils/app/azureAppInsights';
@@ -53,6 +54,7 @@ import FeaturesModel from '@/components/Features/FeaturesModel';
 import { useAzureTts } from '@/components/Hooks/useAzureTts';
 import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
 import { Navbar } from '@/components/Mobile/Navbar';
+import OrientationBlock from '@/components/Mobile/OrientationBlock';
 import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
@@ -505,7 +507,7 @@ const Home = () => {
       document.documentElement.style.setProperty('--vh', `${vh}px`);
 
       // If you want to set the height directly in the state
-      setContainerHeight(`${window.innerHeight}px`);
+      setContainerHeight(`100dvh`);
     };
 
     updateHeight();
@@ -651,111 +653,114 @@ const Home = () => {
   }, [lightMode]);
 
   return (
-    <HomeContext.Provider
-      value={{
-        ...contextValue,
-        handleNewConversation,
-        handleCreateFolder,
-        handleDeleteFolder,
-        handleUpdateFolder,
-        handleSelectConversation,
-        handleUpdateConversation,
-        handleUserLogout,
-        playMessage: (text, speechId) =>
-          speak(
-            convertMarkdownToText(text),
-            speechId,
-            user?.token || '',
-            speechRecognitionLanguage,
-          ),
-        stopPlaying,
-        toggleChatbar,
-        togglePromptbar,
-        setDragData,
-        removeDragData,
-        stopConversationRef,
-      }}
-    >
-      <Head>
-        <title>Chat Everywhere</title>
-        <meta name="description" content="Use ChatGPT anywhere" />
-        <meta
-          name="viewport"
-          content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      {selectedConversation && (
-        <main
-          className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white `}
-          style={{ height: containerHeight }}
-        >
-          <Navbar
-            selectedConversation={selectedConversation}
-            onNewConversation={handleNewConversation}
+    <OrientationBlock>
+      <HomeContext.Provider
+        value={{
+          ...contextValue,
+          handleNewConversation,
+          handleCreateFolder,
+          handleDeleteFolder,
+          handleUpdateFolder,
+          handleSelectConversation,
+          handleUpdateConversation,
+          handleUserLogout,
+          playMessage: (text, speechId) =>
+            speak(
+              convertMarkdownToText(text),
+              speechId,
+              user?.token || '',
+              speechRecognitionLanguage,
+            ),
+          stopPlaying,
+          toggleChatbar,
+          togglePromptbar,
+          setDragData,
+          removeDragData,
+          stopConversationRef,
+        }}
+      >
+        <Head>
+          <title>Chat Everywhere</title>
+          <meta name="description" content="Use ChatGPT anywhere" />
+          <meta
+            name="viewport"
+            content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1"
           />
+        </Head>
+        {selectedConversation && (
+          <main
+            className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white `}
+            style={{ height: containerHeight }}
+          >
+            <Navbar
+              selectedConversation={selectedConversation}
+              onNewConversation={handleNewConversation}
+            />
 
-          <div className="flex items-stretch flex-1 w-full overflow-x-hidden">
-            <Chatbar />
-            <div className="flex flex-1">
-              <Chat stopConversationRef={stopConversationRef} />
+            <div className="flex items-stretch flex-1 w-full overflow-x-hidden">
+              <Chatbar />
+              <div className="flex flex-1">
+                <Chat stopConversationRef={stopConversationRef} />
+              </div>
+              {showSettingsModel && (
+                <SettingsModel
+                  onClose={() =>
+                    dispatch({ field: 'showSettingsModel', value: false })
+                  }
+                />
+              )}
+              {showLoginSignUpModel && (
+                <AuthModel
+                  supabase={supabase}
+                  onClose={() =>
+                    dispatch({ field: 'showLoginSignUpModel', value: false })
+                  }
+                />
+              )}
+
+              {showReferralModel && (
+                <ReferralModel
+                  onClose={() =>
+                    dispatch({ field: 'showReferralModel', value: false })
+                  }
+                />
+              )}
+
+              {showUsageModel && session && (
+                <UsageCreditModel
+                  onClose={() =>
+                    dispatch({ field: 'showUsageModel', value: false })
+                  }
+                />
+              )}
+              {showSurveyModel && (
+                <SurveyModel
+                  onClose={() =>
+                    dispatch({ field: 'showSurveyModel', value: false })
+                  }
+                />
+              )}
+              <NewsModel
+                open={showNewsModel}
+                onOpen={() => dispatch({ field: 'showNewsModel', value: true })}
+                onClose={() =>
+                  dispatch({ field: 'showNewsModel', value: false })
+                }
+              />
+
+              <FeaturesModel
+                open={showFeaturesModel}
+                onClose={() =>
+                  dispatch({ field: 'showFeaturesModel', value: false })
+                }
+              />
+              <Promptbar />
             </div>
-            {showSettingsModel && (
-              <SettingsModel
-                onClose={() =>
-                  dispatch({ field: 'showSettingsModel', value: false })
-                }
-              />
-            )}
-            {showLoginSignUpModel && (
-              <AuthModel
-                supabase={supabase}
-                onClose={() =>
-                  dispatch({ field: 'showLoginSignUpModel', value: false })
-                }
-              />
-            )}
-
-            {showReferralModel && (
-              <ReferralModel
-                onClose={() =>
-                  dispatch({ field: 'showReferralModel', value: false })
-                }
-              />
-            )}
-
-            {showUsageModel && session && (
-              <UsageCreditModel
-                onClose={() =>
-                  dispatch({ field: 'showUsageModel', value: false })
-                }
-              />
-            )}
-            {showSurveyModel && (
-              <SurveyModel
-                onClose={() =>
-                  dispatch({ field: 'showSurveyModel', value: false })
-                }
-              />
-            )}
-            <NewsModel
-              open={showNewsModel}
-              onOpen={() => dispatch({ field: 'showNewsModel', value: true })}
-              onClose={() => dispatch({ field: 'showNewsModel', value: false })}
-            />
-
-            <FeaturesModel
-              open={showFeaturesModel}
-              onClose={() =>
-                dispatch({ field: 'showFeaturesModel', value: false })
-              }
-            />
-            <Promptbar />
-          </div>
-          <VoiceInputActiveOverlay />
-        </main>
-      )}
-    </HomeContext.Provider>
+            <VoiceInputActiveOverlay />
+          </main>
+        )}
+      </HomeContext.Provider>
+    </OrientationBlock>
   );
 };
 export default Home;
