@@ -24,12 +24,18 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="flex justify-between w-full">
-        <button onClick={prevSlide} className="p-2 bg-blue-500 text-white">
-          Prev
+        <button
+          onClick={prevSlide}
+          className="p-2 cursor-pointer text-4xl text-white"
+        >
+          {`<`}
         </button>
         {children[currentIndex]}
-        <button onClick={nextSlide} className="p-2 bg-blue-500 text-white">
-          Next
+        <button
+          onClick={nextSlide}
+          className="p-2 cursor-pointer text-4xl text-white"
+        >
+          {`>`}
         </button>
       </div>
       <div className="flex justify-center space-x-2 ">
