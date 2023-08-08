@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 
+import useDeviceDetect from '@/hooks/useDeviceDetect';
 import useOrientation from '@/hooks/useOrientation';
 
 interface OrientationBlockProps {
@@ -8,9 +9,16 @@ interface OrientationBlockProps {
 
 const OrientationBlock: React.FC<OrientationBlockProps> = ({ children }) => {
   const isLandscape = useOrientation();
+  const deviceInfo = useDeviceDetect();
+  const isMobileOrIOSAndNotTabletAndLandscape =
+    deviceInfo.isMobile && !deviceInfo.isTablet && isLandscape;
 
-  const showBlocker = isLandscape === true ? 'block' : 'hidden';
-  const showContent = isLandscape === false ? 'block' : 'hidden';
+  const showBlocker = isMobileOrIOSAndNotTabletAndLandscape
+    ? 'block'
+    : 'hidden';
+  const showContent = !isMobileOrIOSAndNotTabletAndLandscape
+    ? 'block'
+    : 'hidden';
 
   return (
     <>
