@@ -4,10 +4,6 @@ const useOrientation = (): boolean | null => {
   const [landscape, setLandscape] = useState<boolean | null>(null);
 
   const calculateOrientation = (): void => {
-    console.log(
-      'calculateOrientation',
-      typeof window !== 'undefined' && window.innerWidth > window.innerHeight,
-    );
     setLandscape(
       typeof window !== 'undefined' && window.innerWidth > window.innerHeight,
     );
