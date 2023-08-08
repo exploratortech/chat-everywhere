@@ -505,7 +505,7 @@ const Home = () => {
       document.documentElement.style.setProperty('--vh', `${vh}px`);
 
       // If you want to set the height directly in the state
-      setContainerHeight(`${window.innerHeight}px`);
+      setContainerHeight(`100dvh`);
     };
 
     updateHeight();
