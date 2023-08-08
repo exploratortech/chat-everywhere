@@ -5,7 +5,11 @@ const useOrientation = (): boolean | null => {
 
   useEffect(() => {
     const calculateOrientation = (): void => {
-      alert('trigger calculateOrientation ');
+      alert(
+        `trigger calculateOrientation ${
+          window.innerWidth > window.innerHeight
+        } agent: ${navigator.userAgent}`,
+      );
       setLandscape(
         typeof window !== 'undefined' && window.innerWidth > window.innerHeight,
       );
