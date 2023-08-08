@@ -38,6 +38,7 @@ import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
 import { userProfileQuery } from '@/utils/server/supabase';
+import { UploadedFiles } from '@/utils/app/uploadedFiles';
 
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
@@ -491,6 +492,17 @@ const Home = () => {
     if (!user) return;
     fetchAndUpdateCreditUsage(user.id, isPaidUser);
   }, [user, isPaidUser, conversations]);
+
+  useEffect(() => {
+    if (!user) return;
+    UploadedFiles.syncLocal(user.token)
+      .then((result) => {
+        if (result == null) return;
+        for (const error of result) {
+          toast.error(`Unable to sync file: ${error.filename}`);
+        }
+      });
+  }, [user]);
 
   const handleUserLogout = async () => {
     await supabase.auth.signOut();

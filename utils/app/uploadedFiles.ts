@@ -1,6 +1,9 @@
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 
-import { UploadedFile, UploadedFileMap } from "@/types/uploadedFile";
+import { UploadedFile, UploadedFileMap } from '@/types/uploadedFile';
+
+dayjs.extend(utc);
 
 export const sortByName = (a: UploadedFile | string, b: UploadedFile | string): number => {
   const nameA: string = typeof a === 'string' ? a : a.name;
@@ -34,6 +37,7 @@ const list = (): string[] => {
   return filenames.sort(sortByName);
 };
 
+// When loading files from local storage, all the files are fetched (no pagination).
 const load = async (userToken?: string, next?: string | null): Promise<{ files: UploadedFile[], next: string | null }> => {
   if (userToken) {
     const res = await fetch(`/api/files?next=${next || ''}`, {
@@ -198,17 +202,60 @@ const rename = async (oldName: string, newName: string, userToken?: string): Pro
   }
 };
 
-const upload = async (files: FileList | File[], userToken?: string): Promise<[UploadedFileMap, any[]]> => {
+// Uploads the files already saved locally to the server, and deletes the
+// local files. Returns null upon success, otherwise, returns an array containing
+// the files that failed to upload.
+const syncLocal = async (userToken: string): Promise<null | any[]> => {
+  const { files: localFiles } = await load();
+
+  const files: File[] = [];
+  for (const localFile of localFiles) {
+    const file = new File(
+      [localFile.content],
+      localFile.name,
+      {
+        type: localFile.type,
+        lastModified: dayjs(localFile.updatedAt).valueOf(),
+      }
+    );
+    files.push(file);
+  }
+
+  if (!files.length) {
+    return null;
+  }
+
+  const { errors } = await upload(files, userToken, true);
+  if (errors.length > 0) {
+    return errors;
+  }
+
+  await remove(files.map((file) => file.name));
+  return null;
+};
+
+const upload = async (
+  files: FileList | File[],
+  userToken: string | null = null,
+  sync: boolean = false,
+): Promise<{ files: UploadedFileMap, errors: any[] }> => {
   let uploadedFiles = await createUploadedFiles(files);
   let errors: any[] = [];
 
+  if (!files) return { files: {}, errors: [] };
+
   if (userToken) {
     const formData = new FormData();
-
+    const fileData: any = { updatedAt: {} };
+    
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       formData.append('files[]', file, file.name);
+      fileData.updatedAt[file.name] = file.lastModified;
     }
+
+    formData.append('sync', sync ? 'true' : 'false');
+    formData.append('file_data', JSON.stringify(fileData));
   
     const res = await fetch('/api/files/', {
       method: 'POST',
@@ -244,7 +291,7 @@ const upload = async (files: FileList | File[], userToken?: string): Promise<[Up
     localStorage.setItem('files', jsonString);
   }
 
-  return [uploadedFiles, errors];
+  return { files: uploadedFiles, errors: [] };
 };
 
 const write = (filename: string, content: string): string => {
@@ -324,6 +371,7 @@ export const UploadedFiles = {
   read,
   remove,
   rename,
+  syncLocal,
   upload,
   write,
 };

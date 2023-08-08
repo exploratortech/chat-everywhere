@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 
 import { DefaultMonthlyCredits } from '@/utils/config';
 
@@ -15,6 +16,8 @@ import {
 import { createClient } from '@supabase/supabase-js';
 import { UploadedFiles } from '../app/uploadedFiles';
 import { UploadedFile } from '@/types/uploadedFile';
+
+dayjs.extend(utc);
 
 export const getAdminSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -549,15 +552,43 @@ export const fetchFiles = async (userId: string, next?: string | null): Promise<
   return { files, next: result.data[limit]?.name || null };
 };
 
-export const uploadFiles = async (userId: string, files: File[]): Promise<any> => {
+export const uploadFiles = async (
+  userId: string,
+  files: File[],
+  fileData: any,
+  sync: boolean = false,
+): Promise<any> => {
   const supabase = getAdminSupabaseClient();
 
   const uploads = [];
   const errors: { filename: string, error: string }[] = [];
 
+  const databaseResult = await supabase
+    .from('files')
+    .select('name, updated_at')
+    .eq('user_id', userId)
+    .in('name', files.map((file) => file.name));
+  
+  if (databaseResult.error) {
+    throw databaseResult.error;
+  }
+    
   // 1. Upload files to storage. Files that fail to upload are added to
   // `errors`
   for (const file of files) {
+    // Overwrite files with uploaded files if the uploaded file is newer,
+    // otherwise, don't overwrite.
+    if (sync && databaseResult.data.some((row) => {
+      if (row.name === file.name) {
+        const serverFileUpdatedAt = dayjs(row.updated_at).utc().valueOf();
+        const localFileUpdatedAt = fileData.updatedAt[file.name];
+        return serverFileUpdatedAt > localFileUpdatedAt;
+      }
+      return false;
+    })) {
+      continue;
+    }
+
     uploads.push(
       new Promise<File | null>(async (resolve) => {
         const { error } = await supabase

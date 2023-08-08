@@ -44,15 +44,33 @@ export default async function handler(req: Request): Promise<Response> {
       };
       case 'POST': {
         const formData = await req.formData();
-        const entries = formData.getAll('files[]');
+
+        const filesEntry = formData.getAll('files[]');
+        const sync: boolean = formData.get('sync') === 'true';
+        let fileData!: any;
+
+        try {
+          const jsonString = formData.get('file_data');
+          if (!jsonString) {
+            fileData = { updatedAt: {} };
+          } else {
+            fileData = JSON.parse(jsonString as string);
+          }
+        } catch (error) {
+          return new Response('Malformed parameter `file_data`', { status: 400 });
+        }
   
         const files: File[] = [];
-        for (const entry of entries) {
+        for (const entry of filesEntry) {
           if (entry instanceof File) files.push(entry);
+        }
+
+        if (!files.length) {
+          return new Response('No files uploaded', { status: 400 });
         }
   
         try {
-          const errors = await uploadFiles(user.id, files);
+          const errors = await uploadFiles(user.id, files, fileData, sync);
           return new Response(JSON.stringify({ errors }), { status: 200 });
         } catch (error) {
           console.error(error);

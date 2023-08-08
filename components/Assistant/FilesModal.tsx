@@ -96,7 +96,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
   const handleUploadFiles = useCallback(async (files: FileList | File[]): Promise<boolean> => {
     return await checkLoading(async () => {
       try {
-        const [newUploadedFiles, errors] = await UploadedFiles.upload(files, user?.token);
+        const { files: newUploadedFiles, errors } = await UploadedFiles.upload(files, user?.token);
 
         for (const error of errors) {
           toast.error(`Unable to upload file: ${error.filename}`);
@@ -216,6 +216,15 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
 
   useEffect(() => {
     setDidInitialFetch(false);
+    if (user?.token) {
+      UploadedFiles.syncLocal(user.token)
+        .then((result) => {
+          if (result == null) return;
+          for (const error of result) {
+            toast.error(`Unable to sync file: ${error.filename}`);
+          }
+        });
+    }
   }, [user?.token]);
 
   return (
