@@ -55,11 +55,16 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
           <div
             key={index}
             onClick={handleThumbnailClick(index)}
-            className="w-16 h-16 cursor-pointer"
+            className="relative w-16 h-16 cursor-pointer"
           >
             {React.cloneElement(child as React.ReactElement<any>, {
               className: 'child-no-margin child-no-click',
             })}
+            <div
+              className={`w-full h-full absolute top-0 left-0 ${
+                currentIndex === index ? 'bg-transparent' : 'bg-black/70 '
+              }`}
+            ></div>
           </div>
         ))}
       </div>
