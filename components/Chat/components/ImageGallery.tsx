@@ -25,7 +25,7 @@ export default function ImageGallery({ message }: ImageGalleryProps) {
         return (
           <MemoizedReactMarkdown
             key={`aiImageHtml-${index}`}
-            className="prose dark:prose-invert min-w-full"
+            className="min-w-full"
             remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
             rehypePlugins={[rehypeMathjax, rehypeRaw]}
             components={{

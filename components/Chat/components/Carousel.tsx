@@ -1,3 +1,4 @@
+import { IconCaretLeft, IconCaretRight } from '@tabler/icons-react';
 import React, { ReactNode, useState } from 'react';
 
 type CarouselProps = {
@@ -22,27 +23,28 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
     setCurrentIndex(index);
   };
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="flex justify-between w-full">
-        <button
-          onClick={prevSlide}
-          className="p-2 cursor-pointer text-4xl text-white"
-        >
-          {`<`}
-        </button>
+    <div className="flex flex-col items-center w-full max-w-[80dvw] mobile:max-w-[70dvw] gap-2">
+      <div className="relative flex justify-between w-full">
         {children[currentIndex]}
         <button
-          onClick={nextSlide}
-          className="p-2 cursor-pointer text-4xl text-white"
+          onClick={prevSlide}
+          className="absolute left-[-4rem] mobile:left-[-3rem] top-[50%] translate-y-[-50%] p-4 cursor-pointer text-white"
         >
-          {`>`}
+          <IconCaretLeft height={`20dvw`} />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-[-4rem] mobile:right-[-3rem] top-[50%] translate-y-[-50%] p-4 cursor-pointer text-white"
+        >
+          <IconCaretRight height={`20dvw`} />
         </button>
       </div>
-      <div className="flex justify-center space-x-2 ">
+
+      <div className="flex justify-center space-x-2 my-2">
         {children.map((_, index) => (
           <span
             key={index}
-            className={`h-1 w-1 rounded-full ${
+            className={`h-[1dvw] w-[1dvw] rounded-full ${
               currentIndex === index ? 'bg-blue-500' : 'bg-gray-300'
             }`}
           />

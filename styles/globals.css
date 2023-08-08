@@ -79,3 +79,8 @@ details.disabled summary {
 svg.toggle-arrow {
   transition: transform 0.2s ease-in-out;
 }
+
+[id^='mj-image'] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
