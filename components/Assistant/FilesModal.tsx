@@ -6,6 +6,7 @@ import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { toast } from "react-hot-toast";
 import dayjs from "dayjs";
 
+import useMediaQuery from "@/hooks/useMediaQuery";
 import FilesModalContext, { FilesModalState } from "./FilesModal.context";
 import { FilesList } from "./FilesList";
 import { UploadedFiles, sortByName } from "@/utils/app/uploadedFiles";
@@ -45,6 +46,8 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
   const filesListRef = useRef<HTMLDivElement>(null);
 
   const { t } = useTranslation('model');
+
+  const isMobileLayout = useMediaQuery('(max-width: 640px)');
 
   const checkLoading = useCallback(async (callback: () => Promise<any>): Promise<any> => {
     if (loading) return;
@@ -277,7 +280,9 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
                       }}
                     >
                       <IconPlus size={16} />
-                      {t('Drag and drop or choose files to upload')}
+                      {isMobileLayout
+                        ? t('Upload files')
+                        : t('Drag and drop or choose files to upload')}
                     </button>
                     <button
                       className="flex flex-row items-center self-start gap-x-3 mb-4 p-3 rounded-md border border-white/20 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10 select-none"
@@ -285,7 +290,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
                       onClick={refreshFiles}
                     >
                       <IconRefresh size={16} />
-                      {t('Refresh')}
+                      {isMobileLayout ? '' : t('Refresh')}
                     </button>
                   </div>
                   <FilesList ref={filesListRef} />
