@@ -65,9 +65,6 @@ const handler = async (req: NextRequest): Promise<Response> => {
             hasTier &&
             'last_edited_time' in page
           ) {
-            console.log({
-              page,
-            });
             return {
               id: page.id,
               title: (page.properties.Name as any).title[0].plain_text,
