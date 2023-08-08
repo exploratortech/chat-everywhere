@@ -3,5 +3,8 @@
   "Unable to access microphone": "無法存取麥克風",
   "The speech service is unavailable at the moment, please try again later": "語音服務目前無法使用，請稍後再試",
   "Please register and sign in to enable voice input": "請註冊並登入以啟用語音輸入",
-  "Please sign in to use ai image feature": "請登入以使用 AI 圖片功能"
+  "Please sign in to use ai image feature": "請登入以使用 AI 圖片功能",
+  "We appreciate your use of our application.": "感謝您使用我們的應用程式。",
+  "Currently, our app is optimized to work in portrait mode and unfortunately, we do not support landscape mode at this moment.": "目前，我們的應用程式已經優化為直向模式，但很抱歉，我們目前不支援橫向模式。",
+  "Thank you for your understanding and patience.": "感謝您的理解與耐心。"
 }
