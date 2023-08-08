@@ -44,7 +44,6 @@
     "next-i18next": "^13.2.2",
     "nextjs-google-analytics": "^2.3.3",
     "notion-client": "^6.16.0",
-    "notion-compat": "^6.16.0",
     "notion-utils": "^6.16.0",
     "openai": "^3.2.1",
     "puppeteer": "^19.11.1",
