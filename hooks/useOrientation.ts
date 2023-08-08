@@ -5,20 +5,16 @@ const useOrientation = (): boolean | null => {
 
   useEffect(() => {
     const calculateOrientation = (): void => {
-      alert(
-        `innerWidth: ${window.innerWidth}, 
-        innerHeight: ${window.innerHeight}`,
-      );
       setLandscape(
-        typeof window !== 'undefined' && window.innerWidth > window.innerHeight,
+        typeof window !== 'undefined' && Math.abs(window.orientation) === 90,
       );
     };
     if (typeof window !== 'undefined') {
       calculateOrientation();
-      window.addEventListener('resize', calculateOrientation);
+      window.addEventListener('orientationchange', calculateOrientation);
 
       return () => {
-        window.removeEventListener('resize', calculateOrientation);
+        window.removeEventListener('orientationchange', calculateOrientation);
       };
     }
   }, []);
