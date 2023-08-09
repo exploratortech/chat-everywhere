@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 type AnimatedSlideProps = {
-  direction: 'left' | 'right';
+  direction: 'left' | 'right' | null;
   children: React.ReactNode;
 };
 

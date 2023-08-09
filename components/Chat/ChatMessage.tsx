@@ -20,7 +20,7 @@ import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
 
 import { updateConversation } from '@/utils/app/conversation';
-import { hasMjImageMessage } from '@/utils/app/mjImage';
+import { getMjImageTags } from '@/utils/app/mjImage';
 import { getPluginIcon } from '@/utils/app/ui';
 import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 
@@ -29,8 +29,7 @@ import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import ImageGallery from './components/ImageGallery';
-import MjImageComponent from './components/MjImageComponent';
+import MemoizedImageGallery from './components/ImageGallery/MemoizedImageGallery';
 import TokenCounter from './components/TokenCounter';
 
 import { CodeBlock } from '../Markdown/CodeBlock';
@@ -252,6 +251,14 @@ export const ChatMessage: FC<Props> = memo(
       () => modifyParagraphs(message.content),
       [message.content],
     );
+    const aiImageList = useMemo(() => {
+      return getMjImageTags(formattedMessage);
+    }, [formattedMessage]);
+
+    // TODO: remove below
+    useEffect(() => {
+      console.log('watch aiImageList', aiImageList);
+    }, [aiImageList]);
     return (
       <div
         className={`group px-4 ${
@@ -381,9 +388,7 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
-                {hasMjImageMessage(formattedMessage) && (
-                  <ImageGallery message={formattedMessage} />
-                )}
+                <MemoizedImageGallery aiImageList={aiImageList} />
                 <div className="flex flex-row justify-between">
                   <MemoizedReactMarkdown
                     className="prose dark:prose-invert min-w-full"

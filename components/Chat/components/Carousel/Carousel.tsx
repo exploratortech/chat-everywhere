@@ -1,7 +1,16 @@
 import { IconCaretLeft, IconCaretRight } from '@tabler/icons-react';
-import React, { ReactNode, useMemo, useState } from 'react';
+import React, {
+  ReactNode,
+  use,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
-import AnimatedSlide from './Carousel/AnimatedSlide';
+import HomeContext from '@/pages/api/home/home.context';
+
+import AnimatedSlide from './AnimatedSlide';
 
 type CarouselProps = {
   children: ReactNode[];
@@ -9,7 +18,19 @@ type CarouselProps = {
 
 const Carousel: React.FC<CarouselProps> = ({ children }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState<'left' | 'right'>('left');
+  const [direction, setDirection] = useState<'left' | 'right' | null>(null);
+
+  const {
+    state: { selectedConversation },
+  } = useContext(HomeContext);
+  // reset index on conversation change
+  const selectedConversationId = useMemo(
+    () => selectedConversation?.id,
+    [selectedConversation],
+  );
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [selectedConversationId]);
 
   const nextSlide = () => {
     setDirection('right');
@@ -39,18 +60,22 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
           {currentIndexChildren}
         </AnimatedSlide>
 
-        <button
-          onClick={prevSlide}
-          className="absolute left-[-4rem] mobile:left-[-3rem] top-[50%] translate-y-[-50%] p-4 cursor-pointer text-white"
-        >
-          <IconCaretLeft height={`20dvw`} />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute right-[-4rem] mobile:right-[-3rem] top-[50%] translate-y-[-50%] p-4 cursor-pointer text-white"
-        >
-          <IconCaretRight height={`20dvw`} />
-        </button>
+        {children.length > 0 && (
+          <>
+            <button
+              onClick={prevSlide}
+              className="absolute left-[-4rem] mobile:left-[-3rem] top-[50%] translate-y-[-50%] p-4 cursor-pointer text-white"
+            >
+              <IconCaretLeft height={`20dvw`} />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute right-[-4rem] mobile:right-[-3rem] top-[50%] translate-y-[-50%] p-4 cursor-pointer text-white"
+            >
+              <IconCaretRight height={`20dvw`} />
+            </button>
+          </>
+        )}
       </div>
 
       <div className="flex justify-center space-x-2 my-2">
@@ -58,7 +83,9 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
           <span
             key={index}
             className={`h-2 w-2 rounded-full ${
-              currentIndex === index ? 'bg-blue-500' : 'bg-gray-300'
+              currentIndex === index
+                ? 'bg-gray-800 dark:bg-white'
+                : 'bg-gray-300 dark:bg-gray-500'
             }`}
           />
         ))}

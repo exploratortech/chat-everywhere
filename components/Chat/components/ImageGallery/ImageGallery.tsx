@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
-
-import { getMjImageTags } from '@/utils/app/mjImage';
+import React from 'react';
 
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 
-import Carousel from './Carousel';
-import MjImageComponent from './MjImageComponent';
+import MemoizedCarousel from '../Carousel/MemoizedCarousel';
+import MjImageComponent from '../MjImageComponent';
 
 import rehypeMathjax from 'rehype-mathjax';
 import rehypeRaw from 'rehype-raw';
@@ -14,13 +12,12 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 
 interface ImageGalleryProps {
-  message: string;
+  aiImageList: string[];
 }
 
-export default function ImageGallery({ message }: ImageGalleryProps) {
-  const aiImageList = getMjImageTags(message);
+export default function ImageGallery({ aiImageList }: ImageGalleryProps) {
   return (
-    <Carousel>
+    <MemoizedCarousel>
       {aiImageList.map((aiImageHtml, index) => {
         return (
           <MemoizedReactMarkdown
@@ -36,7 +33,7 @@ export default function ImageGallery({ message }: ImageGalleryProps) {
           </MemoizedReactMarkdown>
         );
       })}
-    </Carousel>
+    </MemoizedCarousel>
   );
 }
 
