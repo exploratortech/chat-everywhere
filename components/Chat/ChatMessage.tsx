@@ -255,10 +255,6 @@ export const ChatMessage: FC<Props> = memo(
       return getMjImageTags(formattedMessage);
     }, [formattedMessage]);
 
-    // TODO: remove below
-    useEffect(() => {
-      console.log('watch aiImageList', aiImageList);
-    }, [aiImageList]);
     return (
       <div
         className={`group px-4 ${
