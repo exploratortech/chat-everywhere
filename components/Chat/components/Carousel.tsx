@@ -44,7 +44,7 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
         {children.map((_, index) => (
           <span
             key={index}
-            className={`h-[1dvw] w-[1dvw] rounded-full ${
+            className={`h-2 w-2 rounded-full ${
               currentIndex === index ? 'bg-blue-500' : 'bg-gray-300'
             }`}
           />
