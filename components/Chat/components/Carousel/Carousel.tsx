@@ -1,7 +1,6 @@
 import { IconCaretLeft, IconCaretRight } from '@tabler/icons-react';
 import React, {
   ReactNode,
-  use,
   useContext,
   useEffect,
   useMemo,
@@ -11,6 +10,7 @@ import React, {
 import HomeContext from '@/pages/api/home/home.context';
 
 import AnimatedSlide from './AnimatedSlide';
+import CarouselThumbnails from './CarouselThumbnails';
 
 type CarouselProps = {
   children: ReactNode[];
@@ -78,6 +78,7 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
         )}
       </div>
 
+      {/* Dots */}
       <div className="flex justify-center space-x-2 my-2">
         {children.map((_, index) => (
           <span
@@ -90,24 +91,13 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
           />
         ))}
       </div>
-      <div className="flex overflow-x-auto  gap-2">
-        {children.map((child, index) => (
-          <div
-            key={index}
-            onClick={handleThumbnailClick(index)}
-            className="relative w-16 h-16 cursor-pointer"
-          >
-            {React.cloneElement(child as React.ReactElement<any>, {
-              className: 'child-no-margin child-no-click',
-            })}
-            <div
-              className={`w-full h-full absolute top-0 left-0 ${
-                currentIndex === index ? 'bg-transparent' : 'bg-black/70 '
-              }`}
-            ></div>
-          </div>
-        ))}
-      </div>
+      {/* Thumbnails */}
+      <CarouselThumbnails
+        currentIndex={currentIndex}
+        handleThumbnailClick={handleThumbnailClick}
+      >
+        {children}
+      </CarouselThumbnails>
     </div>
   );
 };
