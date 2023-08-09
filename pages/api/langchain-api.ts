@@ -202,6 +202,7 @@ const handler = async (req: NextRequest, res: any) => {
       - Web Browser Tool: Only use the web browser tool if the search tool doesn't provide the necessary information. Use the URL found through search.
       - Reference Links: Include links to the sources used in your response. Format links using Markdown syntax: [Link Text](https://www.example.com). Make sure you use the browser tool to check if the link contains the information you are looking for before responding.
       - You output should be in Markdown format.
+      - Markdown footnotes syntax example: [^1]: This is the footnote.
       
       Remember, not adhering to these rules may result in a shutdown.
 
