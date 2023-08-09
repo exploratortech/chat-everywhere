@@ -28,6 +28,7 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
   }, [children, currentIndex]);
 
   const handleThumbnailClick = (index: number) => (event: React.MouseEvent) => {
+    setDirection(index > currentIndex ? 'right' : 'left');
     event.stopPropagation();
     setCurrentIndex(index);
   };
