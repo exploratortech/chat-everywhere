@@ -3,8 +3,6 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import Image from 'next/image';
-
 import useMediaQuery from '@/hooks/useMediaQuery';
 
 import {
@@ -237,11 +235,10 @@ export default function MjImageComponent({
       onFocus={handleDivFocus}
       onBlur={handleDivBlur}
     >
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={src}
         alt=""
-        width={0}
-        height={0}
         className={`${
           showButtons ? `scale-110` : ''
         } w-full m-0 transition-all duration-500 `}
