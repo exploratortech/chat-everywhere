@@ -69,6 +69,5 @@ export function getMjImageTags(message: string) {
   const matches = [...message.matchAll(regex)];
 
   const result = matches.map((match) => match[0]);
-  console.log(result);
   return result;
 }

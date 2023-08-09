@@ -251,9 +251,14 @@ export const ChatMessage: FC<Props> = memo(
       () => modifyParagraphs(message.content),
       [message.content],
     );
-    const aiImageList = useMemo(() => {
-      return getMjImageTags(formattedMessage);
+    const aiImageListString = useMemo(() => {
+      return JSON.stringify(getMjImageTags(formattedMessage));
     }, [formattedMessage]);
+
+    // This is a workaround for the issue that the Carousel will be rendered multiple times
+    const aiImageList = useMemo(() => {
+      return JSON.parse(aiImageListString);
+    }, [aiImageListString]);
 
     return (
       <div
