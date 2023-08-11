@@ -69,10 +69,7 @@ export const CALLABLE_FUNCTIONS = [
 
 const readFromFile = async (filename: string, userToken?: string): Promise<string> => {
   try {
-    const content = await UploadedFiles.read(filename, {
-      userToken: userToken,
-      usingFilename: true,
-    });
+    const content = await UploadedFiles.read(filename, userToken);
 
     // Returns the content as a JSON object because there are cases where GPT
     // will respond with an error depending on the content of the file. (i.e. a

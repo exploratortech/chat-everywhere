@@ -79,18 +79,13 @@ const openUploadWindow = async (): Promise<FileList> => {
   });
 };
 
-// 'fileId' can be a filename. If a filename is used, you must specify that it's
-// being used in the 'options' parameter, otherwise, it defaults to file id.
 const read = async (
-  fileId: string,
-  options: {
-    userToken?: string,
-    usingFilename?: boolean,
-  },
+  filename: string,
+  userToken?: string,
 ): Promise<string> => {
-  if (options.userToken) {
-    const res = await fetch(`/api/files/${encodeURIComponent(fileId)}?by=${options.usingFilename ? 'name' : 'id'}`, {
-      headers: { 'user-token': options.userToken },
+  if (userToken) {
+    const res = await fetch(`/api/files/${encodeURIComponent(filename)}`, {
+      headers: { 'user-token': userToken },
       method: 'GET',
     });
 
@@ -115,7 +110,7 @@ const read = async (
       throw new Error('Unable to retrieve file');
     }
   
-    const file = uploadedFiles[fileId];
+    const file = uploadedFiles[filename];
     if (!file) throw new Error('Couldn\'t find file');
 
     return file.content;
