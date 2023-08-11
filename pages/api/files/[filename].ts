@@ -1,13 +1,13 @@
-import { trackError } from '@/utils/app/azureTelemetry';
-import { validateFilename } from '@/utils/app/uploadedFiles';
+import { NextRequest } from 'next/server';
 
+import { trackError } from '@/utils/app/azureTelemetry';
 import {
+  deleteFiles,
   downloadFile,
   getAdminSupabaseClient,
   getUserProfile,
   renameFile,
 } from '@/utils/server/supabase';
-import { NextRequest } from 'next/server';
 
 const supabase = getAdminSupabaseClient();
 
@@ -27,7 +27,9 @@ export default async function handler(req: NextRequest): Promise<Response> {
     const user = await getUserProfile(data.user.id);
     if (!user) return unauthorizedResponse;
 
-    const filename = req.nextUrl.pathname.split('/').at(-1)!;
+    const filename = decodeURIComponent(
+      req.nextUrl.pathname.split('/').at(-1)!
+    );
   
     switch (req.method) {
       case 'GET': {
@@ -60,6 +62,16 @@ export default async function handler(req: NextRequest): Promise<Response> {
           console.error(error);
           trackError(error as string);
           return new Response('Unable to update file', { status: 400 });
+        }
+      };
+      case 'DELETE': {
+        try {
+          await deleteFiles(user.id, [filename]);
+          return new Response(null, { status: 200 });
+        } catch (error) {
+          console.error(error);
+          trackError(error as string);
+          return new Response('Unable to delete file(s)', { status: 400 });
         }
       };
       default:

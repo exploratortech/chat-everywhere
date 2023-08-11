@@ -147,23 +147,16 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
   const handleDeleteFile = useCallback(async (filename: string): Promise<boolean> => {
     return await checkLoading(async () => {
       try {
-        const deletedFilenames = await UploadedFiles.remove([filename], user?.token);
+        await UploadedFiles.remove(filename, user?.token);
+        
         const updatedUploadedFiles = { ...uploadedFiles };
-        const updatedUploadedFilenames: string[] = [];
-  
-        for (const filename of deletedFilenames) {
-          delete updatedUploadedFiles[filename];
-        }
-  
-        // Retain the files that weren't deleted
-        for (const filename of uploadedFilenames) {
-          if (!deletedFilenames.includes(filename)) {
-            updatedUploadedFilenames.push(filename);
-          }
-        }
+        delete updatedUploadedFiles[filename];
   
         dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
-        dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
+        dispatch({
+          field: 'uploadedFilenames',
+          value: Object.keys(updatedUploadedFiles).sort(sortByName),
+        });
   
         return true;
       } catch (error) {
@@ -174,7 +167,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
         return false;
       }
     });
-  }, [checkLoading, uploadedFiles, uploadedFilenames, user?.token, dispatch]);
+  }, [checkLoading, uploadedFiles, user?.token, dispatch]);
 
   const handleRenameFile= useCallback(async (oldName: string, newName: string): Promise<boolean> => {
     return await checkLoading(async () => {

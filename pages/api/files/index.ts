@@ -1,12 +1,12 @@
-import { trackError } from '@/utils/app/azureTelemetry';
-import { validateFilename } from '@/utils/app/uploadedFiles';
+import { NextRequest } from 'next/server';
+import Papa from 'papaparse';
 
+import { trackError } from '@/utils/app/azureTelemetry';
 import {
   deleteFiles,
   fetchFiles,
   getAdminSupabaseClient,
   getUserProfile,
-  renameFile,
   uploadFiles,
 } from '@/utils/server/supabase';
 
@@ -18,7 +18,7 @@ export const config = {
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function handler(req: NextRequest): Promise<Response> {
   try {
     const userToken = req.headers.get('user-token');
   
@@ -79,18 +79,21 @@ export default async function handler(req: Request): Promise<Response> {
         }
       };
       case 'DELETE': {
-        const url = new URL(req.url);
-        const searchParams = new URLSearchParams(url.search);
+        const { searchParams } = req.nextUrl;
   
-        const csv = searchParams.get('names');
-        if (!csv) {
+        const csvFilenames = searchParams.get('names');
+        if (!csvFilenames) {
           return new Response('Missing \'names\' parameter', { status: 400 });
         }
   
         try {
-          const filenames: string[] = csv.split(',');
-          const deletedFilenames = await deleteFiles(user.id, filenames);
-          return new Response(JSON.stringify({ filenames: deletedFilenames }), { status: 200 });
+          if (csvFilenames === '*') {
+            await deleteFiles(user.id, [], true);
+          } else {
+            const filenames = Papa.parse<string[]>(csvFilenames).data[0];
+            await deleteFiles(user.id, filenames);
+          }
+          return new Response(null, { status: 200 });
         } catch (error) {
           console.error(error);
           trackError(error as string);

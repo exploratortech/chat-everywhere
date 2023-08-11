@@ -36,14 +36,13 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'deleteFiles',
-    description: 'Deletes the specified files.',
+    description: 'Forcibly deletes all or specified files.',
     parameters: {
       type: 'object',
       properties: {
         filenames: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'The names of the files to be deleted',
+          type: 'string',
+          description: 'A comma-separated string of filenames. Pass an asterisk (*) to delete all files.',
         },
       },
       required: ['filenames'],
@@ -51,7 +50,7 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'listFiles',
-    description: 'Lists the names of all stored files. It returns an array of filenames.',
+    description: 'Lists the names of the stored files. It returns an array of filenames.',
     parameters: {
       type: 'object',
       properties: {},
@@ -98,9 +97,9 @@ const writeToFile = (filename: string, content: string, userToken?: string): str
   }
 };
 
-const deleteFiles = (filenames: string[], userToken?: string): string => {
+const deleteFiles = async (filenames: string, userToken?: string): Promise<string> => {
   try {
-    UploadedFiles.remove(filenames);
+    await UploadedFiles.remove(filenames, userToken);
     return '';
   } catch (error) {
     console.error(error);

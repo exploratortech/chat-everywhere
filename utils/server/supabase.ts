@@ -656,31 +656,57 @@ export const uploadFiles = async (
   return errors;
 };
 
-// Returns a list of the filenames that were deleted
-export const deleteFiles = async (userId: string, filenames: string[]): Promise<string[]> => {
+export const deleteFiles = async (userId: string, filenames: string[], all: boolean = false): Promise<void> => {
   const supabase = getAdminSupabaseClient();
 
-  const storageResult = await supabase
-    .storage
-    .from('files')
-    .remove(filenames.map((filename) => `${userId}/${filename}`));
+  if (all) {
+    const queriedFilesResult = await supabase
+      .from('files')
+      .select('path')
+      .eq('user_id', userId);
 
-  if (storageResult.error) {
-    console.error(storageResult.error);
-    throw storageResult.error;
+    if (queriedFilesResult.error) {
+      throw queriedFilesResult.error;
+    }
+
+    if (queriedFilesResult.count === 0) return;
+
+    const storageResult = await supabase
+      .storage
+      .from('files')
+      .remove(queriedFilesResult.data.map((file) => file.path));
+
+    if (storageResult.error) {
+      throw storageResult.error;
+    }
+
+    const databaseResult = await supabase
+      .from('files')
+      .delete()
+      .eq('user_id', userId);
+
+    if (databaseResult.error) {
+      throw databaseResult.error;
+    }
+  } else {
+    const storageResult = await supabase
+      .storage
+      .from('files')
+      .remove(filenames.map((filename) => `${userId}/${filename}`));
+  
+    if (storageResult.error) {
+      throw storageResult.error;
+    }
+  
+    const databaseResult = await supabase
+      .from('files')
+      .delete()
+      .in('path', storageResult.data.map((file) => file.name));
+  
+    if (databaseResult.error) {
+      throw databaseResult.error;
+    }
   }
-
-  const databaseResult = await supabase
-    .from('files')
-    .delete()
-    .in('path', storageResult.data.map((file) => file.name));
-
-  if (databaseResult.error) {
-    console.error(databaseResult.error);
-    throw databaseResult.error;
-  }
-
-  return storageResult.data.map((file) => UploadedFiles.filenameFromPath(file.name) || '');
 };
 
 export const renameFile = async (

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { v4 as uuidv4 } from 'uuid';
+import Papa from 'papaparse';
 
 import { UploadedFile, UploadedFileMap } from '@/types/uploadedFile';
 
@@ -117,12 +117,9 @@ const read = async (
   }
 };
 
-// Returns a list of the filenames that were successfully delete. Ignoring
-// files that don't exist already.
-const remove = async (filenames: string[], userToken?: string): Promise<string[]> => {
+const remove = async (csvFilenames: string, userToken?: string): Promise<void> => {
   if (userToken) {
-    const params = encodeURIComponent(filenames.join(','));
-    const res = await fetch(`/api/files?names=${params}`, {
+    const res = await fetch(`/api/files?names=${encodeURIComponent(csvFilenames)}`, {
       headers: { 'user-token': userToken },
       method: 'DELETE',
     });
@@ -130,12 +127,10 @@ const remove = async (filenames: string[], userToken?: string): Promise<string[]
     if (!res.ok) {
       throw new Error(await res.text());
     }
-
-    const json = await res.json();
-    return json.filenames;
   } else {
+    const filenames = Papa.parse<string[]>(csvFilenames).data[0];
     const data = localStorage.getItem('files');
-    if (!data) return [];
+    if (!data) return;
   
     let uploadedFiles!: UploadedFileMap;
     
@@ -153,8 +148,6 @@ const remove = async (filenames: string[], userToken?: string): Promise<string[]
   
     const jsonString = JSON.stringify(updatedUploadedFiles);
     localStorage.setItem('files', jsonString);
-  
-    return filenames;
   }
 };
 
@@ -252,7 +245,8 @@ const syncLocal = async (userToken: string): Promise<null | any[]> => {
     return errors;
   }
 
-  await remove(files.map((file) => file.name));
+  const csvFilenames = Papa.unparse([files.map((file) => file.name)]);
+  await remove(csvFilenames);
   return null;
 };
 
