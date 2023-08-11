@@ -40,6 +40,11 @@ html {
 html,
 body {
   overscroll-behavior-y: none;
+  overflow: hidden;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
 }
 
 @media (max-width: 720px) {
@@ -88,13 +93,4 @@ svg.toggle-arrow {
 [id^='mj-image'] {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
-}
-
-html,
-body {
-  overflow: hidden;
-  height: 100%;
-  position: fixed;
-  left: 0;
-  top: 0;
 }
