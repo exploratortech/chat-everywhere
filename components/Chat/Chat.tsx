@@ -150,9 +150,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: 'loading', value: true });
         homeDispatch({ field: 'messageIsStreaming', value: true });
 
-        let isSending = false;
+        let isSendingAgain = false;
         do {
-          isSending = false; // Make sure to set it to false on every iteration.
+          isSendingAgain = false; // Make sure to set it to false on every iteration.
 
           const chatBody: ChatBody = {
             model: updatedConversation.model,
@@ -279,14 +279,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   const functionArgs = parsedChunkValue.function_call.arguments;
                   const functionToCall = AVAILABLE_FUNCTIONS[functionName];
                   const parsedFunctionArgs = JSON.parse(functionArgs);
-                  const functionResponse: string = functionToCall(...Object.values(parsedFunctionArgs));
+                  const functionResponse: string = await functionToCall(
+                    ...Object.values(parsedFunctionArgs),
+                    user?.token,
+                  );
   
                   updatedMessages.push({
                     role: 'assistant',
                     content: '',
                     largeContextResponse,
                     showHintForLargeContextResponse,
-                    pluginId: plugin?.id || null,
+                    pluginId: null,
                     functionCall: {
                       name: functionName,
                       arguments: functionArgs,
@@ -297,10 +300,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     role: 'function',
                     name: functionName,
                     content: functionResponse,
-                    pluginId: plugin?.id || null,
+                    pluginId: null,
                   });
   
-                  isSending = true;
+                  isSendingAgain = true;
                 } catch (error) {
                   console.error(error);
                 }
@@ -358,7 +361,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             PluginId: plugin?.id || null,
             LargeContextModel: largeContextResponse,
           });
-        } while (isSending);
+        } while (isSendingAgain);
 
         saveConversation(updatedConversation);
         const updatedConversations: Conversation[] = conversations.map(

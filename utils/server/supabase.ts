@@ -512,7 +512,7 @@ export const fetchFiles = async (userId: string, next?: string | null): Promise<
 
   const query = supabase
     .from('files')
-    .select()
+    .select('*')
     .eq('user_id', userId)
     .order('name', { ascending: true });
 
@@ -540,6 +540,7 @@ export const fetchFiles = async (userId: string, next?: string | null): Promise<
     if (file.name === '.emptyFolderPlaceholder') continue;
 
     files.push({
+      id: file.id,
       name: UploadedFiles.filenameFromPath(file.name)!,
       content: '',
       type: file.type,
@@ -713,4 +714,44 @@ export const renameFile = async (
   }
 
   return newName;
+};
+
+export const downloadFile = async (
+  userId: string,
+  by: { fileId?: string, filename?: string },
+): Promise<Blob | null> => {
+  const supabase = getAdminSupabaseClient();
+
+  let databaseResult!: any;
+  const query = supabase
+    .from('files')
+    .select('path')
+    .eq('user_id', userId);
+
+  if (by.fileId) {
+    databaseResult = await query.eq('id', by.fileId).maybeSingle();
+  } else if (by.filename) {
+    databaseResult = await query.eq('name', by.filename).maybeSingle();
+  } else {
+    throw new Error('Missing `by` parameter');
+  }
+  
+  if (databaseResult.error) {
+    throw databaseResult.error;
+  }
+  
+  if (!databaseResult.data) {
+    return null;
+  }
+
+  const storageResult = await supabase
+    .storage
+    .from('files')
+    .download(databaseResult.data.path);
+
+  if (storageResult.error) {
+    throw databaseResult.error;
+  }
+
+  return storageResult.data;
 };

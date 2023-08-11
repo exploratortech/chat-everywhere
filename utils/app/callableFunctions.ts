@@ -4,7 +4,7 @@ import { UploadedFiles } from "@/utils/app/uploadedFiles";
 export const CALLABLE_FUNCTIONS = [
   {
     name: 'readFromFile',
-    description: 'Read the contents of a given file.',
+    description: 'Reads a given file and returns a JSON object with a single property called \'content\' containing the file\'s content.',
     parameters: {
       type: 'object',
       properties: {
@@ -67,20 +67,24 @@ export const CALLABLE_FUNCTIONS = [
   }
 ];
 
-const readFromFile = (filename: string): string => {
+const readFromFile = async (filename: string, userToken?: string): Promise<string> => {
   try {
-    const content = UploadedFiles.read(filename);
-    return content;
+    const content = await UploadedFiles.read(filename, {
+      userToken: userToken,
+      usingFilename: true,
+    });
+    return JSON.stringify({ content: content });
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
+      console.error(error.stack);
       return `readFromFile:error:${error.message}`;
     }
     return `readFromFile:error:Unable to read file`;
   }
 };
 
-const writeToFile = (filename: string, content: string): string => {
+const writeToFile = (filename: string, content: string, userToken?: string): string => {
   try {
     UploadedFiles.write(filename, content);
     return content;
@@ -93,7 +97,7 @@ const writeToFile = (filename: string, content: string): string => {
   }
 };
 
-const deleteFiles = (filenames: string[]): string => {
+const deleteFiles = (filenames: string[], userToken?: string): string => {
   try {
     UploadedFiles.remove(filenames);
     return '';
@@ -106,7 +110,7 @@ const deleteFiles = (filenames: string[]): string => {
   }
 };
 
-const listFiles = (): string => {
+const listFiles = (userToken?: string): string => {
   try {
     const filenames = UploadedFiles.list();
     return JSON.stringify(filenames);

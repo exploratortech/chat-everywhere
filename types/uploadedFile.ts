@@ -1,4 +1,5 @@
 export interface UploadedFile {
+  id: string;
   name: string;
   content: string;
   size: number;
@@ -8,5 +9,5 @@ export interface UploadedFile {
 }
 
 export interface UploadedFileMap {
-  [fileName: string]: UploadedFile;
+  [fileId: string]: UploadedFile;
 }

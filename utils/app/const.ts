@@ -3,7 +3,7 @@ export const DEFAULT_SYSTEM_PROMPT =
   'If the input includes text such as {lang=xxx}, the response should not include this text.' +
   `The current date is ${new Date().toLocaleDateString()}.`;
 export const PERSISTENT_SYSTEM_PROMPT =
-  'Respond with an error message if a function\'s response matches the pattern: `<name>:error:<message>` where `<name>` is the name of the function and `<message>` is the error message.';
+  'Respond with an error message if and only if a function\'s response matches the pattern: `<name>:error:<message>` where `<name>` is the name of the function and `<message>` is the error message.';
 
 export const OPENAI_API_HOST =
   process.env.OPENAI_API_HOST || 'https://api.openai.com';

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { v4 as uuidv4 } from 'uuid';
 
 import { UploadedFile, UploadedFileMap } from '@/types/uploadedFile';
 
@@ -78,21 +79,47 @@ const openUploadWindow = async (): Promise<FileList> => {
   });
 };
 
-const read = (filename: string): string => {
-  const data = localStorage.getItem('files');
-  if (!data) throw new Error('Couldn\'t find file');
+// 'fileId' can be a filename. If a filename is used, you must specify that it's
+// being used in the 'options' parameter, otherwise, it defaults to file id.
+const read = async (
+  fileId: string,
+  options: {
+    userToken?: string,
+    usingFilename?: boolean,
+  },
+): Promise<string> => {
+  if (options.userToken) {
+    const res = await fetch(`/api/files/${encodeURIComponent(fileId)}?by=${options.usingFilename ? 'name' : 'id'}`, {
+      headers: { 'user-token': options.userToken },
+      method: 'GET',
+    });
+
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+
+    if (!res.body) {
+      return '';
+    }
+
+    const blob = await res.blob();
+    return await blob.text();
+  } else {
+    const data = localStorage.getItem('files');
+    if (!data) throw new Error('Couldn\'t find file');
+    
+    let uploadedFiles!: UploadedFileMap;
+    try {
+      uploadedFiles = JSON.parse(data);
+    } catch (error) {
+      throw new Error('Unable to retrieve file');
+    }
   
-  let uploadedFiles!: UploadedFileMap;
-  try {
-    uploadedFiles = JSON.parse(data);
-  } catch (error) {
-    throw new Error('Unable to retrieve file');
+    const file = uploadedFiles[fileId];
+    if (!file) throw new Error('Couldn\'t find file');
+
+    return file.content;
   }
-
-  const file = uploadedFiles[filename];
-  if (!file) throw new Error('Couldn\'t find file');
-
-  return file.content;
 };
 
 // Returns a list of the filenames that were successfully delete. Ignoring
@@ -310,6 +337,7 @@ const write = (filename: string, content: string): string => {
   const updatedUploadedFiles: UploadedFileMap = {
     ...existingUploadedFiles,
     [filename]: {
+      id: uuidv4(),
       name: filename,
       content,
       size: blob.size,
@@ -345,6 +373,7 @@ const createUploadedFiles = async (files: FileList | File[]): Promise<UploadedFi
           const now = dayjs().toISOString();
 
           uploadedFiles[file.name] = {
+            id: uuidv4(),
             name: file.name,
             content: reader.result as string,
             size: file.size,
