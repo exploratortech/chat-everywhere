@@ -21,7 +21,7 @@ export const PromptbarSettings: FC<Props> = () => {
         icon={<IconFile size={18} />}
         onClick={() => {
           homeDispatch({
-            field: 'showAttachmentsModel',
+            field: 'showFilesModal',
             value: true,
           });
         }}

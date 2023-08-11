@@ -96,7 +96,7 @@ const Home = () => {
       prompts,
       temperature,
       showSettingsModel,
-      showAttachmentsModel,
+      showFilesModal,
       showLoginSignUpModel,
       showReferralModel,
       showUsageModel,
@@ -723,10 +723,10 @@ const Home = () => {
                   }
                 />
               )}
-              {showAttachmentsModel && (
+              {showFilesModal && (
                 <FilesModal
                   onClose={() =>
-                    dispatch({ field: 'showAttachmentsModel', value: false })
+                    dispatch({ field: 'showFilesModal', value: false })
                   }
                 />
               )}
