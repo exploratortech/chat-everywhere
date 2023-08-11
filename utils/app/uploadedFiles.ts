@@ -158,9 +158,9 @@ const remove = async (filenames: string[], userToken?: string): Promise<string[]
   }
 };
 
-const rename = async (oldName: string, newName: string, userToken?: string): Promise<string> => {
-  if (newName === oldName) {
-    return oldName;
+const rename = async (filename: string, newName: string, userToken?: string): Promise<string> => {
+  if (newName === filename) {
+    return filename;
   }
 
   if (newName.length === 0) {
@@ -172,13 +172,13 @@ const rename = async (oldName: string, newName: string, userToken?: string): Pro
   }
 
   if (userToken) {
-    const res = await fetch('/api/files', {
+    const res = await fetch(`/api/files/${filename}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         'user-token': userToken,
       },
-      body: JSON.stringify({ old_name: oldName, new_name: newName }),
+      body: JSON.stringify({ new_name: newName }),
     });
 
     if (!res.ok) {
@@ -200,22 +200,22 @@ const rename = async (oldName: string, newName: string, userToken?: string): Pro
       throw new Error('Unable to rename file');
     }
 
-    if (!uploadedFiles[oldName]) {
+    if (!uploadedFiles[filename]) {
       throw new Error('File doesn\'t exist');
     }
   
-    if (newName !== oldName && uploadedFiles[newName]) {
+    if (uploadedFiles[newName]) {
       throw new Error('Another file with that name already exists');
     }
   
     const updatedUploadedFiles = { ...uploadedFiles };
   
     updatedUploadedFiles[newName] = {
-      ...uploadedFiles[oldName],
+      ...uploadedFiles[filename],
       name: newName,
       updatedAt: dayjs().toISOString(),
     };
-    delete updatedUploadedFiles[oldName];
+    delete updatedUploadedFiles[filename];
   
     const jsonString = JSON.stringify(updatedUploadedFiles);
     localStorage.setItem('files', jsonString);
@@ -332,7 +332,6 @@ const write = (filename: string, content: string): string => {
   const updatedUploadedFiles: UploadedFileMap = {
     ...existingUploadedFiles,
     [filename]: {
-      id: uuidv4(),
       name: filename,
       content,
       size: blob.size,
@@ -368,7 +367,6 @@ const createUploadedFiles = async (files: FileList | File[]): Promise<UploadedFi
           const now = dayjs().toISOString();
 
           uploadedFiles[file.name] = {
-            id: uuidv4(),
             name: file.name,
             content: reader.result as string,
             size: file.size,

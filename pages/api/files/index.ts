@@ -78,36 +78,6 @@ export default async function handler(req: Request): Promise<Response> {
           return new Response('Unable to upload file(s)', { status: 400 });
         }
       };
-      case 'PATCH': {
-        try {
-          const { old_name: oldName, new_name: newName } = await req.json();
-
-          if (!validateFilename(newName)) {
-            return new Response(
-              'Filename cannot contain the following characters: \\/:"*?<>|',
-              { status: 400 },
-            );
-          }
-
-          if (!oldName || !newName) {
-            return new Response(
-              'Missing \'old_name\' or \'new_name\' parameters',
-              { status: 400 },
-            );
-          }
-
-          await renameFile(user.id, oldName, newName);
-          return new Response(null, { status: 200 });
-        } catch (error) {
-          console.error(error);
-          trackError(error as string);
-          if (error instanceof Error) {
-            return new Response(error.message, { status: 400 });
-          } else {
-            return new Response('Unable to update file', { status: 400 });
-          }
-        }
-      };
       case 'DELETE': {
         const url = new URL(req.url);
         const searchParams = new URLSearchParams(url.search);

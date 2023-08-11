@@ -685,7 +685,7 @@ export const deleteFiles = async (userId: string, filenames: string[]): Promise<
 
 export const renameFile = async (
   userId: string,
-  oldName: string,
+  filename: string,
   newName: string,
 ): Promise<string> => {
   const supabase = getAdminSupabaseClient();
@@ -693,7 +693,7 @@ export const renameFile = async (
   const storageResult = await supabase
     .storage
     .from('files')
-    .move(`${userId}/${oldName}`, `${userId}/${newName}`);
+    .move(`${userId}/${filename}`, `${userId}/${newName}`);
   
   if (storageResult.error) {
     throw storageResult.error;
@@ -706,7 +706,7 @@ export const renameFile = async (
       name: newName,
       updated_at: dayjs().toISOString(),
     })
-    .eq('path', `${userId}/${oldName}`);
+    .eq('path', `${userId}/${filename}`);
 
   if (databaseResult.error) {
     throw databaseResult.error;
