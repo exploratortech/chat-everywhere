@@ -73,7 +73,11 @@ const readFromFile = async (filename: string, userToken?: string): Promise<strin
       userToken: userToken,
       usingFilename: true,
     });
-    return JSON.stringify({ content: content });
+
+    // Returns the content as a JSON object because there are cases where GPT
+    // will respond with an error depending on the content of the file. (i.e. a
+    // file containing the single word 'bye')
+    return JSON.stringify({ content });
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
