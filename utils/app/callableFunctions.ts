@@ -24,11 +24,11 @@ export const CALLABLE_FUNCTIONS = [
       properties: {
         filename: {
           type: 'string',
-          description: 'The name of the file',
+          description: 'The name of the file.',
         },
         content: {
           type: 'string',
-          description: 'The content that\'s to be written to the file'
+          description: 'The content that is written to the file.'
         },
       },
       required: ['filename', 'content'],
@@ -66,7 +66,8 @@ export const CALLABLE_FUNCTIONS = [
   }
 ];
 
-const readFromFile = async (filename: string, userToken?: string): Promise<string> => {
+const readFromFile = async (args: { filename: string, userToken?: string }): Promise<string> => {
+  const { filename, userToken } = args;
   try {
     const content = await UploadedFiles.read(filename, userToken);
 
@@ -84,9 +85,10 @@ const readFromFile = async (filename: string, userToken?: string): Promise<strin
   }
 };
 
-const writeToFile = (filename: string, content: string, userToken?: string): string => {
+const writeToFile = async (args: { filename: string, content: string, userToken?: string }): Promise<string> => {
+  const { filename, content, userToken } = args;
   try {
-    UploadedFiles.write(filename, content);
+    await UploadedFiles.write(filename, content, userToken);
     return content;
   } catch (error) {
     console.error(error);
@@ -97,7 +99,8 @@ const writeToFile = (filename: string, content: string, userToken?: string): str
   }
 };
 
-const deleteFiles = async (filenames: string, userToken?: string): Promise<string> => {
+const deleteFiles = async (args: { filenames: string, userToken?: string }): Promise<string> => {
+  const { filenames, userToken } = args;
   try {
     await UploadedFiles.remove(filenames, userToken);
     return '';
@@ -110,7 +113,8 @@ const deleteFiles = async (filenames: string, userToken?: string): Promise<strin
   }
 };
 
-const listFiles = (userToken?: string): string => {
+const listFiles = (args: { userToken?: string }): string => {
+  const { userToken } = args;
   try {
     const filenames = UploadedFiles.list();
     return JSON.stringify(filenames);

@@ -274,39 +274,41 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               } catch (error) { /* Not a JSON string, so ignore */}
 
               if (parsedChunkValue?.function_call) {
+                const functionName = parsedChunkValue.function_call.name;
+                const functionArgs = parsedChunkValue.function_call.arguments;
+                const functionToCall = AVAILABLE_FUNCTIONS[functionName];
+
+                let functionResponse!: string;
+                
                 try {
-                  const functionName = parsedChunkValue.function_call.name;
-                  const functionArgs = parsedChunkValue.function_call.arguments;
-                  const functionToCall = AVAILABLE_FUNCTIONS[functionName];
                   const parsedFunctionArgs = JSON.parse(functionArgs);
-                  const functionResponse: string = await functionToCall(
-                    ...Object.values(parsedFunctionArgs),
-                    user?.token,
-                  );
-  
-                  updatedMessages.push({
-                    role: 'assistant',
-                    content: '',
-                    largeContextResponse,
-                    showHintForLargeContextResponse,
-                    pluginId: null,
-                    functionCall: {
-                      name: functionName,
-                      arguments: functionArgs,
-                    },
-                  });
-  
-                  updatedMessages.push({
-                    role: 'function',
-                    name: functionName,
-                    content: functionResponse,
-                    pluginId: null,
-                  });
-  
-                  isSendingAgain = true;
+                  parsedFunctionArgs.userToken = user?.token;
+                  functionResponse = await functionToCall(parsedFunctionArgs);
                 } catch (error) {
                   console.error(error);
+                  functionResponse = `${functionName}:error:Something unexpected occur, please try again.`;
                 }
+  
+                updatedMessages.push({
+                  role: 'assistant',
+                  content: '',
+                  largeContextResponse,
+                  showHintForLargeContextResponse,
+                  pluginId: null,
+                  functionCall: {
+                    name: functionName,
+                    arguments: functionArgs,
+                  },
+                });
+
+                updatedMessages.push({
+                  role: 'function',
+                  name: functionName,
+                  content: functionResponse,
+                  pluginId: null,
+                });
+  
+                isSendingAgain = true;
               } else {
                 updatedMessages.push({
                   role: 'assistant',

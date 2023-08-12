@@ -555,7 +555,7 @@ export const fetchFiles = async (userId: string, next?: string | null): Promise<
 export const uploadFiles = async (
   userId: string,
   files: File[],
-  fileData: any,
+  fileData: any = {},
   sync: boolean = false,
 ): Promise<any> => {
   const supabase = getAdminSupabaseClient();
@@ -581,7 +581,8 @@ export const uploadFiles = async (
     if (sync && databaseResult.data.some((row) => {
       if (row.name === file.name) {
         const serverFileUpdatedAt = dayjs(row.updated_at).utc().valueOf();
-        const localFileUpdatedAt = fileData.updatedAt[file.name];
+        const localFileUpdatedAt: number | undefined = fileData.updatedAt[file.name];
+        if (!localFileUpdatedAt) return false;
         return serverFileUpdatedAt > localFileUpdatedAt;
       }
       return false;

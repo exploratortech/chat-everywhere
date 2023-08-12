@@ -307,38 +307,55 @@ const upload = async (
     localStorage.setItem('files', jsonString);
   }
 
-  return { files: uploadedFiles, errors: [] };
+  return { files: uploadedFiles, errors };
 };
 
-const write = (filename: string, content: string): string => {
-  const data = localStorage.getItem('files') || '{}';
+const write = async (filename: string, content: string, userToken?: string): Promise<string> => {
+  if (userToken) {
+    const file = new File([content], filename, { type: 'text/plain' });
 
-  let existingUploadedFiles!: UploadedFileMap;
-  try {
-    existingUploadedFiles = JSON.parse(data) as UploadedFileMap;
-  } catch (error) {
-    existingUploadedFiles = {};
-  }
+    const formData = new FormData();
+    formData.append('files[]', file, file.name);
+
+    const res = await fetch('/api/files/', {
+      method: 'POST',
+      body: formData,
+      headers: { 'user-token': userToken },
+    });
+
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+  } else {
+    const data = localStorage.getItem('files') || '{}';
   
-  const blob = new Blob([content]);
-  const now = dayjs().toISOString();
-
-  const updatedUploadedFiles: UploadedFileMap = {
-    ...existingUploadedFiles,
-    [filename]: {
-      name: filename,
-      content,
-      size: blob.size,
-      type: blob.type,
-      createdAt: existingUploadedFiles[filename]
-        ? existingUploadedFiles[filename].createdAt
-        : now,
-      updatedAt: now,
-    },
-  };
-
-  const jsonString = JSON.stringify(updatedUploadedFiles);
-  localStorage.setItem('files', jsonString);
+    let existingUploadedFiles!: UploadedFileMap;
+    try {
+      existingUploadedFiles = JSON.parse(data) as UploadedFileMap;
+    } catch (error) {
+      existingUploadedFiles = {};
+    }
+    
+    const blob = new Blob([content], { type: 'text/plain' });
+    const now = dayjs().toISOString();
+  
+    const updatedUploadedFiles: UploadedFileMap = {
+      ...existingUploadedFiles,
+      [filename]: {
+        name: filename,
+        content,
+        size: blob.size,
+        type: blob.type,
+        createdAt: existingUploadedFiles[filename]
+          ? existingUploadedFiles[filename].createdAt
+          : now,
+        updatedAt: now,
+      },
+    };
+  
+    const jsonString = JSON.stringify(updatedUploadedFiles);
+    localStorage.setItem('files', jsonString);
+  }
 
   return content;
 };
