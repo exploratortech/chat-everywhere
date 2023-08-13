@@ -169,7 +169,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
     });
   }, [checkLoading, uploadedFiles, user?.token, dispatch]);
 
-  const handleRenameFile= useCallback(async (oldName: string, newName: string): Promise<boolean> => {
+  const handleRenameFile = useCallback(async (oldName: string, newName: string): Promise<boolean> => {
     return await checkLoading(async () => {
       try {
         await UploadedFiles.rename(oldName, newName, user?.token);
@@ -202,6 +202,26 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
       }
     });
   }, [checkLoading, uploadedFiles, uploadedFilenames, user?.token, dispatch]);
+
+  const handleDownloadFile = useCallback(async (filename: string): Promise<boolean> => {
+    return await checkLoading(async () => {
+      try {
+        const link = document.createElement('a');
+        const blob = await UploadedFiles.download([filename], user?.token);
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+        return true;
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('Failed to download file');
+        }
+        return false;
+      }
+    });
+  }, [checkLoading, user?.token]);
 
   useEffect(() => {
     if (!didInitialFetch && !loading) {
@@ -246,6 +266,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
             loadFiles,
             deleteFile: handleDeleteFile,
             renameFile: handleRenameFile,
+            downloadFile: handleDownloadFile,
             uploadFiles: handleUploadFiles,
           }}
         >

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import Papa from 'papaparse';
+import JSZip from 'jszip';
 
 import { UploadedFile, UploadedFileMap } from '@/types/uploadedFile';
 
@@ -23,19 +24,50 @@ const filenameFromPath = (path: string): string | null => {
   return substrings[substrings.length - 1];
 };
 
-const list = (): string[] => {
-  const data = localStorage.getItem('files');
-  if (!data) return [];
+const download = async (filenames: string[], userToken?: string): Promise<Blob> => {
+  if (userToken) {
+    const csvFilenames = Papa.unparse<string[]>([filenames]);
+    const res = await fetch(`/api/files?download=${encodeURIComponent(csvFilenames)}`, {
+      headers: { 'user-token': userToken },
+      method: 'GET',
+    });
 
-  let uploadedFiles!: UploadedFileMap;
-  try {
-    uploadedFiles = JSON.parse(data) as UploadedFileMap;
-  } catch (error) {
-    throw new Error('Unable to retrieve files');
+    if (!res.ok) {
+      throw new Error(await res.text());
+    }
+
+    return await res.blob();
+  } else {
+    const data = localStorage.getItem('files') || '{}';
+    let uploadedFiles!: UploadedFileMap;
+
+    try {
+      uploadedFiles = JSON.parse(data);
+    } catch (error) {
+      throw new Error('Unable to retrieve files');
+    }
+
+    if (filenames.length === 0) {
+      throw new Error('No specified files to download');
+    }
+
+    if (filenames.length > 1) {
+      const zip = new JSZip();
+
+      for (const filename of filenames) {
+        const file = uploadedFiles[filename];
+        if (!file) throw new Error(`Unable to find ${filename}`);
+        zip.file(filename, file.content);
+      }
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      return blob;
+    }
+
+    const file = uploadedFiles[filenames[0]];
+    if (!file) throw new Error(`Unable to find ${filenames[0]}`);
+    return new Blob([file.content], { type: file.type });
   }
-
-  const filenames = Object.keys(uploadedFiles);
-  return filenames.sort(sortByName);
 };
 
 // When loading files from local storage, all the files are fetched (no pagination).
@@ -420,7 +452,7 @@ const createUploadedFiles = async (files: FileList | File[]): Promise<UploadedFi
 
 export const UploadedFiles = {
   filenameFromPath,
-  list,
+  download,
   load,
   openUploadWindow,
   read,

@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 import SidebarActionButton from "../Buttons/SidebarActionButton/SidebarActionButton";
-import AttachmentsModelContext from "./FilesModal.context";
+import FilesModalContext from "./FilesModal.context";
 import { UploadedFile } from "@/types/uploadedFile";
 
 dayjs.extend(relativeTime);
@@ -20,7 +20,8 @@ export function FileItem({ file }: Props): JSX.Element {
   const {
     deleteFile,
     renameFile,
-  } = useContext(AttachmentsModelContext);
+    downloadFile,
+  } = useContext(FilesModalContext);
 
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
@@ -63,14 +64,6 @@ export function FileItem({ file }: Props): JSX.Element {
     if (e.code === 'Enter' && await renameFile(file.name, renameValue)) {
       setIsRenaming(false);
     }
-  };
-
-  const downloadFile = (): void => {
-    const link = document.createElement('a');
-    const blob = new Blob([file.content], { type: file.type });
-    link.href = window.URL.createObjectURL(blob);
-    link.download = file.name;
-    link.click();
   };
 
   useEffect(() => {
@@ -131,7 +124,7 @@ export function FileItem({ file }: Props): JSX.Element {
           <div className="flex tablet:hidden flex-row items-center gap-2 pointer-events-auto">
             <SidebarActionButton handleClick={(e) => {
               e.stopPropagation();
-              downloadFile();
+              downloadFile(file.name);
             }}>
               <IconDownload size={18} />
             </SidebarActionButton>
@@ -174,7 +167,7 @@ export function FileItem({ file }: Props): JSX.Element {
             <MenuItemButton
               onClick={(event) => {
                 event.stopPropagation();
-                downloadFile();
+                downloadFile(file.name);
               }}
             >
               <IconDownload size={18} />

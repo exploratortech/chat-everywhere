@@ -35,6 +35,7 @@
     "html-to-md": "^0.8.3",
     "i18next": "^22.4.13",
     "isomorphic-dompurify": "^1.7.0",
+    "jszip": "^3.10.1",
     "langchain": "^0.0.94",
     "markdown-to-txt": "^2.0.1",
     "mathjs": "^11.8.0",

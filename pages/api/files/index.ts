@@ -4,6 +4,7 @@ import Papa from 'papaparse';
 import { trackError } from '@/utils/app/azureTelemetry';
 import {
   deleteFiles,
+  downloadFiles,
   fetchFiles,
   getAdminSupabaseClient,
   getUserProfile,
@@ -33,11 +34,19 @@ export default async function handler(req: NextRequest): Promise<Response> {
     switch (req.method) {
       case 'GET': {
         try {
+          const download = searchParams.get('download');
           const next = searchParams.get('next');
           const query = searchParams.get('query');
-          const data = await fetchFiles(user.id, next, query);
-          console.log('data', data);
-          return new Response(JSON.stringify(data), { status: 200 });
+
+          if (download) {
+            const filenames = Papa.parse<string[]>(download).data[0];
+            const { blob, error } = await downloadFiles(user.id, filenames);
+            if (error) return new Response(error, { status: 404 });
+            return new Response(blob, { status: 200 });
+          } else {
+            const data = await fetchFiles(user.id, next, query);
+            return new Response(JSON.stringify(data), { status: 200 });
+          }
         } catch (error) {
           console.error(error);
           trackError(error as string);

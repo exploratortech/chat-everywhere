@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 import { trackError } from '@/utils/app/azureTelemetry';
 import {
   deleteFiles,
-  downloadFile,
+  downloadFiles,
   getAdminSupabaseClient,
   getUserProfile,
   renameFile,
@@ -34,9 +34,9 @@ export default async function handler(req: NextRequest): Promise<Response> {
     switch (req.method) {
       case 'GET': {
         try {
-          let blob  = await downloadFile(user.id, filename);
-          if (blob == null) {
-            return new Response('Could not find file', { status: 404 });
+          let { blob, error }  = await downloadFiles(user.id, [filename]);
+          if (error) {
+            return new Response(error, { status: 404 });
           }
           return new Response(blob, { status: 200 });
         } catch (error) {

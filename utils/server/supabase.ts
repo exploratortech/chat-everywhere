@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import JSZip from 'jszip';
 
 import { DefaultMonthlyCredits } from '@/utils/config';
 
@@ -513,7 +514,6 @@ export const fetchFiles = async (
 ): Promise<{ files: UploadedFile[], next: string | null }> => {
   const limit = 25;
   const supabase = getAdminSupabaseClient();
-  console.log('query', query);
 
   let filterBuilder = supabase
     .from('files')
@@ -751,35 +751,51 @@ export const renameFile = async (
   return newName;
 };
 
-export const downloadFile = async (
+// Returns a zip file for multiple files.
+export const downloadFiles = async (
   userId: string,
-  filename: string,
-): Promise<Blob | null> => {
+  filenames: string[],
+): Promise<{ blob: Blob | null, error: string | null }> => {
   const supabase = getAdminSupabaseClient();
 
-  const databaseResult = await supabase
-    .from('files')
-    .select('path')
-    .eq('user_id', userId)
-    .eq('name', filename)
-    .maybeSingle();
-  
-  if (databaseResult.error) {
-    throw databaseResult.error;
-  }
-  
-  if (!databaseResult.data) {
-    return null;
-  }
+  if (filenames.length > 1) {
+    const zip = new JSZip();
 
-  const storageResult = await supabase
-    .storage
-    .from('files')
-    .download(databaseResult.data.path);
+    for (const filename of filenames) {
+      const { data, error } = await supabase
+        .storage
+        .from('files')
+        .download(`${userId}/${filename}`);
 
-  if (storageResult.error) {
-    throw databaseResult.error;
+      if (error) {
+        throw error;
+      }
+
+      if (data == null) {
+        return { blob: null, error: `Couldn't find ${filename}` };
+      }
+
+      zip.file(data.name, data);
+    }
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    return { blob, error: null };
+  } else if (filenames.length === 1) {
+    const { data, error } = await supabase
+      .storage
+      .from('files')
+      .download(`${userId}/${filenames[0]}`);
+
+    if (error) {
+      throw error;
+    }
+
+    if (data == null) {
+      return { blob: null, error: `Couldn't find ${filenames[0]}` };
+    }
+
+    return { blob: data, error: null };
+  } else {
+    throw new Error('Missing filename');
   }
-
-  return storageResult.data;
 };
