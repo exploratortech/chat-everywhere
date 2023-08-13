@@ -39,9 +39,15 @@ const list = (): string[] => {
 };
 
 // When loading files from local storage, all the files are fetched (no pagination).
-const load = async (userToken?: string, next?: string | null): Promise<{ files: UploadedFile[], next: string | null }> => {
+const load = async (
+  userToken?: string,
+  next: string | null = null,
+  query: string = '',
+): Promise<{ files: UploadedFile[], next: string | null }> => {
+  query = query?.toUpperCase().trim();
+
   if (userToken) {
-    const res = await fetch(`/api/files?next=${next || ''}`, {
+    const res = await fetch(`/api/files?next=${encodeURIComponent(next || '')}&query=${encodeURIComponent(query)}`, {
       headers: { 'user-token': userToken },
       method: 'GET',
     });
@@ -55,9 +61,25 @@ const load = async (userToken?: string, next?: string | null): Promise<{ files: 
     const data = localStorage.getItem('files');
     if (!data) return { files: [], next: null };
 
-    const uploadedFiles: UploadedFileMap = JSON.parse(data);
-    const sortedUploadedFiles = Object.values(uploadedFiles).sort(sortByName);
-    return { files: sortedUploadedFiles, next: null };
+    let uploadedFiles!: UploadedFileMap;
+    try {
+      uploadedFiles = JSON.parse(data);
+    } catch (error) {
+      throw new Error('Unable to retrieve files');
+    }
+
+    if (query) {
+      const filteredUploadedFiles: UploadedFile[] = [];
+      for (const file of Object.values(uploadedFiles)) {
+        if (file.name.toUpperCase().includes(query)) {
+          filteredUploadedFiles.push(file);
+        }
+      }
+      return { files: filteredUploadedFiles.sort(sortByName), next: null };
+    } else {
+      const sortedUploadedFiles = Object.values(uploadedFiles).sort(sortByName);
+      return { files: sortedUploadedFiles, next: null };
+    }
   }
 };
 

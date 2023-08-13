@@ -49,11 +49,17 @@ export const CALLABLE_FUNCTIONS = [
     },
   },
   {
-    name: 'listFiles',
-    description: 'Lists the names of the stored files. It returns an array of filenames.',
+    name: 'searchFiles',
+    description: 'Returns an array of the first 25 filenames that match a given query in ascending alphabetical order.',
     parameters: {
       type: 'object',
-      properties: {},
+      properties: {
+        query: {
+          type: 'string',
+          description: 'A search query. Can be blank.',
+        },
+      },
+      required: ['query'],
     },
   },
   {
@@ -113,11 +119,11 @@ const deleteFiles = async (args: { filenames: string, userToken?: string }): Pro
   }
 };
 
-const listFiles = (args: { userToken?: string }): string => {
-  const { userToken } = args;
+const searchFiles = async (args: { query?: string, userToken?: string }): Promise<string> => {
+  const { query, userToken } = args;
   try {
-    const filenames = UploadedFiles.list();
-    return JSON.stringify(filenames);
+    const { files } = await UploadedFiles.load(userToken, null, query);
+    return JSON.stringify(files.map((file) => file.name));
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -131,6 +137,6 @@ export const AVAILABLE_FUNCTIONS: { [functionName: string]: Function} = {
   'readFromFile': readFromFile,
   'writeToFile': writeToFile,
   'deleteFiles': deleteFiles,
-  'listFiles': listFiles,
+  'searchFiles': searchFiles,
   'getTimeStamp': getTimeStamp,
 };

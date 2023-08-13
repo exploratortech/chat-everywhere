@@ -27,14 +27,16 @@ export default async function handler(req: NextRequest): Promise<Response> {
   
     const user = await getUserProfile(data.user.id);
     if (!user) return unauthorizedResponse;
+
+    const { searchParams } = req.nextUrl;
   
     switch (req.method) {
       case 'GET': {
         try {
-          const url = new URL(req.url);
-          const searchParams = new URLSearchParams(url.search);
-          const next: string | null = searchParams.get('next');
-          const data = await fetchFiles(user.id, next || null);
+          const next = searchParams.get('next');
+          const query = searchParams.get('query');
+          const data = await fetchFiles(user.id, next, query);
+          console.log('data', data);
           return new Response(JSON.stringify(data), { status: 200 });
         } catch (error) {
           console.error(error);
@@ -79,8 +81,6 @@ export default async function handler(req: NextRequest): Promise<Response> {
         }
       };
       case 'DELETE': {
-        const { searchParams } = req.nextUrl;
-  
         const csvFilenames = searchParams.get('names');
         if (!csvFilenames) {
           return new Response('Missing \'names\' parameter', { status: 400 });

@@ -506,21 +506,30 @@ export const updateProAccountsPlan = async (): Promise<void> => {
   }
 };
 
-export const fetchFiles = async (userId: string, next?: string | null): Promise<{ files: UploadedFile[], next: string | null }> => {
+export const fetchFiles = async (
+  userId: string,
+  next: string | null = null,
+  query: string | null = null,
+): Promise<{ files: UploadedFile[], next: string | null }> => {
   const limit = 25;
   const supabase = getAdminSupabaseClient();
+  console.log('query', query);
 
-  const query = supabase
+  let filterBuilder = supabase
     .from('files')
     .select('*')
     .eq('user_id', userId)
     .order('name', { ascending: true });
 
+  if (query) {
+    filterBuilder = filterBuilder.ilike('name', `%${query}%`);
+  }
+
   let result!: any;
   if (next) {
-    result = await query.gte('name', next).limit(limit + 1);
+    result = await filterBuilder.gte('name', next).limit(limit + 1);
   } else {
-    result = await query.limit(limit + 1);
+    result = await filterBuilder.limit(limit + 1);
   }
 
   if (result.error) {
