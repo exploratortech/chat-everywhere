@@ -418,7 +418,9 @@ export const ChatMessage: FC<Props> = memo(
                         return (
                           <a
                             href={href}
-                            target="_blank"
+                            target={
+                              href && href[0] === '#' ? '_self' : '_blank'
+                            }
                             rel="noreferrer noopener"
                             {...props}
                           >
