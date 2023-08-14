@@ -147,7 +147,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
   const handleDeleteFile = useCallback(async (filename: string): Promise<boolean> => {
     return await checkLoading(async () => {
       try {
-        await UploadedFiles.remove(filename, user?.token);
+        await UploadedFiles.remove([filename], user?.token);
         
         const updatedUploadedFiles = { ...uploadedFiles };
         delete updatedUploadedFiles[filename];

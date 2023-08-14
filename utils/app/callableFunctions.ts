@@ -39,16 +39,16 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'deleteFiles',
-    description: 'Forcibly deletes all or specified files.',
+    description: 'Forcibly deletes all or specified files. Use with `searchFiles` for determining available files.',
     parameters: {
       type: 'object',
       properties: {
-        filenames: {
+        csvFilenames: {
           type: 'string',
-          description: 'A comma-separated string of filenames. Pass an asterisk (*) to delete all files.',
+          description: 'A comma-separated string of filenames. Pass an asterisk (*) to delete all files. Doesn\'t support wildcard characters.',
         },
       },
-      required: ['filenames'],
+      required: ['csvFilenames'],
     },
   },
   {
@@ -77,7 +77,7 @@ export const CALLABLE_FUNCTIONS = [
       properties: {
         query: {
           type: 'string',
-          description: 'A search query. Can be blank. Doesn\'t support wildcard characters.',
+          description: 'A search query. Leave blank for all. Doesn\'t support wildcard characters.',
         },
       },
       required: ['query'],
@@ -85,7 +85,7 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'downloadFiles',
-    description: 'Downloads the specified files. Use with `searchFiles` function to determine available files.',
+    description: 'Downloads the specified files. Use with `searchFiles` function for determining available files.',
     parameters: {
       type: 'object',
       properties: {
@@ -140,9 +140,10 @@ const writeToFile = async (args: { filename: string, content: string, userToken?
   }
 };
 
-const deleteFiles = async (args: { filenames: string, userToken?: string }): Promise<string> => {
-  const { filenames, userToken } = args;
+const deleteFiles = async (args: { csvFilenames: string, userToken?: string }): Promise<string> => {
+  const { csvFilenames, userToken } = args;
   try {
+    const filenames = Papa.parse<string[]>(csvFilenames).data[0];
     await UploadedFiles.remove(filenames, userToken);
     return '';
   } catch (error) {

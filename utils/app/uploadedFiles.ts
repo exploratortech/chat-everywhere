@@ -170,8 +170,9 @@ const read = async (
   }
 };
 
-const remove = async (csvFilenames: string, userToken?: string): Promise<void> => {
+const remove = async (filenames: string[], userToken?: string): Promise<void> => {
   if (userToken) {
+    const csvFilenames = Papa.unparse<string[]>([filenames]);
     const res = await fetch(`/api/files?names=${encodeURIComponent(csvFilenames)}`, {
       headers: { 'user-token': userToken },
       method: 'DELETE',
@@ -181,7 +182,6 @@ const remove = async (csvFilenames: string, userToken?: string): Promise<void> =
       throw new Error(await res.text());
     }
   } else {
-    const filenames = Papa.parse<string[]>(csvFilenames).data[0];
     const data = localStorage.getItem('files');
     if (!data) return;
   
@@ -298,8 +298,7 @@ const syncLocal = async (userToken: string): Promise<null | any[]> => {
     return errors;
   }
 
-  const csvFilenames = Papa.unparse<string[]>([files.map((file) => file.name)]);
-  await remove(csvFilenames);
+  await remove(files.map((file) => file.name));
   return null;
 };
 
