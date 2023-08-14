@@ -675,7 +675,11 @@ export const uploadFiles = async (
   return errors;
 };
 
-export const deleteFiles = async (userId: string, filenames: string[], all: boolean = false): Promise<void> => {
+export const deleteFiles = async (
+  userId: string,
+  filenames: string[],
+  all: boolean = false,
+): Promise<void> => {
   const supabase = getAdminSupabaseClient();
 
   if (all) {
