@@ -21,7 +21,7 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'writeToFile',
-    description: 'Create a new file or write to a specified file.',
+    description: 'Create a new file or write to a specified file of \'text/plain\' mimetype.',
     parameters: {
       type: 'object',
       properties: {
@@ -128,9 +128,16 @@ const readFromFile = async (args: { filename: string, userToken?: string }): Pro
 
 const writeToFile = async (args: { filename: string, content: string, userToken?: string }): Promise<string> => {
   const { filename, content, userToken } = args;
+
+  let formattedFilename = filename.trim();
+  if (!formattedFilename.endsWith('.txt'))
+    return `writeToFile:error:Not a plain text file`;
+
   try {
-    await UploadedFiles.write(filename, content, userToken);
-    return content;
+    if (!await UploadedFiles.write(formattedFilename, content, userToken)) {
+      return `writeToFile:error:Unable to write to file`;
+    }
+    return '';
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {

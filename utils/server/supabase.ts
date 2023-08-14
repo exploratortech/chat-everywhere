@@ -566,11 +566,11 @@ export const uploadFiles = async (
   files: File[],
   fileData: any = {},
   sync: boolean = false,
-): Promise<any> => {
+): Promise<{ filename: string, message: string }[]> => {
   const supabase = getAdminSupabaseClient();
 
   const uploads = [];
-  const errors: { filename: string, error: string }[] = [];
+  const errors: { filename: string, message: string }[] = [];
 
   const databaseResult = await supabase
     .from('files')
@@ -585,6 +585,14 @@ export const uploadFiles = async (
   // 1. Upload files to storage. Files that fail to upload are added to
   // `errors`
   for (const file of files) {
+    if (file.type !== 'text/plain') {
+      errors.push({
+        filename: file.name,
+        message: `${file.name} is not a plain text file.`,
+      });
+      continue;
+    }
+
     // Overwrite files with uploaded files if the uploaded file is newer,
     // otherwise, don't overwrite.
     if (sync && databaseResult.data.some((row) => {
@@ -600,23 +608,23 @@ export const uploadFiles = async (
     }
 
     uploads.push(
-      new Promise<File | null>(async (resolve) => {
-        const { error } = await supabase
+      new Promise<File | null>((resolve) => {
+        supabase
           .storage
           .from('files')
           .upload(
             `${userId}/${file.name}`,
             file,
-            { contentType: 'text/plain', upsert: true },
-          );
-        
-        if (error) {
-          console.error(error);
-          errors.push({ filename: file.name, error: error.message });
-          resolve(null);
-        }
-
-        resolve(file);
+            { contentType: file.type, upsert: true },
+          )
+          .then(({ error }) => {
+            if (error) {
+              console.error(error);
+              errors.push({ filename: file.name, message: error.message });
+              resolve(null);
+            }
+            resolve(file);
+          });
       })
     );
   }
@@ -651,6 +659,7 @@ export const uploadFiles = async (
   if (upsert.error) {
     console.error(upsert.error.message);
 
+    // Remove all uploaded files
     const remove = await supabase
       .storage
       .from('files')

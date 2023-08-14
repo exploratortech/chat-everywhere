@@ -306,9 +306,9 @@ const upload = async (
   files: FileList | File[],
   userToken: string | null = null,
   sync: boolean = false,
-): Promise<{ files: UploadedFileMap, errors: any[] }> => {
+): Promise<{ files: UploadedFileMap, errors: { filename: string, message: string }[] }> => {
   let uploadedFiles = await createUploadedFiles(files);
-  let errors: any[] = [];
+  let errors: { filename: string, message: string }[] = [];
 
   if (!files) return { files: {}, errors: [] };
 
@@ -337,8 +337,10 @@ const upload = async (
 
     const json = await res.json();
     for (const error of json.errors) {
+      // Remove the files that failed to upload
       delete uploadedFiles[error.filename];
     }
+    errors = json.errors;
   } else {
     const data = localStorage.getItem('files');
     let updatedUploadedFiles: UploadedFileMap = {};
@@ -362,7 +364,8 @@ const upload = async (
   return { files: uploadedFiles, errors };
 };
 
-const write = async (filename: string, content: string, userToken?: string): Promise<string> => {
+// Returns true when successful, otherwise, false.
+const write = async (filename: string, content: string, userToken?: string): Promise<boolean> => {
   if (userToken) {
     const file = new File([content], filename, { type: 'text/plain' });
 
@@ -378,6 +381,9 @@ const write = async (filename: string, content: string, userToken?: string): Pro
     if (!res.ok) {
       throw new Error(await res.text());
     }
+
+    const json = await res.json();
+    return json.errors.length === 0;
   } else {
     const data = localStorage.getItem('files') || '{}';
   
@@ -407,9 +413,8 @@ const write = async (filename: string, content: string, userToken?: string): Pro
   
     const jsonString = JSON.stringify(updatedUploadedFiles);
     localStorage.setItem('files', jsonString);
+    return true;
   }
-
-  return content;
 };
 
 const createUploadedFiles = async (files: FileList | File[]): Promise<UploadedFileMap> => {

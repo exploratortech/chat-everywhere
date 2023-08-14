@@ -102,7 +102,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
         const { files: newUploadedFiles, errors } = await UploadedFiles.upload(files, user?.token);
 
         for (const error of errors) {
-          toast.error(`Unable to upload file: ${error.filename}`);
+          toast.error(error.message);
         }
 
         const updatedUploadedFiles = { ...uploadedFiles };
