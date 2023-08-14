@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import JSZip from 'jszip';
+import { downloadZip } from 'client-zip';
 
 import { DefaultMonthlyCredits } from '@/utils/config';
 
@@ -759,27 +759,36 @@ export const downloadFiles = async (
   const supabase = getAdminSupabaseClient();
 
   if (filenames.length > 1) {
-    const zip = new JSZip();
-
+    const files: File[] = [];
+    const downloads: Promise<{ blob: Blob | null, filename: string }>[] = [];
+    
     for (const filename of filenames) {
-      const { data, error } = await supabase
-        .storage
-        .from('files')
-        .download(`${userId}/${filename}`);
-
-      if (error) {
-        throw error;
-      }
-
-      if (data == null) {
-        return { blob: null, error: `Couldn't find ${filename}` };
-      }
-
-      zip.file(data.name, data);
+      downloads.push(new Promise((resolve) => {
+        supabase
+          .storage
+          .from('files')
+          .download(`${userId}/${filename}`)
+          .then(({ data, error }) => {
+            if (error) {
+              resolve({ blob: null, filename });
+              return;
+            }
+            resolve({ blob: data, filename });
+          });
+      }));
     }
 
-    const blob = await zip.generateAsync({ type: 'blob' });
-    return { blob, error: null };
+    const downloadResults = await Promise.all(downloads);
+    for (const result of downloadResults) {
+      const { blob, filename } = result;
+      if (blob == null) {
+        return { blob: null, error: `Couldn't find ${filename}` };
+      }
+      files.push(new File([blob], `ChatEverywhere/${filename}`, { type: blob.type }));
+    }
+
+    const zip = await downloadZip(files).blob();
+    return { blob: zip, error: null };
   } else if (filenames.length === 1) {
     const { data, error } = await supabase
       .storage

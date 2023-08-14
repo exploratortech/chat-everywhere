@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import Papa from 'papaparse';
-import JSZip from 'jszip';
+import { downloadZip } from 'client-zip';
 
 import { UploadedFile, UploadedFileMap } from '@/types/uploadedFile';
 
@@ -52,16 +52,15 @@ const download = async (filenames: string[], userToken?: string): Promise<Blob> 
     }
 
     if (filenames.length > 1) {
-      const zip = new JSZip();
+      const files: File[] = [];
 
       for (const filename of filenames) {
         const file = uploadedFiles[filename];
         if (!file) throw new Error(`Unable to find ${filename}`);
-        zip.file(filename, file.content);
+        files.push(new File([file.content], `ChatEverywhere/${filename}`, { type: file.type }));
       }
 
-      const blob = await zip.generateAsync({ type: 'blob' });
-      return blob;
+      return await downloadZip(files).blob();
     }
 
     const file = uploadedFiles[filenames[0]];
@@ -299,7 +298,7 @@ const syncLocal = async (userToken: string): Promise<null | any[]> => {
     return errors;
   }
 
-  const csvFilenames = Papa.unparse([files.map((file) => file.name)]);
+  const csvFilenames = Papa.unparse<string[]>([files.map((file) => file.name)]);
   await remove(csvFilenames);
   return null;
 };

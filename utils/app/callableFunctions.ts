@@ -1,3 +1,6 @@
+import Papa from 'papaparse';
+import dayjs from 'dayjs';
+
 import { getTimeStamp } from '@/types/misc';
 import { UploadedFiles } from "@/utils/app/uploadedFiles";
 
@@ -68,16 +71,30 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'searchFiles',
-    description: 'Returns an array of the first 25 filenames that match a given query in ascending alphabetical order.',
+    description: 'Returns a comma-separated string of the first 25 filenames that match a given query in ascending alphabetical order.',
     parameters: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
-          description: 'A search query. Can be blank.',
+          description: 'A search query. Can be blank. Doesn\'t support wildcard characters.',
         },
       },
       required: ['query'],
+    },
+  },
+  {
+    name: 'downloadFiles',
+    description: 'Downloads the specified files. Use with `searchFiles` function to determine available files.',
+    parameters: {
+      type: 'object',
+      properties: {
+        csvFilenames: {
+          type: 'string',
+          description: 'A comma-separated string of filenames',
+        },
+      },
+      required: ['csvFilenames'],
     },
   },
   {
@@ -155,7 +172,30 @@ const searchFiles = async (args: { query?: string, userToken?: string }): Promis
   const { query, userToken } = args;
   try {
     const { files } = await UploadedFiles.load(userToken, null, query);
-    return JSON.stringify(files.map((file) => file.name));
+    return Papa.unparse<string[]>([files.map((file) => file.name)]);
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      return `searchFiles:error:${error.message}`;
+    }
+    return `searchFiles:error:Unable to retrieve files`;
+  }
+};
+
+const downloadFiles = async (args: { csvFilenames: string, userToken?: string }): Promise<string> => {
+  const { csvFilenames, userToken } = args;
+  try {
+    const filenames = Papa.parse<string[]>(csvFilenames).data[0];
+    const blob = await UploadedFiles.download(filenames, userToken);
+
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = filenames.length > 1
+      ? `ChatEverywhere-${dayjs().unix()}.zip`
+      : filenames[0];
+    link.click();
+
+    return '';
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -171,5 +211,6 @@ export const AVAILABLE_FUNCTIONS: { [functionName: string]: Function} = {
   'deleteFiles': deleteFiles,
   'renameFile': renameFile,
   'searchFiles': searchFiles,
+  'downloadFiles': downloadFiles,
   'getTimeStamp': getTimeStamp,
 };
