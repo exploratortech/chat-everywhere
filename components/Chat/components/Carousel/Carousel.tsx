@@ -60,7 +60,8 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
           {currentIndexChildren}
         </AnimatedSlide>
 
-        {children.length > 0 && (
+        {/* Main Display */}
+        {children.length > 1 && (
           <>
             <button
               onClick={prevSlide}
@@ -79,25 +80,29 @@ const Carousel: React.FC<CarouselProps> = ({ children }) => {
       </div>
 
       {/* Dots */}
-      <div className="flex justify-center space-x-2 my-2">
-        {children.map((_, index) => (
-          <span
-            key={index}
-            className={`h-2 w-2 rounded-full ${
-              currentIndex === index
-                ? 'bg-gray-800 dark:bg-white'
-                : 'bg-gray-300 dark:bg-gray-500'
-            }`}
-          />
-        ))}
-      </div>
+      {children.length > 1 && (
+        <div className="flex justify-center space-x-2 my-2">
+          {children.map((_, index) => (
+            <span
+              key={index}
+              className={`h-2 w-2 rounded-full ${
+                currentIndex === index
+                  ? 'bg-gray-800 dark:bg-white'
+                  : 'bg-gray-300 dark:bg-gray-500'
+              }`}
+            />
+          ))}
+        </div>
+      )}
       {/* Thumbnails */}
-      <CarouselThumbnails
-        currentIndex={currentIndex}
-        handleThumbnailClick={handleThumbnailClick}
-      >
-        {children}
-      </CarouselThumbnails>
+      {children.length > 1 && (
+        <CarouselThumbnails
+          currentIndex={currentIndex}
+          handleThumbnailClick={handleThumbnailClick}
+        >
+          {children}
+        </CarouselThumbnails>
+      )}
     </div>
   );
 };
