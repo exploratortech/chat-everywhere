@@ -389,7 +389,9 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
-                <MemoizedImageGallery aiImageList={aiImageList} />
+                {aiImageList.length > 0 && (
+                  <MemoizedImageGallery aiImageList={aiImageList} />
+                )}
                 <div className="flex flex-row justify-between">
                   <MemoizedReactMarkdown
                     className="prose dark:prose-invert min-w-full"
