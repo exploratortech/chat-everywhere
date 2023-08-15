@@ -2,8 +2,8 @@ export const DEFAULT_SYSTEM_PROMPT =
   "You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Always be aware of the current date and time, and make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format." +
   'If the input includes text such as {lang=xxx}, the response should not include this text.' +
   `The current date is ${new Date().toLocaleDateString()}.`;
-export const PERSISTENT_SYSTEM_PROMPT =
-  'Respond with an error message if and only if a function\'s response matches the pattern: `<name>:error:<message>` where `<name>` is the name of the function and `<message>` is the error message.';
+export const ASSISTANT_SYSTEM_PROMPT =
+  'You are capable of performing file operations. Respond with an error message if and only if a function\'s response matches the pattern: `<name>:error:<message>` where `<name>` is the name of the function and `<message>` is the error message.';
 
 export const OPENAI_API_HOST =
   process.env.OPENAI_API_HOST || 'https://api.openai.com';

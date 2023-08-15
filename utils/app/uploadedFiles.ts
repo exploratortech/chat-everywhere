@@ -190,7 +190,7 @@ const remove = async (filenames: string[], userToken?: string): Promise<void> =>
     try {
       uploadedFiles = JSON.parse(data);
     } catch (error) {
-      throw new Error('Unable to remove file');
+      throw new Error('Unable to retrieve files');
     }
     
     const updatedUploadedFiles =  { ...uploadedFiles };

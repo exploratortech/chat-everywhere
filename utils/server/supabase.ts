@@ -692,7 +692,7 @@ export const deleteFiles = async (
       throw queriedFilesResult.error;
     }
 
-    if (queriedFilesResult.count === 0) return;
+    if (queriedFilesResult.data.length === 0) return;
 
     const storageResult = await supabase
       .storage

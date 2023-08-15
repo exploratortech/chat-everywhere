@@ -39,13 +39,13 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'deleteFiles',
-    description: 'Forcibly deletes all or specified files. Use with `searchFiles` for determining available files.',
+    description: 'Forcibly deletes all (using \'*\') or specified files. May be used with `searchFiles` for determining available files. Returns an empty string upon success.',
     parameters: {
       type: 'object',
       properties: {
         csvFilenames: {
           type: 'string',
-          description: 'A comma-separated string of filenames. Pass an asterisk (*) to delete all files. Doesn\'t support wildcard characters.',
+          description: 'A comma-separated string of filenames. Pass \'*\' to delete all files. Doesn\'t support other wildcard characters.',
         },
       },
       required: ['csvFilenames'],
@@ -85,7 +85,7 @@ export const CALLABLE_FUNCTIONS = [
   },
   {
     name: 'downloadFiles',
-    description: 'Downloads the specified files. Use with `searchFiles` function for determining available files.',
+    description: 'Downloads the specified files. May be used with `searchFiles` function for determining available files.',
     parameters: {
       type: 'object',
       properties: {
