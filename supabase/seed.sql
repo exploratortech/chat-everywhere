@@ -1,3 +1,7 @@
+-- Creates a files storage bucket with a file upload size limit of 1 MB
+INSERT INTO storage.buckets (id, name, file_size_limit, allowed_mime_types)
+VALUES ('files', 'files', 1048576, ARRAY['text/plain']);
+
 INSERT INTO share_conversations (accessible_id, title, prompts)
 VALUES
   (
