@@ -308,6 +308,7 @@ const syncLocal = async (userToken: string): Promise<null | any[]> => {
     return null;
   }
 
+
   const { errors } = await upload(files, userToken, true);
   if (errors.length > 0) {
     return errors;

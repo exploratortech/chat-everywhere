@@ -242,6 +242,13 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
           for (const error of result) {
             toast.error(`Unable to sync file: ${error.filename}`);
           }
+        })
+        .catch((error) => {
+          if (error instanceof Error) {
+            toast.error(`Failed to sync files: ${error.message}`);
+          } else {
+            toast.error('Failed to sync files');
+          }
         });
     }
   }, [user?.token]);
