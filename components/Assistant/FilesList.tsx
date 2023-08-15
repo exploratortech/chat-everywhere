@@ -13,6 +13,7 @@ const Component = (props: unknown, ref: ForwardedRef<HTMLDivElement>): JSX.Eleme
       uploadedFilenames,
       loading,
       nextFile,
+      totalFiles,
     },
     dispatch,
     loadFiles,
@@ -107,6 +108,10 @@ const Component = (props: unknown, ref: ForwardedRef<HTMLDivElement>): JSX.Eleme
 
   return (
     <>
+      <div className="flex flex-col pb-2">
+        <p className="text-sm text-neutral-400">{t('Maximum file size: 1MB')}</p>
+        <p className="text-sm text-neutral-400">{t('Total files:')} {totalFiles}</p>
+      </div>
       <div className="flex flex-row justify-between text-sm text-neutral-400 py-2 pl-10 pr-[120px] tablet:pr-[54px]">
         <p>{t('Name')}</p>
         <div className="flex flex-row gap-2">
