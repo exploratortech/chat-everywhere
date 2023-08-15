@@ -8,6 +8,7 @@ export interface FilesModalState {
   uploadedFilenames: string[];
   loading: boolean;
   nextFile: string | null;
+  totalFiles: number;
 }
 
 export interface FilesModelContextProps {

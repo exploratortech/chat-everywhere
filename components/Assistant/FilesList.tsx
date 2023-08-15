@@ -5,6 +5,7 @@ import FilesModelContext from "./FilesModal.context";
 import { FileItem } from "./FileItem";
 import Spinner from "../Spinner/Spinner";
 import { sortByName } from "@/utils/app/uploadedFiles";
+import { MAX_NUM_FILES } from "@/utils/app/const";
 
 const Component = (props: unknown, ref: ForwardedRef<HTMLDivElement>): JSX.Element => {
   const {
@@ -110,7 +111,7 @@ const Component = (props: unknown, ref: ForwardedRef<HTMLDivElement>): JSX.Eleme
     <>
       <div className="flex flex-col pb-2">
         <p className="text-sm text-neutral-400">{t('Maximum file size: 1MB')}</p>
-        <p className="text-sm text-neutral-400">{t('Total files:')} {totalFiles}</p>
+        <p className="text-sm text-neutral-400">{t('Total files:')} {totalFiles}/{MAX_NUM_FILES}</p>
       </div>
       <div className="relative flex flex-col flex-1 -mx-3 overflow-hidden">
         <div

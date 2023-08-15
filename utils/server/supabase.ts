@@ -561,25 +561,29 @@ export const fetchFiles = async (
   return { files, next: result.data[limit]?.name || null };
 };
 
+// Returns a list of error objects and the number of successfully uploaded file.
 export const uploadFiles = async (
   userId: string,
   files: File[],
   fileData: any = {},
   sync: boolean = false,
-): Promise<{ filename: string, message: string }[]> => {
+): Promise<{
+  errors: { filename: string, message: string }[],
+  count: number,
+}> => {
   const supabase = getAdminSupabaseClient();
 
   const uploads = [];
   const errors: { filename: string, message: string }[] = [];
 
-  const databaseResult = await supabase
+  const conflictingFilesResult = await supabase
     .from('files')
-    .select('name, updated_at')
+    .select('name, updated_at', { count: 'exact' })
     .eq('user_id', userId)
     .in('name', files.map((file) => file.name));
   
-  if (databaseResult.error) {
-    throw databaseResult.error;
+  if (conflictingFilesResult.error) {
+    throw conflictingFilesResult.error;
   }
     
   // 1. Upload files to storage. Files that fail to upload are added to
@@ -595,7 +599,7 @@ export const uploadFiles = async (
 
     // Overwrite files with uploaded files if the uploaded file is newer,
     // otherwise, don't overwrite.
-    if (sync && databaseResult.data.some((row) => {
+    if (sync && conflictingFilesResult.data.some((row) => {
       if (row.name === file.name) {
         const serverFileUpdatedAt = dayjs(row.updated_at).utc().valueOf();
         const localFileUpdatedAt: number | undefined = fileData.updatedAt[file.name];
@@ -654,6 +658,7 @@ export const uploadFiles = async (
     .upsert(filesToUpsert, {
       onConflict: 'path',
       ignoreDuplicates: false,
+      count: 'exact',
     });
 
   if (upsert.error) {
@@ -672,14 +677,15 @@ export const uploadFiles = async (
     throw new Error('Unable to upload file(s)');
   }
 
-  return errors;
+  const newFileCount = Math.max((upsert.count || 0) - (conflictingFilesResult.count || 0), 0);
+  return { errors, count: newFileCount };
 };
 
 export const deleteFiles = async (
   userId: string,
   filenames: string[],
   all: boolean = false,
-): Promise<void> => {
+): Promise<{ count: number }> => {
   const supabase = getAdminSupabaseClient();
 
   if (all) {
@@ -692,7 +698,9 @@ export const deleteFiles = async (
       throw queriedFilesResult.error;
     }
 
-    if (queriedFilesResult.data.length === 0) return;
+    if (queriedFilesResult.data.length === 0) {
+      return { count: 0 };
+    };
 
     const storageResult = await supabase
       .storage
@@ -705,12 +713,14 @@ export const deleteFiles = async (
 
     const databaseResult = await supabase
       .from('files')
-      .delete()
+      .delete({ count: 'exact' })
       .eq('user_id', userId);
 
     if (databaseResult.error) {
       throw databaseResult.error;
     }
+
+    return { count: databaseResult.count || 0 };
   } else {
     const storageResult = await supabase
       .storage
@@ -723,12 +733,14 @@ export const deleteFiles = async (
   
     const databaseResult = await supabase
       .from('files')
-      .delete()
+      .delete({ count: 'exact' })
       .in('path', storageResult.data.map((file) => file.name));
   
     if (databaseResult.error) {
       throw databaseResult.error;
     }
+
+    return { count: databaseResult.count || 0 };
   }
 };
 
@@ -820,4 +832,18 @@ export const downloadFiles = async (
   } else {
     throw new Error('Missing filename');
   }
+};
+
+export const fetchNumberOfFiles = async (userId: string): Promise<number | null> => {
+  const supabase = getAdminSupabaseClient();
+  const { count, error } = await supabase
+    .from('files')
+    .select('name', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  if (error) {
+    throw error;
+  }
+
+  return count;
 };

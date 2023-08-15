@@ -6,10 +6,12 @@ import {
   deleteFiles,
   downloadFiles,
   fetchFiles,
+  fetchNumberOfFiles,
   getAdminSupabaseClient,
   getUserProfile,
   uploadFiles,
 } from '@/utils/server/supabase';
+import { MAX_NUM_FILES } from '@/utils/app/const';
 
 const supabase = getAdminSupabaseClient();
 
@@ -44,8 +46,15 @@ export default async function handler(req: NextRequest): Promise<Response> {
             if (error) return new Response(error, { status: 404 });
             return new Response(blob, { status: 200 });
           } else {
-            const data = await fetchFiles(user.id, next, query);
-            return new Response(JSON.stringify(data), { status: 200 });
+            const results = await Promise.all([
+              fetchFiles(user.id, next, query),
+              fetchNumberOfFiles(user.id),
+            ]);
+
+            return new Response(
+              JSON.stringify({ ...results[0], total: results[1],  }),
+              { status: 200 },
+            );
           }
         } catch (error) {
           console.error(error);
@@ -79,10 +88,23 @@ export default async function handler(req: NextRequest): Promise<Response> {
         if (!files.length) {
           return new Response('No files uploaded', { status: 400 });
         }
-  
+
         try {
-          const errors = await uploadFiles(user.id, files, fileData, sync);
-          return new Response(JSON.stringify({ errors }), { status: 200 });
+          const fileCount = await fetchNumberOfFiles(user.id);
+
+          if (fileCount == null) {
+            return new Response('Failed to get file count', { status: 400 });
+          }
+
+          if (fileCount + files.length > MAX_NUM_FILES) {
+            return new Response(
+              `Maximum number of files reached (${MAX_NUM_FILES})`,
+              { status: 400 },
+            );
+          }
+
+          const data = await uploadFiles(user.id, files, fileData, sync);
+          return new Response(JSON.stringify(data), { status: 200 });
         } catch (error) {
           console.error(error);
           trackError(error as string);
@@ -96,13 +118,14 @@ export default async function handler(req: NextRequest): Promise<Response> {
         }
   
         try {
+          let data!: { count: number };
           if (csvFilenames === '*') {
-            await deleteFiles(user.id, [], true);
+            data = await deleteFiles(user.id, [], true);
           } else {
             const filenames = Papa.parse<string[]>(csvFilenames).data[0];
-            await deleteFiles(user.id, filenames);
+            data = await deleteFiles(user.id, filenames);
           }
-          return new Response(null, { status: 200 });
+          return new Response(JSON.stringify(data), { status: 200 });
         } catch (error) {
           console.error(error);
           trackError(error as string);

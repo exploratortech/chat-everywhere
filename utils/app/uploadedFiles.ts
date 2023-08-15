@@ -74,7 +74,7 @@ const load = async (
   userToken?: string,
   next: string | null = null,
   query: string = '',
-): Promise<{ files: UploadedFile[], next: string | null }> => {
+): Promise<{ files: UploadedFile[], next: string | null, total: number }> => {
   query = query?.toUpperCase().trim();
 
   if (userToken) {
@@ -90,7 +90,7 @@ const load = async (
     return await res.json();
   } else {
     const data = localStorage.getItem('files');
-    if (!data) return { files: [], next: null };
+    if (!data) return { files: [], next: null, total: 0 };
 
     let uploadedFiles!: UploadedFileMap;
     try {
@@ -106,10 +106,18 @@ const load = async (
           filteredUploadedFiles.push(file);
         }
       }
-      return { files: filteredUploadedFiles.sort(sortByName), next: null };
+      return {
+        files: filteredUploadedFiles.sort(sortByName),
+        next: null,
+        total: Object.keys(uploadedFiles).length,
+      };
     } else {
       const sortedUploadedFiles = Object.values(uploadedFiles).sort(sortByName);
-      return { files: sortedUploadedFiles, next: null };
+      return {
+        files: sortedUploadedFiles,
+        next: null,
+        total: Object.keys(uploadedFiles).length,
+      };
     }
   }
 };
@@ -170,7 +178,7 @@ const read = async (
   }
 };
 
-const remove = async (filenames: string[], userToken?: string): Promise<void> => {
+const remove = async (filenames: string[], userToken?: string): Promise<{ count: number }> => {
   if (userToken) {
     const csvFilenames = Papa.unparse<string[]>([filenames]);
     const res = await fetch(`/api/files?names=${encodeURIComponent(csvFilenames)}`, {
@@ -181,9 +189,13 @@ const remove = async (filenames: string[], userToken?: string): Promise<void> =>
     if (!res.ok) {
       throw new Error(await res.text());
     }
+
+    return await res.json();
   } else {
     const data = localStorage.getItem('files');
-    if (!data) return;
+    let numberOfDeleteFiles = 0;
+
+    if (!data) return { count: 0 };
   
     let uploadedFiles!: UploadedFileMap;
     
@@ -196,11 +208,14 @@ const remove = async (filenames: string[], userToken?: string): Promise<void> =>
     const updatedUploadedFiles =  { ...uploadedFiles };
   
     for (const filename of filenames) {
+      if (updatedUploadedFiles[filename]) numberOfDeleteFiles += 1;
       delete updatedUploadedFiles[filename];
     }
   
     const jsonString = JSON.stringify(updatedUploadedFiles);
     localStorage.setItem('files', jsonString);
+
+    return { count: numberOfDeleteFiles };
   }
 };
 
@@ -306,11 +321,14 @@ const upload = async (
   files: FileList | File[],
   userToken: string | null = null,
   sync: boolean = false,
-): Promise<{ files: UploadedFileMap, errors: { filename: string, message: string }[] }> => {
-  let uploadedFiles = await createUploadedFiles(files);
-  let errors: { filename: string, message: string }[] = [];
+): Promise<{
+  files: UploadedFileMap,
+  errors: { filename: string, message: string }[],
+  count: number,
+}> => {
+  if (!files.length) return { files: {}, errors: [], count: 0 };
 
-  if (!files) return { files: {}, errors: [] };
+  let uploadedFiles = await createUploadedFiles(files);
 
   if (userToken) {
     const formData = new FormData();
@@ -340,28 +358,42 @@ const upload = async (
       // Remove the files that failed to upload
       delete uploadedFiles[error.filename];
     }
-    errors = json.errors;
+
+    return {
+      files: uploadedFiles,
+      errors: json.errors,
+      count: json.count,
+    };
   } else {
-    const data = localStorage.getItem('files');
-    let updatedUploadedFiles: UploadedFileMap = {};
-  
-    if (data) {
-      const existingUploadedFiles = JSON.parse(data) as UploadedFileMap;
-      updatedUploadedFiles = {
-        ...existingUploadedFiles,
-        ...uploadedFiles,
-      };
-    } else {
-      updatedUploadedFiles = {
-        ...uploadedFiles,
-      };
+    const data = localStorage.getItem('files') || '{}';
+    let existingUploadedFiles!: UploadedFileMap;
+    let updatedUploadedFiles!: UploadedFileMap;
+    let numberOfNewFiles = 0;
+
+    try {
+      existingUploadedFiles = JSON.parse(data);
+    } catch (error) {
+      throw new Error('Unable to load files');
     }
+
+    for (const file of Object.values(uploadedFiles)) {
+      if (!existingUploadedFiles[file.name]) numberOfNewFiles += 1;
+    }
+  
+    updatedUploadedFiles = {
+      ...existingUploadedFiles,
+      ...uploadedFiles,
+    };
   
     const jsonString = JSON.stringify(updatedUploadedFiles);
     localStorage.setItem('files', jsonString);
-  }
 
-  return { files: uploadedFiles, errors };
+    return {
+      files: uploadedFiles,
+      errors: [],
+      count: numberOfNewFiles,
+    };
+  }
 };
 
 // Returns true when successful, otherwise, false.

@@ -28,6 +28,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
       uploadedFilenames: [],
       loading: false,
       nextFile: null,
+      totalFiles: 0,
     },
   });
 
@@ -37,6 +38,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
       uploadedFilenames,
       loading,
       nextFile,
+      totalFiles,
     },
     dispatch,
   } = contextValue;
@@ -57,7 +59,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
     return res;
   }, [loading, dispatch]);
 
-  const loadFiles = useCallback(async (next?: string): Promise<{ files: UploadedFile[], next: string | null }> => {
+  const loadFiles = useCallback(async (next?: string): Promise<{ files: UploadedFile[], next: string | null, total: number }> => {
     try {
       return await UploadedFiles.load(user?.token, next);
     } catch (error) {
@@ -66,7 +68,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
       } else {
         toast.error('Unable to load files');
       }
-      return { files: [], next: null };
+      return { files: [], next: null, total: 0 };
     }
   }, [user?.token]);
 
@@ -74,7 +76,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
     await checkLoading(async (): Promise<void> => {
       return new Promise((resolve) => {
         loadFiles()
-          .then(({ files, next }) => {
+          .then(({ files, next, total }) => {
             filesListRef.current?.scrollTo({ top: 0 });
 
             const updatedUploadedFiles: UploadedFileMap = {};
@@ -88,6 +90,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
             dispatch({ field: 'nextFile', value: next });
             dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
             dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
+            dispatch({ field: 'totalFiles', value: total });
           })
           .finally(() => {
             resolve();
@@ -99,7 +102,11 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
   const handleUploadFiles = useCallback(async (files: FileList | File[]): Promise<boolean> => {
     return await checkLoading(async () => {
       try {
-        const { files: newUploadedFiles, errors } = await UploadedFiles.upload(files, user?.token);
+        const {
+          files: newUploadedFiles,
+          errors,
+          count,
+        } = await UploadedFiles.upload(files, user?.token);
 
         for (const error of errors) {
           toast.error(error.message);
@@ -110,8 +117,9 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
         
         for (const filename of Object.keys(newUploadedFiles)) {
           // Add the uploaded files to the local collection if the already fetched
-          // files would've included them. Otherwise, don't add them and fetch the
-          // new files when paginating. This is to ensure consistent pagination behaviour.
+          // files would've included them, otherwise, don't include them. The new
+          // files will be fetched when paginating. This is to ensure consistent
+          // pagination behaviour.
           if (!nextFile || filename.toUpperCase() < nextFile.toUpperCase()) {
             updatedUploadedFiles[filename] = newUploadedFiles[filename];
 
@@ -122,15 +130,9 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
 
         updatedUploadedFilenames.sort(sortByName);
   
-        dispatch({
-          field: 'uploadedFiles',
-          value: updatedUploadedFiles,
-        });
-  
-        dispatch({
-          field: 'uploadedFilenames',
-          value: updatedUploadedFilenames,
-        });
+        dispatch({ field: 'uploadedFiles', value: updatedUploadedFiles });
+        dispatch({ field: 'uploadedFilenames', value: updatedUploadedFilenames });
+        dispatch({ field: 'totalFiles', value: totalFiles + count });
   
         return true;
       } catch (error) {
@@ -142,12 +144,12 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
         return false;
       }
     });
-  }, [checkLoading, uploadedFiles, uploadedFilenames, nextFile, user?.token, dispatch]);
+  }, [checkLoading, uploadedFiles, uploadedFilenames, nextFile, totalFiles, user?.token, dispatch]);
 
   const handleDeleteFile = useCallback(async (filename: string): Promise<boolean> => {
     return await checkLoading(async () => {
       try {
-        await UploadedFiles.remove([filename], user?.token);
+        const { count } = await UploadedFiles.remove([filename], user?.token);
         
         const updatedUploadedFiles = { ...uploadedFiles };
         delete updatedUploadedFiles[filename];
@@ -157,6 +159,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
           field: 'uploadedFilenames',
           value: Object.keys(updatedUploadedFiles).sort(sortByName),
         });
+        dispatch({ field: 'totalFiles', value: totalFiles - count });
   
         return true;
       } catch (error) {
@@ -167,7 +170,7 @@ export const FilesModal = ({ onClose }: Props): JSX.Element => {
         return false;
       }
     });
-  }, [checkLoading, uploadedFiles, user?.token, dispatch]);
+  }, [checkLoading, uploadedFiles, totalFiles, user?.token, dispatch]);
 
   const handleRenameFile = useCallback(async (oldName: string, newName: string): Promise<boolean> => {
     return await checkLoading(async () => {
