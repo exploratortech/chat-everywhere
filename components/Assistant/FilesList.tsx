@@ -136,7 +136,7 @@ const Component = (props: unknown, ref: ForwardedRef<HTMLDivElement>): JSX.Eleme
             </div>
           </div>
           {!loading && uploadedFilenames.length <= 0 && (
-            <p className="text-[14px] leading-normal text-center text-white opacity-50">{t('No files')}</p>
+            <p className="mt-3 text-[14px] leading-normal text-center text-white opacity-50">{t('No files')}</p>
           )}
           {(uploadedFilenames.map((filename) => {
               const file = uploadedFiles[filename];
