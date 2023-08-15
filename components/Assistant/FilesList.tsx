@@ -112,16 +112,9 @@ const Component = (props: unknown, ref: ForwardedRef<HTMLDivElement>): JSX.Eleme
         <p className="text-sm text-neutral-400">{t('Maximum file size: 1MB')}</p>
         <p className="text-sm text-neutral-400">{t('Total files:')} {totalFiles}</p>
       </div>
-      <div className="flex flex-row justify-between text-sm text-neutral-400 py-2 pl-10 pr-[120px] tablet:pr-[54px]">
-        <p>{t('Name')}</p>
-        <div className="flex flex-row gap-2">
-          <p className="block mobile:hidden">{t('Updated At')}</p>
-          <p className="w-20 text-right">{t('Size')}</p>
-        </div>
-      </div>
-      <div className="relative flex flex-col flex-1 overflow-hidden">
+      <div className="relative flex flex-col flex-1 -mx-3 overflow-hidden">
         <div
-          className="absolute left-0 w-full h-full rounded-md border-2 bg-indigo-300/30 border-indigo-400 opacity-0 transition-opacity ease-out duration-200 pointer-events-none"
+          className="absolute left-0 w-full h-full rounded-md border-2 bg-indigo-300/30 border-indigo-400 opacity-0 transition-opacity ease-out duration-200 pointer-events-none z-50"
           ref={dropAreaRef}
         />
         <div
@@ -133,6 +126,15 @@ const Component = (props: unknown, ref: ForwardedRef<HTMLDivElement>): JSX.Eleme
           onScroll={handleScroll}
           ref={ref}
         >
+          <div className="relative h-7">
+            <div className="fixed left-0 right-0 flex flex-row justify-between text-sm text-neutral-400 py-2 pl-[53px] pr-[149px] tablet:pr-[64px] bg-neutral-900 z-30">
+              <p>{t('Name')}</p>
+              <div className="flex flex-row gap-2">
+                <p className="block mobile:hidden">{t('Updated At')}</p>
+                <p className="w-20 text-right">{t('Size')}</p>
+              </div>
+            </div>
+          </div>
           {!loading && uploadedFilenames.length <= 0 && (
             <p className="text-[14px] leading-normal text-center text-white opacity-50">{t('No files')}</p>
           )}
