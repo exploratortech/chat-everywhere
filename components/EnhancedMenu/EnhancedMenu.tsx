@@ -10,12 +10,12 @@ import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import ImageToTextUpload from '../ImageToTextUpload/ImageUpload';
 import ChangeOutputLanguageButton from './ChangeOutputLanguageButton';
 import ConversationStyleSelector from './ConversationStyleSelector';
 import ImageGenerationSelectors from './ImageGenerationSelectors';
-import SpeechRecognitionLanguageSelector from './SpeechRecognitionLanguageSelector';
 import ModeSelector from './ModeSelector';
-import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
+import SpeechRecognitionLanguageSelector from './SpeechRecognitionLanguageSelector';
 
 import PropTypes from 'prop-types';
 
@@ -27,11 +27,7 @@ type EnhancedMenuProps = {
 const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
   ({ isFocused, setIsFocused }, ref) => {
     const {
-      state: {
-        messageIsStreaming,
-        currentMessage,
-        isSpeechRecognitionActive,
-      },
+      state: { messageIsStreaming, currentMessage, isSpeechRecognitionActive },
     } = useContext(HomeContext);
 
     const shouldShow = useMemo(() => {
@@ -65,14 +61,15 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
           border dark:border-gray-900/50 shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]
           transition-all ease-in-out ${
             showMenuAnimation ? '-top-2 opacity-90' : 'top-8 opacity-0'
-        }`}
+          }`}
         style={{
           display: showMenuDisplay ? 'flex' : 'none',
         }}
       >
         <div className="relative w-full px-4 py-2 flex flex-col">
-          <div className="flex flex-row w-full justify-start items-center pb-2 mb-2 border-b dark:border-gray-900/50">
+          <div className="flex flex-row w-full justify-start items-center pb-2 mb-2 border-b gap-4 dark:border-gray-900/50 mobile:!flex-col">
             <SpeechRecognitionLanguageSelector />
+            <ImageToTextUpload />
           </div>
           <div className="flex flex-col md:flex-row w-full justify-between">
             <ModeSelector />
