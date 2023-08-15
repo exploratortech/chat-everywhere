@@ -87,6 +87,16 @@ const handler = async (req: Request): Promise<Response> => {
     console.error(error);
     //Log error to Azure App Insights
     trackError(error as string);
+    if (
+      error instanceof Error &&
+      error.message.includes('maximum context length')
+    ) {
+      return new Response('Error', {
+        status: 500,
+        statusText: error.message,
+      });
+    }
+
     if (error instanceof OpenAIError) {
       switch (error.httpCode) {
         case 429:

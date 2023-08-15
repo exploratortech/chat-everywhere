@@ -78,7 +78,7 @@ export const OpenAIStream = async (
       prioritizeOpenAI: !!options.prioritizeOpenAI,
     }
   );
-  
+
   let attempt = 0;
 
   while (attempt < openAIEndpoints.length) {
@@ -129,11 +129,15 @@ export const OpenAIStream = async (
 
         bodyToSend.model = modelId;
       } else {
-        modelId = OpenAIModelID.GPT_3_5_AZ;;
+        modelId = OpenAIModelID.GPT_3_5_AZ;
         requestHeaders['api-key'] = openAIKey;
 
         if (options.assistantMode && openAIEndpoint === process.env.AZURE_OPENAI_ENDPOINT_2) {
           modelId = OpenAIModelID.GPT_3_5_16K_AZ;
+        }
+
+        if (isGPT4Model) {
+          modelId = OpenAIModelID.GPT_4_32K;
         }
 
         resource = `/openai/deployments/${modelId}/chat/completions?api-version=2023-07-01-preview`;
@@ -145,7 +149,7 @@ export const OpenAIStream = async (
       const timeout = setTimeout(() => abortController.abort(), 10000);
 
       console.log(`Sending request to ${url}`);
-      
+
       const res = await fetch(url, {
         headers: requestHeaders,
         method: 'POST',
