@@ -83,13 +83,10 @@ export async function handlePairCommand (args: string[], data: any): Promise<Com
     }
 
     try {
-      await validatePairCode(userId, pairCode);
+      await validatePairCode(userId, pairCode, 'line');
     } catch (error) {
       if (error instanceof Error) {
-        return {
-          message: error.message,
-          error: true,
-        };
+        return { message: error.message, error: true };
       }
       return {
         message: 'Unable to validate code. Please try again later.',
@@ -104,10 +101,7 @@ export async function handlePairCommand (args: string[], data: any): Promise<Com
       };
     } catch (error) {
       if (error instanceof Error) {
-        return {
-          message: error.message,
-          error: true,
-        };
+        return { message: error.message, error: true };
       }
       return {
         message: 'Unable to pair your account. Please try again later.',

@@ -73,12 +73,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse): Promise<void>
           // 1. Fetch conversation by LINE user id
           // TODO: Check if the user has consented to sharing their user id
           let conversation = await getConversationByApp(lineId);
-          console.log('/api/webhooks/line, getConversation', conversation);
   
           if (conversation == null) {
             try {
               conversation = await createConversationByApp(lineId);
-              console.log('/api/webhooks/line, createConversation', conversation);
             } catch (error) {
               client.replyMessage(event.replyToken, {
                 text: 'Unable to create conversation',

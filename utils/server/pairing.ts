@@ -122,11 +122,11 @@ export const getInstantMessageAppUser = async (
   };
 };
 
-export const validatePairCode = async (userId: string, pairCode: string): Promise<void> => {
+export const validatePairCode = async (userId: string, pairCode: string, app: 'line'): Promise<void> => {
   const supabase = getAdminSupabaseClient();
   const { data, error } = await supabase
     .from('instant_message_app_users')
-    .select('pair_code, pair_code_expires_at')
+    .select(`pair_code, pair_code_expires_at, ${app}_id`)
     .eq('user_id', userId)
     .maybeSingle();
 
@@ -135,12 +135,19 @@ export const validatePairCode = async (userId: string, pairCode: string): Promis
     throw new Error('Unable to validate code. Please try again later.');
   }
 
+  if (!data) {
+    throw new Error('Unable to validate code. Please try again later.');
+  }
+
   if (
-    !data
-    || didPairCodeExpire(data.pair_code_expires_at)
+    didPairCodeExpire(data.pair_code_expires_at)
     || data.pair_code !== pairCode.toUpperCase()
   ) {
     throw new Error('Invalid pair code');
+  }
+
+  if (data[`${app}_id`] != null) {
+    throw new Error('This email has already been paired. Please use \'/unpair\' to unpair your account before pairing it again.');
   }
 };
 
