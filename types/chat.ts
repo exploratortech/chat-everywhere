@@ -8,7 +8,7 @@ export interface Message {
     | PluginID.LANGCHAIN_CHAT
     | PluginID.GPT4
     | PluginID.IMAGE_GEN
-    | PluginID.IMAGE_TO_TEXT
+    | PluginID.IMAGE_TO_PROMPT
     | null;
   largeContextResponse?: boolean; // Use to indicate if the response is from a gpt3.5 16k model
   showHintForLargeContextResponse?: boolean; // Use to indicate if the response can be improved by using a gpt3.5 16k model

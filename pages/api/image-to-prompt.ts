@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { trackError } from '@/utils/app/azureTelemetry';
-import { IMAGE_TO_TEXT_MAX_TIMEOUT } from '@/utils/app/const';
+import { IMAGE_TO_PROMPT_MAX_TIMEOUT } from '@/utils/app/const';
 import { ProgressHandler, makeWriteToStream } from '@/utils/app/streamHandler';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
@@ -57,7 +57,8 @@ const handler = async (req: Request): Promise<Response> => {
 
       while (
         !jobTerminated &&
-        (Date.now() - generationStartedAt < IMAGE_TO_TEXT_MAX_TIMEOUT * 1000 ||
+        (Date.now() - generationStartedAt <
+          IMAGE_TO_PROMPT_MAX_TIMEOUT * 1000 ||
           (textGenerationProgress && textGenerationProgress < 100))
       ) {
         await sleep(3500);
@@ -68,7 +69,9 @@ const handler = async (req: Request): Promise<Response> => {
         if (!generationProgressResponse.ok) {
           console.log(await generationProgressResponse.status);
           console.log(await generationProgressResponse.text());
-          throw new Error('Unable to fetch image to text generation progress');
+          throw new Error(
+            'Unable to fetch image to prompt generation progress',
+          );
         }
         const generationProgressResponseJson =
           await generationProgressResponse.json();
@@ -89,7 +92,7 @@ const handler = async (req: Request): Promise<Response> => {
             await writeToStream(result.join('\n') + '\n');
           } else {
             await writeToStream(
-              'Unable to finish the image to text generation, please try again later.',
+              'Unable to finish the image to prompt generation, please try again later.',
             );
           }
           writer.close();
@@ -117,7 +120,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
       await writeToStream('[DONE]');
       await writeToStream(
-        'Unable to finish the image to text generation, please try again later.',
+        'Unable to finish the image to prompt generation, please try again later.',
       );
       writer.close();
       return;

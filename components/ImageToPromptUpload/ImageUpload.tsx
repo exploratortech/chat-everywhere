@@ -1,6 +1,7 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconCirclePlus } from '@tabler/icons-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -13,7 +14,7 @@ import {
   removeTempHtmlString,
 } from '@/utils/app/htmlStringHandler';
 import { getAvailableSpeechSourceLanguages } from '@/utils/app/i18n';
-import { handleImageToTextSend } from '@/utils/app/image-to-text';
+import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 import { saveSpeechRecognitionLanguage } from '@/utils/app/speechRecognitionLanguage.ts';
 import { removeSecondLastLine } from '@/utils/app/ui';
@@ -29,7 +30,7 @@ import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import dayjs from 'dayjs';
 import { v4 } from 'uuid';
 
-const ImageToTextUpload = () => {
+const ImageToPromptUpload = () => {
   const { t } = useTranslation('model');
 
   const {
@@ -66,46 +67,57 @@ const ImageToTextUpload = () => {
   };
 
   const confirmHandler = useCallback(async () => {
-    if (!imageFile) return;
-    const file = imageFile;
-    clearFile();
-    const uploadImage = async (imageFile: File) => {
-      // upload image
-      const filenameExtension = filename.split('.').pop();
-
-      // each user has a folder to store their images
-      const newFilename = `${user?.id}` + '/' + `${v4()}.${filenameExtension}`;
-      const { data, error } = await supabaseClient.storage
-        .from('image-to-text')
-        .upload(newFilename, imageFile, {
-          cacheControl: '3600',
-          upsert: false,
-          contentType: 'image/png',
-        });
-      if (error) {
-        throw error;
+    try {
+      if (!user) {
+        toast.error('User not found');
       }
-      const imageUrl = await supabaseClient.storage
-        .from('image-to-text')
-        .getPublicUrl(newFilename).data.publicUrl;
-      return imageUrl;
-    };
+      if (!imageFile) return;
+      const file = imageFile;
+      clearFile();
+      const uploadImage = async (imageFile: File) => {
+        // upload image
+        const filenameExtension = filename.split('.').pop();
 
-    setShowImagePreview(false);
+        // each user has a folder to store their images
+        const newFilename =
+          `${user?.id}` + '/' + `${v4()}.${filenameExtension}`;
+        const { data, error } = await supabaseClient.storage
+          .from('image-to-prompt')
+          .upload(newFilename, imageFile, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: 'image/png',
+          });
+        if (error) {
+          throw error;
+        }
+        const imageUrl = await supabaseClient.storage
+          .from('image-to-prompt')
+          .getPublicUrl(newFilename).data.publicUrl;
+        return imageUrl;
+      };
 
-    if (!selectedConversation) return;
-    // upload image and get imageUrl
-    const imageUrl = await uploadImage(file);
-    if (!imageUrl) return;
+      setShowImagePreview(false);
 
-    await handleImageToTextSend({
-      imageUrl,
-      conversations,
-      homeDispatch,
-      selectedConversation,
-      stopConversationRef,
-      user,
-    });
+      if (!selectedConversation) return;
+      // upload image and get imageUrl
+      const imageUrl = await uploadImage(file);
+      if (!imageUrl) return;
+
+      await handleImageToPromptSend({
+        imageUrl,
+        conversations,
+        homeDispatch,
+        selectedConversation,
+        stopConversationRef,
+        user,
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+      }
+      console.log(e);
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -118,7 +130,7 @@ const ImageToTextUpload = () => {
   ]);
 
   return (
-    <div className="flex flex-row items-center justify-between w-full md:justify-start">
+    <div className="flex flex-row items-center justify-end w-full">
       <label className="text-left text-sm text-neutral-700 dark:text-neutral-400 mr-2">
         {t('Image to Text Upload')}
       </label>
@@ -153,4 +165,4 @@ const ImageToTextUpload = () => {
   );
 };
 
-export default ImageToTextUpload;
+export default ImageToPromptUpload;

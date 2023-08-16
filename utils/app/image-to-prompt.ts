@@ -21,7 +21,7 @@ import { removeSecondLastLine } from './ui';
 
 import dayjs from 'dayjs';
 
-interface HandleImageToTextSendProps {
+interface HandleImageToPromptSendProps {
   imageUrl: string;
   selectedConversation: Conversation;
   conversations: Conversation[];
@@ -31,7 +31,7 @@ interface HandleImageToTextSendProps {
   regenerate?: boolean;
 }
 
-export async function handleImageToTextSend({
+export async function handleImageToPromptSend({
   regenerate = false,
   imageUrl,
   selectedConversation,
@@ -39,11 +39,11 @@ export async function handleImageToTextSend({
   homeDispatch,
   user,
   stopConversationRef,
-}: HandleImageToTextSendProps) {
+}: HandleImageToPromptSendProps) {
   const newMessage: Message = {
-    content: `<img id="${PluginID.IMAGE_TO_TEXT}" src="${imageUrl}" />`,
+    content: `<img id="${PluginID.IMAGE_TO_PROMPT}" src="${imageUrl}" />`,
     role: 'assistant',
-    pluginId: PluginID.IMAGE_TO_TEXT,
+    pluginId: PluginID.IMAGE_TO_PROMPT,
   };
   let updatedConversation: Conversation;
 
@@ -66,7 +66,7 @@ export async function handleImageToTextSend({
   const controller = new AbortController();
 
   // use the imageUrl to call api (image to text)
-  const response = await fetch('/api/image-to-text', {
+  const response = await fetch('/api/image-to-prompt', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -25,7 +25,7 @@ export const RANK_INTERVAL = 100;
 
 export const IMAGE_GEN_MAX_TIMEOUT = 60;
 
-export const IMAGE_TO_TEXT_MAX_TIMEOUT = 30;
+export const IMAGE_TO_PROMPT_MAX_TIMEOUT = 30;
 
 export const AZURE_OPENAI_ENDPOINTS = [
   process.env.AZURE_OPENAI_ENDPOINT_1,

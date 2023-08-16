@@ -10,14 +10,14 @@ export enum PluginID {
   LANGCHAIN_CHAT = 'langchain-chat',
   GPT4 = 'gpt-4',
   IMAGE_GEN = 'image-gen',
-  IMAGE_TO_TEXT = 'image-to-text',
+  IMAGE_TO_PROMPT = 'image-to-prompt',
 }
 
 export enum PluginName {
   LANGCHAIN_CHAT = 'Enhance Mode',
   GPT4 = 'GPT-4',
   IMAGE_GEN = 'image-gen',
-  IMAGE_TO_TEXT = 'image-to-text',
+  IMAGE_TO_PROMPT = 'image-to-prompt',
 }
 
 export const Plugins: Record<PluginID, Plugin> = {
@@ -36,9 +36,9 @@ export const Plugins: Record<PluginID, Plugin> = {
     name: PluginName.IMAGE_GEN,
     requiredKeys: [],
   },
-  [PluginID.IMAGE_TO_TEXT]: {
-    id: PluginID.IMAGE_TO_TEXT,
-    name: PluginName.IMAGE_TO_TEXT,
+  [PluginID.IMAGE_TO_PROMPT]: {
+    id: PluginID.IMAGE_TO_PROMPT,
+    name: PluginName.IMAGE_TO_PROMPT,
     requiredKeys: [],
   },
 };

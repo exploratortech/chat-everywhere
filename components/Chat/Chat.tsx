@@ -26,7 +26,7 @@ import {
   removeRedundantTempHtmlString,
   removeTempHtmlString,
 } from '@/utils/app/htmlStringHandler';
-import { handleImageToTextSend } from '@/utils/app/image-to-text';
+import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 import { removeSecondLastLine } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 import { throttle } from '@/utils/data/throttle';
@@ -402,23 +402,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const throttledScrollDown = throttle(scrollDown, 250);
 
   const onRegenerate = () => {
-    // if last is pluginid image-to-text
-    const lastIsImageToText =
+    // if last is pluginid image-to-prompt
+    const lastIsImageToPrompt =
       selectedConversation?.messages[selectedConversation?.messages.length - 1]
-        ?.pluginId === PluginID.IMAGE_TO_TEXT;
+        ?.pluginId === PluginID.IMAGE_TO_PROMPT;
     const lastContent =
       selectedConversation?.messages[selectedConversation?.messages.length - 1]
         ?.content;
     const imageUrl = lastContent?.match(
-      /<img id="image-to-text" src="(.*)" \/>/,
+      /<img id="image-to-prompt" src="(.*)" \/>/,
     )?.[1];
 
     if (!imageUrl) {
       toast.error('No image found from previous conversation');
       return;
     }
-    if (lastIsImageToText) {
-      handleImageToTextSend({
+    if (lastIsImageToPrompt) {
+      handleImageToPromptSend({
         regenerate: true,
         conversations,
         selectedConversation,
