@@ -13,6 +13,7 @@ import {
   removeTempHtmlString,
 } from '@/utils/app/htmlStringHandler';
 import { getAvailableSpeechSourceLanguages } from '@/utils/app/i18n';
+import { getTextByImage } from '@/utils/app/image-to-text';
 import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 import { saveSpeechRecognitionLanguage } from '@/utils/app/speechRecognitionLanguage.ts';
 import { removeSecondLastLine } from '@/utils/app/ui';
@@ -81,10 +82,6 @@ const ImageToTextUpload = () => {
           upsert: false,
           contentType: 'image/png',
         });
-      console.log({
-        data,
-        error,
-      });
       if (error) {
         throw error;
       }
@@ -96,127 +93,20 @@ const ImageToTextUpload = () => {
 
     setShowImagePreview(false);
 
-    let updatedConversation: Conversation;
     if (!selectedConversation) return;
     // upload image and get imageUrl
     const imageUrl = await uploadImage(file);
     if (!imageUrl) return;
 
-    const newMessage: Message = {
-      content: `<img id="${PluginID.IMAGE_TO_TEXT}" src="${imageUrl}" />`,
-      role: 'assistant',
-      pluginId: PluginID.IMAGE_TO_TEXT,
-    };
-    updatedConversation = {
-      ...selectedConversation,
-      messages: [...selectedConversation.messages, newMessage],
-    };
-
-    homeDispatch({ field: 'loading', value: true });
-    homeDispatch({ field: 'messageIsStreaming', value: true });
-
-    const controller = new AbortController();
-
-    // use the imageUrl to call api (image to text)
-    const response = await fetch('/api/image-to-text', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'user-token': user?.token || '',
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        url: imageUrl,
-      }),
+    await getTextByImage({
+      imageUrl,
+      conversations,
+      homeDispatch,
+      selectedConversation,
+      stopConversationRef,
+      user,
     });
-    if (!response.ok) {
-      homeDispatch({ field: 'loading', value: false });
-      homeDispatch({ field: 'messageIsStreaming', value: false });
-      throw new Error('Network response was not ok');
-    }
-    const data = response.body;
-    if (!data) {
-      homeDispatch({ field: 'loading', value: false });
-      homeDispatch({ field: 'messageIsStreaming', value: false });
-      return;
-    }
-    // response is ok, continue
-    homeDispatch({ field: 'loading', value: false });
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let text = '';
-    let largeContextResponse = false;
-    let showHintForLargeContextResponse = false;
-    const originalMessages =
-      updatedConversation.messages.length > 0
-        ? updatedConversation.messages[updatedConversation.messages.length - 1]
-            .content
-        : '';
-    while (!done) {
-      if (stopConversationRef.current === true) {
-        controller.abort();
-        done = true;
-        break;
-      }
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      text += chunkValue;
 
-      if (text.includes('[DONE]')) {
-        text = text.replace('[DONE]', '');
-        done = true;
-      }
-      if (text.includes('[REMOVE_TEMP_HTML]')) {
-        text = removeTempHtmlString(text);
-      }
-
-      if (text.includes('[REMOVE_LAST_LINE]')) {
-        text = text.replace('[REMOVE_LAST_LINE]', '');
-        text = removeSecondLastLine(text);
-      }
-
-      const updatedMessages: Message[] = updatedConversation.messages.map(
-        (message, index) => {
-          if (index === updatedConversation.messages.length - 1) {
-            return {
-              ...message,
-              content:
-                removeTempHtmlString(originalMessages) +
-                removeRedundantTempHtmlString(text),
-              largeContextResponse,
-              showHintForLargeContextResponse,
-            };
-          }
-          return message;
-        },
-      );
-      updatedConversation = {
-        ...updatedConversation,
-        messages: updatedMessages,
-        lastUpdateAtUTC: dayjs().valueOf(),
-      };
-      homeDispatch({
-        field: 'selectedConversation',
-        value: updatedConversation,
-      });
-    }
-    const updatedConversations: Conversation[] = conversations.map(
-      (conversation) => {
-        if (conversation.id === selectedConversation.id) {
-          return updatedConversation;
-        }
-        return conversation;
-      },
-    );
-    saveConversation(updatedConversation);
-
-    homeDispatch({ field: 'conversations', value: updatedConversations });
-    saveConversations(updatedConversations);
-
-    homeDispatch({ field: 'messageIsStreaming', value: false });
-    updateConversationLastUpdatedAtTimeStamp();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     filename,
