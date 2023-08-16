@@ -46,7 +46,10 @@ export default function ImagePreviewModel({
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="p-4 w-full max-w-[1150px] tablet:max-w-[90vw] h-[calc(100vh-100px)] transform overflow-hidden rounded-2xl  text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex flex-col mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
-                <h1 className="my-4 bold text-xl">{t('Image preview')}</h1>
+                <h1 className="my-3 bold text-xl">{t('Image preview')}</h1>
+                <div className="flex items-center justify-center">
+                  {filename}
+                </div>
                 <div className="flex items-center justify-center w-full h-full border border-gray-400">
                   <img src={preview} alt="" className="h-full object-contain" />
                 </div>
@@ -55,16 +58,16 @@ export default function ImagePreviewModel({
                     type="button"
                     className="w-full px-4 py-2 mt-6 border rounded-lg shadow  focus:outline-none border-neutral-800 border-opacity-50 bg-white text-black hover:bg-neutral-300"
                     onClick={() => {
-                      onClose();
+                      onConfirm();
                     }}
                   >
                     {t('Confirm')}
                   </button>
                   <button
                     type="button"
-                    className="w-full px-4 py-2 mt-6 border rounded-lg shadow  focus:outline-none border-neutral-800 border-opacity-50 bg-transparent text-white hover:bg-neutral-300 hover:text-black"
+                    className="w-full px-4 py-2 mt-6 border rounded-lg shadow  focus:outline-none border-neutral-100 hover:border-neutral-300 bg-transparent text-white hover:bg-neutral-300 hover:text-black"
                     onClick={() => {
-                      onConfirm();
+                      onClose();
                     }}
                   >
                     {t('Cancel')}
