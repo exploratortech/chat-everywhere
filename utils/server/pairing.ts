@@ -26,11 +26,12 @@ export const getPairCodeCoolDown = async (userId: string): Promise<number> => {
   const { data, error } = await supabase
     .from('instant_message_app_users')
     .select('pair_code_generated_at')
+    .eq('user_id', userId)
     .maybeSingle();
 
   if (error) {
     console.error(error);
-    return 0;
+    throw new Error('Unable to get pair code cool down');
   }
 
   if (!data || !data.pair_code_generated_at) {
@@ -47,6 +48,8 @@ export const getPairCodeCoolDown = async (userId: string): Promise<number> => {
   }
 };
 
+// Creates an InstantMessageAppUser record if it doesn't already exist and
+// generates a pair code.
 export const assignPairCode = async (userId: string): Promise<any> => {
   const supabase = getAdminSupabaseClient();
 
@@ -78,24 +81,40 @@ export const assignPairCode = async (userId: string): Promise<any> => {
   };
 };
 
-export const getInstantMessageAppUser = async (userId: string): Promise<Record<string, any> | null> => {
+// Gets an InstantMessageAppUser via `userId` or third-party user id
+export const getInstantMessageAppUser = async (
+  options: { userId?: string, appUserId?: string, app?: 'line' },
+): Promise<Record<string, any> | null> => {
+  const { userId, appUserId, app } = options;
+
   const supabase = getAdminSupabaseClient();
-  const { data, error } = await supabase
+  const builder = supabase
     .from('instant_message_app_users')
-    .select('line_id, pair_code, pair_code_expires_at, pair_code_generated_at')
-    .eq('user_id', userId)
-    .maybeSingle();
+    .select('user_id, line_id, pair_code, pair_code_expires_at, pair_code_generated_at');
+    
+  let result!: any;
   
-  if (error) {
-    console.error(error);
+  if (userId) {
+    result = await builder.eq('user_id', userId).maybeSingle();
+  } else if (appUserId && app) {
+    result = await builder.eq(`${app}_id`, appUserId).maybeSingle();
+  } else {
+    throw new Error('Missing either userId or appUserId');
+  }
+  
+  if (result.error) {
+    console.error(result.error);
     return null;
   }
 
-  if (!data) {
+  if (!result.data) {
     return null;
   }
+
+  const { data } = result;
 
   return {
+    userId: data.user_id,
     lineId: data.line_id,
     pairCode: data.pair_code,
     pairCodeExpiresAt: data.pair_code_expires_at,
@@ -133,10 +152,15 @@ export const pair = async (
   const supabase = getAdminSupabaseClient();
 
   const results = await Promise.all([
+    // Invalidate pair code
     supabase
       .from('instant_message_app_users')
-      .update({ [`${app}_id`]: appUserId })
+      .update({
+        [`${app}_id`]: appUserId,
+        pair_code_expires_at: dayjs().toISOString(),
+      })
       .eq('user_id', userId),
+    // Assign user's ChatEverywhere ID to Conversation
     supabase
       .from('conversations')
       .update({ user_id: userId })

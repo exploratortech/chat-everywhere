@@ -1,3 +1,5 @@
+import { NextRequest } from 'next/server';
+
 import { getInstantMessageAppUser } from '@/utils/server/pairing';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
@@ -9,25 +11,22 @@ export const config = {
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
-const handler = async (req: Request): Promise<Response> => {
-  if (req.method !== 'GET') {
-    const res = new Response(null, {
-      status: 405,
-      statusText: 'Method Not Allowed',
-    });
-    return res;
-  }
-
+const handler = async (req: NextRequest): Promise<Response> => {
   const userToken = req.headers.get('user-token');
 
   const { data, error } = await supabase.auth.getUser(userToken || '');
   if (!data || error) return unauthorizedResponse;
 
-  const pairCodeData = await getInstantMessageAppUser(data.user.id);
-  const res = new Response(JSON.stringify(pairCodeData || {}));
-  res.headers.set('Content-Type', 'application/json');
-
-  return res;
+  switch (req.method) {
+    case 'GET':
+      const pairCodeData = await getInstantMessageAppUser({ userId: data.user.id });
+      return new Response(JSON.stringify(pairCodeData), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    default:
+      return new Response('Method Not Allowed', { status: 405 });
+  }
 };
 
 export default handler;

@@ -517,7 +517,7 @@ export const updateProAccountsPlan = async (): Promise<void> => {
   }
 };
 
-export const getConversationByApp = async (userId: string) => {
+export const getConversationByApp = async (userId: string): Promise<Record<string, any> | null> => {
   const supabase = getAdminSupabaseClient();
   const { data, error } = await supabase
     .from('conversations')
@@ -526,8 +526,7 @@ export const getConversationByApp = async (userId: string) => {
     .maybeSingle();
   
   if (error) {
-    console.error(error);
-    return null;
+    throw new Error('Error occurred trying to fetch conversation');
   }
 
   if (!data) {
@@ -543,21 +542,20 @@ export const getConversationByApp = async (userId: string) => {
   };
 };
 
-export const createConversationByApp = async (userId: string) => {
+export const createConversationByApp = async (appUserId: string): Promise<Record<string, any>> => {
   const supabase = getAdminSupabaseClient();
   const { data, error } = await supabase
     .from('conversations')
     .insert({
       id: uuidv4(),
-      app_user_id: userId,
+      app_user_id: appUserId,
       content: [],
     })
     .select()
     .single();
   
   if (error) {
-    console.error(error);
-    return null;
+    throw new Error(error.message);
   }
 
   if (!data) {

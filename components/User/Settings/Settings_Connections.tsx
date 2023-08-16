@@ -21,7 +21,7 @@ export default function Settings_Connections() {
   const fetchPairCodeData = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    const res = await fetch('/api/getConnections', {
+    const res = await fetch('/api/connections', {
       headers: { 'user-token': user.token },
       method: 'GET',
     });
@@ -46,7 +46,7 @@ export default function Settings_Connections() {
               <RefreshButton loading={loading} onClick={fetchPairCodeData} />
             </div>
             <p className="text-center text-neutral-400">
-              {t(`Use "/pair <email> <code>" to pair your account`)} | <Trans i18nKey="Expires in" t={t} defaults="Expires in {{time}}" values={{ time: dayjs(pairCodeData.pairCodeExpiresAt).fromNow() }} />
+              {t(`Use "/pair <email> <code>" to pair your account`)} | <Trans i18nKey="Expires in" t={t} defaults="Expires {{time}}" values={{ time: dayjs(pairCodeData.pairCodeExpiresAt).fromNow() }} />
             </p>
           </>
         ) : (
@@ -79,7 +79,7 @@ function RefreshButton({ loading, onClick }: RefreshButtonProps): JSX.Element {
       className="p-2"
       disabled={loading}
       onClick={() => {
-        !loading && onClick();
+        if (!loading) onClick();
       }}
     >
       {loading ? (

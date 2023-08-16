@@ -7,6 +7,7 @@ import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { createConversationByApp, getConversationByApp, saveConversationByApp } from '@/utils/server/supabase';
 import { executeCommand, isCommand } from '@/utils/app/commands';
+import { getInstantMessageAppUser } from '@/utils/server/pairing';
 
 const lineConfig = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN!,
@@ -72,15 +73,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse): Promise<void>
           // 1. Fetch conversation by LINE user id
           // TODO: Check if the user has consented to sharing their user id
           let conversation = await getConversationByApp(lineId);
+          console.log('/api/webhooks/line, getConversation', conversation);
   
-          if (!conversation) {
-            conversation = await createConversationByApp(lineId);
-          }
-  
-          if (!conversation) {
-            console.error('Unable to create conversation');
-            res.status(500).end('Internal Server Error');
-            return;
+          if (conversation == null) {
+            try {
+              conversation = await createConversationByApp(lineId);
+              console.log('/api/webhooks/line, createConversation', conversation);
+            } catch (error) {
+              client.replyMessage(event.replyToken, {
+                text: 'Unable to create conversation',
+                type: 'text',
+              });
+              res.status(200).end();
+              return;
+            }
           }
   
           const messages = conversation.content;
@@ -93,7 +99,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse): Promise<void>
   
           const stream = await OpenAIStream(
             OpenAIModels[OpenAIModelID.GPT_3_5],
-            'You are a helpful chatbot part of the Chat Everywhere app created by Explorator Labs.',
+            'You are a helpful chatbot part of the Chat Everywhere app created by Explorator Labs. The link to the app is \'https://chateverywhere.app\'.',
             DEFAULT_TEMPERATURE,
             messages,
             null,
