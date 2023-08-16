@@ -61,6 +61,35 @@ export const shortenMessagesBaseOnTokenLimit = async (
   }
 };
 
+export const trimStringBaseOnTokenLimit = async (
+  string: string,
+  tokenLimit: number,
+): Promise<string> => {
+  await init((imports) => WebAssembly.instantiate(wasm, imports));
+  const encoding = new Tiktoken(
+    tiktokenModel.bpe_ranks,
+    tiktokenModel.special_tokens,
+    tiktokenModel.pat_str,
+  );
+
+  let tokenCount = 0;
+  let shortenedString = '';
+
+  for (let i = 0; i < string.length; i++) {
+    const char = string[i];
+    const tokens = encoding.encode(char);
+
+    if (tokenCount > tokenLimit) {
+      break;
+    }
+    tokenCount += tokens.length;
+    shortenedString += char;
+  }
+
+  encoding.free();
+  return shortenedString;
+};
+
 export const getMessagesTokenCount = async (
   messages: Message[],
 ): Promise<number> => {
