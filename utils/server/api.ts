@@ -27,7 +27,7 @@ export const shortenMessagesBaseOnTokenLimit = async (
     const message = messages[i];
     const tokens = encoding.encode(message.content);
 
-    if (tokenCount + tokens.length + 1400 > tokenLimit) {
+    if (tokenCount + tokens.length + 1900 > tokenLimit) {
       break;
     }
     tokenCount += tokens.length;
@@ -90,7 +90,9 @@ export const trimStringBaseOnTokenLimit = async (
   return shortenedString;
 };
 
-export const getMessagesTokenCount = async (messages: Message[]): Promise<number> => {
+export const getMessagesTokenCount = async (
+  messages: Message[],
+): Promise<number> => {
   await init((imports) => WebAssembly.instantiate(wasm, imports));
 
   const encoding = new Tiktoken(

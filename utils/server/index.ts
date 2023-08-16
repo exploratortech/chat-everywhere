@@ -55,7 +55,7 @@ export const OpenAIStream = async (
     isGPT4Model,
     openAIPriority,
   );
-  
+
   let attempt = 0;
 
   while (attempt < openAIEndpoints.length) {
@@ -66,7 +66,9 @@ export const OpenAIStream = async (
       if (!openAIEndpoint || !openAIKey)
         throw new Error('Missing endpoint/key');
 
-      const modelName = isGPT4Model ? process.env.AZURE_OPENAI_GPT_4_MODEL_NAME : process.env.AZURE_OPENAI_MODEL_NAME;
+      const modelName = isGPT4Model
+        ? process.env.AZURE_OPENAI_GPT_4_MODEL_NAME
+        : process.env.AZURE_OPENAI_MODEL_NAME;
       let url = `${openAIEndpoint}/openai/deployments/${modelName}/chat/completions?api-version=2023-06-01-preview`;
       if (openAIEndpoint.includes('openai.com')) {
         url = `${openAIEndpoint}/v1/chat/completions`;
@@ -96,6 +98,12 @@ export const OpenAIStream = async (
         // a fallback model.
         bodyToSend.model = attempt === 0 ? model.id : OpenAIModelID.GPT_3_5;
         requestHeaders.Authorization = `Bearer ${openAIKey}`;
+
+        // For GPT 4 Model (Pro user)
+        if (attempt !== 0 && isGPT4Model) {
+          bodyToSend.model = OpenAIModelID.GPT_4;
+          requestHeaders.Authorization = `Bearer ${process.env.OPENAI_API_GPT_4_KEY}`;
+        }
       } else {
         requestHeaders['api-key'] = openAIKey;
       }
@@ -104,7 +112,7 @@ export const OpenAIStream = async (
       const timeout = setTimeout(() => abortController.abort(), 10000);
 
       console.log(`Sending request to ${url}`);
-      
+
       const res = await fetch(url, {
         headers: requestHeaders,
         method: 'POST',
