@@ -1,8 +1,9 @@
+import { trackError } from '@/utils/app/azureTelemetry';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import {
-  addBackCreditBy1,
+  addCredit,
   addUsageEntry,
   getAdminSupabaseClient,
   getUserProfile,
@@ -13,7 +14,6 @@ import {
 import { ChatBody } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
-import { trackError } from '@/utils/app/azureTelemetry';
 
 const supabase = getAdminSupabaseClient();
 
@@ -71,19 +71,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     await addUsageEntry(PluginID.GPT4, data.user.id);
     await subtractCredit(data.user.id, PluginID.GPT4);
-    // Only enable GPT-4 in production
-    const modelToUse =
-      process.env.NEXT_PUBLIC_ENV === 'production'
-        ? OpenAIModels[OpenAIModelID.GPT_4]
-        : OpenAIModels[OpenAIModelID.GPT_3_5];
 
     const stream = await OpenAIStream(
-      modelToUse,
+      OpenAIModels[OpenAIModelID.GPT_4],
       promptToSend,
       temperatureToUse,
       messagesToSend,
       null,
-      true,
     );
 
     return new Response(stream);
@@ -91,12 +85,22 @@ const handler = async (req: Request): Promise<Response> => {
     console.error(error);
     //Log error to Azure App Insights
     trackError(error as string);
+    if (
+      error instanceof Error &&
+      error.message.includes('maximum context length')
+    ) {
+      return new Response('Error', {
+        status: 500,
+        statusText: error.message,
+      });
+    }
+
     if (error instanceof OpenAIError) {
       switch (error.httpCode) {
         case 429:
           try {
             // Add credit back to user's account
-            await addBackCreditBy1(data.user.id, PluginID.GPT4);
+            await addCredit(data.user.id, PluginID.GPT4, 1);
           } catch (error) {
             //Log error to Azure App Insights
             trackError(error as string);
