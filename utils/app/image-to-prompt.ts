@@ -41,7 +41,7 @@ export async function handleImageToPromptSend({
   stopConversationRef,
 }: HandleImageToPromptSendProps) {
   const newMessage: Message = {
-    content: `<img id="${PluginID.IMAGE_TO_PROMPT}" src="${imageUrl}" />`,
+    content: `## Image to prompt \n\n ### Image: \n\n <img id="${PluginID.IMAGE_TO_PROMPT}" src="${imageUrl}" />`,
     role: 'assistant',
     pluginId: PluginID.IMAGE_TO_PROMPT,
   };

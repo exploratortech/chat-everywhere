@@ -11,6 +11,11 @@ interface DropZoneProps {
 }
 
 function DropZone({ onDropCallback }: DropZoneProps) {
+  const { t } = useTranslation('imageToPrompt');
+  const { t: commonT } = useTranslation('common');
+  const {
+    state: { user },
+  } = useContext(HomeContext);
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length !== 1) {
@@ -21,14 +26,9 @@ function DropZone({ onDropCallback }: DropZoneProps) {
       if (!file) return;
       onDropCallback(file);
     },
-    [onDropCallback],
+    [onDropCallback, t],
   );
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-  const { t: commonT } = useTranslation('common');
-  const { t } = useTranslation('imageToPrompt');
-  const {
-    state: { user },
-  } = useContext(HomeContext);
 
   return (
     <div

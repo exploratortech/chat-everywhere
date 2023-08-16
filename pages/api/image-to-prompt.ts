@@ -89,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
             | undefined;
           await writeToStream('[DONE]');
           if (result) {
-            await writeToStream(result.join('\n') + '\n');
+            await writeToStream(`### Prompt: \n\n` + result.join('\n') + '\n');
           } else {
             await writeToStream(
               'Unable to finish the image to prompt generation, please try again later.',

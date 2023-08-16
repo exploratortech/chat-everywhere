@@ -111,7 +111,7 @@ const ImageToPromptUpload = () => {
   ]);
 
   return (
-    <div className="flex flex-row items-center justify-end w-full">
+    <div className="flex flex-row items-center justify-end w-full mobile:justify-between">
       <label className="text-left text-sm text-neutral-700 dark:text-neutral-400 mr-2">
         {imageToPromptT('Image to Prompt')}
       </label>
