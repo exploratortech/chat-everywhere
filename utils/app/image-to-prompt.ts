@@ -173,7 +173,6 @@ export async function handleImageToPromptSend({
   saveConversation(updatedConversation);
 
   homeDispatch({ field: 'conversations', value: updatedConversations });
-  console.log({ updatedConversations });
   saveConversations(updatedConversations);
 
   homeDispatch({ field: 'messageIsStreaming', value: false });

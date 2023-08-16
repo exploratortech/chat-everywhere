@@ -32,6 +32,8 @@ import { v4 } from 'uuid';
 
 const ImageToPromptUpload = () => {
   const { t } = useTranslation('model');
+  const { t: commonT } = useTranslation('common');
+  const { t: imageToPromptT } = useTranslation('imageToPrompt');
 
   const {
     state: { user, selectedConversation, conversations, messageIsStreaming },
@@ -89,6 +91,7 @@ const ImageToPromptUpload = () => {
             contentType: 'image/png',
           });
         if (error) {
+          clearFile();
           throw error;
         }
         const imageUrl = await supabaseClient.storage
@@ -132,15 +135,21 @@ const ImageToPromptUpload = () => {
   return (
     <div className="flex flex-row items-center justify-end w-full">
       <label className="text-left text-sm text-neutral-700 dark:text-neutral-400 mr-2">
-        {t('Image to Text Upload')}
+        {imageToPromptT('Image to Prompt')}
       </label>
       <div
         className="flex justify-between items-center p-[.4rem]  cursor-pointer w-[50%] rounded-lg border border-neutral-200 bg-transparent text-neutral-900 dark:border-neutral-600 dark:text-white  pr-1 focus:outline-none"
         onClick={() => {
+          if (!user) {
+            toast.error(
+              commonT('Please sign in to use image to prompt feature'),
+            );
+            return;
+          }
           document.getElementById('upload-images-to-text')?.click();
         }}
       >
-        <div className="text-gray-400">{'Click to Upload'}</div>
+        <div className="text-gray-400">{commonT('Upload')}</div>
         <IconCirclePlus />
       </div>
       <input

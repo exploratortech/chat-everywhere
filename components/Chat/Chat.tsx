@@ -52,6 +52,7 @@ interface Props {
 
 export const Chat = memo(({ stopConversationRef }: Props) => {
   const { t } = useTranslation('chat');
+  const { t: commonT } = useTranslation('common');
 
   const {
     state: {
@@ -402,22 +403,26 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const throttledScrollDown = throttle(scrollDown, 250);
 
   const onRegenerate = () => {
-    // if last is pluginid image-to-prompt
     const lastIsImageToPrompt =
       selectedConversation?.messages[selectedConversation?.messages.length - 1]
         ?.pluginId === PluginID.IMAGE_TO_PROMPT;
-    const lastContent =
-      selectedConversation?.messages[selectedConversation?.messages.length - 1]
-        ?.content;
-    const imageUrl = lastContent?.match(
-      /<img id="image-to-prompt" src="(.*)" \/>/,
-    )?.[1];
 
-    if (!imageUrl) {
-      toast.error('No image found from previous conversation');
-      return;
-    }
     if (lastIsImageToPrompt) {
+      if (!user) {
+        toast.error(commonT('Please sign in to use image to prompt feature'));
+        return;
+      }
+      const lastContent =
+        selectedConversation?.messages[
+          selectedConversation?.messages.length - 1
+        ]?.content;
+      const imageUrl = lastContent?.match(
+        /<img id="image-to-prompt" src="(.*)" \/>/,
+      )?.[1];
+      if (!imageUrl) {
+        toast.error('No image found from previous conversation');
+        return;
+      }
       handleImageToPromptSend({
         regenerate: true,
         conversations,
