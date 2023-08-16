@@ -44,7 +44,7 @@ export const getPairCodeCoolDown = async (userId: string): Promise<number> => {
     return 0;
   } else {
     console.log((timestamp.valueOf() - now.valueOf()) / 1000);
-    return (timestamp.valueOf() - now.valueOf()) / 1000;
+    return Math.round((timestamp.valueOf() - now.valueOf()) / 1000);
   }
 };
 
