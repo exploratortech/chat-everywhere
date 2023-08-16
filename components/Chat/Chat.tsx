@@ -14,6 +14,7 @@ import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics/dist/interactions';
 
 import { getEndpoint } from '@/utils/app/api';
+import { trackError } from '@/utils/app/azureTelemetry';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
@@ -43,8 +44,6 @@ import { ChatMessage } from './ChatMessage';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
 
 import dayjs from 'dayjs';
-
-import { trackError } from '@/utils/app/azureTelemetry';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -119,6 +118,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const handleSend = useCallback(
     async (deleteCount = 0, overrideCurrentMessage?: Message) => {
       const message = overrideCurrentMessage || currentMessage;
+      console.log({
+        message,
+      });
 
       if (!message) return;
       const plugin = (message.pluginId && Plugins[message.pluginId]) || null;

@@ -4,9 +4,14 @@ import { PluginID } from './plugin';
 export interface Message {
   role: Role;
   content: string;
-  pluginId: PluginID.LANGCHAIN_CHAT | PluginID.GPT4 | PluginID.IMAGE_GEN | null;
-  largeContextResponse?: boolean // Use to indicate if the response is from a gpt3.5 16k model
-  showHintForLargeContextResponse?: boolean // Use to indicate if the response can be improved by using a gpt3.5 16k model
+  pluginId:
+    | PluginID.LANGCHAIN_CHAT
+    | PluginID.GPT4
+    | PluginID.IMAGE_GEN
+    | PluginID.IMAGE_TO_TEXT
+    | null;
+  largeContextResponse?: boolean; // Use to indicate if the response is from a gpt3.5 16k model
+  showHintForLargeContextResponse?: boolean; // Use to indicate if the response can be improved by using a gpt3.5 16k model
 }
 
 export type Role = 'assistant' | 'user';
