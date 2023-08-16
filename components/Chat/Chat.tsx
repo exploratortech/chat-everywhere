@@ -26,6 +26,7 @@ import {
   removeRedundantTempHtmlString,
   removeTempHtmlString,
 } from '@/utils/app/htmlStringHandler';
+import { handleImageToTextSend } from '@/utils/app/image-to-text';
 import { removeSecondLastLine } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 import { throttle } from '@/utils/data/throttle';
@@ -400,6 +401,41 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   };
   const throttledScrollDown = throttle(scrollDown, 250);
 
+  const onRegenerate = () => {
+    // if last is pluginid image-to-text
+    const lastIsImageToText =
+      selectedConversation?.messages[selectedConversation?.messages.length - 1]
+        ?.pluginId === PluginID.IMAGE_TO_TEXT;
+    const lastContent =
+      selectedConversation?.messages[selectedConversation?.messages.length - 1]
+        ?.content;
+    const imageUrl = lastContent?.match(
+      /<img id="image-to-text" src="(.*)" \/>/,
+    )?.[1];
+
+    if (!imageUrl) {
+      toast.error('No image found from previous conversation');
+      return;
+    }
+    if (lastIsImageToText) {
+      handleImageToTextSend({
+        regenerate: true,
+        conversations,
+        selectedConversation,
+        homeDispatch,
+        imageUrl,
+        stopConversationRef,
+        user,
+      });
+      return;
+    }
+
+    handleSend(
+      2,
+      selectedConversation?.messages[selectedConversation?.messages.length - 2],
+    );
+  };
+
   useEffect(() => {
     throttledScrollDown();
   }, [selectedConversation, throttledScrollDown]);
@@ -523,14 +559,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             onSend={() => {
               handleSend(0);
             }}
-            onRegenerate={() => {
-              handleSend(
-                2,
-                selectedConversation?.messages[
-                  selectedConversation?.messages.length - 2
-                ],
-              );
-            }}
+            onRegenerate={onRegenerate}
           />
         </>
       )}

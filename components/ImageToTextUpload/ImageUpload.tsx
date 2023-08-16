@@ -13,7 +13,7 @@ import {
   removeTempHtmlString,
 } from '@/utils/app/htmlStringHandler';
 import { getAvailableSpeechSourceLanguages } from '@/utils/app/i18n';
-import { getTextByImage } from '@/utils/app/image-to-text';
+import { handleImageToTextSend } from '@/utils/app/image-to-text';
 import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 import { saveSpeechRecognitionLanguage } from '@/utils/app/speechRecognitionLanguage.ts';
 import { removeSecondLastLine } from '@/utils/app/ui';
@@ -98,7 +98,7 @@ const ImageToTextUpload = () => {
     const imageUrl = await uploadImage(file);
     if (!imageUrl) return;
 
-    await getTextByImage({
+    await handleImageToTextSend({
       imageUrl,
       conversations,
       homeDispatch,

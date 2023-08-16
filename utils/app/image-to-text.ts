@@ -21,23 +21,25 @@ import { removeSecondLastLine } from './ui';
 
 import dayjs from 'dayjs';
 
-interface GetTextByImageProps {
+interface HandleImageToTextSendProps {
   imageUrl: string;
   selectedConversation: Conversation;
   conversations: Conversation[];
   homeDispatch: Dispatch<ActionType<HomeInitialState>>;
   user: User | null;
   stopConversationRef: MutableRefObject<boolean>;
+  regenerate?: boolean;
 }
 
-export async function getTextByImage({
+export async function handleImageToTextSend({
+  regenerate = false,
   imageUrl,
   selectedConversation,
   conversations,
   homeDispatch,
   user,
   stopConversationRef,
-}: GetTextByImageProps) {
+}: HandleImageToTextSendProps) {
   const newMessage: Message = {
     content: `<img id="${PluginID.IMAGE_TO_TEXT}" src="${imageUrl}" />`,
     role: 'assistant',
@@ -45,10 +47,18 @@ export async function getTextByImage({
   };
   let updatedConversation: Conversation;
 
-  updatedConversation = {
-    ...selectedConversation,
-    messages: [...selectedConversation.messages, newMessage],
-  };
+  if (regenerate) {
+    // remove the previous message from the selected conversation
+    updatedConversation = {
+      ...selectedConversation,
+      messages: [...selectedConversation.messages.slice(0, -1), newMessage],
+    };
+  } else {
+    updatedConversation = {
+      ...selectedConversation,
+      messages: [...selectedConversation.messages, newMessage],
+    };
+  }
 
   homeDispatch({ field: 'loading', value: true });
   homeDispatch({ field: 'messageIsStreaming', value: true });
