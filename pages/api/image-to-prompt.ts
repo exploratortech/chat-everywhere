@@ -152,11 +152,11 @@ const handler = async (req: Request): Promise<Response> => {
 
 export default handler;
 
-// TODO: remove replaceLocalhost
-function replaceLocalhost(url: string): string {
-  const newHost = 'https://cd5e-27-109-204-166.ngrok-free.app/';
-  return url.replace('http://localhost:54321', newHost);
-}
+// This function is for local development only to replace localhost with ngrok host
+// function replaceLocalhost(url: string): string {
+//   const newHost = 'https://cd5e-27-109-204-166.ngrok-free.app/';
+//   return url.replace('http://localhost:54321', newHost);
+// }
 
 async function nextLegDescribe(url: string) {
   const requestHeader = {
@@ -169,8 +169,7 @@ async function nextLegDescribe(url: string) {
       method: 'POST',
       headers: requestHeader,
       body: JSON.stringify({
-        // TODO: remove replaceLocalhost
-        url: replaceLocalhost(url),
+        url: url,
       }),
     },
   );
