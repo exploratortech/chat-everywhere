@@ -74,7 +74,7 @@ const ImageGenerationSelectors = () => {
         {t(option)}
       </option>
     ));
-  }, []);
+  }, [t]);
 
   const getOptionsForImageStyles = useMemo(() => {
     const options = [];

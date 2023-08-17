@@ -20,6 +20,7 @@ import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
 
 import { updateConversation } from '@/utils/app/conversation';
+import { getMjImageTags } from '@/utils/app/mjImage';
 import { getPluginIcon } from '@/utils/app/ui';
 import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 
@@ -28,8 +29,7 @@ import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import { ImageGenerationComponent } from './components/ImageGenerationComponent';
-import MjImageComponent from './components/MjImageComponent';
+import MemoizedImageGallery from './components/ImageGallery/MemoizedImageGallery';
 import TokenCounter from './components/TokenCounter';
 
 import { CodeBlock } from '../Markdown/CodeBlock';
@@ -58,7 +58,7 @@ export const ChatMessage: FC<Props> = memo(
     const { i18n } = useTranslation();
 
     const {
-      state: { selectedConversation, conversations },
+      state: { selectedConversation, conversations, messageIsStreaming },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -190,22 +190,11 @@ export const ChatMessage: FC<Props> = memo(
     const ImgComponent = useMemo(() => {
       const Component = ({
         src,
-        title,
-        alt,
         node,
       }: React.DetailedHTMLProps<
         React.ImgHTMLAttributes<HTMLImageElement> & { node?: any },
         HTMLImageElement
       >) => {
-        const aiImageButtons =
-          node?.properties?.dataAiImageButtons &&
-          (node?.properties?.dataAiImageButtons).split(',');
-        const aiImagePrompt =
-          node?.properties?.dataAiImagePrompt &&
-          (node?.properties?.dataAiImagePrompt).split(',');
-        const aiImageButtonMessageId =
-          node?.properties?.dataAiImageButtonMessageId;
-
         const isValidUrl = (url: string) => {
           try {
             new URL(url);
@@ -218,36 +207,19 @@ export const ChatMessage: FC<Props> = memo(
         if (!src) return <></>;
         if (!isValidUrl(src)) return <b>{`{InValid IMAGE URL}`}</b>;
 
-        if (message.pluginId !== PluginID.IMAGE_GEN) {
+        if (message.pluginId === PluginID.IMAGE_GEN) {
+          // The IMAGE_GEN plugin will render by Image Gallery
+          return <></>;
+        } else {
           return (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={src} alt="" className="w-full" />
           );
         }
-        if (aiImageButtons) {
-          return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <MjImageComponent
-              src={src}
-              buttons={aiImageButtons}
-              buttonMessageId={aiImageButtonMessageId}
-              prompt={aiImagePrompt}
-            />
-          );
-        }
-
-        return (
-          <ImageGenerationComponent
-            src={src}
-            title={title}
-            messageIndex={messageIndex}
-            generationPrompt={alt || ''}
-          />
-        );
       };
       Component.displayName = 'ImgComponent';
       return Component;
-    }, [message.pluginId, messageIndex]);
+    }, [message.pluginId]);
 
     const CodeComponent = useMemo(() => {
       const Component: React.FC<any> = ({
@@ -279,6 +251,15 @@ export const ChatMessage: FC<Props> = memo(
       () => modifyParagraphs(message.content),
       [message.content],
     );
+    const aiImageListString = useMemo(() => {
+      return JSON.stringify(getMjImageTags(formattedMessage));
+    }, [formattedMessage]);
+
+    // This is a workaround for the issue that the Carousel will be rendered multiple times
+    const aiImageList = useMemo(() => {
+      return JSON.parse(aiImageListString);
+    }, [aiImageListString]);
+
     return (
       <div
         className={`group px-4 ${
@@ -408,6 +389,13 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
+                <div className={`${aiImageList.length > 0 ? '' : 'hidden'}`}>
+                  <MemoizedImageGallery
+                    key={`${selectedConversation?.id} ${messageIsStreaming}`}
+                    aiImageList={aiImageList}
+                  />
+                </div>
+
                 <div className="flex flex-row justify-between">
                   <MemoizedReactMarkdown
                     className="prose dark:prose-invert min-w-full"

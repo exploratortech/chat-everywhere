@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .child-no-margin > * {
+    margin: 0 !important;
+  }
+  .child-no-click > * {
+    pointer-events: none;
+  }
+}
+
 ::-webkit-scrollbar-track {
   background-color: transparent;
 }
@@ -28,8 +37,14 @@ html {
   background: #202123;
 }
 
-html, body {
+html,
+body {
   overscroll-behavior-y: none;
+  overflow: hidden;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
 }
 
 @media (max-width: 720px) {
@@ -75,11 +90,7 @@ svg.toggle-arrow {
   transition: transform 0.2s ease-in-out;
 }
 
-html,
-body {
-  overflow: hidden;
-  height: 100%;
-  position: fixed;
-  left: 0;
-  top: 0;
+[id^='mj-image'] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
