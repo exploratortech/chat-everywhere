@@ -31,7 +31,6 @@ export async function executeCommand(
   data: CommandData,
 ): Promise<CommandResult> {
   const [command, ...args] = parseCommand(input);
-  console.log('command', command);
 
   try {
     switch (command) {
