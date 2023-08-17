@@ -19,7 +19,7 @@ type CommandData = {
 }
 
 export function isCommand(input: string): boolean {
-  return !!input.match(/^\s*\/\w+/i);
+  return !!input.match(/^\s*\/[\w?]+/i);
 };
 
 function parseCommand(input: string): string[] {
@@ -35,6 +35,8 @@ export async function executeCommand(
 
   try {
     switch (command) {
+      case '/?':
+      case '/help': return await handleHelpCommand();
       case '/pair': return await handlePairCommand(args, data);
       case '/unpair': return await handleUnpairCommand(args, data);
       default:
@@ -52,7 +54,18 @@ export async function executeCommand(
   }
 };
 
-export async function handlePairCommand (args: string[], data: CommandData): Promise<CommandResult> {
+export const handleHelpCommand = async (): Promise<CommandResult> => {
+  return {
+    message: [
+    'Here is a list of the available commands:',
+    '\n1. /help or /? - Displays this help message',
+    '\n2. /pair [email] [code] - Connect to your Chat Everywhere account',
+    '\n3. /unpair - Unpair from your Chat Everywhere account',
+    ].join(''),
+  };
+};
+
+export const handlePairCommand = async (args: string[], data: CommandData): Promise<CommandResult> => {
   const [email, pairCode] = args;
 
   if (args.length === 0) {
