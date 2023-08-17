@@ -94,8 +94,13 @@ const ImageToPromptUpload = () => {
         user,
       });
     } catch (e) {
-      if (e instanceof Error) {
-        console.log(e.message);
+      if (
+        e &&
+        typeof e === 'object' &&
+        'message' in e &&
+        typeof e.message === 'string'
+      ) {
+        toast.error(e.message);
       }
       console.log(e);
     }
