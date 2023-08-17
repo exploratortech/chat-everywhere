@@ -12,7 +12,6 @@ export default function Settings_Connections() {
 
   const {
     state: { user },
-    dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -51,8 +50,14 @@ export default function Settings_Connections() {
           </>
         ) : (
           <div className="flex flex-row items-center">
-            <p className="text-center text-neutral-400">{t(`Use "/pair <email>" to generate a new pair code`)}</p>
-            <RefreshButton loading={loading} onClick={fetchPairCodeData} />
+            {user == null ? (
+              <p className="text-center text-neutral-400">{t('Sign in and pair your account to access your conversations from other platforms.')}</p>
+            ) : (
+              <>
+                <p className="text-center text-neutral-400">{t(`Use "/pair <email>" to generate a new pair code`)}</p>
+                <RefreshButton loading={loading} onClick={fetchPairCodeData} />
+              </>
+            )}
           </div>
         )}
       </div>
@@ -104,6 +109,10 @@ function Connection({
   qrCode,
   connected = false,
 }: ConnectionProps): JSX.Element {
+  const {
+    state: { user },
+  } = useContext(HomeContext);
+
   const { t } = useTranslation('model');
 
   return (
@@ -127,16 +136,18 @@ function Connection({
           fill
         />
       </div>
-      <div className="flex flex-row items-center mt-1 text-neutral-400">
-        {connected ? (
-          <>
-            <p className="text-sm">{t('Connected')}</p>
-            <IconCircleCheckFilled className="m-1 text-green-400" size={20} />
-          </>
-        ) : (
-          <p className="py-1 text-sm">{t('Not Connected')}</p>
-        )}
-      </div>
+      {user && (
+        <div className="flex flex-row items-center mt-1 text-neutral-400">
+          {connected ? (
+            <>
+              <p className="text-sm">{t('Connected')}</p>
+              <IconCircleCheckFilled className="m-1 text-green-400" size={20} />
+            </>
+          ) : (
+            <p className="py-1 text-sm">{t('Not Connected')}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
