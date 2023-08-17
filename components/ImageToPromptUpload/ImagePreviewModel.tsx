@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { Dialog, Transition } from '@headlessui/react';
-import { IconX } from '@tabler/icons-react';
-import React, { Dispatch, Fragment, createContext } from 'react';
+import React, { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 type Props = {
@@ -50,7 +49,7 @@ export default function ImagePreviewModel({
                 <div className="flex items-center justify-center">
                   {filename}
                 </div>
-                <div className="flex items-center justify-center w-full h-full border border-gray-400">
+                <div className="flex items-center justify-center w-full h-full max-h-[60dvh] border border-gray-400">
                   <img src={preview} alt="" className="h-full object-contain" />
                 </div>
                 <div className="flex h-max items-center gap-2 justify-center">
