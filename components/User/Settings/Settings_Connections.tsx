@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import Image from 'next/image';
-import { IconCircleCheckFilled, IconDots, IconRefresh } from '@tabler/icons-react';
+import { IconCircleCheckFilled, IconDots, IconExternalLink, IconRefresh } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -61,12 +61,13 @@ export default function Settings_Connections() {
           </div>
         )}
       </div>
-      <div className="grid grid-cols-3 mobile:grid-cols-1 mobile:px-20 gap-10">
+      <div className="grid grid-cols-3 mobile:grid-cols-1 gap-10">
         <Connection
           name="LINE"
           image="/assets/images/line_icon.png"
           qrCode="/assets/images/line_qr_code.png"
           connected={pairCodeData?.lineId}
+          link={`https://line.me/R/ti/p/${encodeURIComponent('@829axojl')}`}
         />
       </div>
     </div>
@@ -101,6 +102,7 @@ type ConnectionProps = {
   image: string;
   qrCode: string;
   connected?: boolean;
+  link?: string;
 }
 
 function Connection({
@@ -108,6 +110,7 @@ function Connection({
   image,
   qrCode,
   connected = false,
+  link,
 }: ConnectionProps): JSX.Element {
   const {
     state: { user },
@@ -128,6 +131,11 @@ function Connection({
           height="32"
           className="rounded-lg"
         />
+        {link && (
+          <a href={link} className="ml-2 p-2" target="_blank">
+            <IconExternalLink size={24} />
+          </a>
+        )}
       </div>
       <div className="relative w-full aspect-square">
         <Image
