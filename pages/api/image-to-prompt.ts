@@ -154,8 +154,9 @@ export default handler;
 
 // This function is for local development only to replace localhost with ngrok host
 // function replaceLocalhost(url: string): string {
-//   const newHost = 'https://cd5e-27-109-204-166.ngrok-free.app/';
-//   return url.replace('http://localhost:54321', newHost);
+//   const ngrokHost = 'YOUR NGROK HOST';
+//   const localSupabaseHost = 'YOUR SUPABASE LOCAL HOST';
+//   return url.replace(localSupabaseHost, ngrokHost );
 // }
 
 async function nextLegDescribe(url: string) {
@@ -169,6 +170,8 @@ async function nextLegDescribe(url: string) {
       method: 'POST',
       headers: requestHeader,
       body: JSON.stringify({
+        // This line is for local development only to replace localhost with ngrok host
+        // url: replaceLocalhost(url),
         url: url,
       }),
     },
