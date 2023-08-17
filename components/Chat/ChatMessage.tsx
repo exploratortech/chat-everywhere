@@ -58,7 +58,7 @@ export const ChatMessage: FC<Props> = memo(
     const { i18n } = useTranslation();
 
     const {
-      state: { selectedConversation, conversations },
+      state: { selectedConversation, conversations, messageIsStreaming },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -389,9 +389,13 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
-                {aiImageList.length > 0 && (
-                  <MemoizedImageGallery aiImageList={aiImageList} />
-                )}
+                <div className={`${aiImageList.length > 0 ? '' : 'hidden'}`}>
+                  <MemoizedImageGallery
+                    key={`${selectedConversation?.id} ${messageIsStreaming}`}
+                    aiImageList={aiImageList}
+                  />
+                </div>
+
                 <div className="flex flex-row justify-between">
                   <MemoizedReactMarkdown
                     className="prose dark:prose-invert min-w-full"

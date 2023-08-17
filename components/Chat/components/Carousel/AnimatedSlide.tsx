@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 
 type AnimatedSlideProps = {
   direction: 'left' | 'right' | null;
@@ -10,22 +10,21 @@ const AnimatedSlide: React.FC<AnimatedSlideProps> = ({
   children,
 }) => {
   const [animationClass, setAnimationClass] = useState('');
-  const [previousChildren, setPreviousChildren] =
-    useState<React.ReactNode>(children);
   const [mounted, setMounted] = useState(false);
+  const previousChildrenRef = useRef(children);
 
   useEffect(() => {
     if (mounted) {
       if (direction === 'left') {
         setAnimationClass('slide-out-right');
         setTimeout(() => {
-          setPreviousChildren(children);
+          previousChildrenRef.current = children;
           setAnimationClass('slide-in-left');
         }, 500);
       } else if (direction === 'right') {
         setAnimationClass('slide-out-left');
         setTimeout(() => {
-          setPreviousChildren(children);
+          previousChildrenRef.current = children;
           setAnimationClass('slide-in-right');
         }, 500);
       }
@@ -97,9 +96,9 @@ const AnimatedSlide: React.FC<AnimatedSlideProps> = ({
           }
         }
       `}</style>
-      {previousChildren}
+      {previousChildrenRef.current}
     </div>
   );
 };
 
-export default AnimatedSlide;
+export default memo(AnimatedSlide);
