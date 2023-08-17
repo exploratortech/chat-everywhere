@@ -1,4 +1,5 @@
 {
   "Image to Prompt": "圖片轉提示",
-  "Please upload only 1 image": "請上傳一張圖片"
+  "Please upload only 1 image": "請上傳一張圖片",
+  "The Max Image Size is 20MB":  "圖片大小上限為20MB"
 }

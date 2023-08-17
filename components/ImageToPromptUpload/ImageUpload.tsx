@@ -94,14 +94,13 @@ const ImageToPromptUpload = () => {
         user,
       });
     } catch (e) {
-      if (
-        e &&
-        typeof e === 'object' &&
-        'message' in e &&
-        typeof e.message === 'string'
-      ) {
-        toast.error(e.message);
-      }
+      const isErrorMessage =  e && typeof e === 'object' && 'message' in e && typeof e.message === 'string'
+      const isMaxSizeError = isErrorMessage && (e.message as string).includes('maximum allowed size')
+      if (isMaxSizeError) {
+        toast.error(imageToPromptT('The Max Image Size is 20MB'));
+      } else if (isErrorMessage) {
+        toast.error(e.message as string);
+      } 
       console.log(e);
     }
 
