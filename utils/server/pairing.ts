@@ -1,9 +1,16 @@
-import { getAdminSupabaseClient } from './supabase';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import { v4 as uuidv4 } from "uuid";
 
-import { PAIR_CODE_CHARACTERS, PAIR_CODE_COOL_DOWN, PAIR_CODE_LENGTH, PAIR_CODE_LIFETIME } from '../app/const';
+import { getAdminSupabaseClient } from './supabase';
+import type { PairPlatforms } from '@/types/pair';
+
+import {
+  PAIR_CODE_CHARACTERS,
+  PAIR_CODE_COOL_DOWN,
+  PAIR_CODE_LENGTH,
+  PAIR_CODE_LIFETIME,
+} from '../app/const';
 
 dayjs.extend(isSameOrBefore);
 
@@ -83,7 +90,7 @@ export const assignPairCode = async (userId: string): Promise<any> => {
 
 // Gets an InstantMessageAppUser via `userId` or third-party user id
 export const getInstantMessageAppUser = async (
-  options: { userId?: string, appUserId?: string, app?: 'line' },
+  options: { userId?: string, appUserId?: string, app?: PairPlatforms },
 ): Promise<Record<string, any> | null> => {
   const { userId, appUserId, app } = options;
 
@@ -122,7 +129,12 @@ export const getInstantMessageAppUser = async (
   };
 };
 
-export const validatePairCode = async (userId: string, pairCode: string, app: 'line'): Promise<void> => {
+// Throws an error when the pair code is invalid
+export const validatePairCode = async (
+  userId: string,
+  pairCode: string,
+  app: PairPlatforms,
+): Promise<void> => {
   const supabase = getAdminSupabaseClient();
   const { data, error } = await supabase
     .from('instant_message_app_users')
@@ -130,12 +142,8 @@ export const validatePairCode = async (userId: string, pairCode: string, app: 'l
     .eq('user_id', userId)
     .maybeSingle();
 
-  if (error) {
-    console.error(error);
-    throw new Error('Unable to validate code. Please try again later.');
-  }
-
-  if (!data) {
+  if (error || !data) {
+    if (error) console.error(error);
     throw new Error('Unable to validate code. Please try again later.');
   }
 
@@ -145,16 +153,12 @@ export const validatePairCode = async (userId: string, pairCode: string, app: 'l
   ) {
     throw new Error('Invalid pair code');
   }
-
-  if (data[`${app}_id`] != null) {
-    throw new Error('This email has already been paired. Please use \'/unpair\' to unpair your account before pairing it again.');
-  }
 };
 
 export const pair = async (
   userId: string,
   appUserId: string,
-  app: 'line',
+  app: PairPlatforms,
 ): Promise<void> => {
   const supabase = getAdminSupabaseClient();
 
@@ -192,4 +196,61 @@ export const pair = async (
       throw new Error('Unable to pair your account. Please try again later');
     }
   }
+};
+
+// Removes the user's third-party user id from their InstantMessageAppUsers
+// record. Accepts either userId or appUserId.
+export const unpair = async (
+  options: { userId?: string, appUserId?: string },
+  app: PairPlatforms,
+): Promise<void> => {
+  const { userId, appUserId } = options;
+
+  if (!userId && !appUserId) {
+    throw new Error('Missing either userId or appUserId');
+  }
+
+  if (userId && appUserId) {
+    throw new Error('Both \'userId\' and \'appUserId\' were provided.');
+  }
+
+  const supabase = getAdminSupabaseClient();
+  let result!: any;
+
+  if (userId) {
+    result = await supabase
+      .from('instant_message_app_users')
+      .update({ [`${app}_id`]: null })
+      .eq('user_id', userId);
+  } else {
+    result = await supabase
+      .from('instant_message_app_users')
+      .update({ [`${app}_id`]: null })
+      .eq(`${app}_id`, appUserId);
+  }
+
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+};
+
+export const isPaired = async (
+  appUserId: string,
+  app: PairPlatforms,
+): Promise<boolean> => {
+  const supabase = getAdminSupabaseClient();
+  const { count, error } = await supabase
+    .from('instant_message_app_users')
+    .select('*', { head: true, count: 'exact' })
+    .eq(`${app}_id`, appUserId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (count == null) {
+    throw new Error('Unable to determine pairing');
+  }
+
+  return count !== 0;
 };

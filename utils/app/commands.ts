@@ -1,10 +1,24 @@
 import { CommandResult } from "@/types/command";
-import { assignPairCode, getPairCodeCoolDown, pair, validatePairCode } from "../server/pairing";
+import {
+  assignPairCode,
+  getPairCodeCoolDown,
+  isPaired,
+  pair,
+  unpair,
+  validatePairCode,
+} from "../server/pairing";
 import { getUserIdByEmail } from "../server/supabase";
 import { isEmailValid } from "./validation";
+import { PairPlatforms } from "@/types/pair";
+
+type CommandData = {
+  app?: PairPlatforms,
+  appUserId?: string,
+  userId?: string,
+}
 
 export function isCommand(input: string): boolean {
-  return !!input.match(/^\s*\/pair/i);
+  return !!input.match(/^\s*\/\w+/i);
 };
 
 function parseCommand(input: string): string[] {
@@ -12,12 +26,17 @@ function parseCommand(input: string): string[] {
   return formattedCommand.split(' ');
 };
 
-export async function executeCommand(input: string, data?: any): Promise<CommandResult> {
+export async function executeCommand(
+  input: string,
+  data: CommandData,
+): Promise<CommandResult> {
   const [command, ...args] = parseCommand(input);
+  console.log('command', command);
 
   try {
     switch (command) {
       case '/pair': return await handlePairCommand(args, data);
+      case '/unpair': return await handleUnpairCommand(args, data);
       default:
         return {
           message: `Unknown command '${command}'`,
@@ -33,11 +52,10 @@ export async function executeCommand(input: string, data?: any): Promise<Command
   }
 };
 
-export async function handlePairCommand (args: string[], data: any): Promise<CommandResult> {
+export async function handlePairCommand (args: string[], data: CommandData): Promise<CommandResult> {
   const [email, pairCode] = args;
 
   if (args.length === 1) {
-    // args: <email>
     if (!email || !isEmailValid(email)) {
       return {
         message: 'Invalid email',
@@ -64,8 +82,6 @@ export async function handlePairCommand (args: string[], data: any): Promise<Com
       error: true,
     };
   } else if (args.length === 2) {
-    // args: <email> <pair_code>
-    // data: { lineId: string }
     if (!email || !isEmailValid(email)) {
       return {
         message: 'Invalid email',
@@ -73,8 +89,9 @@ export async function handlePairCommand (args: string[], data: any): Promise<Com
       };
     }
 
-    if (!data || !data.lineId) {
-      throw new Error('Missing data.lineId for /pair command');
+    const { app, appUserId } = data;
+    if (!app || !appUserId) {
+      throw new Error('Missing \'app\' or \'appUserId\'');
     }
 
     const userId = await getUserIdByEmail(email);
@@ -94,8 +111,15 @@ export async function handlePairCommand (args: string[], data: any): Promise<Com
       };
     }
 
+    if (await isPaired(appUserId, app)) {
+      return {
+        message: 'Your account is already paired. Please unpair your account using \'/unpair\' before pairing it again.',
+        error: true,
+      }
+    };
+
     try {
-      await pair(userId, data.lineId, 'line');
+      await pair(userId, appUserId, app);
       return {
         message: 'Success! Your account is now paired.',
       };
@@ -109,7 +133,45 @@ export async function handlePairCommand (args: string[], data: any): Promise<Com
       };
     }
   } else {
-    // Error, show usage
-    return { message: 'The command you entered is invalid. The proper usage is \'/pair <email>\' for generating a new pairing code or \'/pair <email> <code>\' to pair your account' };
+    return {
+      message: 'The command you entered is invalid. The proper usage is \'/pair <email>\' for generating a new pairing code or \'/pair <email> <code>\' to pair your account',
+      error: true,
+    };
+  }
+};
+
+export const handleUnpairCommand = async (args: string[], data: CommandData): Promise<CommandResult> => {
+  if (args.length === 0) {
+    try {
+      const { app, appUserId } = data;
+
+      if (!app || !appUserId) {
+        throw new Error('Missing \'app\' or \'appUserId\'');
+      }
+
+      if (!await isPaired(appUserId, app)) {
+        return {
+          message: 'Your account is already unpaired.',
+          error: true,
+        };
+      }
+
+      await unpair({ appUserId }, app);
+      return { message: 'Success! Your account has been unpaired.' };
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error) {
+        return { message: error.message, error: true };
+      }
+      return {
+        message: 'Unable to unpair your account. Please try again later.',
+        error: true,
+      };
+    }
+  } else {
+    return {
+      message: 'Wrong command execution. The proper usage is \'/unpair\'.',
+      error: true,
+    }
   }
 };
