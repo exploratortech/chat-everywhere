@@ -1,6 +1,7 @@
 import { CommandResult } from "@/types/command";
 import {
   assignPairCode,
+  getInstantMessageAppUser,
   getPairCodeCoolDown,
   isPaired,
   pair,
@@ -54,7 +55,18 @@ export async function executeCommand(
 export async function handlePairCommand (args: string[], data: CommandData): Promise<CommandResult> {
   const [email, pairCode] = args;
 
-  if (args.length === 1) {
+  if (args.length === 0) {
+    const { app, appUserId } = data;
+    if (!app || !appUserId) {
+      throw new Error('Missing \'app\' or \'appUserId\'');
+    }
+
+    if (await isPaired(appUserId, app)) {
+      return { message: 'Your account is paired.' };
+    } else {
+      return { message: 'Your account isn\'t paired. Use "/pair <email>" to get started.' };
+    }
+  } else if (args.length === 1) {
     if (!email || !isEmailValid(email)) {
       return {
         message: 'Invalid email',
