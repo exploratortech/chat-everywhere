@@ -13,9 +13,6 @@ interface DropZoneProps {
 function DropZone({ onDropCallback }: DropZoneProps) {
   const { t } = useTranslation('imageToPrompt');
   const { t: commonT } = useTranslation('common');
-  const {
-    state: { user },
-  } = useContext(HomeContext);
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length !== 1) {
@@ -37,10 +34,7 @@ function DropZone({ onDropCallback }: DropZoneProps) {
       } text-neutral-900 dark:border-neutral-600 dark:text-white  pr-1 focus:outline-none`}
       {...getRootProps()}
       onClick={() => {
-        if (!user) {
-          toast.error(commonT('Please sign in to use image to prompt feature'));
-          return;
-        }
+        
         document.getElementById('upload-images-to-text')?.click();
       }}
     >

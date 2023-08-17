@@ -14,6 +14,7 @@ import { v4 } from 'uuid';
 
 const ImageToPromptUpload = () => {
   const { t: imageToPromptT } = useTranslation('imageToPrompt');
+  const { t: commonT } = useTranslation('common');
 
   const {
     state: { user, selectedConversation, conversations, messageIsStreaming },
@@ -28,6 +29,10 @@ const ImageToPromptUpload = () => {
   const supabaseClient = useMemo(() => createBrowserSupabaseClient(), []);
 
   const fileInputOnChange = (file: File) => {
+    if (!user) {
+      toast.error(commonT('Please sign in to use image to prompt feature'));
+      return;
+    }
     if (!file) return;
     const reader = new FileReader();
 
@@ -48,9 +53,6 @@ const ImageToPromptUpload = () => {
 
   const confirmHandler = useCallback(async () => {
     try {
-      if (!user) {
-        toast.error('User not found');
-      }
       if (!imageFile) return;
       const file = imageFile;
       clearFile();
