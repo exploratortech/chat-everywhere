@@ -1,4 +1,3 @@
-import { Message } from '@/types/chat';
 import { trackError } from '@/utils/app/azureTelemetry';
 import { trimStringBaseOnTokenLimit, shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import fetchWebSummary from '@/utils/server/fetchWebSummary';
