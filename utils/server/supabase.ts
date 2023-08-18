@@ -13,6 +13,7 @@ import {
 
 import { createClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
+import { PairPlatforms } from '@/types/pair';
 
 export const getAdminSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -581,4 +582,47 @@ export const saveConversationByApp = async (userId: string, params: any) => {
   if (error) {
     throw new Error('Unable to save conversation');
   }
+};
+
+// Gets an InstantMessageAppUser via `userId` or third-party user id. If a
+// third-party user id is used, 'app' must be specified.
+export const getInstantMessageAppUser = async (
+  options: { userId?: string, appUserId?: string, app?: PairPlatforms },
+): Promise<Record<string, any> | null> => {
+  const { userId, appUserId, app } = options;
+
+  const supabase = getAdminSupabaseClient();
+  const builder = supabase
+    .from('instant_message_app_users')
+    .select('*');
+    
+  let result!: any;
+  
+  if (userId) {
+    result = await builder.eq('user_id', userId).maybeSingle();
+  } else if (appUserId && app) {
+    result = await builder.eq(`${app}_id`, appUserId).maybeSingle();
+  } else {
+    throw new Error('Missing either userId or appUserId');
+  }
+  
+  if (result.error) {
+    console.error(result.error);
+    return null;
+  }
+
+  if (!result.data) {
+    return null;
+  }
+
+  const { data } = result;
+
+  return {
+    userId: data.user_id,
+    lineId: data.line_id,
+    pairCode: data.pair_code,
+    pairCodeExpiresAt: data.pair_code_expires_at,
+    pairCodeGeneratedAt: data.pair_code_generated_at,
+    createdAt: data.created_at,
+  };
 };

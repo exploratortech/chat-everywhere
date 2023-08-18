@@ -1,7 +1,9 @@
 import { NextRequest } from 'next/server';
 
-import { getInstantMessageAppUser } from '@/utils/server/pairing';
-import { getAdminSupabaseClient } from '@/utils/server/supabase';
+import {
+  getAdminSupabaseClient,
+  getInstantMessageAppUser,
+} from '@/utils/server/supabase';
 
 const supabase = getAdminSupabaseClient();
 

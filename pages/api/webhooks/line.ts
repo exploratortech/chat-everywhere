@@ -16,7 +16,7 @@ import {
   getConversationByApp,
   saveConversationByApp,
 } from '@/utils/server/supabase';
-import { executeCommand, isCommand } from '@/utils/app/commands';
+import { executeCommand, isCommand } from '@/utils/app/command';
 
 const lineConfig = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN!,
@@ -100,7 +100,7 @@ const handleMessage = async (event: MessageEvent) => {
       { app: 'line', appUserId: lineId },
     );
     client.replyMessage(event.replyToken, {
-      text: result.message,
+      text: result.error ? `Error: ${result.message}` : result.message,
       type: 'text',
     });
     return;
