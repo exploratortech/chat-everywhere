@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { toolNameMapping, tools } from '../../utils/app/online_mode';
+import {
+  normalizePreviousMessages,
+  toolNameMapping,
+  tools,
+} from '../../utils/app/online_mode';
 import { trackError } from '@/utils/app/azureTelemetry';
 import { truncateLogMessage } from '@/utils/server';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
@@ -10,8 +14,6 @@ import { PluginID } from '@/types/plugin';
 
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { Serialized } from 'langchain/dist/load/serializable';
-import { LLMResult } from 'langchain/dist/schema';
 
 export const config = {
   runtime: 'edge',
@@ -130,13 +132,7 @@ const handler = async (req: NextRequest, res: any) => {
       
       The current date and time is ${new Date().toLocaleString()}.
       Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
-      ${requestBody.messages
-        .map((message, index) => {
-          return `${index + 1}) ${
-            message.role === 'assistant' ? 'You' : 'User'
-          } ${normalizeTextAnswer(message.content)}`;
-        })
-        .join('\n')}
+        ${await normalizePreviousMessages(requestBody.messages)}
 
         As an LLM model, you have certain guidelines to adhere to in order to ensure effective and accurate communication. Please follow these rules diligently:
         
@@ -183,11 +179,6 @@ const handler = async (req: NextRequest, res: any) => {
     //Log error to Azure App Insights
     trackError(e as string);
   }
-};
-
-const normalizeTextAnswer = (text: string) => {
-  const mindlogRegex = /```Online \n(.|\n)*```/g;
-  return text.replace(mindlogRegex, '').replace('{', '{{').replace('}', '}}');
 };
 
 export default handler;

@@ -1,9 +1,10 @@
+import { Message } from '@/types/chat';
 import { trackError } from '@/utils/app/azureTelemetry';
+import { trimStringBaseOnTokenLimit, shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import fetchWebSummary from '@/utils/server/fetchWebSummary';
 
 import { DynamicTool, GoogleCustomSearch } from 'langchain/tools';
 import { all, create } from 'mathjs';
-import { trimStringBaseOnTokenLimit } from '@/utils/server/api';
 
 const calculator = new DynamicTool({
   name: 'calculator',
@@ -55,3 +56,20 @@ export const toolNameMapping: ToolMapping = {
   calculator: 'Calculator',
   'web-browser': 'Web Browser',
 };
+
+const normalizeTextAnswer = (text: string) => {
+  const mindlogRegex = /```Online \n(.|\n)*```/g;
+  return text.replace(mindlogRegex, '').replace('{', '{{').replace('}', '}}');
+};
+
+export const normalizePreviousMessages = async (messages: any[]) => {
+  const shortenMessages = await shortenMessagesBaseOnTokenLimit('', messages, 8000);
+  const normalizedMessages =  shortenMessages.map((message, index) => {
+    return `${index + 1}) ${
+      message.role === 'assistant' ? 'You' : 'User'
+    } ${normalizeTextAnswer(message.content)}`;
+  }).join('\n');
+  
+  return normalizedMessages;
+}
+  
