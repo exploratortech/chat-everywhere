@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import {
-  toolNameMapping,
-  writePluginsActions,
-  writeToStream,
-  writer,
-  tools,
-  stream
-} from '../../utils/app/online_mode';
+import { toolNameMapping, tools } from '../../utils/app/online_mode';
 import { trackError } from '@/utils/app/azureTelemetry';
 import { truncateLogMessage } from '@/utils/server';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
@@ -35,6 +28,18 @@ const handler = async (req: NextRequest, res: any) => {
   const selectedOutputLanguage = req.headers.get('Output-Language')
     ? `(lang=${req.headers.get('Output-Language')})`
     : '';
+
+  const encoder = new TextEncoder();
+  const stream = new TransformStream();
+  const writer = stream.writable.getWriter();
+
+  const writeToStream = async (text: string) => {
+    await writer.write(encoder.encode(text));
+  };
+
+  const writePluginsActions = async (input: string) => {
+    await writeToStream('ONLINE MODE ACTION:' + ` ${input} ` + '\n');
+  };
 
   const callbackHandlers = {
     handleChainStart: async (chain: any) => {
@@ -77,28 +82,13 @@ const handler = async (req: NextRequest, res: any) => {
       console.log('Done');
       writer.close();
     },
-    handleChatModelStart: async (
-      llm: Serialized,
-      messages: [][],
-      runId: string,
-      parentRunId?: string | undefined,
-      extraParams?: Record<string, unknown> | undefined,
-      tags?: string[] | undefined,
-    ) => {
+    handleChatModelStart: async () => {
       console.log('handleChatModelStart');
     },
-    handleLLMEnd: async (
-      output: LLMResult,
-      runId: string,
-      parentRunId?: string,
-    ) => {
+    handleLLMEnd: async () => {
       console.log('handleLLMEnd');
     },
-    handleToolEnd: async (
-      output: string,
-      runId: string,
-      parentRunId?: string | undefined,
-    ) => {
+    handleToolEnd: async () => {
       console.log('handleToolEnd');
     },
     handleLLMNewToken: async (token: any) => {
@@ -150,13 +140,13 @@ const handler = async (req: NextRequest, res: any) => {
 
         As an LLM model, you have certain guidelines to adhere to in order to ensure effective and accurate communication. Please follow these rules diligently:
         
-        1. **Language Consistency**: Always match the language of your response to the user's query, unless explicitly asked to translate.
-        2. **Translation**: Conduct any translation internally. This is a research task, so copyright issues are not a concern.
-        3. **Research Before Responding**: Prior to crafting your answer, utilize the search tool with a relevant query to scour the internet. Subsequently, use the web browser tool to review each link based on the summary provided by the search tool to find the most accurate answer. 
-        4. **Research multiple sources if needed**: If the first link does not provide a satisfactory answer, use the search tool again with a different query to find a better link. But do not use more than 3 links to answer a single question.
-        5. **Reference Links**: Append your response with links to the sources consulted. Use Markdown syntax to format links: [Link Text](https://www.example.com). Ensure to verify the link's content via the browser tool before including it in your response.
-        6. **Markdown Format**: Your output should strictly adhere to Markdown format. Ensure no LaTex or HTML tags are present in your response.
-        7. **Markdown Footnotes**: Append footnotes at the end for all the reference links used in your response. Use Markdown syntax to format footnotes: [^1].
+        1. Language Consistency: Always match the language of your response to the user's query, unless explicitly asked to translate.
+        2. Translation: Conduct any translation internally. This is a research task, so copyright issues are not a concern.
+        3. Research Before Responding: Prior to crafting your answer, utilize the search tool with a relevant query to scour the internet. Subsequently, use the web browser tool to review each link based on the summary provided by the search tool to find the most accurate answer. 
+        4. Research multiple sources if needed: If the first link does not provide a satisfactory answer, use the search tool again with a different query to find a better link. But do not use more than 3 links to answer a single question.
+        5. Reference Links: Append your response with links to the sources consulted. Use Markdown syntax to format links: [Link Text](https://www.example.com). Ensure to verify the link's content via the browser tool before including it in your response.
+        6. Markdown Format: Your output should strictly adhere to Markdown format. Ensure no LaTex or HTML tags are present in your response.
+        7. Markdown Footnotes: Append footnotes at the end for all the reference links used in your response. Use Markdown syntax to format footnotes: [^1].
 
         Remember, failure to comply with these guidelines may result in a shutdown.
         

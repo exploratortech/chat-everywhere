@@ -23,18 +23,6 @@ const calculator = new DynamicTool({
   },
 });
 
-const encoder = new TextEncoder();
-export const stream = new TransformStream();
-export const writer = stream.writable.getWriter();
-
-export const writeToStream = async (text: string) => {
-  await writer.write(encoder.encode(text));
-};
-
-export const writePluginsActions = async (input: string) => {
-  await writeToStream('ONLINE MODE ACTION:' + ` ${input} ` + '\n');
-};
-
 const webBrowser = new DynamicTool({
   name: 'web-browser',
   description:
@@ -42,7 +30,6 @@ const webBrowser = new DynamicTool({
   func: async (input) => {
     const inputURL = new URL(input);
     const { content } = await fetchWebSummary(inputURL.toString());
-    await writePluginsActions(`Done browsing \n`);
     return trimStringBaseOnTokenLimit(content, 15000); // Trim web browser content to 15000 tokens
   },
 });
