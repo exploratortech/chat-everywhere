@@ -1,11 +1,13 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import Image from 'next/image';
-import { IconCircleCheckFilled, IconDots, IconExternalLink, IconRefresh } from '@tabler/icons-react';
+import { IconCircleCheckFilled, IconDots, IconExternalLink, IconPlugConnectedX, IconRefresh } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 
 import HomeContext from '@/pages/api/home/home.context';
-import { didPairCodeExpire } from '@/utils/server/pairing';
+import { didPairCodeExpire, unpair } from '@/utils/server/pairing';
+import { toast } from 'react-hot-toast';
+import { SidebarButton } from '@/components/Sidebar/SidebarButton';
 
 export default function Settings_Connections() {
   const { t } = useTranslation('model');
@@ -37,7 +39,7 @@ export default function Settings_Connections() {
   return (
     <div>
       <h1 className="font-bold mb-4">{t("Connections")}</h1>
-      <div className="flex flex-col items-center mb-4 p-3 border rounded-lg text-sm">
+      <div className="flex flex-col items-center mb-4 p-3 border border-white/50 rounded-lg text-sm">
         {pairCodeData && !didPairCodeExpire(pairCodeData.pairCodeExpiresAt) ? (
           <>
             <div className="flex flex-row items-center gap-2">
@@ -63,9 +65,22 @@ export default function Settings_Connections() {
       </div>
       <div className="grid grid-cols-3 mobile:grid-cols-1 gap-10">
         <Connection
-          name="LINE"
+          name="Line"
           image="/assets/images/line_icon.png"
           qrCode="/assets/images/line_qr_code.png"
+          onDisconnect={async () => {
+            if (!user) return;
+            try {
+              // TODO
+            } catch (error) {
+              console.error(error);
+              if (error instanceof Error) {
+                toast.error(error.message);
+              } else {
+                toast.error(t('Unable to disconnect your account. Please try again later.'));
+              }
+            }
+          }}
           connected={pairCodeData?.lineId}
           link={`https://line.me/R/ti/p/${encodeURIComponent('@829axojl')}`}
         />
@@ -101,6 +116,7 @@ type ConnectionProps = {
   name: string;
   image: string;
   qrCode: string;
+  onDisconnect: () => void;
   connected?: boolean;
   link?: string;
 }
@@ -109,6 +125,7 @@ function Connection({
   name,
   image,
   qrCode,
+  onDisconnect,
   connected = false,
   link,
 }: ConnectionProps): JSX.Element {
@@ -119,43 +136,51 @@ function Connection({
   const { t } = useTranslation('model');
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="flex items-center mb-2">
-        <h1 className="m-0 mr-2">
-          {t(`Connect with ${name}`)}
-        </h1>
-        <Image
-          src={image}
-          alt={`Icon of ${name}`}
-          width="32"
-          height="32"
-          className="rounded-lg"
-        />
-        {link && (
-          <a href={link} className="ml-2 p-2" target="_blank">
-            <IconExternalLink size={24} />
-          </a>
-        )}
+    <div className="flex flex-col border border-white/50 rounded-lg">
+      <div className="flex flex-row justify-between items-center p-3">
+        <div className="flex flex-row items-center">
+          <Image
+            src={image}
+            alt={`Icon of ${name}`}
+            width="32"
+            height="32"
+            className="rounded-lg"
+          />
+          <h1 className="m-0 ml-3 mr-2">{name}</h1>
+        </div>
+        {connected && (<IconCircleCheckFilled className="text-green-400" size={24} />)}
       </div>
       <div className="relative w-full aspect-square">
         <Image
           src={qrCode}
-          alt="LINE QR Code"
+          alt={`${name} QR Code`}
           fill
         />
       </div>
-      {user && (
-        <div className="flex flex-row items-center mt-1 text-neutral-400">
-          {connected ? (
-            <>
-              <p className="text-sm">{t('Connected')}</p>
-              <IconCircleCheckFilled className="m-1 text-green-400" size={20} />
-            </>
-          ) : (
-            <p className="py-1 text-sm">{t('Not Connected')}</p>
-          )}
-        </div>
-      )}
+      <div className="flex flex-row items-center p-2">
+        {user && (
+          <>
+            {connected ? (
+              <SidebarButton
+                icon={<IconPlugConnectedX size={18} />}
+                onClick={onDisconnect}
+                text={t('Disconnect')}
+              />
+            ) : (
+              <p className="py-1 text-sm">{t('Not Connected')}</p>
+            )}
+          </>
+        )}
+        {link && (
+          <SidebarButton
+            className="flex-shrink w-auto ml-2"
+            icon={<IconExternalLink size={24} />}
+            onClick={() => {
+              window.open(link, '_blank')?.focus();
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }
