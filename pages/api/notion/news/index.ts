@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
 
+import { trackError } from '@/utils/app/azureTelemetry';
+
 import { ChatEverywhereNews } from '@/types/notion';
 
 import { Client } from '@notionhq/client';
 import { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
-import { trackError } from '@/utils/app/azureTelemetry';
 
 const newsDatabaseID = process.env.NOTION_NEWS_DATABASE_ID as string;
 const notionKey = process.env.NOTION_SECRET_KEY as string;
@@ -54,12 +55,17 @@ const handler = async (req: NextRequest): Promise<Response> => {
         .map((page) => {
           if (
             'properties' in page &&
+            'created_time' in page &&
             'Name' in page.properties &&
-            'title' in page.properties.Name
+            'title' in page.properties.Name &&
+            Array.isArray(page.properties.Name.title)
           ) {
             return {
               id: page.id,
-              title: page.properties.Name.title[0].plain_text,
+              title:
+                page.properties.Name.title.length > 0
+                  ? page.properties.Name.title[0]?.plain_text
+                  : '',
               createdTime: page.created_time,
             };
           }
