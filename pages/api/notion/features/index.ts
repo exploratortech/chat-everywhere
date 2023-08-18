@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
 
+import { trackError } from '@/utils/app/azureTelemetry';
+
 import { ChatEverywhereFeatures } from '@/types/notion';
 
 import { Client } from '@notionhq/client';
 import { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
-import { trackError } from '@/utils/app/azureTelemetry';
 
 const featuresDatabaseID = process.env.NOTION_FEATURES_DATABASE_ID as string;
 const notionKey = process.env.NOTION_SECRET_KEY as string;
@@ -58,7 +59,12 @@ const handler = async (req: NextRequest): Promise<Response> => {
             'Tier' in page.properties &&
             'multi_select' in page.properties.Tier;
 
-          if (hasProperties && hasName && hasTier) {
+          if (
+            hasProperties &&
+            hasName &&
+            hasTier &&
+            'last_edited_time' in page
+          ) {
             return {
               id: page.id,
               title: (page.properties.Name as any).title[0].plain_text,
