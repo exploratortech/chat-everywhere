@@ -8,6 +8,7 @@ import HomeContext from '@/pages/api/home/home.context';
 import { didPairCodeExpire, unpair } from '@/utils/server/pairing';
 import { toast } from 'react-hot-toast';
 import { SidebarButton } from '@/components/Sidebar/SidebarButton';
+import { PairPlatforms } from '@/types/pair';
 
 export default function Settings_Connections() {
   const { t } = useTranslation('model');
@@ -31,6 +32,32 @@ export default function Settings_Connections() {
       setPairCodeData(await res.json());
     }
   }, [user]);
+
+  const disconnect = useCallback(async (app: PairPlatforms): Promise<void> => {
+    try {
+      if (!user) throw new Error('Not signed in.');
+
+      const res = await fetch(`/api/connections?app=${app}`, {
+        headers: { 'user-token': user.token },
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      setPairCodeData({
+        ...pairCodeData,
+        [`${app}Id`]: null,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Unable to disconnect. Please try again later.');
+      }
+    }
+  }, [pairCodeData, user]);
 
   useEffect(() => {
     fetchPairCodeData();
@@ -68,19 +95,7 @@ export default function Settings_Connections() {
           name="Line"
           image="/assets/images/line_icon.png"
           qrCode="/assets/images/line_qr_code.png"
-          onDisconnect={async () => {
-            if (!user) return;
-            try {
-              // TODO
-            } catch (error) {
-              console.error(error);
-              if (error instanceof Error) {
-                toast.error(error.message);
-              } else {
-                toast.error(t('Unable to disconnect your account. Please try again later.'));
-              }
-            }
-          }}
+          onDisconnect={() => disconnect('line')}
           connected={pairCodeData?.lineId}
           link={`https://line.me/R/ti/p/${encodeURIComponent('@829axojl')}`}
         />
@@ -167,7 +182,7 @@ function Connection({
                 text={t('Disconnect')}
               />
             ) : (
-              <p className="py-1 text-sm">{t('Not Connected')}</p>
+              <p className="flex-grow p-3 text-sm">{t('Not Connected')}</p>
             )}
           </>
         )}

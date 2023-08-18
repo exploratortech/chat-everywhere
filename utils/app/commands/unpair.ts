@@ -30,7 +30,6 @@ const unpairAccount = async ({ app, appUserId }: Data): Promise<CommandResult> =
     await unpair({ appUserId }, app);
     return { message: 'Success! Your account has been unpaired.' };
   } catch (error) {
-    console.error(error);
     if (error instanceof Error) {
       return { message: error.message, error: true };
     }

@@ -196,6 +196,7 @@ export const unpair = async (
   }
 
   if (result.error) {
+    console.error(result.error);
     throw new Error(result.error.message);
   }
 };
