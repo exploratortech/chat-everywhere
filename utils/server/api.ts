@@ -75,6 +75,10 @@ export const trimStringBaseOnTokenLimit = async (
   let tokenCount = 0;
   let shortenedString = '';
 
+  if(!string || string.length === 0) {
+    return shortenedString;
+  }
+
   for (let i = 0; i < string.length; i++) {
     const char = string[i];
     const tokens = encoding.encode(char);
