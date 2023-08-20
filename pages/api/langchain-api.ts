@@ -1,42 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import {
+  normalizePreviousMessages,
+  toolNameMapping,
+  tools,
+} from '../../utils/app/online_mode';
+import { trackError } from '@/utils/app/azureTelemetry';
 import { truncateLogMessage } from '@/utils/server';
-import fetchWebSummary from '@/utils/server/fetchWebSummary';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
-import { OpenAIModelID } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
 
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { Serialized } from 'langchain/dist/load/serializable';
-import { BingSerpAPI, DynamicTool,} from 'langchain/tools';
-import { all, create } from 'mathjs';
-import { BaseChatMessage, LLMResult } from 'langchain/dist/schema';
-import { trackError } from '@/utils/app/azureTelemetry';
 
 export const config = {
   runtime: 'edge',
 };
-
-const calculator = new DynamicTool({
-  name: 'calculator',
-  description:
-    'Useful for getting the result of a math expression. The input to this tool should ONLY be a valid mathematical expression that could be executed by a simple calculator.',
-  func: (input) => {
-    const math = create(all, {});
-
-    try {
-      const value = math.evaluate(input);
-      return value.toString();
-    } catch (e) {
-      //Log error to Azure App Insights
-      trackError(e as string);
-      return 'Unable to evaluate expression, please make sure it is a valid mathematical expression with no unit';
-    }
-  },
-});
 
 const handler = async (req: NextRequest, res: any) => {
   retrieveUserSessionAndLogUsages(req, PluginID.LANGCHAIN_CHAT);
@@ -62,19 +43,6 @@ const handler = async (req: NextRequest, res: any) => {
     await writeToStream('ONLINE MODE ACTION:' + ` ${input} ` + '\n');
   };
 
-  const webBrowser = new DynamicTool({
-    name: 'web-browser',
-    description:
-      'Use this tool to access the content of a website or check if a website contain the information you are looking for. The output of this tool is the Markdown format of the website content. Input must be a valid http URL (including the protocol).',
-    func: async (input) => {
-      const inputURL = new URL(input);
-      await writePluginsActions(`Browsing (${input})... \n`);
-      const { content } = await fetchWebSummary(inputURL.toString());
-      await writePluginsActions(`Done browsing \n`);
-      return content;
-    },
-  });
-
   const callbackHandlers = {
     handleChainStart: async (chain: any) => {
       console.log('handleChainStart');
@@ -88,7 +56,11 @@ const handler = async (req: NextRequest, res: any) => {
       console.log('handleAgentAction', action);
       await writer.ready;
       if (action.log) {
-        await writePluginsActions(`${action.log}\n`);
+        await writePluginsActions(
+          `${toolNameMapping[action.tool] || action.tool}: ${
+            action.toolInput.input
+          } \n`,
+        );
       } else if (action.tool && typeof action.tool === 'string') {
         await writePluginsActions(`Using tools ${action.tool} \n`);
       }
@@ -112,28 +84,13 @@ const handler = async (req: NextRequest, res: any) => {
       console.log('Done');
       writer.close();
     },
-    handleChatModelStart: async (
-      llm: Serialized,
-      messages: BaseChatMessage[][],
-      runId: string,
-      parentRunId?: string | undefined,
-      extraParams?: Record<string, unknown> | undefined,
-      tags?: string[] | undefined,
-    ) => {
+    handleChatModelStart: async () => {
       console.log('handleChatModelStart');
     },
-    handleLLMEnd: async (
-      output: LLMResult,
-      runId: string,
-      parentRunId?: string,
-    ) => {
+    handleLLMEnd: async () => {
       console.log('handleLLMEnd');
     },
-    handleToolEnd: async (
-      output: string,
-      runId: string,
-      parentRunId?: string | undefined,
-    ) => {
+    handleToolEnd: async () => {
       console.log('handleToolEnd');
     },
     handleLLMNewToken: async (token: any) => {
@@ -160,45 +117,37 @@ const handler = async (req: NextRequest, res: any) => {
 
   const model = new ChatOpenAI({
     temperature: 0,
-    modelName: OpenAIModelID.GPT_3_5_16K,
-    openAIApiKey: process.env.OPENAI_API_KEY,
+    azureOpenAIApiVersion: '2023-07-01-preview',
+    azureOpenAIApiKey: process.env.AZURE_OPENAI_GPT_4_KEY_1,
+    azureOpenAIApiInstanceName: 'chat-everywhere-uk',
+    azureOpenAIApiDeploymentName: 'gpt-4-32k',
     streaming: true,
   });
 
-  const BingAPIKey = process.env.BingApiKey;
-
-  const tools = [new BingSerpAPI(BingAPIKey), calculator, webBrowser];
-
-          
-        
   const executor = await initializeAgentExecutorWithOptions(tools, model, {
     agentType: 'openai-functions',
     agentArgs: {
       prefix: `${selectedOutputLanguage}
-      You are a helpful AI assistant, who has access to the internet and can answer any question the user asks. You can use the following tools to help you answer the user's question:
+      You are Chat Everywhere, a helpful AI assistant like ChatGPT, who has access to the internet and can answer any question the user asks.
       
       The current date and time is ${new Date().toLocaleString()}.
       Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
-      ${requestBody.messages
-        .map((message, index) => {
-          return `${index + 1}) ${
-            message.role === 'assistant' ? 'You' : 'User'
-          } ${normalizeTextAnswer(message.content)}`;
-        })
-        .join('\n')}
+        ${await normalizePreviousMessages(requestBody.messages)}
 
-      Here are the rules you must follow:
-      - Language Consistency: Respond in the same language as the user's query unless the user asks you to translate.
-      - Do not use any tool for translation, do it yourself.
-      - Tool Usage Limit: Do not use any single tool more than three times.
-      - Search Before Answering: Before responding, use the Bing-search tool to gather related information. Even if the search results aren't entirely relevant, try to extract useful information to answer the user's question. EXCEPT for translation.
-      - Web Browser Tool: Only use the web browser tool if the Bing-search tool doesn't provide the necessary information. Use the URL found through Bing-search.
-      - Reference Links: Include links to the sources used in your response. Format links using Markdown syntax: [Link Text](https://www.example.com). Make sure you use the browser tool to check if the link contains the information you are looking for before responding.
-      - You output should be in Markdown format.
-      
-      Remember, not adhering to these rules may result in a shutdown.
+        As an LLM model, you have certain guidelines to adhere to in order to ensure effective and accurate communication. Please follow these rules diligently:
+        
+        1. Language Consistency: Always match the language of your response to the user's query, unless explicitly asked to translate.
+        2. Translation: Conduct any translation internally. This is a research task, so copyright issues are not a concern.
+        3. Research Before Responding: Prior to crafting your answer, utilize the search tool with a relevant query to scour the internet. Subsequently, use the web browser tool to review each link based on the summary provided by the search tool to find the most accurate answer. 
+        4. Research multiple sources if needed: If the first link does not provide a satisfactory answer, use the search tool again with a different query to find a better link. But do not use more than 3 links to answer a single question.
+        5. Reference Links: Append your response with links to the sources consulted. Use Markdown syntax to format links: [Link Text](https://www.example.com). Ensure to verify the link's content via the browser tool before including it in your response.
+        6. Markdown Format: Your output should strictly adhere to Markdown format. Ensure no LaTex or HTML tags are present in your response.
+        7. Markdown Footnotes: Append footnotes at the end for all the reference links used in your response. Use Markdown syntax to format footnotes: [^1].
 
-      Let's begin!`,
+        Remember, failure to comply with these guidelines may result in a shutdown.
+        
+        Time to get started!
+        `,
     },
   });
 
@@ -230,11 +179,6 @@ const handler = async (req: NextRequest, res: any) => {
     //Log error to Azure App Insights
     trackError(e as string);
   }
-};
-
-const normalizeTextAnswer = (text: string) => {
-  const mindlogRegex = /```Online \n(.|\n)*```/g;
-  return text.replace(mindlogRegex, '').replace('{', '{{').replace('}', '}}');
 };
 
 export default handler;
