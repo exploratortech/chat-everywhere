@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
+
+import HomeContext from '@/pages/api/home/home.context';
 
 interface CircularProgressProps {
   milliseconds: number;
@@ -13,9 +15,15 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
 }) => {
   const size = 30;
   const strokeWidth = 4;
-  const foregroundColor = '#959A9C';
-  const backgroundColor = '#323340';
-  const textColor = '#959A9C';
+  const {
+    state: { lightMode },
+  } = useContext(HomeContext);
+  const { foregroundColor, backgroundColor, textColor } = useMemo(() => {
+    const foregroundColor = lightMode === 'light' ? '#8C949D' : '#959A9C';
+    const backgroundColor = lightMode === 'light' ? '#232324' : '#323340';
+    const textColor = lightMode === 'light' ? '#8C949D' : '#959A9C';
+    return { foregroundColor, backgroundColor, textColor };
+  }, [lightMode]);
 
   const { radius, circumference, strokeDashoffset } = useMemo(() => {
     const radius = (size - strokeWidth) / 2;
