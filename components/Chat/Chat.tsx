@@ -29,6 +29,7 @@ import {
 import { removeSecondLastLine } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 import { throttle } from '@/utils/data/throttle';
+import { reorderItem } from '@/utils/app/rank';
 
 import { ChatBody, Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
@@ -44,7 +45,6 @@ import { ChatMessage } from './ChatMessage';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
 
 import dayjs from 'dayjs';
-import { reorderItem } from '@/utils/app/rank';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
