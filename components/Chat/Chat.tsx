@@ -44,6 +44,7 @@ import { ChatMessage } from './ChatMessage';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
 
 import dayjs from 'dayjs';
+import { reorderItem } from '@/utils/app/rank';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -310,7 +311,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         }
 
         saveConversation(updatedConversation);
-        const updatedConversations: Conversation[] = conversations.map(
+        let updatedConversations: Conversation[] = conversations.map(
           (conversation) => {
             if (conversation.id === selectedConversation.id) {
               return updatedConversation;
@@ -325,11 +326,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             (conversation) => conversation.id === updatedConversation.id,
           )
         ) {
-          updatedConversations.unshift(updatedConversation);
-        }
-
-        if (updatedConversations.length === 0) {
           updatedConversations.push(updatedConversation);
+          updatedConversations =
+            reorderItem(updatedConversations, updatedConversation.id, 0);
         }
 
         homeDispatch({ field: 'conversations', value: updatedConversations });
