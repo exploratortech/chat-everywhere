@@ -9,7 +9,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Tooltip } from 'react-tooltip';
 
 import { useTranslation } from 'next-i18next';
 
@@ -29,7 +28,7 @@ import TokenCounter from './components/TokenCounter';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../VoiceInput/VoiceInputButton';
-import CircularProgress from './CircularProgress';
+import LimiterButton from './LimiterButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
@@ -432,25 +431,11 @@ export const ChatInput = ({
           />
 
           {intervalRemaining > 0 ? (
-            <>
-              <Tooltip
-                anchorSelect="#limiter-tooltip"
-                content={limiterToolTip}
-              />
-              <button
-                id="limiter-tooltip"
-                className="absolute top-0 right-0 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
-                onClick={() => {}}
-              >
-                <CircularProgress
-                  milliseconds={intervalRemaining}
-                  maxMilliseconds={maxInterval}
-                  setMilliseconds={(value: number) => {
-                    setIntervalRemaining(value);
-                  }}
-                ></CircularProgress>
-              </button>
-            </>
+            <LimiterButton
+              intervalRemaining={intervalRemaining}
+              maxInterval={maxInterval}
+              setIntervalRemaining={setIntervalRemaining}
+            />
           ) : (
             <button
               className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
