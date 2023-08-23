@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { Tooltip } from 'react-tooltip';
 
 import { useTranslation } from 'next-i18next';
 
@@ -94,6 +95,16 @@ export const ChatInput = ({
     setContent(value);
     updatePromptListVisibility(value);
   };
+
+  const limiterToolTip = useMemo(() => {
+    const isFreeUser = user && user.plan === 'free';
+    if (isFreeUser) {
+      return (
+        t('Upgrade to the Pro version to eliminate the cooldown period.') || ''
+      );
+    }
+    return t('Register to decrease the cooldown time.') || '';
+  }, [t, user]);
 
   const { intervalRemaining, setIntervalRemaining, maxInterval } = useLimiter(
     user,
@@ -328,8 +339,9 @@ export const ChatInput = ({
           selectedConversation &&
           selectedConversation.messages.length > 0 && (
             <button
-              className="absolute top-0 left-0 right-0 mx-auto mb-3 flex w-fit items-center gap-3 rounded border border-neutral-200 bg-white py-2 px-4 text-black hover:opacity-50 dark:border-neutral-600 dark:bg-[#343541] dark:text-white md:mb-0 md:mt-2"
+              className="absolute top-0 left-0 right-0 mx-auto mb-3 flex w-fit items-center gap-3 rounded border border-neutral-200 bg-white py-2 px-4 text-black hover:opacity-50 dark:border-neutral-600 dark:bg-[#343541] dark:text-white md:mb-0 md:mt-2 disabled:opacity-25"
               onClick={() => onRegenerate()}
+              disabled={intervalRemaining > 0}
             >
               <IconRepeat size={16} /> {t('Regenerate response')}
             </button>
@@ -420,18 +432,25 @@ export const ChatInput = ({
           />
 
           {intervalRemaining > 0 ? (
-            <button
-              className="absolute top-0 right-0 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
-              onClick={() => {}}
-            >
-              <CircularProgress
-                milliseconds={intervalRemaining}
-                maxMilliseconds={maxInterval}
-                setMilliseconds={(value: number) => {
-                  setIntervalRemaining(value);
-                }}
-              ></CircularProgress>
-            </button>
+            <>
+              <Tooltip
+                anchorSelect="#limiter-tooltip"
+                content={limiterToolTip}
+              />
+              <button
+                id="limiter-tooltip"
+                className="absolute top-0 right-0 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+                onClick={() => {}}
+              >
+                <CircularProgress
+                  milliseconds={intervalRemaining}
+                  maxMilliseconds={maxInterval}
+                  setMilliseconds={(value: number) => {
+                    setIntervalRemaining(value);
+                  }}
+                ></CircularProgress>
+              </button>
+            </>
           ) : (
             <button
               className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"

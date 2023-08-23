@@ -57,6 +57,7 @@
     "react-notion-x": "^6.16.0",
     "react-query": "^3.39.3",
     "react-syntax-highlighter": "^15.5.0",
+    "react-tooltip": "^5.21.1",
     "react-transition-group": "^4.4.5",
     "rehype-mathjax": "^4.0.2",
     "rehype-raw": "^6.1.1",
