@@ -28,9 +28,10 @@ function useLimiter(user: User | null, messageIsStreaming: boolean) {
     }
   }, [maxInterval, messageIsStreaming, previousMessageIsStreaming, user]);
 
-  useEffect(() => {
-    localStorage.setItem('intervalRemaining', intervalRemaining.toString());
-  }, [intervalRemaining]);
+  // Disable local storage for now
+  // useEffect(() => {
+  //   localStorage.setItem('intervalRemaining', intervalRemaining.toString());
+  // }, [intervalRemaining]);
 
   return { intervalRemaining, setIntervalRemaining, maxInterval };
 }
