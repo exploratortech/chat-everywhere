@@ -14,7 +14,7 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
   setMilliseconds,
 }) => {
   const size = 30;
-  const strokeWidth = 4;
+  const strokeWidth = 3;
   const {
     state: { lightMode },
   } = useContext(HomeContext);
@@ -60,15 +60,15 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
         <circle
           className="transition-all duration-500 ease-in-out"
           stroke={foregroundColor}
-          strokeWidth={strokeWidth * 1.2}
+          strokeWidth={strokeWidth}
           fill="transparent"
           strokeLinecap="round"
-          strokeDasharray={`${circumference} ${circumference}`}
+          strokeDasharray={`${circumference - 1} ${circumference - 1}`}
           style={{ strokeDashoffset }}
           r={radius}
           cx={size / 2}
           cy={size / 2}
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          transform={`rotate(-85 ${size / 2} ${size / 2})`}
         />
         <text
           x="50%"
