@@ -14,6 +14,7 @@ import { useTranslation } from 'next-i18next';
 
 import useDisplayAttribute from '@/hooks/useDisplayAttribute';
 import useFocusHandler from '@/hooks/useFocusInputHandler';
+import useLimiter from '@/hooks/useLimiter';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
@@ -27,6 +28,7 @@ import TokenCounter from './components/TokenCounter';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../VoiceInput/VoiceInputButton';
+import CircularProgress from './CircularProgress';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
@@ -53,6 +55,7 @@ export const ChatInput = ({
       currentMessage,
       speechContent,
       isSpeechRecognitionActive,
+      user,
     },
 
     dispatch: homeDispatch,
@@ -92,7 +95,15 @@ export const ChatInput = ({
     updatePromptListVisibility(value);
   };
 
+  const { intervalRemaining, setIntervalRemaining, maxInterval } = useLimiter(
+    user,
+    messageIsStreaming,
+  );
+
   const handleSend = () => {
+    if (intervalRemaining > 0) {
+      return;
+    }
     if (messageIsStreaming || isSpeechRecognitionActive) {
       return;
     }
@@ -329,7 +340,11 @@ export const ChatInput = ({
             border bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] 
             dark:bg-[#40414F] dark:text-white 
             dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4 
-            ${isOverTokenLimit && !isSpeechRecognitionActive ? '!border-red-500 dark:!border-red-600' : ''}
+            ${
+              isOverTokenLimit && !isSpeechRecognitionActive
+                ? '!border-red-500 dark:!border-red-600'
+                : ''
+            }
             ${
               !currentMessage || currentMessage.pluginId === null
                 ? 'border-black/10 dark:border-gray-900/50'
@@ -337,7 +352,6 @@ export const ChatInput = ({
             }
           `}
         >
-
           <EnhancedMenu
             ref={menuRef}
             isFocused={isFocused}
@@ -347,9 +361,7 @@ export const ChatInput = ({
           <div className="flex items-start">
             <div className="flex items-center pt-1 pl-1">
               <VoiceInputButton />
-              <button
-                className="rounded-sm p-1 text-zinc-500 dark:text-zinc-400 cursor-default"
-              >
+              <button className="rounded-sm p-1 text-zinc-500 dark:text-zinc-400 cursor-default">
                 {getPluginIcon(currentMessage?.pluginId)}
               </button>
             </div>
@@ -358,8 +370,16 @@ export const ChatInput = ({
               ref={textareaRef}
               className={`
                 m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md
-                ${ isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : '' }
-                ${ isOverTokenLimit && isSpeechRecognitionActive ? 'border !border-red-500 dark:!border-red-600' : 'border-0' }
+                ${
+                  isSpeechRecognitionActive
+                    ? 'z-[1100] pointer-events-none'
+                    : ''
+                }
+                ${
+                  isOverTokenLimit && isSpeechRecognitionActive
+                    ? 'border !border-red-500 dark:!border-red-600'
+                    : 'border-0'
+                }
               `}
               style={{
                 paddingBottom: `${
@@ -386,8 +406,12 @@ export const ChatInput = ({
           <TokenCounter
             className={`
               ${isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''}
-              ${isCloseToTokenLimit || isOverTokenLimit ? 'visible' : 'invisible'}
-              ${ isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : '' }
+              ${
+                isCloseToTokenLimit || isOverTokenLimit
+                  ? 'visible'
+                  : 'invisible'
+              }
+              ${isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : ''}
               absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400
             `}
             value={content}
@@ -395,16 +419,31 @@ export const ChatInput = ({
             setIsCloseToLimit={setIsCloseToTokenLimit}
           />
 
-          <button
-            className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
-            onClick={handleSend}
-          >
-            {messageIsStreaming ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
-            ) : (
-              <IconSend size={18} />
-            )}
-          </button>
+          {intervalRemaining > 0 ? (
+            <button
+              className="absolute top-0 right-0 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+              onClick={() => {}}
+            >
+              <CircularProgress
+                milliseconds={intervalRemaining}
+                maxMilliseconds={maxInterval}
+                setMilliseconds={(value: number) => {
+                  setIntervalRemaining(value);
+                }}
+              ></CircularProgress>
+            </button>
+          ) : (
+            <button
+              className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+              onClick={handleSend}
+            >
+              {messageIsStreaming ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
+              ) : (
+                <IconSend size={18} />
+              )}
+            </button>
+          )}
 
           {showPromptList && filteredPrompts.length > 0 && (
             <div className="absolute bottom-12 w-full z-20">
