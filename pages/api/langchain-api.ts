@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import {
+  formatMessage,
   normalizePreviousMessages,
   toolNameMapping,
   tools,
@@ -132,7 +133,7 @@ const handler = async (req: NextRequest, res: any) => {
       
       The current date and time is ${new Date().toLocaleString()}.
       Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
-        ${await normalizePreviousMessages(requestBody.messages)}
+        ${formatMessage(await normalizePreviousMessages(requestBody.messages))}
 
         As an LLM model, you have certain guidelines to adhere to in order to ensure effective and accurate communication. Please follow these rules diligently:
         
