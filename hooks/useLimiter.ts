@@ -6,10 +6,8 @@ import usePreviousState from './usePreviousState';
 
 function useLimiter(user: User | null, messageIsStreaming: boolean) {
   const previousMessageIsStreaming = usePreviousState(messageIsStreaming);
-  const [intervalRemaining, setIntervalRemaining] = useState(() => {
-    const savedValue = localStorage.getItem('intervalRemaining');
-    return savedValue ? parseInt(savedValue) : 0;
-  });
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [intervalRemaining, setIntervalRemaining] = useState(0);
 
   const maxInterval = useMemo(() => {
     const isProUser = user && (user.plan === 'pro' || user.plan === 'edu');
@@ -24,16 +22,31 @@ function useLimiter(user: User | null, messageIsStreaming: boolean) {
 
   useEffect(() => {
     if (previousMessageIsStreaming && !messageIsStreaming) {
-      setIntervalRemaining(maxInterval);
+      setStartTime(Date.now());
     }
   }, [maxInterval, messageIsStreaming, previousMessageIsStreaming, user]);
 
-  // Disable local storage for now
-  // useEffect(() => {
-  //   localStorage.setItem('intervalRemaining', intervalRemaining.toString());
-  // }, [intervalRemaining]);
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (startTime !== null) {
+      timer = setInterval(() => {
+        const remaining = maxInterval - (Date.now() - startTime);
+        setIntervalRemaining(remaining);
 
-  return { intervalRemaining, setIntervalRemaining, maxInterval };
+        if (remaining <= 0) {
+          setStartTime(null);
+        }
+      }, 50);
+    }
+
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    };
+  }, [startTime, maxInterval]);
+
+  return { intervalRemaining, startTime, setStartTime, maxInterval };
 }
 
 export default useLimiter;

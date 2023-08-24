@@ -9,13 +9,11 @@ import CircularProgress from './CircularProgress';
 interface LimiterButtonProps {
   intervalRemaining: number;
   maxInterval: number;
-  setIntervalRemaining: (value: number) => void;
 }
 
 export default function LimiterButton({
   intervalRemaining,
   maxInterval,
-  setIntervalRemaining,
 }: LimiterButtonProps) {
   const { t } = useTranslation('chat');
   const {
@@ -41,9 +39,6 @@ export default function LimiterButton({
         <CircularProgress
           milliseconds={intervalRemaining}
           maxMilliseconds={maxInterval}
-          setMilliseconds={(value: number) => {
-            setIntervalRemaining(value);
-          }}
         ></CircularProgress>
       </button>
       <Tooltip

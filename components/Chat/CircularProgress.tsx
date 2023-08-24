@@ -5,13 +5,11 @@ import HomeContext from '@/pages/api/home/home.context';
 interface CircularProgressProps {
   milliseconds: number;
   maxMilliseconds: number;
-  setMilliseconds: (value: number) => void;
 }
 
 const CircularProgress: React.FC<CircularProgressProps> = ({
   milliseconds,
   maxMilliseconds,
-  setMilliseconds,
 }) => {
   const size = 30;
   const strokeWidth = 3;
@@ -33,16 +31,6 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
       circumference - (percentage / 100) * circumference * 0.9;
     return { radius, circumference, strokeDashoffset };
   }, [size, strokeWidth, milliseconds, maxMilliseconds]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const newMilliseconds = milliseconds > 50 ? milliseconds - 50 : 0;
-      if (milliseconds !== newMilliseconds) {
-        setMilliseconds(newMilliseconds);
-      }
-    }, 50);
-    return () => clearTimeout(timer);
-  }, [milliseconds, setMilliseconds]);
 
   const seconds = Math.round(milliseconds / 1000);
 

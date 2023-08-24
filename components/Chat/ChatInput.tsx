@@ -95,17 +95,7 @@ export const ChatInput = ({
     updatePromptListVisibility(value);
   };
 
-  const limiterToolTip = useMemo(() => {
-    const isFreeUser = user && user.plan === 'free';
-    if (isFreeUser) {
-      return (
-        t('Upgrade to the Pro version to eliminate the cooldown period.') || ''
-      );
-    }
-    return t('Register to decrease the cooldown time.') || '';
-  }, [t, user]);
-
-  const { intervalRemaining, setIntervalRemaining, maxInterval } = useLimiter(
+  const { intervalRemaining, startTime, maxInterval } = useLimiter(
     user,
     messageIsStreaming,
   );
@@ -434,7 +424,6 @@ export const ChatInput = ({
             <LimiterButton
               intervalRemaining={intervalRemaining}
               maxInterval={maxInterval}
-              setIntervalRemaining={setIntervalRemaining}
             />
           ) : (
             <button
