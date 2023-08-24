@@ -27,8 +27,12 @@ export default function LimiterButton({
         t('Upgrade to the Pro version to eliminate the cooldown period.') || ''
       );
     }
-    return t('Register to decrease the cooldown time.') || '';
-  }, [t, user]);
+    return (
+      t(
+        'Please register for free to reduce cooldown time, or pay to enjoy unlimited access.',
+      ) || ''
+    );
+  }, [t]);
   return (
     <>
       <button
