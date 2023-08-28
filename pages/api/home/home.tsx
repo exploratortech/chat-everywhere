@@ -784,6 +784,7 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
         'features',
         'auth',
         'mjImage',
+        'imageToPrompt',
       ])),
     },
   };
