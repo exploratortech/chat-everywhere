@@ -69,7 +69,9 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
         <div className="relative w-full px-4 py-2 flex flex-col">
           <div className="flex flex-row w-full justify-start items-center pb-2 mb-2 border-b gap-4 dark:border-gray-900/50 mobile:!flex-col">
             <SpeechRecognitionLanguageSelector />
-            <ImageToPromptUpload />
+            {currentMessage?.pluginId === PluginID.IMAGE_GEN && (
+              <ImageToPromptUpload />
+            )}
           </div>
           <div className="flex flex-col md:flex-row w-full justify-between">
             <ModeSelector />
