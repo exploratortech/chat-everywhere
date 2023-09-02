@@ -123,7 +123,7 @@ export const AuthModel: FC<Props> = ({ onClose, supabase }) => {
                           },
                         },
                       }}
-                      providers={[]}
+                      providers={['google']}
                       theme="dark"
                       localization={{
                         variables: {
