@@ -54,30 +54,32 @@ export default function Settings_Account() {
       );
     }
   };
-  const upgradeForOneMonthLinkOnClick = () => {
-    const paymentLink =
-      process.env.NEXT_PUBLIC_ENV === 'production'
-        ? 'https://buy.stripe.com/3csbMH7Y62Ch77O005'
-        : 'https://buy.stripe.com/test_bIY6pTcvq52O60E4gh';
-    const userEmail = user?.email;
-    const userId = user?.id;
 
-    event('One month upgrade button clicked', {
-      category: 'Engagement',
-      label: 'Upgrade',
-      userEmail: userEmail || 'N/A',
-    });
-    trackEvent('Upgrade (one-month only) button clicked');
+  // const upgradeForOneMonthLinkOnClick = () => {
+  //   const paymentLink =
+  //     process.env.NEXT_PUBLIC_ENV === 'production'
+  //       ? 'https://buy.stripe.com/3csbMH7Y62Ch77O005'
+  //       : 'https://buy.stripe.com/test_bIY6pTcvq52O60E4gh';
+  //   const userEmail = user?.email;
+  //   const userId = user?.id;
 
-    if (!user) {
-      toast.error('Please sign-up before upgrading to pro plan');
-    } else {
-      window.open(
-        `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
-        '_blank',
-      );
-    }
-  };
+  //   event('One month upgrade button clicked', {
+  //     category: 'Engagement',
+  //     label: 'Upgrade',
+  //     userEmail: userEmail || 'N/A',
+  //   });
+  //   trackEvent('Upgrade (one-month only) button clicked');
+
+  //   if (!user) {
+  //     toast.error('Please sign-up before upgrading to pro plan');
+  //   } else {
+  //     window.open(
+  //       `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
+  //       '_blank',
+  //     );
+  //   }
+  // };
+
   const subscriptionManagementLink = () =>
     process.env.NEXT_PUBLIC_ENV === 'production'
       ? 'https://billing.stripe.com/p/login/5kAbMj0wt5VF6AwaEE'
@@ -91,7 +93,7 @@ export default function Settings_Account() {
           {!isPaidUser && (
             <span className="text-sm mb-2">
               {t(
-                'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime! Please make sure you registered before upgrading to avoid wait time.',
+                'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime!',
               )}
             </span>
           )}
@@ -132,14 +134,7 @@ export default function Settings_Account() {
                   >
                     {t('Upgrade')}
                   </a>
-                  <a
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => upgradeForOneMonthLinkOnClick()}
-                    className="px-4 py-2 text-xs border rounded-lg bg-neutral-300 shadow border-none text-neutral-700 hover:bg-white focus:outline-none mt-2 text-center cursor-pointer"
-                  >
-                    {t('Upgrade for one month only')}
-                  </a>
+                  <p className="text-xs text-neutral-400 mt-2">{t('No Strings Attached - Cancel Anytime!')}</p>
                 </div>
               )}
               {user?.plan === 'pro' && user.proPlanExpirationDate && (
