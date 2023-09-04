@@ -77,7 +77,7 @@ export const ChatbarSettings = () => {
           <SidebarButton
             text={t('Sign in')}
             icon={<IconLogin size={18} />}
-            suffixIcon={<IconBrandGoogle size={18} />}
+            suffixIcon={<IconBrandGoogle size={18} color='#DB4437' stroke={3}/>}
             onClick={signInOnClick}
           />
         )}
