@@ -6,6 +6,8 @@ import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 
+const tokenCounterBuffer = 100;
+
 export const shortenMessagesBaseOnTokenLimit = async (
   prompt: string,
   messages: Message[],
@@ -28,7 +30,10 @@ export const shortenMessagesBaseOnTokenLimit = async (
     const message = messages[i];
     const tokens = encoding.encode(message.content);
 
-    if (tokenCount + tokens.length + completionTokens > tokenLimit) {
+    if (
+      tokenCount + tokens.length + completionTokens + tokenCounterBuffer >
+      tokenLimit
+    ) {
       break;
     }
     tokenCount += tokens.length;
@@ -43,7 +48,10 @@ export const shortenMessagesBaseOnTokenLimit = async (
       const char = lastMessage.content[i];
       const tokens = encoding.encode(char);
 
-      if (tokenCount + tokens.length + completionTokens > tokenLimit) {
+      if (
+        tokenCount + tokens.length + completionTokens + tokenCounterBuffer >
+        tokenLimit
+      ) {
         break;
       }
       tokenCount += tokens.length;
@@ -76,14 +84,14 @@ export const trimStringBaseOnTokenLimit = async (
   let tokenCount = 0;
   let shortenedString = '';
 
-  if(!string || string.length === 0) {
+  if (!string || string.length === 0) {
     return shortenedString;
   }
 
   for (let i = 0; i < string.length; i++) {
     const char = string[i];
     const tokens = encoding.encode(char);
-    
+
     if (tokenCount > tokenLimit) {
       break;
     }

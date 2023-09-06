@@ -63,7 +63,6 @@ export const OpenAIStream = async (
   while (attempt < openAIEndpoints.length) {
     const openAIEndpoint = openAIEndpoints[attempt];
     const openAIKey = openAIKeys[attempt];
-    const maxCompletionToken = isGPT4Model ? 2000 : 800;
 
     try {
       if (!openAIEndpoint || !openAIKey)
@@ -81,7 +80,7 @@ export const OpenAIStream = async (
         systemPrompt,
         messages,
         model.tokenLimit,
-        maxCompletionToken
+        model.completionTokenLimit
       );
 
       const bodyToSend: any = {
@@ -92,7 +91,7 @@ export const OpenAIStream = async (
           },
           ...normalizeMessages(messagesToSend),
         ],
-        max_tokens: maxCompletionToken,
+        max_tokens: model.completionTokenLimit,
         temperature,
         stream: true,
         presence_penalty: 0,
