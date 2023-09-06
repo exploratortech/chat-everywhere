@@ -1,3 +1,5 @@
+import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
+
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
@@ -61,6 +63,7 @@ export const OpenAIStream = async (
   while (attempt < openAIEndpoints.length) {
     const openAIEndpoint = openAIEndpoints[attempt];
     const openAIKey = openAIKeys[attempt];
+    const maxCompletionToken = isGPT4Model ? 2000 : 800;
 
     try {
       if (!openAIEndpoint || !openAIKey)
@@ -74,15 +77,22 @@ export const OpenAIStream = async (
         url = `${openAIEndpoint}/v1/chat/completions`;
       }
 
+      const messagesToSend = await shortenMessagesBaseOnTokenLimit(
+        systemPrompt,
+        messages,
+        model.tokenLimit,
+        maxCompletionToken
+      );
+
       const bodyToSend: any = {
         messages: [
           {
             role: 'system',
             content: systemPrompt,
           },
-          ...normalizeMessages(messages),
+          ...normalizeMessages(messagesToSend),
         ],
-        max_tokens: isGPT4Model ? 2000 : 800,
+        max_tokens: maxCompletionToken,
         temperature,
         stream: true,
         presence_penalty: 0,
