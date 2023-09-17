@@ -221,7 +221,12 @@ export const ChatMessage: FC<Props> = memo(
         if (message.pluginId !== PluginID.IMAGE_GEN) {
           return (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={src} alt="" className="w-full" />
+            <img
+              id={node?.properties?.id}
+              src={src}
+              alt=""
+              className="w-full"
+            />
           );
         }
         if (aiImageButtons) {
@@ -418,7 +423,9 @@ export const ChatMessage: FC<Props> = memo(
                         return (
                           <a
                             href={href}
-                            target="_blank"
+                            target={
+                              href && href[0] === '#' ? '_self' : '_blank'
+                            }
                             rel="noreferrer noopener"
                             {...props}
                           >

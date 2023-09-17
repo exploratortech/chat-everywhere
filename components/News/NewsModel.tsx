@@ -44,6 +44,8 @@ const NewsModel = memo(({ className = '', open, onOpen, onClose }: Props) => {
   const latestNewsId = useMemo(() => newsList[0]?.id, [newsList]);
 
   const fetchMoreNews = useCallback(async (nextCursor?: string) => {
+    if (isLoading) return;
+
     setIsLoading(true);
     try {
       const response = await fetch(

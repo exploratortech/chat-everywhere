@@ -29,6 +29,8 @@ export const IMAGE_GEN_MAX_TIMEOUT = 60;
 
 export const MAX_NUM_FILES = 100;
 
+export const IMAGE_TO_PROMPT_MAX_TIMEOUT = 30;
+
 export const AZURE_OPENAI_ENDPOINTS = [
   process.env.AZURE_OPENAI_ENDPOINT_1,
   process.env.AZURE_OPENAI_ENDPOINT_2,

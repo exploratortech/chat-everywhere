@@ -242,7 +242,7 @@ const Home = () => {
 
     const newConversation: Conversation = getNewConversation();
 
-    const updatedConversations = [...conversations, newConversation];
+    const updatedConversations = [newConversation, ...conversations];
 
     dispatch({ field: 'selectedConversation', value: newConversation });
     dispatch({ field: 'conversations', value: updatedConversations });
@@ -291,7 +291,7 @@ const Home = () => {
       },
       prompt: DEFAULT_SYSTEM_PROMPT,
       temperature: DEFAULT_TEMPERATURE,
-      rank: generateRank(getNonDeletedCollection(conversations)),
+      rank: generateRank(getNonDeletedCollection(conversations), 0),
       folderId: null,
       lastUpdateAtUTC: dayjs().valueOf(),
     };
@@ -812,6 +812,7 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
         'features',
         'auth',
         'mjImage',
+        'imageToPrompt',
       ])),
     },
   };

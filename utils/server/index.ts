@@ -1,3 +1,5 @@
+import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
+
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
@@ -7,7 +9,6 @@ import {
   AZURE_OPENAI_GPT_4_KEYS,
   AZURE_OPENAI_KEYS,
   OPENAI_API_HOST,
-  OPENAI_API_TYPE,
 } from '../app/const';
 import { CALLABLE_FUNCTIONS } from '../app/callableFunctions';
 
@@ -89,15 +90,30 @@ export const OpenAIStream = async (
       if (!openAIEndpoint || !openAIKey)
         throw new Error('Missing endpoint/key');
 
+      const modelName = isGPT4Model
+        ? process.env.AZURE_OPENAI_GPT_4_MODEL_NAME
+        : process.env.AZURE_OPENAI_MODEL_NAME;
+      let url = `${openAIEndpoint}/openai/deployments/${modelName}/chat/completions?api-version=2023-06-01-preview`;
+      if (openAIEndpoint.includes('openai.com')) {
+        url = `${openAIEndpoint}/v1/chat/completions`;
+      }
+
+      const messagesToSend = await shortenMessagesBaseOnTokenLimit(
+        systemPrompt,
+        messages,
+        model.tokenLimit,
+        model.completionTokenLimit
+      );
+
       const bodyToSend: any = {
         messages: [
           {
             role: 'system',
             content: systemPrompt,
           },
-          ...normalizeMessages(messages),
+          ...normalizeMessages(messagesToSend),
         ],
-        max_tokens: isGPT4Model ? 2000 : 800,
+        max_tokens: model.completionTokenLimit,
         temperature,
         stream: true,
         presence_penalty: 0,
@@ -143,7 +159,7 @@ export const OpenAIStream = async (
         resource = `/openai/deployments/${modelId}/chat/completions?api-version=2023-07-01-preview`;
       }
 
-      const url = `${openAIEndpoint}${resource}`;
+      url = `${openAIEndpoint}${resource}`;
 
       const abortController = new AbortController();
       const timeout = setTimeout(() => abortController.abort(), 10000);

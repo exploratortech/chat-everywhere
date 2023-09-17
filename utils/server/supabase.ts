@@ -53,7 +53,10 @@ export const addUsageEntry = async (
 };
 
 // Get user credits
-export const getUserCredits = async (userId: string, apiType: PluginID) => {
+export const getUserCredits = async (
+  userId: string,
+  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
+) => {
   const supabase = getAdminSupabaseClient();
   const { data, error } = await supabase
     .from('user_credits')
@@ -89,7 +92,7 @@ export const getUserCredits = async (userId: string, apiType: PluginID) => {
 // Update user credits
 export const updateUserCredits = async (
   userId: string,
-  apiType: PluginID,
+  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
   newBalance: number,
 ): Promise<void> => {
   const supabase = getAdminSupabaseClient();
@@ -112,7 +115,7 @@ export const updateUserCredits = async (
 // Subtract one credit from user's balance
 export const subtractCredit = async (
   userId: string,
-  apiType: PluginID,
+  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
   const newBalance = userCredits.balance - 1;
@@ -121,7 +124,7 @@ export const subtractCredit = async (
 
 export const addCredit = async (
   userId: string,
-  apiType: PluginID,
+  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
   credit: number,
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
@@ -132,7 +135,7 @@ export const addCredit = async (
 // Add user credits entry
 export const addUserCreditsEntry = async (
   userId: string,
-  apiType: PluginID,
+  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
 ): Promise<void> => {
   const initialBalance = DefaultMonthlyCredits[apiType];
   const supabase = getAdminSupabaseClient();
@@ -148,7 +151,7 @@ export const addUserCreditsEntry = async (
 // Reset user credits
 export const resetUserCredits = async (
   userId: string,
-  apiType: PluginID,
+  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
 ): Promise<void> => {
   updateUserCredits(userId, apiType, DefaultMonthlyCredits[apiType]);
 };
@@ -156,7 +159,7 @@ export const resetUserCredits = async (
 // Check if user has run out of credits
 export const hasUserRunOutOfCredits = async (
   userId: string,
-  apiType: PluginID,
+  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
 ): Promise<boolean> => {
   const userCredits = await getUserCredits(userId, apiType);
   return userCredits.balance <= 0;

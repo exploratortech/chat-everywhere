@@ -1,7 +1,6 @@
 import { trackError } from '@/utils/app/azureTelemetry';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
-import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import {
   addCredit,
   addUsageEntry,
@@ -55,17 +54,11 @@ const handler = async (req: Request): Promise<Response> => {
       temperatureToUse = DEFAULT_TEMPERATURE;
     }
 
-    const messagesToSend = await shortenMessagesBaseOnTokenLimit(
-      prompt,
-      messages,
-      OpenAIModels['gpt-4'].tokenLimit,
-    );
+    let messageToSend = messages;
 
     if (selectedOutputLanguage) {
-      messagesToSend[
-        messagesToSend.length - 1
-      ].content = `${selectedOutputLanguage} ${
-        messagesToSend[messagesToSend.length - 1].content
+      messageToSend[messageToSend.length - 1].content = `${selectedOutputLanguage} ${
+        messageToSend[messageToSend.length - 1].content
       }`;
     }
 
@@ -76,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
       OpenAIModels[OpenAIModelID.GPT_4],
       promptToSend,
       temperatureToUse,
-      messagesToSend,
+      messageToSend,
       {
         prioritizeOpenAI: true,
       }

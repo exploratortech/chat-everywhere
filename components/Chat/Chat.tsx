@@ -14,6 +14,7 @@ import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics/dist/interactions';
 
 import { getEndpoint } from '@/utils/app/api';
+import { trackError } from '@/utils/app/azureTelemetry';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
@@ -25,9 +26,11 @@ import {
   removeRedundantTempHtmlString,
   removeTempHtmlString,
 } from '@/utils/app/htmlStringHandler';
+import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 import { removeSecondLastLine } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 import { throttle } from '@/utils/data/throttle';
+import { reorderItem } from '@/utils/app/rank';
 
 import { ChatBody, Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
@@ -45,14 +48,13 @@ import { ErrorMessageDiv } from './ErrorMessageDiv';
 import dayjs from 'dayjs';
 import { AVAILABLE_FUNCTIONS } from '@/utils/app/callableFunctions';
 
-import { trackError } from '@/utils/app/azureTelemetry';
-
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
 
 export const Chat = memo(({ stopConversationRef }: Props) => {
   const { t } = useTranslation('chat');
+  const { t: commonT } = useTranslation('common');
 
   const {
     state: {
@@ -120,6 +122,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const handleSend = useCallback(
     async (deleteCount = 0, overrideCurrentMessage?: Message) => {
       const message = overrideCurrentMessage || currentMessage;
+      console.log({
+        message,
+      });
 
       if (!message) return;
       const plugin = (message.pluginId && Plugins[message.pluginId]) || null;
@@ -366,7 +371,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         } while (isSendingAgain);
 
         saveConversation(updatedConversation);
-        const updatedConversations: Conversation[] = conversations.map(
+        let updatedConversations: Conversation[] = conversations.map(
           (conversation) => {
             if (conversation.id === selectedConversation.id) {
               return updatedConversation;
@@ -382,10 +387,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           )
         ) {
           updatedConversations.push(updatedConversation);
-        }
-
-        if (updatedConversations.length === 0) {
-          updatedConversations.push(updatedConversation);
+          updatedConversations =
+            reorderItem(updatedConversations, updatedConversation.id, 0);
         }
 
         homeDispatch({ field: 'conversations', value: updatedConversations });
@@ -444,6 +447,45 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     }
   };
   const throttledScrollDown = throttle(scrollDown, 250);
+
+  const onRegenerate = () => {
+    const lastIsImageToPrompt =
+      selectedConversation?.messages[selectedConversation?.messages.length - 1]
+        ?.pluginId === PluginID.IMAGE_TO_PROMPT;
+
+    if (lastIsImageToPrompt) {
+      if (!user) {
+        toast.error(commonT('Please sign in to use image to prompt feature'));
+        return;
+      }
+      const lastContent =
+        selectedConversation?.messages[
+          selectedConversation?.messages.length - 1
+        ]?.content;
+      const imageUrl = lastContent?.match(
+        /<img id="image-to-prompt" src="(.*)" \/>/,
+      )?.[1];
+      if (!imageUrl) {
+        toast.error('No image found from previous conversation');
+        return;
+      }
+      handleImageToPromptSend({
+        regenerate: true,
+        conversations,
+        selectedConversation,
+        homeDispatch,
+        imageUrl,
+        stopConversationRef,
+        user,
+      });
+      return;
+    }
+
+    handleSend(
+      2,
+      selectedConversation?.messages[selectedConversation?.messages.length - 2],
+    );
+  };
 
   useEffect(() => {
     throttledScrollDown();
@@ -570,14 +612,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             onSend={() => {
               handleSend(0);
             }}
-            onRegenerate={() => {
-              handleSend(
-                2,
-                selectedConversation?.messages[
-                  selectedConversation?.messages.length - 2
-                ],
-              );
-            }}
+            onRegenerate={onRegenerate}
           />
         </>
       )}

@@ -1,10 +1,9 @@
-import { OPENAI_API_TYPE } from '../utils/app/const';
-
 export interface OpenAIModel {
   id: string;
   name: string;
   maxLength: number; // maximum length of a message
   tokenLimit: number;
+  completionTokenLimit: number;
 }
 
 export enum OpenAIModelID {
@@ -26,18 +25,21 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     name: 'GPT-3.5',
     maxLength: 12000,
     tokenLimit: 4000,
+    completionTokenLimit: 800
   },
   [OpenAIModelID.GPT_3_5_AZ]: {
     id: OpenAIModelID.GPT_3_5_AZ,
     name: 'GPT-3.5',
     maxLength: 12000,
     tokenLimit: 4000,
+    completionTokenLimit: 800
   },
   [OpenAIModelID.GPT_3_5_16K]: {
     id: OpenAIModelID.GPT_3_5_16K,
     name: 'GPT-3.5-16K',
     maxLength: 48000,
     tokenLimit: 16000,
+    completionTokenLimit: 4000
   },
   [OpenAIModelID.GPT_3_5_16K_0613]: {
     id: OpenAIModelID.GPT_3_5_16K_0613,
@@ -56,11 +58,13 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     name: 'GPT-4',
     maxLength: 24000,
     tokenLimit: 8000,
+    completionTokenLimit: 2000
   },
   [OpenAIModelID.GPT_4_32K]: {
     id: OpenAIModelID.GPT_4_32K,
     name: 'GPT-4-32K',
     maxLength: 96000,
     tokenLimit: 32000,
+    completionTokenLimit: 8000
   },
 };

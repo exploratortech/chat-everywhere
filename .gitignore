@@ -44,6 +44,7 @@ next-env.d.ts
 # Supabase
 supabase/.branches
 supabase/.temp
+supabase/config.toml
 pnpm-lock.yaml
 
 # Script

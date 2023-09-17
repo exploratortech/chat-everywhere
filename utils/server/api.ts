@@ -6,10 +6,13 @@ import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 
+const tokenCounterBuffer = 100;
+
 export const shortenMessagesBaseOnTokenLimit = async (
   prompt: string,
   messages: Message[],
   tokenLimit: number,
+  completionTokens: number = 2000, // Number of tokens to reserve for completion, the max_token params in the API
 ): Promise<Message[]> => {
   await init((imports) => WebAssembly.instantiate(wasm, imports));
   const encoding = new Tiktoken(
@@ -27,7 +30,10 @@ export const shortenMessagesBaseOnTokenLimit = async (
     const message = messages[i];
     const tokens = encoding.encode(message.content);
 
-    if (tokenCount + tokens.length + 1900 > tokenLimit) {
+    if (
+      tokenCount + tokens.length + completionTokens + tokenCounterBuffer >
+      tokenLimit
+    ) {
       break;
     }
     tokenCount += tokens.length;
@@ -41,13 +47,16 @@ export const shortenMessagesBaseOnTokenLimit = async (
     for (let i = 0; i < lastMessage.content.length; i++) {
       const char = lastMessage.content[i];
       const tokens = encoding.encode(char);
-      if (tokenCount + tokens.length + 1400 > tokenLimit) {
+
+      if (
+        tokenCount + tokens.length + completionTokens + tokenCounterBuffer >
+        tokenLimit
+      ) {
         break;
       }
       tokenCount += tokens.length;
       shortenedMessageContent += char;
     }
-
     encoding.free();
     return [
       {
@@ -59,6 +68,39 @@ export const shortenMessagesBaseOnTokenLimit = async (
     encoding.free();
     return messagesToSend;
   }
+};
+
+export const trimStringBaseOnTokenLimit = async (
+  string: string,
+  tokenLimit: number,
+): Promise<string> => {
+  await init((imports) => WebAssembly.instantiate(wasm, imports));
+  const encoding = new Tiktoken(
+    tiktokenModel.bpe_ranks,
+    tiktokenModel.special_tokens,
+    tiktokenModel.pat_str,
+  );
+
+  let tokenCount = 0;
+  let shortenedString = '';
+
+  if (!string || string.length === 0) {
+    return shortenedString;
+  }
+
+  for (let i = 0; i < string.length; i++) {
+    const char = string[i];
+    const tokens = encoding.encode(char);
+
+    if (tokenCount > tokenLimit) {
+      break;
+    }
+    tokenCount += tokens.length;
+    shortenedString += char;
+  }
+
+  encoding.free();
+  return shortenedString;
 };
 
 export const getMessagesTokenCount = async (

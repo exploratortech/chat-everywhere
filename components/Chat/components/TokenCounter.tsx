@@ -37,13 +37,13 @@ function TokenCounter({
   const modelMaxTokenLength = useMemo(() => {
     switch (currentMessage?.pluginId) {
       case 'gpt-4':
-        return OpenAIModels[OpenAIModelID.GPT_4].tokenLimit;
+        return (OpenAIModels[OpenAIModelID.GPT_4].tokenLimit - OpenAIModels[OpenAIModelID.GPT_4].completionTokenLimit);
       default:
         // Only enable 16k model for pro users
         const defaultModel = isPaidUser
           ? OpenAIModels[OpenAIModelID.GPT_3_5_16K]
           : OpenAIModels[OpenAIModelID.GPT_3_5];
-        return defaultModel.tokenLimit;
+        return (defaultModel.tokenLimit - defaultModel.completionTokenLimit);
     }
   }, [currentMessage?.pluginId, isPaidUser]);
 
