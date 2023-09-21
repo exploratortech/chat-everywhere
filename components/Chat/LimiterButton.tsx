@@ -24,12 +24,12 @@ export default function LimiterButton({
     const isFreeUser = user && user.plan === 'free';
     if (isFreeUser) {
       return (
-        t('Upgrade to the Pro version to eliminate the cooldown period.') || ''
+        t('Upgrade to remove wait time') || ''
       );
     }
     return (
       t(
-        'Please register for free to reduce cooldown time, or pay to enjoy unlimited access.',
+        'Please sign in to reduce wait time, or upgrade to remove it',
       ) || ''
     );
   }, [t]);
