@@ -52,5 +52,7 @@
   "Click to download image": "点击下载",
   "Features introduction page is now available!": "阅读功能介绍，让您更快上手!",
   "Upscale image failed": "图片放大失败, 请稍后再试",
-  "We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.": "服务器负荷过高，抱歉给您带来不便。请稍后再试，感谢您的耐心等待。"
+  "We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.": "服务器负荷过高，抱歉给您带来不便。请稍后再试，感谢您的耐心等待。",
+  "Please sign in to reduce wait time, or upgrade to remove it": "请登入以降低等待时间，或者升级以完全去除它",
+  "Upgrade to remove wait time": "升级至我们的专业版，无需等待即可发送下一条讯息"
 }
