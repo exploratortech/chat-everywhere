@@ -24,6 +24,7 @@ const nextConfig = {
       'localhost',
       'gdldiwtaingbnreeyuoj.supabase.co',
       'tlzqgrjdkmblgtbmalki.supabase.co',
+      'api.chateverywhere.app',
       'cdn.discordapp.com',
       'cdn.midjourney.com',
     ],

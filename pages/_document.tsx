@@ -216,41 +216,6 @@ export default function Document(props: Props) {
       <body>
         <Main />
         <NextScript />
-        {/* Ad Verification tag for Infolinks*/}
-        {process.env.NEXT_PUBLIC_ENV === 'production' && (
-          <>
-            <script
-              type="text/javascript"
-              dangerouslySetInnerHTML={{
-                __html: `
-                var infolinks_pid = 3395445;
-                var infolinks_wsid = 0;
-              `,
-              }}
-            />
-            <script
-              type="text/javascript"
-              async
-              src="http://resources.infolinks.com/js/infolinks_main.js"
-            />
-
-            {/* Sovrn ads code for Affiliate Links */}
-            <script
-              type="text/javascript"
-              dangerouslySetInnerHTML={{
-                __html: `
-                var vglnk = {key: '${sovrnAdsKey}'};
-                (function(d, t) {var s = d.createElement(t);
-                  s.type = 'text/javascript';s.async = true;
-                  s.src = '//clickcdn.sovrn.com/api/sovrncm.js';
-                  var r = d.getElementsByTagName(t)[0];
-                  r.parentNode.insertBefore(s, r);
-                }(document, 'script'));
-              `,
-              }}
-            />
-          </>
-        )}
       </body>
     </Html>
   );

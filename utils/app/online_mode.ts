@@ -70,5 +70,9 @@ export const normalizePreviousMessages = async (messages: any[]) => {
   }).join('\n');
   
   return normalizedMessages;
-}
-  
+};
+
+export const formatMessage = (message: string): string => {
+  // Escapes the curly brackets
+  return message.replace(/({)|(})/g, "$1$1$2$2");
+};

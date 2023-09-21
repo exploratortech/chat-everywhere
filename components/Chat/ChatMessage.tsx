@@ -213,7 +213,12 @@ export const ChatMessage: FC<Props> = memo(
         } else {
           return (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={src} alt="" className="w-full" />
+            <img
+              id={node?.properties?.id}
+              src={src}
+              alt=""
+              className="w-full"
+            />
           );
         }
       };
