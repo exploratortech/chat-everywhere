@@ -4,7 +4,9 @@
   "The speech service is unavailable at the moment, please try again later": "语音服务目前无法使用，请稍后再试",
   "Please register and sign in to enable voice input": "请注册并登录以启用语音输入",
   "Please sign in to use ai image feature": "请登录以使用ai图像功能",
+  "Please sign in to use image to prompt feature": "请登录以使用图像提示功能",
   "We appreciate your use of our application.": "感谢您使用我们的应用程序。",
   "Currently, our app is optimized to work in portrait mode and unfortunately, we do not support landscape mode at this moment.": "目前，我们的应用程序已针对纵向模式进行了优化，但很遗憾，我们目前不支持横向模式。",
-  "Thank you for your understanding and patience.": "感谢您的理解和耐心。"
+  "Thank you for your understanding and patience.": "感谢您的理解和耐心。",
+  "Upload": "上传"
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import {
+  formatMessage,
   normalizePreviousMessages,
   toolNameMapping,
   tools,
@@ -132,7 +133,7 @@ const handler = async (req: NextRequest, res: any) => {
       
       The current date and time is ${new Date().toLocaleString()}.
       Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
-        ${await normalizePreviousMessages(requestBody.messages)}
+        ${formatMessage(await normalizePreviousMessages(requestBody.messages))}
 
         As an LLM model, you have certain guidelines to adhere to in order to ensure effective and accurate communication. Please follow these rules diligently:
         
@@ -143,6 +144,7 @@ const handler = async (req: NextRequest, res: any) => {
         5. Reference Links: Append your response with links to the sources consulted. Use Markdown syntax to format links: [Link Text](https://www.example.com). Ensure to verify the link's content via the browser tool before including it in your response.
         6. Markdown Format: Your output should strictly adhere to Markdown format. Ensure no LaTex or HTML tags are present in your response.
         7. Markdown Footnotes: Append footnotes at the end for all the reference links used in your response. Use Markdown syntax to format footnotes: [^1].
+        8. Web browser limit: Do not use the web browser tool more than 5 times to find a satisfactory answer.
 
         Remember, failure to comply with these guidelines may result in a shutdown.
         

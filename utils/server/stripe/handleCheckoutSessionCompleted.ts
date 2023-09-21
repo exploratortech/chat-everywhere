@@ -122,7 +122,10 @@ async function getProPlanExpirationDate(
 async function addCreditToUser(
   email: string,
   credit: number,
-  creditType: Omit<PluginID, PluginID.LANGCHAIN_CHAT>,
+  creditType: Exclude<
+    PluginID,
+    PluginID.LANGCHAIN_CHAT | PluginID.IMAGE_TO_PROMPT
+  >,
 ) {
   // Get user id by email address
   const supabase = getAdminSupabaseClient();
@@ -143,5 +146,12 @@ async function addCreditToUser(
   const userId = user?.id;
 
   // add credit to user account
-  await addCredit(userId, creditType as PluginID, credit);
+  await addCredit(
+    userId,
+    creditType as Exclude<
+      PluginID,
+      PluginID.LANGCHAIN_CHAT | PluginID.IMAGE_TO_PROMPT
+    >,
+    credit,
+  );
 }
