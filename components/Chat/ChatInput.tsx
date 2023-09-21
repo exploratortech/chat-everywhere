@@ -95,9 +95,15 @@ export const ChatInput = ({
     updatePromptListVisibility(value);
   };
 
+  const isOnlineModeStreaming = useMemo(() => {
+    return (
+      currentMessage?.pluginId === PluginID.LANGCHAIN_CHAT && messageIsStreaming
+    );
+  }, [messageIsStreaming, currentMessage]);
+
   const { intervalRemaining, startTime, maxInterval } = useLimiter(
     user,
-    messageIsStreaming,
+    isOnlineModeStreaming,
   );
 
   const handleSend = () => {
