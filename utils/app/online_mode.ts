@@ -1,27 +1,14 @@
 import { trackError } from '@/utils/app/azureTelemetry';
-import { trimStringBaseOnTokenLimit, shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
+import {
+  shortenMessagesBaseOnTokenLimit,
+  trimStringBaseOnTokenLimit,
+} from '@/utils/server/api';
 import fetchWebSummary from '@/utils/server/fetchWebSummary';
 
 import { DynamicTool, GoogleCustomSearch } from 'langchain/tools';
-import { all, create } from 'mathjs';
+import { Calculator } from 'langchain/tools/calculator';
 
-const calculator = new DynamicTool({
-  name: 'calculator',
-  description:
-    'Useful for getting the result of a math expression. The input to this tool should ONLY be a valid mathematical expression that could be executed by a simple calculator.',
-  func: (input) => {
-    const math = create(all, {});
-
-    try {
-      const value = math.evaluate(input);
-      return value.toString();
-    } catch (e) {
-      //Log error to Azure App Insights
-      trackError(e as string);
-      return 'Unable to evaluate expression, please make sure it is a valid mathematical expression with no unit';
-    }
-  },
-});
+const calculator = new Calculator();
 
 const webBrowser = new DynamicTool({
   name: 'web-browser',
@@ -62,17 +49,23 @@ const normalizeTextAnswer = (text: string) => {
 };
 
 export const normalizePreviousMessages = async (messages: any[]) => {
-  const shortenMessages = await shortenMessagesBaseOnTokenLimit('', messages, 8000);
-  const normalizedMessages =  shortenMessages.map((message, index) => {
-    return `${index + 1}) ${
-      message.role === 'assistant' ? 'You' : 'User'
-    } ${normalizeTextAnswer(message.content)}`;
-  }).join('\n');
-  
+  const shortenMessages = await shortenMessagesBaseOnTokenLimit(
+    '',
+    messages,
+    8000,
+  );
+  const normalizedMessages = shortenMessages
+    .map((message, index) => {
+      return `${index + 1}) ${
+        message.role === 'assistant' ? 'You' : 'User'
+      } ${normalizeTextAnswer(message.content)}`;
+    })
+    .join('\n');
+
   return normalizedMessages;
 };
 
 export const formatMessage = (message: string): string => {
   // Escapes the curly brackets
-  return message.replace(/({)|(})/g, "$1$1$2$2");
+  return message.replace(/({)|(})/g, '$1$1$2$2');
 };
