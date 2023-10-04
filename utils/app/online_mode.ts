@@ -30,7 +30,7 @@ const webBrowser = new DynamicTool({
   func: async (input) => {
     const inputURL = new URL(input);
     const { content } = await fetchWebSummary(inputURL.toString());
-    return trimStringBaseOnTokenLimit(content, 15000); // Trim web browser content to 15000 tokens
+    return trimStringBaseOnTokenLimit(content, 2000); // Trim web browser content to 15000 tokens
   },
 });
 
