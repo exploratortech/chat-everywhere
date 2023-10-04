@@ -111,7 +111,7 @@ const handler = async (req: NextRequest, res: any) => {
         await writePluginsActions(
           `Sorry, I am not able to answer your question. \n`,
         );
-        console.log('Chain Error: ', truncateLogMessage(err.message));
+        console.error('Chain Error: ', truncateLogMessage(err.message));
       }
       await writer.abort(err);
     },
