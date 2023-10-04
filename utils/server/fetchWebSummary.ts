@@ -20,7 +20,9 @@ const fetchWebSummary = async (url: string) => {
     };
   } catch (error) {
     console.error(error);
-    throw error;
+    return {
+      content: "Unable to fetch web content. Please try other URL.",
+    };
   }
 };
 export default fetchWebSummary;

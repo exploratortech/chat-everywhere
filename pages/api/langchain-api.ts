@@ -9,6 +9,7 @@ import {
 import { trackError } from '@/utils/app/azureTelemetry';
 import { truncateLogMessage } from '@/utils/server';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
+import { trimStringBaseOnTokenLimit } from '@/utils/server/api';
 
 import { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
@@ -110,7 +111,7 @@ const handler = async (req: NextRequest, res: any) => {
         await writePluginsActions(
           `Sorry, I am not able to answer your question. \n`,
         );
-        console.log('Chain Error: ', truncateLogMessage(err.message));
+        console.error('Chain Error: ', truncateLogMessage(err.message));
       }
       await writer.abort(err);
     },
@@ -121,7 +122,7 @@ const handler = async (req: NextRequest, res: any) => {
     azureOpenAIApiVersion: '2023-07-01-preview',
     azureOpenAIApiKey: process.env.AZURE_OPENAI_GPT_4_KEY_1,
     azureOpenAIApiInstanceName: 'chat-everywhere-uk',
-    azureOpenAIApiDeploymentName: 'gpt-4-32k',
+    azureOpenAIApiDeploymentName: 'gpt-4',
     streaming: true,
   });
 
@@ -133,7 +134,10 @@ const handler = async (req: NextRequest, res: any) => {
       
       The current date and time is ${new Date().toLocaleString()}.
       Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
-        ${formatMessage(await normalizePreviousMessages(requestBody.messages))}
+        ${trimStringBaseOnTokenLimit(
+          formatMessage(await normalizePreviousMessages(requestBody.messages)),
+          5000,
+        )}
 
         As an LLM model, you have certain guidelines to adhere to in order to ensure effective and accurate communication. Please follow these rules diligently:
         
