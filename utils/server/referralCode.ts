@@ -13,7 +13,8 @@ export const generateReferralCodeAndExpirationDate =
     );
     const newReferralCode = voucher_codes
       .generate({ length: 8, count: 1 })
-      .pop();
+      .pop()
+      ?.toUpperCase();
 
     if (!newReferralCode) throw new Error('Failed to generate referral code');
 

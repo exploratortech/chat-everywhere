@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
       referralCode: string;
     };
 
-    const { isValid, referrerId } = await getReferralCodeDetail(referralCode.trim());
+    const { isValid, referrerId } = await getReferralCodeDetail(referralCode);
 
     // Check if referral code is valid
     if (!isValid || !referrerId)

@@ -354,7 +354,7 @@ export const getReferralCodeDetail = async (
   const { data: record, error } = await supabase
     .from('profiles')
     .select('id')
-    .eq('referral_code', code)
+    .eq('referral_code', code.trim().toUpperCase())
     .single();
   if (error) {
     throw error;
