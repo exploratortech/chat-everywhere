@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { trackError } from '@/utils/app/azureTelemetry';
+import { trackError } from '@/utils/server/azureAppInsights';
 import { IMAGE_TO_PROMPT_MAX_TIMEOUT } from '@/utils/app/const';
 import { ProgressHandler, makeWriteToStream } from '@/utils/app/streamHandler';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';

@@ -1,5 +1,5 @@
 // This is our first version of our own API endpoint, currently it's only a wrapper of ChatGPT API's completion endpoint.
-import { trackError } from '@/utils/app/azureTelemetry';
+import { trackError } from '@/utils/server/azureAppInsights';
 import {
   DEFAULT_SYSTEM_PROMPT,
   DEFAULT_TEMPERATURE,

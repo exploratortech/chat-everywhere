@@ -2,7 +2,7 @@ import {
   getReferralCodeDetail,
   redeemReferralCode,
 } from '../../../utils/server/supabase';
-import { trackError } from '@/utils/app/azureTelemetry';
+import { trackError } from '@/utils/server/azureAppInsights';
 import { getUserProfile, resetUserCredits } from '@/utils/server/supabase';
 
 import { PluginID } from '@/types/plugin';

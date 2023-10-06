@@ -9,7 +9,7 @@ import { UserProfile } from './../../../types/user';
 
 import getRawBody from 'raw-body';
 import Stripe from 'stripe';
-import { trackError } from '@/utils/app/azureTelemetry';
+import { trackError } from '@/utils/server/azureAppInsights';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2022-11-15',

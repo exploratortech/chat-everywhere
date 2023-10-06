@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 
-import { trackError } from '@/utils/app/azureTelemetry';
+import { trackError } from '@/utils/server/azureAppInsights';
 
 import { ChatEverywhereNews } from '@/types/notion';
 

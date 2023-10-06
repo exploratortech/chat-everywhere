@@ -1,4 +1,4 @@
-import { trackError } from '@/utils/app/azureTelemetry';
+import { trackError } from '@/utils/server/azureAppInsights';
 import {
   getAdminSupabaseClient,
   getUserProfile,

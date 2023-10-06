@@ -10,7 +10,7 @@ import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
-import { trackError } from '@/utils/app/azureTelemetry';
+import { trackError } from '@/utils/server/azureAppInsights';
 
 export const config = {
   runtime: 'edge',

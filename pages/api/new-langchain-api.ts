@@ -9,7 +9,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { BingSerpAPI, DynamicTool } from 'langchain/tools';
 import { all, create } from 'mathjs';
-import { trackError } from '@/utils/app/azureTelemetry';
+import { trackError } from '@/utils/server/azureAppInsights';
 
 const calculator = new DynamicTool({
   name: 'calculator',

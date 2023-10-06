@@ -6,7 +6,7 @@ import {
   toolNameMapping,
   tools,
 } from '../../utils/app/online_mode';
-import { trackError } from '@/utils/app/azureTelemetry';
+import { trackError } from '@/utils/server/azureAppInsights';
 import { truncateLogMessage } from '@/utils/server';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
