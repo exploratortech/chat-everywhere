@@ -401,6 +401,21 @@ export const redeemReferralCode = async ({
   }
 };
 
+export const fetchValidReferralCodes = async () => {
+  const supabase = getAdminSupabaseClient();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('referral_code')
+    .neq('referral_code', null)
+    .gte('referral_code_expiration_date', dayjs().toISOString());
+  
+  if (error) {
+    throw error;
+  }
+
+  return data.map((datum) => datum.referral_code);
+};
+
 export const userProfileQuery = async ({
   client,
   userId,

@@ -1,4 +1,5 @@
 import {
+  fetchValidReferralCodes,
   getReferralCodeDetail,
   redeemReferralCode,
 } from '../../../utils/server/supabase';
@@ -22,7 +23,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (!userProfile) return unauthorizedResponse;
 
     if (userProfile.plan !== 'free')
-      return new Response('User must be on free plan', { status: 400 });
+      throw new Error('User must be on free plan');
 
     // Disable for now
     // Check if user has already redeemed a referral code before
@@ -43,11 +44,17 @@ const handler = async (req: Request): Promise<Response> => {
       referralCode: string;
     };
 
-    const { isValid, referrerId } = await getReferralCodeDetail(referralCode);
+    const formattedReferralCode = referralCode.trim().toUpperCase();
+
+    const { isValid, referrerId } = await getReferralCodeDetail(formattedReferralCode);
 
     // Check if referral code is valid
-    if (!isValid || !referrerId)
-      return new Response('Invalid referral code', { status: 400 });
+    if (!isValid || !referrerId) {
+      await logReferralCodeResult(formattedReferralCode, false);
+      throw new Error('Invalid referral code');
+    } else {
+      await logReferralCodeResult(formattedReferralCode, true);
+    }
 
     // Redeem code and upgrade user account to Pro plan
     await redeemReferralCode({
@@ -60,10 +67,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
-    //Log error to Azure App Insights
-    trackError(error as string);
-    return new Response('Invalid Code', { status: 500 });
+    if (error instanceof Error) {
+      trackError(error.message);
+      return new Response(error.message, { status: 400 });
+    } else {
+      trackError(error as string);
+      return new Response('Invalid code', { status: 500 });
+    }
   }
+};
+
+const logReferralCodeResult = async (referralCode: string, successful: boolean) => {
+  const validReferralCodes = await fetchValidReferralCodes();
+  console.log(
+    `User entered referral code ${referralCode}. Valid referral codes are ${validReferralCodes.join(', ')}`,
+    successful ? '(VALID CODE)' : '(INVALID CODE)',
+  );
 };
 
 export default handler;
