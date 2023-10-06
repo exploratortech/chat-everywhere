@@ -1,4 +1,4 @@
-import { trackError } from '@/utils/server/azureAppInsights';
+import { trackError } from '@/utils/app/azureTelemetry';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';

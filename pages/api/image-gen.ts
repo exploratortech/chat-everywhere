@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { trackError } from '@/utils/server/azureAppInsights';
+import { trackError } from '@/utils/app/azureTelemetry';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,

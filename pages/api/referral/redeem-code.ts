@@ -3,7 +3,7 @@ import {
   getReferralCodeDetail,
   redeemReferralCode,
 } from '../../../utils/server/supabase';
-import { trackError } from '@/utils/server/azureAppInsights';
+import { trackError } from '@/utils/app/azureTelemetry';
 import { getUserProfile, resetUserCredits } from '@/utils/server/supabase';
 
 import { PluginID } from '@/types/plugin';
@@ -67,6 +67,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
+    console.error(error);
     if (error instanceof Error) {
       trackError(error.message);
       return new Response(error.message, { status: 400 });

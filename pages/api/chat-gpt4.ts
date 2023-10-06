@@ -1,4 +1,4 @@
-import { trackError } from '@/utils/server/azureAppInsights';
+import { trackError } from '@/utils/app/azureTelemetry';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
