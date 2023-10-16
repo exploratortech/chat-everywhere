@@ -274,6 +274,21 @@ export const ChatInput = ({
   }, [content]);
 
   useEffect(() => {
+    const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.key === '/' && !isFocused) {
+        e.preventDefault();
+        textareaRef.current?.focus();
+      }
+    };
+  
+    window.addEventListener('keydown', handleGlobalKeyDown);
+  
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+  }, [isFocused]);
+
+  useEffect(() => {
     homeDispatch({
       field: 'currentMessage',
       value: {
@@ -374,6 +389,7 @@ export const ChatInput = ({
             </div>
 
             <textarea
+              onFocus={() => setIsFocused(true)}
               ref={textareaRef}
               className={`
                 m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md

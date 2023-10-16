@@ -236,7 +236,7 @@ export const OpenAIStream = async (
 
 // Truncate log message to 4000 characters
 export const truncateLogMessage = (message: string) =>
-  message.length > 4000 ? `${message.slice(0, 4000)}...` : message;
+  message.length > 2000 ? `${message.slice(0, 2000)}...` : message;
 
 // Returns a list of shuffled endpoints and keys. They should be used based
 // on their order in the list.
