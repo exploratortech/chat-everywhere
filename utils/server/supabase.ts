@@ -408,12 +408,12 @@ export const fetchValidReferralCodes = async () => {
     .select('referral_code')
     .neq('referral_code', null)
     .gte('referral_code_expiration_date', dayjs().toISOString());
-  
+
   if (error) {
     throw error;
   }
 
-  return data.map((datum) => datum.referral_code);
+  return data.map((datum) => datum.referral_code) as string[];
 };
 
 export const userProfileQuery = async ({
