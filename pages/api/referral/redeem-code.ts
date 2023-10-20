@@ -46,7 +46,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     const formattedReferralCode = referralCode.trim().toUpperCase();
 
-    const { isValid, referrerId } = await getReferralCodeDetail(formattedReferralCode);
+    const { isValid, referrerId } = await getReferralCodeDetail(
+      formattedReferralCode,
+    );
 
     // Check if referral code is valid
     if (!isValid || !referrerId) {
@@ -78,10 +80,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-const logReferralCodeResult = async (referralCode: string, successful: boolean) => {
+const logReferralCodeResult = async (
+  referralCode: string,
+  successful: boolean,
+) => {
   const validReferralCodes = await fetchValidReferralCodes();
   console.log(
-    `User entered referral code ${referralCode}. Valid referral codes are ${validReferralCodes.join(', ')}`,
+    `User entered referral code ${referralCode}. Valid referral codes are [${validReferralCodes.join(', ',)}]`,
     successful ? '(VALID CODE)' : '(INVALID CODE)',
   );
 };
