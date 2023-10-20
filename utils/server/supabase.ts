@@ -355,7 +355,7 @@ export const getReferralCodeDetail = async (
     .from('profiles')
     .select('id')
     .eq('referral_code', code.trim().toUpperCase())
-    .single();
+    .maybeSingle();
   if (error) {
     throw error;
   }
