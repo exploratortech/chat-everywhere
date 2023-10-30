@@ -8,7 +8,6 @@ import { FolderInterface } from '@/types/folder';
 import { Prompt } from '@/types/prompt';
 import { User } from '@/types/user';
 
-import mixpanel from 'mixpanel-browser';
 import posthog from 'posthog-js';
 
 export const EventNames = [
@@ -58,11 +57,6 @@ const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
 export const enableTracking =
   process.env.NEXT_PUBLIC_ENV === 'production' || true;
 
-export const initializeMixpanel = () => {
-  if (!enableTracking) return;
-  mixpanel.init('4a378d158509c05295af13dc46eb3f1a');
-};
-
 export const initializePosthog = () => {
   if (!enableTracking) return;
   posthog.init(POSTHOG_KEY, {
@@ -82,8 +76,6 @@ export const updateUserInfo = (user: User) => {
   });
 
   posthog.alias(user.id, getOrGenerateUserId());
-
-  console.log('updating user info ...');
 };
 
 export const clearUserInfo = () => {
@@ -97,7 +89,6 @@ export const trackEvent = (
   additionalPayload?: PayloadType,
 ) => {
   if (!enableTracking) return;
-  mixpanel.track(eventName, additionalPayload);
   posthog.capture(eventName, additionalPayload);
 };
 

@@ -30,7 +30,6 @@ import {
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import {
   clearUserInfo,
-  enableTracking,
   logUsageSnapshot,
   trackEvent,
   updateUserInfo,
@@ -72,7 +71,6 @@ import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
 
 import dayjs from 'dayjs';
-import mixpanel from 'mixpanel-browser';
 import { v4 as uuidv4 } from 'uuid';
 
 const Home = () => {
@@ -449,13 +447,6 @@ const Home = () => {
               isInReferralTrial: userProfile.isInReferralTrial,
             },
           });
-          if (enableTracking) {
-            mixpanel.identify(session.user.id);
-            mixpanel.people.union({
-              Email: session.user.email,
-              Plan: userProfile.plan || 'free',
-            });
-          }
           // Set authenticated user context for Application Insights
           if (enableAzureTracking) {
             appInsights.setAuthenticatedUserContext(
