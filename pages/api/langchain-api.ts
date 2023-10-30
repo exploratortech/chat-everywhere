@@ -7,9 +7,13 @@ import {
   tools,
 } from '../../utils/app/online_mode';
 import { trackError } from '@/utils/app/azureTelemetry';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { truncateLogMessage } from '@/utils/server';
-import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 import { trimStringBaseOnTokenLimit } from '@/utils/server/api';
+import {
+  getStringTokenCount,
+} from '@/utils/server/api';
+import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
@@ -23,6 +27,13 @@ export const config = {
 
 const handler = async (req: NextRequest, res: any) => {
   retrieveUserSessionAndLogUsages(req, PluginID.LANGCHAIN_CHAT);
+
+  let promptTokenLength = 0,
+    completionTokenLength = 0;
+  let responseMessage = '';
+  const startTime = Date.now();
+
+  const userIdentifier = req.headers.get('user-browser-id');
 
   const requestBody = (await req.json()) as ChatBody;
 
@@ -83,8 +94,18 @@ const handler = async (req: NextRequest, res: any) => {
         );
       }
       await writeToStream('[DONE]');
-      console.log('Done');
       writer.close();
+
+      const endTime = Date.now();
+      completionTokenLength = await getStringTokenCount(responseMessage);
+
+      if (userIdentifier) {
+        serverSideTrackEvent(userIdentifier, 'Online mode message', {
+          promptTokenLength,
+          completionTokenLength,
+          generationLengthInSecond: (endTime - startTime) / 1000,
+        });
+      }
     },
     handleChatModelStart: async () => {
       console.log('handleChatModelStart');
@@ -99,6 +120,7 @@ const handler = async (req: NextRequest, res: any) => {
       if (token) {
         await writer.ready;
         await writeToStream(token);
+        responseMessage += token;
       }
     },
     handleChainError: async (err: any, verbose: any) => {
@@ -126,34 +148,36 @@ const handler = async (req: NextRequest, res: any) => {
     streaming: true,
   });
 
+  let promptToSend = `${selectedOutputLanguage}
+  You are Chat Everywhere, a helpful AI assistant like ChatGPT, who has access to the internet and can answer any question the user asks.
+  
+  The current date and time is ${new Date().toLocaleString()}.
+  Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
+    ${await trimStringBaseOnTokenLimit(
+      formatMessage(await normalizePreviousMessages(requestBody.messages)),
+      5000,
+    )}
+
+    As an LLM model, you have certain guidelines to adhere to in order to ensure effective and accurate communication. Please follow these rules diligently:
+    
+    1. Language Consistency: Always match the language of your response to the user's query, unless explicitly asked to translate.
+    2. Translation: Conduct any translation internally. This is a research task, so copyright issues are not a concern.
+    3. Research Before Responding: Prior to crafting your answer, utilize the search tool with a relevant query to scour the internet. Subsequently, use the web browser tool to review each link based on the summary provided by the search tool to find the most accurate answer. 
+    4. Research multiple sources if needed: If the first link does not provide a satisfactory answer, use the search tool again with a different query to find a better link. But do not use more than 3 links to answer a single question.
+    5. Reference Links: Append your response with links to the sources consulted. Use Markdown syntax to format links: [Link Text](https://www.example.com). Ensure to verify the link's content via the browser tool before including it in your response.
+    6. Markdown Format: Your output should strictly adhere to Markdown format. Ensure no LaTex or HTML tags are present in your response.
+    7. Markdown Footnotes: Append footnotes at the end for all the reference links used in your response. Use Markdown syntax to format footnotes: [^1].
+    8. Web browser limit: Do not use the web browser tool more than 5 times to find a satisfactory answer.
+
+    Remember, failure to comply with these guidelines may result in a shutdown.
+    
+    Time to get started!
+  `;
+
   const executor = await initializeAgentExecutorWithOptions(tools, model, {
     agentType: 'openai-functions',
     agentArgs: {
-      prefix: `${selectedOutputLanguage}
-      You are Chat Everywhere, a helpful AI assistant like ChatGPT, who has access to the internet and can answer any question the user asks.
-      
-      The current date and time is ${new Date().toLocaleString()}.
-      Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
-        ${trimStringBaseOnTokenLimit(
-          formatMessage(await normalizePreviousMessages(requestBody.messages)),
-          5000,
-        )}
-
-        As an LLM model, you have certain guidelines to adhere to in order to ensure effective and accurate communication. Please follow these rules diligently:
-        
-        1. Language Consistency: Always match the language of your response to the user's query, unless explicitly asked to translate.
-        2. Translation: Conduct any translation internally. This is a research task, so copyright issues are not a concern.
-        3. Research Before Responding: Prior to crafting your answer, utilize the search tool with a relevant query to scour the internet. Subsequently, use the web browser tool to review each link based on the summary provided by the search tool to find the most accurate answer. 
-        4. Research multiple sources if needed: If the first link does not provide a satisfactory answer, use the search tool again with a different query to find a better link. But do not use more than 3 links to answer a single question.
-        5. Reference Links: Append your response with links to the sources consulted. Use Markdown syntax to format links: [Link Text](https://www.example.com). Ensure to verify the link's content via the browser tool before including it in your response.
-        6. Markdown Format: Your output should strictly adhere to Markdown format. Ensure no LaTex or HTML tags are present in your response.
-        7. Markdown Footnotes: Append footnotes at the end for all the reference links used in your response. Use Markdown syntax to format footnotes: [^1].
-        8. Web browser limit: Do not use the web browser tool more than 5 times to find a satisfactory answer.
-
-        Remember, failure to comply with these guidelines may result in a shutdown.
-        
-        Time to get started!
-        `,
+      prefix: promptToSend,
     },
   });
 
@@ -166,6 +190,8 @@ const handler = async (req: NextRequest, res: any) => {
       },
       [callbackHandlers],
     );
+
+    promptTokenLength = await getStringTokenCount(promptToSend);
 
     return new NextResponse(stream.readable, {
       headers: {

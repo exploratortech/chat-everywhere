@@ -51,6 +51,7 @@ type PayloadType = {
   ReferralCode?: string;
   promptTokenLength?: number;
   completionTokenLength?: number;
+  generationLengthInSecond?: number
 };
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
