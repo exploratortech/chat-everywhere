@@ -11,7 +11,6 @@ import { event } from 'nextjs-google-analytics';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
-import useOrientation from '@/hooks/useOrientation';
 
 import { fetchShareableConversation } from '@/utils/app/api';
 import { appInsights, enableAzureTracking } from '@/utils/app/azureAppInsights';
@@ -29,8 +28,13 @@ import {
   updateConversation,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import { trackEvent } from '@/utils/app/eventTracking';
-import { enableTracking } from '@/utils/app/eventTracking';
+import {
+  clearUserInfo,
+  enableTracking,
+  logUsageSnapshot,
+  trackEvent,
+  updateUserInfo,
+} from '@/utils/app/eventTracking';
 import { saveFolders } from '@/utils/app/folders';
 import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
@@ -92,7 +96,6 @@ const Home = () => {
       conversations,
       selectedConversation,
       prompts,
-      temperature,
       showSettingsModel,
       showLoginSignUpModel,
       showReferralModel,
@@ -420,6 +423,9 @@ const Home = () => {
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
+      // User info has been updated for this session
+      if (session.user.id === user?.id) return;
+
       userProfileQuery({
         client: supabase,
         userId: session.user.id,
@@ -489,6 +495,7 @@ const Home = () => {
 
   useEffect(() => {
     if (!user) return;
+    updateUserInfo(user);
     fetchAndUpdateCreditUsage(user.id, isPaidUser);
   }, [user, isPaidUser, conversations]);
 
@@ -497,6 +504,7 @@ const Home = () => {
     dispatch({ field: 'user', value: null });
     dispatch({ field: 'showSettingsModel', value: false });
     toast.success(t('You have been logged out'));
+    clearUserInfo();
   };
 
   // ON LOAD --------------------------------------------
@@ -538,18 +546,22 @@ const Home = () => {
       dispatch({ field: 'showPromptbar', value: showPromptbar === 'true' });
     }
 
+    let cleanedFolders: FolderInterface[] = [];
+    let cleanedPrompts: Prompt[] = [];
+    let cleanedConversationHistory: Conversation[] = [];
+
     const folders = localStorage.getItem('folders');
     if (folders) {
       const parsedFolders: FolderInterface[] =
         JSON.parse(folders).sort(sortByRank);
-      const cleanedFolders: FolderInterface[] = cleanFolders(parsedFolders);
+      cleanedFolders = cleanFolders(parsedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
 
     const prompts = localStorage.getItem('prompts');
     if (prompts) {
       const parsedPrompts: Prompt[] = JSON.parse(prompts).sort(sortByRank);
-      const cleanedPrompts: Prompt[] = cleanPrompts(parsedPrompts);
+      cleanedPrompts = cleanPrompts(parsedPrompts);
       dispatch({ field: 'prompts', value: cleanedPrompts });
     }
 
@@ -569,7 +581,7 @@ const Home = () => {
     }
 
     const conversationHistory = localStorage.getItem('conversationHistory');
-    let cleanedConversationHistory: Conversation[] = [];
+    cleanedConversationHistory = [];
     if (conversationHistory) {
       const parsedConversationHistory: Conversation[] =
         JSON.parse(conversationHistory).sort(sortByRank);
@@ -578,6 +590,8 @@ const Home = () => {
       );
       dispatch({ field: 'conversations', value: cleanedConversationHistory });
     }
+
+    logUsageSnapshot(cleanedFolders, cleanedConversationHistory, cleanedPrompts);
 
     const newConversation = {
       id: uuidv4(),

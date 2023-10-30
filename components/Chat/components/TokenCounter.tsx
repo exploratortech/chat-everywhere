@@ -19,6 +19,17 @@ interface Props {
   setIsCloseToLimit: (isCloseToLimit: boolean) => void;
 }
 
+export const getTokenLength = (value: string) => {
+  const encoding = new Tiktoken(
+    cl100k_base.bpe_ranks,
+    cl100k_base.special_tokens,
+    cl100k_base.pat_str,
+  );
+  const tokens = encoding.encode(value);
+  encoding.free();
+  return tokens.length;
+};
+
 const promptTokensLength = getTokenLength(DEFAULT_SYSTEM_PROMPT);
 
 function TokenCounter({
@@ -37,13 +48,16 @@ function TokenCounter({
   const modelMaxTokenLength = useMemo(() => {
     switch (currentMessage?.pluginId) {
       case 'gpt-4':
-        return (OpenAIModels[OpenAIModelID.GPT_4].tokenLimit - OpenAIModels[OpenAIModelID.GPT_4].completionTokenLimit);
+        return (
+          OpenAIModels[OpenAIModelID.GPT_4].tokenLimit -
+          OpenAIModels[OpenAIModelID.GPT_4].completionTokenLimit
+        );
       default:
         // Only enable 16k model for pro users
         const defaultModel = isPaidUser
           ? OpenAIModels[OpenAIModelID.GPT_3_5_16K]
           : OpenAIModels[OpenAIModelID.GPT_3_5];
-        return (defaultModel.tokenLimit - defaultModel.completionTokenLimit);
+        return defaultModel.tokenLimit - defaultModel.completionTokenLimit;
     }
   }, [currentMessage?.pluginId, isPaidUser]);
 
@@ -73,14 +87,3 @@ function TokenCounter({
 }
 
 export default TokenCounter;
-
-function getTokenLength(value: string) {
-  const encoding = new Tiktoken(
-    cl100k_base.bpe_ranks,
-    cl100k_base.special_tokens,
-    cl100k_base.pat_str,
-  );
-  const tokens = encoding.encode(value);
-  encoding.free();
-  return tokens.length;
-}

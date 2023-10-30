@@ -29,6 +29,14 @@ const nextConfig = {
       'cdn.midjourney.com',
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/:path*",
+        destination: "https://app.posthog.com/:path*",
+      },
+    ];
+  },
 };
 
 module.exports = withPWA(nextConfig);

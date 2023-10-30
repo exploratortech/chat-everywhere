@@ -8,18 +8,22 @@ import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 
 const tokenCounterBuffer = 100;
 
+const getEncodingInstance = async () => {
+  await init((imports) => WebAssembly.instantiate(wasm, imports));
+  return new Tiktoken(
+    tiktokenModel.bpe_ranks,
+    tiktokenModel.special_tokens,
+    tiktokenModel.pat_str,
+  );
+};
+
 export const shortenMessagesBaseOnTokenLimit = async (
   prompt: string,
   messages: Message[],
   tokenLimit: number,
   completionTokens: number = 2000, // Number of tokens to reserve for completion, the max_token params in the API
 ): Promise<Message[]> => {
-  await init((imports) => WebAssembly.instantiate(wasm, imports));
-  const encoding = new Tiktoken(
-    tiktokenModel.bpe_ranks,
-    tiktokenModel.special_tokens,
-    tiktokenModel.pat_str,
-  );
+  const encoding = await getEncodingInstance();
 
   const promptTokens = encoding.encode(prompt);
 
@@ -74,12 +78,7 @@ export const trimStringBaseOnTokenLimit = async (
   string: string,
   tokenLimit: number,
 ): Promise<string> => {
-  await init((imports) => WebAssembly.instantiate(wasm, imports));
-  const encoding = new Tiktoken(
-    tiktokenModel.bpe_ranks,
-    tiktokenModel.special_tokens,
-    tiktokenModel.pat_str,
-  );
+  const encoding = await getEncodingInstance();
 
   let tokenCount = 0;
   let shortenedString = '';
@@ -104,15 +103,9 @@ export const trimStringBaseOnTokenLimit = async (
 };
 
 export const getMessagesTokenCount = async (
-  messages: Message[],
+  messages: Message[] | { role: string; content: string }[],
 ): Promise<number> => {
-  await init((imports) => WebAssembly.instantiate(wasm, imports));
-
-  const encoding = new Tiktoken(
-    tiktokenModel.bpe_ranks,
-    tiktokenModel.special_tokens,
-    tiktokenModel.pat_str,
-  );
+  const encoding = await getEncodingInstance();
 
   let tokenCount = 0;
   for (let i = 0; i < messages.length; i++) {
@@ -122,4 +115,11 @@ export const getMessagesTokenCount = async (
   }
 
   return tokenCount;
+};
+
+export const getStringTokenCount = async (string: string): Promise<number> => {
+  const encoding = await getEncodingInstance();
+
+  const tokens = encoding.encode(string);
+  return tokens.length;
 };

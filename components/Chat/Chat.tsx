@@ -177,6 +177,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             'Content-Type': 'application/json',
             'Output-Language': outputLanguage,
             'user-token': user?.token || '',
+            'user-browser-id': getOrGenerateUserId() || '',
+            'user-selected-plugin-id': plugin?.id || '',
           },
           signal: controller.signal,
           body,
