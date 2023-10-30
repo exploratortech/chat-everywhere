@@ -68,6 +68,7 @@ export const OpenAIStream = async (
   );
 
   let attempt = 0;
+  const startTime = Date.now();
 
   while (attempt < openAIEndpoints.length) {
     const openAIEndpoint = openAIEndpoints[attempt];
@@ -238,6 +239,7 @@ export const OpenAIStream = async (
               eventName,
               promptMessages: messagesToSendInArray,
               completionMessage: respondMessage,
+              totalDurationInMs: Date.now() - startTime,
             });
 
             stop = true;
@@ -258,16 +260,19 @@ const logEvent = async ({
   eventName,
   promptMessages,
   completionMessage,
+  totalDurationInMs,
 }: {
   userIdentifier?: string;
   eventName?: EventNameTypes;
   promptMessages: { role: string; content: string }[];
   completionMessage: string;
+  totalDurationInMs: number;
 }) => {
   if (userIdentifier && userIdentifier !== '' && eventName) {
     serverSideTrackEvent(userIdentifier, eventName, {
       promptTokenLength: await getMessagesTokenCount(promptMessages),
       completionTokenLength: await getStringTokenCount(completionMessage),
+      generationLengthInSecond: totalDurationInMs / 1000,
     });
   }
 };
