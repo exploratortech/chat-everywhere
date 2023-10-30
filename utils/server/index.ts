@@ -269,7 +269,7 @@ const logEvent = async ({
   totalDurationInMs: number;
 }) => {
   if (userIdentifier && userIdentifier !== '' && eventName) {
-    serverSideTrackEvent(userIdentifier, eventName, {
+    await serverSideTrackEvent(userIdentifier, eventName, {
       promptTokenLength: await getMessagesTokenCount(promptMessages),
       completionTokenLength: await getStringTokenCount(completionMessage),
       generationLengthInSecond: totalDurationInMs / 1000,
