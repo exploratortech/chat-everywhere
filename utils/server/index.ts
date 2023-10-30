@@ -269,11 +269,6 @@ const logEvent = async ({
       promptTokenLength: await getMessagesTokenCount(promptMessages),
       completionTokenLength: await getStringTokenCount(completionMessage),
     });
-
-    console.log(userIdentifier, eventName, {
-      promptTokenLength: await getMessagesTokenCount(promptMessages),
-      completionTokenLength: await getStringTokenCount(completionMessage),
-    });
   }
 };
 

@@ -132,12 +132,25 @@ export const logUsageSnapshot = (
   promptTemplates: Prompt[],
 ) => {
   try {
+    const numberOfConversationFolders = folders.filter(
+      (folder) => folder.type === 'chat' && !folder.deleted,
+    ).length;
+
+    const numberOfPromptTemplatesFolders = folders.filter(
+      (folder) => folder.type === 'prompt' && !folder.deleted,
+    ).length;
+
+    const numberOfConversations = conversations.filter(
+      (conversation) => !conversation.deleted).length;
+
+    const numberOfPromptTemplates = promptTemplates.filter(
+      (promptTemplate) => !promptTemplate.deleted).length;
+
     const usageSnapshot = {
-      conversationFolders: folders.filter((folder) => folder.type === 'chat').length,
-      conversations: conversations.length,
-      promptTemplates: folders.filter((folder) => folder.type === 'prompt')
-        .length,
-      promptTemplatesFolders: promptTemplates.length,
+      conversations: numberOfConversations,
+      conversationFolders: numberOfConversationFolders,
+      promptTemplates: numberOfPromptTemplates,
+      promptTemplatesFolders: numberOfPromptTemplatesFolders,
     };
 
     posthog.identify(getOrGenerateUserId(), usageSnapshot);
