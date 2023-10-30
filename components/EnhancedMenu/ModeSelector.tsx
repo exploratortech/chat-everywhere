@@ -25,10 +25,6 @@ const ModeSelector = () => {
   }, [currentMessage]);
 
   const pluginOnChange = (pluginId: string) => {
-    trackEvent('Switch plugin', {
-      PluginId: pluginId === 'default' ? null : pluginId,
-    });
-
     homeDispatch({
       field: 'currentMessage',
       value: {

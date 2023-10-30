@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { trackError } from '@/utils/app/azureTelemetry';
 import { IMAGE_TO_PROMPT_MAX_TIMEOUT } from '@/utils/app/const';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { ProgressHandler, makeWriteToStream } from '@/utils/app/streamHandler';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
@@ -28,6 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
   const encoder = new TextEncoder();
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
+  const startTime = Date.now();
 
   const writeToStream = makeWriteToStream(writer, encoder);
   const progressHandler = new ProgressHandler(writeToStream);
@@ -96,6 +98,9 @@ const handler = async (req: Request): Promise<Response> => {
             );
           }
           writer.close();
+          serverSideTrackEvent(data.user.id, 'AI image to prompt', {
+            generationLengthInSecond: (Date.now() - startTime) / 1000,
+          });
           return;
         } else if (textGenerationProgress === null) {
           progressHandler.updateProgress({

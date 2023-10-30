@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { IMAGE_GEN_MAX_TIMEOUT } from '@/utils/app/const';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import {
   ProgressHandler,
@@ -54,6 +55,7 @@ const handler = async (req: Request): Promise<Response> => {
   const encoder = new TextEncoder();
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
+  const startTime = Date.now();
 
   let jobTerminated = false;
   const writeToStream = makeWriteToStream(writer, encoder);
@@ -178,6 +180,14 @@ const handler = async (req: Request): Promise<Response> => {
 
           await writeToStream('[DONE]');
           writer.close();
+          await serverSideTrackEvent(
+            data.user.id,
+            'AI image button clicked',
+            {
+              aiImageButtonCommand: button,
+              generationLengthInSecond: (Date.now() - startTime) / 1000,
+            }
+          )
           return;
         }
       } else {

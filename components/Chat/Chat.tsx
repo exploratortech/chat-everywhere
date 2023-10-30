@@ -86,9 +86,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const handleSend = useCallback(
     async (deleteCount = 0, overrideCurrentMessage?: Message) => {
       const message = overrideCurrentMessage || currentMessage;
-      console.log({
-        message,
-      });
 
       if (!message) return;
       const plugin = (message.pluginId && Plugins[message.pluginId]) || null;

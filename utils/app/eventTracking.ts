@@ -39,19 +39,25 @@ export const EventNames = [
   'Default mode message',
   'GPT4 mode message',
   'AI image generation',
+  'AI image to prompt',
+  'AI image button clicked',
   'Image to prompt',
 ];
 
 export type EventNameTypes = (typeof EventNames)[number];
 
-type PayloadType = {
+export type PayloadType = {
   Length?: number;
   PluginId?: string | null;
   LargeContextModel?: boolean;
   ReferralCode?: string;
   promptTokenLength?: number;
   completionTokenLength?: number;
-  generationLengthInSecond?: number
+  generationLengthInSecond?: number;
+  imageGenerationFailed?: string;
+  imageGenerationErrorMessage?: string;
+  imageGenerationPrompt?: string;
+  aiImageButtonCommand?: string
 };
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
@@ -133,10 +139,12 @@ export const logUsageSnapshot = (
     ).length;
 
     const numberOfConversations = conversations.filter(
-      (conversation) => !conversation.deleted).length;
+      (conversation) => !conversation.deleted,
+    ).length;
 
     const numberOfPromptTemplates = promptTemplates.filter(
-      (promptTemplate) => !promptTemplate.deleted).length;
+      (promptTemplate) => !promptTemplate.deleted,
+    ).length;
 
     const usageSnapshot = {
       conversations: numberOfConversations,
