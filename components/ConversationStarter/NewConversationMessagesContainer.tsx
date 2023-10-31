@@ -72,7 +72,14 @@ export const NewConversationMessagesContainer: FC<Props> = ({
 
   return (
     <div className="font-normal">
-      <span className="font-semibold font-serif">Chat Everywhere</span>
+      <a
+        href="https://intro.chateverywhere.app"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-semibold font-serif underline"
+      >
+        Chat Everywhere
+      </a>
 
       {/* Ask for support banner */}
       {(!user || user?.plan === 'free') && (
