@@ -69,6 +69,7 @@ const NewsModel = memo(({ className = '', open, onOpen, onClose }: Props) => {
     }
   }, []);
 
+  // Disable latest news popup for now
   // useEffect(() => {
   //   if (!latestNewsId) return;
 

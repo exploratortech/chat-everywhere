@@ -71,7 +71,9 @@ export const initializePosthog = () => {
     autocapture: false,
   });
 
-  posthog.identify(getOrGenerateUserId());
+  posthog.identify(getOrGenerateUserId(), {
+    env: process.env.NEXT_PUBLIC_ENV,
+  });
 };
 
 export const updateUserInfo = (user: User) => {
@@ -151,6 +153,7 @@ export const logUsageSnapshot = (
       conversationFolders: numberOfConversationFolders,
       promptTemplates: numberOfPromptTemplates,
       promptTemplatesFolders: numberOfPromptTemplatesFolders,
+      env: process.env.NEXT_PUBLIC_ENV,
     };
 
     posthog.identify(getOrGenerateUserId(), usageSnapshot);
