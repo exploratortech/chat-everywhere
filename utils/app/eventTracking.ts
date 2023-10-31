@@ -156,7 +156,10 @@ export const logUsageSnapshot = (
       env: process.env.NEXT_PUBLIC_ENV,
     };
 
-    posthog.identify(getOrGenerateUserId(), usageSnapshot);
+    posthog.identify(getOrGenerateUserId(), {
+      testAttribute: 'test',
+      ...usageSnapshot
+    });
   } catch (error) {
     console.log(error);
   }
