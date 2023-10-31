@@ -131,6 +131,8 @@ export const logUsageSnapshot = (
   conversations: Conversation[],
   promptTemplates: Prompt[],
 ) => {
+  console.log("Snapshot user's usage");
+  
   try {
     const numberOfConversationFolders = folders.filter(
       (folder) => folder.type === 'chat' && !folder.deleted,
