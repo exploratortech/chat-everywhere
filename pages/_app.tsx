@@ -11,7 +11,7 @@ import { Inter } from 'next/font/google';
 import { GoogleAnalytics } from 'nextjs-google-analytics';
 
 import { enableAzureTracking, reactPlugin } from '@/utils/app/azureAppInsights';
-import { initializeMixpanel } from '@/utils/app/eventTracking';
+import { initializePosthog } from '@/utils/app/eventTracking';
 
 import '@/styles/globals.css';
 import '@/styles/transitionGroup.css';
@@ -41,7 +41,7 @@ function App({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
   const [supabase] = useState(() => createBrowserSupabaseClient());
 
   useEffect(() => {
-    initializeMixpanel();
+    initializePosthog();
   }, []);
 
   return (

@@ -69,15 +69,16 @@ const NewsModel = memo(({ className = '', open, onOpen, onClose }: Props) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (!latestNewsId) return;
+  // Disable latest news popup for now
+  // useEffect(() => {
+  //   if (!latestNewsId) return;
 
-    const latestNewsIdInLocalStorage = readLatestNewsIdFromLocalStorage();
-    if (latestNewsId !== latestNewsIdInLocalStorage) {
-      onOpen();
-      storeLatestNewsIdToLocalStorage(latestNewsId);
-    }
-  }, [latestNewsId, onOpen]);
+  //   const latestNewsIdInLocalStorage = readLatestNewsIdFromLocalStorage();
+  //   if (latestNewsId !== latestNewsIdInLocalStorage) {
+  //     onOpen();
+  //     storeLatestNewsIdToLocalStorage(latestNewsId);
+  //   }
+  // }, [latestNewsId, onOpen]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

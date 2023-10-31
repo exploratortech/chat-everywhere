@@ -19,6 +19,9 @@ export const config = {
 const handler = async (req: Request): Promise<Response> => {
   retrieveUserSessionAndLogUsages(req);
 
+  const userIdentifier = req.headers.get('user-browser-id');
+  const pluginId = req.headers.get('user-selected-plugin-id');
+
   try {
     const selectedOutputLanguage = req.headers.get('Output-Language')
       ? `{lang=${req.headers.get('Output-Language')}}`
@@ -78,6 +81,8 @@ const handler = async (req: Request): Promise<Response> => {
       messagesToSend,
       messageToStreamBack,
       isPaidUser,
+      userIdentifier || undefined,
+      pluginId === '' ? 'Default mode message' : null,
     );
 
     return new Response(stream);

@@ -1,4 +1,12 @@
-import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
+import {
+  type EventNameTypes,
+  serverSideTrackEvent,
+} from '@/utils/app/eventTracking';
+import {
+  getMessagesTokenCount,
+  getStringTokenCount,
+  shortenMessagesBaseOnTokenLimit,
+} from '@/utils/server/api';
 
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
@@ -9,7 +17,6 @@ import {
   AZURE_OPENAI_GPT_4_KEYS,
   AZURE_OPENAI_KEYS,
   OPENAI_API_HOST,
-  OPENAI_API_TYPE,
 } from '../app/const';
 
 import {
@@ -51,6 +58,8 @@ export const OpenAIStream = async (
   messages: Message[],
   customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
   openAIPriority: boolean = false,
+  userIdentifier?: string,
+  eventName?: EventNameTypes | null,
 ) => {
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
   const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
@@ -59,6 +68,7 @@ export const OpenAIStream = async (
   );
 
   let attempt = 0;
+  const startTime = Date.now();
 
   while (attempt < openAIEndpoints.length) {
     const openAIEndpoint = openAIEndpoints[attempt];
@@ -80,17 +90,19 @@ export const OpenAIStream = async (
         systemPrompt,
         messages,
         model.tokenLimit,
-        model.completionTokenLimit
+        model.completionTokenLimit,
       );
 
+      const messagesToSendInArray = [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        ...normalizeMessages(messagesToSend),
+      ];
+
       const bodyToSend: any = {
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt,
-          },
-          ...normalizeMessages(messagesToSend),
-        ],
+        messages: messagesToSendInArray,
         max_tokens: model.completionTokenLimit,
         temperature,
         stream: true,
@@ -165,6 +177,7 @@ export const OpenAIStream = async (
           let buffer: Uint8Array[] = [];
           let stop = false;
           let error: any = null;
+          let respondMessage = '';
 
           const onParse = (event: ParsedEvent | ReconnectInterval) => {
             if (event.type === 'event') {
@@ -176,18 +189,17 @@ export const OpenAIStream = async (
 
               try {
                 const json = JSON.parse(data);
-
                 if (json.choices[0]) {
                   if (json.choices[0].finish_reason != null) {
                     if (customMessageToStreamBack) {
                       buffer.push(encoder.encode(customMessageToStreamBack));
                     }
-
                     stop = true;
                     return;
                   }
                   const text = json.choices[0].delta.content;
                   buffer.push(encoder.encode(text));
+                  respondMessage += text;
                 }
               } catch (e) {
                 if (!(e instanceof SyntaxError)) {
@@ -221,6 +233,15 @@ export const OpenAIStream = async (
             for await (const chunk of res.body as any) {
               parser.feed(decoder.decode(chunk));
             }
+
+            await logEvent({
+              userIdentifier,
+              eventName,
+              promptMessages: messagesToSendInArray,
+              completionMessage: respondMessage,
+              totalDurationInMs: Date.now() - startTime,
+            });
+
             stop = true;
           })();
         },
@@ -232,6 +253,28 @@ export const OpenAIStream = async (
   }
 
   throw new Error('Error: Unable to make requests to OpenAI');
+};
+
+const logEvent = async ({
+  userIdentifier,
+  eventName,
+  promptMessages,
+  completionMessage,
+  totalDurationInMs,
+}: {
+  userIdentifier?: string;
+  eventName?: EventNameTypes | null;
+  promptMessages: { role: string; content: string }[];
+  completionMessage: string;
+  totalDurationInMs: number;
+}) => {
+  if (userIdentifier && userIdentifier !== '' && eventName) {
+    await serverSideTrackEvent(userIdentifier, eventName, {
+      promptTokenLength: await getMessagesTokenCount(promptMessages),
+      completionTokenLength: await getStringTokenCount(completionMessage),
+      generationLengthInSecond: totalDurationInMs / 1000,
+    });
+  }
 };
 
 // Truncate log message to 4000 characters

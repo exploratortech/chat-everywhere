@@ -6,6 +6,10 @@ import {
   DEFAULT_IMAGE_GENERATION_STYLE,
   IMAGE_GEN_MAX_TIMEOUT,
 } from '@/utils/app/const';
+import {
+  type PayloadType,
+  serverSideTrackEvent,
+} from '@/utils/app/eventTracking';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import {
   ProgressHandler,
@@ -87,10 +91,12 @@ const handler = async (req: Request): Promise<Response> => {
     });
   }
 
+  const startTime = Date.now();
   const encoder = new TextEncoder();
   const stream = new TransformStream();
   const writer = stream.writable.getWriter();
-  let generationPrompt = '';
+  let generationPrompt = '',
+    promptBeforeProcessing = '';
 
   let jobTerminated = false;
 
@@ -99,6 +105,24 @@ const handler = async (req: Request): Promise<Response> => {
   const progressHandler = new ProgressHandler(writeToStream);
 
   const requestBody = (await req.json()) as ChatBody;
+
+  const logEvent = async (errorMessage?: string) => {
+    const payloadToLog: PayloadType = {
+      generationLengthInSecond: (Date.now() - startTime)/1000,
+    };
+
+    if (errorMessage) {
+      payloadToLog.imageGenerationFailed = 'true';
+      payloadToLog.imageGenerationErrorMessage = errorMessage;
+      payloadToLog.imageGenerationPrompt = `${promptBeforeProcessing} -> ${generationPrompt}`;
+    }
+
+    await serverSideTrackEvent(
+      data.user.id,
+      'AI image generation',
+      payloadToLog,
+    );
+  };
 
   progressHandler.updateProgress({
     content: 'Initializing ... \n',
@@ -110,6 +134,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   const latestUserPromptMessage =
     requestBody.messages[requestBody.messages.length - 1].content;
+
+  promptBeforeProcessing = latestUserPromptMessage;
 
   const imageGeneration = async () => {
     const requestHeader = {
@@ -149,11 +175,11 @@ const handler = async (req: Request): Promise<Response> => {
       );
 
       if (!imageGenerationResponse.ok) {
+        await logEvent('Image generation failed');
         throw new Error('Image generation failed');
       }
 
       const imageGenerationResponseJson = await imageGenerationResponse.json();
-      console.log({ imageGenerationResponseJson });
 
       if (
         imageGenerationResponseJson.success !== true ||
@@ -161,6 +187,7 @@ const handler = async (req: Request): Promise<Response> => {
       ) {
         console.log(imageGenerationResponseJson);
         console.error('Failed during submitting request');
+        await logEvent('Failed during submitting request');
         throw new Error('Image generation failed');
       }
 
@@ -187,6 +214,7 @@ const handler = async (req: Request): Promise<Response> => {
         if (!imageGenerationProgressResponse.ok) {
           console.log(await imageGenerationProgressResponse.status);
           console.log(await imageGenerationProgressResponse.text());
+          await logEvent('Unable to fetch image generation progress');
           throw new Error('Unable to fetch image generation progress');
         }
 
@@ -228,6 +256,7 @@ const handler = async (req: Request): Promise<Response> => {
               writer.close();
               return;
             }
+            await logEvent('Internal error during image generation process');
             throw new Error(
               `Internal error during image generation process {${
                 mjResponseContent || 'No response content'
@@ -254,6 +283,7 @@ const handler = async (req: Request): Promise<Response> => {
 
             await writeToStream('[DONE]');
             writer.close();
+            await logEvent();
             return;
           }
         } else {
@@ -284,6 +314,7 @@ const handler = async (req: Request): Promise<Response> => {
         'Unable to finish the generation in 5 minutes, please try again later.',
       );
       writer.close();
+      await logEvent('Unable to finish the generation in 5 minutes');
       return;
     } catch (error) {
       jobTerminated = true;
@@ -299,6 +330,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       await writeToStream('[DONE]');
       writer.close();
+      await logEvent(`Exception being thrown: ${error}`);
       return;
     }
   };

@@ -21,7 +21,6 @@ import {
 } from '@/utils/app/const';
 import { saveConversation, saveConversations } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import { trackEvent } from '@/utils/app/eventTracking';
 import {
   removeRedundantTempHtmlString,
   removeTempHtmlString,
@@ -38,7 +37,6 @@ import { PluginID, Plugins } from '@/types/plugin';
 import HomeContext from '@/pages/api/home/home.context';
 
 import { NewConversationMessagesContainer } from '../ConversationStarter/NewConversationMessagesContainer';
-import Spinner from '../Spinner';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
@@ -85,45 +83,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const logGaEvent = useCallback(
-    (messageLength?: number) => {
-      // Fail silently to avoid impacting user experience
-      try {
-        const messageType = currentMessage?.pluginId || 'gpt-3.5';
-        let eventName = 'Send Message (no-login)';
-
-        if (user) {
-          if (user.plan !== 'free') {
-            eventName = 'Send Message (paid account)';
-          } else {
-            eventName = 'Send Message (free account)';
-          }
-        }
-
-        let eventPayload = {
-          category: 'Usages',
-          userEmail: user?.email || 'N/A',
-          messageType: messageType,
-          user_type: user ? user?.plan : 'no-login',
-          user_id: user ? user?.email : getOrGenerateUserId(),
-        } as any;
-
-        if (messageLength) {
-          eventPayload.length = messageLength;
-        }
-
-        event(eventName, eventPayload);
-      } catch (e) {}
-    },
-    [user, currentMessage],
-  );
-
   const handleSend = useCallback(
     async (deleteCount = 0, overrideCurrentMessage?: Message) => {
       const message = overrideCurrentMessage || currentMessage;
-      console.log({
-        message,
-      });
 
       if (!message) return;
       const plugin = (message.pluginId && Plugins[message.pluginId]) || null;
@@ -177,6 +139,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             'Content-Type': 'application/json',
             'Output-Language': outputLanguage,
             'user-token': user?.token || '',
+            'user-browser-id': getOrGenerateUserId() || '',
+            'user-selected-plugin-id': plugin?.id || '',
           },
           signal: controller.signal,
           body,
@@ -341,12 +305,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: 'messageIsStreaming', value: false });
 
         updateConversationLastUpdatedAtTimeStamp();
-        logGaEvent(text.length);
-        trackEvent('Send message', {
-          Length: text.length,
-          PluginId: plugin?.id || null,
-          LargeContextModel: largeContextResponse,
-        });
       }
     },
     [
