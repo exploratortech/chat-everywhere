@@ -62,7 +62,7 @@ export type PayloadType = {
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
 export const enableTracking =
-  process.env.NEXT_PUBLIC_ENV === 'production' || true;
+  process.env.NEXT_PUBLIC_ENV === 'production' || true; // Enable global logging for now
 
 export const initializePosthog = () => {
   if (!enableTracking) return;
@@ -157,7 +157,6 @@ export const logUsageSnapshot = (
     };
 
     posthog.identify(getOrGenerateUserId(), usageSnapshot);
-    console.log("Snapshot user's usage", usageSnapshot);
   } catch (error) {
     console.log(error);
   }
