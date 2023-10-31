@@ -263,7 +263,7 @@ const logEvent = async ({
   totalDurationInMs,
 }: {
   userIdentifier?: string;
-  eventName?: EventNameTypes;
+  eventName?: EventNameTypes | null;
   promptMessages: { role: string; content: string }[];
   completionMessage: string;
   totalDurationInMs: number;
