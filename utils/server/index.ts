@@ -59,7 +59,7 @@ export const OpenAIStream = async (
   customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
   openAIPriority: boolean = false,
   userIdentifier?: string,
-  eventName?: EventNameTypes,
+  eventName?: EventNameTypes | NonNullable,
 ) => {
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
   const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(

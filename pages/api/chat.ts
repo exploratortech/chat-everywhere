@@ -7,11 +7,9 @@ import {
 } from '@/utils/server/api';
 import { isPaidUserByAuthToken } from '@/utils/server/supabase';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
-import { type EventNameTypes } from '@/utils/app/eventTracking';
 
 import { ChatBody } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
-import { PluginID } from '@/types/plugin';
 import { trackError } from '@/utils/app/azureTelemetry';
 
 export const config = {
@@ -23,18 +21,6 @@ const handler = async (req: Request): Promise<Response> => {
 
   const userIdentifier = req.headers.get('user-browser-id');
   const pluginId = req.headers.get('user-selected-plugin-id');
-  let eventName: EventNameTypes = 'Default mode message';
-
-  if(pluginId !== ''){
-    if(pluginId === PluginID.GPT4){
-      eventName = 'GPT4 mode message';
-    }
-    else if(pluginId === PluginID.IMAGE_GEN){
-      eventName = 'AI image generation';
-    }else if(pluginId === PluginID.IMAGE_TO_PROMPT){
-      eventName = 'Image to prompt';
-    }
-  }
 
   try {
     const selectedOutputLanguage = req.headers.get('Output-Language')
@@ -96,7 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
       messageToStreamBack,
       isPaidUser,
       userIdentifier || undefined,
-      eventName,
+      pluginId === '' ? 'Default mode message' : null,
     );
 
     return new Response(stream);
