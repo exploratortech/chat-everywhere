@@ -57,7 +57,7 @@ export type PayloadType = {
   imageGenerationFailed?: string;
   imageGenerationErrorMessage?: string;
   imageGenerationPrompt?: string;
-  aiImageButtonCommand?: string
+  aiImageButtonCommand?: string;
 };
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
@@ -131,8 +131,6 @@ export const logUsageSnapshot = (
   conversations: Conversation[],
   promptTemplates: Prompt[],
 ) => {
-  console.log("Snapshot user's usage");
-  
   try {
     const numberOfConversationFolders = folders.filter(
       (folder) => folder.type === 'chat' && !folder.deleted,
@@ -159,6 +157,7 @@ export const logUsageSnapshot = (
     };
 
     posthog.identify(getOrGenerateUserId(), usageSnapshot);
+    console.log("Snapshot user's usage", usageSnapshot);
   } catch (error) {
     console.log(error);
   }
