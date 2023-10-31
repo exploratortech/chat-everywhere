@@ -26,10 +26,10 @@ import {
   removeTempHtmlString,
 } from '@/utils/app/htmlStringHandler';
 import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
+import { reorderItem } from '@/utils/app/rank';
 import { removeSecondLastLine } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 import { throttle } from '@/utils/data/throttle';
-import { reorderItem } from '@/utils/app/rank';
 
 import { ChatBody, Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
@@ -156,7 +156,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             );
           } else {
             toast.error(
-              response.statusText || t('Unknown error, please contact support'),
+              t('Sorry, something went wrong. Our team has been notified and will look into it.')
             );
           }
 
@@ -296,8 +296,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           )
         ) {
           updatedConversations.push(updatedConversation);
-          updatedConversations =
-            reorderItem(updatedConversations, updatedConversation.id, 0);
+          updatedConversations = reorderItem(
+            updatedConversations,
+            updatedConversation.id,
+            0,
+          );
         }
 
         homeDispatch({ field: 'conversations', value: updatedConversations });

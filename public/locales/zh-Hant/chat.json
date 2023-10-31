@@ -53,5 +53,6 @@
   "Upscale image failed": "放大圖片失敗, 請稍後再試",
   "We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.": "很抱歉造成不便，我們的伺服器目前正在經歷高流量，請稍後再試。感謝您的耐心等待。",
   "Please sign in to reduce wait time, or upgrade to remove it": "請登入以降低等待時間，或者升級以完全去除它",
-  "Upgrade to the Pro version to eliminate the wait time": "升級至我們的專業版，無需等待即可發送下一條訊息"
+  "Upgrade to the Pro version to eliminate the wait time": "升級至我們的專業版，無需等待即可發送下一條訊息",
+  "Sorry, something went wrong. Our team has been notified and will look into it.": "抱歉，出現了一些問題。我們的團隊會盡快處理。請稍後再試。"
 }

@@ -1,5 +1,6 @@
 import { trackError } from '@/utils/app/azureTelemetry';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { serverSideTrackEvent, trackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
   addCredit,
@@ -11,6 +12,7 @@ import {
 } from '@/utils/server/supabase';
 
 import { ChatBody } from '@/types/chat';
+import { type Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
 
@@ -38,6 +40,9 @@ const handler = async (req: Request): Promise<Response> => {
     });
   }
 
+  let promptToSend = '';
+  let messageToSend: Message[] = [];
+
   try {
     const selectedOutputLanguage = req.headers.get('Output-Language')
       ? `{lang=${req.headers.get('Output-Language')}}`
@@ -45,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { messages, prompt, temperature } = (await req.json()) as ChatBody;
 
-    let promptToSend = prompt;
+    promptToSend = prompt;
     if (!promptToSend) {
       promptToSend = DEFAULT_SYSTEM_PROMPT;
     }
@@ -54,10 +59,12 @@ const handler = async (req: Request): Promise<Response> => {
       temperatureToUse = DEFAULT_TEMPERATURE;
     }
 
-    let messageToSend = messages;
+    messageToSend = messages;
 
     if (selectedOutputLanguage) {
-      messageToSend[messageToSend.length - 1].content = `${selectedOutputLanguage} ${
+      messageToSend[
+        messageToSend.length - 1
+      ].content = `${selectedOutputLanguage} ${
         messageToSend[messageToSend.length - 1].content
       }`;
     }
@@ -90,6 +97,16 @@ const handler = async (req: Request): Promise<Response> => {
         statusText: error.message,
       });
     }
+
+    //Log error to Azure App Insights
+    trackError(error as string);
+    serverSideTrackEvent(data.user.id, 'Error', {
+      currentConversation: JSON.stringify(messageToSend),
+      messageToSend: promptToSend,
+      errorMessage: error
+      ? (error as Error).message
+      : 'unknown error',
+    });
 
     if (error instanceof OpenAIError) {
       switch (error.httpCode) {
