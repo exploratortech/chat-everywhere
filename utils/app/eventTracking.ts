@@ -42,6 +42,9 @@ export const EventNames = [
   'AI image to prompt',
   'AI image button clicked',
   'Image to prompt',
+
+  // Error tracing
+  'Error'
 ];
 
 export type EventNameTypes = (typeof EventNames)[number];
@@ -58,6 +61,11 @@ export type PayloadType = {
   imageGenerationErrorMessage?: string;
   imageGenerationPrompt?: string;
   aiImageButtonCommand?: string;
+  
+  // Detail error trace
+  currentConversation?: string;
+  messageToSend?: string;
+  errorMessage?: string;
 };
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';

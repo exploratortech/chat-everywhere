@@ -1,5 +1,7 @@
 // This endpoint only allow GPT-3.5 and GPT-3.5 16K models
+import { trackError } from '@/utils/app/azureTelemetry';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
   getMessagesTokenCount,
@@ -9,8 +11,8 @@ import { isPaidUserByAuthToken } from '@/utils/server/supabase';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
+import { type Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
-import { trackError } from '@/utils/app/azureTelemetry';
 
 export const config = {
   runtime: 'edge',
@@ -21,6 +23,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   const userIdentifier = req.headers.get('user-browser-id');
   const pluginId = req.headers.get('user-selected-plugin-id');
+  let messagesToSend: Message[] = [];
+  let promptToSend = '';
 
   try {
     const selectedOutputLanguage = req.headers.get('Output-Language')
@@ -28,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
       : '';
     const { messages, prompt, temperature } = (await req.json()) as ChatBody;
 
-    let promptToSend = prompt;
+    promptToSend = prompt;
     if (!promptToSend) {
       promptToSend = DEFAULT_SYSTEM_PROMPT;
     }
@@ -45,11 +49,13 @@ const handler = async (req: Request): Promise<Response> => {
     const requireToUseLargerContextWindowModel =
       (await getMessagesTokenCount(messages)) + 1000 > defaultTokenLimit; // Add buffer token to take system prompt into account
 
-    const isPaidUser = await isPaidUserByAuthToken(req.headers.get('user-token'));
+    const isPaidUser = await isPaidUserByAuthToken(
+      req.headers.get('user-token'),
+    );
     const useLargerContextWindowModel =
       requireToUseLargerContextWindowModel && isPaidUser;
 
-    const messagesToSend = await shortenMessagesBaseOnTokenLimit(
+    messagesToSend = await shortenMessagesBaseOnTokenLimit(
       prompt,
       messages,
       useLargerContextWindowModel ? extendedTokenLimit : defaultTokenLimit,
@@ -90,6 +96,15 @@ const handler = async (req: Request): Promise<Response> => {
     console.error(error);
     //Log error to Azure App Insights
     trackError(error as string);
+    serverSideTrackEvent(userIdentifier || 'not-defined', 'Error', {
+      PluginId: pluginId || 'not-defined',
+      currentConversation: JSON.stringify(messagesToSend),
+      messageToSend: promptToSend,
+      errorMessage: error
+        ? (error as Error).message
+        : 'unknown error',
+    });
+
     if (error instanceof OpenAIError) {
       return new Response('Error', { status: 500, statusText: error.message });
     } else {
