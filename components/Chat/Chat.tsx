@@ -154,6 +154,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 'We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.',
               ),
             );
+          } else if (response.status === 401) {
+            toast.error(
+              t(
+                'Sorry something went wrong. Please refresh the page and try again.',
+              ),
+            );
           } else {
             toast.error(
               t('Sorry, something went wrong. Our team has been notified and will look into it.')
