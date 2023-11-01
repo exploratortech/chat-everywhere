@@ -68,6 +68,7 @@ export const OpenAIStream = async (
   );
 
   let attempt = 0;
+  let attemptLogs = '';
   const startTime = Date.now();
 
   while (attempt < openAIEndpoints.length) {
@@ -77,6 +78,10 @@ export const OpenAIStream = async (
     try {
       if (!openAIEndpoint || !openAIKey)
         throw new Error('Missing endpoint/key');
+
+      attemptLogs += `Attempt ${
+        attempt + 1
+      }: Using endpoint ${openAIEndpoint}\n`;
 
       const modelName = isGPT4Model
         ? process.env.AZURE_OPENAI_GPT_4_MODEL_NAME
@@ -133,6 +138,7 @@ export const OpenAIStream = async (
       const timeout = setTimeout(() => abortController.abort(), 10000);
 
       console.log(`Sending request to ${url}`);
+      attemptLogs += `Attempt ${attempt + 1}: Sending request to ${url}\n`;
 
       const res = await fetch(url, {
         headers: requestHeaders,
@@ -156,14 +162,23 @@ export const OpenAIStream = async (
               res.status,
             ),
           );
+          attemptLogs += `Attempt ${attempt + 1}: Error - ${
+            result.error.message
+          }\n`;
         } else {
           console.error(
             new Error(
-              `OpenAI API returned an error: ${
+              `Chat endpoint returned an error: ${
                 decoder.decode(result?.value) || result.statusText
               }`,
             ),
           );
+          
+          attemptLogs += `Attempt ${
+            attempt + 1
+          }: Error - Chat endpoint returned an error: ${
+            decoder.decode(result?.value) || result.statusText
+          }\n`;
         }
 
         attempt += 1;
@@ -249,10 +264,20 @@ export const OpenAIStream = async (
     } catch (error) {
       attempt += 1;
       console.error(error);
+      attemptLogs += `Attempt ${attempt}: Error - ${
+        (error as Error).message
+      }\n`;
     }
   }
 
-  throw new Error('Error: Unable to make requests to OpenAI');
+  if (userIdentifier) {
+    serverSideTrackEvent(userIdentifier, 'Error', {
+      currentConversation: JSON.stringify(messages),
+      errorMessage: attemptLogs,
+    });
+  }
+
+  throw new Error('Error: Unable to make requests');
 };
 
 const logEvent = async ({
