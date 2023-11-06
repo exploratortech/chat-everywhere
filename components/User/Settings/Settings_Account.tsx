@@ -97,7 +97,7 @@ export default function Settings_Account() {
               )}
             </span>
           )}
-          {isPaidUser && user?.hasReferrer && (
+          {isPaidUser && user?.isInReferralTrial && (
             <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
               <IconCircleCheck className="text-green-500" size={19} />
               <p className="flex items-center">
@@ -149,7 +149,7 @@ export default function Settings_Account() {
           </div>
           {displayReferralCodeEnterer && <ReferralCodeEnter />}
           <div>
-            {user?.plan === 'pro' && !user?.hasReferrer && (
+            {user?.plan === 'pro' && !user?.isInReferralTrial && (
               <p className="text-xs text-neutral-400">
                 {t(
                   'Thank you for supporting us! If you want to cancel your subscription, please visit ',
