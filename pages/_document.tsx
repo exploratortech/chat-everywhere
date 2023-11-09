@@ -18,7 +18,6 @@ export default function Document(props: Props) {
           content="Chat Everywhere - ChatGPT for power users"
         />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#202123" />
         <meta
           property="og:title"
           content="Chat Everywhere - ChatGPT for power users"

@@ -24,10 +24,6 @@
   height: 6px;
 }
 
-html {
-  background: #202123;
-}
-
 html, body {
   overscroll-behavior-y: none;
 }
