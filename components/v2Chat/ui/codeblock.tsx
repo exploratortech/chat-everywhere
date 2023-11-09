@@ -6,7 +6,7 @@ import { FC, memo } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { coldarkDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
-import { useCopyToClipboard } from '@/utils/v2Chat/use-copy-to-clipboard';
+import { useCopyToClipboard } from '@/hooks/v2Chat/use-copy-to-clipboard';
 
 import { Button } from '@/components/v2Chat/ui/button';
 import {

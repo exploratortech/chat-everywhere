@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { useAtBottom } from '@/utils/v2Chat/use-at-bottom';
+import { useAtBottom } from '@/hooks/v2Chat/use-at-bottom';
 
 import { cn } from '@/utils/v2Chat/utils';
 

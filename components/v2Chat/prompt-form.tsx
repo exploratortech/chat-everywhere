@@ -3,7 +3,7 @@ import Textarea from 'react-textarea-autosize';
 
 import { useRouter } from 'next/navigation';
 
-import { useEnterSubmit } from '@/utils/v2Chat/use-enter-submit';
+import { useEnterSubmit } from '@/hooks/v2Chat/use-enter-submit';
 import { cn } from '@/utils/v2Chat/utils';
 
 import { Button, buttonVariants } from '@/components/v2Chat/ui/button';
