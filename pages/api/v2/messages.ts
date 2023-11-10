@@ -18,6 +18,7 @@ export type requestType =
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
 const DEFAULT_MESSAGE_LIMIT = 20;
+const ASSISTANT_ID = process.env.OPENAI_V2_ASSISTANT_ID;
 
 const handler = async (req: Request): Promise<Response> => {
   const supabase = getAdminSupabaseClient();
@@ -31,13 +32,19 @@ const handler = async (req: Request): Promise<Response> => {
     const userProfile = await getUserProfile(user.user.id);
     if (!user || userProfile.plan === 'free') return unauthorizedResponse;
 
-    const { conversationId, latestMessageId, beforeMessageId, requestType } =
-      (await req.json()) as {
-        requestType: requestType;
-        conversationId: string;
-        beforeMessageId?: string;
-        latestMessageId?: string;
-      };
+    const {
+      conversationId,
+      latestMessageId,
+      beforeMessageId,
+      requestType,
+      messageContent,
+    } = (await req.json()) as {
+      requestType: requestType;
+      conversationId: string;
+      beforeMessageId?: string;
+      latestMessageId?: string;
+      messageContent?: string;
+    };
 
     if (!requestType)
       return new Response('Invalid request type', { status: 400 });
@@ -50,8 +57,8 @@ const handler = async (req: Request): Promise<Response> => {
           latestMessageId,
           beforeMessageId,
         );
-      // case 'send message':
-      //   return sendMessage(user.user.id, conversationId);
+      case 'send message':
+        return sendMessage(user.user.id, conversationId, messageContent);
       // case 'create conversation':
       //   return createConversation(user.user.id);
       default:
@@ -63,11 +70,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-const retrieveMessages = async (
+const doesConversationBelongToUser = async (
   userId: string,
   conversationId: string,
-  latestMessageId?: string,
-  beforeMessageId?: string,
 ) => {
   const supabase = getAdminSupabaseClient();
 
@@ -79,14 +84,32 @@ const retrieveMessages = async (
 
   if (error) {
     console.error(error);
-    return new Response('Error', { status: 500 });
+    return false;
   }
 
   if (!data || data.length === 0) {
+    return false;
+  }
+
+  return true;
+};
+
+const retrieveMessages = async (
+  userId: string,
+  conversationId: string,
+  latestMessageId?: string,
+  beforeMessageId?: string,
+) => {
+  const isConversationBelongsToUser = await doesConversationBelongToUser(
+    userId,
+    conversationId,
+  );
+
+  if (!isConversationBelongsToUser) {
     return new Response("Conversation doesn't exist.", { status: 404 });
   }
 
-  let openAiUrl = `https://api.openai.com/v1/threads/${conversationId}/messages?limit=${DEFAULT_MESSAGE_LIMIT}&`;
+  let openAiUrl = `https://api.openai.com/v1/threads/${conversationId}/messages?limit=${DEFAULT_MESSAGE_LIMIT}&order=asc&`;
 
   if (latestMessageId) {
     openAiUrl += `after=${latestMessageId}`;
@@ -105,6 +128,97 @@ const retrieveMessages = async (
 
   const openAiData = await openAiResponse.json();
   return new Response(JSON.stringify(openAiData.data), { status: 200 });
+};
+
+const sendMessage = async (
+  userId: string,
+  conversationId: string,
+  messageContent?: string,
+) => {
+  if (!messageContent) {
+    return new Response('Message content is empty', { status: 400 });
+  }
+  
+  const isConversationBelongsToUser = await doesConversationBelongToUser(
+    userId,
+    conversationId,
+  );
+
+  if (!isConversationBelongsToUser) {
+    return new Response("Unauthorized access to conversation.", { status: 403 });
+  }
+
+  // Add a Message object to Thread
+  const messageCreationUrl = `https://api.openai.com/v1/threads/${conversationId}/messages`;
+
+  const messageCreationResponse = await authorizedOpenAiRequest(
+    messageCreationUrl,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        "role": "user",
+        "content": messageContent,
+      }),
+    },
+  );
+
+  if (!messageCreationResponse.ok) {
+    console.log("Failed on message creation");
+    console.error(await messageCreationResponse.text());
+    return new Response('Error', { status: 500 });
+  }
+
+  // Create a Run object for the message in Thread
+  const runCreationUrl = `https://api.openai.com/v1/threads/${conversationId}/runs`;
+
+  const runCreationResponse = await authorizedOpenAiRequest(runCreationUrl, {
+    method: 'POST',
+    body: JSON.stringify({
+      assistant_id: ASSISTANT_ID,
+    }),
+  });
+
+  if (!runCreationResponse.ok) {
+    console.error(await runCreationResponse.text());
+    return new Response('Error', { status: 500 });
+  }
+
+  // Keep checking every 500 ms until Run's status is completed
+  // or until 15 seconds have passed
+  const runId = (await runCreationResponse.json()).id;
+
+  const runStatusUrl = `https://api.openai.com/v1/threads/${conversationId}/runs/${runId}`;
+  let runStatusResponse;
+  let runStatusData;
+  const startTime = Date.now();
+  const timeout = 15000;
+  const interval = 500;
+
+  while (Date.now() - startTime < timeout) {
+    runStatusResponse = await authorizedOpenAiRequest(runStatusUrl, {
+      method: 'GET',
+    });
+
+    if (!runStatusResponse.ok) {
+      console.error(await runStatusResponse.text());
+      return new Response('Error', { status: 500 });
+    }
+
+    runStatusData = await runStatusResponse.json();
+
+    if (runStatusData.status === 'completed') {
+      break;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+
+  if (runStatusData.status !== 'completed') {
+    console.error('Timeout: Run status check exceeded 15 seconds');
+    return new Response('Error: Timeout', { status: 500 });
+  }
+
+  return new Response(null, { status: 200 });
 };
 
 export default handler;

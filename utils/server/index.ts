@@ -349,6 +349,7 @@ export const authorizedOpenAiRequest = async (
   const headers = {
     Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     'OpenAI-Beta': 'assistants=v1',
+    'Content-Type': 'application/json',
     ...options.headers,
   };
   return fetch(url, { ...options, headers });

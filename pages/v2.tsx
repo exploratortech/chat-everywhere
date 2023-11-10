@@ -24,8 +24,6 @@ import type {
   OpenAIMessageType,
 } from '@/types/v2Chat/chat';
 
-import { type requestType } from '@/pages/api/v2/messages';
-
 import { ChatList } from '@/components/v2Chat/chat-list';
 import { ChatPanel } from '@/components/v2Chat/chat-panel';
 import { Header } from '@/components/v2Chat/header';
@@ -37,11 +35,12 @@ const V2Chat = () => {
 
   const [selectedConversationId, setSelectedConversationId] =
     useState<string>('');
+  const [selectedConversation, setSelectedConversation] =
+    useState<ConversationType>();
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [messages, setMessages] = useState<MessageType[]>([]);
-  const [chatRespondLoading, setChatRespondLoading] = useState<boolean>(false);
-
-  const onMessageSent = async (message: string) => {};
+  const [chatResponseLoading, setChatResponseLoading] =
+    useState<boolean>(false);
 
   const supabase = useSupabaseClient();
   const user = useUser();
@@ -68,6 +67,7 @@ const V2Chat = () => {
     );
 
     if (!conversation) return;
+    setSelectedConversation(conversation);
     fetchMessages(conversation.threadId);
   }, [selectedConversationId]);
 
@@ -90,6 +90,9 @@ const V2Chat = () => {
         title: item.title,
       }));
       setConversations(conversations);
+      if(conversations.length > 0){
+        setSelectedConversationId(conversations[0].id);
+      }
     }
   };
 
@@ -114,6 +117,32 @@ const V2Chat = () => {
     }));
     setMessages(messages);
     console.log(messages);
+  };
+
+  const onMessageSent = async () => {
+    if (!user || !session || !selectedConversationId || !selectedConversation)
+      return;
+
+    setChatResponseLoading(true);
+    const response = await fetch('/api/v2/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-token': session.access_token,
+      },
+      body: JSON.stringify({
+        requestType: 'send message',
+        conversationId: selectedConversation.threadId,
+        messageContent: input,
+      }),
+    });
+
+    if (response.status === 200) {
+      fetchConversations();
+      setChatResponseLoading(false);
+    } else {
+      console.error(response);
+    }
   };
 
   const conversationOnSelect = (conversationId: string) => {
@@ -142,7 +171,7 @@ const V2Chat = () => {
           {messages.length > 0 && <ChatList messages={messages} />}
           <ChatPanel
             id={selectedConversationId}
-            isLoading={chatRespondLoading}
+            isLoading={chatResponseLoading}
             stop={() => {}}
             append={onMessageSent}
             reload={() => {}}
