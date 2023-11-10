@@ -24,6 +24,7 @@ import type {
   OpenAIMessageType,
 } from '@/types/v2Chat/chat';
 
+import { ChatList } from '@/components/v2Chat/chat-list';
 import { ChatPanel } from '@/components/v2Chat/chat-panel';
 import { Header } from '@/components/v2Chat/header';
 import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
@@ -108,7 +109,6 @@ const V2Chat = () => {
     }));
     setMessages(messages);
     console.log(messages);
-    
   };
 
   const conversationOnSelect = (conversationId: string) => {
@@ -134,6 +134,7 @@ const V2Chat = () => {
           conversations={conversations}
         />
         <main className="flex flex-col flex-1 bg-muted/50">
+          {messages.length > 0 && <ChatList messages={messages} />}
           <ChatPanel
             id={selectedConversationId}
             isLoading={chatRespondLoading}
