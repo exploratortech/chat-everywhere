@@ -173,7 +173,7 @@ export const OpenAIStream = async (
               }`,
             ),
           );
-          
+
           attemptLogs += `Attempt ${
             attempt + 1
           }: Error - Chat endpoint returned an error: ${
@@ -340,4 +340,16 @@ const getRandomOpenAIEndpointsAndKeys = (
   }
 
   return [endpoints, keys];
+};
+
+export const authorizedOpenAiRequest = async (
+  url: string,
+  options: RequestInit = {},
+) => {
+  const headers = {
+    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    'OpenAI-Beta': 'assistants=v1',
+    ...options.headers,
+  };
+  return fetch(url, { ...options, headers });
 };

@@ -47,8 +47,19 @@ const V2Chat = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (!selectedConversationId) return;
+
+    const conversation = conversations.find(
+      (item) => item.id === selectedConversationId,
+    );
+
+    if (!conversation) return;
+    fetchMessages(conversation.threadId);
+  }, [selectedConversationId]);
+
   const fetchConversations = async () => {
-    if(user === null) return;
+    if (user === null) return;
 
     const { data, error } = await supabase
       .from('user_v2_conversations')
@@ -67,6 +78,21 @@ const V2Chat = () => {
       }));
       setConversations(conversations);
     }
+  };
+
+  const fetchMessages = async (conversationId: string) => {
+    if (!user) return;
+
+    const response = await fetch('/api/v2/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-id': user.id,
+      },
+      body: JSON.stringify({ conversationId }),
+    });
+    const data = await response.json();
+    console.log(data);
   };
 
   const conversationOnSelect = (conversationId: string) => {

@@ -1,7 +1,5 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-
 import { cn } from '@/utils/v2Chat/utils';
 
 import { type ConversationType } from '@/types/v2Chat/chat';
@@ -20,8 +18,6 @@ export function SidebarItem({
   selected,
   conversationOnSelect,
 }: SidebarItemProps) {
-  const pathname = usePathname();
-
   if (!conversation?.id) return null;
 
   return (
