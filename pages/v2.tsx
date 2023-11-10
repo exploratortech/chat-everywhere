@@ -24,6 +24,8 @@ import type {
   OpenAIMessageType,
 } from '@/types/v2Chat/chat';
 
+import { type requestType } from '@/pages/api/v2/messages';
+
 import { ChatList } from '@/components/v2Chat/chat-list';
 import { ChatPanel } from '@/components/v2Chat/chat-panel';
 import { Header } from '@/components/v2Chat/header';
@@ -100,7 +102,10 @@ const V2Chat = () => {
         'Content-Type': 'application/json',
         'user-token': session.access_token,
       },
-      body: JSON.stringify({ conversationId }),
+      body: JSON.stringify({
+        requestType: 'retrieve messages',
+        conversationId,
+      }),
     });
     const data = (await response.json()) as OpenAIMessageType[];
     const messages: MessageType[] = data.map((messageItem) => ({
