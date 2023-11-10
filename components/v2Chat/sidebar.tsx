@@ -1,19 +1,19 @@
-'use client'
+'use client';
 
-import * as React from 'react'
+import * as React from 'react';
 
-import { Button } from '@/components/v2Chat/ui/button'
+import { Button } from '@/components/v2Chat/ui/button';
+import { IconSidebar } from '@/components/v2Chat/ui/icons';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger
-} from '@/components/v2Chat/ui/sheet'
-import { IconSidebar } from '@/components/v2Chat/ui/icons'
+  SheetTrigger,
+} from '@/components/v2Chat/ui/sheet';
 
 export interface SidebarProps {
-  children?: React.ReactNode
+  children?: React.ReactNode;
 }
 
 export function Sidebar({ children }: SidebarProps) {
@@ -32,5 +32,5 @@ export function Sidebar({ children }: SidebarProps) {
         {children}
       </SheetContent>
     </Sheet>
-  )
+  );
 }

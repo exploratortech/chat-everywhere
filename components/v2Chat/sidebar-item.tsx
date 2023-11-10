@@ -12,15 +12,23 @@ import { IconMessage } from '@/components/v2Chat/ui/icons';
 interface SidebarItemProps {
   conversation: ConversationType;
   selected: boolean;
+  conversationOnSelect: (conversationId: string) => void;
 }
 
-export function SidebarItem({ conversation, selected }: SidebarItemProps) {
+export function SidebarItem({
+  conversation,
+  selected,
+  conversationOnSelect,
+}: SidebarItemProps) {
   const pathname = usePathname();
 
   if (!conversation?.id) return null;
 
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      onClick={() => conversationOnSelect(conversation.id)}
+    >
       <div className="absolute left-2 top-1 flex h-6 w-6 items-center justify-center">
         <IconMessage className="mr-2" />
       </div>

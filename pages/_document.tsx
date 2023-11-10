@@ -203,11 +203,8 @@ export default function Document(props: Props) {
           media="screen and (device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
           href="/splash-screens/8.3__iPad_Mini_portrait.png"
         />
-
-        {/* Ad Verification tag for Propellerads*/}
-        <meta name="monetag" content="b0996adc439888b4590068e1e29a5696" />
       </Head>
-      <body>
+      <body className='w-full'>
         <Main />
         <NextScript />
       </body>

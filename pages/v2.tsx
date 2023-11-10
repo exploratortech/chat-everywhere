@@ -22,13 +22,12 @@ import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
 
 const V2Chat = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>();
-  const [selectedConversationId, setSelectedConversationId] =
-    useState<string>('');
-  const [latestMessageId, setLatestMessageId] = useState<string | null>(null);
-  const [chatRespondLoading, setChatRespondLoading] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
 
+  const [selectedConversationId, setSelectedConversationId] =
+    useState<string>('');
   const [conversations, setConversations] = useState<ConversationType[]>([]);
+  const [chatRespondLoading, setChatRespondLoading] = useState<boolean>(false);
 
   const onMessageSent = async (message: string) => {};
 
@@ -43,8 +42,36 @@ const V2Chat = () => {
       }).then((res) => {
         setUserProfile(res);
       });
+
+      fetchConversations();
     }
   }, [user]);
+
+  const fetchConversations = async () => {
+    if(user === null) return;
+
+    const { data, error } = await supabase
+      .from('user_v2_conversations')
+      .select('*')
+      .eq('uid', user.id);
+
+    if (error) {
+      console.log(error);
+    } else {
+      const conversations: ConversationType[] = data.map((item: any) => ({
+        id: item.id,
+        threadId: item.threadId,
+        messages: [],
+        loading: false,
+        title: item.title,
+      }));
+      setConversations(conversations);
+    }
+  };
+
+  const conversationOnSelect = (conversationId: string) => {
+    setSelectedConversationId(conversationId);
+  };
 
   if (!userProfile) {
     return (
@@ -57,17 +84,26 @@ const V2Chat = () => {
 
   return (
     <TooltipProvider>
-      <Header userProfile={userProfile} />
-      <ChatPanel
-        id={selectedConversationId}
-        isLoading={chatRespondLoading}
-        stop={() => {}}
-        append={onMessageSent}
-        reload={() => {}}
-        input={input}
-        setInput={setInput}
-        messages={conversations}
-      />
+      <div className="flex flex-col min-h-screen">
+        <Header
+          userProfile={userProfile}
+          conversationOnSelect={conversationOnSelect}
+          selectedConversationId={selectedConversationId}
+          conversations={conversations}
+        />
+        <main className="flex flex-col flex-1 bg-muted/50">
+          <ChatPanel
+            id={selectedConversationId}
+            isLoading={chatRespondLoading}
+            stop={() => {}}
+            append={onMessageSent}
+            reload={() => {}}
+            input={input}
+            setInput={setInput}
+            messages={conversations}
+          />
+        </main>
+      </div>
     </TooltipProvider>
   );
 };
