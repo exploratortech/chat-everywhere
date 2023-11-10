@@ -90,7 +90,7 @@ const V2Chat = () => {
         title: item.title,
       }));
       setConversations(conversations);
-      if(conversations.length > 0){
+      if (conversations.length > 0) {
         setSelectedConversationId(conversations[0].id);
       }
     }
@@ -167,8 +167,10 @@ const V2Chat = () => {
           selectedConversationId={selectedConversationId}
           conversations={conversations}
         />
-        <main className="flex flex-col flex-1 bg-muted/50">
-          {messages.length > 0 && <ChatList messages={messages} />}
+        <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto">
+          <div className="pb-[200px] pt-4 md:pt-10">
+            {messages.length > 0 && <ChatList messages={messages} />}
+          </div>
           <ChatPanel
             id={selectedConversationId}
             isLoading={chatResponseLoading}
