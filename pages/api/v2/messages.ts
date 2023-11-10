@@ -14,12 +14,15 @@ const DEFAULT_MESSAGE_LIMIT = 20;
 
 const handler = async (req: Request): Promise<Response> => {
   try {
-    const userId = req.headers.get('user-id');
-    if (!userId) return unauthorizedResponse;
-    const userProfile = await getUserProfile(userId);
+    const supabase = getAdminSupabaseClient();
 
-    if (!userProfile || userProfile.plan === 'free')
-      return unauthorizedResponse;
+    const userToken = req.headers.get('user-token');
+    const { data: user, error: userFetchingError } =
+      await supabase.auth.getUser(userToken || '');
+    if (!user || userFetchingError) return unauthorizedResponse;
+
+    const userProfile = await getUserProfile(user.user.id);
+    if (!user || userProfile.plan === 'free') return unauthorizedResponse;
 
     const { conversationId, latestMessageId, beforeMessageId } =
       (await req.json()) as {
@@ -28,7 +31,6 @@ const handler = async (req: Request): Promise<Response> => {
         latestMessageId?: string;
       };
 
-    const supabase = getAdminSupabaseClient();
     const { data, error } = await supabase
       .from('user_v2_conversations')
       .select('*')

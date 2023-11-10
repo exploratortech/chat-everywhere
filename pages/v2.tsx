@@ -6,7 +6,11 @@
  * We will opt to use Assistant API in v2 with raw endpoints instead of the SDK, until Vercel's AI package is ready.
  *  https://github.com/vercel/ai/pull/728
  */
-import { useSupabaseClient, useUser } from '@supabase/auth-helpers-react';
+import {
+  useSession,
+  useSupabaseClient,
+  useUser,
+} from '@supabase/auth-helpers-react';
 import React, { useEffect, useState } from 'react';
 
 import { appWithTranslation } from 'next-i18next';
@@ -14,7 +18,11 @@ import { appWithTranslation } from 'next-i18next';
 import { userProfileQuery } from '@/utils/server/supabase';
 
 import { UserProfile } from '@/types/user';
-import type { ConversationType, MessageType } from '@/types/v2Chat/chat';
+import type {
+  ConversationType,
+  MessageType,
+  OpenAIMessageType,
+} from '@/types/v2Chat/chat';
 
 import { ChatPanel } from '@/components/v2Chat/chat-panel';
 import { Header } from '@/components/v2Chat/header';
@@ -27,12 +35,14 @@ const V2Chat = () => {
   const [selectedConversationId, setSelectedConversationId] =
     useState<string>('');
   const [conversations, setConversations] = useState<ConversationType[]>([]);
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const [chatRespondLoading, setChatRespondLoading] = useState<boolean>(false);
 
   const onMessageSent = async (message: string) => {};
 
   const supabase = useSupabaseClient();
   const user = useUser();
+  const session = useSession();
 
   useEffect(() => {
     if (user && !userProfile) {
@@ -81,18 +91,24 @@ const V2Chat = () => {
   };
 
   const fetchMessages = async (conversationId: string) => {
-    if (!user) return;
+    if (!user || !session) return;
 
     const response = await fetch('/api/v2/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'user-id': user.id,
+        'user-token': session.access_token,
       },
       body: JSON.stringify({ conversationId }),
     });
-    const data = await response.json();
-    console.log(data);
+    const data = (await response.json()) as OpenAIMessageType[];
+    const messages: MessageType[] = data.map((messageItem) => ({
+      role: messageItem.role,
+      content: messageItem.content[0].text.value,
+    }));
+    setMessages(messages);
+    console.log(messages);
+    
   };
 
   const conversationOnSelect = (conversationId: string) => {
