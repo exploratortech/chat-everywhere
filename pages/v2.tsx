@@ -160,7 +160,7 @@ const V2Chat = () => {
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col min-h-screen">
+      <div className="v2-container flex flex-col min-h-screen">
         <Header
           userProfile={userProfile}
           conversationOnSelect={conversationOnSelect}

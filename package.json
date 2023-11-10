@@ -80,6 +80,7 @@
     "stream": "^0.0.2",
     "stripe": "^12.10.0",
     "tailwind-merge": "^2.0.0",
+    "tailwindcss-animate": "^1.0.7",
     "uuid": "^9.0.0",
     "voucher-code-generator": "^1.3.0",
     "ws": "^8.13.0"
