@@ -100,30 +100,25 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         </div>
       )}
 
-      {/* Feature Introduction Popup */}
       <div
-        className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none cursor-pointer"
-        onClick={featureOnClick}
+        className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none"
       >
         <span className="bg-yellow-100 text-yellow-800 text-xs font-medium ml-2 mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-800 dark:text-yellow-300">
           New
         </span>
         <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
-          {t('Features introduction page is now available!')}
+          {t('Starting Nov 13th, online mode will only be available for Pro user.')}
         </span>
       </div>
 
-      {/* Survey for user information */}
-      {!isSurveyFilled && (
-        <div
-          className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none cursor-pointer"
-          onClick={surveyOnClick}
-        >
-          <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
-            {t('Please share your thoughts by completing a brief survey')}
-          </span>
-        </div>
-      )}
+      <div
+        className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none cursor-pointer"
+        onClick={featureOnClick}
+      >
+        <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
+          {t('Features introduction page is now available!')}
+        </span>
+      </div>
 
       {rolePlayMode ? (
         <RolePlayPrompts roleOnClick={roleOnClick} />
