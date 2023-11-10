@@ -449,7 +449,8 @@ export const userProfileQuery = async ({
   const { data: referralTable, error: refereeError } = await client
     .from('referral')
     .select('*')
-    .or(`referee_id.eq.${userProfile.id},referrer_id.eq.${userProfile.id}`);
+    .or(`referee_id.eq.${userProfile.id},referrer_id.eq.${userProfile.id}`)
+    .order('referral_date', { ascending: false });
   if (refereeError) {
     throw refereeError;
   }
