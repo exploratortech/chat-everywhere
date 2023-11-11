@@ -154,7 +154,7 @@ const V2Chat = () => {
 
       const data = await response.json();
       tempSelectedConversation = { ...data };
-      setConversations([...conversations, tempSelectedConversation]);
+      setConversations([tempSelectedConversation, ...conversations]);
       setSelectedConversationId(tempSelectedConversation.id);
       setSelectedConversation(tempSelectedConversation);
     } else {
