@@ -19,6 +19,7 @@ export interface PromptProps {
   setInput: (value: string) => void;
   onSubmit: (value: string) => Promise<void>;
   isLoading: boolean;
+  startNewChat: () => void;
 }
 
 export function PromptForm({
@@ -26,6 +27,7 @@ export function PromptForm({
   input,
   setInput,
   isLoading,
+  startNewChat,
 }: PromptProps) {
   const { formRef, onKeyDown } = useEnterSubmit();
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
@@ -55,8 +57,7 @@ export function PromptForm({
             <button
               onClick={(e) => {
                 e.preventDefault();
-                router.refresh();
-                router.push('/');
+                startNewChat();
               }}
               className={cn(
                 buttonVariants({ size: 'sm', variant: 'outline' }),

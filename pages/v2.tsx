@@ -13,6 +13,8 @@ import {
 } from '@supabase/auth-helpers-react';
 import React, { useEffect, useState } from 'react';
 
+
+
 import { appWithTranslation } from 'next-i18next';
 
 import { userProfileQuery } from '@/utils/server/supabase';
@@ -26,6 +28,7 @@ import type {
 
 import { ChatList } from '@/components/v2Chat/chat-list';
 import { ChatPanel } from '@/components/v2Chat/chat-panel';
+import { EmptyScreen } from '@/components/v2Chat/empty-screen';
 import { Header } from '@/components/v2Chat/header';
 import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
 
@@ -36,7 +39,7 @@ const V2Chat = () => {
   const [selectedConversationId, setSelectedConversationId] =
     useState<string>('');
   const [selectedConversation, setSelectedConversation] =
-    useState<ConversationType>();
+    useState<ConversationType | null>(null);
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [chatResponseLoading, setChatResponseLoading] =
@@ -60,7 +63,11 @@ const V2Chat = () => {
   }, [user]);
 
   useEffect(() => {
-    if (!selectedConversationId) return;
+    if (!selectedConversationId) {
+      setSelectedConversation(null);
+      setMessages([]);
+      return;
+    }
 
     const conversation = conversations.find(
       (item) => item.id === selectedConversationId,
@@ -77,7 +84,8 @@ const V2Chat = () => {
     const { data, error } = await supabase
       .from('user_v2_conversations')
       .select('*')
-      .eq('uid', user.id);
+      .eq('uid', user.id)
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.log(error);
@@ -119,11 +127,40 @@ const V2Chat = () => {
     console.log(messages);
   };
 
-  const onMessageSent = async () => {
-    if (!user || !session || !selectedConversationId || !selectedConversation)
-      return;
-
+  const onMessageSent = async (message: any) => {
+    if (!user || !session) return;
+    
     setChatResponseLoading(true);
+
+    let tempSelectedConversation: ConversationType;
+
+    if (!selectedConversation) {
+      const response = await fetch('/api/v2/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'user-token': session.access_token,
+        },
+        body: JSON.stringify({
+          requestType: 'create conversation',
+          messageContent: message.content,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error(await response.text());
+        return;
+      }
+
+      const data = await response.json();
+      tempSelectedConversation = { ...data };
+      setConversations([tempSelectedConversation, ...conversations]);
+      setSelectedConversationId(tempSelectedConversation.id);
+      setSelectedConversation(tempSelectedConversation);
+    } else {
+      tempSelectedConversation = selectedConversation;
+    }
+
     const response = await fetch('/api/v2/messages', {
       method: 'POST',
       headers: {
@@ -132,7 +169,7 @@ const V2Chat = () => {
       },
       body: JSON.stringify({
         requestType: 'send message',
-        conversationId: selectedConversation.threadId,
+        conversationId: tempSelectedConversation.threadId,
         messageContent: input,
       }),
     });
@@ -143,6 +180,10 @@ const V2Chat = () => {
     } else {
       console.error(response);
     }
+  };
+
+  const startNewChat = () => {
+    setSelectedConversationId('');
   };
 
   const conversationOnSelect = (conversationId: string) => {
@@ -163,13 +204,18 @@ const V2Chat = () => {
       <div className="v2-container flex flex-col min-h-screen">
         <Header
           userProfile={userProfile}
+          startNewChat={startNewChat}
           conversationOnSelect={conversationOnSelect}
           selectedConversationId={selectedConversationId}
           conversations={conversations}
         />
         <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto">
           <div className="pb-[200px] pt-4 md:pt-10">
-            {messages.length > 0 && <ChatList messages={messages} />}
+            {messages.length > 0 ? (
+              <ChatList messages={messages} />
+            ) : (
+              <EmptyScreen />
+            )}
           </div>
           <ChatPanel
             id={selectedConversationId}
@@ -180,6 +226,7 @@ const V2Chat = () => {
             input={input}
             setInput={setInput}
             messages={conversations}
+            startNewChat={startNewChat}
           />
         </main>
       </div>

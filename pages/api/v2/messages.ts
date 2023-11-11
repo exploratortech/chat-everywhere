@@ -1,8 +1,7 @@
+import { ConversationType } from '@/types/v2Chat/chat';
 import { authorizedOpenAiRequest } from '@/utils/server';
-import {
-  getAdminSupabaseClient,
-  getUserProfile,
-} from '@/utils/server/supabase';
+import { getAdminSupabaseClient, getUserProfile } from '@/utils/server/supabase';
+
 
 export const config = {
   runtime: 'edge',
@@ -59,8 +58,8 @@ const handler = async (req: Request): Promise<Response> => {
         );
       case 'send message':
         return sendMessage(user.user.id, conversationId, messageContent);
-      // case 'create conversation':
-      //   return createConversation(user.user.id);
+      case 'create conversation':
+        return createConversation(user.user.id, messageContent);
       default:
         return new Response('Invalid request type', { status: 400 });
     }
@@ -138,14 +137,16 @@ const sendMessage = async (
   if (!messageContent) {
     return new Response('Message content is empty', { status: 400 });
   }
-  
+
   const isConversationBelongsToUser = await doesConversationBelongToUser(
     userId,
     conversationId,
   );
 
   if (!isConversationBelongsToUser) {
-    return new Response("Unauthorized access to conversation.", { status: 403 });
+    return new Response('Unauthorized access to conversation.', {
+      status: 403,
+    });
   }
 
   // Add a Message object to Thread
@@ -156,14 +157,14 @@ const sendMessage = async (
     {
       method: 'POST',
       body: JSON.stringify({
-        "role": "user",
-        "content": messageContent,
+        role: 'user',
+        content: messageContent,
       }),
     },
   );
 
   if (!messageCreationResponse.ok) {
-    console.log("Failed on message creation");
+    console.log('Failed on message creation');
     console.error(await messageCreationResponse.text());
     return new Response('Error', { status: 500 });
   }
@@ -219,6 +220,50 @@ const sendMessage = async (
   }
 
   return new Response(null, { status: 200 });
+};
+
+const createConversation = async (
+  userId: string,
+  messageContent?: string,
+) => {
+  try {
+    if (!messageContent) {
+      throw new Error('Failed to create conversation. Missing message content.');
+    }
+
+    const openAiUrl = 'https://api.openai.com/v1/threads';
+    const response = await authorizedOpenAiRequest(openAiUrl, { method: 'POST' });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    const thread = await response.json();
+
+    const supabase = getAdminSupabaseClient();
+    const { data, error } = await supabase
+      .from('user_v2_conversations')
+      .insert({
+        uid: userId,
+        threadId: thread.id,
+        title: messageContent.substring(0, 40),
+      })
+      .select()
+      .single();
+
+    if (!data) {
+      throw new Error('');
+    }
+
+    if (error) {
+      throw new Error(JSON.stringify(error));
+    }
+
+    return new Response(JSON.stringify(data), { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return new Response('Error', { status: 500 });
+  }
 };
 
 export default handler;
