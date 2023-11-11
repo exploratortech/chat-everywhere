@@ -13,6 +13,8 @@ import {
 } from '@supabase/auth-helpers-react';
 import React, { useEffect, useState } from 'react';
 
+
+
 import { appWithTranslation } from 'next-i18next';
 
 import { userProfileQuery } from '@/utils/server/supabase';
@@ -82,7 +84,8 @@ const V2Chat = () => {
     const { data, error } = await supabase
       .from('user_v2_conversations')
       .select('*')
-      .eq('uid', user.id);
+      .eq('uid', user.id)
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.log(error);
@@ -124,11 +127,40 @@ const V2Chat = () => {
     console.log(messages);
   };
 
-  const onMessageSent = async () => {
-    if (!user || !session || !selectedConversationId || !selectedConversation)
-      return;
-
+  const onMessageSent = async (message: any) => {
+    if (!user || !session) return;
+    
     setChatResponseLoading(true);
+
+    let tempSelectedConversation: ConversationType;
+
+    if (!selectedConversation) {
+      const response = await fetch('/api/v2/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'user-token': session.access_token,
+        },
+        body: JSON.stringify({
+          requestType: 'create conversation',
+          messageContent: message.content,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error(await response.text());
+        return;
+      }
+
+      const data = await response.json();
+      tempSelectedConversation = { ...data };
+      setConversations([...conversations, tempSelectedConversation]);
+      setSelectedConversationId(tempSelectedConversation.id);
+      setSelectedConversation(tempSelectedConversation);
+    } else {
+      tempSelectedConversation = selectedConversation;
+    }
+
     const response = await fetch('/api/v2/messages', {
       method: 'POST',
       headers: {
@@ -137,7 +169,7 @@ const V2Chat = () => {
       },
       body: JSON.stringify({
         requestType: 'send message',
-        conversationId: selectedConversation.threadId,
+        conversationId: tempSelectedConversation.threadId,
         messageContent: input,
       }),
     });
