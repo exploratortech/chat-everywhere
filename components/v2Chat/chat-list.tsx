@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import { type MessageType } from '@/types/v2Chat/chat';
 
 import { ChatMessage } from '@/components/v2Chat/chat-message';
@@ -5,9 +7,14 @@ import { Separator } from '@/components/v2Chat/ui/separator';
 
 export interface ChatList {
   messages: MessageType[];
+  scrollToButton: () => void;
 }
 
-export function ChatList({ messages }: ChatList) {
+export function ChatList({ messages, scrollToButton }: ChatList) {
+  useEffect(() => {
+    scrollToButton();
+  }, [messages]);
+
   if (!messages.length) {
     return null;
   }

@@ -11,9 +11,7 @@ import {
   useSupabaseClient,
   useUser,
 } from '@supabase/auth-helpers-react';
-import React, { useEffect, useState } from 'react';
-
-
+import React, { useEffect, useRef, useState } from 'react';
 
 import { appWithTranslation } from 'next-i18next';
 
@@ -28,6 +26,7 @@ import type {
 
 import { ChatList } from '@/components/v2Chat/chat-list';
 import { ChatPanel } from '@/components/v2Chat/chat-panel';
+import { ChatScrollAnchor } from '@/components/v2Chat/chat-scroll-anchor';
 import { EmptyScreen } from '@/components/v2Chat/empty-screen';
 import { Header } from '@/components/v2Chat/header';
 import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
@@ -35,6 +34,7 @@ import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
 const V2Chat = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>();
   const [input, setInput] = useState<string>('');
+  const chatScrollAnchorRef = useRef();
 
   const [selectedConversationId, setSelectedConversationId] =
     useState<string>('');
@@ -77,6 +77,14 @@ const V2Chat = () => {
     setSelectedConversation(conversation);
     fetchMessages(conversation.threadId);
   }, [selectedConversationId]);
+
+  const scrollToButton = () => {
+    if(!chatScrollAnchorRef.current) return;
+    interface ChatScrollAnchorMethods {
+      scrollToBottom: () => void;
+    }
+    (chatScrollAnchorRef.current as ChatScrollAnchorMethods).scrollToBottom();
+  }
 
   const fetchConversations = async () => {
     if (user === null) return;
@@ -128,7 +136,7 @@ const V2Chat = () => {
 
   const onMessageSent = async (message: any) => {
     if (!user || !session) return;
-    
+
     setChatResponseLoading(true);
 
     let tempSelectedConversation: ConversationType;
@@ -211,7 +219,16 @@ const V2Chat = () => {
         <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto">
           <div className="pb-[200px] pt-4 md:pt-10">
             {messages.length > 0 ? (
-              <ChatList messages={messages} />
+              <>
+                <ChatList
+                  messages={messages}
+                  scrollToButton={scrollToButton}
+                />
+                <ChatScrollAnchor
+                  ref={chatScrollAnchorRef}
+                  trackVisibility={chatResponseLoading}
+                />
+              </>
             ) : (
               <EmptyScreen />
             )}
