@@ -3,7 +3,7 @@
 import * as React from 'react';
 
 import { Button } from '@/components/v2Chat/ui/button';
-import { IconSidebar } from '@/components/v2Chat/ui/icons';
+import { IconPlus, IconSidebar } from '@/components/v2Chat/ui/icons';
 import {
   Sheet,
   SheetContent,
@@ -14,9 +14,10 @@ import {
 
 export interface SidebarProps {
   children?: React.ReactNode;
+  onNewChatClick: () => void;
 }
 
-export function Sidebar({ children }: SidebarProps) {
+export function Sidebar({ children, onNewChatClick }: SidebarProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -29,6 +30,17 @@ export function Sidebar({ children }: SidebarProps) {
         <SheetHeader className="p-4">
           <SheetTitle className="text-sm">Chat History</SheetTitle>
         </SheetHeader>
+        <div className="mb-2 px-2">
+          <Button
+            className="justify-start w-full h-10 shadow-none"
+            type="button"
+            variant="outline"
+            onClick={onNewChatClick}
+          >
+            <IconPlus className="-translate-x-2" />
+            New Chat
+          </Button>
+        </div>
         {children}
       </SheetContent>
     </Sheet>

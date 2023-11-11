@@ -12,6 +12,7 @@ import { IconGitHub, IconSeparator } from '@/components/v2Chat/ui/icons';
 
 type HeaderProps = {
   userProfile: UserProfile;
+  startNewChat: () => void;
   conversationOnSelect: (conversationId: string) => void;
   selectedConversationId: string;
   conversations: ConversationType[];
@@ -19,13 +20,14 @@ type HeaderProps = {
 
 export function Header({
   conversations,
+  startNewChat,
   conversationOnSelect,
   selectedConversationId,
 }: HeaderProps) {
   return (
     <div className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-4 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl">
       <div className="flex items-center">
-        <Sidebar>
+        <Sidebar onNewChatClick={startNewChat}>
           <SidebarList
             selectedConversationId={selectedConversationId}
             conversations={conversations}

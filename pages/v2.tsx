@@ -26,6 +26,7 @@ import type {
 
 import { ChatList } from '@/components/v2Chat/chat-list';
 import { ChatPanel } from '@/components/v2Chat/chat-panel';
+import { EmptyScreen } from '@/components/v2Chat/empty-screen';
 import { Header } from '@/components/v2Chat/header';
 import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
 
@@ -145,6 +146,10 @@ const V2Chat = () => {
     }
   };
 
+  const startNewChat = () => {
+    setSelectedConversationId('');
+  };
+
   const conversationOnSelect = (conversationId: string) => {
     setSelectedConversationId(conversationId);
   };
@@ -163,13 +168,18 @@ const V2Chat = () => {
       <div className="v2-container flex flex-col min-h-screen">
         <Header
           userProfile={userProfile}
+          startNewChat={startNewChat}
           conversationOnSelect={conversationOnSelect}
           selectedConversationId={selectedConversationId}
           conversations={conversations}
         />
         <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto">
           <div className="pb-[200px] pt-4 md:pt-10">
-            {messages.length > 0 && <ChatList messages={messages} />}
+            {messages.length > 0 ? (
+              <ChatList messages={messages} />
+            ) : (
+              <EmptyScreen />
+            )}
           </div>
           <ChatPanel
             id={selectedConversationId}
