@@ -12,6 +12,7 @@ export interface ChatPanelProps {
   input: string;
   setInput: (value: string) => void;
   messages: any[];
+  startNewChat: () => void;
 }
 
 export function ChatPanel({
@@ -23,6 +24,7 @@ export function ChatPanel({
   input,
   setInput,
   messages,
+  startNewChat,
 }: ChatPanelProps) {
   return (
     <div className="fixed inset-x-0 bottom-0 bg-gradient-to-b from-muted/10 from-10% to-muted/30 to-50%">
@@ -63,6 +65,7 @@ export function ChatPanel({
             input={input}
             setInput={setInput}
             isLoading={isLoading}
+            startNewChat={startNewChat}
           />
         </div>
       </div>

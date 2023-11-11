@@ -226,6 +226,7 @@ const V2Chat = () => {
             input={input}
             setInput={setInput}
             messages={conversations}
+            startNewChat={startNewChat}
           />
         </main>
       </div>
