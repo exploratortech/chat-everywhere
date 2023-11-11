@@ -37,7 +37,7 @@ const V2Chat = () => {
   const [selectedConversationId, setSelectedConversationId] =
     useState<string>('');
   const [selectedConversation, setSelectedConversation] =
-    useState<ConversationType>();
+    useState<ConversationType | null>(null);
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [chatResponseLoading, setChatResponseLoading] =
@@ -61,7 +61,11 @@ const V2Chat = () => {
   }, [user]);
 
   useEffect(() => {
-    if (!selectedConversationId) return;
+    if (!selectedConversationId) {
+      setSelectedConversation(null);
+      setMessages([]);
+      return;
+    }
 
     const conversation = conversations.find(
       (item) => item.id === selectedConversationId,
