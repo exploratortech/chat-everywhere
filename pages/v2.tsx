@@ -124,7 +124,6 @@ const V2Chat = () => {
       content: messageItem.content[0].text.value,
     }));
     setMessages(messages);
-    console.log(messages);
   };
 
   const onMessageSent = async (message: any) => {
@@ -175,7 +174,7 @@ const V2Chat = () => {
     });
 
     if (response.status === 200) {
-      fetchConversations();
+      fetchMessages(tempSelectedConversation.threadId);
       setChatResponseLoading(false);
     } else {
       console.error(response);
