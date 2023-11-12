@@ -1,8 +1,6 @@
 import * as React from 'react';
 import Textarea from 'react-textarea-autosize';
 
-import { useRouter } from 'next/navigation';
-
 import { useEnterSubmit } from '@/hooks/v2Chat/use-enter-submit';
 import { cn } from '@/utils/v2Chat/utils';
 
@@ -31,13 +29,12 @@ export function PromptForm({
 }: PromptProps) {
   const { formRef, onKeyDown } = useEnterSubmit();
   const inputRef = React.useRef<HTMLTextAreaElement>(null);
-  const router = useRouter();
 
   React.useEffect(() => {
-    if (inputRef.current) {
+    if (inputRef.current && !isLoading) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [isLoading]);
 
   return (
     <form
@@ -80,6 +77,7 @@ export function PromptForm({
           placeholder="Send a message."
           spellCheck={false}
           className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
+          disabled={isLoading}
         />
         <div className="absolute right-0 top-4 sm:right-4">
           <Tooltip>
