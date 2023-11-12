@@ -30,6 +30,9 @@ import { ChatScrollAnchor } from '@/components/v2Chat/chat-scroll-anchor';
 import { EmptyScreen } from '@/components/v2Chat/empty-screen';
 import { Header } from '@/components/v2Chat/header';
 import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
+import {
+  Dialog,
+} from '@/components/v2Chat/ui/dialog';
 
 const V2Chat = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>();
