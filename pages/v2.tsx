@@ -35,6 +35,7 @@ const V2Chat = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>();
   const [input, setInput] = useState<string>('');
   const chatScrollAnchorRef = useRef();
+  const [enablePullingForUpdates, setEnablePullingForUpdates] = useState(false);
 
   const [selectedConversationId, setSelectedConversationId] =
     useState<string>('');
@@ -77,6 +78,16 @@ const V2Chat = () => {
     setSelectedConversation(conversation);
     fetchMessages(conversation.threadId);
   }, [selectedConversationId]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (enablePullingForUpdates && selectedConversation) {
+        fetchMessages(selectedConversation.threadId);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [enablePullingForUpdates, selectedConversation]);
 
   const scrollToButton = () => {
     if(!chatScrollAnchorRef.current) return;
@@ -132,6 +143,17 @@ const V2Chat = () => {
       content: messageItem.content[0].text.value,
     }));
     setMessages(messages);
+
+    // Check if requires pulling
+    const lastMessage = messages[messages.length - 1];
+    if(!lastMessage || !lastMessage.metadata) return;
+    if(lastMessage.metadata.imageGenerationStatus === "in progress"){
+      setChatResponseLoading(true);
+      setEnablePullingForUpdates(true);
+    }else{
+      setChatResponseLoading(false);
+      setEnablePullingForUpdates(false);
+    }
   };
 
   const onMessageSent = async (message: any) => {
