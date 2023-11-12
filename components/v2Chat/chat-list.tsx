@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { type MessageType } from '@/types/v2Chat/chat';
 
 import { ChatMessage } from '@/components/v2Chat/chat-message';
+import { ImageContainer } from '@/components/v2Chat/image-container';
 import { ImageGenerationSpinner } from '@/components/v2Chat/image-generation-spinner';
 import { Separator } from '@/components/v2Chat/ui/separator';
 
@@ -31,6 +32,10 @@ export function ChatList({ messages, scrollToButton }: ChatList) {
           {message.metadata?.imageGenerationStatus === 'in progress' && (
             <ImageGenerationSpinner />
           )}
+          {message.metadata?.imageGenerationStatus === 'completed' &&
+            message.metadata?.imageUrl && (
+              <ImageContainer url={message.metadata.imageUrl} />
+            )}
         </div>
       ))}
     </div>

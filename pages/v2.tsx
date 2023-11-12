@@ -141,6 +141,7 @@ const V2Chat = () => {
     const messages: MessageType[] = data.map((messageItem) => ({
       role: messageItem.role,
       content: messageItem.content[0].text.value,
+      metadata: messageItem.metadata,
     }));
     setMessages(messages);
 

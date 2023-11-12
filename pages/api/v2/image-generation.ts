@@ -2,10 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 import {
-  getOpenAiRunObject,
-  updateMetadataOfMessage,
   generateImage,
-  submitToolOutput
+  getOpenAiRunObject,
+  submitToolOutput,
+  updateMetadataOfMessage,
 } from '@/utils/v2Chat/openAiApiUtils';
 
 interface RequestBody {
@@ -33,8 +33,12 @@ export default async function handler(
     return;
   }
 
-  console.log("Generating image with threadId, messageId, runId ", threadId, messageId, runId);
-  
+  console.log(
+    'Generating image with threadId, messageId, runId ',
+    threadId,
+    messageId,
+    runId,
+  );
 
   const supabase = getAdminSupabaseClient();
   let toolCallId = null;
@@ -55,14 +59,14 @@ export default async function handler(
 
     const run = await getOpenAiRunObject(threadId, runId);
     const requiredAction = run.required_action;
-    
+
     if (!requiredAction) {
       res.status(400).json({ error: 'Run does not require action' });
       return;
     }
 
     const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
-      (toolCall) => toolCall.function.name === "generate_image"
+      (toolCall) => toolCall.function.name === 'generate_image',
     );
 
     if (!toolCall) {
@@ -73,29 +77,42 @@ export default async function handler(
     toolCallId = toolCall.id;
 
     const imageGenerationPrompt = toolCall.function.arguments;
-    const imageGenerationPromptString = JSON.parse(imageGenerationPrompt).prompt;
+    const imageGenerationPromptString = JSON.parse(
+      imageGenerationPrompt,
+    ).prompt;
 
-    const imageGenerationResponse = await generateImage(imageGenerationPromptString);
+    const imageGenerationResponse = await generateImage(
+      imageGenerationPromptString,
+    );
     const imageGenerationUrl = imageGenerationResponse.data[0].url;
 
-    console.log("Image url: ", imageGenerationUrl);
-    
+    console.log('Image url: ', imageGenerationUrl);
+
+    await submitToolOutput(
+      threadId,
+      runId,
+      toolCallId,
+      'Successfully generated image',
+    );
+
     await updateMetadataOfMessage(threadId, messageId, {
       imageGenerationStatus: 'completed',
       imageUrl: imageGenerationUrl,
     });
 
-    await submitToolOutput(threadId, runId, toolCallId, "Successfully generated image");
-
     res.status(200).end();
-
   } catch (error) {
     // Update meta data in message
     await updateMetadataOfMessage(threadId, messageId, {
       imageGenerationStatus: 'failed',
     });
-    if(toolCallId){
-      await submitToolOutput(threadId, runId, toolCallId, "Unable to generate image, please try again");
+    if (toolCallId) {
+      await submitToolOutput(
+        threadId,
+        runId,
+        toolCallId,
+        'Unable to generate image, please try again',
+      );
     }
     console.error(error);
     res.status(500).json({ error: 'Unable to generate image' });
