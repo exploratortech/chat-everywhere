@@ -1,13 +1,18 @@
-import { ConversationType } from '@/types/v2Chat/chat';
 import { authorizedOpenAiRequest } from '@/utils/server';
-import { getAdminSupabaseClient, getUserProfile } from '@/utils/server/supabase';
-
+import {
+  getAdminSupabaseClient,
+  getUserProfile,
+} from '@/utils/server/supabase';
+import {
+  addOpenAiMessageToThread,
+  updateMetadataOfMessage,
+} from '@/utils/v2Chat/openAiApiUtils';
 
 export const config = {
   runtime: 'edge',
 };
 
-export type requestType =
+export type RequestType =
   | 'retrieve messages'
   | 'send message'
   // ^This request will trigger a "Create message" and "Create Run" requests, then
@@ -38,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
       requestType,
       messageContent,
     } = (await req.json()) as {
-      requestType: requestType;
+      requestType: RequestType;
       conversationId: string;
       beforeMessageId?: string;
       latestMessageId?: string;
@@ -150,16 +155,11 @@ const sendMessage = async (
   }
 
   // Add a Message object to Thread
-  const messageCreationUrl = `https://api.openai.com/v1/threads/${conversationId}/messages`;
-
-  const messageCreationResponse = await authorizedOpenAiRequest(
-    messageCreationUrl,
+  const messageCreationResponse = await addOpenAiMessageToThread(
+    conversationId,
     {
-      method: 'POST',
-      body: JSON.stringify({
-        role: 'user',
-        content: messageContent,
-      }),
+      role: 'user',
+      content: messageContent,
     },
   );
 
@@ -168,6 +168,8 @@ const sendMessage = async (
     console.error(await messageCreationResponse.text());
     return new Response('Error', { status: 500 });
   }
+
+  const latestMessageId = (await messageCreationResponse.json()).id;
 
   // Create a Run object for the message in Thread
   const runCreationUrl = `https://api.openai.com/v1/threads/${conversationId}/runs`;
@@ -207,11 +209,43 @@ const sendMessage = async (
 
     runStatusData = await runStatusResponse.json();
 
-    if (runStatusData.status === 'completed') {
+    if (
+      runStatusData.status === 'completed' ||
+      runStatusData.status === 'requires_action'
+    ) {
       break;
     }
 
+    if (runStatusData.status === 'failed') {
+      console.log(runStatusData);
+      console.log('Run creation failed');
+      return new Response('Error: Failed', { status: 500 });
+    }
+
     await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+
+  if (runStatusData.status === 'requires_action') {
+    console.log('Required tool calling');
+
+    await updateMetadataOfMessage(conversationId, latestMessageId, {
+      imageGenerationStatus: 'in progress',
+    });
+
+    // Trigger image generation asynchronously
+    fetch(`${process.env.SERVER_HOST}/api/v2/image-generation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        threadId: conversationId,
+        messageId: latestMessageId,
+        runId: runStatusData.id,
+      }),
+    });
+
+    return new Response(null, { status: 200 });
   }
 
   if (runStatusData.status !== 'completed') {
@@ -222,17 +256,18 @@ const sendMessage = async (
   return new Response(null, { status: 200 });
 };
 
-const createConversation = async (
-  userId: string,
-  messageContent?: string,
-) => {
+const createConversation = async (userId: string, messageContent?: string) => {
   try {
     if (!messageContent) {
-      throw new Error('Failed to create conversation. Missing message content.');
+      throw new Error(
+        'Failed to create conversation. Missing message content.',
+      );
     }
 
     const openAiUrl = 'https://api.openai.com/v1/threads';
-    const response = await authorizedOpenAiRequest(openAiUrl, { method: 'POST' });
+    const response = await authorizedOpenAiRequest(openAiUrl, {
+      method: 'POST',
+    });
 
     if (!response.ok) {
       throw new Error(await response.text());

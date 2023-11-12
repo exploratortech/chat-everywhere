@@ -166,6 +166,13 @@ const V2Chat = () => {
       setSelectedConversation(tempSelectedConversation);
     } else {
       tempSelectedConversation = selectedConversation;
+      setMessages([
+        ...messages,
+        {
+          role: 'user',
+          content: message.content,
+        },
+      ]);
     }
 
     const response = await fetch('/api/v2/messages', {
@@ -182,11 +189,13 @@ const V2Chat = () => {
     });
 
     if (response.status === 200) {
-      fetchMessages(tempSelectedConversation.threadId);
       setChatResponseLoading(false);
     } else {
       console.error(response);
     }
+
+    setChatResponseLoading(false);
+    fetchMessages(tempSelectedConversation.threadId);
   };
 
   const startNewChat = () => {
