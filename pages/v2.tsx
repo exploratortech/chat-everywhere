@@ -12,6 +12,7 @@ import {
   useUser,
 } from '@supabase/auth-helpers-react';
 import React, { useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { appWithTranslation } from 'next-i18next';
 
@@ -118,9 +119,6 @@ const V2Chat = () => {
         title: item.title,
       }));
       setConversations(conversations);
-      if (conversations.length > 0) {
-        setSelectedConversationId(conversations[0].id);
-      }
     }
   };
 
@@ -146,14 +144,19 @@ const V2Chat = () => {
     }));
     setMessages(messages);
 
-    if(messages.length > 0 && messages[messages.length - 1].role === 'assistant'){
+    if (
+      messages.length > 0 &&
+      messages[messages.length - 1].role === 'assistant'
+    ) {
       fetchSuggestions(messages);
-    };
+    }
 
     // Check if requires pulling
-    const lastMessage = [...messages].reverse().find(message => message.metadata?.imageGenerationStatus);
+    const lastMessage = [...messages]
+      .reverse()
+      .find((message) => message.metadata?.imageGenerationStatus);
     if (!lastMessage || !lastMessage.metadata) return;
-    
+
     setSuggestions([]);
     if (lastMessage.metadata.imageGenerationStatus === 'in progress') {
       setChatResponseLoading(true);
@@ -165,7 +168,8 @@ const V2Chat = () => {
   };
 
   const fetchSuggestions = async (messages: MessageType[]) => {
-    if (!user || !session || enablePullingForUpdates || chatResponseLoading) return;
+    if (!user || !session || enablePullingForUpdates || chatResponseLoading)
+      return;
 
     const response = await fetch('/api/v2/suggestions', {
       method: 'POST',
@@ -181,8 +185,13 @@ const V2Chat = () => {
 
     try {
       const suggestions = await response.json();
-      if (!Array.isArray(suggestions) || !suggestions.every(item => typeof item === 'string')) {
-        throw new Error(`Invalid suggestions format. Expected an array of strings. Got ${suggestions}`);
+      if (
+        !Array.isArray(suggestions) ||
+        !suggestions.every((item) => typeof item === 'string')
+      ) {
+        throw new Error(
+          `Invalid suggestions format. Expected an array of strings. Got ${suggestions}`,
+        );
       }
       setSuggestions(suggestions);
     } catch (error) {
@@ -249,6 +258,7 @@ const V2Chat = () => {
     if (response.status === 200) {
       setChatResponseLoading(false);
     } else {
+      toast.error('Unable to send message. Please try again later.');
       console.error(response);
     }
 
@@ -266,9 +276,11 @@ const V2Chat = () => {
 
   if (!userProfile) {
     return (
-      <div>
-        <h1>Access Denied</h1>
-        <p>You must be logged in to view this page.</p>
+      <div className="v2-container flex flex-col min-h-screen">
+        <div>
+          <h1>Access Denied</h1>
+          <p>You must be logged in or be our Pro member to view this page.</p>
+        </div>
       </div>
     );
   }
@@ -283,8 +295,8 @@ const V2Chat = () => {
           selectedConversationId={selectedConversationId}
           conversations={conversations}
         />
-        <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto pb-5 md:pb-0">
-          <div className="pb-[200px] pt-4 md:pt-10">
+        <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto pt-5">
+          <div className="pb-[120px] mt-12 mb-14">
             {messages.length > 0 ? (
               <>
                 <ChatList
