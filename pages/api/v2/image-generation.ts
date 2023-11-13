@@ -61,13 +61,14 @@ export default async function handler(
   // try {
   const run = await getOpenAiRunObject(threadId, runId);
   const requiredAction = run.required_action;
-
-  if (!requiredAction) {
-    res.status(400).json({ error: 'Run does not require action' });
-    return;
-  }
-
   // === TESTING WORKING TAG ===
+
+  // if (!requiredAction) {
+  //   res.status(400).json({ error: 'Run does not require action' });
+  //   return;
+  // }
+
+  // === NOT WORKING TAG ===
 
   // const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
   //   (toolCall) => toolCall.function.name === 'generate_image',
@@ -77,7 +78,6 @@ export default async function handler(
   //   res.status(400).json({ error: 'Tool call not found' });
   //   return;
   // }
-  // === NOT WORKING TAG ===
 
   // toolCallId = toolCall.id;
 
