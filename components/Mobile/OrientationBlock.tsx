@@ -27,15 +27,15 @@ const OrientationBlock: React.FC<OrientationBlockProps> = ({ children }) => {
       <div
         className={`relative inset-0 bg-white dark:bg-[#343541] dark:text-white w-[100dvw] h-[100dvh] text-center px-4 py-8 ${showBlocker}`}
       >
-        <h1 className="text-2xl font-bold mb-4">
+        <h1 className="text-2xl font-bold mb-4" suppressHydrationWarning>
           {t('We appreciate your use of our application.')}
         </h1>
-        <p className="mb-4">
+        <p className="mb-4" suppressHydrationWarning>
           {t(
             'Currently, our app is optimized to work in portrait mode and unfortunately, we do not support landscape mode at this moment.',
           )}
         </p>
-        <p>{t('Thank you for your understanding and patience.')}</p>
+        <p suppressHydrationWarning>{t('Thank you for your understanding and patience.')}</p>
       </div>
       <div className={`${showContent}`}>{children}</div>
     </>
