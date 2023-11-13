@@ -74,7 +74,7 @@ export default async function handler(
       'OpenAI-Beta': 'assistants=v1',
       'Content-Type': 'application/json',
     };
-    await fetch(openAiUrl, { headers });
+    const response = await fetch(openAiUrl, { headers });
     // === TESTING WORKING TAG ===
 
     // if (!response.ok) {
