@@ -62,18 +62,19 @@ export default async function handler(
   // WORKING TAG ===
 
   // try {
-    // === TESTING WORKING TAG ===
     // const run = await getOpenAiRunObject(threadId, runId);
-
+    
     // Breaking down the above line
     const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`;
-
+    
     const response = await authorizedOpenAiRequest(openAiUrl);
+    // === TESTING WORKING TAG ===
 
-    if (!response.ok) {
-      console.error(await response.text());
-      throw new Error('Failed to retrieve run');
-    }
+    // if (!response.ok) {
+    //   console.error(await response.text());
+    //   throw new Error('Failed to retrieve run');
+    // }
+    // === NOT WORKING TAG ===
 
     // const requiredAction = run.required_action;
   // } catch (error) {
@@ -87,7 +88,6 @@ export default async function handler(
   //   return;
   // }
 
-  // === NOT WORKING TAG ===
 
   // const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
   //   (toolCall) => toolCall.function.name === 'generate_image',
