@@ -93,7 +93,7 @@ export default async function handler(
       threadId,
       runId,
       toolCallId,
-      'Successfully generated image with URL: ' + imageGenerationUrl,
+      'Successfully generated image, image is displayed on user\'s screen',
     );
 
     await waitForRunToCompletion(threadId, runId);
