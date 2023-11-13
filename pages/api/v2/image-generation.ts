@@ -67,15 +67,17 @@ export default async function handler(
     return;
   }
 
-  const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
-    (toolCall) => toolCall.function.name === 'generate_image',
-  );
-
-  if (!toolCall) {
-    res.status(400).json({ error: 'Tool call not found' });
-    return;
-  }
   // === TESTING WORKING TAG ===
+
+  // const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
+  //   (toolCall) => toolCall.function.name === 'generate_image',
+  // );
+
+  // if (!toolCall) {
+  //   res.status(400).json({ error: 'Tool call not found' });
+  //   return;
+  // }
+  // === NOT WORKING TAG ===
 
   // toolCallId = toolCall.id;
 
