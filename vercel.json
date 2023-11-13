@@ -10,7 +10,7 @@
     }
   ],
   "functions": {
-    "src/pages/api/v2/**/*": {
+    "pages/api/v2/**/*": {
       "maxDuration": 300
     }
   }
