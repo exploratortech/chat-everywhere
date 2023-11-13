@@ -89,8 +89,9 @@ export const generateImage = async (
   let response;
   let delay = 500; // Initial delay of 500ms
   let retries = 0; // Initial retry count
+  const maxRetries = 10;
 
-  while (retries < 3) {
+  while (retries < maxRetries) {
     response = await authorizedOpenAiRequest(openAiUrl, {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -106,7 +107,7 @@ export const generateImage = async (
     retries += 1;
   }
 
-  if (!response || !response.ok || retries === 3) {
+  if (!response || !response.ok || retries === maxRetries) {
     if(response){
       console.error(await response.text());
     }
