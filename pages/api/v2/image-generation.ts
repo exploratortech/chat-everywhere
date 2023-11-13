@@ -24,6 +24,8 @@ export default async function handler(
 ) {
 
   console.log('Image generation endpoint is hit');
+  res.status(205).end('Missing threadId or messageId or runId');
+  return;
   
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
