@@ -58,10 +58,15 @@ export default async function handler(
 
   // WORKING TAG ===
 
-  // try {
-  const run = await getOpenAiRunObject(threadId, runId);
-  const requiredAction = run.required_action;
-  // === TESTING WORKING TAG ===
+  try {
+    const run = await getOpenAiRunObject(threadId, runId);
+    const requiredAction = run.required_action;
+    // === TESTING WORKING TAG ===
+  } catch (error) {
+    // console.error("Unable to get OpenAi run object");
+    // res.status(500).json({ error: 'Unable to generate image' });
+    return;
+  }
 
   // if (!requiredAction) {
   //   res.status(400).json({ error: 'Run does not require action' });
