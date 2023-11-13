@@ -148,8 +148,9 @@ const V2Chat = () => {
     fetchSuggestions(messages);
 
     // Check if requires pulling
-    const lastMessage = messages[messages.length - 1];
+    const lastMessage = [...messages].reverse().find(message => message.metadata?.imageGenerationStatus);
     if (!lastMessage || !lastMessage.metadata) return;
+    
     setSuggestions([]);
     if (lastMessage.metadata.imageGenerationStatus === 'in progress') {
       setChatResponseLoading(true);

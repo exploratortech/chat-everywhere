@@ -6,6 +6,7 @@ import {
   getOpenAiRunObject,
   submitToolOutput,
   updateMetadataOfMessage,
+  waitForRunToCompletion
 } from '@/utils/v2Chat/openAiApiUtils';
 
 interface RequestBody {
@@ -92,8 +93,10 @@ export default async function handler(
       threadId,
       runId,
       toolCallId,
-      'Successfully generated image',
+      'Successfully generated image with URL: ' + imageGenerationUrl,
     );
+
+    await waitForRunToCompletion(threadId, runId);
 
     await updateMetadataOfMessage(threadId, messageId, {
       imageGenerationStatus: 'completed',

@@ -102,6 +102,24 @@ export const generateImage = async (
   return imageResponse;
 };
 
+export const waitForRunToCompletion = async (
+  threadId: string,
+  runId: string,
+) => {
+  let run: OpenAIRunType;
+  let startTime = Date.now();
+  do {
+    run = await getOpenAiRunObject(threadId, runId);
+    if (run.status === 'completed' || run.status === 'failed') {
+      break;
+    }
+    if (Date.now() - startTime > 5000) {
+      throw new Error('Timeout after 5 seconds');
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  } while (true);
+};
+
 export const submitToolOutput = async (
   threadId: string,
   runId: string,
