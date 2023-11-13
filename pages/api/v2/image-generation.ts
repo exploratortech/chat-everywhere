@@ -59,41 +59,30 @@ export default async function handler(
   // WORKING TAG ===
 
   // try {
-    // const run = await getOpenAiRunObject(threadId, runId);
-    
-    const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`;
-    
-    const response = await authorizedOpenAiRequest(openAiUrl);
-    // Breaking down the above line
+  // const run = await getOpenAiRunObject(threadId, runId);
 
-    // const options: RequestInit = {};
-    // const headers = {
-    //   Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    //   'OpenAI-Beta': 'assistants=v1',
-    //   'Content-Type': 'application/json',
-    //   ...options.headers,
-    // };
-    // const response = await fetch(openAiUrl, { ...options, headers });
-    // === TESTING WORKING TAG ===
+  const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`;
 
-    // if (!response.ok) {
-    //   console.error(await response.text());
-    //   throw new Error('Failed to retrieve run');
-    // }
-    // === NOT WORKING TAG ===
+  const response = await authorizedOpenAiRequest(openAiUrl);
 
-    // const requiredAction = run.required_action;
+  if (!response.ok) {
+    console.error(await response.text());
+    throw new Error('Failed to retrieve run');
+  }
+
+  // const requiredAction = run.required_action;
   // } catch (error) {
-    // console.error("Unable to get OpenAi run object");
-    // res.status(500).json({ error: 'Unable to generate image' });
+  // console.error("Unable to get OpenAi run object");
+  // res.status(500).json({ error: 'Unable to generate image' });
   //   return;
   // }
+  // === TESTING WORKING TAG ===
+  // === NOT WORKING TAG ===
 
   // if (!requiredAction) {
   //   res.status(400).json({ error: 'Run does not require action' });
   //   return;
   // }
-
 
   // const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
   //   (toolCall) => toolCall.function.name === 'generate_image',
@@ -159,6 +148,7 @@ export default async function handler(
   // }
 }
 
+// Move this function from utils/server/index.ts to here for serverless function compatibility reason
 export const authorizedOpenAiRequest = async (
   url: string,
   options: RequestInit = {},
