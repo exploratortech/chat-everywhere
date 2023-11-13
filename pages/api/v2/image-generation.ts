@@ -45,7 +45,7 @@ export default async function handler(
   const supabase = getAdminSupabaseClient();
   let toolCallId = null;
 
-  const { data: thread, error } = await supabase
+  const { data: thread } = await supabase
     .from('user_v2_conversations')
     .select('*')
     .eq('threadId', threadId)

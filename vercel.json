@@ -8,10 +8,5 @@
       "path": "/api/cron/update-pro-accounts-plan",
       "schedule": "0 16 * * *"
     }
-  ],
-  "functions": {
-    "src/pages/api/v2/image-generation": {
-      "maxDuration": 300
-    }
-  }
+  ]
 }
