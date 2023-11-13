@@ -45,82 +45,82 @@ export default async function handler(
   const supabase = getAdminSupabaseClient();
   let toolCallId = null;
 
-  // try {
   const { data: thread, error } = await supabase
     .from('user_v2_conversations')
     .select('*')
     .eq('threadId', threadId)
     .single();
 
-    if (!thread) {
-      res.status(404).json({ error: 'Thread not found' });
+  if (!thread) {
+    res.status(404).json({ error: 'Thread not found' });
+    return;
+  }
+
+  // res.status(200).json({});
+  // return;
+
+  try {
+    const run = await getOpenAiRunObject(threadId, runId);
+    const requiredAction = run.required_action;
+
+    if (!requiredAction) {
+      res.status(400).json({ error: 'Run does not require action' });
       return;
     }
 
-  res.status(200).json({});
-  return;
+    const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
+      (toolCall) => toolCall.function.name === 'generate_image',
+    );
 
-  //   const run = await getOpenAiRunObject(threadId, runId);
-  //   const requiredAction = run.required_action;
+    if (!toolCall) {
+      res.status(400).json({ error: 'Tool call not found' });
+      return;
+    }
 
-  //   if (!requiredAction) {
-  //     res.status(400).json({ error: 'Run does not require action' });
-  //     return;
-  //   }
+    toolCallId = toolCall.id;
 
-  //   const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
-  //     (toolCall) => toolCall.function.name === 'generate_image',
-  //   );
+    const imageGenerationPrompt = toolCall.function.arguments;
+    const imageGenerationPromptString = JSON.parse(
+      imageGenerationPrompt,
+    ).prompt;
 
-  //   if (!toolCall) {
-  //     res.status(400).json({ error: 'Tool call not found' });
-  //     return;
-  //   }
+    const imageGenerationResponse = await generateImage(
+      imageGenerationPromptString,
+    );
+    const imageGenerationUrl = imageGenerationResponse.data[0].url;
 
-  //   toolCallId = toolCall.id;
+    console.log('Image url: ', imageGenerationUrl);
 
-  //   const imageGenerationPrompt = toolCall.function.arguments;
-  //   const imageGenerationPromptString = JSON.parse(
-  //     imageGenerationPrompt,
-  //   ).prompt;
+    await submitToolOutput(
+      threadId,
+      runId,
+      toolCallId,
+      'Successfully generated image with URL: ' + imageGenerationUrl,
+    );
 
-  //   const imageGenerationResponse = await generateImage(
-  //     imageGenerationPromptString,
-  //   );
-  //   const imageGenerationUrl = imageGenerationResponse.data[0].url;
+    await waitForRunToCompletion(threadId, runId);
 
-  //   console.log('Image url: ', imageGenerationUrl);
+    await updateMetadataOfMessage(threadId, messageId, {
+      imageGenerationStatus: 'completed',
+      imageUrl: imageGenerationUrl,
+    });
 
-  //   await submitToolOutput(
-  //     threadId,
-  //     runId,
-  //     toolCallId,
-  //     'Successfully generated image with URL: ' + imageGenerationUrl,
-  //   );
-
-  //   await waitForRunToCompletion(threadId, runId);
-
-  //   await updateMetadataOfMessage(threadId, messageId, {
-  //     imageGenerationStatus: 'completed',
-  //     imageUrl: imageGenerationUrl,
-  //   });
-
-  //   res.status(200).end();
-  // } catch (error) {
-  //   // Update meta data in message
-  //   await updateMetadataOfMessage(threadId, messageId, {
-  //     imageGenerationStatus: 'failed',
-  //   });
-  //   if (toolCallId) {
-  //     await submitToolOutput(
-  //       threadId,
-  //       runId,
-  //       toolCallId,
-  //       'Unable to generate image, please try again',
-  //     );
-  //   }
-  //   console.error(error);
-  //   res.status(500).json({ error: 'Unable to generate image' });
-  //   return;
-  // }
+    res.status(200).end();
+  } catch (error) {
+    // Update meta data in message
+    await updateMetadataOfMessage(threadId, messageId, {
+      imageGenerationStatus: 'failed',
+    });
+    if (toolCallId) {
+      await submitToolOutput(
+        threadId,
+        runId,
+        toolCallId,
+        'Unable to generate image, please try again',
+      );
+    }
+    console.error(error);
+    res.status(500).json({ error: 'Unable to generate image' });
+    return;
+  }
 }
