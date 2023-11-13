@@ -64,10 +64,17 @@ export default async function handler(
   // try {
     // const run = await getOpenAiRunObject(threadId, runId);
     
-    // Breaking down the above line
     const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`;
     
-    const response = await authorizedOpenAiRequest(openAiUrl);
+    // const response = await authorizedOpenAiRequest(openAiUrl);
+    // Breaking down the above line
+
+    const headers = {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      'OpenAI-Beta': 'assistants=v1',
+      'Content-Type': 'application/json',
+    };
+    await fetch(openAiUrl, { headers });
     // === TESTING WORKING TAG ===
 
     // if (!response.ok) {
