@@ -56,48 +56,27 @@ export default async function handler(
     return;
   }
 
-  // WORKING TAG ===
-
-  // try {
   const run = await getOpenAiRunObject(threadId, runId);
 
-  // const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`;
+  // WORKING Above this line
+  
+  const requiredAction = run.required_action;
 
-  // const response = await authorizedOpenAiRequest(openAiUrl);
+  if (!requiredAction) {
+    res.status(400).json({ error: 'Run does not require action' });
+    return;
+  }
 
-  // if (!response.ok) {
-  //   console.error(await response.text());
-  //   throw new Error('Failed to retrieve run');
-  // }
+  const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
+    (toolCall) => toolCall.function.name === 'generate_image',
+  );
 
-  // const run = await response.json();
+  if (!toolCall) {
+    res.status(400).json({ error: 'Tool call not found' });
+    return;
+  }
 
-  // console.log(run);
-
-  // const requiredAction = run.required_action;
-  // } catch (error) {
-  // console.error("Unable to get OpenAi run object");
-  // res.status(500).json({ error: 'Unable to generate image' });
-  //   return;
-  // }
-  // === TESTING WORKING TAG ===
-  // === NOT WORKING TAG ===
-
-  // if (!requiredAction) {
-  //   res.status(400).json({ error: 'Run does not require action' });
-  //   return;
-  // }
-
-  // const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
-  //   (toolCall) => toolCall.function.name === 'generate_image',
-  // );
-
-  // if (!toolCall) {
-  //   res.status(400).json({ error: 'Tool call not found' });
-  //   return;
-  // }
-
-  // toolCallId = toolCall.id;
+  toolCallId = toolCall.id;
 
   // const imageGenerationPrompt = toolCall.function.arguments;
   // const imageGenerationPromptString = JSON.parse(
