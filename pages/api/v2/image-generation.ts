@@ -52,15 +52,13 @@ export default async function handler(
     .eq('threadId', threadId)
     .single();
 
+    if (!thread) {
+      res.status(404).json({ error: 'Thread not found' });
+      return;
+    }
+
   res.status(200).json({});
   return;
-
-  //     if (error) throw new Error(JSON.stringify(error));
-
-  //   if (!thread) {
-  //     res.status(404).json({ error: 'Thread not found' });
-  //     return;
-  //   }
 
   //   const run = await getOpenAiRunObject(threadId, runId);
   //   const requiredAction = run.required_action;
