@@ -44,89 +44,88 @@ export default async function handler(
 
   const supabase = getAdminSupabaseClient();
   let toolCallId = null;
+  try {
+    const { data: thread } = await supabase
+      .from('user_v2_conversations')
+      .select('*')
+      .eq('threadId', threadId)
+      .single();
 
-  const { data: thread } = await supabase
-    .from('user_v2_conversations')
-    .select('*')
-    .eq('threadId', threadId)
-    .single();
+    if (!thread) {
+      res.status(404).json({ error: 'Thread not found' });
+      return;
+    }
 
-  if (!thread) {
-    res.status(404).json({ error: 'Thread not found' });
+    const run = await getOpenAiRunObject(threadId, runId);
+
+    const requiredAction = run.required_action;
+
+    if (!requiredAction) {
+      res.status(400).json({ error: 'Run does not require action' });
+      return;
+    }
+
+    const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
+      (toolCall) => toolCall.function.name === 'generate_image',
+    );
+
+    if (!toolCall) {
+      res.status(400).json({ error: 'Tool call not found' });
+      return;
+    }
+
+    toolCallId = toolCall.id;
+    // WORKING Above this line
+
+    const imageGenerationPrompt = toolCall.function.arguments;
+    const imageGenerationPromptString = JSON.parse(
+      imageGenerationPrompt,
+    ).prompt;
+
+    const imageGenerationResponse = await generateImage(
+      imageGenerationPromptString,
+    );
+    const imageGenerationUrl = imageGenerationResponse.data[0].url;
+
+    console.log('Image url: ', imageGenerationUrl);
+
+    await submitToolOutput(
+      threadId,
+      runId,
+      toolCallId,
+      'Successfully generated image with URL: ' + imageGenerationUrl,
+    );
+
+    await waitForRunToCompletion(threadId, runId);
+
+    await updateMetadataOfMessage(threadId, messageId, {
+      imageGenerationStatus: 'completed',
+      imageUrl: imageGenerationUrl,
+    });
+
+    res.status(200).end();
+  } catch (error) {
+    try {
+      // Update meta data in message
+      await updateMetadataOfMessage(threadId, messageId, {
+        imageGenerationStatus: 'failed',
+      });
+      if (toolCallId) {
+        await submitToolOutput(
+          threadId,
+          runId,
+          toolCallId,
+          'Unable to generate image, please try again',
+        );
+      }
+    } catch (error) {
+      console.error(
+        'Error updating metadata or submitting tool output: ',
+        error,
+      );
+    }
+    console.error(error);
+    res.status(500).json({ error: 'Unable to generate image' });
     return;
   }
-
-  const run = await getOpenAiRunObject(threadId, runId);
-
-  // WORKING Above this line
-  
-  const requiredAction = run.required_action;
-
-  if (!requiredAction) {
-    res.status(400).json({ error: 'Run does not require action' });
-    return;
-  }
-
-  const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
-    (toolCall) => toolCall.function.name === 'generate_image',
-  );
-
-  if (!toolCall) {
-    res.status(400).json({ error: 'Tool call not found' });
-    return;
-  }
-
-  toolCallId = toolCall.id;
-
-  // const imageGenerationPrompt = toolCall.function.arguments;
-  // const imageGenerationPromptString = JSON.parse(
-  //   imageGenerationPrompt,
-  // ).prompt;
-
-  // const imageGenerationResponse = await generateImage(
-  //   imageGenerationPromptString,
-  // );
-  // const imageGenerationUrl = imageGenerationResponse.data[0].url;
-
-  // console.log('Image url: ', imageGenerationUrl);
-
-  // await submitToolOutput(
-  //   threadId,
-  //   runId,
-  //   toolCallId,
-  //   'Successfully generated image with URL: ' + imageGenerationUrl,
-  // );
-
-  // await waitForRunToCompletion(threadId, runId);
-
-  // await updateMetadataOfMessage(threadId, messageId, {
-  //   imageGenerationStatus: 'completed',
-  //   imageUrl: imageGenerationUrl,
-  // });
-
-  res.status(200).end();
-  // } catch (error) {
-  // try {
-  //   // Update meta data in message
-  //   await updateMetadataOfMessage(threadId, messageId, {
-  //     imageGenerationStatus: 'failed',
-  //   });
-  //   if (toolCallId) {
-  //     await submitToolOutput(
-  //       threadId,
-  //       runId,
-  //       toolCallId,
-  //       'Unable to generate image, please try again',
-  //     );
-  //   }
-  // } catch (error) {
-  //   console.error(
-  //     'Error updating metadata or submitting tool output: ',
-  //     error,
-  //   );
-  // }
-  //   console.error(error);
-  //   res.status(500).json({ error: 'Unable to generate image' });
-  //   return;
-  // }
 }
