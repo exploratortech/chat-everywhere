@@ -11,9 +11,6 @@ import {
   waitForRunToCompletion,
 } from '@/utils/v2Chat/openAiApiUtils';
 
-import { authorizedOpenAiRequest } from '@/utils/server';
-
-
 interface RequestBody {
   threadId: string;
   messageId: string;
@@ -161,3 +158,16 @@ export default async function handler(
   //   return;
   // }
 }
+
+export const authorizedOpenAiRequest = async (
+  url: string,
+  options: RequestInit = {},
+) => {
+  const headers = {
+    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    'OpenAI-Beta': 'assistants=v1',
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  return fetch(url, { ...options, headers });
+};
