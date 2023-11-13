@@ -28,22 +28,22 @@ export default async function handler(
     res.status(405).end('Method Not Allowed');
   }
 
+  const { threadId, messageId, runId } = req.body as RequestBody;
+
+  if (!threadId || !messageId || !runId) {
+    res.status(400).json({ error: 'Missing threadId or messageId or runId' });
+    return;
+  }
+
+  console.log(
+    'Generating image with threadId, messageId, runId ',
+    threadId,
+    messageId,
+    runId,
+  );
+  
   res.status(200).json({});
   return;
-  
-  // const { threadId, messageId, runId } = req.body as RequestBody;
-
-  // if (!threadId || !messageId || !runId) {
-  //   res.status(400).json({ error: 'Missing threadId or messageId or runId' });
-  //   return;
-  // }
-
-  // console.log(
-  //   'Generating image with threadId, messageId, runId ',
-  //   threadId,
-  //   messageId,
-  //   runId,
-  // );
 
   // const supabase = getAdminSupabaseClient();
   // let toolCallId = null;
