@@ -1,3 +1,6 @@
+// This serverless function is responsible for generating an image for a message
+// and storing it in the thread.
+
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
@@ -6,7 +9,7 @@ import {
   getOpenAiRunObject,
   submitToolOutput,
   updateMetadataOfMessage,
-  waitForRunToCompletion
+  waitForRunToCompletion,
 } from '@/utils/v2Chat/openAiApiUtils';
 
 interface RequestBody {
@@ -15,13 +18,13 @@ interface RequestBody {
   runId: string;
 }
 
-// This serverless function is responsible for generating an image for a message
-// and storing it in the database.
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+
+  console.log('Image generation endpoint is hit');
+  
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     res.status(405).end('Method Not Allowed');
