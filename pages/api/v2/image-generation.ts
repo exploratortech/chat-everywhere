@@ -69,12 +69,14 @@ export default async function handler(
     // const response = await authorizedOpenAiRequest(openAiUrl);
     // Breaking down the above line
 
+    const options: RequestInit = {};
     const headers = {
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       'OpenAI-Beta': 'assistants=v1',
       'Content-Type': 'application/json',
+      ...options.headers,
     };
-    const response = await fetch(openAiUrl, { headers });
+    const response = await fetch(openAiUrl, { ...options, headers });
     // === TESTING WORKING TAG ===
 
     // if (!response.ok) {
