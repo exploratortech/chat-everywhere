@@ -107,25 +107,25 @@ export default async function handler(
 
     res.status(200).end();
   } catch (error) {
-    try {
-      // Update meta data in message
-      await updateMetadataOfMessage(threadId, messageId, {
-        imageGenerationStatus: 'failed',
-      });
-      if (toolCallId) {
-        await submitToolOutput(
-          threadId,
-          runId,
-          toolCallId,
-          'Unable to generate image, please try again',
-        );
-      }
-    } catch (error) {
-      console.error(
-        'Error updating metadata or submitting tool output: ',
-        error,
-      );
-    }
+    // try {
+    //   // Update meta data in message
+    //   await updateMetadataOfMessage(threadId, messageId, {
+    //     imageGenerationStatus: 'failed',
+    //   });
+    //   if (toolCallId) {
+    //     await submitToolOutput(
+    //       threadId,
+    //       runId,
+    //       toolCallId,
+    //       'Unable to generate image, please try again',
+    //     );
+    //   }
+    // } catch (error) {
+    //   console.error(
+    //     'Error updating metadata or submitting tool output: ',
+    //     error,
+    //   );
+    // }
     console.error(error);
     res.status(500).json({ error: 'Unable to generate image' });
     return;
