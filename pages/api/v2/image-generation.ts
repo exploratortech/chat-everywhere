@@ -1,6 +1,5 @@
 // This serverless function is responsible for generating an image for a message
 // and storing it in the thread.
-
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
@@ -22,15 +21,16 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-
   console.log('Image generation endpoint is hit');
-  res.status(200).end();
-  
-  // if (req.method !== 'POST') {
-  //   res.setHeader('Allow', 'POST');
-  //   res.status(405).end('Method Not Allowed');
-  // }
 
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    res.status(405).end('Method Not Allowed');
+  }
+
+  res.status(200).json({});
+  return;
+  
   // const { threadId, messageId, runId } = req.body as RequestBody;
 
   // if (!threadId || !messageId || !runId) {
