@@ -6,6 +6,7 @@ import { trackError } from '@/utils/app/azureTelemetry';
 import { getUserProfile, resetUserCredits } from '@/utils/server/supabase';
 
 import { PluginID } from '@/types/plugin';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 
 export const config = {
   runtime: 'edge',
@@ -16,6 +17,7 @@ const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 const handler = async (req: Request): Promise<Response> => {
   try {
     const userId = req.headers.get('user-id');
+
     if (!userId) return unauthorizedResponse;
     const userProfile = await getUserProfile(userId);
 
@@ -43,6 +45,21 @@ const handler = async (req: Request): Promise<Response> => {
       referralCode: string;
     };
 
+    // Special 2 weeks trial code mainly for v2 in-field testing
+    if (referralCode === process.env.TEMP_2_WEEKS_TRIAL_CODE) {
+      await redeemReferralCode({
+        referrerId: null,
+        refereeId: userId,
+        referralCode,
+        lengthOfTrialInDays: 14,
+      });
+
+      serverSideTrackEvent(userId, 'v2 Trial redemption success');
+      await resetUserCredits(userId, PluginID.GPT4);
+      await resetUserCredits(userId, PluginID.IMAGE_GEN);
+      return new Response(JSON.stringify({ success: true }), { status: 200 });
+    }
+
     const { isValid, referrerId } = await getReferralCodeDetail(referralCode);
 
     // Check if referral code is valid
@@ -53,6 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
     await redeemReferralCode({
       referrerId,
       refereeId: userId,
+      referralCode,
     });
 
     await resetUserCredits(userId, PluginID.GPT4);
@@ -62,6 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error) {
     //Log error to Azure App Insights
     trackError(error as string);
+    console.error(error);
     return new Response('Invalid Code', { status: 500 });
   }
 };

@@ -368,21 +368,31 @@ export const getReferralCodeDetail = async (
 export const redeemReferralCode = async ({
   referrerId,
   refereeId,
+  lengthOfTrialInDays,
+  referralCode
 }: {
-  referrerId: string;
+  referrerId: string | null;
   refereeId: string;
+  referralCode: string;
+  lengthOfTrialInDays?: number;
 }): Promise<void> => {
   const supabase = getAdminSupabaseClient();
-  const trialDays =
+  let trialDays =
     typeof process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS === 'string'
       ? parseInt(process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS)
       : 3;
+
+  if(lengthOfTrialInDays){
+    trialDays = lengthOfTrialInDays;
+  }
+
   // create a record in the referral table
   const { error: referralError } = await supabase.from('referral').insert([
     {
       referrer_id: referrerId,
       referee_id: refereeId,
       referral_date: dayjs().toDate(),
+      referral_code: referralCode,
     },
   ]);
   if (referralError) {

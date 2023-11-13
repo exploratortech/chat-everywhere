@@ -33,11 +33,13 @@ export const ReferralCodeEnter = () => {
   } = useQuery<{ profile: UserProfile }, Error>(
     'redeemReferralCode',
     async () => {
+      if(user === null) throw new Error('User is not logged in');
+
       const response = await fetch('/api/referral/redeem-code', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'user-id': user!.id,
+          'user-id': user.id,
         },
         body: JSON.stringify({
           referralCode,
@@ -55,7 +57,7 @@ export const ReferralCodeEnter = () => {
       }
       const profile = await userProfileQuery({
         client: supabase,
-        userId: user!.id,
+        userId: user.id,
       });
       return { profile };
     },
