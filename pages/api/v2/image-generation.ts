@@ -44,18 +44,19 @@ export default async function handler(
 
   const supabase = getAdminSupabaseClient();
   let toolCallId = null;
-  
-  try {
-      const { data: thread, error } = await supabase
-        .from('user_v2_conversations')
-        .select('*')
-        .eq('threadId', threadId)
-        .single();
-    
-      if (error) throw new Error(JSON.stringify(error));
 
-    res.status(200).json({});
-    return;
+  res.status(200).json({});
+  return;
+  
+  // try {
+  //     const { data: thread, error } = await supabase
+  //       .from('user_v2_conversations')
+  //       .select('*')
+  //       .eq('threadId', threadId)
+  //       .single();
+    
+  //     if (error) throw new Error(JSON.stringify(error));
+
 
   //   if (!thread) {
   //     res.status(404).json({ error: 'Thread not found' });
@@ -108,21 +109,21 @@ export default async function handler(
   //   });
 
   //   res.status(200).end();
-  } catch (error) {
-    // Update meta data in message
-    await updateMetadataOfMessage(threadId, messageId, {
-      imageGenerationStatus: 'failed',
-    });
-    if (toolCallId) {
-      await submitToolOutput(
-        threadId,
-        runId,
-        toolCallId,
-        'Unable to generate image, please try again',
-      );
-    }
-    console.error(error);
-    res.status(500).json({ error: 'Unable to generate image' });
-    return;
-  }
+  // } catch (error) {
+  //   // Update meta data in message
+  //   await updateMetadataOfMessage(threadId, messageId, {
+  //     imageGenerationStatus: 'failed',
+  //   });
+  //   if (toolCallId) {
+  //     await submitToolOutput(
+  //       threadId,
+  //       runId,
+  //       toolCallId,
+  //       'Unable to generate image, please try again',
+  //     );
+  //   }
+  //   console.error(error);
+  //   res.status(500).json({ error: 'Unable to generate image' });
+  //   return;
+  // }
 }
