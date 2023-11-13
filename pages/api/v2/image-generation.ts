@@ -59,8 +59,8 @@ export default async function handler(
   // WORKING TAG ===
 
   // try {
-    const run = await getOpenAiRunObject(threadId, runId);
     // === TESTING WORKING TAG ===
+    // const run = await getOpenAiRunObject(threadId, runId);
     // const requiredAction = run.required_action;
   // } catch (error) {
     // console.error("Unable to get OpenAi run object");
