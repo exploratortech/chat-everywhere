@@ -10,9 +10,16 @@ import { Separator } from '@/components/v2Chat/ui/separator';
 export interface ChatList {
   messages: MessageType[];
   scrollToButton: () => void;
+  suggestions: string[];
+  onMessageSent: (message: MessageType) => void;
 }
 
-export function ChatList({ messages, scrollToButton }: ChatList) {
+export function ChatList({
+  messages,
+  scrollToButton,
+  suggestions,
+  onMessageSent,
+}: ChatList) {
   useEffect(() => {
     scrollToButton();
   }, [messages]);
@@ -38,6 +45,26 @@ export function ChatList({ messages, scrollToButton }: ChatList) {
             )}
         </div>
       ))}
+      <div>
+        {suggestions.length > 0 && (
+          <div className="flex flex-wrap justify-center items-center">
+            {suggestions.map((suggestion, index) => (
+              <button
+                key={index}
+                className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md m-2"
+                onClick={() =>
+                  onMessageSent({
+                    role: 'user',
+                    content: suggestion,
+                  })
+                }
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

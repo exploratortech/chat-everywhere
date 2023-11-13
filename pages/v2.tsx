@@ -30,9 +30,6 @@ import { ChatScrollAnchor } from '@/components/v2Chat/chat-scroll-anchor';
 import { EmptyScreen } from '@/components/v2Chat/empty-screen';
 import { Header } from '@/components/v2Chat/header';
 import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
-import {
-  Dialog,
-} from '@/components/v2Chat/ui/dialog';
 
 const V2Chat = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>();
@@ -48,6 +45,7 @@ const V2Chat = () => {
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [chatResponseLoading, setChatResponseLoading] =
     useState<boolean>(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const supabase = useSupabaseClient();
   const user = useUser();
@@ -93,12 +91,12 @@ const V2Chat = () => {
   }, [enablePullingForUpdates, selectedConversation]);
 
   const scrollToButton = () => {
-    if(!chatScrollAnchorRef.current) return;
+    if (!chatScrollAnchorRef.current) return;
     interface ChatScrollAnchorMethods {
       scrollToBottom: () => void;
     }
     (chatScrollAnchorRef.current as ChatScrollAnchorMethods).scrollToBottom();
-  }
+  };
 
   const fetchConversations = async () => {
     if (user === null) return;
@@ -147,23 +145,54 @@ const V2Chat = () => {
       metadata: messageItem.metadata,
     }));
     setMessages(messages);
+    fetchSuggestions(messages);
 
     // Check if requires pulling
     const lastMessage = messages[messages.length - 1];
-    if(!lastMessage || !lastMessage.metadata) return;
-    if(lastMessage.metadata.imageGenerationStatus === "in progress"){
+    if (!lastMessage || !lastMessage.metadata) return;
+    setSuggestions([]);
+    if (lastMessage.metadata.imageGenerationStatus === 'in progress') {
       setChatResponseLoading(true);
       setEnablePullingForUpdates(true);
-    }else{
+    } else {
       setChatResponseLoading(false);
       setEnablePullingForUpdates(false);
     }
   };
 
-  const onMessageSent = async (message: any) => {
+  const fetchSuggestions = async (messages: MessageType[]) => {
+    if (!user || !session) return;
+    if (enablePullingForUpdates) return;
+
+    const response = await fetch('/api/v2/suggestions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-token': session.access_token,
+      },
+      body: JSON.stringify({
+        previousMessages: messages.slice(Math.max(messages.length - 4, 0)),
+        latestAssistantMessage: messages[messages.length - 1],
+      }),
+    });
+
+    try {
+      const suggestions = await response.json();
+      if (!Array.isArray(suggestions) || !suggestions.every(item => typeof item === 'string')) {
+        throw new Error(`Invalid suggestions format. Expected an array of strings. Got ${suggestions}`);
+      }
+      setSuggestions(suggestions);
+    } catch (error) {
+      setSuggestions([]);
+      console.error(error);
+    }
+  };
+
+  const onMessageSent = async (message: MessageType) => {
     if (!user || !session) return;
 
     setChatResponseLoading(true);
+    setSuggestions([]);
 
     let tempSelectedConversation: ConversationType;
 
@@ -210,7 +239,7 @@ const V2Chat = () => {
       body: JSON.stringify({
         requestType: 'send message',
         conversationId: tempSelectedConversation.threadId,
-        messageContent: input,
+        messageContent: input || message.content,
       }),
     });
 
@@ -220,8 +249,8 @@ const V2Chat = () => {
       console.error(response);
     }
 
+    await fetchMessages(tempSelectedConversation.threadId);
     setChatResponseLoading(false);
-    fetchMessages(tempSelectedConversation.threadId);
   };
 
   const startNewChat = () => {
@@ -258,6 +287,8 @@ const V2Chat = () => {
                 <ChatList
                   messages={messages}
                   scrollToButton={scrollToButton}
+                  suggestions={suggestions}
+                  onMessageSent={onMessageSent}
                 />
                 <ChatScrollAnchor
                   ref={chatScrollAnchorRef}

@@ -18,12 +18,9 @@ export interface ChatPanelProps {
 export function ChatPanel({
   id,
   isLoading,
-  stop,
   append,
-  reload,
   input,
   setInput,
-  messages,
   startNewChat,
 }: ChatPanelProps) {
   return (
