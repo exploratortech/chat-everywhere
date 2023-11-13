@@ -10,9 +10,11 @@ import { trackError } from '@/utils/app/azureTelemetry';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { truncateLogMessage } from '@/utils/server';
 import { trimStringBaseOnTokenLimit } from '@/utils/server/api';
+import { getStringTokenCount } from '@/utils/server/api';
 import {
-  getStringTokenCount,
-} from '@/utils/server/api';
+  getAdminSupabaseClient,
+  getUserProfile,
+} from '@/utils/server/supabase';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
@@ -25,15 +27,24 @@ export const config = {
   runtime: 'edge',
 };
 
+const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
+
+const supabase = getAdminSupabaseClient();
+
 const handler = async (req: NextRequest, res: any) => {
   retrieveUserSessionAndLogUsages(req, PluginID.LANGCHAIN_CHAT);
+
+  const userToken = req.headers.get('user-token');
+  const { data, error } = await supabase.auth.getUser(userToken || '');
+  if (!data || error) return unauthorizedResponse;
+
+  const user = await getUserProfile(data.user.id);
+  if (!user || user.plan === 'free') return unauthorizedResponse;
 
   let promptTokenLength = 0,
     completionTokenLength = 0;
   let responseMessage = '';
   const startTime = Date.now();
-
-  const userIdentifier = req.headers.get('user-browser-id');
 
   const requestBody = (await req.json()) as ChatBody;
 
@@ -99,13 +110,11 @@ const handler = async (req: NextRequest, res: any) => {
       const endTime = Date.now();
       completionTokenLength = await getStringTokenCount(responseMessage);
 
-      if (userIdentifier) {
-        serverSideTrackEvent(userIdentifier, 'Online mode message', {
-          promptTokenLength,
-          completionTokenLength,
-          generationLengthInSecond: (endTime - startTime) / 1000,
-        });
-      }
+      serverSideTrackEvent(user.id, 'Online mode message', {
+        promptTokenLength,
+        completionTokenLength,
+        generationLengthInSecond: (endTime - startTime) / 1000,
+      });
     },
     handleChatModelStart: async () => {
       console.log('handleChatModelStart');

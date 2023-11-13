@@ -45,6 +45,14 @@ const ModeSelector = () => {
           placeholder={t('Select a lang') || ''}
           value={currentSelectedPluginId}
           onChange={(e) => {
+            if (e.target.value === PluginID.LANGCHAIN_CHAT && !isPaidUser) {
+              alert(
+                t(
+                  'Sorry online mode is only for Pro user, please sign up and purchase Pro plan to use this feature.',
+                ),
+              );
+              return;
+            }
             homeDispatch({ field: 'outputLanguage', value: 'default' });
             saveOutputLanguage('default');
             pluginOnChange(e.target.value);
