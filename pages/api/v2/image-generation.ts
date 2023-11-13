@@ -59,16 +59,20 @@ export default async function handler(
   // WORKING TAG ===
 
   // try {
-  // const run = await getOpenAiRunObject(threadId, runId);
+  const run = await getOpenAiRunObject(threadId, runId);
 
-  const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`;
+  // const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`;
 
-  const response = await authorizedOpenAiRequest(openAiUrl);
+  // const response = await authorizedOpenAiRequest(openAiUrl);
 
-  if (!response.ok) {
-    console.error(await response.text());
-    throw new Error('Failed to retrieve run');
-  }
+  // if (!response.ok) {
+  //   console.error(await response.text());
+  //   throw new Error('Failed to retrieve run');
+  // }
+
+  // const run = await response.json();
+
+  // console.log(run);
 
   // const requiredAction = run.required_action;
   // } catch (error) {
@@ -147,17 +151,3 @@ export default async function handler(
   //   return;
   // }
 }
-
-// Move this function from utils/server/index.ts to here for serverless function compatibility reason
-export const authorizedOpenAiRequest = async (
-  url: string,
-  options: RequestInit = {},
-) => {
-  const headers = {
-    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    'OpenAI-Beta': 'assistants=v1',
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-  return fetch(url, { ...options, headers });
-};

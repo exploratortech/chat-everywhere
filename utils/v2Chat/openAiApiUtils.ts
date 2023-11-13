@@ -1,5 +1,3 @@
-import { authorizedOpenAiRequest } from '@/utils/server';
-
 import { MessageMetaDataType, OpenAiImageResponseType } from '@/types/v2Chat/chat';
 import {
   MessageType,
@@ -144,4 +142,18 @@ export const submitToolOutput = async (
     console.error(await response.text());
     throw new Error('Failed to submit tool outputs');
   }
+};
+
+// Move this function from utils/server/index.ts to here for serverless function compatibility reason
+const authorizedOpenAiRequest = async (
+  url: string,
+  options: RequestInit = {},
+) => {
+  const headers = {
+    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    'OpenAI-Beta': 'assistants=v1',
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  return fetch(url, { ...options, headers });
 };
