@@ -5,6 +5,11 @@ import { type MessageType } from '@/types/v2Chat/chat';
 import { ChatMessage } from '@/components/v2Chat/chat-message';
 import { ImageContainer } from '@/components/v2Chat/image-container';
 import { ImageGenerationSpinner } from '@/components/v2Chat/image-generation-spinner';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@/components/v2Chat/ui/alert';
 import { Separator } from '@/components/v2Chat/ui/separator';
 
 export interface ChatList {
@@ -43,6 +48,14 @@ export function ChatList({
             message.metadata?.imageUrl && (
               <ImageContainer url={message.metadata.imageUrl} />
             )}
+          {message.metadata?.imageGenerationStatus === 'failed' && (
+            <Alert variant="destructive" className="max-w-xs mb-6">
+              <AlertTitle>Error!</AlertTitle>
+              <AlertDescription>
+                Unable to generate image, please try again
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
       ))}
       <div>
