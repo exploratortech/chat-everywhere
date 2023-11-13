@@ -75,7 +75,6 @@ export default async function handler(
     }
 
     toolCallId = toolCall.id;
-    // WORKING Above this line
 
     const imageGenerationPrompt = toolCall.function.arguments;
     const imageGenerationPromptString = JSON.parse(

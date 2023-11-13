@@ -86,13 +86,30 @@ export const generateImage = async (
     response_format: 'url',
   };
 
-  const response = await authorizedOpenAiRequest(openAiUrl, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
+  let response;
+  let delay = 500; // Initial delay of 500ms
+  let retries = 0; // Initial retry count
 
-  if (!response.ok) {
-    console.error(await response.text());
+  while (retries < 3) {
+    response = await authorizedOpenAiRequest(openAiUrl, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+
+    if (response.status !== 429) {
+      break;
+    }
+
+    // If status is 429 (Too Many Requests), wait for the delay then double it for the next iteration
+    await new Promise(resolve => setTimeout(resolve, delay));
+    delay *= 2;
+    retries += 1;
+  }
+
+  if (!response || !response.ok || retries === 3) {
+    if(response){
+      console.error(await response.text());
+    }
     throw new Error('Failed to generate image');
   }
 
