@@ -24,105 +24,105 @@ export default async function handler(
 ) {
 
   console.log('Image generation endpoint is hit');
-  res.status(205).end('Missing threadId or messageId or runId');
+  res.status(200).end();
   
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    res.status(405).end('Method Not Allowed');
-  }
+  // if (req.method !== 'POST') {
+  //   res.setHeader('Allow', 'POST');
+  //   res.status(405).end('Method Not Allowed');
+  // }
 
-  const { threadId, messageId, runId } = req.body as RequestBody;
+  // const { threadId, messageId, runId } = req.body as RequestBody;
 
-  if (!threadId || !messageId || !runId) {
-    res.status(400).json({ error: 'Missing threadId or messageId or runId' });
-    return;
-  }
+  // if (!threadId || !messageId || !runId) {
+  //   res.status(400).json({ error: 'Missing threadId or messageId or runId' });
+  //   return;
+  // }
 
-  console.log(
-    'Generating image with threadId, messageId, runId ',
-    threadId,
-    messageId,
-    runId,
-  );
+  // console.log(
+  //   'Generating image with threadId, messageId, runId ',
+  //   threadId,
+  //   messageId,
+  //   runId,
+  // );
 
-  const supabase = getAdminSupabaseClient();
-  let toolCallId = null;
+  // const supabase = getAdminSupabaseClient();
+  // let toolCallId = null;
 
-  try {
-    const { data: thread, error } = await supabase
-      .from('user_v2_conversations')
-      .select('*')
-      .eq('threadId', threadId)
-      .single();
+  // try {
+  //   const { data: thread, error } = await supabase
+  //     .from('user_v2_conversations')
+  //     .select('*')
+  //     .eq('threadId', threadId)
+  //     .single();
 
-    if (error) throw new Error(JSON.stringify(error));
+  //   if (error) throw new Error(JSON.stringify(error));
 
-    if (!thread) {
-      res.status(404).json({ error: 'Thread not found' });
-      return;
-    }
+  //   if (!thread) {
+  //     res.status(404).json({ error: 'Thread not found' });
+  //     return;
+  //   }
 
-    const run = await getOpenAiRunObject(threadId, runId);
-    const requiredAction = run.required_action;
+  //   const run = await getOpenAiRunObject(threadId, runId);
+  //   const requiredAction = run.required_action;
 
-    if (!requiredAction) {
-      res.status(400).json({ error: 'Run does not require action' });
-      return;
-    }
+  //   if (!requiredAction) {
+  //     res.status(400).json({ error: 'Run does not require action' });
+  //     return;
+  //   }
 
-    const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
-      (toolCall) => toolCall.function.name === 'generate_image',
-    );
+  //   const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
+  //     (toolCall) => toolCall.function.name === 'generate_image',
+  //   );
 
-    if (!toolCall) {
-      res.status(400).json({ error: 'Tool call not found' });
-      return;
-    }
+  //   if (!toolCall) {
+  //     res.status(400).json({ error: 'Tool call not found' });
+  //     return;
+  //   }
 
-    toolCallId = toolCall.id;
+  //   toolCallId = toolCall.id;
 
-    const imageGenerationPrompt = toolCall.function.arguments;
-    const imageGenerationPromptString = JSON.parse(
-      imageGenerationPrompt,
-    ).prompt;
+  //   const imageGenerationPrompt = toolCall.function.arguments;
+  //   const imageGenerationPromptString = JSON.parse(
+  //     imageGenerationPrompt,
+  //   ).prompt;
 
-    const imageGenerationResponse = await generateImage(
-      imageGenerationPromptString,
-    );
-    const imageGenerationUrl = imageGenerationResponse.data[0].url;
+  //   const imageGenerationResponse = await generateImage(
+  //     imageGenerationPromptString,
+  //   );
+  //   const imageGenerationUrl = imageGenerationResponse.data[0].url;
 
-    console.log('Image url: ', imageGenerationUrl);
+  //   console.log('Image url: ', imageGenerationUrl);
 
-    await submitToolOutput(
-      threadId,
-      runId,
-      toolCallId,
-      'Successfully generated image with URL: ' + imageGenerationUrl,
-    );
+  //   await submitToolOutput(
+  //     threadId,
+  //     runId,
+  //     toolCallId,
+  //     'Successfully generated image with URL: ' + imageGenerationUrl,
+  //   );
 
-    await waitForRunToCompletion(threadId, runId);
+  //   await waitForRunToCompletion(threadId, runId);
 
-    await updateMetadataOfMessage(threadId, messageId, {
-      imageGenerationStatus: 'completed',
-      imageUrl: imageGenerationUrl,
-    });
+  //   await updateMetadataOfMessage(threadId, messageId, {
+  //     imageGenerationStatus: 'completed',
+  //     imageUrl: imageGenerationUrl,
+  //   });
 
-    res.status(200).end();
-  } catch (error) {
-    // Update meta data in message
-    await updateMetadataOfMessage(threadId, messageId, {
-      imageGenerationStatus: 'failed',
-    });
-    if (toolCallId) {
-      await submitToolOutput(
-        threadId,
-        runId,
-        toolCallId,
-        'Unable to generate image, please try again',
-      );
-    }
-    console.error(error);
-    res.status(500).json({ error: 'Unable to generate image' });
-    return;
-  }
+  //   res.status(200).end();
+  // } catch (error) {
+  //   // Update meta data in message
+  //   await updateMetadataOfMessage(threadId, messageId, {
+  //     imageGenerationStatus: 'failed',
+  //   });
+  //   if (toolCallId) {
+  //     await submitToolOutput(
+  //       threadId,
+  //       runId,
+  //       toolCallId,
+  //       'Unable to generate image, please try again',
+  //     );
+  //   }
+  //   console.error(error);
+  //   res.status(500).json({ error: 'Unable to generate image' });
+  //   return;
+  // }
 }
