@@ -145,7 +145,10 @@ const V2Chat = () => {
       metadata: messageItem.metadata,
     }));
     setMessages(messages);
-    fetchSuggestions(messages);
+
+    if(messages.length > 0 && messages[messages.length - 1].role === 'assistant'){
+      fetchSuggestions(messages);
+    };
 
     // Check if requires pulling
     const lastMessage = [...messages].reverse().find(message => message.metadata?.imageGenerationStatus);
@@ -162,8 +165,7 @@ const V2Chat = () => {
   };
 
   const fetchSuggestions = async (messages: MessageType[]) => {
-    if (!user || !session) return;
-    if (enablePullingForUpdates) return;
+    if (!user || !session || enablePullingForUpdates || chatResponseLoading) return;
 
     const response = await fetch('/api/v2/suggestions', {
       method: 'POST',
@@ -281,7 +283,7 @@ const V2Chat = () => {
           selectedConversationId={selectedConversationId}
           conversations={conversations}
         />
-        <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto">
+        <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto pb-5 md:pb-0">
           <div className="pb-[200px] pt-4 md:pt-10">
             {messages.length > 0 ? (
               <>
@@ -290,6 +292,7 @@ const V2Chat = () => {
                   scrollToButton={scrollToButton}
                   suggestions={suggestions}
                   onMessageSent={onMessageSent}
+                  isChatResponseLoading={chatResponseLoading}
                 />
                 <ChatScrollAnchor
                   ref={chatScrollAnchorRef}

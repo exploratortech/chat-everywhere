@@ -8,6 +8,7 @@ export type ConversationType = {
 
 export type MessageMetaDataType = {
   imageGenerationStatus?: 'in progress' | 'completed' | 'failed';
+  imageGenerationError?: string;
   imageUrl?: string;
 };
 
@@ -78,7 +79,14 @@ export type OpenAiImageResponseType = {
   data: [
     {
       revised_prompt: string;
-      url: string;
-    }
+      url?: string;
+      b64_json?: string;
+    },
   ];
+  error?: {
+    code: string;
+    message: string;
+    param: string;
+    type: string;
+  };
 };

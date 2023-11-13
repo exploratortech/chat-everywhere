@@ -11,6 +11,9 @@ import {
   waitForRunToCompletion,
 } from '@/utils/v2Chat/openAiApiUtils';
 
+import { decode } from 'base64-arraybuffer';
+import { v4 } from 'uuid';
+
 interface RequestBody {
   threadId: string;
   messageId: string;
@@ -81,25 +84,54 @@ export default async function handler(
       imageGenerationPrompt,
     ).prompt;
 
+    console.log('imageGenerationPrompt: ', imageGenerationPrompt);
+
     const imageGenerationResponse = await generateImage(
       imageGenerationPromptString,
     );
-    const imageGenerationUrl = imageGenerationResponse.data[0].url;
+    const generatedImageInBase64 = imageGenerationResponse.data[0].b64_json;
 
-    console.log('Image url: ', imageGenerationUrl);
+    if (!generatedImageInBase64) {
+      if (imageGenerationResponse.errorMessage) {
+        throw new Error(imageGenerationResponse.errorMessage);
+      }
+      throw new Error('Image generation failed');
+    }
+    console.log(
+      'Image generated successfully, storing to Supabase storage ...',
+    );
+
+    // Store image in Supabase storage
+    const imageFileName = `${messageId}-${v4()}.png`;
+    const { error: fileUploadError } = await supabase.storage
+      .from('ai-images')
+      .upload(imageFileName, decode(generatedImageInBase64), {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: 'image/png',
+      });
+    if (fileUploadError) throw fileUploadError;
+
+    const { data: imagePublicUrlData } = await supabase.storage
+      .from('ai-images')
+      .getPublicUrl(imageFileName);
+
+    if (!imagePublicUrlData) throw new Error('Image generation failed');
+
+    console.log('Image access URL: ', imagePublicUrlData.publicUrl);
 
     await submitToolOutput(
       threadId,
       runId,
       toolCallId,
-      'Successfully generated image, image is displayed on user\'s screen',
+      "Successfully generated image, image is displayed on user's screen",
     );
 
     await waitForRunToCompletion(threadId, runId);
 
     await updateMetadataOfMessage(threadId, messageId, {
       imageGenerationStatus: 'completed',
-      imageUrl: imageGenerationUrl,
+      imageUrl: imagePublicUrlData.publicUrl,
     });
 
     res.status(200).end();
@@ -109,12 +141,29 @@ export default async function handler(
       imageGenerationStatus: 'failed',
     });
     if (toolCallId) {
-      await submitToolOutput(
-        threadId,
-        runId,
-        toolCallId,
-        'Unable to generate image, please try again',
-      );
+      if (error instanceof Error) {
+        console.log('error.message: ', error.message);
+
+        await submitToolOutput(
+          threadId,
+          runId,
+          toolCallId,
+          'Unable to generate image' +
+            `${
+              error.message
+                ? `Error message: ${error.message}. Base on the error message, help user to decide what's the next best action to take.`
+                : ''
+            }`,
+        );
+      } else {
+        await submitToolOutput(
+          threadId,
+          runId,
+          toolCallId,
+          'Unable to generate image' + `${error}`,
+        );
+      }
+      await waitForRunToCompletion(threadId, runId);
     }
     console.error(error);
     res.status(500).json({ error: 'Unable to generate image' });

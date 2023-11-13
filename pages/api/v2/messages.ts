@@ -6,6 +6,7 @@ import {
 import {
   addOpenAiMessageToThread,
   updateMetadataOfMessage,
+  cancelCurrentThreadRun
 } from '@/utils/v2Chat/openAiApiUtils';
 
 export const config = {
@@ -154,6 +155,9 @@ const sendMessage = async (
     });
   }
 
+  // Cancel any hanging runs
+  await cancelCurrentThreadRun(conversationId);
+  
   // Add a Message object to Thread
   const messageCreationResponse = await addOpenAiMessageToThread(
     conversationId,

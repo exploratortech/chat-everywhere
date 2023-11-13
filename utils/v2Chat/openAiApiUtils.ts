@@ -1,4 +1,7 @@
-import { MessageMetaDataType, OpenAiImageResponseType } from '@/types/v2Chat/chat';
+import {
+  MessageMetaDataType,
+  OpenAiImageResponseType,
+} from '@/types/v2Chat/chat';
 import {
   MessageType,
   OpenAIMessageType,
@@ -75,7 +78,7 @@ export const getOpenAiRunObject = async (
 
 export const generateImage = async (
   prompt: string,
-): Promise<OpenAiImageResponseType> => {
+): Promise<OpenAiImageResponseType & { errorMessage?: string }> => {
   const openAiUrl = 'https://api.openai.com/v1/images/generations';
 
   const payload = {
@@ -83,7 +86,7 @@ export const generateImage = async (
     prompt: prompt,
     n: 1,
     size: '1024x1024',
-    response_format: 'url',
+    response_format: 'b64_json',
   };
 
   let response;
@@ -102,20 +105,72 @@ export const generateImage = async (
     }
 
     // If status is 429 (Too Many Requests), wait for the delay then double it for the next iteration
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await new Promise((resolve) => setTimeout(resolve, delay));
     delay *= 2;
     retries += 1;
   }
 
-  if (!response || !response.ok || retries === maxRetries) {
-    if(response){
-      console.error(await response.text());
-    }
-    throw new Error('Failed to generate image');
+  if (!response) {
+    throw new Error('Failed to generate image, empty response.');
   }
 
   const imageResponse: OpenAiImageResponseType = await response.json();
-  return imageResponse;
+  const imageGenerationResponse: OpenAiImageResponseType & {
+    errorMessage?: string;
+  } = imageResponse;
+
+  if (!response.ok) {
+    console.error(imageResponse?.error?.message);
+    imageGenerationResponse.errorMessage = imageResponse?.error?.message;
+  } else if (retries === maxRetries) {
+    console.error('Failed to generate image, max retries reached');
+    imageGenerationResponse.errorMessage = 'Server is busy, please try again later.';
+  }
+  return imageGenerationResponse;
+};
+
+export const cancelCurrentThreadRun = async (threadId: string) => {
+  const activeStatus = ['in_progress', 'requires_action', 'cancelling'];
+  const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs?limit=10`;
+  const response = await authorizedOpenAiRequest(openAiUrl, {
+    method: 'GET',
+  });
+
+  if (!response.ok) {
+    // Failed gracefully since there maybe a race condition
+    console.error('Failed to retrieve runs');
+    return;
+  }
+
+  const runs: OpenAIRunType[] = (await response.json()).data;
+  const activeRuns = runs.filter((run) => activeStatus.includes(run.status));
+
+  for (const activeRun of activeRuns) {
+    console.log('Canceling run: ', activeRun.id);
+
+    const cancelUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${activeRun.id}/cancel`;
+    let cancelResponse = await authorizedOpenAiRequest(cancelUrl, {
+      method: 'POST',
+    });
+
+    if (!cancelResponse.ok) {
+      console.error('Failed to cancel run: ', activeRun.id);
+      throw new Error('Failed to cancel run');
+    }
+
+    // Wait until the run no longer has the in_progress, requires_action, or cancelling status
+    let runStatus = activeRun.status;
+    let startTime = Date.now();
+    while (activeStatus.includes(runStatus)) {
+      const runObject = await getOpenAiRunObject(threadId, activeRun.id);
+      runStatus = runObject.status;
+      if (Date.now() - startTime > 5000) {
+        console.error('Timeout after 5 seconds');
+        throw new Error('Timeout after 5 seconds');
+      }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  }
 };
 
 export const waitForRunToCompletion = async (
@@ -132,7 +187,7 @@ export const waitForRunToCompletion = async (
     if (Date.now() - startTime > 5000) {
       throw new Error('Timeout after 5 seconds');
     }
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   } while (true);
 };
 

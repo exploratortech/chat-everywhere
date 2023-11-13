@@ -17,6 +17,7 @@ export interface ChatList {
   scrollToButton: () => void;
   suggestions: string[];
   onMessageSent: (message: MessageType) => void;
+  isChatResponseLoading: boolean;
 }
 
 export function ChatList({
@@ -24,6 +25,7 @@ export function ChatList({
   scrollToButton,
   suggestions,
   onMessageSent,
+  isChatResponseLoading,
 }: ChatList) {
   useEffect(() => {
     scrollToButton();
@@ -59,7 +61,7 @@ export function ChatList({
         </div>
       ))}
       <div>
-        {suggestions.length > 0 && (
+        {suggestions.length > 0 && !isChatResponseLoading && (
           <div className="flex flex-wrap justify-center items-center">
             {suggestions.map((suggestion, index) => (
               <button
