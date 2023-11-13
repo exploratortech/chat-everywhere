@@ -245,6 +245,9 @@ const sendMessage = async (
       }),
     });
 
+    // Some buffer room for the /image-generation serverless function to initialize
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     return new Response(null, { status: 200 });
   }
 
