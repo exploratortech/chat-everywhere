@@ -39,7 +39,7 @@ const WrapWithProvider: React.FC<WrapWithProviderProps> = ({ children }) => {
 function App({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
   const queryClient = new QueryClient();
   const [supabase] = useState(() => createBrowserSupabaseClient());
-
+  
   useEffect(() => {
     initializePosthog();
   }, []);

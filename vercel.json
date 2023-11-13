@@ -8,5 +8,10 @@
       "path": "/api/cron/update-pro-accounts-plan",
       "schedule": "0 16 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "pages/api/v2/**/*": {
+      "maxDuration": 300
+    }
+  }
 }

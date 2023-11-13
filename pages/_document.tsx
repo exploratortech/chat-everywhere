@@ -18,7 +18,6 @@ export default function Document(props: Props) {
           content="Chat Everywhere - ChatGPT for power users"
         />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#202123" />
         <meta
           property="og:title"
           content="Chat Everywhere - ChatGPT for power users"
@@ -32,6 +31,7 @@ export default function Document(props: Props) {
         <meta property="og:url" content={`https://chateverywhere.app`} />
         <link rel="manifest" href="/manifest.json" />
         <link rel="shortcut icon" href="/favicon.ico" />
+        <meta name="theme-color" content="#202123" />
 
         {/* Splash screen */}
         <link
@@ -204,11 +204,8 @@ export default function Document(props: Props) {
           media="screen and (device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
           href="/splash-screens/8.3__iPad_Mini_portrait.png"
         />
-
-        {/* Ad Verification tag for Propellerads*/}
-        <meta name="monetag" content="b0996adc439888b4590068e1e29a5696" />
       </Head>
-      <body>
+      <body className='w-full'>
         <Main />
         <NextScript />
       </body>
