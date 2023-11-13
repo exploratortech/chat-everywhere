@@ -2,6 +2,7 @@
 // and storing it in the thread.
 import { NextApiRequest, NextApiResponse } from 'next';
 
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 import {
   generateImage,
@@ -47,6 +48,8 @@ export default async function handler(
 
   const supabase = getAdminSupabaseClient();
   let toolCallId = null;
+  const startTime = Date.now();
+
   try {
     const { data: thread } = await supabase
       .from('user_v2_conversations')
@@ -134,6 +137,11 @@ export default async function handler(
       imageUrl: imagePublicUrlData.publicUrl,
     });
 
+    serverSideTrackEvent('N/A', 'v2 Image generation processed', {
+      v2ImageGenerationUrl: imagePublicUrlData.publicUrl,
+      v2ImageGenerationDurationInMS: Date.now() - startTime,
+    });
+
     res.status(200).end();
   } catch (error) {
     // Update meta data in message
@@ -144,6 +152,9 @@ export default async function handler(
       if (error instanceof Error) {
         console.log('error.message: ', error.message);
 
+        serverSideTrackEvent('N/A', 'v2 Error', {
+          errorMessage: error.message,
+        });
         await submitToolOutput(
           threadId,
           runId,
@@ -165,6 +176,9 @@ export default async function handler(
       }
       await waitForRunToCompletion(threadId, runId);
     }
+    serverSideTrackEvent('N/A', 'v2 Error', {
+      errorMessage: 'Unable to generate image',
+    });
     console.error(error);
     res.status(500).json({ error: 'Unable to generate image' });
     return;

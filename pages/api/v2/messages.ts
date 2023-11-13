@@ -1,3 +1,4 @@
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { authorizedOpenAiRequest } from '@/utils/server';
 import {
   getAdminSupabaseClient,
@@ -5,8 +6,8 @@ import {
 } from '@/utils/server/supabase';
 import {
   addOpenAiMessageToThread,
+  cancelCurrentThreadRun,
   updateMetadataOfMessage,
-  cancelCurrentThreadRun
 } from '@/utils/v2Chat/openAiApiUtils';
 
 export const config = {
@@ -56,6 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     switch (requestType) {
       case 'retrieve messages':
+        serverSideTrackEvent(userProfile.id, 'v2 Retrieve messages');
         return await retrieveMessages(
           user.user.id,
           conversationId,
@@ -63,8 +65,10 @@ const handler = async (req: Request): Promise<Response> => {
           beforeMessageId,
         );
       case 'send message':
+        serverSideTrackEvent(userProfile.id, 'v2 Send message');
         return sendMessage(user.user.id, conversationId, messageContent);
       case 'create conversation':
+        serverSideTrackEvent(userProfile.id, 'v2 Create conversation');
         return createConversation(user.user.id, messageContent);
       default:
         return new Response('Invalid request type', { status: 400 });
@@ -157,7 +161,7 @@ const sendMessage = async (
 
   // Cancel any hanging runs
   await cancelCurrentThreadRun(conversationId);
-  
+
   // Add a Message object to Thread
   const messageCreationResponse = await addOpenAiMessageToThread(
     conversationId,
@@ -234,6 +238,12 @@ const sendMessage = async (
 
     await updateMetadataOfMessage(conversationId, latestMessageId, {
       imageGenerationStatus: 'in progress',
+    });
+
+    serverSideTrackEvent(userId, 'v2 Image generation request', {
+      v2ThreadId: conversationId,
+      v2MessageId: latestMessageId,
+      v2runId: runStatusData.id,
     });
 
     // Trigger image generation asynchronously
