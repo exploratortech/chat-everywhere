@@ -77,33 +77,33 @@ export default async function handler(
       return;
     }
 
-    toolCallId = toolCall.id;
+    // toolCallId = toolCall.id;
 
-    const imageGenerationPrompt = toolCall.function.arguments;
-    const imageGenerationPromptString = JSON.parse(
-      imageGenerationPrompt,
-    ).prompt;
+    // const imageGenerationPrompt = toolCall.function.arguments;
+    // const imageGenerationPromptString = JSON.parse(
+    //   imageGenerationPrompt,
+    // ).prompt;
 
-    const imageGenerationResponse = await generateImage(
-      imageGenerationPromptString,
-    );
-    const imageGenerationUrl = imageGenerationResponse.data[0].url;
+    // const imageGenerationResponse = await generateImage(
+    //   imageGenerationPromptString,
+    // );
+    // const imageGenerationUrl = imageGenerationResponse.data[0].url;
 
-    console.log('Image url: ', imageGenerationUrl);
+    // console.log('Image url: ', imageGenerationUrl);
 
-    await submitToolOutput(
-      threadId,
-      runId,
-      toolCallId,
-      'Successfully generated image with URL: ' + imageGenerationUrl,
-    );
+    // await submitToolOutput(
+    //   threadId,
+    //   runId,
+    //   toolCallId,
+    //   'Successfully generated image with URL: ' + imageGenerationUrl,
+    // );
 
-    await waitForRunToCompletion(threadId, runId);
+    // await waitForRunToCompletion(threadId, runId);
 
-    await updateMetadataOfMessage(threadId, messageId, {
-      imageGenerationStatus: 'completed',
-      imageUrl: imageGenerationUrl,
-    });
+    // await updateMetadataOfMessage(threadId, messageId, {
+    //   imageGenerationStatus: 'completed',
+    //   imageUrl: imageGenerationUrl,
+    // });
 
     res.status(200).end();
   } catch (error) {
