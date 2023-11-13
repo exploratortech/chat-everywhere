@@ -31,6 +31,7 @@ export default function Document(props: Props) {
         <meta property="og:url" content={`https://chateverywhere.app`} />
         <link rel="manifest" href="/manifest.json" />
         <link rel="shortcut icon" href="/favicon.ico" />
+        <meta name="theme-color" content="#202123" />
 
         {/* Splash screen */}
         <link
