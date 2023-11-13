@@ -1,8 +1,10 @@
-import { FC, useContext } from 'react';
-import { useTranslation } from 'next-i18next';
-import { IconBolt } from '@tabler/icons-react';
+import { FC } from 'react';
 
-export const FootNoteMessage: FC = () => {
+import { useTranslation } from 'next-i18next';
+
+export const FootNoteMessage: FC<{ displayV2Link?: boolean }> = ({
+  displayV2Link,
+}) => {
   const { t } = useTranslation('chat');
 
   return (
@@ -29,6 +31,11 @@ export const FootNoteMessage: FC = () => {
         <br />
         {t('Where the forefront of AI technology meets universal access.')}
       </div>
+      {displayV2Link && (
+        <a href="/v2" target="_blank" rel="noreferrer" className="underline">
+          {t('Enter v2 Beta')}
+        </a>
+      )}
     </div>
   );
 };
