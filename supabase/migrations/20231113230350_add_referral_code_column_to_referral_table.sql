@@ -1,0 +1,1 @@
+alter table "public"."referral" add column "referral_code" text;

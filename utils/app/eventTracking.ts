@@ -50,6 +50,7 @@ export const EventNames = [
   'v2 Image generation request',
   'v2 Image generation processed',
   'v2 Update Metadata of message',
+  'v2 Trial redemption success',
 
   // Error tracing
   'Error',

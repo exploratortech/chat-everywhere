@@ -22,7 +22,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   const { t } = useTranslation('chat');
   const { t: modelTranslate } = useTranslation('model');
   const {
-    state: { user, isSurveyFilled },
+    state: { user },
     dispatch,
   } = useContext(HomeContext);
 
@@ -100,14 +100,14 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         </div>
       )}
 
-      <div
-        className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none"
-      >
+      <div className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none">
         <span className="bg-yellow-100 text-yellow-800 text-xs font-medium ml-2 mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-800 dark:text-yellow-300">
           New
         </span>
         <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
-          {t('Starting Nov 13th, online mode will only be available for Pro user.')}
+          {t(
+            'Starting Nov 13th, online mode will only be available for Pro user.',
+          )}
         </span>
       </div>
 
@@ -133,7 +133,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
           ? t('Switch to Sample Prompts')
           : t('Switch to Role Play')}
       </button>
-      <FootNoteMessage />
+      <FootNoteMessage displayV2Link={user?.isInReferralTrial || false} />
     </div>
   );
 };

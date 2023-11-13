@@ -368,21 +368,31 @@ export const getReferralCodeDetail = async (
 export const redeemReferralCode = async ({
   referrerId,
   refereeId,
+  lengthOfTrialInDays,
+  referralCode,
 }: {
-  referrerId: string;
+  referrerId: string | null;
   refereeId: string;
+  referralCode: string;
+  lengthOfTrialInDays?: number;
 }): Promise<void> => {
   const supabase = getAdminSupabaseClient();
-  const trialDays =
+  let trialDays =
     typeof process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS === 'string'
       ? parseInt(process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS)
       : 3;
+
+  if (lengthOfTrialInDays) {
+    trialDays = lengthOfTrialInDays;
+  }
+
   // create a record in the referral table
   const { error: referralError } = await supabase.from('referral').insert([
     {
       referrer_id: referrerId,
       referee_id: refereeId,
       referral_date: dayjs().toDate(),
+      referral_code: referralCode,
     },
   ]);
   if (referralError) {
@@ -446,30 +456,36 @@ export const userProfileQuery = async ({
 
   if (!userProfile) throw new Error('User not found');
 
-  const { data: referralTable, error: refereeError } = await client
-    .from('referral')
-    .select('*')
-    .or(`referee_id.eq.${userProfile.id},referrer_id.eq.${userProfile.id}`)
-    .order('referral_date', { ascending: false });
-  if (refereeError) {
-    throw refereeError;
+  let referrerRecords,
+    refereeRecords,
+    isInReferralTrial = false;
+
+  if (userProfile.plan !== 'free') {
+    const { data: referralTable, error: refereeError } = await client
+      .from('referral')
+      .select('*')
+      .or(`referee_id.eq.${userProfile.id},referrer_id.eq.${userProfile.id}`)
+      .order('referral_date', { ascending: false });
+    if (refereeError) {
+      throw refereeError;
+    }
+
+    referrerRecords = referralTable?.find(
+      (r) => userProfile && r.referee_id === userProfile.id,
+    );
+    refereeRecords = referralTable?.find(
+      (r) => userProfile && r.referrer_id === userProfile.id,
+    );
+
+    isInReferralTrial = (() => {
+      if (!referrerRecords) return false;
+      const referrerDate = dayjs(referrerRecords.referral_date);
+      const trailDays = +(process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS || '3');
+      const trailExpirationDate = referrerDate.add(trailDays, 'days');
+
+      return dayjs().isBefore(trailExpirationDate);
+    })();
   }
-
-  const referrerRecords = referralTable?.find(
-    (r) => userProfile && r.referee_id === userProfile.id,
-  );
-  const refereeRecords = referralTable?.find(
-    (r) => userProfile && r.referrer_id === userProfile.id,
-  );
-
-  const isInReferralTrial = (() => {
-    if (!referrerRecords) return false;
-    const referrerDate = dayjs(referrerRecords.referral_date);
-    const trailDays = +(process.env.NEXT_PUBLIC_REFERRAL_TRIAL_DAYS || '3');
-    const trailExpirationDate = referrerDate.add(trailDays, 'days');
-
-    return dayjs().isBefore(trailExpirationDate);
-  })();
 
   return {
     id: userProfile.id,
