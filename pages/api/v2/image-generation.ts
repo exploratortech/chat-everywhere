@@ -11,6 +11,9 @@ import {
   waitForRunToCompletion,
 } from '@/utils/v2Chat/openAiApiUtils';
 
+import { authorizedOpenAiRequest } from '@/utils/server';
+
+
 interface RequestBody {
   threadId: string;
   messageId: string;
@@ -61,6 +64,17 @@ export default async function handler(
   // try {
     // === TESTING WORKING TAG ===
     // const run = await getOpenAiRunObject(threadId, runId);
+
+    // Breaking down the above line
+    const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${runId}`;
+
+    const response = await authorizedOpenAiRequest(openAiUrl);
+
+    if (!response.ok) {
+      console.error(await response.text());
+      throw new Error('Failed to retrieve run');
+    }
+
     // const requiredAction = run.required_action;
   // } catch (error) {
     // console.error("Unable to get OpenAi run object");
