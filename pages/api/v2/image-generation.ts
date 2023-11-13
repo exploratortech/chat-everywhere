@@ -56,26 +56,25 @@ export default async function handler(
     return;
   }
 
-  // res.status(200).json({});
-  // return;
+  // WORKING TAG ===
 
-  try {
-    const run = await getOpenAiRunObject(threadId, runId);
-    const requiredAction = run.required_action;
+  // try {
+    // const run = await getOpenAiRunObject(threadId, runId);
+    // const requiredAction = run.required_action;
 
-    if (!requiredAction) {
-      res.status(400).json({ error: 'Run does not require action' });
-      return;
-    }
+    // if (!requiredAction) {
+    //   res.status(400).json({ error: 'Run does not require action' });
+    //   return;
+    // }
 
-    const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
-      (toolCall) => toolCall.function.name === 'generate_image',
-    );
+    // const toolCall = requiredAction.submit_tool_outputs.tool_calls.find(
+    //   (toolCall) => toolCall.function.name === 'generate_image',
+    // );
 
-    if (!toolCall) {
-      res.status(400).json({ error: 'Tool call not found' });
-      return;
-    }
+    // if (!toolCall) {
+    //   res.status(400).json({ error: 'Tool call not found' });
+    //   return;
+    // }
 
     // toolCallId = toolCall.id;
 
@@ -106,7 +105,7 @@ export default async function handler(
     // });
 
     res.status(200).end();
-  } catch (error) {
+  // } catch (error) {
     // try {
     //   // Update meta data in message
     //   await updateMetadataOfMessage(threadId, messageId, {
@@ -126,8 +125,8 @@ export default async function handler(
     //     error,
     //   );
     // }
-    console.error(error);
-    res.status(500).json({ error: 'Unable to generate image' });
-    return;
-  }
+  //   console.error(error);
+  //   res.status(500).json({ error: 'Unable to generate image' });
+  //   return;
+  // }
 }
