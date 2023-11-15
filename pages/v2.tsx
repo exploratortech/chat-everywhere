@@ -1,5 +1,3 @@
-'use client';
-
 /* This is our initial effort to revamp the UI and underlying structure for the app.
  * UI components are heavily inspired by vercel/ai-chatbot's repo https://github.com/vercel-labs/ai-chatbot
  *
