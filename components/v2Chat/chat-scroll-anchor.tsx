@@ -32,7 +32,7 @@ const ChatScrollAnchor = React.forwardRef(
     // Expose scroll to bottom function
     React.useImperativeHandle(ref, () => ({
       scrollToBottom: () => {
-        entry?.target.scrollIntoView({ block: 'start' });
+        entry?.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       },
     }));
 

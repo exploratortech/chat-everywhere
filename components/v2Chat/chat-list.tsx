@@ -30,7 +30,11 @@ export function ChatList({
   chatMessagesLoading,
 }: ChatList) {
   useEffect(() => {
-    scrollToButton();
+    if(isChatResponseLoading) return;
+
+    setTimeout(() => {
+      scrollToButton();
+    }, 250);
   }, [messages]);
 
   if (!messages.length) {
