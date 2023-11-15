@@ -1,5 +1,7 @@
 // Inspired by Chatbot-UI and modified to fit the needs of this project
 // @see https://github.com/mckaywrigley/chatbot-ui/blob/main/components/Chat/ChatMessage.tsx
+import React, { useState } from 'react';
+
 import { cn } from '@/utils/v2Chat/utils';
 
 import { MessageType } from '@/types/v2Chat/chat';
@@ -17,10 +19,14 @@ export interface ChatMessageProps {
 }
 
 export function ChatMessage({ message, ...props }: ChatMessageProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div
       className={cn('group relative mb-4 flex items-start md:-ml-12')}
       {...props}
+      onMouseOver={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div
         className={cn(
@@ -74,7 +80,7 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
         >
           {message.content}
         </MemoizedReactMarkdown>
-        <ChatMessageActions message={message} />
+        <ChatMessageActions message={message} show={isHovered} />
       </div>
     </div>
   );

@@ -11,10 +11,12 @@ import { IconCheck, IconCopy } from '@/components/v2Chat/ui/icons';
 
 interface ChatMessageActionsProps extends React.ComponentProps<'div'> {
   message: MessageType;
+  show: boolean;
 }
 
 export function ChatMessageActions({
   message,
+  show,
   className,
   ...props
 }: ChatMessageActionsProps) {
@@ -33,10 +35,17 @@ export function ChatMessageActions({
       )}
       {...props}
     >
-      <Button variant="ghost" size="icon" onClick={onCopy}>
-        {isCopied ? <IconCheck /> : <IconCopy />}
-        <span className="sr-only">Copy message</span>
-      </Button>
+      <div className={`${show ? '' : 'w-8 h-8'}`}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onCopy}
+          className={`${show ? '' : 'hidden'}`}
+        >
+          {isCopied ? <IconCheck /> : <IconCopy />}
+          <span className="sr-only">Copy message</span>
+        </Button>
+      </div>
     </div>
   );
 }
