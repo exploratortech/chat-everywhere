@@ -1,5 +1,3 @@
-'use client';
-
 /* This is our initial effort to revamp the UI and underlying structure for the app.
  * UI components are heavily inspired by vercel/ai-chatbot's repo https://github.com/vercel-labs/ai-chatbot
  *
@@ -44,6 +42,8 @@ const V2Chat = () => {
     useState<ConversationType | null>(null);
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [messages, setMessages] = useState<MessageType[]>([]);
+  const [chatMessagesLoading, setChatMessagesLoading] =
+    useState<boolean>(false);
   const [chatResponseLoading, setChatResponseLoading] =
     useState<boolean>(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -77,15 +77,22 @@ const V2Chat = () => {
     );
 
     if (!conversation) return;
+    setChatMessagesLoading(true);
     setSelectedConversation(conversation);
     fetchMessages(conversation.threadId);
   }, [selectedConversationId]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const triggerFetchImages = () => {
       if (enablePullingForUpdates && selectedConversation) {
         fetchMessages(selectedConversation.threadId);
       }
+    };
+
+    triggerFetchImages();
+
+    const interval = setInterval(() => {
+      triggerFetchImages();
     }, 2000);
 
     return () => clearInterval(interval);
@@ -143,6 +150,7 @@ const V2Chat = () => {
       metadata: messageItem.metadata,
     }));
     setMessages(messages);
+    setChatMessagesLoading(false);
 
     if (
       messages.length > 0 &&
@@ -287,7 +295,7 @@ const V2Chat = () => {
 
   return (
     <TooltipProvider>
-      <div className="v2-container flex flex-col min-h-screen">
+      <div className="v2-container flex flex-col min-h-screen w-screen">
         <Header
           userProfile={userProfile}
           startNewChat={startNewChat}
@@ -305,6 +313,7 @@ const V2Chat = () => {
                   suggestions={suggestions}
                   onMessageSent={onMessageSent}
                   isChatResponseLoading={chatResponseLoading}
+                  chatMessagesLoading={chatMessagesLoading}
                 />
                 <ChatScrollAnchor
                   ref={chatScrollAnchorRef}
