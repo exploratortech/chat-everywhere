@@ -44,6 +44,8 @@ const V2Chat = () => {
     useState<ConversationType | null>(null);
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [messages, setMessages] = useState<MessageType[]>([]);
+  const [chatMessagesLoading, setChatMessagesLoading] =
+    useState<boolean>(false);
   const [chatResponseLoading, setChatResponseLoading] =
     useState<boolean>(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -77,15 +79,22 @@ const V2Chat = () => {
     );
 
     if (!conversation) return;
+    setChatMessagesLoading(true);
     setSelectedConversation(conversation);
     fetchMessages(conversation.threadId);
   }, [selectedConversationId]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const triggerFetchImages = () => {
       if (enablePullingForUpdates && selectedConversation) {
         fetchMessages(selectedConversation.threadId);
       }
+    };
+
+    triggerFetchImages();
+
+    const interval = setInterval(() => {
+      triggerFetchImages();
     }, 2000);
 
     return () => clearInterval(interval);
@@ -143,6 +152,7 @@ const V2Chat = () => {
       metadata: messageItem.metadata,
     }));
     setMessages(messages);
+    setChatMessagesLoading(false);
 
     if (
       messages.length > 0 &&
@@ -305,6 +315,7 @@ const V2Chat = () => {
                   suggestions={suggestions}
                   onMessageSent={onMessageSent}
                   isChatResponseLoading={chatResponseLoading}
+                  chatMessagesLoading={chatMessagesLoading}
                 />
                 <ChatScrollAnchor
                   ref={chatScrollAnchorRef}
