@@ -71,7 +71,7 @@ const generateMjPrompt = (
     resultPrompt += ' --chaos 50';
   }
 
-  return resultPrompt + ' --v 5.1';
+  return resultPrompt + ' --v 5.2';
 };
 
 const handler = async (req: Request): Promise<Response> => {
