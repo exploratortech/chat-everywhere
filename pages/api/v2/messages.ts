@@ -66,10 +66,10 @@ const handler = async (req: Request): Promise<Response> => {
         );
       case 'send message':
         serverSideTrackEvent(userProfile.id, 'v2 Send message');
-        return sendMessage(user.user.id, conversationId, messageContent);
+        return await sendMessage(user.user.id, conversationId, messageContent);
       case 'create conversation':
         serverSideTrackEvent(userProfile.id, 'v2 Create conversation');
-        return createConversation(user.user.id, messageContent);
+        return await createConversation(user.user.id, messageContent);
       default:
         return new Response('Invalid request type', { status: 400 });
     }
