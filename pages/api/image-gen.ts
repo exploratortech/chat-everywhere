@@ -183,10 +183,10 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error('Image generation failed');
       }
 
-      errorTraceMessage +=
+      errorTraceMessage =
         'From endpoint: https://api.thenextleg.io/v2/imagine: ' +
         imageGenerationResponseText +
-        ' --- ';
+        ' --- ' + errorTraceMessage;
 
       const imageGenerationResponseJson = JSON.parse(
         imageGenerationResponseText,
@@ -229,7 +229,7 @@ const handler = async (req: Request): Promise<Response> => {
           imageGenerationProgressResponseText,
         );
 
-        errorTraceMessage += `From endpoint: ${generationProgressEndpoint}: ${imageGenerationProgressResponseText} --- `;
+        errorTraceMessage = `From endpoint: ${generationProgressEndpoint}: ${imageGenerationProgressResponseText} --- ` + errorTraceMessage;
 
         if (!imageGenerationProgressResponse.ok) {
           console.log(imageGenerationProgressResponse.status);
