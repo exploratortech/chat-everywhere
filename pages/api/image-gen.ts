@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-import { trackError } from '@/utils/app/azureTelemetry';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
@@ -91,6 +90,8 @@ const handler = async (req: Request): Promise<Response> => {
     });
   }
 
+  let errorTraceMessage = '';
+
   const startTime = Date.now();
   const encoder = new TextEncoder();
   const stream = new TransformStream();
@@ -108,12 +109,13 @@ const handler = async (req: Request): Promise<Response> => {
 
   const logEvent = async (errorMessage?: string) => {
     const payloadToLog: PayloadType = {
-      generationLengthInSecond: (Date.now() - startTime)/1000,
+      generationLengthInSecond: (Date.now() - startTime) / 1000,
     };
 
     if (errorMessage) {
       payloadToLog.imageGenerationFailed = 'true';
-      payloadToLog.imageGenerationErrorMessage = errorMessage;
+      payloadToLog.imageGenerationErrorMessage =
+        errorMessage + errorTraceMessage;
       payloadToLog.imageGenerationPrompt = `${promptBeforeProcessing} -> ${generationPrompt}`;
     }
 
@@ -174,12 +176,21 @@ const handler = async (req: Request): Promise<Response> => {
         },
       );
 
+      const imageGenerationResponseText = await imageGenerationResponse.text();
+
       if (!imageGenerationResponse.ok) {
         await logEvent('Image generation failed');
         throw new Error('Image generation failed');
       }
 
-      const imageGenerationResponseJson = await imageGenerationResponse.json();
+      errorTraceMessage +=
+        'From endpoint: https://api.thenextleg.io/v2/imagine: ' +
+        imageGenerationResponseText +
+        ' --- ';
+
+      const imageGenerationResponseJson = JSON.parse(
+        imageGenerationResponseText,
+      );
 
       if (
         imageGenerationResponseJson.success !== true ||
@@ -192,6 +203,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       const imageGenerationMessageId = imageGenerationResponseJson.messageId;
+      const generationProgressEndpoint = `https://api.thenextleg.io/v2/message/${imageGenerationMessageId}?authToken=${process.env.THE_NEXT_LEG_API_KEY}`;
 
       // Check every 3.5 seconds if the image generation is done
       let generationStartedAt = Date.now();
@@ -207,19 +219,24 @@ const handler = async (req: Request): Promise<Response> => {
       ) {
         await sleep(3500);
         const imageGenerationProgressResponse = await fetch(
-          `https://api.thenextleg.io/v2/message/${imageGenerationMessageId}?authToken=${process.env.THE_NEXT_LEG_API_KEY}`,
+          generationProgressEndpoint,
           { method: 'GET' },
         );
 
+        const imageGenerationProgressResponseText =
+          await imageGenerationProgressResponse.text();
+        const imageGenerationProgressResponseJson = JSON.parse(
+          imageGenerationProgressResponseText,
+        );
+
+        errorTraceMessage += `From endpoint: ${generationProgressEndpoint}: ${imageGenerationProgressResponseText} --- `;
+
         if (!imageGenerationProgressResponse.ok) {
-          console.log(await imageGenerationProgressResponse.status);
-          console.log(await imageGenerationProgressResponse.text());
+          console.log(imageGenerationProgressResponse.status);
+          console.log(imageGenerationProgressResponseText);
           await logEvent('Unable to fetch image generation progress');
           throw new Error('Unable to fetch image generation progress');
         }
-
-        const imageGenerationProgressResponseJson =
-          await imageGenerationProgressResponse.json();
 
         const generationProgress = imageGenerationProgressResponseJson.progress;
 
@@ -299,6 +316,7 @@ const handler = async (req: Request): Promise<Response> => {
                   : `${generationProgress}% complete`
               } ... ${getTotalGenerationTime()}s \n`,
               removeLastLine: true,
+              previewImageUrl: imageGenerationProgressResponseJson?.progressImageUrl,
               percentage:
                 typeof generationProgress === 'number'
                   ? `${generationProgress}`
@@ -320,8 +338,6 @@ const handler = async (req: Request): Promise<Response> => {
       jobTerminated = true;
 
       console.log(error);
-      //Log error to Azure App Insights
-      trackError(error as string);
       await progressHandler.updateProgress({
         content:
           'Error occurred while generating image, please try again later.',

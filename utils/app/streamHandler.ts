@@ -56,6 +56,7 @@ export class ProgressHandler {
     state?: 'loading' | 'completed' | 'error';
     removeLastLine?: boolean;
     percentage?: `${number}`;
+    previewImageUrl?: string;
   }) {
     if (removeLastLine) {
       this.progressContent = removeLastLineF(this.progressContent);

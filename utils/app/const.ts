@@ -23,7 +23,7 @@ export const DEFAULT_IMAGE_GENERATION_QUALITY = 'high';
 
 export const RANK_INTERVAL = 100;
 
-export const IMAGE_GEN_MAX_TIMEOUT = 60;
+export const IMAGE_GEN_MAX_TIMEOUT = 300;
 
 export const IMAGE_TO_PROMPT_MAX_TIMEOUT = 30;
 
