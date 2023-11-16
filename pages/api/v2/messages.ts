@@ -171,13 +171,14 @@ const sendMessage = async (
     },
   );
 
+  const messageCreationData = await messageCreationResponse.text();
+
   if (!messageCreationResponse.ok) {
-    console.log('Failed on message creation');
-    console.error(await messageCreationResponse.text());
+    console.error('Failed on message creation', messageCreationData);
     return new Response('Error', { status: 500 });
   }
 
-  const latestMessageId = (await messageCreationResponse.json()).id;
+  const latestMessageId = (JSON.parse(messageCreationData)).id;
 
   // Create a Run object for the message in Thread
   const runCreationUrl = `https://api.openai.com/v1/threads/${conversationId}/runs`;
@@ -195,14 +196,14 @@ const sendMessage = async (
   }
 
   // Keep checking every 500 ms until Run's status is completed
-  // or until 15 seconds have passed
+  // or until 20 seconds have passed
   const runId = (await runCreationResponse.json()).id;
 
   const runStatusUrl = `https://api.openai.com/v1/threads/${conversationId}/runs/${runId}`;
   let runStatusResponse;
   let runStatusData;
   const startTime = Date.now();
-  const timeout = 15000;
+  const timeout = 20 * 1000;
   const interval = 500;
 
   while (Date.now() - startTime < timeout) {
@@ -260,13 +261,13 @@ const sendMessage = async (
     });
 
     // Some buffer room for the /image-generation serverless function to initialize
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     return new Response(null, { status: 200 });
   }
 
   if (runStatusData.status !== 'completed') {
-    console.error('Timeout: Run status check exceeded 15 seconds');
+    console.error('Timeout: Run status check exceeded 20 seconds', runStatusData);
     return new Response('Error: Timeout', { status: 500 });
   }
 
