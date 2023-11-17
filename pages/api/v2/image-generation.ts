@@ -141,44 +141,44 @@ export default async function handler(
   } catch (error) {
     res.status(500).json({ error: 'Unable to generate image' });
     return;
-    
-    // Update meta data in message
-    await updateMetadataOfMessage(threadId, messageId, {
-      imageGenerationStatus: 'failed',
-    });
-    if (toolCallId) {
-      if (error instanceof Error) {
-        console.log('error.message: ', error.message);
 
-        serverSideTrackEvent('N/A', 'v2 Error', {
-          errorMessage: error.message,
-        });
-        await submitToolOutput(
-          threadId,
-          runId,
-          toolCallId,
-          'Unable to generate image' +
-            `${
-              error.message
-                ? `Error message: ${error.message}. Base on the error message, help user to decide what's the next best action to take.`
-                : ''
-            }`,
-        );
-      } else {
-        await submitToolOutput(
-          threadId,
-          runId,
-          toolCallId,
-          'Unable to generate image' + `${error}`,
-        );
-      }
-      await waitForRunToCompletion(threadId, runId);
-    }
-    serverSideTrackEvent('N/A', 'v2 Error', {
-      errorMessage: 'Unable to generate image',
-    });
-    console.error(error);
-    res.status(500).json({ error: 'Unable to generate image' });
-    return;
+    // Update meta data in message
+    // await updateMetadataOfMessage(threadId, messageId, {
+    //   imageGenerationStatus: 'failed',
+    // });
+    // if (toolCallId) {
+    //   if (error instanceof Error) {
+    //     console.log('error.message: ', error.message);
+
+    //     serverSideTrackEvent('N/A', 'v2 Error', {
+    //       errorMessage: error.message,
+    //     });
+    //     await submitToolOutput(
+    //       threadId,
+    //       runId,
+    //       toolCallId,
+    //       'Unable to generate image' +
+    //         `${
+    //           error.message
+    //             ? `Error message: ${error.message}. Base on the error message, help user to decide what's the next best action to take.`
+    //             : ''
+    //         }`,
+    //     );
+    //   } else {
+    //     await submitToolOutput(
+    //       threadId,
+    //       runId,
+    //       toolCallId,
+    //       'Unable to generate image' + `${error}`,
+    //     );
+    //   }
+    //   await waitForRunToCompletion(threadId, runId);
+    // }
+    // serverSideTrackEvent('N/A', 'v2 Error', {
+    //   errorMessage: 'Unable to generate image',
+    // });
+    // console.error(error);
+    // res.status(500).json({ error: 'Unable to generate image' });
+    // return;
   }
 }
