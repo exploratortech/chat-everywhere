@@ -32,7 +32,7 @@ export const updateMetadataOfMessage = async (
   const response = await authorizedOpenAiRequest(openAiUrl, {
     method: 'POST',
     body: JSON.stringify({
-      metadata,
+      metadata: metadata,
     }),
   });
 

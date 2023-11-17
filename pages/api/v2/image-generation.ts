@@ -27,11 +27,6 @@ export default async function handler(
 ) {
   console.log('Image generation endpoint is hit');
 
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    res.status(405).end('Method Not Allowed');
-  }
-
   const { threadId, messageId, runId } = req.body as RequestBody;
 
   if (!threadId || !messageId || !runId) {
