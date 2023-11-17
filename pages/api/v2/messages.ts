@@ -248,7 +248,8 @@ const sendMessage = async (
     });
 
     // Trigger image generation asynchronously
-    fetch(`${process.env.SERVER_HOST}/api/v2/image-generation`, {
+    console.log("process.env.NEXT_PUBLIC_VERCEL_URL: ", process.env.NEXT_PUBLIC_VERCEL_URL);
+    fetch(`${process.env.SERVER_HOST || `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`}/api/v2/image-generation`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
