@@ -155,13 +155,13 @@ const V2Chat = () => {
       metadata: messageItem.metadata,
     }));
     setMessages(messages);
-    setChatMessagesLoading(false);
-
+    
     // Check if requires polling on conversation status
     if (data.requiresPolling) {
       setChatResponseLoading(true);
       setEnablePullingForUpdates(true);
     } else {
+      setChatMessagesLoading(false);
       setChatResponseLoading(false);
       setEnablePullingForUpdates(false);
     }
@@ -218,6 +218,7 @@ const V2Chat = () => {
     let tempSelectedConversation: ConversationType;
 
     if (!selectedConversation) {
+      setChatMessagesLoading(true);
       const response = await fetch('/api/v2/messages', {
         method: 'POST',
         headers: {
@@ -240,9 +241,6 @@ const V2Chat = () => {
       tempSelectedConversation = { ...data };
       setConversations([tempSelectedConversation, ...conversations]);
       setSelectedConversationId(tempSelectedConversation.id);
-      setSelectedConversation(tempSelectedConversation);
-      setEnablePullingForUpdates(true);
-      setChatResponseLoading(true);
     } else {
       tempSelectedConversation = selectedConversation;
       setMessages([
@@ -308,11 +306,7 @@ const V2Chat = () => {
         />
         <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto pt-5">
           <div className="pb-[120px] mt-12 mb-14">
-            {
-              chatMessagesLoading && (
-                <ConversationLoadingSpinner/>
-              )
-            }
+            {chatMessagesLoading && <ConversationLoadingSpinner />}
             {messages.length > 0 ? (
               <>
                 <ChatList
