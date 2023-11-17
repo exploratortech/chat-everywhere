@@ -148,6 +148,16 @@ const V2Chat = () => {
         conversationId,
       }),
     });
+
+    if(!response.ok) {
+      console.error(response);
+      toast.error('Unable to load messages. Please try again later.');
+      setChatMessagesLoading(false);
+      setChatResponseLoading(false);
+      setEnablePullingForUpdates(false);
+      return;
+    }
+
     const data = (await response.json()) as RetrieveMessageResponseType;
     const messages: MessageType[] = data.messages.map((messageItem) => ({
       role: messageItem.role,
