@@ -26,7 +26,7 @@ const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 const DEFAULT_MESSAGE_LIMIT = 50;
 const ASSISTANT_ID = process.env.OPENAI_V2_ASSISTANT_ID;
 
-const handler = async (req: Request): Promise<Response> => {
+const handler = async (req: Request): Promise<Response | ReadableStream> => {
   const supabase = getAdminSupabaseClient();
 
   try {
@@ -159,119 +159,122 @@ const sendMessage = async (
     });
   }
 
-  // Cancel any hanging runs
-  await cancelCurrentThreadRun(conversationId);
-
-  // Add a Message object to Thread
-  const messageCreationResponse = await addOpenAiMessageToThread(
-    conversationId,
-    {
-      role: 'user',
-      content: messageContent,
+  // Return a stream as a workaround to the 25 second timeout limit on edge function
+  return new ReadableStream({
+    async start() {
+      // Cancel any hanging runs
+      await cancelCurrentThreadRun(conversationId);
+    
+      // Add a Message object to Thread
+      const messageCreationResponse = await addOpenAiMessageToThread(
+        conversationId,
+        {
+          role: 'user',
+          content: messageContent,
+        },
+      );
+    
+      const messageCreationData = await messageCreationResponse.text();
+    
+      if (!messageCreationResponse.ok) {
+        console.error('Failed on message creation', messageCreationData);
+        return new Response('Error', { status: 500 });
+      }
+    
+      const latestMessageId = (JSON.parse(messageCreationData)).id;
+    
+      // Create a Run object for the message in Thread
+      const runCreationUrl = `https://api.openai.com/v1/threads/${conversationId}/runs`;
+    
+      const runCreationResponse = await authorizedOpenAiRequest(runCreationUrl, {
+        method: 'POST',
+        body: JSON.stringify({
+          assistant_id: ASSISTANT_ID,
+        }),
+      });
+    
+      if (!runCreationResponse.ok) {
+        console.error(await runCreationResponse.text());
+        return new Response('Error', { status: 500 });
+      }
+    
+      // Keep checking every 500 ms until Run's status is completed
+      // or until 4 mins have passed
+      const runId = (await runCreationResponse.json()).id;
+    
+      const runStatusUrl = `https://api.openai.com/v1/threads/${conversationId}/runs/${runId}`;
+      let runStatusResponse;
+      let runStatusData;
+      const startTime = Date.now();
+      const timeout = 4 * 60 * 1000;
+      const interval = 500;
+    
+      while (Date.now() - startTime < timeout) {
+        runStatusResponse = await authorizedOpenAiRequest(runStatusUrl, {
+          method: 'GET',
+        });
+    
+        if (!runStatusResponse.ok) {
+          console.error(await runStatusResponse.text());
+          return new Response('Error', { status: 500 });
+        }
+    
+        runStatusData = await runStatusResponse.json();
+    
+        if (
+          runStatusData.status === 'completed' ||
+          runStatusData.status === 'requires_action'
+        ) {
+          break;
+        }
+    
+        if (runStatusData.status === 'failed') {
+          console.log(runStatusData);
+          console.log('Run creation failed');
+          return new Response('Error: Failed', { status: 500 });
+        }
+    
+        await new Promise((resolve) => setTimeout(resolve, interval));
+      }
+    
+      if (runStatusData.status === 'requires_action') {
+        console.log('Required tool calling');
+    
+        await updateMetadataOfMessage(conversationId, latestMessageId, {
+          imageGenerationStatus: 'in progress',
+        });
+    
+        serverSideTrackEvent(userId, 'v2 Image generation request', {
+          v2ThreadId: conversationId,
+          v2MessageId: latestMessageId,
+          v2runId: runStatusData.id,
+        });
+    
+        // Trigger image generation asynchronously
+        fetch(`${process.env.SERVER_HOST || `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`}/api/v2/image-generation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            threadId: conversationId,
+            messageId: latestMessageId,
+            runId: runStatusData.id,
+          }),
+        });
+    
+        // Some buffer room for the /image-generation serverless function to initialize
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+    
+        return new Response(null, { status: 200 });
+      }
+    
+      if (runStatusData.status !== 'completed') {
+        console.error('Timeout: Run status check exceeded 20 seconds', runStatusData);
+        return new Response('Error: Timeout', { status: 500 });
+      }
     },
-  );
-
-  const messageCreationData = await messageCreationResponse.text();
-
-  if (!messageCreationResponse.ok) {
-    console.error('Failed on message creation', messageCreationData);
-    return new Response('Error', { status: 500 });
-  }
-
-  const latestMessageId = (JSON.parse(messageCreationData)).id;
-
-  // Create a Run object for the message in Thread
-  const runCreationUrl = `https://api.openai.com/v1/threads/${conversationId}/runs`;
-
-  const runCreationResponse = await authorizedOpenAiRequest(runCreationUrl, {
-    method: 'POST',
-    body: JSON.stringify({
-      assistant_id: ASSISTANT_ID,
-    }),
   });
-
-  if (!runCreationResponse.ok) {
-    console.error(await runCreationResponse.text());
-    return new Response('Error', { status: 500 });
-  }
-
-  // Keep checking every 500 ms until Run's status is completed
-  // or until 20 seconds have passed
-  const runId = (await runCreationResponse.json()).id;
-
-  const runStatusUrl = `https://api.openai.com/v1/threads/${conversationId}/runs/${runId}`;
-  let runStatusResponse;
-  let runStatusData;
-  const startTime = Date.now();
-  const timeout = 20 * 1000;
-  const interval = 500;
-
-  while (Date.now() - startTime < timeout) {
-    runStatusResponse = await authorizedOpenAiRequest(runStatusUrl, {
-      method: 'GET',
-    });
-
-    if (!runStatusResponse.ok) {
-      console.error(await runStatusResponse.text());
-      return new Response('Error', { status: 500 });
-    }
-
-    runStatusData = await runStatusResponse.json();
-
-    if (
-      runStatusData.status === 'completed' ||
-      runStatusData.status === 'requires_action'
-    ) {
-      break;
-    }
-
-    if (runStatusData.status === 'failed') {
-      console.log(runStatusData);
-      console.log('Run creation failed');
-      return new Response('Error: Failed', { status: 500 });
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, interval));
-  }
-
-  if (runStatusData.status === 'requires_action') {
-    console.log('Required tool calling');
-
-    await updateMetadataOfMessage(conversationId, latestMessageId, {
-      imageGenerationStatus: 'in progress',
-    });
-
-    serverSideTrackEvent(userId, 'v2 Image generation request', {
-      v2ThreadId: conversationId,
-      v2MessageId: latestMessageId,
-      v2runId: runStatusData.id,
-    });
-
-    // Trigger image generation asynchronously
-    fetch(`${process.env.SERVER_HOST || `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`}/api/v2/image-generation`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        threadId: conversationId,
-        messageId: latestMessageId,
-        runId: runStatusData.id,
-      }),
-    });
-
-    // Some buffer room for the /image-generation serverless function to initialize
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    return new Response(null, { status: 200 });
-  }
-
-  if (runStatusData.status !== 'completed') {
-    console.error('Timeout: Run status check exceeded 20 seconds', runStatusData);
-    return new Response('Error: Timeout', { status: 500 });
-  }
-
-  return new Response(null, { status: 200 });
 };
 
 const createConversation = async (userId: string, messageContent?: string) => {
