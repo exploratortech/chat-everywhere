@@ -12,6 +12,7 @@ import {
 
 export const config = {
   runtime: 'edge',
+  preferredRegion: 'icn1'  // Only execute this function in the Korea region in case OpenAI blocks it
 };
 
 export type RequestType =

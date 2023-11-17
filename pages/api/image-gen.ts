@@ -32,6 +32,7 @@ const supabase = getAdminSupabaseClient();
 
 export const config = {
   runtime: 'edge',
+  preferredRegion: 'icn1' // Only execute this function in the Korea region in case OpenAI blocks it
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
