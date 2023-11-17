@@ -129,7 +129,7 @@ export default async function handler(
       "Successfully generated image, image is displayed on user's screen",
     );
 
-    await waitForRunToCompletion(threadId, runId);
+    await waitForRunToCompletion(threadId, runId, false, 60*1000);
 
     await updateMetadataOfMessage(threadId, messageId, {
       imageGenerationStatus: 'completed',
@@ -182,7 +182,7 @@ export default async function handler(
           'Unable to generate image' + `${error}`,
         );
       }
-      await waitForRunToCompletion(threadId, runId);
+      await waitForRunToCompletion(threadId, runId, false, 60*1000);
     }
     serverSideTrackEvent('N/A', 'v2 Error', {
       errorMessage: 'Unable to generate image',
