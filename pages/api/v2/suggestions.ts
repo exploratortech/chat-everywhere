@@ -9,6 +9,7 @@ import { MessageType } from '@/types/v2Chat/chat';
 
 export const config = {
   runtime: 'edge',
+  preferredRegion: 'icn1'
 };
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });

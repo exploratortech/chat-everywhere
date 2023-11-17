@@ -20,6 +20,7 @@ const supabase = getAdminSupabaseClient();
 
 export const config = {
   runtime: 'edge',
+  preferredRegion: 'icn1'
 };
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
