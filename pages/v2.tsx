@@ -21,6 +21,7 @@ import type {
   ConversationType,
   MessageType,
   OpenAIMessageType,
+  RetrieveMessageResponseType,
 } from '@/types/v2Chat/chat';
 
 import { ChatList } from '@/components/v2Chat/chat-list';
@@ -83,16 +84,16 @@ const V2Chat = () => {
   }, [selectedConversationId]);
 
   useEffect(() => {
-    const triggerFetchImages = () => {
+    const triggerFetchMessages = () => {
       if (enablePullingForUpdates && selectedConversation) {
         fetchMessages(selectedConversation.threadId);
       }
     };
 
-    triggerFetchImages();
+    triggerFetchMessages();
 
     const interval = setInterval(() => {
-      triggerFetchImages();
+      triggerFetchMessages();
     }, 2000);
 
     return () => clearInterval(interval);
@@ -143,8 +144,8 @@ const V2Chat = () => {
         conversationId,
       }),
     });
-    const data = (await response.json()) as OpenAIMessageType[];
-    const messages: MessageType[] = data.map((messageItem) => ({
+    const data = (await response.json()) as RetrieveMessageResponseType;
+    const messages: MessageType[] = data.messages.map((messageItem) => ({
       role: messageItem.role,
       content: messageItem.content[0].text.value,
       metadata: messageItem.metadata,
@@ -152,32 +153,26 @@ const V2Chat = () => {
     setMessages(messages);
     setChatMessagesLoading(false);
 
-    if (
-      messages.length > 0 &&
-      messages[messages.length - 1].role === 'assistant'
-    ) {
-      fetchSuggestions(messages);
-    }
-
-    // Check if requires pulling
-    const lastMessage = [...messages]
-      .reverse()
-      .find((message) => message.metadata?.imageGenerationStatus);
-    if (!lastMessage || !lastMessage.metadata) return;
-
-    setSuggestions([]);
-    if (lastMessage.metadata.imageGenerationStatus === 'in progress') {
+    // Check if requires polling on conversation status
+    if(data.requiresPolling){
       setChatResponseLoading(true);
       setEnablePullingForUpdates(true);
-    } else {
+    }else{
       setChatResponseLoading(false);
       setEnablePullingForUpdates(false);
     }
+
+    fetchSuggestions(messages);
   };
 
   const fetchSuggestions = async (messages: MessageType[]) => {
+    console.log("Fetch suggestion triggered");
+    console.log(messages.length, messages[messages.length - 1]);
+    
     if (!user || !session || enablePullingForUpdates || chatResponseLoading)
       return;
+    
+    if(messages.length === 0 || messages[messages.length - 1].role !== 'assistant') return;
 
     const response = await fetch('/api/v2/suggestions', {
       method: 'POST',
@@ -231,6 +226,7 @@ const V2Chat = () => {
 
       if (!response.ok) {
         console.error(await response.text());
+        toast.error('Unable to send message. Please try again later.');
         return;
       }
 
@@ -263,15 +259,14 @@ const V2Chat = () => {
       }),
     });
 
-    if (response.status === 200) {
-      setChatResponseLoading(false);
-    } else {
+    if (response.status !== 200) {
       toast.error('Unable to send message. Please try again later.');
       console.error(response);
+      return;
     }
 
-    await fetchMessages(tempSelectedConversation.threadId);
-    setChatResponseLoading(false);
+    setChatResponseLoading(true);
+    setEnablePullingForUpdates(true);
   };
 
   const startNewChat = () => {

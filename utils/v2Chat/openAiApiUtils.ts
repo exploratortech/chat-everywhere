@@ -1,11 +1,10 @@
 import {
   MessageMetaDataType,
-  OpenAiImageResponseType,
-} from '@/types/v2Chat/chat';
-import {
   MessageType,
   OpenAIMessageType,
   OpenAIRunType,
+  OpenAiImageResponseType,
+  activeRunStatuses,
 } from '@/types/v2Chat/chat';
 
 export const addOpenAiMessageToThread = async (
@@ -76,6 +75,22 @@ export const getOpenAiRunObject = async (
   return run;
 };
 
+export const getOpenAiLatestRunObject = async (
+  threadId: string,
+): Promise<OpenAIRunType> => {
+  const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs?limit=1`;
+
+  const response = await authorizedOpenAiRequest(openAiUrl);
+
+  if (!response.ok) {
+    console.error(await response.text());
+    throw new Error('Failed to retrieve latest run');
+  }
+
+  const runs: OpenAIRunType[] = (await response.json()).data;
+  return runs[0];
+}
+
 export const generateImage = async (
   prompt: string,
 ): Promise<OpenAiImageResponseType & { errorMessage?: string }> => {
@@ -131,7 +146,6 @@ export const generateImage = async (
 };
 
 export const cancelCurrentThreadRun = async (threadId: string) => {
-  const activeStatus = ['in_progress', 'requires_action', 'cancelling'];
   const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs?limit=10`;
   const response = await authorizedOpenAiRequest(openAiUrl, {
     method: 'GET',
@@ -144,7 +158,9 @@ export const cancelCurrentThreadRun = async (threadId: string) => {
   }
 
   const runs: OpenAIRunType[] = (await response.json()).data;
-  const activeRuns = runs.filter((run) => activeStatus.includes(run.status));
+  const activeRuns = runs.filter((run) =>
+    activeRunStatuses.includes(run.status),
+  );
 
   for (const activeRun of activeRuns) {
     console.log(
@@ -167,7 +183,7 @@ export const cancelCurrentThreadRun = async (threadId: string) => {
     // Wait until the run no longer has the in_progress, requires_action, or cancelling status
     let runStatus = activeRun.status;
     let startTime = Date.now();
-    while (activeStatus.includes(runStatus)) {
+    while (activeRunStatuses.includes(runStatus)) {
       const runObject = await getOpenAiRunObject(threadId, activeRun.id);
       runStatus = runObject.status;
       if (Date.now() - startTime > 5000) {
@@ -221,9 +237,10 @@ export const cancelRunOnThreadIfNeeded = async (
   const currentTimestampInSeconds = Date.now() / 1000;
 
   if (currentTimestampInSeconds - messageCreatedAt < tenMinutesInSeconds) {
-    console.log('Message is less than 10 minutes old, skipping cancellation');
     return;
   } else {
+    console.log('Message is more than 10 minutes old, cancelling run');
+    
     await updateMetadataOfMessage(threadId, messageId, {
       imageGenerationStatus: 'failed',
     });

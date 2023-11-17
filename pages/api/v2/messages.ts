@@ -8,11 +8,18 @@ import {
   addOpenAiMessageToThread,
   cancelCurrentThreadRun,
   cancelRunOnThreadIfNeeded,
+  getOpenAiLatestRunObject,
+  getOpenAiRunObject,
   updateMetadataOfMessage,
-  waitForRunToCompletion,
 } from '@/utils/v2Chat/openAiApiUtils';
 
-import { OpenAIMessageType } from '@/types/v2Chat/chat';
+import {
+  ConversationType,
+  MessageType,
+  OpenAIMessageType,
+  completedRunStatuses,
+  v2ConversationType,
+} from '@/types/v2Chat/chat';
 
 export const config = {
   runtime: 'edge',
@@ -114,6 +121,8 @@ const retrieveMessages = async (
   latestMessageId?: string,
   beforeMessageId?: string,
 ) => {
+  const supabase = getAdminSupabaseClient();
+
   const isConversationBelongsToUser = await doesConversationBelongToUser(
     userId,
     conversationId,
@@ -143,14 +152,99 @@ const retrieveMessages = async (
   const messages = (await messagesResponse.json()).data as OpenAIMessageType[];
   const latestMessage = messages[messages.length - 1];
 
-  // To handle hanging run that failed
+  if (!latestMessage) {
+    return new Response(
+      JSON.stringify({
+        messages: [],
+        requiresPolling: false,
+      }),
+      { status: 200 },
+    );
+  }
+
+  const { data: conversationObject } = await supabase
+    .from('user_v2_conversations')
+    .select('id, uid, threadId, title, runInProgress, processLock')
+    .eq('threadId', conversationId)
+    .single();
+
+  const runInProgress = (conversationObject as v2ConversationType)
+    .runInProgress;
+  const processLock = (conversationObject as v2ConversationType).processLock;
+
+  if (runInProgress && !processLock) {
+    const runObject = await getOpenAiLatestRunObject(conversationId);
+
+    // If run is completed, stop polling
+    if (completedRunStatuses.includes(runObject.status)) {
+      await setConversationRunInProgress(conversationId, false);
+      await setConversationProcessLock(conversationId, false);
+      return new Response(
+        JSON.stringify({
+          messages,
+          requiresPolling: false,
+        }),
+        { status: 200 },
+      );
+    }
+
+    if (runObject.status === 'requires_action') {
+      console.log('Required tool calling');
+      await setConversationProcessLock(conversationId, true);
+
+      try {
+        // Trigger image generation asynchronously
+        fetch(
+          `${
+            process.env.SERVER_HOST ||
+            `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+          }/api/v2/image-generation`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              threadId: conversationId,
+              messageId: latestMessage.id,
+              runId: runObject.id,
+            }),
+          },
+        );
+        // Some buffer room for the /image-generation serverless function to initialize
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (error) {
+        console.error('Error triggering image generation:', error);
+        await setConversationProcessLock(conversationId, false);
+        await updateMetadataOfMessage(conversationId, latestMessage.id, {
+          imageGenerationStatus: 'failed',
+        });
+        return new Response(null, { status: 500 });
+      }
+
+      await updateMetadataOfMessage(conversationId, latestMessage.id, {
+        imageGenerationStatus: 'in progress',
+      });
+
+      serverSideTrackEvent(userId, 'v2 Image generation request', {
+        v2ThreadId: conversationId,
+        v2MessageId: latestMessage.id,
+        v2runId: runObject.id,
+      });
+    }
+  }
+
+  // If threads takes longer than 10 mins to run, kill it
   await cancelRunOnThreadIfNeeded(
     latestMessage.created_at,
     latestMessage.id,
     conversationId,
   );
 
-  return new Response(JSON.stringify(messages), { status: 200 });
+  return new Response(JSON.stringify({
+    messages,
+    requiresPolling: runInProgress,
+  }), { status: 200 });
 };
 
 const sendMessage = async (
@@ -190,8 +284,6 @@ const sendMessage = async (
     return new Response('Error', { status: 500 });
   }
 
-  const latestMessageId = (await messageCreationResponse.json()).id;
-
   // Create a Run object for the message in Thread
   const runCreationUrl = `https://api.openai.com/v1/threads/${conversationId}/runs`;
 
@@ -207,63 +299,7 @@ const sendMessage = async (
     return new Response('Error', { status: 500 });
   }
 
-  // Keep checking every 500 ms until Run's status is completed
-  // or until 15 seconds have passed
-  const runId = (await runCreationResponse.json()).id;
-
-  let runStatusData = await waitForRunToCompletion(
-    conversationId,
-    runId,
-    true,
-    15000,
-  );
-
-  if (runStatusData.status === 'requires_action') {
-    console.log('Required tool calling');
-
-    try {
-      // Trigger image generation asynchronously
-      fetch(
-        `${
-          process.env.SERVER_HOST ||
-          `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-        }/api/v2/image-generation`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            threadId: conversationId,
-            messageId: latestMessageId,
-            runId: runStatusData.id,
-          }),
-        },
-      );
-      // Some buffer room for the /image-generation serverless function to initialize
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    } catch (error) {
-      console.error('Error triggering image generation:', error);
-      return new Response(null, { status: 500 });
-    }
-
-    await updateMetadataOfMessage(conversationId, latestMessageId, {
-      imageGenerationStatus: 'in progress',
-    });
-
-    serverSideTrackEvent(userId, 'v2 Image generation request', {
-      v2ThreadId: conversationId,
-      v2MessageId: latestMessageId,
-      v2runId: runStatusData.id,
-    });
-
-    return new Response(null, { status: 200 });
-  }
-
-  if (runStatusData.status !== 'completed') {
-    console.error('Timeout: Run status check exceeded 15 seconds');
-    return new Response('Error: Timeout', { status: 500 });
-  }
+  await setConversationRunInProgress(conversationId, true);
 
   return new Response(null, { status: 200 });
 };
@@ -311,6 +347,32 @@ const createConversation = async (userId: string, messageContent?: string) => {
     console.error(error);
     return new Response('Error', { status: 500 });
   }
+};
+
+const setConversationRunInProgress = async (
+  conversationId: string,
+  runInProgress: boolean,
+) => {
+  const supabase = getAdminSupabaseClient();
+  await supabase
+    .from('user_v2_conversations')
+    .update({
+      runInProgress,
+    })
+    .eq('threadId', conversationId);
+};
+
+const setConversationProcessLock = async (
+  conversationId: string,
+  processLock: boolean,
+) => {
+  const supabase = getAdminSupabaseClient();
+  await supabase
+    .from('user_v2_conversations')
+    .update({
+      processLock,
+    })
+    .eq('threadId', conversationId);
 };
 
 export default handler;

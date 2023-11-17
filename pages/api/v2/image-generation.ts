@@ -63,7 +63,6 @@ export default async function handler(
     }
 
     const run = await getOpenAiRunObject(threadId, runId);
-
     const requiredAction = run.required_action;
 
     if (!requiredAction) {
@@ -137,6 +136,14 @@ export default async function handler(
       imageUrl: imagePublicUrlData.publicUrl,
     });
 
+    await supabase
+      .from('user_v2_conversations')
+      .update({
+        runInProgress: false,
+        processLock: false,
+      })
+      .eq('threadId', threadId);
+
     serverSideTrackEvent('N/A', 'v2 Image generation processed', {
       v2ImageGenerationUrl: imagePublicUrlData.publicUrl,
       v2ImageGenerationDurationInMS: Date.now() - startTime,
@@ -148,6 +155,7 @@ export default async function handler(
     await updateMetadataOfMessage(threadId, messageId, {
       imageGenerationStatus: 'failed',
     });
+
     if (toolCallId) {
       if (error instanceof Error) {
         console.log('error.message: ', error.message);
@@ -179,6 +187,15 @@ export default async function handler(
     serverSideTrackEvent('N/A', 'v2 Error', {
       errorMessage: 'Unable to generate image',
     });
+
+    await supabase
+      .from('user_v2_conversations')
+      .update({
+        runInProgress: false,
+        processLock: false,
+      })
+      .eq('threadId', threadId);
+
     console.error(error);
     res.status(500).json({ error: 'Unable to generate image' });
     return;
