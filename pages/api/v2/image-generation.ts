@@ -139,6 +139,7 @@ export default async function handler(
 
     res.status(200).end();
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Unable to generate image' });
     return;
 
