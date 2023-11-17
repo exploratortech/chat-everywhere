@@ -124,7 +124,8 @@ export const generateImage = async (
     imageGenerationResponse.errorMessage = imageResponse?.error?.message;
   } else if (retries === maxRetries) {
     console.error('Failed to generate image, max retries reached');
-    imageGenerationResponse.errorMessage = 'Server is busy, please try again later.';
+    imageGenerationResponse.errorMessage =
+      'Server is busy, please try again later.';
   }
   return imageGenerationResponse;
 };
@@ -176,7 +177,9 @@ export const cancelCurrentThreadRun = async (threadId: string) => {
 export const waitForRunToCompletion = async (
   threadId: string,
   runId: string,
-) => {
+  acceptRequiresActionStatus = false,
+  timeoutLimit = 5000,
+): Promise<OpenAIRunType> => {
   let run: OpenAIRunType;
   let startTime = Date.now();
   do {
@@ -184,11 +187,20 @@ export const waitForRunToCompletion = async (
     if (run.status === 'completed' || run.status === 'failed') {
       break;
     }
-    if (Date.now() - startTime > 5000) {
-      throw new Error('Timeout after 5 seconds');
+    if (acceptRequiresActionStatus && run.status === 'requires_action') {
+      break;
+    }
+    if (Date.now() - startTime > timeoutLimit) {
+      throw new Error(
+        `Timeout after ${
+          timeoutLimit / 1000
+        } seconds while waiting for run to complete`,
+      );
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
   } while (true);
+
+  return run;
 };
 
 export const submitToolOutput = async (

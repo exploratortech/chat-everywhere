@@ -8,6 +8,7 @@ import {
   addOpenAiMessageToThread,
   cancelCurrentThreadRun,
   updateMetadataOfMessage,
+  waitForRunToCompletion,
 } from '@/utils/v2Chat/openAiApiUtils';
 
 export const config = {
@@ -160,7 +161,6 @@ const sendMessage = async (
     });
   }
 
-  // Cancel any hanging runs
   await cancelCurrentThreadRun(conversationId);
 
   // Add a Message object to Thread
@@ -199,68 +199,41 @@ const sendMessage = async (
   // or until 15 seconds have passed
   const runId = (await runCreationResponse.json()).id;
 
-  const runStatusUrl = `https://api.openai.com/v1/threads/${conversationId}/runs/${runId}`;
-  let runStatusResponse;
-  let runStatusData;
-  const startTime = Date.now();
-  const timeout = 15000;
-  const interval = 500;
-
-  while (Date.now() - startTime < timeout) {
-    runStatusResponse = await authorizedOpenAiRequest(runStatusUrl, {
-      method: 'GET',
-    });
-
-    if (!runStatusResponse.ok) {
-      console.error(await runStatusResponse.text());
-      return new Response('Error', { status: 500 });
-    }
-
-    runStatusData = await runStatusResponse.json();
-
-    if (
-      runStatusData.status === 'completed' ||
-      runStatusData.status === 'requires_action'
-    ) {
-      break;
-    }
-
-    if (runStatusData.status === 'failed') {
-      console.log(runStatusData);
-      console.log('Run creation failed');
-      return new Response('Error: Failed', { status: 500 });
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, interval));
-  }
+  let runStatusData = await waitForRunToCompletion(
+    conversationId,
+    runId,
+    true,
+    15000,
+  );
 
   if (runStatusData.status === 'requires_action') {
     console.log('Required tool calling');
-    console.log(
-      `Endpoint URL: ${
-        process.env.SERVER_HOST ||
-        `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      }/api/v2/image-generation`,
-    );
 
-    // Trigger image generation asynchronously
-    fetch(
-      `${
-        process.env.SERVER_HOST ||
-        `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      }/api/v2/image-generation`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+    try {
+      // Trigger image generation asynchronously
+      fetch(
+        `${
+          process.env.SERVER_HOST ||
+          `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+        }/api/v2/image-generation`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            threadId: conversationId,
+            messageId: latestMessageId,
+            runId: runStatusData.id,
+          }),
         },
-        body: JSON.stringify({
-          threadId: conversationId,
-          messageId: latestMessageId,
-          runId: runStatusData.id,
-        }),
-      },
-    );
+      );
+      // Some buffer room for the /image-generation serverless function to initialize
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch (error) {
+      console.error('Error triggering image generation:', error);
+      return new Response(null, { status: 500 });
+    }
 
     await updateMetadataOfMessage(conversationId, latestMessageId, {
       imageGenerationStatus: 'in progress',
@@ -271,9 +244,6 @@ const sendMessage = async (
       v2MessageId: latestMessageId,
       v2runId: runStatusData.id,
     });
-
-    // Some buffer room for the /image-generation serverless function to initialize
-    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     return new Response(null, { status: 200 });
   }
