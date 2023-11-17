@@ -233,10 +233,10 @@ export const cancelRunOnThreadIfNeeded = async (
   messageId: string,
   threadId: string,
 ) => {
-  const tenMinutesInSeconds = 10 * 60;
+  const fiveMinsInSeconds = 5 * 60;
   const currentTimestampInSeconds = Date.now() / 1000;
 
-  if (currentTimestampInSeconds - messageCreatedAt < tenMinutesInSeconds) {
+  if (currentTimestampInSeconds - messageCreatedAt < fiveMinsInSeconds) {
     return;
   } else {
     console.log('Message is more than 10 minutes old, cancelling run');

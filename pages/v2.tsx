@@ -99,6 +99,10 @@ const V2Chat = () => {
     return () => clearInterval(interval);
   }, [enablePullingForUpdates, selectedConversation]);
 
+  useEffect(() => {
+    fetchSuggestions();
+  }, [messages]);
+
   const scrollToButton = () => {
     if (!chatScrollAnchorRef.current) return;
     interface ChatScrollAnchorMethods {
@@ -161,14 +165,9 @@ const V2Chat = () => {
       setChatResponseLoading(false);
       setEnablePullingForUpdates(false);
     }
-
-    fetchSuggestions(messages);
   };
 
-  const fetchSuggestions = async (messages: MessageType[]) => {
-    console.log("Fetch suggestion triggered");
-    console.log(messages.length, messages[messages.length - 1]);
-    
+  const fetchSuggestions = async () => {
     if (!user || !session || enablePullingForUpdates || chatResponseLoading)
       return;
     
@@ -197,6 +196,9 @@ const V2Chat = () => {
         );
       }
       setSuggestions(suggestions);
+      setTimeout(() => {
+        scrollToButton();
+      }, 500);
     } catch (error) {
       setSuggestions([]);
       console.error(error);
@@ -235,6 +237,8 @@ const V2Chat = () => {
       setConversations([tempSelectedConversation, ...conversations]);
       setSelectedConversationId(tempSelectedConversation.id);
       setSelectedConversation(tempSelectedConversation);
+      setEnablePullingForUpdates(true);
+      setChatResponseLoading(true);
     } else {
       tempSelectedConversation = selectedConversation;
       setMessages([
