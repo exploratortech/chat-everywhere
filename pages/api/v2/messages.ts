@@ -12,7 +12,7 @@ import {
 
 export const config = {
   runtime: 'edge',
-  preferredRegion: 'icn1'  // Only execute this function in the Korea region in case OpenAI blocks it
+  preferredRegion: 'icn1', // Only execute this function in the Korea region in case OpenAI blocks it
 };
 
 export type RequestType =
@@ -236,6 +236,31 @@ const sendMessage = async (
 
   if (runStatusData.status === 'requires_action') {
     console.log('Required tool calling');
+    console.log(
+      `Endpoint URL: ${
+        process.env.SERVER_HOST ||
+        `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+      }/api/v2/image-generation`,
+    );
+
+    // Trigger image generation asynchronously
+    fetch(
+      `${
+        process.env.SERVER_HOST ||
+        `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+      }/api/v2/image-generation`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          threadId: conversationId,
+          messageId: latestMessageId,
+          runId: runStatusData.id,
+        }),
+      },
+    );
 
     await updateMetadataOfMessage(conversationId, latestMessageId, {
       imageGenerationStatus: 'in progress',
@@ -245,21 +270,6 @@ const sendMessage = async (
       v2ThreadId: conversationId,
       v2MessageId: latestMessageId,
       v2runId: runStatusData.id,
-    });
-
-    console.log(`Endpoint URL: ${process.env.SERVER_HOST || `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`}/api/v2/image-generation`);
-    
-    // Trigger image generation asynchronously
-    fetch(`${process.env.SERVER_HOST || `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`}/api/v2/image-generation`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        threadId: conversationId,
-        messageId: latestMessageId,
-        runId: runStatusData.id,
-      }),
     });
 
     // Some buffer room for the /image-generation serverless function to initialize
