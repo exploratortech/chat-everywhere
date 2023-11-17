@@ -139,6 +139,9 @@ export default async function handler(
 
     res.status(200).end();
   } catch (error) {
+    res.status(500).json({ error: 'Unable to generate image' });
+    return;
+    
     // Update meta data in message
     await updateMetadataOfMessage(threadId, messageId, {
       imageGenerationStatus: 'failed',
