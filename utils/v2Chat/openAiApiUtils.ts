@@ -37,6 +37,12 @@ export const updateMetadataOfMessage = async (
   });
 
   if (!response.ok) {
+    console.error(
+      'Body passing in: ',
+      JSON.stringify({
+        metadata,
+      }),
+    );
     console.error(await response.text());
     throw new Error('Failed to update message metadata');
   }
@@ -124,7 +130,8 @@ export const generateImage = async (
     imageGenerationResponse.errorMessage = imageResponse?.error?.message;
   } else if (retries === maxRetries) {
     console.error('Failed to generate image, max retries reached');
-    imageGenerationResponse.errorMessage = 'Server is busy, please try again later.';
+    imageGenerationResponse.errorMessage =
+      'Server is busy, please try again later.';
   }
   return imageGenerationResponse;
 };
