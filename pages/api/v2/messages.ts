@@ -7,9 +7,12 @@ import {
 import {
   addOpenAiMessageToThread,
   cancelCurrentThreadRun,
+  cancelRunOnThreadIfNeeded,
   updateMetadataOfMessage,
   waitForRunToCompletion,
 } from '@/utils/v2Chat/openAiApiUtils';
+
+import { OpenAIMessageType } from '@/types/v2Chat/chat';
 
 export const config = {
   runtime: 'edge',
@@ -128,17 +131,26 @@ const retrieveMessages = async (
     openAiUrl += `before=${beforeMessageId}`;
   }
 
-  const openAiResponse = await authorizedOpenAiRequest(openAiUrl, {
+  const messagesResponse = await authorizedOpenAiRequest(openAiUrl, {
     method: 'GET',
   });
 
-  if (!openAiResponse.ok) {
-    console.error(await openAiResponse.text());
+  if (!messagesResponse.ok) {
+    console.error(await messagesResponse.text());
     return new Response('Error', { status: 500 });
   }
 
-  const openAiData = await openAiResponse.json();
-  return new Response(JSON.stringify(openAiData.data), { status: 200 });
+  const messages = (await messagesResponse.json()).data as OpenAIMessageType[];
+  const latestMessage = messages[messages.length - 1];
+
+  // To handle hanging run that failed
+  await cancelRunOnThreadIfNeeded(
+    latestMessage.created_at,
+    latestMessage.id,
+    conversationId,
+  );
+
+  return new Response(JSON.stringify(messages), { status: 200 });
 };
 
 const sendMessage = async (

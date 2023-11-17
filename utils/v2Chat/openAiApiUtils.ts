@@ -147,7 +147,12 @@ export const cancelCurrentThreadRun = async (threadId: string) => {
   const activeRuns = runs.filter((run) => activeStatus.includes(run.status));
 
   for (const activeRun of activeRuns) {
-    console.log('Canceling run: ', activeRun.id);
+    console.log(
+      'Canceling run: ',
+      activeRun.id,
+      ' with status: ',
+      activeRun.status,
+    );
 
     const cancelUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${activeRun.id}/cancel`;
     let cancelResponse = await authorizedOpenAiRequest(cancelUrl, {
@@ -184,7 +189,11 @@ export const waitForRunToCompletion = async (
   let startTime = Date.now();
   do {
     run = await getOpenAiRunObject(threadId, runId);
-    if (run.status === 'completed' || run.status === 'failed') {
+    if (
+      run.status === 'completed' ||
+      run.status === 'failed' ||
+      run.status === 'expired'
+    ) {
       break;
     }
     if (acceptRequiresActionStatus && run.status === 'requires_action') {
@@ -194,13 +203,32 @@ export const waitForRunToCompletion = async (
       throw new Error(
         `Timeout after ${
           timeoutLimit / 1000
-        } seconds while waiting for run to complete`,
+        } seconds while waiting for run to complete. Run status: ${run.status}`,
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
   } while (true);
 
   return run;
+};
+
+export const cancelRunOnThreadIfNeeded = async (
+  messageCreatedAt: number,
+  messageId: string,
+  threadId: string,
+) => {
+  const tenMinutesInSeconds = 10 * 60;
+  const currentTimestampInSeconds = Date.now() / 1000;
+
+  if (currentTimestampInSeconds - messageCreatedAt < tenMinutesInSeconds) {
+    console.log('Message is less than 10 minutes old, skipping cancellation');
+    return;
+  } else {
+    await updateMetadataOfMessage(threadId, messageId, {
+      imageGenerationStatus: 'failed',
+    });
+    await cancelCurrentThreadRun(threadId);
+  }
 };
 
 export const submitToolOutput = async (
