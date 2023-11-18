@@ -20,7 +20,6 @@ import { UserProfile } from '@/types/user';
 import type {
   ConversationType,
   MessageType,
-  OpenAIMessageType,
   RetrieveMessageResponseType,
 } from '@/types/v2Chat/chat';
 
@@ -29,6 +28,7 @@ import { ChatPanel } from '@/components/v2Chat/chat-panel';
 import { ChatScrollAnchor } from '@/components/v2Chat/chat-scroll-anchor';
 import { EmptyScreen } from '@/components/v2Chat/empty-screen';
 import { Header } from '@/components/v2Chat/header';
+import { InitialScreen } from '@/components/v2Chat/initial-screen';
 import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
 
 const V2Chat = () => {
@@ -149,7 +149,7 @@ const V2Chat = () => {
       }),
     });
 
-    if(!response.ok) {
+    if (!response.ok) {
       console.error(response);
       toast.error('Unable to load messages. Please try again later.');
       setChatMessagesLoading(false);
@@ -165,7 +165,7 @@ const V2Chat = () => {
       metadata: messageItem.metadata,
     }));
     setMessages(messages);
-    
+
     // Check if requires polling on conversation status
     if (data.requiresPolling) {
       setChatResponseLoading(true);
@@ -295,12 +295,7 @@ const V2Chat = () => {
 
   if (!userProfile) {
     return (
-      <div className="v2-container flex flex-col min-h-screen">
-        <div>
-          <h1>Access Denied</h1>
-          <p>You must be logged in or be our Pro member to view this page.</p>
-        </div>
-      </div>
+      <InitialScreen />
     );
   }
 
