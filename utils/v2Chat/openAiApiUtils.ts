@@ -212,7 +212,7 @@ export const cancelCurrentThreadRun = async (threadId: string) => {
   }
 };
 
-export const waitForRunToCompletion = async (
+export const waitForRunToComplete = async (
   threadId: string,
   runId: string,
   acceptRequiresActionStatus = false,

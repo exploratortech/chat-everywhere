@@ -7,10 +7,10 @@ import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { generateDallEImage } from '@/utils/server/functionCalls/imageGeneration';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 import {
-  getMessagesByThreadId,
+  cancelCurrentThreadRun,
   submitToolOutput,
   updateMetadataOfMessage,
-  waitForRunToCompletion,
+  waitForRunToComplete,
 } from '@/utils/v2Chat/openAiApiUtils';
 
 import { OpenAIRunType, v2ConversationType } from '@/types/v2Chat/chat';
@@ -69,7 +69,7 @@ export default async function handler(
   }
 
   try {
-    run = await waitForRunToCompletion(threadId, runId, true, 180 * 1000); // Max 3 mins for run to execute
+    run = await waitForRunToComplete(threadId, runId, true, 180 * 1000); // Max 3 mins for run to execute
   } catch (e) {
     console.error("Run didn't complete in 3 mins, failed");
     await setThreadRunInProgress(threadId, false);
@@ -154,7 +154,7 @@ export default async function handler(
             'Unable to generate image, please try again later.',
           );
         }
-        await waitForRunToCompletion(threadId, runId, false, 60 * 1000);
+        await waitForRunToComplete(threadId, runId, false, 60 * 1000);
       }
     }
 
@@ -169,7 +169,7 @@ export default async function handler(
         imageGenerationStatus: 'failed',
       });
     }
-    await waitForRunToCompletion(threadId, runId, false, 60 * 1000);
+    await waitForRunToComplete(threadId, runId, false, 60 * 1000);
 
     serverSideTrackEvent('N/A', 'v2 Error', {
       errorMessage: 'Thread-handler error' + error,
