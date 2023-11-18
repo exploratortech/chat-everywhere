@@ -21,6 +21,23 @@ export const addOpenAiMessageToThread = async (
   return response;
 };
 
+export const getMessagesByThreadId = async (
+  threadId: string,
+  limit: number = 10
+): Promise<OpenAIMessageType[]> => {
+  const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/messages?limit=${limit}`;
+
+  const response = await authorizedOpenAiRequest(openAiUrl);
+
+  if (!response.ok) {
+    console.error(await response.text());
+    throw new Error('Failed to retrieve messages');
+  }
+
+  const messages: OpenAIMessageType[] = (await response.json()).data;
+  return messages;
+}
+
 export const updateMetadataOfMessage = async (
   threadId: string,
   messageId: string,

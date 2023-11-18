@@ -7,19 +7,9 @@ import {
 import {
   addOpenAiMessageToThread,
   cancelCurrentThreadRun,
-  cancelRunOnThreadIfNeeded,
-  getOpenAiLatestRunObject,
-  getOpenAiRunObject,
-  updateMetadataOfMessage,
 } from '@/utils/v2Chat/openAiApiUtils';
 
-import {
-  ConversationType,
-  MessageType,
-  OpenAIMessageType,
-  completedRunStatuses,
-  v2ConversationType,
-} from '@/types/v2Chat/chat';
+import { OpenAIMessageType } from '@/types/v2Chat/chat';
 
 export const config = {
   runtime: 'edge',
@@ -168,83 +158,13 @@ const retrieveMessages = async (
     .eq('threadId', conversationId)
     .single();
 
-  const runInProgress = (conversationObject as v2ConversationType)
-    .runInProgress;
-  const processLock = (conversationObject as v2ConversationType).processLock;
-
-  if (runInProgress && !processLock) {
-    const runObject = await getOpenAiLatestRunObject(conversationId);
-
-    // If run is completed, stop polling
-    if (completedRunStatuses.includes(runObject.status)) {
-      await setConversationRunInProgress(conversationId, false);
-      await setConversationProcessLock(conversationId, false);
-      return new Response(
-        JSON.stringify({
-          messages,
-          requiresPolling: false,
-        }),
-        { status: 200 },
-      );
-    }
-
-    if (runObject.status === 'requires_action') {
-      console.log('Required tool calling');
-      await setConversationProcessLock(conversationId, true);
-
-      try {
-        // Trigger image generation asynchronously
-        fetch(
-          `${
-            process.env.SERVER_HOST ||
-            `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-          }/api/v2/image-generation`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              threadId: conversationId,
-              messageId: latestMessage.id,
-              runId: runObject.id,
-            }),
-          },
-        );
-        // Some buffer room for the /image-generation serverless function to initialize
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      } catch (error) {
-        console.error('Error triggering image generation:', error);
-        await setConversationProcessLock(conversationId, false);
-        await updateMetadataOfMessage(conversationId, latestMessage.id, {
-          imageGenerationStatus: 'failed',
-        });
-        return new Response(null, { status: 500 });
-      }
-
-      await updateMetadataOfMessage(conversationId, latestMessage.id, {
-        imageGenerationStatus: 'in progress',
-      });
-
-      serverSideTrackEvent(userId, 'v2 Image generation request', {
-        v2ThreadId: conversationId,
-        v2MessageId: latestMessage.id,
-        v2runId: runObject.id,
-      });
-    }
-  }
-
-  // If threads takes longer than 10 mins to run, kill it
-  await cancelRunOnThreadIfNeeded(
-    latestMessage.created_at,
-    latestMessage.id,
-    conversationId,
+  return new Response(
+    JSON.stringify({
+      messages,
+      requiresPolling: conversationObject?.runInProgress || false,
+    }),
+    { status: 200 },
   );
-
-  return new Response(JSON.stringify({
-    messages,
-    requiresPolling: runInProgress,
-  }), { status: 200 });
 };
 
 const sendMessage = async (
@@ -266,8 +186,6 @@ const sendMessage = async (
       status: 403,
     });
   }
-
-  await cancelCurrentThreadRun(conversationId);
 
   // Add a Message object to Thread
   const messageCreationResponse = await addOpenAiMessageToThread(
@@ -300,6 +218,25 @@ const sendMessage = async (
   }
 
   await setConversationRunInProgress(conversationId, true);
+
+  fetch(
+    `${
+      process.env.SERVER_HOST || `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+    }/api/v2/thread-handler`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        threadId: conversationId,
+        runId: (await runCreationResponse.json()).id,
+        messageId: (await messageCreationResponse.json()).id,
+      }),
+    },
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 200));
 
   return new Response(null, { status: 200 });
 };
