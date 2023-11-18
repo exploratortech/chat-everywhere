@@ -1,16 +1,39 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { Button } from '@/components/v2Chat/ui/button';
 import { Card } from '@/components/v2Chat/ui/card';
 import { Dialog, DialogContent } from '@/components/v2Chat/ui/dialog';
 import { IconDownload } from '@/components/v2Chat/ui/icons';
 
+import dayjs from 'dayjs';
+
 export const ImageContainer = ({ url }: { url: string }) => {
+  const [downloadLoading, setDownloadLoading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
 
-  const downloadImage = () => {
-    window.open(url, '_blank');
+  const downloadImage = async () => {
+    setDownloadLoading(true);
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      const href = URL.createObjectURL(blob);
+
+      // Create a "hidden" anchor tag with the download attribute and simulate a click.
+      const link = document.createElement('a');
+      link.href = href;
+      link.download = 'chateverywhere-v2-' + dayjs().valueOf() + '.png';
+      link.style.display = 'none';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      toast.error('Unable to download image');
+    }
+    setDownloadLoading(false);
   };
 
   return (
@@ -23,6 +46,7 @@ export const ImageContainer = ({ url }: { url: string }) => {
               type="submit"
               size="sm"
               className="px-3 mt-3"
+              disabled={downloadLoading}
               onClick={downloadImage}
             >
               <span className="sr-only">Download</span>
