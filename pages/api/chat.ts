@@ -16,6 +16,7 @@ import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 
 export const config = {
   runtime: 'edge',
+  preferredRegion: 'icn1'
 };
 
 const handler = async (req: Request): Promise<Response> => {

@@ -13,5 +13,8 @@
     "pages/api/v2/**/*": {
       "maxDuration": 300
     }
-  }
+  },
+  "regions": [
+    "icn1"
+  ]
 }

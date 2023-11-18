@@ -1,11 +1,10 @@
 import {
   MessageMetaDataType,
-  OpenAiImageResponseType,
-} from '@/types/v2Chat/chat';
-import {
   MessageType,
   OpenAIMessageType,
   OpenAIRunType,
+  OpenAiImageResponseType,
+  activeRunStatuses,
 } from '@/types/v2Chat/chat';
 
 export const addOpenAiMessageToThread = async (
@@ -21,6 +20,23 @@ export const addOpenAiMessageToThread = async (
 
   return response;
 };
+
+export const getMessagesByThreadId = async (
+  threadId: string,
+  limit: number = 10
+): Promise<OpenAIMessageType[]> => {
+  const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/messages?limit=${limit}`;
+
+  const response = await authorizedOpenAiRequest(openAiUrl);
+
+  if (!response.ok) {
+    console.error(await response.text());
+    throw new Error('Failed to retrieve messages');
+  }
+
+  const messages: OpenAIMessageType[] = (await response.json()).data;
+  return messages;
+}
 
 export const updateMetadataOfMessage = async (
   threadId: string,
@@ -76,6 +92,22 @@ export const getOpenAiRunObject = async (
   return run;
 };
 
+export const getOpenAiLatestRunObject = async (
+  threadId: string,
+): Promise<OpenAIRunType> => {
+  const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs?limit=1`;
+
+  const response = await authorizedOpenAiRequest(openAiUrl);
+
+  if (!response.ok) {
+    console.error(await response.text());
+    throw new Error('Failed to retrieve latest run');
+  }
+
+  const runs: OpenAIRunType[] = (await response.json()).data;
+  return runs[0];
+}
+
 export const generateImage = async (
   prompt: string,
 ): Promise<OpenAiImageResponseType & { errorMessage?: string }> => {
@@ -124,13 +156,13 @@ export const generateImage = async (
     imageGenerationResponse.errorMessage = imageResponse?.error?.message;
   } else if (retries === maxRetries) {
     console.error('Failed to generate image, max retries reached');
-    imageGenerationResponse.errorMessage = 'Server is busy, please try again later.';
+    imageGenerationResponse.errorMessage =
+      'Server is busy, please try again later.';
   }
   return imageGenerationResponse;
 };
 
 export const cancelCurrentThreadRun = async (threadId: string) => {
-  const activeStatus = ['in_progress', 'requires_action', 'cancelling'];
   const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/runs?limit=10`;
   const response = await authorizedOpenAiRequest(openAiUrl, {
     method: 'GET',
@@ -143,10 +175,17 @@ export const cancelCurrentThreadRun = async (threadId: string) => {
   }
 
   const runs: OpenAIRunType[] = (await response.json()).data;
-  const activeRuns = runs.filter((run) => activeStatus.includes(run.status));
+  const activeRuns = runs.filter((run) =>
+    activeRunStatuses.includes(run.status),
+  );
 
   for (const activeRun of activeRuns) {
-    console.log('Canceling run: ', activeRun.id);
+    console.log(
+      'Canceling run: ',
+      activeRun.id,
+      ' with status: ',
+      activeRun.status,
+    );
 
     const cancelUrl = `https://api.openai.com/v1/threads/${threadId}/runs/${activeRun.id}/cancel`;
     let cancelResponse = await authorizedOpenAiRequest(cancelUrl, {
@@ -161,7 +200,7 @@ export const cancelCurrentThreadRun = async (threadId: string) => {
     // Wait until the run no longer has the in_progress, requires_action, or cancelling status
     let runStatus = activeRun.status;
     let startTime = Date.now();
-    while (activeStatus.includes(runStatus)) {
+    while (activeRunStatuses.includes(runStatus)) {
       const runObject = await getOpenAiRunObject(threadId, activeRun.id);
       runStatus = runObject.status;
       if (Date.now() - startTime > 5000) {
@@ -173,22 +212,57 @@ export const cancelCurrentThreadRun = async (threadId: string) => {
   }
 };
 
-export const waitForRunToCompletion = async (
+export const waitForRunToComplete = async (
   threadId: string,
   runId: string,
-) => {
+  acceptRequiresActionStatus = false,
+  timeoutLimit = 5000,
+): Promise<OpenAIRunType> => {
   let run: OpenAIRunType;
   let startTime = Date.now();
   do {
     run = await getOpenAiRunObject(threadId, runId);
-    if (run.status === 'completed' || run.status === 'failed') {
+    if (
+      run.status === 'completed' ||
+      run.status === 'failed' ||
+      run.status === 'expired'
+    ) {
       break;
     }
-    if (Date.now() - startTime > 5000) {
-      throw new Error('Timeout after 5 seconds');
+    if (acceptRequiresActionStatus && run.status === 'requires_action') {
+      break;
+    }
+    if (Date.now() - startTime > timeoutLimit) {
+      throw new Error(
+        `Timeout after ${
+          timeoutLimit / 1000
+        } seconds while waiting for run to complete. Run status: ${run.status}`,
+      );
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
   } while (true);
+
+  return run;
+};
+
+export const cancelRunOnThreadIfNeeded = async (
+  messageCreatedAt: number,
+  messageId: string,
+  threadId: string,
+) => {
+  const fiveMinsInSeconds = 5 * 60;
+  const currentTimestampInSeconds = Date.now() / 1000;
+
+  if (currentTimestampInSeconds - messageCreatedAt < fiveMinsInSeconds) {
+    return;
+  } else {
+    console.log('Message is more than 10 minutes old, cancelling run');
+    
+    await updateMetadataOfMessage(threadId, messageId, {
+      imageGenerationStatus: 'failed',
+    });
+    await cancelCurrentThreadRun(threadId);
+  }
 };
 
 export const submitToolOutput = async (

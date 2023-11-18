@@ -6,16 +6,31 @@ export type ConversationType = {
   title: string;
 };
 
+export type v2ConversationType = {
+  id: number;
+  uid: string;
+  threadId: string;
+  title: string;
+  runInProgress: boolean;
+  processLock: boolean;
+};
+
 export type MessageMetaDataType = {
   imageGenerationStatus?: 'in progress' | 'completed' | 'failed';
   imageGenerationError?: string;
   imageUrl?: string;
+  runHandlingLock?: boolean;
 };
 
 export type MessageType = {
   role: string;
   content: string;
   metadata?: MessageMetaDataType;
+};
+
+export type RetrieveMessageResponseType = {
+  messages: OpenAIMessageType[];
+  requiresPolling: boolean;
 };
 
 export type OpenAIMessageType = {
@@ -39,13 +54,33 @@ export type OpenAIMessageType = {
   metadata?: MessageMetaDataType;
 };
 
+export const activeRunStatuses = [
+  'in_progress',
+  'requires_action',
+  'cancelling',
+];
+export const completedRunStatuses = [
+  'cancelled',
+  'failed',
+  'completed',
+  'expired',
+];
+
 export type OpenAIRunType = {
   id: string;
   object: string;
   created_at: number;
   assistant_id: string;
   thread_id: string;
-  status: string;
+  status:
+    | 'queued'
+    | 'in_progress'
+    | 'requires_action'
+    | 'cancelling'
+    | 'cancelled'
+    | 'failed'
+    | 'completed'
+    | 'expired';
   started_at: number;
   expires_at: number | null;
   cancelled_at: number | null;

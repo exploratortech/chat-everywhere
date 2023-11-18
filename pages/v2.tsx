@@ -21,6 +21,7 @@ import type {
   ConversationType,
   MessageType,
   OpenAIMessageType,
+  RetrieveMessageResponseType,
 } from '@/types/v2Chat/chat';
 
 import { ChatList } from '@/components/v2Chat/chat-list';
@@ -83,20 +84,24 @@ const V2Chat = () => {
   }, [selectedConversationId]);
 
   useEffect(() => {
-    const triggerFetchImages = () => {
+    const triggerFetchMessages = () => {
       if (enablePullingForUpdates && selectedConversation) {
         fetchMessages(selectedConversation.threadId);
       }
     };
 
-    triggerFetchImages();
+    triggerFetchMessages();
 
     const interval = setInterval(() => {
-      triggerFetchImages();
+      triggerFetchMessages();
     }, 2000);
 
     return () => clearInterval(interval);
   }, [enablePullingForUpdates, selectedConversation]);
+
+  useEffect(() => {
+    fetchSuggestions();
+  }, [messages]);
 
   const scrollToButton = () => {
     if (!chatScrollAnchorRef.current) return;
@@ -143,40 +148,43 @@ const V2Chat = () => {
         conversationId,
       }),
     });
-    const data = (await response.json()) as OpenAIMessageType[];
-    const messages: MessageType[] = data.map((messageItem) => ({
+
+    if(!response.ok) {
+      console.error(response);
+      toast.error('Unable to load messages. Please try again later.');
+      setChatMessagesLoading(false);
+      setChatResponseLoading(false);
+      setEnablePullingForUpdates(false);
+      return;
+    }
+
+    const data = (await response.json()) as RetrieveMessageResponseType;
+    const messages: MessageType[] = data.messages.map((messageItem) => ({
       role: messageItem.role,
       content: messageItem.content[0].text.value,
       metadata: messageItem.metadata,
     }));
     setMessages(messages);
-    setChatMessagesLoading(false);
-
-    if (
-      messages.length > 0 &&
-      messages[messages.length - 1].role === 'assistant'
-    ) {
-      fetchSuggestions(messages);
-    }
-
-    // Check if requires pulling
-    const lastMessage = [...messages]
-      .reverse()
-      .find((message) => message.metadata?.imageGenerationStatus);
-    if (!lastMessage || !lastMessage.metadata) return;
-
-    setSuggestions([]);
-    if (lastMessage.metadata.imageGenerationStatus === 'in progress') {
+    
+    // Check if requires polling on conversation status
+    if (data.requiresPolling) {
       setChatResponseLoading(true);
       setEnablePullingForUpdates(true);
     } else {
+      setChatMessagesLoading(false);
       setChatResponseLoading(false);
       setEnablePullingForUpdates(false);
     }
   };
 
-  const fetchSuggestions = async (messages: MessageType[]) => {
+  const fetchSuggestions = async () => {
     if (!user || !session || enablePullingForUpdates || chatResponseLoading)
+      return;
+
+    if (
+      messages.length === 0 ||
+      messages[messages.length - 1].role !== 'assistant'
+    )
       return;
 
     const response = await fetch('/api/v2/suggestions', {
@@ -202,6 +210,9 @@ const V2Chat = () => {
         );
       }
       setSuggestions(suggestions);
+      setTimeout(() => {
+        scrollToButton();
+      }, 500);
     } catch (error) {
       setSuggestions([]);
       console.error(error);
@@ -217,6 +228,7 @@ const V2Chat = () => {
     let tempSelectedConversation: ConversationType;
 
     if (!selectedConversation) {
+      setChatMessagesLoading(true);
       const response = await fetch('/api/v2/messages', {
         method: 'POST',
         headers: {
@@ -231,6 +243,7 @@ const V2Chat = () => {
 
       if (!response.ok) {
         console.error(await response.text());
+        toast.error('Unable to send message. Please try again later.');
         return;
       }
 
@@ -238,7 +251,6 @@ const V2Chat = () => {
       tempSelectedConversation = { ...data };
       setConversations([tempSelectedConversation, ...conversations]);
       setSelectedConversationId(tempSelectedConversation.id);
-      setSelectedConversation(tempSelectedConversation);
     } else {
       tempSelectedConversation = selectedConversation;
       setMessages([
@@ -263,15 +275,14 @@ const V2Chat = () => {
       }),
     });
 
-    if (response.status === 200) {
-      setChatResponseLoading(false);
-    } else {
+    if (response.status !== 200) {
       toast.error('Unable to send message. Please try again later.');
       console.error(response);
+      return;
     }
 
-    await fetchMessages(tempSelectedConversation.threadId);
-    setChatResponseLoading(false);
+    setChatResponseLoading(true);
+    setEnablePullingForUpdates(true);
   };
 
   const startNewChat = () => {
@@ -305,6 +316,7 @@ const V2Chat = () => {
         />
         <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto pt-5">
           <div className="pb-[120px] mt-12 mb-14">
+            {chatMessagesLoading && <ConversationLoadingSpinner />}
             {messages.length > 0 ? (
               <>
                 <ChatList
@@ -321,7 +333,7 @@ const V2Chat = () => {
                 />
               </>
             ) : (
-              <EmptyScreen />
+              !chatMessagesLoading && <EmptyScreen />
             )}
           </div>
           <ChatPanel
@@ -340,5 +352,28 @@ const V2Chat = () => {
     </TooltipProvider>
   );
 };
+
+const ConversationLoadingSpinner = () => (
+  <div className="relative mx-auto max-w-2xl px-4 h-full">
+    <div className="flex justify-center items-center h-full mt-5">
+      <svg
+        aria-hidden="true"
+        className="w-10 h-10 me-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600 mr-2"
+        viewBox="0 0 100 101"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+          fill="currentColor"
+        />
+        <path
+          d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+          fill="currentFill"
+        />
+      </svg>
+    </div>
+  </div>
+);
 
 export default appWithTranslation(V2Chat);
