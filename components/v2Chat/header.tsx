@@ -37,12 +37,16 @@ export function Header({
           />
         </Sidebar>
       </div>
-      <div className="flex flex-row font-semibold">
-        <Badge variant={'outline'} className="mr-2">
-          v2 Beta
-        </Badge>
-        <span className="font-serif">Chat Everywhere</span>
-      </div>
+      {selectedConversationId && (
+        <div className="flex flex-row font-semibold">
+          <Badge variant={'outline'} className="mr-2">
+            v2 Beta
+          </Badge>
+          <a href="https://intro.chateverywhere.app" target="_blank">
+            <span className="font-serif">Chat Everywhere</span>
+          </a>
+        </div>
+      )}
       <div className="flex items-center justify-end space-x-2">
         <a
           target="_blank"
