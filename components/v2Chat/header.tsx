@@ -10,6 +10,8 @@ import { SidebarList } from '@/components/v2Chat/sidebar-list';
 import { buttonVariants } from '@/components/v2Chat/ui/button';
 import { IconGitHub, IconSeparator } from '@/components/v2Chat/ui/icons';
 
+import { Badge } from './ui/badge';
+
 type HeaderProps = {
   userProfile: UserProfile;
   startNewChat: () => void;
@@ -34,6 +36,12 @@ export function Header({
             conversationOnSelect={conversationOnSelect}
           />
         </Sidebar>
+      </div>
+      <div className="flex flex-row font-semibold">
+        <Badge variant={'outline'} className="mr-2">
+          v2 Beta
+        </Badge>
+        <span className="font-serif">Chat Everywhere</span>
       </div>
       <div className="flex items-center justify-end space-x-2">
         <a
