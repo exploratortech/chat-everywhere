@@ -30,6 +30,13 @@ export default async function handler(
     res.setHeader('Allow', 'POST');
     res.status(405).end('Method Not Allowed');
   }
+
+  const authToken = req.headers['auth-token'];
+
+  if(authToken !== process.env.THREAD_RUNNER_AUTH_TOKEN) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
   
   const { threadId, runId, messageId } = req.body as RequestBody;
   console.log('Thread runner endpoint is hit with threadId, runId, messageId ', threadId, runId, messageId);

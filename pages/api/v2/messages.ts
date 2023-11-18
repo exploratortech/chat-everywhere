@@ -227,6 +227,7 @@ const sendMessage = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'auth-token': process.env.THREAD_RUNNER_AUTH_TOKEN || '',
       },
       body: JSON.stringify({
         threadId: conversationId,
