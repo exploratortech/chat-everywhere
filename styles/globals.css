@@ -152,6 +152,8 @@ body {
   .v2-container {
     * {
       @apply border-border;
+      --colors-brand: #18181b;
+      --colors-brandAccent: #2f2f31;
     }
     body {
       @apply bg-background text-foreground;

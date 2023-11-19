@@ -11,10 +11,11 @@ export const InitialScreen = () => {
   return (
     <div className="v2-container flex flex-col min-h-screen justify-center items-center">
       <Card>
-        <CardHeader className='max-w-md'>
-          <p>
-            Welcome to Chat Everywhere, currently we need
-            to have to be our Pro account member in order to proceed. Thank you!
+        <CardHeader className="flex justify-center max-w-sm md:max-w-md">
+          <p className="text-center">
+            Thank you for your interest in trying out Chat Everywhere v2
+            interface, while this is still in development, we cant wait to show
+            it to you!
           </p>
         </CardHeader>
         <CardContent>
