@@ -100,14 +100,6 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         </div>
       )}
 
-      <div className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none bg-yellow-100 dark:bg-yellow-900">
-        <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
-          {t(
-            'We are experiencing instability with image generation service. We are working on it. Sorry for the inconvenience.',
-          )}
-        </span>
-      </div>
-
       <div
         className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none cursor-pointer"
         onClick={featureOnClick}
