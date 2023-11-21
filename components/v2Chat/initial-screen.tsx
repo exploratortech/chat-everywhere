@@ -21,6 +21,9 @@ export const InitialScreen = () => {
     return url;
   };
 
+  console.log(getURL());
+  
+
   return (
     <div className="v2-container flex flex-col min-h-screen justify-center items-center">
       <Card>
