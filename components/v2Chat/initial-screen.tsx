@@ -1,6 +1,7 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { Auth } from '@supabase/auth-ui-react';
 
+import { Badge } from './ui/badge';
 import { Card, CardContent, CardHeader } from './ui/card';
 
 import { ThemeSupa } from '@supabase/auth-ui-shared';
@@ -12,11 +13,14 @@ export const InitialScreen = () => {
     <div className="v2-container flex flex-col min-h-screen justify-center items-center">
       <Card>
         <CardHeader className="flex justify-center max-w-sm md:max-w-md">
-          <p className="text-center">
-            Thank you for your interest in trying out Chat Everywhere v2
-            interface, while this is still in development, we cant wait to show
-            it to you!
-          </p>
+          <div className="text-center flex flex-col">
+            <p>Chat Everywhere v2</p>
+            <div className="w-full flex justify-center mt-1">
+              <Badge variant={'outline'} className="w-fit">
+                Beta
+              </Badge>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Auth
