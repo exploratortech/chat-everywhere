@@ -29,6 +29,7 @@ import { ChatScrollAnchor } from '@/components/v2Chat/chat-scroll-anchor';
 import { EmptyScreen } from '@/components/v2Chat/empty-screen';
 import { Header } from '@/components/v2Chat/header';
 import { InitialScreen } from '@/components/v2Chat/initial-screen';
+import { PaymentDialog } from '@/components/v2Chat/payment-dialog';
 import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
 
 const V2Chat = () => {
@@ -294,14 +295,13 @@ const V2Chat = () => {
   };
 
   if (!userProfile) {
-    return (
-      <InitialScreen />
-    );
+    return <InitialScreen />;
   }
 
   return (
     <TooltipProvider>
       <div className="v2-container flex flex-col min-h-screen w-screen">
+        {userProfile.plan === 'free' && <PaymentDialog />}
         <Header
           userProfile={userProfile}
           startNewChat={startNewChat}
