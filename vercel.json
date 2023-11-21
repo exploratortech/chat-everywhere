@@ -16,9 +16,5 @@
   },
   "regions": [
     "icn1"
-  ],
-  "functionFailoverRegions": [
-    "sin1",
-    "kix1"
   ]
 }
