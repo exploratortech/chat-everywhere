@@ -20,7 +20,6 @@ export const InitialScreen = () => {
   const getURL = () => {
     let url = currentHostname;
     url = `https://${url}/v2`;
-    url = url.charAt(url.length - 1) === '/' ? url : `${url}/`;
     return url;
   };
 
