@@ -38,6 +38,7 @@ const V2Chat = () => {
   const chatScrollAnchorRef = useRef();
   const [enablePullingForUpdates, setEnablePullingForUpdates] = useState(false);
 
+  const [openPaymentDialog, setOpenPaymentDialog] = useState<boolean>(true);
   const [selectedConversationId, setSelectedConversationId] =
     useState<string>('');
   const [selectedConversation, setSelectedConversation] =
@@ -301,7 +302,11 @@ const V2Chat = () => {
   return (
     <TooltipProvider>
       <div className="v2-container flex flex-col min-h-screen w-screen">
-        {userProfile.plan === 'free' && <PaymentDialog />}
+        <PaymentDialog
+          userProfile={userProfile}
+          open={userProfile.plan === 'free' || openPaymentDialog}
+          onOpenChange={(open: boolean) => setOpenPaymentDialog(open)}
+        />
         <Header
           userProfile={userProfile}
           startNewChat={startNewChat}
