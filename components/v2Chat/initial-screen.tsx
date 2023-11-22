@@ -10,19 +10,14 @@ import { useEffect, useState } from 'react';
 
 export const InitialScreen = () => {
   const supabase = useSupabaseClient();
-  const [currentHostname, setCurrentHostname] = useState<string | null>('');
+  const [redirectUrl, setRedirectUrl] = useState<string>('');
 
   useEffect(() => {
-    setCurrentHostname(window.location.href);
+    setRedirectUrl(window.location.href);
   }, []);
 
-
-  const getURL = () => {
-    let url = currentHostname;
-    url = `https://${url}/v2`;
-    return url;
-  };
-
+  console.log(redirectUrl);
+  
   return (
     <div className="v2-container flex flex-col min-h-screen justify-center items-center">
       <Card className="w-full max-w-md sm:max-w-sm">
@@ -43,7 +38,7 @@ export const InitialScreen = () => {
               theme: ThemeSupa,
             }}
             providers={['google']}
-            redirectTo={getURL()}
+            redirectTo={redirectUrl}
           />
           <div className="text-xs text-neutral-400 text-center">
             By signing up, you agree to our
