@@ -15,8 +15,6 @@ export const InitialScreen = () => {
   useEffect(() => {
     setRedirectUrl(window.location.href);
   }, []);
-
-  console.log(redirectUrl);
   
   return (
     <div className="v2-container flex flex-col min-h-screen justify-center items-center">
