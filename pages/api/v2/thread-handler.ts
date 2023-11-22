@@ -154,7 +154,7 @@ export default async function handler(
             'Unable to generate image, please try again later.',
           );
         }
-        await waitForRunToComplete(threadId, runId, false, 60 * 1000);
+        await waitForRunToComplete(threadId, runId, false, 120 * 1000);
       }
     }
 
@@ -169,7 +169,7 @@ export default async function handler(
         imageGenerationStatus: 'failed',
       });
     }
-    await waitForRunToComplete(threadId, runId, false, 60 * 1000);
+    await waitForRunToComplete(threadId, runId, false, 120 * 1000);
 
     serverSideTrackEvent('N/A', 'v2 Error', {
       errorMessage: 'Thread-handler error' + error,

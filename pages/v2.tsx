@@ -20,7 +20,6 @@ import { UserProfile } from '@/types/user';
 import type {
   ConversationType,
   MessageType,
-  OpenAIMessageType,
   RetrieveMessageResponseType,
 } from '@/types/v2Chat/chat';
 
@@ -29,6 +28,8 @@ import { ChatPanel } from '@/components/v2Chat/chat-panel';
 import { ChatScrollAnchor } from '@/components/v2Chat/chat-scroll-anchor';
 import { EmptyScreen } from '@/components/v2Chat/empty-screen';
 import { Header } from '@/components/v2Chat/header';
+import { InitialScreen } from '@/components/v2Chat/initial-screen';
+import { PaymentDialog } from '@/components/v2Chat/payment-dialog';
 import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
 
 const V2Chat = () => {
@@ -37,6 +38,7 @@ const V2Chat = () => {
   const chatScrollAnchorRef = useRef();
   const [enablePullingForUpdates, setEnablePullingForUpdates] = useState(false);
 
+  const [openPaymentDialog, setOpenPaymentDialog] = useState<boolean>(false);
   const [selectedConversationId, setSelectedConversationId] =
     useState<string>('');
   const [selectedConversation, setSelectedConversation] =
@@ -149,7 +151,7 @@ const V2Chat = () => {
       }),
     });
 
-    if(!response.ok) {
+    if (!response.ok) {
       console.error(response);
       toast.error('Unable to load messages. Please try again later.');
       setChatMessagesLoading(false);
@@ -165,7 +167,7 @@ const V2Chat = () => {
       metadata: messageItem.metadata,
     }));
     setMessages(messages);
-    
+
     // Check if requires polling on conversation status
     if (data.requiresPolling) {
       setChatResponseLoading(true);
@@ -294,25 +296,24 @@ const V2Chat = () => {
   };
 
   if (!userProfile) {
-    return (
-      <div className="v2-container flex flex-col min-h-screen">
-        <div>
-          <h1>Access Denied</h1>
-          <p>You must be logged in or be our Pro member to view this page.</p>
-        </div>
-      </div>
-    );
+    return <InitialScreen />;
   }
 
   return (
     <TooltipProvider>
       <div className="v2-container flex flex-col min-h-screen w-screen">
+        <PaymentDialog
+          userProfile={userProfile}
+          open={userProfile.plan === 'free' || openPaymentDialog}
+          onOpenChange={(open: boolean) => setOpenPaymentDialog(open)}
+        />
         <Header
           userProfile={userProfile}
           startNewChat={startNewChat}
           conversationOnSelect={conversationOnSelect}
           selectedConversationId={selectedConversationId}
           conversations={conversations}
+          profileOnClick={() => setOpenPaymentDialog(true)}
         />
         <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto pt-5">
           <div className="pb-[120px] mt-12 mb-14">

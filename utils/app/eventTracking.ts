@@ -43,6 +43,9 @@ export const EventNames = [
   'AI image button clicked',
   'Image to prompt',
 
+  // Payment
+  'Payment success',
+
   // V2
   'v2 Retrieve messages',
   'v2 Send message',
@@ -51,6 +54,8 @@ export const EventNames = [
   'v2 Image generation processed',
   'v2 Update Metadata of message',
   'v2 Trial redemption success',
+  'v2 Payment link clicked',
+  'v2 Referral code redemption failed',
 
   // Error tracing
   'Error',
