@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { UserProfile } from '@/types/user';
@@ -16,6 +18,8 @@ import {
   AlertDialogTitle,
 } from '@/components/v2Chat/ui/alert-dialog';
 import { Button } from '@/components/v2Chat/ui/button';
+import { Input } from '@/components/v2Chat/ui/input';
+import toast from 'react-hot-toast';
 
 import dayjs from 'dayjs';
 
@@ -28,15 +32,22 @@ export const PaymentDialog = ({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) => {
+  const [promoCode, setPromoCode] = useState<string>('');
+  const [isPromoCodeValid, setIsPromoCodeValid] = useState<boolean | null>(
+    null,
+  );
+  const [isPromoCodeProcessing, setIsPromoCodeProcessing] =
+    useState<boolean>(false);
+
   const isPaidUser = userProfile.plan === 'pro';
+  const userEmail = userProfile.email;
+  const userId = userProfile.id;
 
   const upgradeLinkOnClick = () => {
     const paymentLink =
       process.env.NEXT_PUBLIC_ENV === 'production'
         ? 'https://buy.stripe.com/4gw9Ez6U2gt71NudRd'
         : 'https://buy.stripe.com/test_dR68y152Y7aWagUcMU';
-    const userEmail = userProfile.email;
-    const userId = userProfile.id;
 
     trackEvent('v2 Payment link clicked');
 
@@ -46,17 +57,51 @@ export const PaymentDialog = ({
     );
   };
 
+  const promoCodeApplyOnClick = async () => {
+    setIsPromoCodeProcessing(true);
+
+    const response = await fetch('/api/referral/redeem-code', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-id': userId,
+      },
+      body: JSON.stringify({
+        referralCode: promoCode,
+      }),
+    });
+
+    if (response.status === 200) {
+      setIsPromoCodeValid(true);
+      setIsPromoCodeProcessing(false);
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      return;
+    }
+
+    if (response.status === 400) {
+      trackEvent('v2 Referral code redemption failed');
+      setIsPromoCodeValid(false);
+      setPromoCode('');
+      setIsPromoCodeProcessing(false);
+      return;
+    }
+
+    toast.error('Something went wrong, please try again later.');
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Select your plan</AlertDialogTitle>
-
           <Alert className="flex flex-row justify-between border-blue-300">
             <div className="flex flex-col justify-center">
               <AlertTitle>Weekly</AlertTitle>
               <AlertDescription>
-                Unlimited usage for 7 days. <br />
+                Unlimited usage for 7 days <br />
               </AlertDescription>
             </div>
             <div className="flex flex-col justify-center">
@@ -88,6 +133,43 @@ export const PaymentDialog = ({
               )}
             </div>
           </Alert>
+          {!isPaidUser && (
+            <div className="flex flex-col items-center">
+              <div className="flex justify-between w-full">
+                <Input
+                  placeholder="Promo code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  className="w-1/2 outline-none"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      promoCodeApplyOnClick();
+                    }
+                  }}
+                />
+                <Button
+                  variant={'outline'}
+                  disabled={promoCode === '' || isPromoCodeProcessing}
+                  onClick={promoCodeApplyOnClick}
+                >
+                  <span className="text-xs">
+                    {isPromoCodeProcessing ? '...' : 'Apply'}
+                  </span>
+                </Button>
+              </div>
+              {isPromoCodeValid !== null && (
+                <p
+                  className={`text-xs w-full mt-2 ${
+                    isPromoCodeValid ? 'text-gray-600' : 'text-red-500'
+                  }`}
+                >
+                  {isPromoCodeValid
+                    ? 'Promo code applied, refreshing in 2 seconds ...'
+                    : 'Promo code is invalid'}
+                </p>
+              )}
+            </div>
+          )}
         </AlertDialogHeader>
         {isPaidUser && (
           <AlertDialogFooter>

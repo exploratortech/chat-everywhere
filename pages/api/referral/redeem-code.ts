@@ -81,7 +81,7 @@ const handler = async (req: Request): Promise<Response> => {
     //Log error to Azure App Insights
     trackError(error as string);
     console.error(error);
-    return new Response('Invalid Code', { status: 500 });
+    return new Response('Invalid Code', { status: 400 });
   }
 };
 

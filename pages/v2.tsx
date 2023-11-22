@@ -38,7 +38,7 @@ const V2Chat = () => {
   const chatScrollAnchorRef = useRef();
   const [enablePullingForUpdates, setEnablePullingForUpdates] = useState(false);
 
-  const [openPaymentDialog, setOpenPaymentDialog] = useState<boolean>(true);
+  const [openPaymentDialog, setOpenPaymentDialog] = useState<boolean>(false);
   const [selectedConversationId, setSelectedConversationId] =
     useState<string>('');
   const [selectedConversation, setSelectedConversation] =
