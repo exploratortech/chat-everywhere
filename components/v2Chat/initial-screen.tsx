@@ -23,10 +23,10 @@ export const InitialScreen = () => {
 
   return (
     <div className="v2-container flex flex-col min-h-screen justify-center items-center">
-      <Card>
-        <CardHeader className="flex justify-center max-w-sm md:max-w-md">
+      <Card className="w-full max-w-md sm:max-w-sm">
+        <CardHeader className="flex justify-center w-full">
           <div className="text-center flex flex-col">
-            <p>Chat Everywhere v2</p>
+            <p className="text-lg font-serif">Chat Everywhere v2</p>
             <div className="w-full flex justify-center mt-1">
               <Badge variant={'outline'} className="w-fit">
                 Beta
