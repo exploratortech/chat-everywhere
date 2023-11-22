@@ -313,6 +313,7 @@ const V2Chat = () => {
           conversationOnSelect={conversationOnSelect}
           selectedConversationId={selectedConversationId}
           conversations={conversations}
+          profileOnClick={() => setOpenPaymentDialog(true)}
         />
         <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto pt-5">
           <div className="pb-[120px] mt-12 mb-14">
