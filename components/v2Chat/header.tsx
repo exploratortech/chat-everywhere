@@ -57,7 +57,7 @@ export function Header({
         </div>
       </div>
       {selectedConversationId && (
-        <div className="flex flex-row font-semibold">
+        <div className="hidden md:flex flex-row font-semibold">
           <a href="https://intro.chateverywhere.app" target="_blank">
             <span className="font-serif">Chat Everywhere v2</span>
           </a>
