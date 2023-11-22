@@ -26,7 +26,7 @@ export const InitialScreen = () => {
       <Card className="w-full max-w-md sm:max-w-sm">
         <CardHeader className="flex justify-center w-full">
           <div className="text-center flex flex-col">
-            <p className="text-lg font-serif">Chat Everywhere v2</p>
+            <a className="text-xl font-serif" href='https://intro.chateverywhere.app' target='_blank'>Chat Everywhere v2</a>
             <div className="w-full flex justify-center mt-1">
               <Badge variant={'outline'} className="w-fit">
                 Beta
