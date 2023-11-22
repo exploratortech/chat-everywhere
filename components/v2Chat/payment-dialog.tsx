@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
@@ -19,7 +20,6 @@ import {
 } from '@/components/v2Chat/ui/alert-dialog';
 import { Button } from '@/components/v2Chat/ui/button';
 import { Input } from '@/components/v2Chat/ui/input';
-import toast from 'react-hot-toast';
 
 import dayjs from 'dayjs';
 
@@ -114,12 +114,14 @@ export const PaymentDialog = ({
                   >
                     Current plan
                   </Button>
-                  <p className="text-xs mt-0.5 text-gray-500">
-                    *Expires on{' '}
-                    {dayjs(userProfile.proPlanExpirationDate).format(
-                      'YYYY-MM-DD',
-                    )}
-                  </p>
+                  {userProfile.proPlanExpirationDate && (
+                    <p className="text-xs mt-0.5 text-gray-500">
+                      *Expires on{' '}
+                      {dayjs(userProfile.proPlanExpirationDate).format(
+                        'YYYY-MM-DD',
+                      )}
+                    </p>
+                  )}
                 </>
               ) : (
                 <>

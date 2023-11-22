@@ -15,7 +15,7 @@ export const InitialScreen = () => {
       process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
       'http://localhost:3000/';
     // Make sure to include `https://` when not localhost.
-    url = url.includes('http') ? url : `https://${url}`;
+    url = url.includes('http') ? url : `https://${url}/v2`;
     // Make sure to include a trailing `/`.
     url = url.charAt(url.length - 1) === '/' ? url : `${url}/`;
     return url;
