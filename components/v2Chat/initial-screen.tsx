@@ -6,11 +6,19 @@ import { Card, CardContent, CardHeader } from './ui/card';
 
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 
+import { useEffect, useState } from 'react';
+
 export const InitialScreen = () => {
   const supabase = useSupabaseClient();
+  const [currentHostname, setCurrentHostname] = useState<string | null>('');
+
+  useEffect(() => {
+    setCurrentHostname(window.location.href);
+  }, []);
+
 
   const getURL = () => {
-    let url = window.location.hostname;
+    let url = currentHostname;
     url = `https://${url}/v2`;
     url = url.charAt(url.length - 1) === '/' ? url : `${url}/`;
     return url;
