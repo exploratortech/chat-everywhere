@@ -47,7 +47,10 @@ export function Header({
           />
         </Sidebar>
         <div
-          className={cn(buttonVariants({ variant: 'outline' }), "ml-2 cursor-pointer")}
+          className={cn(
+            buttonVariants({ variant: 'outline' }),
+            'ml-2 cursor-pointer',
+          )}
           onClick={profileOnClick}
         >
           <IconProfile />
@@ -55,12 +58,12 @@ export function Header({
       </div>
       {selectedConversationId && (
         <div className="flex flex-row font-semibold">
-          <Badge variant={'outline'} className="mr-2">
-            v2 Beta
-          </Badge>
           <a href="https://intro.chateverywhere.app" target="_blank">
-            <span className="font-serif">Chat Everywhere</span>
+            <span className="font-serif">Chat Everywhere v2</span>
           </a>
+          <Badge variant={'outline'} className="ml-2">
+            Beta
+          </Badge>
         </div>
       )}
       <div className="flex items-center justify-end space-x-2">
