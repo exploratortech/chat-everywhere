@@ -110,7 +110,7 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
         data-tooltip-id="share-line-tooltip"
         data-tooltip-content={t('Share to LINE') || ''}
         data-tooltip-place="bottom"
-        className={`translate-x-[1000px] text-[#4CC764] hover:text-[#17ff44] focus:translate-x-0 group-hover:translate-x-0 h-fit ${className} ${
+        className={`translate-x-[9999px] text-[#4CC764] hover:text-[#17ff44] focus:translate-x-0 group-hover:translate-x-0 h-fit ${className} ${
           loading ? '!translate-x-0' : ''
         }`}
         onClick={shareOnClick}
