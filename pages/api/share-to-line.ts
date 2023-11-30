@@ -1,4 +1,4 @@
-import { trackEvent } from '@/utils/app/eventTracking';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
 import { decode } from 'base64-arraybuffer';
@@ -120,7 +120,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('Failed to send message to LINE', { status: 500 });
   }
 
-  trackEvent('Share to Line');
+  serverSideTrackEvent(user.data.user?.id || 'N/A', 'Share to Line');
   return new Response('', { status: 200 });
 };
 
