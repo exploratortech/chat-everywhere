@@ -445,6 +445,7 @@ const Home = () => {
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
               isInReferralTrial: userProfile.isInReferralTrial,
+              isConnectedWithLine: userProfile.isConnectedWithLine,
             },
           });
           // Set authenticated user context for Application Insights

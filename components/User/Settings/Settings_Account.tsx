@@ -1,3 +1,4 @@
+import { useSession } from '@supabase/auth-helpers-react';
 import { IconCircleCheck } from '@tabler/icons-react';
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -25,6 +26,9 @@ export default function Settings_Account() {
     state: { user, isPaidUser },
     dispatch,
   } = useContext(HomeContext);
+
+  const session = useSession();
+
   const changePasswordOnClick = () => {
     dispatch({ field: 'showSettingsModel', value: false });
     dispatch({ field: 'showLoginSignUpModel', value: true });
@@ -55,38 +59,24 @@ export default function Settings_Account() {
     }
   };
 
-  // const upgradeForOneMonthLinkOnClick = () => {
-  //   const paymentLink =
-  //     process.env.NEXT_PUBLIC_ENV === 'production'
-  //       ? 'https://buy.stripe.com/3csbMH7Y62Ch77O005'
-  //       : 'https://buy.stripe.com/test_bIY6pTcvq52O60E4gh';
-  //   const userEmail = user?.email;
-  //   const userId = user?.id;
-
-  //   event('One month upgrade button clicked', {
-  //     category: 'Engagement',
-  //     label: 'Upgrade',
-  //     userEmail: userEmail || 'N/A',
-  //   });
-  //   trackEvent('Upgrade (one-month only) button clicked');
-
-  //   if (!user) {
-  //     toast.error('Please sign-up before upgrading to pro plan');
-  //   } else {
-  //     window.open(
-  //       `${paymentLink}?prefilled_email=${userEmail}&client_reference_id=${userId}`,
-  //       '_blank',
-  //     );
-  //   }
-  // };
-
   const subscriptionManagementLink = () =>
     process.env.NEXT_PUBLIC_ENV === 'production'
       ? 'https://billing.stripe.com/p/login/5kAbMj0wt5VF6AwaEE'
       : 'https://billing.stripe.com/p/login/test_28o4jFe6GaqK1UY5kk';
+
+  const lineConnectOnClick = () => {
+    const clientId = process.env.NEXT_PUBLIC_LINE_NOTIFY_CLIENT_ID;
+    const redirectUrl =
+      process.env.NEXT_PUBLIC_ENV === 'production'
+        ? 'https://chateverywhere.app/api/webhooks/line-notify-connect'
+        : `${window.location.protocol}://${window.location.hostname}/api/webhooks/line-notify-connect`;
+    const lineConnectLink = `https://notify-bot.line.me/oauth/authorize?response_type=code&client_id=${clientId}&scope=notify&state=${session?.access_token}&redirect_uri${redirectUrl}`;
+    window.open(lineConnectLink);
+  };
+
   return (
     <div>
-      <h1 className="font-bold mb-4">{t("Account")}</h1>
+      <h1 className="font-bold mb-4">{t('Account')}</h1>
 
       <div className="mx-auto max-w-2xl">
         <div className="rounded-2xl flex flex-col">
@@ -134,7 +124,9 @@ export default function Settings_Account() {
                   >
                     {t('Upgrade')}
                   </a>
-                  <p className="text-xs text-neutral-400 mt-2">{t('No Strings Attached - Cancel Anytime!')}</p>
+                  <p className="text-xs text-neutral-400 mt-2">
+                    {t('No Strings Attached - Cancel Anytime!')}
+                  </p>
                 </div>
               )}
               {user?.plan === 'pro' && user.proPlanExpirationDate && (
@@ -208,6 +200,21 @@ export default function Settings_Account() {
             </div>
           )}
         </div>
+      </div>
+
+      <div>
+        {user?.isConnectedWithLine ? (
+          <p className="text-xs text-neutral-400 mt-2">
+            {t('You are connected with LINE')}
+          </p>
+        ) : (
+          <button
+            className="px-4 py-2 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer mr-2 text-xs"
+            onClick={lineConnectOnClick}
+          >
+            {t('Connect with LINE')}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -426,12 +426,13 @@ export const userProfileQuery = async ({
     pro_plan_expiration_date: any;
     referral_code: any;
     referral_code_expiration_date: any;
+    line_access_token?: string;
   } | null = null;
   if (userId) {
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token',
       )
       .eq('id', userId)
       .single();
@@ -444,7 +445,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token',
       )
       .eq('email', email)
       .single();
@@ -487,6 +488,8 @@ export const userProfileQuery = async ({
     })();
   }
 
+  console.log("line_access_token: ", userProfile.line_access_token);
+  
   return {
     id: userProfile.id,
     email: userProfile.email,
@@ -497,6 +500,7 @@ export const userProfileQuery = async ({
     hasReferrer: !!referrerRecords,
     hasReferee: !!refereeRecords,
     isInReferralTrial: isInReferralTrial,
+    isConnectedWithLine: !!userProfile.line_access_token,
   } as UserProfile;
 };
 
