@@ -204,7 +204,7 @@ export default function Settings_Account() {
         <div className="inline-flex items-center justify-center w-full">
           <hr className="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
           <span className="absolute px-3 text-white -translate-x-1/2 left-1/2 bg-[#171717]">
-            Integrations
+            {t('Integrations (pro plan)')}
           </span>
         </div>
         <div className="flex items-center">
@@ -221,8 +221,9 @@ export default function Settings_Account() {
             </p>
           ) : (
             <button
-              className="border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent"
+              className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent ${!user || !isPaidUser && "!text-gray-400"}`}
               onClick={lineConnectOnClick}
+              disabled={!user || !isPaidUser}
             >
               {t('Connect with LINE')}
             </button>
