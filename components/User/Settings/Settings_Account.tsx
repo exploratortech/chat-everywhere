@@ -4,6 +4,7 @@ import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
+import Image from 'next/image';
 import { event } from 'nextjs-google-analytics';
 
 import { trackEvent } from '@/utils/app/eventTracking';
@@ -200,21 +201,33 @@ export default function Settings_Account() {
             </div>
           )}
         </div>
-      </div>
-
-      <div>
-        {user?.isConnectedWithLine ? (
-          <p className="text-xs text-neutral-400 mt-2">
-            {t('You are connected with LINE')}
-          </p>
-        ) : (
-          <button
-            className="px-4 py-2 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer mr-2 text-xs"
-            onClick={lineConnectOnClick}
-          >
-            {t('Connect with LINE')}
-          </button>
-        )}
+        <div className="inline-flex items-center justify-center w-full">
+          <hr className="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
+          <span className="absolute px-3 text-white -translate-x-1/2 left-1/2 bg-[#171717]">
+            Integrations
+          </span>
+        </div>
+        <div className="flex items-center">
+          <Image
+            src="/assets/line-icon.webp"
+            alt="Line icon"
+            className="inline-block"
+            width="50"
+            height="50"
+          />
+          {user?.isConnectedWithLine ? (
+            <p className="text-xs text-neutral-400">
+              {t('Connected with LINE')}
+            </p>
+          ) : (
+            <button
+              className="border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent"
+              onClick={lineConnectOnClick}
+            >
+              {t('Connect with LINE')}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
