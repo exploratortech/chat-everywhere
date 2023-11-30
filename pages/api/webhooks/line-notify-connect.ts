@@ -1,8 +1,25 @@
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
+import { trackEvent } from '@/utils/app/eventTracking';
 
 export const config = {
   runtime: 'edge',
-  preferredRegion: 'icn1'
+  preferredRegion: 'icn1',
+};
+
+const redirectHomeWithNotice = (
+  notice: string,
+  noticeType: 'success' | 'error' = 'error',
+): Response => {
+  const response = new Response('', { status: 302 });
+  const homeUrl =
+    process.env.NODE_ENV === 'development'
+      ? `http://localhost:3000`
+      : `http://${process.env.NEXT_PUBLIC_BASE_URL}`;
+  response.headers.set(
+    'Location',
+    `${homeUrl}?notice=${notice}&noticeType=${noticeType}`,
+  );
+  return response;
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -13,43 +30,53 @@ const handler = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
   const supabaseAccessToken = url.searchParams.get('state');
-  
-  if(!code || !supabaseAccessToken) {
-    console.error('No code or access token found');
-    return new Response('No code or access token found', { status: 400 });
+
+  if (!code || !supabaseAccessToken) {
+    console.error('No code or access token found', code, supabaseAccessToken);
+    return redirectHomeWithNotice(
+      'Unable to connect with LINE, please try again later',
+      'error',
+    );
   }
-  console.log('Code:', code);
 
   // Retrieved the code, now exchange it for an access token
   const response = await fetch('https://notify-bot.line.me/oauth/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
-      'grant_type': 'authorization_code',
-      'code': code,
-      'redirect_uri': 'http://localhost:3000/api/webhooks/line-notify-connect',
-      'client_id': process.env.LINE_NOTIFY_CLIENT_ID || '',
-      'client_secret': process.env.LINE_NOTIFY_CLIENT_SECRET || ''
-    })
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: 'http://localhost:3000/api/webhooks/line-notify-connect',
+      client_id: process.env.NEXT_PUBLIC_LINE_NOTIFY_CLIENT_ID || '',
+      client_secret: process.env.LINE_NOTIFY_CLIENT_SECRET || '',
+    }),
   });
 
   if (!response.ok) {
+    console.log(await response.text());
+    
     console.error('Failed to exchange code for access token');
-    return new Response('Failed to exchange code for access token', { status: 500 });
+    return redirectHomeWithNotice(
+      'Unable to connect with LINE, please try again later',
+      'error',
+    );
   }
 
   const data = await response.json();
   const accessToken = data.access_token;
-  
+
   const supabase = getAdminSupabaseClient();
 
   const user = await supabase.auth.getUser(supabaseAccessToken);
 
-  if(!user) {
+  if (!user) {
     console.error('No user found with this access token');
-    return new Response('No user found with this access token', { status: 400 });
+    return redirectHomeWithNotice(
+      'Unable to connect with LINE, please try again later',
+      'error',
+    );
   }
 
   // Store the accessToken in the line_access_token column in the profiles table in Supabase
@@ -60,14 +87,14 @@ const handler = async (req: Request): Promise<Response> => {
 
   if (error) {
     console.error('Failed to store access token:', error);
-    return new Response('Failed to store access token', { status: 500 });
+    return redirectHomeWithNotice(
+      'Unable to connect with LINE, please try again later',
+      'error',
+    );
   }
 
-  console.log('User ID:', user.data.user?.id);
-
-  const redirectResponse = new Response('', { status: 302 });
-  redirectResponse.headers.set('Location', 'http://localhost:3000/');
-  return redirectResponse;
-}
+  trackEvent('LINE Notify connected');
+  return redirectHomeWithNotice('Successfully connected to LINE', 'success');
+};
 
 export default handler;
