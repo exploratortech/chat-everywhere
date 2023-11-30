@@ -23,6 +23,8 @@ import { Conversation, Message } from '@/types/chat';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import { LineShareButton } from '../LineShareButton';
+
 import dayjs from 'dayjs';
 
 interface MjImageComponentProps {
@@ -297,6 +299,17 @@ export default function MjImageComponent({
           onClick={helpButtonOnClick}
         >
           <IconHelp size={isMobileLayout ? 16 : undefined} />
+        </button>
+        <button
+          className={`${
+            showButtons ? 'block' : 'hidden'
+          } absolute bottom-0 right-0 p-1`}
+        >
+          <LineShareButton
+            imageFileUrl={src}
+            size={20}
+            displayInProgressToast={true}
+          />
         </button>
       </div>
     </div>

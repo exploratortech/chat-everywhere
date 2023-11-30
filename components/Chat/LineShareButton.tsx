@@ -7,14 +7,22 @@ import { Tooltip } from 'react-tooltip';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import { encode } from 'base64-arraybuffer';
+
 interface LineShareButtonProps {
+  displayInProgressToast?: boolean;
   className?: string;
-  messageContent: string;
+  messageContent?: string;
+  imageFileUrl?: string;
+  size?: number;
 }
 
 export const LineShareButton: FC<LineShareButtonProps> = ({
+  displayInProgressToast = false,
   className = '',
-  messageContent,
+  messageContent = '',
+  imageFileUrl = '',
+  size = 18,
 }) => {
   const { t } = useTranslation('feature');
   const {
@@ -24,6 +32,7 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
   const supabase = useSupabaseClient();
 
   const { dispatch: homeDispatch } = useContext(HomeContext);
+  let imageFileInBase64: String | null = null;
 
   const shareOnClick = async () => {
     if (!user || user.plan === 'free') {
@@ -41,11 +50,21 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
       return;
     }
 
+    if (imageFileUrl) {
+      const response = await fetch(imageFileUrl);
+      const blob = await response.arrayBuffer();
+      imageFileInBase64 = encode(blob);
+    }
+
     setLoading(true);
+    if (displayInProgressToast) {
+      toast(t('Sharing message to LINE...'));
+    }
     const payload = {
       accessToken: (await supabase.auth.getSession()).data.session
         ?.access_token,
       messageContent: messageContent,
+      imageFile: imageFileInBase64,
     };
 
     try {
@@ -97,9 +116,9 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
         onClick={shareOnClick}
       >
         {loading ? (
-          <IconLoader size={18} className="animate-spin" />
+          <IconLoader size={size} className="animate-spin" />
         ) : (
-          <IconMessageCircleUp size={18} />
+          <IconMessageCircleUp size={size} />
         )}
       </button>
       <Tooltip id="share-line-tooltip" />
