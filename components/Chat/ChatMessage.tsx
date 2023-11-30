@@ -418,7 +418,7 @@ export const ChatMessage: FC<Props> = memo(
                         >
                           <IconTrash size={18} />
                         </button>
-                        <LineShareButton messageContent={message.content}/>
+                        <LineShareButton messageContent={message.content} />
                       </div>
                     )}
                   </>
@@ -481,7 +481,13 @@ export const ChatMessage: FC<Props> = memo(
                   <div className="flex flex-row items-center">
                     {(message.pluginId === PluginID.GPT4 ||
                       !message.pluginId) && (
-                      <SpeechButton inputText={message.content} />
+                      <>
+                        <SpeechButton inputText={message.content} />
+                        <LineShareButton
+                          messageContent={message.content}
+                          className="ml-2"
+                        />
+                      </>
                     )}
                     {displayFooterButtons && (
                       <>
@@ -489,7 +495,6 @@ export const ChatMessage: FC<Props> = memo(
                         <div className="m-1 hidden tablet:flex">
                           <CopyButton className="translate-x-[unset] !text-gray-500 hover:!text-gray-300" />
                         </div>
-                        <LineShareButton messageContent={message.content} className='ml-2'/>
                       </>
                     )}
                   </div>
