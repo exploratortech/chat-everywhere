@@ -481,13 +481,7 @@ export const ChatMessage: FC<Props> = memo(
                   <div className="flex flex-row items-center">
                     {(message.pluginId === PluginID.GPT4 ||
                       !message.pluginId) && (
-                      <>
-                        <SpeechButton inputText={message.content} />
-                        <LineShareButton
-                          messageContent={message.content}
-                          className="ml-2"
-                        />
-                      </>
+                      <SpeechButton inputText={message.content} />
                     )}
                     {displayFooterButtons && (
                       <>
@@ -495,6 +489,15 @@ export const ChatMessage: FC<Props> = memo(
                         <div className="m-1 hidden tablet:flex">
                           <CopyButton className="translate-x-[unset] !text-gray-500 hover:!text-gray-300" />
                         </div>
+                      </>
+                    )}
+                    {(message.pluginId === PluginID.GPT4 ||
+                      !message.pluginId) && (
+                      <>
+                        <LineShareButton
+                          messageContent={message.content}
+                          className="ml-2"
+                        />
                       </>
                     )}
                   </div>
