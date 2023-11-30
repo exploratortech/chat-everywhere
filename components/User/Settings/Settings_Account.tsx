@@ -72,7 +72,7 @@ export default function Settings_Account() {
         ? 'https://chateverywhere.app/api/webhooks/line-notify-connect'
         : `${window.location.protocol}//${window.location.host}/api/webhooks/line-notify-connect`;
     const lineConnectLink = `https://notify-bot.line.me/oauth/authorize?response_type=code&client_id=${clientId}&scope=notify&state=${session?.access_token}&redirect_uri=${redirectUrl}`;
-    window.open(lineConnectLink);
+    window.location.href = lineConnectLink;
   };
 
   return (

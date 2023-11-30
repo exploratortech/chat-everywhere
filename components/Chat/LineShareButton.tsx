@@ -16,7 +16,7 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
   className = '',
   messageContent,
 }) => {
-  const { t } = useTranslation('chat');
+  const { t } = useTranslation('feature');
   const {
     state: { user },
   } = useContext(HomeContext);
@@ -28,13 +28,15 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
   const shareOnClick = async () => {
     if (!user || user.plan === 'free') {
       toast.error(
-        "This is a Pro only feature. Please sign-up to use it if you don't have an account.",
+        t(
+          "This is a Pro only feature. Please sign-up to use it if you don't have an account.",
+        ),
       );
       return;
     }
 
     if (!user.isConnectedWithLine) {
-      toast.error('Please connect with your Line account first.');
+      toast.error(t('Please connect with your Line account first.'));
       homeDispatch({ field: 'showSettingsModel', value: true });
       return;
     }
@@ -56,27 +58,29 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
       });
 
       if (response.status === 400 || response.status === 500 || !response.ok) {
-        toast.error('Failed to share message, please try again later');
+        toast.error(t('Failed to share message, please try again later'));
         setLoading(false);
         return;
       }
 
       if (response.status === 401) {
         toast.error(
-          'Your Line connection has expired, please re-connect on the setting page',
+          t(
+            'Your Line connection has expired, please re-connect on the setting page',
+          ),
         );
         setLoading(false);
         return;
       }
 
-      toast.success('Message shared successfully');
+      toast.success(t('Message shared successfully'));
       setLoading(false);
     } catch (error) {
       console.error(
         'There has been a problem with your fetch operation:',
         error,
       );
-      toast.error('Failed to share message, please try again later');
+      toast.error(t('Failed to share message, please try again later'));
       setLoading(false);
     }
   };
