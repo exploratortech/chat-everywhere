@@ -46,6 +46,10 @@ export const EventNames = [
   // Payment
   'Payment success',
 
+  // Integration
+  'LINE Notify connected',
+  'Share to Line',
+
   // V2
   'v2 Retrieve messages',
   'v2 Send message',

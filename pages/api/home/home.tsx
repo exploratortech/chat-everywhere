@@ -445,6 +445,7 @@ const Home = () => {
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
               isInReferralTrial: userProfile.isInReferralTrial,
+              isConnectedWithLine: userProfile.isConnectedWithLine,
             },
           });
           // Set authenticated user context for Application Insights
@@ -511,6 +512,18 @@ const Home = () => {
 
     updateHeight();
     window.addEventListener('resize', updateHeight);
+
+    // Display notice message from url if exist
+    const { notice, noticeType } = router.query;
+    if (notice) {
+      toast.dismiss();
+      if (noticeType === 'error') {
+        toast.error(t(notice as string));
+      } else {
+        toast.success(t(notice as string));
+      }
+      router.replace(router.pathname, router.pathname, { shallow: true });
+    }
     return () => {
       window.removeEventListener('resize', updateHeight);
     };
@@ -582,7 +595,11 @@ const Home = () => {
       dispatch({ field: 'conversations', value: cleanedConversationHistory });
     }
 
-    logUsageSnapshot(cleanedFolders, cleanedConversationHistory, cleanedPrompts);
+    logUsageSnapshot(
+      cleanedFolders,
+      cleanedConversationHistory,
+      cleanedPrompts,
+    );
 
     const newConversation = {
       id: uuidv4(),

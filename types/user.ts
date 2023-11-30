@@ -26,6 +26,7 @@ export interface UserProfile {
   hasReferee: boolean;
   hasReferrer: boolean;
   isInReferralTrial: boolean;
+  isConnectedWithLine: boolean;
 }
 
 export interface CreditUsage {

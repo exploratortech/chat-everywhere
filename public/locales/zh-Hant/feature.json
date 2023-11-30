@@ -2,5 +2,12 @@
   "Syncing ...": "同步中 ...",
   "Synced": "已同步",
   "Sync failed": "同步失敗",
-  "Cloud sync disabled": "雲端同步未啟用"
+  "Cloud sync disabled": "雲端同步未啟用",
+  "This is a Pro only feature. Please sign-up to use it if you don't have an account.": "這是Pro版的獨享功能, 請先登入和升級。",
+  "Please connect with your Line account first.": "請先連接您的LINE帳戶",
+  "Failed to share message, please try again later": "轉發失敗，請稍後再試",
+  "Your Line connection has expired, please re-connect on the setting page": "您的Line連接已失效, 請重新連接",
+  "Message shared successfully": "轉發成功!",
+  "Share to LINE": "轉發到LINE",
+  "Sharing message to LINE...": "正在轉發到LINE..."
 }

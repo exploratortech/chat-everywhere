@@ -68,7 +68,7 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   if (!isProUser || messageIsStreaming) return <></>;
 
   return (
-    <div className={`cursor-pointer text-gray-500 hover:text-gray-300 mr-2`}>
+    <div className={`cursor-pointer text-gray-500 hover:text-gray-300`}>
       {getPlayerIcon()}
     </div>
   );

@@ -25,6 +25,7 @@ export const PlanDetail = {
       'GPT-4 (50 response/month + credit)',
       'MidJourney generation (50 images/month + credit)',
       '16K model',
+      'LINE connection'
     ],
   },
   combinedSimplify: [
@@ -33,6 +34,7 @@ export const PlanDetail = {
     'MidJourney image generation',
     'AI speech',
     '16K model',
+    'LINE connection'
   ],
 };
 

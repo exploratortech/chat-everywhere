@@ -1,0 +1,1 @@
+alter table "public"."profiles" add column "line_access_token" text;
