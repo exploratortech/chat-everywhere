@@ -48,6 +48,7 @@ export const EventNames = [
 
   // Integration
   'LINE Notify connected',
+  'Share to Line',
 
   // V2
   'v2 Retrieve messages',

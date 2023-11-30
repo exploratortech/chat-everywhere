@@ -36,6 +36,7 @@ import { CodeBlock } from '../Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
 import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';
+import { LineShareButton } from './LineShareButton';
 import { SpeechButton } from './SpeechButton';
 
 import rehypeMathjax from 'rehype-mathjax';
@@ -412,11 +413,12 @@ export const ChatMessage: FC<Props> = memo(
                           size={18}
                         />
                         <button
-                          className={`text-gray-500 hover:!text-gray-300 h-fit`}
+                          className={`text-gray-500 hover:!text-gray-300 h-fit mr-2`}
                           onClick={handleDeleteMessage}
                         >
                           <IconTrash size={18} />
                         </button>
+                        <LineShareButton messageContent={message.content}/>
                       </div>
                     )}
                   </>
@@ -487,6 +489,7 @@ export const ChatMessage: FC<Props> = memo(
                         <div className="m-1 hidden tablet:flex">
                           <CopyButton className="translate-x-[unset] !text-gray-500 hover:!text-gray-300" />
                         </div>
+                        <LineShareButton messageContent={message.content} className='ml-2'/>
                       </>
                     )}
                   </div>

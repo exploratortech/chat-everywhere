@@ -216,7 +216,7 @@ export default function Settings_Account() {
             height="50"
           />
           {user?.isConnectedWithLine ? (
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-neutral-400 cursor-default">
               {t('Connected with LINE')}
             </p>
           ) : (
