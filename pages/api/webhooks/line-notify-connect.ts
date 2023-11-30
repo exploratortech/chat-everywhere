@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
     body: new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: 'https://chateverywhere.app/api/webhooks/line-notify-connect',
+      redirect_uri: 'https://beta.chateverywhere.app/api/webhooks/line-notify-connect',
       client_id: process.env.NEXT_PUBLIC_LINE_NOTIFY_CLIENT_ID || '',
       client_secret: process.env.LINE_NOTIFY_CLIENT_SECRET || '',
     }),
