@@ -1,5 +1,5 @@
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
-import { trackEvent } from '@/utils/app/eventTracking';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 
 export const config = {
   runtime: 'edge',
@@ -94,7 +94,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
   }
 
-  trackEvent('LINE Notify connected');
+  serverSideTrackEvent(user.data.user?.id || "N/A", 'LINE Notify connected');
   return redirectHomeWithNotice('Successfully connected to LINE', 'success');
 };
 

@@ -8,6 +8,7 @@ import { Tooltip } from 'react-tooltip';
 import HomeContext from '@/pages/api/home/home.context';
 
 import { encode } from 'base64-arraybuffer';
+import { trackEvent } from '@/utils/app/eventTracking';
 
 interface LineShareButtonProps {
   displayInProgressToast?: boolean;
@@ -35,6 +36,8 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
   let imageFileInBase64: String | null = null;
 
   const shareOnClick = async () => {
+    trackEvent('LINE share button clicked');
+
     if (!user || user.plan === 'free') {
       toast.error(
         t(

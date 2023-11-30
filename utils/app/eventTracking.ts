@@ -47,6 +47,7 @@ export const EventNames = [
   'Payment success',
 
   // Integration
+  'LINE share button clicked',
   'LINE Notify connected',
   'Share to Line',
 
