@@ -165,14 +165,20 @@ export const ChatMessage: FC<Props> = memo(
       }
     }, [isEditing]);
 
-    const CopyButton = ({ className = '' }: { className?: string }) => {
+    const CopyButton = ({
+      className = '',
+      size = 20,
+    }: {
+      className?: string;
+      size?: number;
+    }) => {
       if (message.pluginId === PluginID.IMAGE_GEN) return <></>;
 
       if (messagedCopied) {
         return (
           <IconCheck
-            size={20}
-            className="text-green-500 dark:text-green-400 h-fit"
+            size={size}
+            className={` !text-green-500 !dark:text-green-400 h-fit ${className}`}
           />
         );
       } else {
@@ -181,7 +187,7 @@ export const ChatMessage: FC<Props> = memo(
             className={`translate-x-[1000px] text-gray-500 hover:text-gray-700 focus:translate-x-0 group-hover:translate-x-0 dark:text-gray-400 dark:hover:text-gray-300 h-fit ${className}`}
             onClick={copyOnClick}
           >
-            <IconCopy size={20} />
+            <IconCopy size={size} />
           </button>
         );
       }
@@ -325,7 +331,7 @@ export const ChatMessage: FC<Props> = memo(
 
           <div className="prose mt-[-2px] w-full dark:prose-invert">
             {message.role === 'user' ? (
-              <div className="flex w-full flex-col md:flex-row md:justify-between">
+              <div className="flex w-full flex-col md:justify-between">
                 {isEditing ? (
                   <div
                     className={`flex w-full flex-col relative ${
@@ -389,26 +395,31 @@ export const ChatMessage: FC<Props> = memo(
                     />
                   </div>
                 ) : (
-                  <div className="prose whitespace-pre-wrap dark:prose-invert">
-                    {message.content}
-                  </div>
-                )}
-
-                {!isEditing && (
-                  <div className="flex flex-row m-1">
-                    <button
-                      className={`text-gray-500 hover:text-gray-700 focus:translate-x-0 group-hover:translate-x-0 dark:text-gray-400 dark:hover:text-gray-300 h-fit mr-1`}
-                      onClick={toggleEditing}
-                    >
-                      <IconEdit size={18} fill="none" />
-                    </button>
-                    <button
-                      className={`text-gray-500 hover:text-gray-700 focus:translate-x-0 group-hover:translate-x-0 dark:text-gray-400 dark:hover:text-gray-300 h-fit`}
-                      onClick={handleDeleteMessage}
-                    >
-                      <IconTrash size={18} />
-                    </button>
-                  </div>
+                  <>
+                    <div className="prose whitespace-pre-wrap dark:prose-invert">
+                      {message.content}
+                    </div>
+                    {!isEditing && (
+                      <div className="flex flex-row items-center mt-3 w-full">
+                        <button
+                          className={`text-gray-500 hover:!text-gray-300 h-fit mr-2`}
+                          onClick={toggleEditing}
+                        >
+                          <IconEdit size={18} fill="none" />
+                        </button>
+                        <CopyButton
+                          className="translate-x-[unset] !text-gray-500 hover:!text-gray-300 mr-2"
+                          size={18}
+                        />
+                        <button
+                          className={`text-gray-500 hover:!text-gray-300 h-fit`}
+                          onClick={handleDeleteMessage}
+                        >
+                          <IconTrash size={18} />
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             ) : (
@@ -458,7 +469,6 @@ export const ChatMessage: FC<Props> = memo(
                       img: ImgComponent,
                     }}
                   >
-                    {/* {message.content} */}
                     {formattedMessage}
                   </MemoizedReactMarkdown>
                   <div className="flex m-1 tablet:hidden">
