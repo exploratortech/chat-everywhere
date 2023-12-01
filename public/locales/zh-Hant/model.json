@@ -99,5 +99,8 @@
   "LINE connection": "轉發到LINE",
   "Connected with LINE": "已連接LINE",
   "Connect with LINE": "授權和連接至LINE",
-  "Integrations (pro plan)": "擴充功能 (Pro版獨享)"
+  "Integrations (pro plan)": "擴充功能 (Pro版獨享)",
+  "Successfully disconnected with LINE": "LINE連接成功取消",
+  "Unable to disconnect with LINE, please try again later": "無法取消LINE連接, 請稍後再試",
+  "Disconnect": "取消連接"
 }

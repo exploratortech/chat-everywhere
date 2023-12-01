@@ -50,6 +50,7 @@ export const EventNames = [
   'LINE share button clicked',
   'LINE Notify connected',
   'Share to Line',
+  'Disconnect LINE Notify',
 
   // V2
   'v2 Retrieve messages',

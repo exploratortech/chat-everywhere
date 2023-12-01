@@ -100,5 +100,8 @@
   "LINE connection": "转发到LINE",
   "Connected with LINE": "LINE已连接",
   "Connect with LINE": "授权和连接至LINE",
-  "Integrations (pro plan)": "扩展功能 (Pro版独享)"
+  "Integrations (pro plan)": "扩展功能 (Pro版独享)",
+  "Successfully disconnected with LINE": "LINE连接成功取消",
+  "Unable to disconnect with LINE, please try again later": "无法取消LINE连接, 请稍后再试",
+  "Disconnect": "取消连接"
 }
