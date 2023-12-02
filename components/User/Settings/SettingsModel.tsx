@@ -35,7 +35,6 @@ export default function SettingsModel({ onClose }: Props) {
   return (
     <Transition appear show={true} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose} open>
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -45,7 +44,7 @@ export default function SettingsModel({ onClose }: Props) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-gray-500/50" />
         </Transition.Child>
 
         <SettingsModelContext.Provider
@@ -62,7 +61,7 @@ export default function SettingsModel({ onClose }: Props) {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className=" w-full max-w-[1150px] tablet:max-w-[90vw] h-[calc(100vh-100px)] transform overflow-hidden rounded-2xl  text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
+                <Dialog.Panel className="w-full max-w-[70vw] xl:max-w-3xl tablet:max-w-[90vw] h-[calc(80vh-100px)] transform overflow-hidden rounded-2xl text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
                   <Sidebar className="bg-neutral-800 flex-shrink-0 flex-grow-0" />
                   <div className="p-6 bg-neutral-900 flex-grow relative overflow-y-auto">
                     {showing === 'account' && <Settings_Account />}

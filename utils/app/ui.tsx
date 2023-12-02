@@ -11,7 +11,6 @@ import { PluginID } from '@/types/plugin';
 export const PlanDetail = {
   free: {
     features: [
-      'Online mode',
       'Voice input',
       'Share conversations',
       'Folder manager',
@@ -22,10 +21,11 @@ export const PlanDetail = {
     features: [
       'Cloud sync',
       'AI speech',
+      'Online mode',
       'GPT-4 (50 response/month + credit)',
       'MidJourney generation (50 images/month + credit)',
       '16K model',
-      'LINE connection'
+      'LINE connection',
     ],
   },
   combinedSimplify: [
@@ -34,7 +34,7 @@ export const PlanDetail = {
     'MidJourney image generation',
     'AI speech',
     '16K model',
-    'LINE connection'
+    'LINE connection',
   ],
 };
 
