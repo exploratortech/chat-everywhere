@@ -258,8 +258,8 @@ export default function Settings_Account() {
             </div>
           ) : (
             <button
-              className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent ${
-                !user || (!isPaidUser && '!text-gray-400')
+              className={`border border-neutral-600 hover:bg-gray-200 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent ${
+                (!user || !isPaidUser) ? '!text-gray-400' : 'text-gray-800'
               }`}
               onClick={lineConnectOnClick}
               disabled={!user || !isPaidUser}
