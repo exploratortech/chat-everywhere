@@ -35,7 +35,6 @@ export default function SettingsModel({ onClose }: Props) {
   return (
     <Transition appear show={true} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose} open>
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -45,7 +44,7 @@ export default function SettingsModel({ onClose }: Props) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-gray-500/50" />
         </Transition.Child>
 
         <SettingsModelContext.Provider
