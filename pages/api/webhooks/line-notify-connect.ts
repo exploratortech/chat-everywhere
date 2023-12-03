@@ -1,5 +1,6 @@
-import { getAdminSupabaseClient } from '@/utils/server/supabase';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+import { getHomeUrl } from '@/utils/server/api';
+import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
 export const config = {
   runtime: 'edge',
@@ -11,11 +12,7 @@ const redirectHomeWithNotice = (
   noticeType: 'success' | 'error' = 'error',
 ): Response => {
   const response = new Response('', { status: 302 });
-  let homeUrl =
-    process.env.NODE_ENV === 'development'
-      ? `http://localhost:3000`
-      : `https://${process.env.VERCEL_URL}`;
-  homeUrl = process.env.NODE_ENV === 'production' ? 'https://chateverywhere.app' : homeUrl;
+  let homeUrl = getHomeUrl();
   response.headers.set(
     'Location',
     `${homeUrl}?notice=${notice}&noticeType=${noticeType}`,
@@ -49,7 +46,8 @@ const handler = async (req: Request): Promise<Response> => {
     body: new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: 'https://chateverywhere.app/api/webhooks/line-notify-connect',
+      redirect_uri:
+        'https://chateverywhere.app/api/webhooks/line-notify-connect',
       client_id: process.env.NEXT_PUBLIC_LINE_NOTIFY_CLIENT_ID || '',
       client_secret: process.env.LINE_NOTIFY_CLIENT_SECRET || '',
     }),
@@ -57,7 +55,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   if (!response.ok) {
     console.log(await response.text());
-    
+
     console.error('Failed to exchange code for access token');
     return redirectHomeWithNotice(
       'Unable to connect with LINE, please try again later',
@@ -94,7 +92,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
   }
 
-  serverSideTrackEvent(user.data.user?.id || "N/A", 'LINE Notify connected');
+  serverSideTrackEvent(user.data.user?.id || 'N/A', 'LINE Notify connected');
   return redirectHomeWithNotice('Successfully connected to LINE', 'success');
 };
 

@@ -38,6 +38,7 @@ export const EventNames = [
   'Online mode message',
   'Default mode message',
   'GPT4 mode message',
+  'MQTT mode message',
   'AI image generation',
   'AI image to prompt',
   'AI image button clicked',
@@ -51,7 +52,7 @@ export const EventNames = [
   'LINE Notify connected',
   'Share to Line',
   'Disconnect LINE Notify',
-  'MQTT send request',
+  'MQTT trigger connection',
 
   // V2
   'v2 Retrieve messages',

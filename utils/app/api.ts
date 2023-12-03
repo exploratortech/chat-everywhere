@@ -23,6 +23,10 @@ export const getEndpoint = (plugin: Plugin | null) => {
     return 'api/image-gen';
   }
 
+  if(plugin.id === PluginID.mqtt) {
+    return 'api/mqtt';
+  }
+
   return 'api/chat';
 };
 

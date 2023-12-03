@@ -3,20 +3,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
+import type { mqttConnectionType, newMqttConnectionType } from '@/types/data';
+
 import HomeContext from '@/pages/api/home/home.context';
-
-type mqttConnectionType = {
-  id: string;
-  name?: string;
-  description?: string;
-  topic?: string;
-  payload?: string;
-};
-
-type newMqttConnectionType = Pick<
-  mqttConnectionType,
-  'description' | 'topic' | 'payload' | 'name'
->;
 
 const StyledButton = ({
   children,

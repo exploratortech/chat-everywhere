@@ -8,7 +8,7 @@ import {
   shortenMessagesBaseOnTokenLimit,
 } from '@/utils/server/api';
 
-import { Message } from '@/types/chat';
+import { FunctionCall, Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
 import {
@@ -60,6 +60,8 @@ export const OpenAIStream = async (
   openAIPriority: boolean = false,
   userIdentifier?: string,
   eventName?: EventNameTypes | null,
+  functionCalls?: FunctionCall[],
+  functionCallOnTrigger?: (functionName: string) => Promise<boolean>,
 ) => {
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
   const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
@@ -86,7 +88,7 @@ export const OpenAIStream = async (
       const modelName = isGPT4Model
         ? process.env.AZURE_OPENAI_GPT_4_MODEL_NAME
         : process.env.AZURE_OPENAI_MODEL_NAME;
-      let url = `${openAIEndpoint}/openai/deployments/${modelName}/chat/completions?api-version=2023-06-01-preview`;
+      let url = `${openAIEndpoint}/openai/deployments/${modelName}/chat/completions?api-version=2023-07-01-preview`;
       if (openAIEndpoint.includes('openai.com')) {
         url = `${openAIEndpoint}/v1/chat/completions`;
       }
@@ -113,6 +115,7 @@ export const OpenAIStream = async (
         stream: true,
         presence_penalty: 0,
         frequency_penalty: 0,
+        functions: functionCalls,
       };
 
       const requestHeaders: { [header: string]: string } = {
@@ -193,6 +196,9 @@ export const OpenAIStream = async (
           let stop = false;
           let error: any = null;
           let respondMessage = '';
+          let functionCallRequired = false;
+          let functionCallName = '';
+          let functionCallResponseMessageInJsonString = '';
 
           const onParse = (event: ParsedEvent | ReconnectInterval) => {
             if (event.type === 'event') {
@@ -212,7 +218,22 @@ export const OpenAIStream = async (
                     stop = true;
                     return;
                   }
+
+                  if (json.choices[0].delta.function_call) {
+                    const delta = json.choices[0].delta;
+                    functionCallRequired = true;
+                    if (delta.function_call.arguments) {
+                      functionCallResponseMessageInJsonString +=
+                        delta.function_call.arguments;
+                    }
+
+                    if (delta.function_call.name) {
+                      functionCallName = delta.function_call.name;
+                    }
+                  }
+
                   const text = json.choices[0].delta.content;
+
                   buffer.push(encoder.encode(text));
                   respondMessage += text;
                 }
@@ -247,6 +268,32 @@ export const OpenAIStream = async (
           (async function () {
             for await (const chunk of res.body as any) {
               parser.feed(decoder.decode(chunk));
+            }
+
+            if (functionCallRequired) {
+              const functionCallResponseMessageInJson = JSON.parse(
+                functionCallResponseMessageInJsonString,
+              );
+              const functionCallResponseMessage =
+                functionCallResponseMessageInJson.response;
+              buffer.push(encoder.encode(functionCallResponseMessage));
+
+              let functionRunResult = false;
+              if (functionCallOnTrigger) {
+                functionRunResult = await functionCallOnTrigger(
+                  functionCallName,
+                );
+              }
+
+              let functionRunResultMessage = '';
+              if (!functionRunResult) {
+                functionRunResultMessage = `\n\n *Unable to trigger MQTT connection (${functionCallName}), please check your connection or contact support.*`;
+              } else {
+                functionRunResultMessage = `\n\n *MQTT connection (${functionCallName}) triggered successfully.*`;
+              }
+              buffer.push(encoder.encode(functionRunResultMessage));
+
+              respondMessage += functionCallResponseMessage;
             }
 
             await logEvent({

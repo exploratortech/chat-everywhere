@@ -45,6 +45,8 @@ export default async function handler(
     });
   }
 
+  console.log("Sending MQTT message", topic, message);
+
   const client = await mqtt.connectAsync('mqtt://broker.emqx.io');
 
   try {
