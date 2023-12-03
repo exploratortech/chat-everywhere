@@ -1,5 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+import {
+  getAdminSupabaseClient,
+  getUserProfile,
+} from '@/utils/server/supabase';
+
 import mqtt from 'mqtt';
 
 export default async function handler(
@@ -11,6 +17,22 @@ export default async function handler(
       message: 'Method not allowed',
     });
   }
+  const supabase = getAdminSupabaseClient();
+  const userToken = req.headers['user-token'] as string;
+
+  const { data, error } = await supabase.auth.getUser(userToken || '');
+  if (!data || error) {
+    return res.status(401).json({
+      message: 'Unauthorized',
+    });
+  }
+
+  const user = await getUserProfile(data.user.id);
+  if (!user || user.plan === 'free') {
+    return res.status(401).json({
+      message: 'Unauthorized',
+    });
+  }
 
   const { topic, message } = req.body as {
     topic: string;
@@ -18,18 +40,23 @@ export default async function handler(
   };
 
   if (!topic || !message) {
-    res.status(400).json({
+    return res.status(400).json({
       message: 'Missing payload',
     });
   }
 
-  let client = await mqtt.connectAsync('mqtt://broker.emqx.io');
-  let requestResponse = await client.publishAsync(topic, message);
+  const client = await mqtt.connectAsync('mqtt://broker.emqx.io');
 
-  console.log(requestResponse);
+  try {
+    await client.publishAsync(topic, message);
 
-  // serverSideTrackEvent(user.data.user?.id || 'N/A', 'Share to Line');
-  res.status(200).json({
-    message: 'OK',
-  });
+    serverSideTrackEvent(user.id || 'N/A', 'MQTT send request');
+    return res.status(200).json({
+      message: 'OK',
+    });
+  } catch (e) {
+    return res.status(500).json({
+      message: 'Internal Server Error',
+    });
+  }
 }

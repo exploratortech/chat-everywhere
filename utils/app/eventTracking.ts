@@ -51,6 +51,7 @@ export const EventNames = [
   'LINE Notify connected',
   'Share to Line',
   'Disconnect LINE Notify',
+  'MQTT send request',
 
   // V2
   'v2 Retrieve messages',

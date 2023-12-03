@@ -1,4 +1,4 @@
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
 import React, { useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -65,6 +65,7 @@ export default function Settings_MQTT() {
     useState<newMqttConnectionType | null>(null);
 
   const supabase = useSupabaseClient();
+  const session = useSession();
 
   const fetchMQTTConnections = async () => {
     if (!user) return;
@@ -93,7 +94,12 @@ export default function Settings_MQTT() {
   const handleAddConnection = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newConnection) {
-      if (!newConnection.topic || !newConnection.payload || !newConnection.description || !newConnection.name) {
+      if (
+        !newConnection.topic ||
+        !newConnection.payload ||
+        !newConnection.description ||
+        !newConnection.name
+      ) {
         toast.error(t('All fields are required'));
         return;
       }
@@ -160,6 +166,44 @@ export default function Settings_MQTT() {
     }
   };
 
+  const testConnectionOnClick = async (id: string) => {
+    const connectionToTest = mqttConnections.find(
+      (connection) => connection.id === id,
+    );
+
+    if (connectionToTest) {
+      console.log(session?.access_token);
+
+      try {
+        const response = await fetch('/api/mqtt/send-request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'user-token': session?.access_token || '',
+          },
+          body: JSON.stringify({
+            topic: connectionToTest.topic,
+            message: connectionToTest.payload,
+          }),
+        });
+
+        if (response.status === 200) {
+          toast.success(t('Connection tested successfully'));
+          return;
+        }
+
+        if (response.status === 500) {
+          toast.error(t('Internal server error, please try again later'));
+          return;
+        }
+
+        toast.error(t('Connection failed'));
+      } catch (error) {
+        toast.error(t('Connection failed'));
+      }
+    }
+  };
+
   const handleInputChange = (
     id: string,
     key: keyof mqttConnectionType,
@@ -220,10 +264,19 @@ export default function Settings_MQTT() {
               }
               placeholder={t('Payload') || ''}
             />
-            <div>
-              <StyledButton type="submit">
-                {t('Update Connection')}
-              </StyledButton>
+            <div className="flex justify-between w-full">
+              <div className="flex">
+                <StyledButton type="submit">{t('Update')}</StyledButton>
+                <StyledButton
+                  className="ml-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    testConnectionOnClick(connection.id);
+                  }}
+                >
+                  {t('Test request')}
+                </StyledButton>
+              </div>
               <StyledButton
                 className="ml-2 border-red-500 hover:bg-red-500 hover:border-red-500"
                 type="button"
@@ -231,7 +284,7 @@ export default function Settings_MQTT() {
                   connection.id && handleDeleteConnection(connection.id)
                 }
               >
-                {t('Delete Connection')}
+                {t('Delete')}
               </StyledButton>
             </div>
           </form>
