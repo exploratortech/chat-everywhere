@@ -1,4 +1,3 @@
-import { useSession } from '@supabase/auth-helpers-react';
 import { IconCircleCheck } from '@tabler/icons-react';
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -27,8 +26,6 @@ export default function Settings_Account() {
     state: { user, isPaidUser },
     dispatch,
   } = useContext(HomeContext);
-
-  const session = useSession();
 
   const changePasswordOnClick = () => {
     dispatch({ field: 'showSettingsModel', value: false });
