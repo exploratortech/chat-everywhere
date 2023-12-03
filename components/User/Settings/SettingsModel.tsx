@@ -10,6 +10,7 @@ import Settings_Account from './Settings_Account';
 import Settings_App from './Settings_App';
 import Settings_Data from './Settings_Data';
 import Sidebar from './Sidebar';
+import Settings_MQTT from './Settings_MQTT';
 
 type Props = {
   onClose: () => void;
@@ -75,6 +76,7 @@ export default function SettingsModel({ onClose }: Props) {
                     {showing === 'account' && <Settings_Account />}
                     {showing === 'app' && <Settings_App />}
                     {showing === 'data' && <Settings_Data />}
+                    {showing === 'mqtt' && <Settings_MQTT />}
                     <button
                       className="w-max min-h-[34px] p-4 absolute top-0 right-0"
                       onClick={onClose}

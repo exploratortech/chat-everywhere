@@ -4,9 +4,9 @@ create table "public"."mqtt_connections" (
     "created_at" timestamp with time zone not null default now(),
     "topic" text not null,
     "payload" text not null,
-    "description" text not null
+    "description" text not null,
+    "name" text not null
 );
-
 
 alter table "public"."mqtt_connections" enable row level security;
 
@@ -18,26 +18,10 @@ alter table "public"."mqtt_connections" add constraint "mqtt_connections_uuid_fk
 
 alter table "public"."mqtt_connections" validate constraint "mqtt_connections_uuid_fkey";
 
-create policy "Enable delete for users based on user_id"
+create policy "Enable access for users' records"
 on "public"."mqtt_connections"
 as permissive
-for delete
-to public
-using ((auth.uid() = uuid));
-
-
-create policy "Enable insert for users based on user_id"
-on "public"."mqtt_connections"
-as permissive
-for insert
-to public
-with check ((auth.uid() = uuid));
-
-
-create policy "Enable update for users' records"
-on "public"."mqtt_connections"
-as permissive
-for update
+for all
 to public
 using ((auth.uid() = uuid))
 with check ((auth.uid() = uuid));
