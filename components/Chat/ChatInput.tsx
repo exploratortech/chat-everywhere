@@ -55,9 +55,9 @@ export const ChatInput = ({
       currentMessage,
       speechContent,
       isSpeechRecognitionActive,
+      showSettingsModel,
       user,
     },
-
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -275,7 +275,7 @@ export const ChatInput = ({
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
-      if (e.key === '/' && !isFocused) {
+      if (e.key === '/' && !isFocused && !showSettingsModel) {
         e.preventDefault();
         textareaRef.current?.focus();
       }
@@ -286,7 +286,7 @@ export const ChatInput = ({
     return () => {
       window.removeEventListener('keydown', handleGlobalKeyDown);
     };
-  }, [isFocused]);
+  }, [isFocused, showSettingsModel]);
 
   useEffect(() => {
     homeDispatch({
