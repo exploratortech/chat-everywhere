@@ -81,6 +81,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!mqttConnection) return false;
 
+    console.log("Triggering via URL: ", `${getHomeUrl()}/api/mqtt/send-request` );
+    
     const triggerMqttResponse = await fetch(
       `${getHomeUrl()}/api/mqtt/send-request`,
       {
