@@ -70,7 +70,9 @@ const handler = async (req: Request): Promise<Response> => {
     });
   });
 
-  const mqttConnectionOnTrigger = async (connectionName: string): Promise<boolean> => {
+  const mqttConnectionOnTrigger = async (
+    connectionName: string,
+  ): Promise<boolean> => {
     console.log('MQTT connection triggered: ', connectionName);
 
     const mqttConnection = mqttConnectionsData.find(
@@ -79,10 +81,15 @@ const handler = async (req: Request): Promise<Response> => {
         mqttConnection.name.replace(/\s/g, '-') === connectionName,
     );
 
+    console.log('Found mqttConnection: ', mqttConnection);
+
     if (!mqttConnection) return false;
 
-    console.log("Triggering via URL: ", `${getHomeUrl()}/api/mqtt/send-request` );
-    
+    console.log(
+      'Triggering via URL: ',
+      `${getHomeUrl()}/api/mqtt/send-request`,
+    );
+
     const triggerMqttResponse = await fetch(
       `${getHomeUrl()}/api/mqtt/send-request`,
       {
