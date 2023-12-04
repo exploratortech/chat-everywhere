@@ -44,6 +44,7 @@ export default function Settings_MQTT() {
   const { t } = useTranslation('model');
   const {
     state: { user, isPaidUser },
+    // dispatch,
   } = useContext(HomeContext);
   const [loading, setLoading] = useState(true);
   const [mqttConnections, setMqttConnections] = useState<mqttConnectionType[]>(
@@ -78,6 +79,16 @@ export default function Settings_MQTT() {
   useEffect(() => {
     fetchMQTTConnections();
   }, []);
+
+  // useEffect(() => {
+  //   dispatch({
+  //     field: 'user',
+  //     value: {
+  //       ...user,
+  //       hasMqttConnection: mqttConnections.length > 0,
+  //     },
+  //   });
+  // }, [mqttConnections]);
 
   const handleAddConnection = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -313,7 +324,7 @@ export default function Settings_MQTT() {
           }
           placeholder={t('Payload') || ''}
         />
-        <StyledButton type="submit">{t('Add Connection')}</StyledButton>
+        <StyledButton type="submit" disabled={!newConnection}>{t('Add Connection')}</StyledButton>
         <span className="text-xs mt-2">
           {t('Currently only support')}
           <a
