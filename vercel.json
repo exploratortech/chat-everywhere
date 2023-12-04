@@ -12,6 +12,9 @@
   "functions": {
     "pages/api/v2/**/*": {
       "maxDuration": 300
+    },
+    "pages/api/mqtt/**/*": {
+      "maxDuration": 300
     }
   },
   "regions": [
