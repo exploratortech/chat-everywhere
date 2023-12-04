@@ -459,7 +459,8 @@ export const userProfileQuery = async ({
 
   let referrerRecords,
     refereeRecords,
-    isInReferralTrial = false;
+    isInReferralTrial = false,
+    hasMqttConnection = false;
 
   if (userProfile.plan !== 'free') {
     const { data: referralTable, error: refereeError } = await client
@@ -486,9 +487,16 @@ export const userProfileQuery = async ({
 
       return dayjs().isBefore(trailExpirationDate);
     })();
-  }
 
-  console.log("line_access_token: ", userProfile.line_access_token);
+    const {data: mqttConnection, error: mqttConnectionError} = await client
+      .from('mqtt_connections')
+      .select('id')
+      .eq('uuid', userProfile.id);
+    
+    if(mqttConnection && !mqttConnectionError) {
+      hasMqttConnection = true;
+    }
+  }
   
   return {
     id: userProfile.id,
@@ -501,6 +509,7 @@ export const userProfileQuery = async ({
     hasReferee: !!refereeRecords,
     isInReferralTrial: isInReferralTrial,
     isConnectedWithLine: !!userProfile.line_access_token,
+    hasMqttConnection: hasMqttConnection,
   } as UserProfile;
 };
 
