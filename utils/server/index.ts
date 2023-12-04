@@ -281,9 +281,10 @@ export const OpenAIStream = async (
               let functionRunResult = false;
               if (functionCallOnTrigger) {
                 console.log('Triggering function call from OpenAIStream: ', functionCallName);
-                functionRunResult = await functionCallOnTrigger(
-                  functionCallName,
-                );
+                // functionRunResult = await functionCallOnTrigger(
+                //   functionCallName,
+                // );
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 console.log('Finish triggering function call from OpenAIStream: ', functionCallName);
               }
 
