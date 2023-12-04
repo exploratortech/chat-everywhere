@@ -282,11 +282,9 @@ export const OpenAIStream = async (
               let functionRunResult = false;
               if (functionCallOnTrigger) {
                 buffer.push(encoder.encode("[PLACEHOLDER]")); // Stream back place holder for initial response to extent timeout limit
-                console.log('Triggering function call from OpenAIStream: ', functionCallName);
                 functionRunResult = await functionCallOnTrigger(
                   functionCallName,
                 );
-                console.log('Finish triggering function call from OpenAIStream: ', functionCallName);
               }
 
               let functionRunResultMessage = '';

@@ -78,9 +78,6 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: mqttConnectionsData, error: mqttConnectionRequestError } =
       await supabase.from('mqtt_connections').select('*').eq('uuid', user.id);
 
-    console.log('Existing MQTT connections: ', mqttConnectionsData);
-    console.log('Looking for ', connectionName);
-
     if (mqttConnectionRequestError || !mqttConnectionsData) return false;
 
     const mqttConnection = mqttConnectionsData.find(

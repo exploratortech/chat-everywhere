@@ -241,7 +241,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           // We can use this command to trigger the initial stream of Edge function response
           // so we have more than 25 seconds on Vercel Edge network to wait for response
           if (text.includes('[PLACEHOLDER]')) {
-            text = text.replace('[REMOVE_LAST_LINE]', '');
+            text = text.replace('[PLACEHOLDER]', '');
           }
 
           if (isFirst) {
