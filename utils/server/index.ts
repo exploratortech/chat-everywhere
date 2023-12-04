@@ -280,9 +280,11 @@ export const OpenAIStream = async (
 
               let functionRunResult = false;
               if (functionCallOnTrigger) {
+                console.log('Triggering function call from OpenAIStream: ', functionCallName);
                 functionRunResult = await functionCallOnTrigger(
                   functionCallName,
                 );
+                console.log('Finish triggering function call from OpenAIStream: ', functionCallName);
               }
 
               let functionRunResultMessage = '';
