@@ -259,6 +259,8 @@ export const OpenAIStream = async (
               if (error) {
                 controller.error(error);
               } else {
+                console.log("Closing controller");
+                
                 controller.close();
               }
               clearInterval(interval);
@@ -310,7 +312,9 @@ export const OpenAIStream = async (
             stop = true;
           })();
         },
-      });
+      }
+      
+      );
     } catch (error) {
       attempt += 1;
       console.error(error);
