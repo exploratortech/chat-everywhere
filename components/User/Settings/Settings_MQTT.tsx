@@ -44,7 +44,6 @@ export default function Settings_MQTT() {
   const { t } = useTranslation('model');
   const {
     state: { user, isPaidUser },
-    // dispatch,
   } = useContext(HomeContext);
   const [loading, setLoading] = useState(true);
   const [mqttConnections, setMqttConnections] = useState<mqttConnectionType[]>(
@@ -79,16 +78,6 @@ export default function Settings_MQTT() {
   useEffect(() => {
     fetchMQTTConnections();
   }, []);
-
-  // useEffect(() => {
-  //   dispatch({
-  //     field: 'user',
-  //     value: {
-  //       ...user,
-  //       hasMqttConnection: mqttConnections.length > 0,
-  //     },
-  //   });
-  // }, [mqttConnections]);
 
   const handleAddConnection = async (e: React.FormEvent) => {
     e.preventDefault();
