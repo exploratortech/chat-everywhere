@@ -44,7 +44,6 @@ export default function Settings_MQTT() {
   const { t } = useTranslation('model');
   const {
     state: { user, isPaidUser },
-    dispatch: homeDispatch,
   } = useContext(HomeContext);
   const [loading, setLoading] = useState(true);
   const [mqttConnections, setMqttConnections] = useState<mqttConnectionType[]>(
@@ -52,6 +51,7 @@ export default function Settings_MQTT() {
   );
   const [newConnection, setNewConnection] =
     useState<newMqttConnectionType | null>(null);
+  const [sendingTestRequest, setSendingTestRequest] = useState(false);
 
   const supabase = useSupabaseClient();
   const session = useSession();
@@ -68,7 +68,6 @@ export default function Settings_MQTT() {
       if (error) throw error;
       // handle the data as needed
       setMqttConnections(data);
-      console.log(data);
     } catch (error) {
       console.error('Error fetching MQTT connections: ', error);
     } finally {
@@ -161,8 +160,7 @@ export default function Settings_MQTT() {
     );
 
     if (connectionToTest) {
-      console.log(session?.access_token);
-
+      setSendingTestRequest(true);
       try {
         const response = await fetch('/api/mqtt/send-request', {
           method: 'POST',
@@ -178,15 +176,18 @@ export default function Settings_MQTT() {
 
         if (response.status === 200) {
           toast.success(t('Connection tested successfully'));
+          setSendingTestRequest(false);
           return;
         }
 
         if (response.status === 500) {
           toast.error(t('Internal server error, please try again later'));
+          setSendingTestRequest(false);
           return;
         }
 
         toast.error(t('Connection failed'));
+        setSendingTestRequest(false);
       } catch (error) {
         toast.error(t('Connection failed'));
       }
@@ -262,8 +263,9 @@ export default function Settings_MQTT() {
                     e.preventDefault();
                     testConnectionOnClick(connection.id);
                   }}
+                  disabled={sendingTestRequest}
                 >
-                  {t('Test request')}
+                  {sendingTestRequest ? '...' : t('Test request')}
                 </StyledButton>
               </div>
               <StyledButton

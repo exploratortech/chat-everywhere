@@ -102,5 +102,26 @@
   "Integrations (pro plan)": "擴充功能 (Pro版獨享)",
   "Successfully disconnected with LINE": "LINE連接成功取消",
   "Unable to disconnect with LINE, please try again later": "無法取消LINE連接, 請稍後再試",
-  "Disconnect": "取消連接"
+  "Disconnect": "取消連接",
+  "MQTT": "MQTT",
+  "(Advance user only) Send MQTT payload to your IoT devices. Integrate AI into your control network.": "(僅限進階用戶) 發送 MQTT 訊息到您的 IoT 設備。將 AI 整合到您的控制網絡中。",
+  "Loading ...": "載入中...",
+
+  "Edit Connections": "編輯指令",
+  "Name": "名稱",
+  "Description": "指令",
+  "Topic": "主題 (Topic)",
+  "Payload": "訊息 (Payload)",
+  "Update": "更新",
+  "Test request": "發送測試",
+  "Delete": "刪除",
+  "Add Connection": "添加指令",
+  "Currently only support": "目前僅支持",
+  "All fields are required": "所有欄位都是必填的",
+  "Connection added successfully": "指令添加成功",
+  "Error updating MQTT connection, please try again later": "更新 MQTT 指令時出錯，請稍後再試",
+  "Connection updated successfully": "指令更新成功",
+  "Internal server error, please try again later": "服務器錯誤，請稍後再試",
+  "Connection failed": "連接失敗",
+  "Connection tested successfully": "連接測試成功"
 }
