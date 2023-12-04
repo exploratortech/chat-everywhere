@@ -84,6 +84,7 @@ export default function Settings_MQTT() {
     dispatch({
       field: 'user',
       value: {
+        ...user,
         hasMqttConnection: mqttConnections.length > 0,
       },
     });
