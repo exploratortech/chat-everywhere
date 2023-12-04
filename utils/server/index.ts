@@ -255,7 +255,7 @@ export const OpenAIStream = async (
               controller.enqueue(data);
             }
 
-            if (buffer.length === 0 && stop) {
+            if (buffer.length === 0 && stop && !functionCallRequired) {
               if (error) {
                 controller.error(error);
               } else {
