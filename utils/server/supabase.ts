@@ -493,7 +493,7 @@ export const userProfileQuery = async ({
       .select('id')
       .eq('uuid', userProfile.id);
     
-    if(mqttConnection && !mqttConnectionError) {
+    if(mqttConnection && mqttConnection.length > 0 && !mqttConnectionError) {
       hasMqttConnection = true;
     }
   }
