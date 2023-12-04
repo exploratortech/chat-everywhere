@@ -255,12 +255,11 @@ export const OpenAIStream = async (
               controller.enqueue(data);
             }
 
+            // Only close the stream if there is no more data to send, manual stop, or no more function call is pending
             if (buffer.length === 0 && stop && !functionCallRequired) {
               if (error) {
                 controller.error(error);
               } else {
-                console.log("Closing controller");
-                
                 controller.close();
               }
               clearInterval(interval);
@@ -282,6 +281,7 @@ export const OpenAIStream = async (
 
               let functionRunResult = false;
               if (functionCallOnTrigger) {
+                buffer.push(encoder.encode("[PLACEHOLDER]")); // Stream back place holder for initial response to extent timeout limit
                 console.log('Triggering function call from OpenAIStream: ', functionCallName);
                 functionRunResult = await functionCallOnTrigger(
                   functionCallName,
