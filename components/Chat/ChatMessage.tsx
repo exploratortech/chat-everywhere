@@ -59,7 +59,7 @@ export const ChatMessage: FC<Props> = memo(
     const { i18n } = useTranslation();
 
     const {
-      state: { selectedConversation, conversations },
+      state: { selectedConversation, conversations, messageIsStreaming },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -492,14 +492,15 @@ export const ChatMessage: FC<Props> = memo(
                       </>
                     )}
                     {(message.pluginId === PluginID.GPT4 ||
-                      !message.pluginId) && (
-                      <>
-                        <LineShareButton
-                          messageContent={message.content}
-                          className="ml-2"
-                        />
-                      </>
-                    )}
+                      !message.pluginId) &&
+                      !messageIsStreaming && (
+                        <>
+                          <LineShareButton
+                            messageContent={message.content}
+                            className="ml-2"
+                          />
+                        </>
+                      )}
                   </div>
                   {displayFooterButtons && (
                     <CreditCounter pluginId={message.pluginId} />
