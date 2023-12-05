@@ -19,7 +19,11 @@ export const LineConnectionButton = () => {
 
   const lineConnectOnClick = () => {
     const clientId = process.env.NEXT_PUBLIC_LINE_NOTIFY_CLIENT_ID;
-    const redirectUrl = `${getHomeUrl()}/api/webhooks/line-notify-connect`;
+    let redirectUrl = `${getHomeUrl()}/api/webhooks/line-notify-connect`;
+    //TODO: remove beta url hardcoding
+    if(process.env.NEXT_PUBLIC_ENV === 'staging') {
+      redirectUrl = 'https://beta.chateverywhere.app/api/webhooks/line-notify-connect';
+    }
     const lineConnectLink = `https://notify-bot.line.me/oauth/authorize?response_type=code&client_id=${clientId}&scope=notify&state=${session?.access_token}&redirect_uri=${redirectUrl}`;
     window.location.href = lineConnectLink;
   };
