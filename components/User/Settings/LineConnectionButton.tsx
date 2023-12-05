@@ -2,6 +2,7 @@ import { useSession } from '@supabase/auth-helpers-react';
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+import { getHomeUrl } from '@/utils/server/api';
 
 import Image from 'next/image';
 
@@ -18,10 +19,7 @@ export const LineConnectionButton = () => {
 
   const lineConnectOnClick = () => {
     const clientId = process.env.NEXT_PUBLIC_LINE_NOTIFY_CLIENT_ID;
-    const redirectUrl =
-      process.env.NEXT_PUBLIC_ENV === 'production'
-        ? 'https://chateverywhere.app/api/webhooks/line-notify-connect'
-        : `${window.location.protocol}//${window.location.host}/api/webhooks/line-notify-connect`;
+    const redirectUrl = `${getHomeUrl()}/api/webhooks/line-notify-connect`;
     const lineConnectLink = `https://notify-bot.line.me/oauth/authorize?response_type=code&client_id=${clientId}&scope=notify&state=${session?.access_token}&redirect_uri=${redirectUrl}`;
     window.location.href = lineConnectLink;
   };

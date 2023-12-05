@@ -45,7 +45,13 @@ export const llmHandler = async ({
   const { data: mqttConnectionsData, error: mqttConnectionRequestError } =
     await supabase.from('mqtt_connections').select('*').eq('uuid', user.id);
 
-  if (mqttConnectionRequestError || !mqttConnectionsData) {
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('line_access_token')
+    .match({ id: user.id })
+    .single();
+
+  if (mqttConnectionRequestError || !mqttConnectionsData || profileError) {
     onUpdate('[Error]');
     console.error(mqttConnectionRequestError);
     onEnd();
@@ -54,7 +60,7 @@ export const llmHandler = async ({
 
   functionCallsToSend.push(
     ...getFunctionCallsFromMqttConnections(mqttConnectionsData),
-    ...getHelperFunctionCalls(),
+    ...getHelperFunctionCalls(profile.line_access_token),
   );
 
   try {
@@ -97,6 +103,7 @@ export const llmHandler = async ({
           const helperFunctionResult = await triggerHelperFunction(
             functionCall.name,
             functionCall.arguments,
+            user.id,
           );
           onUpdate(`*[Finish executing] ${functionCall.name}*\n`);
 

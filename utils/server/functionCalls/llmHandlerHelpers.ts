@@ -4,9 +4,15 @@ import { getHomeUrl } from '@/utils/server/api';
 import { FunctionCall } from '@/types/chat';
 import { mqttConnectionType } from '@/types/data';
 
-const helperFunctionNames = { weather: 'get-weather' };
+// This object is used as enum
+const helperFunctionNames = {
+  weather: 'get-weather',
+  line: 'send-message-to-line',
+};
 
-export const getHelperFunctionCalls = (): FunctionCall[] => {
+export const getHelperFunctionCalls = (
+  lineAccessToken?: string,
+): FunctionCall[] => {
   const functionCallsToSend: FunctionCall[] = [];
 
   functionCallsToSend.push({
@@ -24,14 +30,35 @@ export const getHelperFunctionCalls = (): FunctionCall[] => {
     },
   });
 
+  if (lineAccessToken) {
+    functionCallsToSend.push({
+      name: helperFunctionNames.line,
+      description: 'When user mention Line, it\'s an messaging app similar to Whatsapp. Use this function to send a message to their Line account upon request.',
+      parameters: {
+        type: 'object',
+        properties: {
+          message: {
+            type: 'string',
+            description:
+              'Message to send to Line, can be in any language or format.',
+          },
+        },
+      },
+    });
+  }
+
   return functionCallsToSend;
 };
 
 export const triggerHelperFunction = async (
   helperFunctionName: string,
   argumentsString: string,
+  userId: string,
 ): Promise<string> => {
+  console.log('Trying to trigger helperFunction: ', helperFunctionName);
+
   switch (helperFunctionName) {
+    // 'get-weather'
     case helperFunctionNames.weather:
       let cityName: string;
       const apiKey = process.env.WEATHER_API_KEY;
@@ -60,6 +87,39 @@ export const triggerHelperFunction = async (
         'Here is the weather information: \n' +
         JSON.stringify(await triggerGetWeatherResponse.json(), null, 2)
       );
+
+    // send-message-to-line'
+    case helperFunctionNames.line:
+      console.log('Sending notification to LINE');
+
+      let messageContent;
+      try {
+        messageContent = JSON.parse(argumentsString).message;
+      } catch (e) {
+        return 'Unable to parse JSON that you provided, please output a valid JSON string.';
+      }
+
+      try {
+        const response = await fetch(`${getHomeUrl()}/api/share-to-line`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userId,
+            authToken: process.env.AUTH_TOKEN,
+            messageContent
+          }),
+        });
+
+        if (response.status !== 200) {
+          return 'Unable to send notification to LINE. Ask user to confirm if they have setup the connection on the setting panel.';
+        } else {
+          return 'Successfully send notification to line';
+        }
+      } catch (e) {
+        return 'Unable to send notification to LINE';
+      }
     default:
       return "I don't know how to do that yet, please try again later.";
   }
