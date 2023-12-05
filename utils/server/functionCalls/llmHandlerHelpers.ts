@@ -40,7 +40,7 @@ export const getHelperFunctionCalls = (
           message: {
             type: 'string',
             description:
-              'Message to send to Line, can be in any language or format.',
+              'Message to send to Line, can be in any language, but not in Markdown format.',
           },
         },
       },
