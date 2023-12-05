@@ -18,7 +18,7 @@ export const getHelperFunctionCalls = (): FunctionCall[] => {
         city: {
           type: 'string',
           description:
-            "City of the weather you want to get, for example, 'Taipei'",
+            "City of the weather you want to get, for example, 'Taipei'. Translate the city name to English before sending it to this function.",
         },
       },
     },
