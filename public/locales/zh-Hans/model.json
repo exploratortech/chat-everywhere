@@ -123,5 +123,7 @@
   "Connection updated successfully": "指令更新成功",
   "Internal server error, please try again later": "服务器错误，请稍后再试",
   "Connection failed": "连接失败",
-  "Connection tested successfully": "连接测试成功"
+  "Connection tested successfully": "连接测试成功",
+  "Dynamic": "自动生成",
+  "Payload Description": "消息 (Payload) 描述"
 }
