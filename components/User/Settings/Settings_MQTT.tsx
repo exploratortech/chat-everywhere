@@ -353,13 +353,31 @@ export default function Settings_MQTT() {
           }
           placeholder={t('Topic') || ''}
         />
-        <StyledInput
-          value={newConnection?.payload || ''}
-          onChange={(e) =>
-            setNewConnection({ ...newConnection, payload: e.target.value })
-          }
-          placeholder={t('Payload') || ''}
-        />
+        <div className="flex justify-between">
+          <StyledToggle
+            checked={newConnection?.dynamicInput || false}
+            onChange={(e) =>
+              setNewConnection({
+                ...newConnection,
+                dynamicInput: e.target.checked,
+              })
+            }
+            className="grow-0 mx-2"
+            placeholder={t('Dynamic') || ''}
+          />
+          <StyledInput
+            value={newConnection?.payload || ''}
+            onChange={(e) =>
+              setNewConnection({ ...newConnection, payload: e.target.value })
+            }
+            placeholder={
+              (newConnection?.dynamicInput
+                ? t('Payload Description')
+                : t('Payload')) || ''
+            }
+            className="grow"
+          />
+        </div>
         <StyledButton type="submit" disabled={!newConnection}>
           {t('Add Connection')}
         </StyledButton>
