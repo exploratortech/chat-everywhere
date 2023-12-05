@@ -4,9 +4,9 @@ import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
 import { AIStream } from '@/utils/server/functionCalls/AIStream';
 import {
   getFunctionCallsFromMqttConnections,
-  triggerMqttConnection,
   getHelperFunctionCalls,
   triggerHelperFunction,
+  triggerMqttConnection,
 } from '@/utils/server/functionCalls/llmHandlerHelpers';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
@@ -23,12 +23,13 @@ type handlerType = {
 const llmHandlerPrompt =
   DEFAULT_SYSTEM_PROMPT +
   `
-Remember. You now have the capability to control real world devices via MQTT connections via function calls.
-Each function is only responsible for one action, for example, turning on a light is one function, turning off a light is another function.
+  Remember. You now have the capability to control real world devices via MQTT connections via function calls (the function name starts with 'mqtt'). 
+  But only limited to the functions that we provided.
+  Each function is only responsible for one action, for example, turning on a light is one function, turning off a light is another function.
 
-If user request to execute multiple functions at the same time, run them one by one. 
-For example, if user request to turn on a light and turn off a light at the same time, run the turn on function first, then run the turn off function.
-`;
+  If user request to execute multiple functions at the same time, run them one by one. 
+  For example, if user request to turn on a light and turn off a light at the same time, run the turn on function first, then run the turn off function.
+  `;
 
 export const llmHandler = async ({
   user,
@@ -91,7 +92,7 @@ export const llmHandler = async ({
             }`,
             pluginId: null,
           });
-        }else{
+        } else {
           onUpdate(`*[Executing] ${functionCall.name}*\n`);
           const helperFunctionResult = await triggerHelperFunction(
             functionCall.name,
@@ -102,9 +103,7 @@ export const llmHandler = async ({
           innerWorkingMessages.push({
             role: 'function',
             name: functionCall.name,
-            content: `function name '${functionCall.name}'s execution result: ${
-              helperFunctionResult
-            }`,
+            content: `function name '${functionCall.name}'s execution result: ${helperFunctionResult}`,
             pluginId: null,
           });
         }
