@@ -27,14 +27,25 @@ const StyledInput = ({
   className = '',
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <div className="flex flex-col my-2">
+  <div className={`flex flex-col my-2 ${className}`}>
     <span className="text-sm mb-1">{props.placeholder}</span>
     <input
-      className={`
-    flex-1 rounded-md border border-neutral-600 bg-[#202123] px-4 py-3 pr-10 text-[14px] leading-3 text-white
-      ${className}
-    `}
+      className="flex-1 rounded-md border border-neutral-600 bg-[#202123] px-4 py-3 pr-10 text-[14px] leading-3 text-white"
       type="text"
+      {...props}
+    />
+  </div>
+);
+
+const StyledToggle = ({
+  className = '',
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement>) => (
+  <div className={`flex flex-col my-2 items-center ${className}`}>
+    <span className="text-sm mb-1">{props.placeholder}</span>
+    <input
+      className="flex-1 rounded-md border border-neutral-600 bg-[#202123] px-4 py-3 pr-10 leading-3 text-white w-3"
+      type="checkbox"
       {...props}
     />
   </div>
@@ -67,7 +78,11 @@ export default function Settings_MQTT() {
         .eq('uuid', user.id);
       if (error) throw error;
       // handle the data as needed
-      setMqttConnections(data);
+      const processedData = data?.map((connection) => ({
+        ...connection,
+        dynamicInput: connection.dynamic_input,
+      }));
+      setMqttConnections(processedData);
     } catch (error) {
       console.error('Error fetching MQTT connections: ', error);
     } finally {
@@ -92,9 +107,16 @@ export default function Settings_MQTT() {
         return;
       }
       try {
+        const dbRecord = {
+          ...newConnection,
+          uuid: user?.id,
+          dynamic_input: newConnection.dynamicInput,
+        };
+        delete dbRecord.dynamicInput;
+
         const { error } = await supabase
           .from('mqtt_connections')
-          .insert([{ ...newConnection, uuid: user?.id }]);
+          .insert([dbRecord]);
         if (error) throw error;
 
         await fetchMQTTConnections();
@@ -127,10 +149,16 @@ export default function Settings_MQTT() {
       (connection) => connection.id === id,
     );
     if (connectionToUpdate) {
+      const dbRecord = {
+        ...connectionToUpdate,
+        dynamic_input: connectionToUpdate.dynamicInput,
+      };
+      delete dbRecord.dynamicInput;
+
       try {
         const { error } = await supabase
           .from('mqtt_connections')
-          .update(connectionToUpdate)
+          .update(dbRecord)
           .match({ id: connectionToUpdate.id })
           .single();
 
@@ -197,7 +225,7 @@ export default function Settings_MQTT() {
   const handleInputChange = (
     id: string,
     key: keyof mqttConnectionType,
-    value: string,
+    value: string | boolean,
   ) => {
     setMqttConnections(
       mqttConnections.map((conn) =>
@@ -247,13 +275,32 @@ export default function Settings_MQTT() {
               }
               placeholder={t('Topic') || ''}
             />
-            <StyledInput
-              value={connection.payload || ''}
-              onChange={(e) =>
-                handleInputChange(connection.id, 'payload', e.target.value)
-              }
-              placeholder={t('Payload') || ''}
-            />
+            <div className="flex justify-between">
+              <StyledToggle
+                checked={connection.dynamicInput || false}
+                onChange={(e) =>
+                  handleInputChange(
+                    connection.id,
+                    'dynamicInput',
+                    e.target.checked,
+                  )
+                }
+                className="grow-0 mx-2"
+                placeholder={t('Dynamic') || ''}
+              />
+              <StyledInput
+                value={connection.payload || ''}
+                onChange={(e) =>
+                  handleInputChange(connection.id, 'payload', e.target.value)
+                }
+                placeholder={
+                  (connection.dynamicInput
+                    ? t('Payload Description')
+                    : t('Payload')) || ''
+                }
+                className="grow"
+              />
+            </div>
             <div className="flex justify-between w-full">
               <div className="flex">
                 <StyledButton type="submit">{t('Update')}</StyledButton>
@@ -313,7 +360,9 @@ export default function Settings_MQTT() {
           }
           placeholder={t('Payload') || ''}
         />
-        <StyledButton type="submit" disabled={!newConnection}>{t('Add Connection')}</StyledButton>
+        <StyledButton type="submit" disabled={!newConnection}>
+          {t('Add Connection')}
+        </StyledButton>
         <span className="text-xs mt-2">
           {t('Currently only support')}
           <a
