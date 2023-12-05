@@ -53,6 +53,7 @@ export const EventNames = [
   'Share to Line',
   'Disconnect LINE Notify',
   'MQTT trigger connection',
+  'Helper function triggered',
 
   // V2
   'v2 Retrieve messages',
@@ -96,6 +97,9 @@ export type PayloadType = {
   v2runId?: string;
   v2ImageGenerationUrl?: string;
   v2ImageGenerationDurationInMS?: number;
+
+  // Integration
+  helperFunctionName?: string;
 };
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';

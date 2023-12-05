@@ -5,6 +5,8 @@ import { AIStream } from '@/utils/server/functionCalls/AIStream';
 import {
   getFunctionCallsFromMqttConnections,
   triggerMqttConnection,
+  getHelperFunctionCalls,
+  triggerHelperFunction,
 } from '@/utils/server/functionCalls/llmHandlerHelpers';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
@@ -51,6 +53,7 @@ export const llmHandler = async ({
 
   functionCallsToSend.push(
     ...getFunctionCallsFromMqttConnections(mqttConnectionsData),
+    ...getHelperFunctionCalls(),
   );
 
   try {
@@ -85,6 +88,22 @@ export const llmHandler = async ({
             name: functionCall.name,
             content: `function name '${functionCall.name}' execution result: ${
               mqttConnectionResult ? 'success' : 'failed'
+            }`,
+            pluginId: null,
+          });
+        }else{
+          onUpdate(`*[Executing] ${functionCall.name}*\n`);
+          const helperFunctionResult = await triggerHelperFunction(
+            functionCall.name,
+            functionCall.arguments,
+          );
+          onUpdate(`*[Finish executing] ${functionCall.name}*\n`);
+
+          innerWorkingMessages.push({
+            role: 'function',
+            name: functionCall.name,
+            content: `function name '${functionCall.name}'s execution result: ${
+              helperFunctionResult
             }`,
             pluginId: null,
           });
