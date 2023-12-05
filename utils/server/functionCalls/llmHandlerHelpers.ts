@@ -1,5 +1,5 @@
-import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getHomeUrl } from '@/utils/app/api';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 
 import { FunctionCall } from '@/types/chat';
 import { mqttConnectionType } from '@/types/data';
@@ -17,7 +17,7 @@ export const getHelperFunctionCalls = (
 
   functionCallsToSend.push({
     name: helperFunctionNames.weather,
-    description: 'Get weather information',
+    description: 'Get weather information of a city from online',
     parameters: {
       type: 'object',
       properties: {
@@ -132,7 +132,12 @@ export const getFunctionCallsFromMqttConnections = (
   const functionCallsToSend: FunctionCall[] = [];
 
   mqttConnectionsData.forEach((mqttConnection: mqttConnectionType) => {
-    if (!mqttConnection.name || !mqttConnection.description) return;
+    if (
+      !mqttConnection.name ||
+      !mqttConnection.description ||
+      mqttConnection.receiver
+    )
+      return;
     functionCallsToSend.push({
       name: `mqtt-${mqttConnection.name.replace(/\s/g, '-')}`,
       description: mqttConnection.description,
@@ -153,6 +158,37 @@ export const getFunctionCallsFromMqttConnections = (
   return functionCallsToSend;
 };
 
+export const getReceiverFunctionCallsFromMqttConnections = (
+  mqttConnectionsData: mqttConnectionType[],
+): FunctionCall[] => {
+  const functionCallsToSend: FunctionCall[] = [];
+
+  mqttConnectionsData.forEach((mqttConnection: mqttConnectionType) => {
+    if (
+      !mqttConnection.name ||
+      !mqttConnection.description ||
+      !mqttConnection.receiver
+    )
+      return;
+
+    functionCallsToSend.push({
+      name: `mqttreceiver-${mqttConnection.name.replace(/\s/g, '-')}`,
+      description: `A user connected MQTT device, you can retrieve information from this device base on the device description: ${mqttConnection.description}`,
+      parameters: {
+        type: 'object',
+        properties: {
+          payload: {
+            type: 'string',
+            description: 'You can ignore this.',
+          },
+        },
+      },
+    });
+  });
+
+  return functionCallsToSend;
+};
+
 export const triggerMqttConnection = async (
   userId: string,
   mqttConnections: mqttConnectionType[],
@@ -161,21 +197,20 @@ export const triggerMqttConnection = async (
 ): Promise<string> => {
   console.log('MQTT connection triggered: ', connectionName);
   let argumentObject;
-  try{
+  try {
     argumentObject = JSON.parse(argumentsString);
-  }catch(e){
-    return "Unable to parse JSON that you provided, please output a valid JSON string.";
+  } catch (e) {
+    return 'Unable to parse JSON that you provided, please output a valid JSON string.';
   }
 
-  
   const mqttConnection = mqttConnections.find(
     (mqttConnection: mqttConnectionType) =>
-    mqttConnection.name &&
-    mqttConnection.name.replace(/\s/g, '-') ===
-    connectionName.replace('mqtt-', ''),
-    );
-    
-    if (!mqttConnection) return "Failed";
+      mqttConnection.name &&
+      mqttConnection.name.replace(/\s/g, '-') ===
+        connectionName.replace('mqtt-', ''),
+  );
+
+  if (!mqttConnection) return 'Failed';
   const triggerMqttResponse = await fetch(
     `${getHomeUrl()}/api/mqtt/send-request`,
     {
@@ -186,15 +221,63 @@ export const triggerMqttConnection = async (
       },
       body: JSON.stringify({
         topic: mqttConnection.topic,
-        message: mqttConnection.dynamicInput ? argumentObject.payload : mqttConnection.payload,
+        message: mqttConnection.dynamicInput
+          ? argumentObject.payload
+          : mqttConnection.payload,
       }),
     },
   );
 
   if (triggerMqttResponse.status !== 200) {
-    return "Unable to trigger MQTT connection, please try again later.";
+    return 'Unable to trigger MQTT connection, please try again later.';
   } else {
     serverSideTrackEvent(userId || 'N/A', 'MQTT trigger connection');
-    return "Successfully triggered MQTT connection, you should see the result in a few seconds.";
+    return 'Successfully triggered MQTT connection, you should see the result in a few seconds.';
+  }
+};
+
+export const retrieveMqttConnectionPayload = async (
+  userId: string,
+  mqttConnections: mqttConnectionType[],
+  connectionName: string,
+): Promise<string> => {
+  console.log('MQTT retrieval connection triggered: ', connectionName);
+
+  const mqttConnection = mqttConnections.find(
+    (mqttConnection: mqttConnectionType) =>
+      mqttConnection.name &&
+      mqttConnection.name.replace(/\s/g, '-') ===
+        connectionName.replace('mqttreceiver-', ''),
+  );
+
+  if (!mqttConnection) return 'Failed';
+
+  const triggerMqttResponse = await fetch(
+    `${getHomeUrl()}/api/mqtt/retrieve-payload`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': process.env.AUTH_TOKEN || '',
+      },
+      body: JSON.stringify({
+        topic: mqttConnection.topic,
+      }),
+    },
+  );
+
+  if (triggerMqttResponse.status !== 200) {
+    return 'Unable to trigger MQTT connection, please try again later.';
+  } else {
+    serverSideTrackEvent(userId || 'N/A', 'MQTT retrieval connection');
+    try {
+      const parsedResponse = await triggerMqttResponse.json();
+      const payload = parsedResponse.payload;
+      console.log(parsedResponse);
+      
+      return payload;
+    } catch (e) {
+      return 'Unable to parse the payload, please try again later.';
+    }
   }
 };

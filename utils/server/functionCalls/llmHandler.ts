@@ -5,6 +5,8 @@ import { AIStream } from '@/utils/server/functionCalls/AIStream';
 import {
   getFunctionCallsFromMqttConnections,
   getHelperFunctionCalls,
+  getReceiverFunctionCallsFromMqttConnections,
+  retrieveMqttConnectionPayload,
   triggerHelperFunction,
   triggerMqttConnection,
 } from '@/utils/server/functionCalls/llmHandlerHelpers';
@@ -24,6 +26,8 @@ const llmHandlerPrompt =
   DEFAULT_SYSTEM_PROMPT +
   `
   Remember. You now have the capability to control real world devices via MQTT connections via function calls (the function name starts with 'mqtt'). 
+  Also you can retrieve real world data via function calls (the function name starts with 'mqttreceiver-').
+
   But only limited to the functions that we provided.
   Each function is only responsible for one action, for example, turning on a light is one function, turning off a light is another function.
 
@@ -67,6 +71,7 @@ export const llmHandler = async ({
 
   functionCallsToSend.push(
     ...getFunctionCallsFromMqttConnections(processedMqttConnections),
+    ...getReceiverFunctionCallsFromMqttConnections(processedMqttConnections),
     ...getHelperFunctionCalls(profile.line_access_token),
   );
 
@@ -89,7 +94,10 @@ export const llmHandler = async ({
 
       // Function call required, executing
       for (const functionCall of requestedFunctionCalls) {
+        let executionResult: string;
+
         if (functionCall.name.startsWith('mqtt-')) {
+          // Send payload to MQTT connection
           onUpdate(`*[Executing] ${functionCall.name}*\n`);
           const mqttConnectionResult = await triggerMqttConnection(
             user.id,
@@ -98,13 +106,19 @@ export const llmHandler = async ({
             functionCall.arguments,
           );
           onUpdate(`*[Finish executing] ${functionCall.name}*\n`);
-          innerWorkingMessages.push({
-            role: 'function',
-            name: functionCall.name,
-            content: `function name '${functionCall.name}' execution result: ${mqttConnectionResult}`,
-            pluginId: null,
-          });
+          executionResult = mqttConnectionResult;
+        } else if (functionCall.name.startsWith('mqttreceiver-')) {
+          // Retrieve payload from MQTT connection
+          onUpdate(`*[Executing] ${functionCall.name}*\n`);
+          const mqttConnectionResult = await retrieveMqttConnectionPayload(
+            user.id,
+            processedMqttConnections,
+            functionCall.name,
+          );
+          onUpdate(`*[Finish executing] ${functionCall.name}*\n`);
+          executionResult = mqttConnectionResult;
         } else {
+          // Execute helper function
           onUpdate(`*[Executing] ${functionCall.name}*\n`);
           const helperFunctionResult = await triggerHelperFunction(
             functionCall.name,
@@ -112,14 +126,15 @@ export const llmHandler = async ({
             user.id,
           );
           onUpdate(`*[Finish executing] ${functionCall.name}*\n`);
-
-          innerWorkingMessages.push({
-            role: 'function',
-            name: functionCall.name,
-            content: `function name '${functionCall.name}'s execution result: ${helperFunctionResult}`,
-            pluginId: null,
-          });
+          executionResult = helperFunctionResult;
         }
+
+        innerWorkingMessages.push({
+          role: 'function',
+          name: functionCall.name,
+          content: `function name '${functionCall.name}'s execution result: ${executionResult}`,
+          pluginId: null,
+        });
       }
     }
   } catch (err) {

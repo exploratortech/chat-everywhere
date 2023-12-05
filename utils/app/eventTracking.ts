@@ -54,6 +54,7 @@ export const EventNames = [
   'Disconnect LINE Notify',
   'MQTT trigger connection',
   'Helper function triggered',
+  'MQTT retrieval connection',
 
   // V2
   'v2 Retrieve messages',
@@ -68,7 +69,7 @@ export const EventNames = [
 
   // Error tracing
   'Error',
-  'v2 Error'
+  'v2 Error',
 ];
 
 export type EventNameTypes = (typeof EventNames)[number];
@@ -103,8 +104,7 @@ export type PayloadType = {
 };
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
-export const enableTracking =
-  process.env.NEXT_PUBLIC_ENV === 'production';
+export const enableTracking = process.env.NEXT_PUBLIC_ENV === 'production';
 
 export const initializePosthog = () => {
   if (!enableTracking) return;
