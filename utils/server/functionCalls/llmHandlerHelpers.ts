@@ -33,7 +33,8 @@ export const getHelperFunctionCalls = (
   if (lineAccessToken) {
     functionCallsToSend.push({
       name: helperFunctionNames.line,
-      description: 'When user mention Line, it\'s an messaging app similar to Whatsapp. Use this function to send a message to their Line account upon request.',
+      description:
+        "When user mention Line, it's an messaging app similar to Whatsapp. Use this function to send a message to their Line account upon request.",
       parameters: {
         type: 'object',
         properties: {
@@ -108,7 +109,7 @@ export const triggerHelperFunction = async (
           body: JSON.stringify({
             userId: userId,
             authToken: process.env.AUTH_TOKEN,
-            messageContent
+            messageContent,
           }),
         });
 
@@ -138,10 +139,11 @@ export const getFunctionCallsFromMqttConnections = (
       parameters: {
         type: 'object',
         properties: {
-          response: {
+          payload: {
             type: 'string',
-            description:
-              "Response to user that you' already triggered the function execution, they should see the response in a few seconds",
+            description: mqttConnection.dynamicInput
+              ? `Payload to send to the device, make sure you are complying with the description here: ${mqttConnection.payload}`
+              : "Response to user that you' already triggered the function execution, they should see the response in a few seconds",
           },
         },
       },
@@ -155,18 +157,25 @@ export const triggerMqttConnection = async (
   userId: string,
   mqttConnections: mqttConnectionType[],
   connectionName: string,
-): Promise<boolean> => {
+  argumentsString: string,
+): Promise<string> => {
   console.log('MQTT connection triggered: ', connectionName);
+  let argumentObject;
+  try{
+    argumentObject = JSON.parse(argumentsString);
+  }catch(e){
+    return "Unable to parse JSON that you provided, please output a valid JSON string.";
+  }
 
+  
   const mqttConnection = mqttConnections.find(
     (mqttConnection: mqttConnectionType) =>
-      mqttConnection.name &&
-      mqttConnection.name.replace(/\s/g, '-') ===
-        connectionName.replace('mqtt-', ''),
-  );
-
-  if (!mqttConnection) return false;
-
+    mqttConnection.name &&
+    mqttConnection.name.replace(/\s/g, '-') ===
+    connectionName.replace('mqtt-', ''),
+    );
+    
+    if (!mqttConnection) return "Failed";
   const triggerMqttResponse = await fetch(
     `${getHomeUrl()}/api/mqtt/send-request`,
     {
@@ -177,15 +186,15 @@ export const triggerMqttConnection = async (
       },
       body: JSON.stringify({
         topic: mqttConnection.topic,
-        message: mqttConnection.payload,
+        message: mqttConnection.dynamicInput ? argumentObject.payload : mqttConnection.payload,
       }),
     },
   );
 
   if (triggerMqttResponse.status !== 200) {
-    return false;
+    return "Unable to trigger MQTT connection, please try again later.";
   } else {
     serverSideTrackEvent(userId || 'N/A', 'MQTT trigger connection');
-    return true;
+    return "Successfully triggered MQTT connection, you should see the result in a few seconds.";
   }
 };

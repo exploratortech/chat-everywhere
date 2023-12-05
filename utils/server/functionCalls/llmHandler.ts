@@ -58,8 +58,15 @@ export const llmHandler = async ({
     return;
   }
 
+  const processedMqttConnections = mqttConnectionsData.map(
+    (mqttConnection) => ({
+      ...mqttConnection,
+      dynamicInput: mqttConnection.dynamic_input,
+    }),
+  );
+
   functionCallsToSend.push(
-    ...getFunctionCallsFromMqttConnections(mqttConnectionsData),
+    ...getFunctionCallsFromMqttConnections(processedMqttConnections),
     ...getHelperFunctionCalls(profile.line_access_token),
   );
 
@@ -86,16 +93,15 @@ export const llmHandler = async ({
           onUpdate(`*[Executing] ${functionCall.name}*\n`);
           const mqttConnectionResult = await triggerMqttConnection(
             user.id,
-            mqttConnectionsData,
+            processedMqttConnections,
             functionCall.name,
+            functionCall.arguments,
           );
           onUpdate(`*[Finish executing] ${functionCall.name}*\n`);
           innerWorkingMessages.push({
             role: 'function',
             name: functionCall.name,
-            content: `function name '${functionCall.name}' execution result: ${
-              mqttConnectionResult ? 'success' : 'failed'
-            }`,
+            content: `function name '${functionCall.name}' execution result: ${mqttConnectionResult}`,
             pluginId: null,
           });
         } else {
