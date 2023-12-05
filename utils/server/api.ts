@@ -17,18 +17,6 @@ const getEncodingInstance = async () => {
   );
 };
 
-export const getHomeUrl = (): string => {
-  let homeUrl = process.env.NODE_ENV === 'development'
-    ? `http://localhost:3000`
-    : `https://${process.env.VERCEL_URL}`;
-
-  homeUrl =
-    process.env.NEXT_PUBLIC_ENV === 'production'
-      ? 'https://chateverywhere.app'
-      : homeUrl;
-  return homeUrl;
-};
-
 export const shortenMessagesBaseOnTokenLimit = async (
   prompt: string,
   messages: Message[],

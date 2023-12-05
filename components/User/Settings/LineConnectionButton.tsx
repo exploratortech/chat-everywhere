@@ -2,7 +2,7 @@ import { useSession } from '@supabase/auth-helpers-react';
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { getHomeUrl } from '@/utils/server/api';
+import { getHomeUrl } from '@/utils/app/api';
 
 import Image from 'next/image';
 

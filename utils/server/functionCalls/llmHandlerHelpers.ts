@@ -1,5 +1,5 @@
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
-import { getHomeUrl } from '@/utils/server/api';
+import { getHomeUrl } from '@/utils/app/api';
 
 import { FunctionCall } from '@/types/chat';
 import { mqttConnectionType } from '@/types/data';

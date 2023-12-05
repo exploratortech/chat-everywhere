@@ -64,3 +64,14 @@ export async function fetchShareableConversation(
     throw new Error('Failed to fetch the conversation');
   }
 }
+
+export const getHomeUrl = (): string => {
+  let homeUrl = process.env.NODE_ENV === 'development'
+    ? `http://localhost:3000`
+    : `https://${process.env.VERCEL_URL}`;
+
+  if(process.env.NEXT_PUBLIC_ENV === 'production') {
+    homeUrl = 'https://chateverywhere.app';
+  }
+  return homeUrl;
+};
