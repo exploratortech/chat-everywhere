@@ -19,19 +19,24 @@ export default async function handler(
   }
   const supabase = getAdminSupabaseClient();
   const userToken = req.headers['user-token'] as string;
+  const authToken = req.headers['auth-token'] as string;
 
-  const { data, error } = await supabase.auth.getUser(userToken || '');
-  if (!data || error) {
-    return res.status(401).json({
-      message: 'Unauthorized',
-    });
-  }
+  let user = null;
 
-  const user = await getUserProfile(data.user.id);
-  if (!user || user.plan === 'free') {
-    return res.status(401).json({
-      message: 'Unauthorized',
-    });
+  if (!authToken || authToken !== process.env.AUTH_TOKEN) {
+    const { data, error } = await supabase.auth.getUser(userToken || '');
+    if (!data || error) {
+      return res.status(401).json({
+        message: 'Unauthorized',
+      });
+    }
+
+    user = await getUserProfile(data.user.id);
+    if (!user || user.plan === 'free') {
+      return res.status(401).json({
+        message: 'Unauthorized',
+      });
+    }
   }
 
   const { topic, message } = req.body as {
@@ -45,14 +50,14 @@ export default async function handler(
     });
   }
 
-  console.log("Sending MQTT message", topic, message);
+  console.log('Sending MQTT message', topic, message);
 
   const client = await mqtt.connectAsync('mqtt://broker.emqx.io');
 
   try {
     await client.publishAsync(topic, message);
 
-    serverSideTrackEvent(user.id || 'N/A', 'MQTT send request');
+    serverSideTrackEvent(user?.id || 'N/A', 'MQTT send request');
     return res.status(200).json({
       message: 'OK',
     });

@@ -18,7 +18,7 @@ const getEncodingInstance = async () => {
 };
 
 export const getHomeUrl = (): string => {
-  let homeUrl = !process.env.NEXT_PUBLIC_ENV
+  let homeUrl = process.env.NODE_ENV === 'development'
     ? `http://localhost:3000`
     : `https://${process.env.VERCEL_URL}`;
 

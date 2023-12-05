@@ -49,7 +49,7 @@ export class OpenAIError extends Error {
 
 // Only keep role and content keys
 export const normalizeMessages = (messages: Message[]) =>
-  messages.map(({ role, content }) => ({ role, content }));
+  messages.map(({ role, content, name }) => ({ role, content, name }));
 
 export const OpenAIStream = async (
   model: OpenAIModel,
@@ -360,7 +360,7 @@ export const truncateLogMessage = (message: string) =>
 
 // Returns a list of shuffled endpoints and keys. They should be used based
 // on their order in the list.
-const getRandomOpenAIEndpointsAndKeys = (
+export const getRandomOpenAIEndpointsAndKeys = (
   includeGPT4: boolean = false,
   openAIPriority: boolean,
 ): [(string | undefined)[], (string | undefined)[]] => {

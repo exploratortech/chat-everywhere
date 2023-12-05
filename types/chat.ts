@@ -4,6 +4,7 @@ import { PluginID } from './plugin';
 export interface Message {
   role: Role;
   content: string;
+  name?: string;
   pluginId:
     | PluginID.LANGCHAIN_CHAT
     | PluginID.GPT4
@@ -15,7 +16,7 @@ export interface Message {
   showHintForLargeContextResponse?: boolean; // Use to indicate if the response can be improved by using a gpt3.5 16k model
 }
 
-export type Role = 'assistant' | 'user';
+export type Role = 'assistant' | 'user' | 'function';
 
 export interface ChatBody {
   model: OpenAIModel;
