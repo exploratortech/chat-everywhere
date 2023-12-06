@@ -107,7 +107,7 @@
   "(Advance user only) Send MQTT payload to your IoT devices. Integrate AI into your control network.": "(僅限進階用戶) 發送 MQTT 訊息到您的 IoT 設備。將 AI 整合到您的控制網絡中。",
   "Loading ...": "載入中...",
 
-  "Edit Connections": "編輯指令",
+  "Connections": "指令集",
   "Name": "名稱",
   "Description": "指令簡介",
   "Topic": "主題 (Topic)",
