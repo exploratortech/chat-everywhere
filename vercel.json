@@ -14,7 +14,7 @@
       "maxDuration": 300
     },
     "pages/api/mqtt/**/*": {
-      "maxDuration": 300
+      "maxDuration": 120
     }
   },
   "regions": [
