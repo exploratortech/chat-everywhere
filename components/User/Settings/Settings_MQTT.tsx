@@ -76,7 +76,7 @@ export default function Settings_MQTT() {
         const dbRecord = {
           ...newConnection,
           uuid: user?.id,
-          dynamic_input: newConnection.dynamicInput,
+          dynamic_input: newConnection.dynamicInput || false,
         };
         delete dbRecord.dynamicInput;
 
