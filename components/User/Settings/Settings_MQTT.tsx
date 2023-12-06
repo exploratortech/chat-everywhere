@@ -7,6 +7,7 @@ import type { mqttConnectionType, newMqttConnectionType } from '@/types/data';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import { MQTTConnectionForm } from './MQTTConnectionForm';
 import {
   StyledButton,
   StyledInput,
@@ -25,6 +26,9 @@ export default function Settings_MQTT() {
   const [newConnection, setNewConnection] =
     useState<newMqttConnectionType | null>(null);
   const [sendingTestRequest, setSendingTestRequest] = useState(false);
+  const [connectionBeingEdited, setConnectionBeingEdited] = useState<
+    string | null
+  >(null);
 
   const supabase = useSupabaseClient();
   const session = useSession();
@@ -138,6 +142,7 @@ export default function Settings_MQTT() {
           ),
         );
         toast.success(t('Connection updated successfully'));
+        setConnectionBeingEdited(null);
       } catch (error) {
         console.error('Error updating MQTT connection: ', error);
       }
@@ -249,102 +254,20 @@ export default function Settings_MQTT() {
 
       {loading && <p>{t('Loading ...')}</p>}
 
-      <h2 className="font-bold mb-2">{t('Edit Connections')}</h2>
+      <h2 className="font-bold mb-2">{t('Connections')}</h2>
       {mqttConnections.map((connection) => (
-        <div key={connection.id} className="mb-4">
-          <form
-            onSubmit={(e) => handleUpdateConnection(connection.id, e)}
-            className="flex flex-col"
-          >
-            <div className="flex justify-between">
-              <StyledInput
-                value={connection.name || ''}
-                onChange={(e) =>
-                  handleInputChange(connection.id, 'name', e.target.value)
-                }
-                placeholder={t('Name') || ''}
-              />
-              <StyledToggle
-                checked={connection?.receiver || false}
-                onChange={(e) =>
-                  handleInputChange(connection.id, 'receiver', e.target.checked)
-                }
-                className="grow-0 mx-2"
-                placeholder={t('Receiver') || ''}
-              />
-            </div>
-            <StyledInput
-              value={connection.description || ''}
-              onChange={(e) =>
-                handleInputChange(connection.id, 'description', e.target.value)
-              }
-              placeholder={t('Description') || ''}
-            />
-            <StyledInput
-              value={connection.topic || ''}
-              onChange={(e) =>
-                handleInputChange(connection.id, 'topic', e.target.value)
-              }
-              placeholder={t('Topic') || ''}
-            />
-            {!connection.receiver && (
-              <div className="flex justify-between">
-                <StyledToggle
-                  checked={connection.dynamicInput || false}
-                  onChange={(e) =>
-                    handleInputChange(
-                      connection.id,
-                      'dynamicInput',
-                      e.target.checked,
-                    )
-                  }
-                  className="grow-0 mx-2"
-                  placeholder={t('Dynamic') || ''}
-                />
-                <StyledInput
-                  value={connection.payload || ''}
-                  onChange={(e) =>
-                    handleInputChange(connection.id, 'payload', e.target.value)
-                  }
-                  placeholder={
-                    (connection.dynamicInput
-                      ? t('Payload Description')
-                      : t('Payload')) || ''
-                  }
-                  className="grow"
-                />
-              </div>
-            )}
-            <div className="flex justify-between w-full">
-              <div className="flex">
-                <StyledButton type="submit">{t('Update')}</StyledButton>
-                <StyledButton
-                  className="ml-2"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if(connection.receiver){
-                      testReceiverOnClick(connection.id);
-                    }else{
-                      testConnectionOnClick(connection.id);
-                    }
-                  }}
-                  disabled={sendingTestRequest}
-                >
-                  {sendingTestRequest ? '...' : t('Test')}
-                </StyledButton>
-              </div>
-              <StyledButton
-                className="ml-2 border-red-500 hover:bg-red-500 hover:border-red-500"
-                type="button"
-                onClick={() =>
-                  connection.id && handleDeleteConnection(connection.id)
-                }
-              >
-                {t('Delete')}
-              </StyledButton>
-            </div>
-          </form>
-        </div>
+        <MQTTConnectionForm
+          key={connection.id}
+          editing={connectionBeingEdited === connection.id}
+          connection={connection}
+          handleInputChange={handleInputChange}
+          handleUpdateConnection={handleUpdateConnection}
+          testReceiverOnClick={testReceiverOnClick}
+          testConnectionOnClick={testConnectionOnClick}
+          sendingTestRequest={sendingTestRequest}
+          handleDeleteConnection={handleDeleteConnection}
+          editButtonOnClick={setConnectionBeingEdited}
+        />
       ))}
 
       <hr className="my-4" />

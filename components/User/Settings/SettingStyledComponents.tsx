@@ -5,7 +5,7 @@ export const StyledButton = ({
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     className={`
-    rounded-md border border-white/20 p-3 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10
+    rounded-md border border-white/20 p-2 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10
       ${className}
     `}
     {...props}

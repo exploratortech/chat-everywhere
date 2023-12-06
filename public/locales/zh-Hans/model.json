@@ -125,5 +125,9 @@
   "Connection failed": "连接失败",
   "Connection tested successfully": "连接测试成功",
   "Dynamic": "自动生成",
-  "Payload Description": "消息 (Payload) 描述"
+  "Payload Description": "消息 (Payload) 描述",
+  "Receiver": "接收器",
+  "Cancel": "取消",
+  "Edit": "编辑",
+  "Test": "测试"
 }
