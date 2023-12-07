@@ -487,8 +487,6 @@ export const userProfileQuery = async ({
       return dayjs().isBefore(trailExpirationDate);
     })();
   }
-
-  console.log("line_access_token: ", userProfile.line_access_token);
   
   return {
     id: userProfile.id,
