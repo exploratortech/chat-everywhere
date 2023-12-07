@@ -1,6 +1,6 @@
 // This endpoint will retrieve the last and only retained message on the topic
-
 import { NextApiRequest, NextApiResponse } from 'next';
+
 import {
   getAdminSupabaseClient,
   getUserProfile,
@@ -63,11 +63,10 @@ export default async function handler(
       });
     });
 
-    await new Promise(resolve => setTimeout(resolve, 350));
+    await new Promise((resolve) => setTimeout(resolve, 350));
     client.end();
-    console.log("Payload before sending: ", payload);
 
-    if (payload) {      
+    if (payload) {
       return res.status(200).json({
         payload: payload,
       });
@@ -76,7 +75,6 @@ export default async function handler(
         payload: 'No payload received',
       });
     }
-
   } catch (e) {
     return res.status(500).json({
       payload: 'Internal Server Error',
