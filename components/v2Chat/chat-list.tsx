@@ -45,7 +45,7 @@ export function ChatList({
 
   return (
     <div
-      className="relative max-w-3xl overflow-auto flex flex-col-reverse h-[calc(99vh-4rem)] pb-[6rem]"
+      className="relative max-w-3xl overflow-auto flex flex-col-reverse h-[calc(99vh-4rem)] pb-[6rem] justify-start"
       id="scrollableDiv"
     >
       <InfiniteScroll
@@ -56,6 +56,7 @@ export function ChatList({
         hasMore={!allMessagesAreLoaded}
         loader={<ConversationLoadingSpinner className="mb-3" />}
         scrollableTarget="scrollableDiv"
+        scrollThreshold={0.6}
       >
         {messages.map((message, index) => (
           <div

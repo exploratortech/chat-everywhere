@@ -252,7 +252,6 @@ const V2Chat = () => {
         );
       }
       setSuggestions(suggestions);
-      console.log('Received suggestions: ', suggestions);
 
       setTimeout(() => {
         scrollToButton();
@@ -298,12 +297,12 @@ const V2Chat = () => {
     } else {
       tempSelectedConversation = selectedConversation;
       setMessages([
-        ...messages,
         {
           id: 'temp-id',
           role: 'user',
           content: message.content,
         },
+        ...messages,
       ]);
     }
 

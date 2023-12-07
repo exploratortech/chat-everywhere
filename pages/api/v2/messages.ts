@@ -25,7 +25,7 @@ export type RequestType =
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
-const DEFAULT_MESSAGE_LIMIT = 10;
+const DEFAULT_MESSAGE_LIMIT = 30;
 const ASSISTANT_ID = process.env.OPENAI_V2_ASSISTANT_ID;
 
 const handler = async (req: Request): Promise<Response> => {
