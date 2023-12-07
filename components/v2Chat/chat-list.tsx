@@ -3,7 +3,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { type MessageType } from '@/types/v2Chat/chat';
 
 import { ChatMessage } from '@/components/v2Chat/chat-message';
-import { ImageContainer } from '@/components/v2Chat/image-container';
+import ImageContainer from '@/components/v2Chat/image-container';
 import { ImageGenerationSpinner } from '@/components/v2Chat/image-generation-spinner';
 import {
   Alert,
