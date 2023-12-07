@@ -45,7 +45,7 @@ export function ChatList({
 
   return (
     <div
-      className="relative max-w-3xl overflow-auto flex flex-col-reverse h-[calc(99vh-4rem)] pb-[6rem] justify-start"
+      className="relative w-screen pl-4 md:pl-0 md:max-w-3xl overflow-auto flex flex-col-reverse h-[calc(99vh-4rem)] pb-[6rem] justify-start"
       id="scrollableDiv"
     >
       <InfiniteScroll
@@ -61,7 +61,7 @@ export function ChatList({
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`h-full w-full ${
+            className={`h-full w-[90vw] md:w-[44rem] max-screen ${
               index === messages.length - 1 ? 'mt-10' : ''
             }`}
           >
