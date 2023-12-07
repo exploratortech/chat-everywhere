@@ -7,7 +7,10 @@ import type { mqttConnectionType, newMqttConnectionType } from '@/types/data';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import { MQTTConnectionForm, extractAlphabetsAndSpace } from './MQTTConnectionForm';
+import {
+  MQTTConnectionForm,
+  extractAlphabetsAndSpace,
+} from './MQTTConnectionForm';
 import {
   StyledButton,
   StyledInput,
@@ -18,6 +21,7 @@ export default function Settings_MQTT() {
   const { t } = useTranslation('model');
   const {
     state: { user, isPaidUser },
+    dispatch,
   } = useContext(HomeContext);
   const [loading, setLoading] = useState(true);
   const [mqttConnections, setMqttConnections] = useState<mqttConnectionType[]>(
@@ -59,6 +63,13 @@ export default function Settings_MQTT() {
   useEffect(() => {
     fetchMQTTConnections();
   }, []);
+
+  useEffect(() => {
+    dispatch({
+      field: 'hasMqttConnection',
+      value: mqttConnections.length > 0,
+    });
+  }, [mqttConnections]);
 
   const handleAddConnection = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -277,7 +288,10 @@ export default function Settings_MQTT() {
           <StyledInput
             value={newConnection?.name || ''}
             onChange={(e) =>
-              setNewConnection({ ...newConnection, name: extractAlphabetsAndSpace(e.target.value) })
+              setNewConnection({
+                ...newConnection,
+                name: extractAlphabetsAndSpace(e.target.value),
+              })
             }
             placeholder={t('Name (English only)') || ''}
             className="grow"

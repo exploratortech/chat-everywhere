@@ -431,6 +431,7 @@ const Home = () => {
         .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
+          dispatch({ field: 'hasMqttConnection', value: userProfile.hasMqttConnection });
           dispatch({
             field: 'user',
             value: {
@@ -445,8 +446,7 @@ const Home = () => {
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
               isInReferralTrial: userProfile.isInReferralTrial,
-              isConnectedWithLine: userProfile.isConnectedWithLine,
-              hasMqttConnection: userProfile.hasMqttConnection,
+              isConnectedWithLine: userProfile.isConnectedWithLine
             },
           });
           // Set authenticated user context for Application Insights

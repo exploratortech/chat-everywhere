@@ -11,7 +11,7 @@ const ModeSelector = () => {
   const { t } = useTranslation('model');
 
   const {
-    state: { currentMessage, isPaidUser, user },
+    state: { currentMessage, isPaidUser, user, hasMqttConnection },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -83,7 +83,7 @@ const ModeSelector = () => {
               >
                 {t('AI Image')}
               </option>
-              {user?.hasMqttConnection && (
+              {hasMqttConnection && (
                 <option
                   value={PluginID.mqtt}
                   className="dark:bg-[#343541] dark:text-white text-yellow-600"
