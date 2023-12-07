@@ -84,9 +84,12 @@ const V2Chat = () => {
 
     if (!conversation) return;
     setSelectedConversation(conversation);
-
+    
     // For new conversation, give it a few seconds for the new messages to added into the database at Openai
-    if(messages.length !== 1) fetchMessages(conversation.threadId);
+    if(messages.length !== 1) {
+      setChatMessagesLoading(true);
+      fetchMessages(conversation.threadId);
+    }
   }, [selectedConversationId]);
 
   useEffect(() => {
