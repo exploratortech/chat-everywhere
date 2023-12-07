@@ -7,7 +7,7 @@ import type { mqttConnectionType, newMqttConnectionType } from '@/types/data';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import { MQTTConnectionForm } from './MQTTConnectionForm';
+import { MQTTConnectionForm, extractAlphabetsAndSpace } from './MQTTConnectionForm';
 import {
   StyledButton,
   StyledInput,
@@ -277,9 +277,9 @@ export default function Settings_MQTT() {
           <StyledInput
             value={newConnection?.name || ''}
             onChange={(e) =>
-              setNewConnection({ ...newConnection, name: e.target.value })
+              setNewConnection({ ...newConnection, name: extractAlphabetsAndSpace(e.target.value) })
             }
-            placeholder={t('Name') || ''}
+            placeholder={t('Name (English only)') || ''}
             className="grow"
           />
           <StyledToggle

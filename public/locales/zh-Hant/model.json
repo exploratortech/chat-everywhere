@@ -109,6 +109,7 @@
 
   "Connections": "指令集",
   "Name": "名稱",
+  "Name (English only)": "名稱 (僅限英文)",
   "Description": "指令簡介",
   "Topic": "主題 (Topic)",
   "Payload": "訊息 (Payload)",
