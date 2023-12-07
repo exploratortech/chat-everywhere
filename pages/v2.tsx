@@ -357,15 +357,15 @@ const V2Chat = () => {
           conversations={conversations}
           profileOnClick={() => setOpenPaymentDialog(true)}
         />
-        <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto">
+        <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out">
           <div
-            className={`flex justify-center ${
+            className={`flex flex-col items-center ${
               messages.length === 0 ? 'h-screen' : ''
             }`}
           >
             {chatMessagesLoading && <ConversationLoadingSpinner />}
             {messages.length > 0 ? (
-              <div>
+              <>
                 <ChatList
                   messages={messages}
                   scrollToButton={scrollToButton}
@@ -380,7 +380,7 @@ const V2Chat = () => {
                   ref={chatScrollAnchorRef}
                   trackVisibility={chatResponseLoading}
                 />
-              </div>
+              </>
             ) : (
               !chatMessagesLoading && <EmptyScreen />
             )}
