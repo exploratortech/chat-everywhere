@@ -274,7 +274,7 @@ export const retrieveMqttConnectionPayload = async (
       const parsedResponse = await triggerMqttResponse.json();
       const payload = parsedResponse.payload;
       console.log(parsedResponse);
-      
+
       return payload;
     } catch (e) {
       return 'Unable to parse the payload, please try again later.';

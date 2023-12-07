@@ -60,8 +60,6 @@ export const OpenAIStream = async (
   openAIPriority: boolean = false,
   userIdentifier?: string,
   eventName?: EventNameTypes | null,
-  functionCalls?: FunctionCall[],
-  functionCallOnTrigger?: (functionName: string) => Promise<boolean>,
 ) => {
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
   const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
@@ -88,7 +86,7 @@ export const OpenAIStream = async (
       const modelName = isGPT4Model
         ? process.env.AZURE_OPENAI_GPT_4_MODEL_NAME
         : process.env.AZURE_OPENAI_MODEL_NAME;
-      let url = `${openAIEndpoint}/openai/deployments/${modelName}/chat/completions?api-version=2023-07-01-preview`;
+      let url = `${openAIEndpoint}/openai/deployments/${modelName}/chat/completions?api-version=2023-06-01-preview`;
       if (openAIEndpoint.includes('openai.com')) {
         url = `${openAIEndpoint}/v1/chat/completions`;
       }
@@ -115,7 +113,6 @@ export const OpenAIStream = async (
         stream: true,
         presence_penalty: 0,
         frequency_penalty: 0,
-        functions: functionCalls,
       };
 
       const requestHeaders: { [header: string]: string } = {
@@ -219,19 +216,6 @@ export const OpenAIStream = async (
                     return;
                   }
 
-                  if (json.choices[0].delta.function_call) {
-                    const delta = json.choices[0].delta;
-                    functionCallRequired = true;
-                    if (delta.function_call.arguments) {
-                      functionCallResponseMessageInJsonString +=
-                        delta.function_call.arguments;
-                    }
-
-                    if (delta.function_call.name) {
-                      functionCallName = delta.function_call.name;
-                    }
-                  }
-
                   const text = json.choices[0].delta.content;
 
                   buffer.push(encoder.encode(text));
@@ -255,8 +239,7 @@ export const OpenAIStream = async (
               controller.enqueue(data);
             }
 
-            // Only close the stream if there is no more data to send, manual stop, or no more function call is pending
-            if (buffer.length === 0 && stop && !functionCallRequired) {
+            if (buffer.length === 0 && stop) {
               if (error) {
                 controller.error(error);
               } else {
@@ -271,34 +254,6 @@ export const OpenAIStream = async (
               parser.feed(decoder.decode(chunk));
             }
 
-            if (functionCallRequired) {
-              const functionCallResponseMessageInJson = JSON.parse(
-                functionCallResponseMessageInJsonString,
-              );
-              const functionCallResponseMessage =
-                functionCallResponseMessageInJson.response;
-              buffer.push(encoder.encode(functionCallResponseMessage));
-
-              let functionRunResult = false;
-              if (functionCallOnTrigger) {
-                buffer.push(encoder.encode("[PLACEHOLDER]")); // Stream back place holder for initial response to extent timeout limit
-                functionRunResult = await functionCallOnTrigger(
-                  functionCallName,
-                );
-              }
-
-              let functionRunResultMessage = '';
-              if (!functionRunResult) {
-                functionRunResultMessage = `\n\n *Unable to trigger MQTT connection (${functionCallName}), please check your connection or contact support.*`;
-              } else {
-                functionRunResultMessage = `\n\n *MQTT connection (${functionCallName}) triggered successfully.*`;
-              }
-              buffer.push(encoder.encode(functionRunResultMessage));
-
-              respondMessage += functionCallResponseMessage;
-              functionCallRequired = false;
-            }
-
             await logEvent({
               userIdentifier,
               eventName,
@@ -310,9 +265,7 @@ export const OpenAIStream = async (
             stop = true;
           })();
         },
-      }
-      
-      );
+      });
     } catch (error) {
       attempt += 1;
       console.error(error);
