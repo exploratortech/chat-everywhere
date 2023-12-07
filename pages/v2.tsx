@@ -30,6 +30,7 @@ import { EmptyScreen } from '@/components/v2Chat/empty-screen';
 import { Header } from '@/components/v2Chat/header';
 import { InitialScreen } from '@/components/v2Chat/initial-screen';
 import { PaymentDialog } from '@/components/v2Chat/payment-dialog';
+import { ConversationLoadingSpinner } from '@/components/v2Chat/ui/conversation-loading-spinner';
 import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
 
 const V2Chat = () => {
@@ -45,6 +46,8 @@ const V2Chat = () => {
     useState<ConversationType | null>(null);
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [messages, setMessages] = useState<MessageType[]>([]);
+  const [allMessagesAreLoaded, setAllMessagesAreLoaded] =
+    useState<boolean>(false);
   const [chatMessagesLoading, setChatMessagesLoading] =
     useState<boolean>(false);
   const [chatResponseLoading, setChatResponseLoading] =
@@ -162,11 +165,13 @@ const V2Chat = () => {
 
     const data = (await response.json()) as RetrieveMessageResponseType;
     const messages: MessageType[] = data.messages.map((messageItem) => ({
+      id: messageItem.id,
       role: messageItem.role,
       content: messageItem.content[0].text.value,
       metadata: messageItem.metadata,
     }));
     setMessages(messages);
+    setAllMessagesAreLoaded(false);
 
     // Check if requires polling on conversation status
     if (data.requiresPolling) {
@@ -176,6 +181,45 @@ const V2Chat = () => {
       setChatMessagesLoading(false);
       setChatResponseLoading(false);
       setEnablePullingForUpdates(false);
+    }
+  };
+
+  const fetchMoreMessages = async (latestMessageId: string) => {
+    if (!user || !session || !latestMessageId) return;
+
+    const response = await fetch('/api/v2/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'user-token': session.access_token,
+      },
+      body: JSON.stringify({
+        requestType: 'retrieve messages',
+        conversationId: selectedConversation?.threadId || '',
+        latestMessageId,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(response);
+      toast.error('Unable to load messages. Please try again later.');
+      return;
+    }
+
+    const data = (await response.json()) as RetrieveMessageResponseType;
+    const newMessages: MessageType[] = data.messages.map((messageItem) => ({
+      id: messageItem.id,
+      role: messageItem.role,
+      content: messageItem.content[0].text.value,
+      metadata: messageItem.metadata,
+    }));
+
+    if (newMessages.length !== 0) {
+      setMessages([...messages, ...newMessages]);
+      return;
+    } else {
+      setAllMessagesAreLoaded(true);
+      return;
     }
   };
 
@@ -258,6 +302,7 @@ const V2Chat = () => {
       setMessages([
         ...messages,
         {
+          id: 'temp-id',
           role: 'user',
           content: message.content,
         },
@@ -315,11 +360,11 @@ const V2Chat = () => {
           conversations={conversations}
           profileOnClick={() => setOpenPaymentDialog(true)}
         />
-        <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto pt-5">
-          <div className="pb-[120px] mt-12 mb-14">
+        <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto">
+          <div className="pb-[120px] mt-0 mb-14 flex justify-center">
             {chatMessagesLoading && <ConversationLoadingSpinner />}
             {messages.length > 0 ? (
-              <>
+              <div>
                 <ChatList
                   messages={messages}
                   scrollToButton={scrollToButton}
@@ -327,12 +372,14 @@ const V2Chat = () => {
                   onMessageSent={onMessageSent}
                   isChatResponseLoading={chatResponseLoading}
                   chatMessagesLoading={chatMessagesLoading}
+                  onLoadMore={fetchMoreMessages}
+                  allMessagesAreLoaded={allMessagesAreLoaded}
                 />
                 <ChatScrollAnchor
                   ref={chatScrollAnchorRef}
                   trackVisibility={chatResponseLoading}
                 />
-              </>
+              </div>
             ) : (
               !chatMessagesLoading && <EmptyScreen />
             )}
@@ -353,28 +400,5 @@ const V2Chat = () => {
     </TooltipProvider>
   );
 };
-
-const ConversationLoadingSpinner = () => (
-  <div className="relative mx-auto max-w-2xl px-4 h-full">
-    <div className="flex justify-center items-center h-full mt-5">
-      <svg
-        aria-hidden="true"
-        className="w-10 h-10 me-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600 mr-2"
-        viewBox="0 0 100 101"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-          fill="currentColor"
-        />
-        <path
-          d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-          fill="currentFill"
-        />
-      </svg>
-    </div>
-  </div>
-);
 
 export default appWithTranslation(V2Chat);

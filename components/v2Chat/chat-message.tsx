@@ -23,7 +23,7 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
 
   return (
     <div
-      className={cn('group relative mb-4 flex items-start md:-ml-12')}
+      className={cn('group relative mb-4 flex items-start mr-10')}
       {...props}
       onMouseOver={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -38,7 +38,7 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
       >
         {message.role === 'user' ? <IconUser /> : <IconOpenAI />}
       </div>
-      <div className="flex-1 px-1 ml-4 space-y-2 overflow-hidden">
+      <div className="flex px-1 ml-4 space-y-2 overflow-hidden">
         <MemoizedReactMarkdown
           className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
           remarkPlugins={[remarkGfm, remarkMath]}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { type MessageType } from '@/types/v2Chat/chat';
 
@@ -10,6 +10,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from '@/components/v2Chat/ui/alert';
+import { ConversationLoadingSpinner } from '@/components/v2Chat/ui/conversation-loading-spinner';
 import { Separator } from '@/components/v2Chat/ui/separator';
 
 export interface ChatList {
@@ -19,6 +20,8 @@ export interface ChatList {
   onMessageSent: (message: MessageType) => void;
   isChatResponseLoading: boolean;
   chatMessagesLoading: boolean;
+  onLoadMore: (firstMessageId: string) => void;
+  allMessagesAreLoaded: boolean;
 }
 
 export function ChatList({
@@ -28,48 +31,55 @@ export function ChatList({
   onMessageSent,
   isChatResponseLoading,
   chatMessagesLoading,
+  onLoadMore,
+  allMessagesAreLoaded,
 }: ChatList) {
-  useEffect(() => {
-    if(isChatResponseLoading) return;
-
-    setTimeout(() => {
-      scrollToButton();
-    }, 250);
-  }, [messages]);
-
   if (!messages.length) {
     return null;
   }
 
   if (chatMessagesLoading) {
-    return <></>
+    return <></>;
   }
 
   return (
-    <div className="relative mx-auto max-w-2xl px-4 h-full">
-      {messages.map((message, index) => (
-        <div key={index}>
-          <ChatMessage message={message} />
-          {index < messages.length - 1 && (
-            <Separator className="my-4 md:my-8" />
-          )}
-          {message.metadata?.imageGenerationStatus === 'in progress' && (
-            <ImageGenerationSpinner />
-          )}
-          {message.metadata?.imageGenerationStatus === 'completed' &&
-            message.metadata?.imageUrl && (
-              <ImageContainer url={message.metadata.imageUrl} />
+    <div
+      className="relative max-w-2xl h-full overflow-auto flex flex-col-reverse"
+      id="scrollableDiv"
+      style={{ height: '82vh' }}
+    >
+      <InfiniteScroll
+        dataLength={messages.length}
+        next={() => onLoadMore(messages[messages.length - 1].id || '')}
+        style={{ display: 'flex', flexDirection: 'column-reverse' }}
+        inverse={true}
+        hasMore={!allMessagesAreLoaded}
+        loader={<ConversationLoadingSpinner className="mb-3" />}
+        scrollableTarget="scrollableDiv"
+      >
+        {messages.map((message, index) => (
+          <div key={index} className="h-full w-full">
+            <ChatMessage message={message} />
+            {index !== 0 && <Separator className="my-4 md:my-8" />}
+            {message.metadata?.imageGenerationStatus === 'in progress' && (
+              <ImageGenerationSpinner />
             )}
-          {message.metadata?.imageGenerationStatus === 'failed' && (
-            <Alert variant="destructive" className="max-w-xs mb-6">
-              <AlertTitle>Error!</AlertTitle>
-              <AlertDescription>
-                Unable to generate image, please try again
-              </AlertDescription>
-            </Alert>
-          )}
-        </div>
-      ))}
+            {message.metadata?.imageGenerationStatus === 'completed' &&
+              message.metadata?.imageUrl && (
+                <ImageContainer url={message.metadata.imageUrl} />
+              )}
+            {message.metadata?.imageGenerationStatus === 'failed' && (
+              <Alert variant="destructive" className="max-w-xs mb-6">
+                <AlertTitle>Error!</AlertTitle>
+                <AlertDescription>
+                  Unable to generate image, please try again
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        ))}
+      </InfiniteScroll>
+
       <div>
         {suggestions.length > 0 && !isChatResponseLoading && (
           <div className="flex flex-wrap justify-center items-center">

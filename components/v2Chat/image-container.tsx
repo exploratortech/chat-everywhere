@@ -71,7 +71,7 @@ export const ImageContainer = ({ url }: { url: string }) => {
           </div>
         </DialogContent>
       </Dialog>
-      <div className="max-w-xs mb-5">
+      <div className="max-w-xs mb-5 ml-12">
         <Card
           className="p-3 cursor-pointer"
           onClick={() => setShowDialog(true)}
