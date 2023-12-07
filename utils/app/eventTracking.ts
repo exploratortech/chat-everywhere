@@ -45,6 +45,7 @@ export const EventNames = [
 
   // Payment
   'Payment success',
+  'New paying customer',
 
   // Integration
   'LINE share button clicked',
@@ -87,6 +88,9 @@ export type PayloadType = {
   currentConversation?: string;
   messageToSend?: string;
   errorMessage?: string;
+
+  // Payment
+  paymentDetail?: string;
 
   // V2
   v2ThreadId?: string;

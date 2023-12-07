@@ -1,3 +1,5 @@
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+
 import { PluginID } from '@/types/plugin';
 
 import {
@@ -55,6 +57,13 @@ export default async function handleCheckoutSessionCompleted(
     email,
     sinceDate,
   );
+
+  serverSideTrackEvent(userId || 'N/A', 'New paying customer', {
+    paymentDetail:
+      !session.amount_subtotal || session.amount_subtotal <= 50000
+        ? 'One-time'
+        : 'Monthly',
+  });
 
   // Update user account by User id
   if (userId) {
