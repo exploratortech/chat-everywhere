@@ -12,6 +12,7 @@ import {
 } from '@/components/v2Chat/ui/alert';
 import { ConversationLoadingSpinner } from '@/components/v2Chat/ui/conversation-loading-spinner';
 import { Separator } from '@/components/v2Chat/ui/separator';
+import { SuggestionContainer } from '@/components/v2Chat/ui/suggestion-container';
 
 export interface ChatList {
   messages: MessageType[];
@@ -44,9 +45,8 @@ export function ChatList({
 
   return (
     <div
-      className="relative max-w-2xl h-full overflow-auto flex flex-col-reverse"
+      className="relative max-w-3xl overflow-auto flex flex-col-reverse h-[calc(99vh-4rem)] pb-[6rem]"
       id="scrollableDiv"
-      style={{ height: '82vh' }}
     >
       <InfiniteScroll
         dataLength={messages.length}
@@ -81,30 +81,16 @@ export function ChatList({
                 </AlertDescription>
               </Alert>
             )}
+            {index === 0 && (
+              <SuggestionContainer
+                suggestions={suggestions}
+                isChatResponseLoading={isChatResponseLoading}
+                onMessageSent={onMessageSent}
+              />
+            )}
           </div>
         ))}
       </InfiniteScroll>
-
-      <div>
-        {suggestions.length > 0 && !isChatResponseLoading && (
-          <div className="flex flex-wrap justify-center items-center">
-            {suggestions.map((suggestion, index) => (
-              <button
-                key={index}
-                className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md m-2"
-                onClick={() =>
-                  onMessageSent({
-                    role: 'user',
-                    content: suggestion,
-                  })
-                }
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }

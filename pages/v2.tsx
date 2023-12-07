@@ -229,7 +229,7 @@ const V2Chat = () => {
 
     if (
       messages.length === 0 ||
-      messages[messages.length - 1].role !== 'assistant'
+      messages[0].role !== 'assistant'
     )
       return;
 
@@ -256,6 +256,8 @@ const V2Chat = () => {
         );
       }
       setSuggestions(suggestions);
+      console.log("Received suggestions: ", suggestions);
+      
       setTimeout(() => {
         scrollToButton();
       }, 500);
@@ -361,7 +363,7 @@ const V2Chat = () => {
           profileOnClick={() => setOpenPaymentDialog(true)}
         />
         <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto">
-          <div className="pb-[120px] mt-0 mb-14 flex justify-center">
+          <div className="flex justify-center">
             {chatMessagesLoading && <ConversationLoadingSpinner />}
             {messages.length > 0 ? (
               <div>
