@@ -58,7 +58,12 @@ export function ChatList({
         scrollableTarget="scrollableDiv"
       >
         {messages.map((message, index) => (
-          <div key={index} className="h-full w-full">
+          <div
+            key={index}
+            className={`h-full w-full ${
+              index === messages.length - 1 ? 'mt-10' : ''
+            }`}
+          >
             <ChatMessage message={message} />
             {index !== 0 && <Separator className="my-4 md:my-8" />}
             {message.metadata?.imageGenerationStatus === 'in progress' && (
