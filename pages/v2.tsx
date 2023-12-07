@@ -83,9 +83,10 @@ const V2Chat = () => {
     );
 
     if (!conversation) return;
-    setChatMessagesLoading(true);
     setSelectedConversation(conversation);
-    fetchMessages(conversation.threadId);
+
+    // For new conversation, give it a few seconds for the new messages to added into the database at Openai
+    if(messages.length !== 1) fetchMessages(conversation.threadId);
   }, [selectedConversationId]);
 
   useEffect(() => {
@@ -108,7 +109,7 @@ const V2Chat = () => {
     fetchSuggestions();
   }, [messages]);
 
-  const scrollToButton = () => {
+  const scrollToBottom = () => {
     if (!chatScrollAnchorRef.current) return;
     interface ChatScrollAnchorMethods {
       scrollToBottom: () => void;
@@ -254,7 +255,7 @@ const V2Chat = () => {
       setSuggestions(suggestions);
 
       setTimeout(() => {
-        scrollToButton();
+        scrollToBottom();
       }, 500);
     } catch (error) {
       setSuggestions([]);
@@ -271,7 +272,13 @@ const V2Chat = () => {
     let tempSelectedConversation: ConversationType;
 
     if (!selectedConversation) {
-      setChatMessagesLoading(true);
+      setMessages([
+        {
+          id: 'temp-id',
+          role: 'user',
+          content: message.content,
+        },
+      ]);
       const response = await fetch('/api/v2/messages', {
         method: 'POST',
         headers: {
@@ -285,8 +292,9 @@ const V2Chat = () => {
       });
 
       if (!response.ok) {
-        console.error(await response.text());
+        console.error(await response.text(), response.status);
         toast.error('Unable to send message. Please try again later.');
+        setChatResponseLoading(false);
         return;
       }
 
@@ -322,6 +330,7 @@ const V2Chat = () => {
     if (response.status !== 200) {
       toast.error('Unable to send message. Please try again later.');
       console.error(response);
+      setChatResponseLoading(false);
       return;
     }
 
@@ -368,7 +377,7 @@ const V2Chat = () => {
               <>
                 <ChatList
                   messages={messages}
-                  scrollToButton={scrollToButton}
+                  scrollToButton={scrollToBottom}
                   suggestions={suggestions}
                   onMessageSent={onMessageSent}
                   isChatResponseLoading={chatResponseLoading}
