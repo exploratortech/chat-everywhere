@@ -227,11 +227,7 @@ const V2Chat = () => {
     if (!user || !session || enablePullingForUpdates || chatResponseLoading)
       return;
 
-    if (
-      messages.length === 0 ||
-      messages[0].role !== 'assistant'
-    )
-      return;
+    if (messages.length === 0 || messages[0].role !== 'assistant') return;
 
     const response = await fetch('/api/v2/suggestions', {
       method: 'POST',
@@ -256,8 +252,8 @@ const V2Chat = () => {
         );
       }
       setSuggestions(suggestions);
-      console.log("Received suggestions: ", suggestions);
-      
+      console.log('Received suggestions: ', suggestions);
+
       setTimeout(() => {
         scrollToButton();
       }, 500);
@@ -363,7 +359,11 @@ const V2Chat = () => {
           profileOnClick={() => setOpenPaymentDialog(true)}
         />
         <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out overflow-y-auto">
-          <div className="flex justify-center">
+          <div
+            className={`flex justify-center ${
+              messages.length === 0 ? 'h-screen' : ''
+            }`}
+          >
             {chatMessagesLoading && <ConversationLoadingSpinner />}
             {messages.length > 0 ? (
               <div>
