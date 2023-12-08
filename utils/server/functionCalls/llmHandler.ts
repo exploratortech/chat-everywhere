@@ -138,7 +138,7 @@ export const llmHandler = async ({
       }
     }
   } catch (err) {
-    onUpdate('[ERROR]');
+    onUpdate('*[ERROR]*');
     console.error(err);
   } finally {
     onEnd();

@@ -54,8 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
       }, 45);
 
-      sendToUser('');
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      sendToUser('[PLACEHOLDER]');
 
       llmHandler({
         user,

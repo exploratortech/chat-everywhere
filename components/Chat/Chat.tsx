@@ -250,7 +250,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               ...updatedConversation.messages,
               {
                 role: 'assistant',
-                content: removeRedundantTempHtmlString(chunkValue),
+                content: removeRedundantTempHtmlString(text),
                 largeContextResponse,
                 showHintForLargeContextResponse,
                 pluginId: plugin?.id || null,
