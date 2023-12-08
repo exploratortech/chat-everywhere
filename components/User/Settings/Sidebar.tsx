@@ -109,15 +109,6 @@ export default function Sidebar({
       </a>
     ));
 
-  const enableMQTT = () => {
-    const enableEmails = [
-      'jack@exploratorlabs.com',
-      'pos_soft_king@yahoo.com.tw',
-    ];
-
-    return enableEmails.includes(user?.email || '');
-  };
-
   return (
     <div className={`${className} flex justify-between flex-col`}>
       <div>
@@ -128,8 +119,7 @@ export default function Sidebar({
       </div>
 
       <div className="flex flex-col">
-        {/* TODO: Remove after testing on production */}
-        {!disableFooterItems && enableMQTT() && getRenderItems(footerItems)}
+        {!disableFooterItems && getRenderItems(footerItems)}
         <a
           href="#"
           className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"
