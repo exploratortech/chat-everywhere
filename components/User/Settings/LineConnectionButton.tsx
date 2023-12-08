@@ -10,7 +10,7 @@ import HomeContext from '@/pages/api/home/home.context';
 
 export const LineConnectionButton = () => {
   const {
-    state: { user, isPaidUser },
+    state: { user, isPaidUser, isConnectedWithLine },
     dispatch,
   } = useContext(HomeContext);
   const { t } = useTranslation('model');
@@ -42,10 +42,8 @@ export const LineConnectionButton = () => {
     }
 
     dispatch({
-      field: 'user',
-      value: {
-        isConnectedWithLine: false,
-      },
+      field: 'isConnectedWithLine',
+      value: false,
     });
     toast.success('Successfully disconnected with LINE');
     setDisconnecting(false);
@@ -59,7 +57,7 @@ export const LineConnectionButton = () => {
         width="50"
         height="50"
       />
-      {user?.isConnectedWithLine ? (
+      {isConnectedWithLine ? (
         <div className="flex items-center">
           <p className="text-xs text-neutral-400 cursor-default">
             {t('Connected with LINE')}
