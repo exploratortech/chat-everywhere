@@ -487,7 +487,7 @@ export const userProfileQuery = async ({
 
       return dayjs().isBefore(trailExpirationDate);
     })();
-
+    
     const {data: mqttConnection, error: mqttConnectionError} = await client
       .from('mqtt_connections')
       .select('id')

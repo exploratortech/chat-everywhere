@@ -2,7 +2,7 @@ import { Badge } from './ui/badge';
 
 export function EmptyScreen() {
   return (
-    <div className="mx-auto max-w-2xl px-4">
+    <div className="mx-auto max-w-2xl px-4 mt-20">
       <div className="rounded-lg border bg-background p-8">
         <div className="flex align-middle mb-1">
           <h1 className="text-lg font-semibold">

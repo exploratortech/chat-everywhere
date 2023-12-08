@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import toast from 'react-hot-toast';
 
 import { Button } from '@/components/v2Chat/ui/button';
@@ -9,7 +9,7 @@ import { IconDownload, IconOpenInNewTab } from '@/components/v2Chat/ui/icons';
 
 import dayjs from 'dayjs';
 
-export const ImageContainer = ({ url }: { url: string }) => {
+const ImageContainer = ({ url }: { url: string }) => {
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
 
@@ -71,7 +71,7 @@ export const ImageContainer = ({ url }: { url: string }) => {
           </div>
         </DialogContent>
       </Dialog>
-      <div className="max-w-xs mb-5">
+      <div className="max-w-xs mb-5 ml-12">
         <Card
           className="p-3 cursor-pointer"
           onClick={() => setShowDialog(true)}
@@ -82,3 +82,5 @@ export const ImageContainer = ({ url }: { url: string }) => {
     </>
   );
 };
+
+export default memo(ImageContainer);
