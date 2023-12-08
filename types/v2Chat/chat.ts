@@ -23,6 +23,7 @@ export type MessageMetaDataType = {
 };
 
 export type MessageType = {
+  id?: string;
   role: string;
   content: string;
   metadata?: MessageMetaDataType;

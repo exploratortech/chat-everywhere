@@ -2,7 +2,7 @@ import React from 'react';
 
 export function ImageGenerationSpinner() {
   return (
-    <div className="max-w-md space-y-2 text-gray-500 list-inside dark:text-gray-400">
+    <div className="max-w-md space-y-2 text-gray-500 list-inside dark:text-gray-400 ml-12">
       <div className="flex items-center">
         <svg
           aria-hidden="true"

@@ -25,7 +25,7 @@ export type RequestType =
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
-const DEFAULT_MESSAGE_LIMIT = 50;
+const DEFAULT_MESSAGE_LIMIT = 30;
 const ASSISTANT_ID = process.env.OPENAI_V2_ASSISTANT_ID;
 
 const handler = async (req: Request): Promise<Response> => {
@@ -43,7 +43,6 @@ const handler = async (req: Request): Promise<Response> => {
     const {
       conversationId,
       latestMessageId,
-      beforeMessageId,
       requestType,
       messageContent,
     } = (await req.json()) as {
@@ -63,8 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
         return await retrieveMessages(
           user.user.id,
           conversationId,
-          latestMessageId,
-          beforeMessageId,
+          latestMessageId
         );
       case 'send message':
         serverSideTrackEvent(userProfile.id, 'v2 Send message');
@@ -109,7 +107,6 @@ const retrieveMessages = async (
   userId: string,
   conversationId: string,
   latestMessageId?: string,
-  beforeMessageId?: string,
 ) => {
   const supabase = getAdminSupabaseClient();
 
@@ -122,12 +119,10 @@ const retrieveMessages = async (
     return new Response("Conversation doesn't exist.", { status: 404 });
   }
 
-  let openAiUrl = `https://api.openai.com/v1/threads/${conversationId}/messages?limit=${DEFAULT_MESSAGE_LIMIT}&order=asc&`;
+  let openAiUrl = `https://api.openai.com/v1/threads/${conversationId}/messages?limit=${DEFAULT_MESSAGE_LIMIT}&order=desc&`;
 
   if (latestMessageId) {
     openAiUrl += `after=${latestMessageId}`;
-  } else if (beforeMessageId) {
-    openAiUrl += `before=${beforeMessageId}`;
   }
 
   const messagesResponse = await authorizedOpenAiRequest(openAiUrl, {
