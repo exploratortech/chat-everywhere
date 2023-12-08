@@ -1,10 +1,10 @@
 import {
+  IconBuildingBroadcastTower,
   IconFileCode,
   IconLogin,
   IconLogout,
   IconSettings,
   IconUser,
-  IconBuildingBroadcastTower
 } from '@tabler/icons-react';
 import React, { cloneElement, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,7 +27,10 @@ type sideBarItemType = {
   callback: () => void;
 };
 
-export default function Sidebar({ className = '', disableFooterItems = true }: Props) {
+export default function Sidebar({
+  className = '',
+  disableFooterItems = true,
+}: Props) {
   const {
     state: { showing },
     dispatch,
@@ -106,6 +109,15 @@ export default function Sidebar({ className = '', disableFooterItems = true }: P
       </a>
     ));
 
+  const enableMQTT = () => {
+    const enableEmails = [
+      'jack@exploratorlabs.com',
+      'pos_soft_king@yahoo.com.tw',
+    ];
+
+    return enableEmails.includes(user?.email || '');
+  };
+
   return (
     <div className={`${className} flex justify-between flex-col`}>
       <div>
@@ -116,7 +128,8 @@ export default function Sidebar({ className = '', disableFooterItems = true }: P
       </div>
 
       <div className="flex flex-col">
-        {!disableFooterItems && getRenderItems(footerItems)}
+        {/* TODO: Remove after testing on production */}
+        {!disableFooterItems && enableMQTT() && getRenderItems(footerItems)}
         <a
           href="#"
           className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"
