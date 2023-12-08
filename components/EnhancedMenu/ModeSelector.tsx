@@ -1,7 +1,6 @@
 import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { trackEvent } from '@/utils/app/eventTracking';
 import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 
 import { PluginID } from '@/types/plugin';
@@ -12,7 +11,7 @@ const ModeSelector = () => {
   const { t } = useTranslation('model');
 
   const {
-    state: { currentMessage, user, isPaidUser },
+    state: { currentMessage, isPaidUser, user, hasMqttConnection },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -84,6 +83,14 @@ const ModeSelector = () => {
               >
                 {t('AI Image')}
               </option>
+              {hasMqttConnection && (
+                <option
+                  value={PluginID.mqtt}
+                  className="dark:bg-[#343541] dark:text-white text-yellow-600"
+                >
+                  {t('MQTT')}
+                </option>
+              )}
             </>
           )}
         </select>

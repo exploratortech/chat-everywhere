@@ -4,17 +4,19 @@ import { PluginID } from './plugin';
 export interface Message {
   role: Role;
   content: string;
+  name?: string;
   pluginId:
     | PluginID.LANGCHAIN_CHAT
     | PluginID.GPT4
     | PluginID.IMAGE_GEN
     | PluginID.IMAGE_TO_PROMPT
+    | PluginID.mqtt
     | null;
   largeContextResponse?: boolean; // Use to indicate if the response is from a gpt3.5 16k model
   showHintForLargeContextResponse?: boolean; // Use to indicate if the response can be improved by using a gpt3.5 16k model
 }
 
-export type Role = 'assistant' | 'user';
+export type Role = 'assistant' | 'user' | 'function';
 
 export interface ChatBody {
   model: OpenAIModel;
@@ -41,4 +43,10 @@ export interface Conversation {
   // Image generations parameters
   imageStyle?: string;
   imageQuality?: string;
+}
+
+export interface FunctionCall {
+  name: string;
+  description: string;
+  parameters: any;
 }

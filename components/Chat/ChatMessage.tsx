@@ -59,7 +59,7 @@ export const ChatMessage: FC<Props> = memo(
     const { i18n } = useTranslation();
 
     const {
-      state: { selectedConversation, conversations },
+      state: { selectedConversation, conversations, messageIsStreaming },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
@@ -301,7 +301,7 @@ export const ChatMessage: FC<Props> = memo(
         style={{ overflowWrap: 'anywhere' }}
       >
         <div className="relative m-auto flex gap-4 py-4 text-base md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
-          <div className="min-w-[40px] text-center font-bold flex flex-col justify-start">
+          <div className="min-w-[40px] text-center font-bold flex flex-col justify-start flex-wrap content-center">
             {message.role === 'assistant' ? (
               message.pluginId ? (
                 getPluginIcon(message.pluginId, 28)
@@ -492,14 +492,15 @@ export const ChatMessage: FC<Props> = memo(
                       </>
                     )}
                     {(message.pluginId === PluginID.GPT4 ||
-                      !message.pluginId) && (
-                      <>
-                        <LineShareButton
-                          messageContent={message.content}
-                          className="ml-2"
-                        />
-                      </>
-                    )}
+                      !message.pluginId) &&
+                      !messageIsStreaming && (
+                        <>
+                          <LineShareButton
+                            messageContent={message.content}
+                            className="ml-2"
+                          />
+                        </>
+                      )}
                   </div>
                   {displayFooterButtons && (
                     <CreditCounter pluginId={message.pluginId} />

@@ -3,6 +3,7 @@ import {
   IconBrain,
   IconNumber4,
   IconPaint,
+  IconBuildingBroadcastTower
 } from '@tabler/icons-react';
 import { IconCheck } from '@tabler/icons-react';
 
@@ -61,6 +62,8 @@ export const getPluginIcon = (
       return <IconNumber4 size={size} />;
     case PluginID.IMAGE_GEN:
       return <IconPaint size={size} />;
+    case PluginID.mqtt:
+      return <IconBuildingBroadcastTower size={size} />;
     default:
       return <IconBolt size={size} />;
   }

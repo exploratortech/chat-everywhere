@@ -8,7 +8,7 @@ import {
   shortenMessagesBaseOnTokenLimit,
 } from '@/utils/server/api';
 
-import { Message } from '@/types/chat';
+import { FunctionCall, Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
 import {
@@ -49,7 +49,7 @@ export class OpenAIError extends Error {
 
 // Only keep role and content keys
 export const normalizeMessages = (messages: Message[]) =>
-  messages.map(({ role, content }) => ({ role, content }));
+  messages.map(({ role, content, name }) => ({ role, content, name }));
 
 export const OpenAIStream = async (
   model: OpenAIModel,
@@ -193,6 +193,9 @@ export const OpenAIStream = async (
           let stop = false;
           let error: any = null;
           let respondMessage = '';
+          let functionCallRequired = false;
+          let functionCallName = '';
+          let functionCallResponseMessageInJsonString = '';
 
           const onParse = (event: ParsedEvent | ReconnectInterval) => {
             if (event.type === 'event') {
@@ -212,7 +215,9 @@ export const OpenAIStream = async (
                     stop = true;
                     return;
                   }
+
                   const text = json.choices[0].delta.content;
+
                   buffer.push(encoder.encode(text));
                   respondMessage += text;
                 }
@@ -308,7 +313,7 @@ export const truncateLogMessage = (message: string) =>
 
 // Returns a list of shuffled endpoints and keys. They should be used based
 // on their order in the list.
-const getRandomOpenAIEndpointsAndKeys = (
+export const getRandomOpenAIEndpointsAndKeys = (
   includeGPT4: boolean = false,
   openAIPriority: boolean,
 ): [(string | undefined)[], (string | undefined)[]] => {

@@ -1,4 +1,5 @@
 import {
+  IconBuildingBroadcastTower,
   IconFileCode,
   IconLogin,
   IconLogout,
@@ -16,9 +17,20 @@ import { SettingsModelContext } from './SettingsModel';
 
 type Props = {
   className?: string;
+  disableFooterItems?: boolean;
 };
 
-export default function Sidebar({ className = '' }: Props) {
+type sideBarItemType = {
+  icon: JSX.Element;
+  name: string;
+  value: string;
+  callback: () => void;
+};
+
+export default function Sidebar({
+  className = '',
+  disableFooterItems = true,
+}: Props) {
   const {
     state: { showing },
     dispatch,
@@ -31,7 +43,7 @@ export default function Sidebar({ className = '' }: Props) {
   } = useContext(HomeContext);
   const { t } = useTranslation('model');
   const iconClass = 'h-[18px] tablet:h-[22px] tablet:w-[36px]';
-  const items = [
+  const items: sideBarItemType[] = [
     {
       icon: <IconUser />,
       name: t('Account'),
@@ -65,6 +77,46 @@ export default function Sidebar({ className = '' }: Props) {
         }),
     },
   ];
+  const footerItems = [
+    {
+      icon: <IconBuildingBroadcastTower />,
+      name: t('MQTT'),
+      value: 'mqtt',
+      callback: () =>
+        dispatch({
+          field: 'showing',
+          value: 'mqtt',
+        }),
+    },
+  ];
+
+  const getRenderItems = (itemsArray: sideBarItemType[]) =>
+    itemsArray.map((item, i) => (
+      <a
+        key={`${i} ${item.name}`}
+        href="#"
+        className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 tablet:px-2 tablet:py-4 
+          ${showing === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
+          `}
+        onClick={item.callback}
+      >
+        <div className="flex gap-2 items-center ">
+          {cloneElement(item.icon, {
+            className: iconClass,
+          })}
+          <div className="tablet:hidden"> {item.name}</div>
+        </div>
+      </a>
+    ));
+
+  const enableMQTT = () => {
+    const enableEmails = [
+      'jack@exploratorlabs.com',
+      'pos_soft_king@yahoo.com.tw',
+    ];
+
+    return enableEmails.includes(user?.email || '');
+  };
 
   return (
     <div className={`${className} flex justify-between flex-col`}>
@@ -72,57 +124,37 @@ export default function Sidebar({ className = '' }: Props) {
         <b className="pt-6 px-6 block select-none tablet:hidden">
           {t('Settings')}
         </b>
-        <div className="py-6 flex flex-col">
-          {items.map((item, i) => {
-            return (
-              <a
-                key={`${i} ${item.name}`}
-                href="#"
-                className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 tablet:px-2 tablet:py-4 
-                ${
-                  showing === item.value
-                    ? 'bg-neutral-900 text-neutral-100'
-                    : ''
-                }
-                `}
-                onClick={item.callback}
-              >
-                <div className="flex gap-2 items-center ">
-                  {cloneElement(item.icon, {
-                    className: iconClass,
-                  })}
-                  <div className="tablet:hidden"> {item.name}</div>
-                </div>
-              </a>
-            );
-          })}
-        </div>
+        <div className="py-6 flex flex-col">{getRenderItems(items)}</div>
       </div>
 
-      <a
-        href="#"
-        className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"
-        onClick={() => {
-          closeModel();
-          if (user) {
-            handleUserLogout();
-          } else {
-            homeDispatch({
-              field: 'showLoginSignUpModel',
-              value: true,
-            });
-          }
-        }}
-      >
-        {user ? (
-          <IconLogout className={iconClass} />
-        ) : (
-          <IconLogin className={iconClass} />
-        )}
-        <div className="tablet:hidden">
-          {user ? t('Sign out') : t('Sign in')}
-        </div>
-      </a>
+      <div className="flex flex-col">
+        {/* TODO: Remove after testing on production */}
+        {!disableFooterItems && enableMQTT() && getRenderItems(footerItems)}
+        <a
+          href="#"
+          className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"
+          onClick={() => {
+            closeModel();
+            if (user) {
+              handleUserLogout();
+            } else {
+              homeDispatch({
+                field: 'showLoginSignUpModel',
+                value: true,
+              });
+            }
+          }}
+        >
+          {user ? (
+            <IconLogout className={iconClass} />
+          ) : (
+            <IconLogin className={iconClass} />
+          )}
+          <div className="tablet:hidden">
+            {user ? t('Sign out') : t('Sign in')}
+          </div>
+        </a>
+      </div>
     </div>
   );
 }

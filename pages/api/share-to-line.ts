@@ -14,33 +14,42 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  const { accessToken, messageContent, imageFile } = (await req.json()) as {
-    accessToken: string;
-    messageContent: string;
-    imageFile: string | null;
-  };
+  const { accessToken, messageContent, imageFile, authToken, userId } =
+    (await req.json()) as {
+      accessToken: string;
+      messageContent: string;
+      imageFile: string | null;
 
-  if (!accessToken || (messageContent === '' && !imageFile)) {
-    return new Response('Missing sessionId or messageContent or imageFile', {
-      status: 400,
-    });
-  }
+      // For server-side triggering
+      authToken: string;
+      userId: string;
+    };
 
   const supabase = getAdminSupabaseClient();
-  const user = await supabase.auth.getUser(accessToken);
+  let user;
 
-  if (!user) {
-    console.error('No user found with this access token');
-    return new Response('No user found with this access token', {
-      status: 400,
-    });
-  }
+  if (!authToken || authToken !== process.env.AUTH_TOKEN || !userId) {
+    if (!accessToken || (messageContent === '' && !imageFile)) {
+      return new Response('Missing sessionId or messageContent or imageFile', {
+        status: 400,
+      });
+    }
+
+    user = await supabase.auth.getUser(accessToken);
+
+    if (!user) {
+      console.error('No user found with this access token');
+      return new Response('No user found with this access token', {
+        status: 400,
+      });
+    }
+  };
 
   // Retrieve access token from profiles table
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('line_access_token')
-    .match({ id: user.data.user?.id })
+    .match({ id: userId || user?.data.user?.id })
     .single();
 
   if (!profile || profileError) {
@@ -53,7 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   if (imageFile) {
     const imageFileBlob = decode(imageFile);
-    const originalImagePath = `${user.data.user?.id}-${v4()}.png`;
+    const originalImagePath = `${user?.data.user?.id}-${v4()}.png`;
 
     // 1. Upload the image file to Supabase Storage
     const { error: storageError } = await supabase.storage
@@ -109,7 +118,7 @@ const handler = async (req: Request): Promise<Response> => {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ line_access_token: null })
-        .match({ id: user.data.user?.id });
+        .match({ id: user?.data.user?.id });
 
       if (updateError) {
         console.error('Error updating user profile:', updateError);
@@ -120,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('Failed to send message to LINE', { status: 500 });
   }
 
-  serverSideTrackEvent(user.data.user?.id || 'N/A', 'Share to Line');
+  serverSideTrackEvent(user?.data.user?.id || 'N/A', 'Share to Line');
   return new Response('', { status: 200 });
 };
 

@@ -38,6 +38,7 @@ export const EventNames = [
   'Online mode message',
   'Default mode message',
   'GPT4 mode message',
+  'MQTT mode message',
   'AI image generation',
   'AI image to prompt',
   'AI image button clicked',
@@ -52,6 +53,9 @@ export const EventNames = [
   'LINE Notify connected',
   'Share to Line',
   'Disconnect LINE Notify',
+  'MQTT trigger connection',
+  'Helper function triggered',
+  'MQTT retrieval connection',
 
   // V2
   'v2 Retrieve messages',
@@ -66,7 +70,7 @@ export const EventNames = [
 
   // Error tracing
   'Error',
-  'v2 Error'
+  'v2 Error',
 ];
 
 export type EventNameTypes = (typeof EventNames)[number];
@@ -98,11 +102,13 @@ export type PayloadType = {
   v2runId?: string;
   v2ImageGenerationUrl?: string;
   v2ImageGenerationDurationInMS?: number;
+
+  // Integration
+  helperFunctionName?: string;
 };
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
-export const enableTracking =
-  process.env.NEXT_PUBLIC_ENV === 'production';
+export const enableTracking = process.env.NEXT_PUBLIC_ENV === 'production';
 
 export const initializePosthog = () => {
   if (!enableTracking) return;

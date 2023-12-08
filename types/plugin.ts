@@ -11,6 +11,7 @@ export enum PluginID {
   GPT4 = 'gpt-4',
   IMAGE_GEN = 'image-gen',
   IMAGE_TO_PROMPT = 'image-to-prompt',
+  mqtt = 'mqtt',
 }
 
 export enum PluginName {
@@ -18,6 +19,7 @@ export enum PluginName {
   GPT4 = 'GPT-4',
   IMAGE_GEN = 'image-gen',
   IMAGE_TO_PROMPT = 'image-to-prompt',
+  mqtt = 'MQTT',
 }
 
 export const Plugins: Record<PluginID, Plugin> = {
@@ -39,6 +41,11 @@ export const Plugins: Record<PluginID, Plugin> = {
   [PluginID.IMAGE_TO_PROMPT]: {
     id: PluginID.IMAGE_TO_PROMPT,
     name: PluginName.IMAGE_TO_PROMPT,
+    requiredKeys: [],
+  },
+  [PluginID.mqtt]: {
+    id: PluginID.mqtt,
+    name: PluginName.mqtt,
     requiredKeys: [],
   },
 };

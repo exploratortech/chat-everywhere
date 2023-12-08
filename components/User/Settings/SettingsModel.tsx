@@ -1,20 +1,23 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconX } from '@tabler/icons-react';
-import React, { Dispatch, Fragment, createContext } from 'react';
+import React, { Dispatch, Fragment, createContext, useContext } from 'react';
 
 import { ActionType, useCreateReducer } from '@/hooks/useCreateReducer';
+
+import HomeContext from '@/pages/api/home/home.context';
 
 import Settings_Account from './Settings_Account';
 import Settings_App from './Settings_App';
 import Settings_Data from './Settings_Data';
 import Sidebar from './Sidebar';
+import Settings_MQTT from './Settings_MQTT';
 
 type Props = {
   onClose: () => void;
 };
 
 const settingsState = {
-  showing: 'account' as 'account' | 'app' | 'data',
+  showing: 'account' as 'account' | 'app' | 'data' | 'mqtt',
 };
 
 interface SettingsContext {
@@ -31,6 +34,9 @@ export default function SettingsModel({ onClose }: Props) {
   const {
     state: { showing },
   } = settingsContext;
+  const {
+    state: { user, isPaidUser },
+  } = useContext(HomeContext);
 
   return (
     <Transition appear show={true} as={Fragment}>
@@ -62,11 +68,15 @@ export default function SettingsModel({ onClose }: Props) {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-[70vw] xl:max-w-3xl tablet:max-w-[90vw] h-[calc(80vh-100px)] transform overflow-hidden rounded-2xl text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
-                  <Sidebar className="bg-neutral-800 flex-shrink-0 flex-grow-0" />
+                  <Sidebar
+                    className="bg-neutral-800 flex-shrink-0 flex-grow-0"
+                    disableFooterItems={!user || !isPaidUser}
+                  />
                   <div className="p-6 bg-neutral-900 flex-grow relative overflow-y-auto">
                     {showing === 'account' && <Settings_Account />}
                     {showing === 'app' && <Settings_App />}
                     {showing === 'data' && <Settings_Data />}
+                    {showing === 'mqtt' && <Settings_MQTT />}
                     <button
                       className="w-max min-h-[34px] p-4 absolute top-0 right-0"
                       onClick={onClose}

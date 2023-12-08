@@ -52,6 +52,7 @@ export interface HomeInitialState {
 
   // Plugins Utils
   creditUsage: CreditUsage | null;
+  hasMqttConnection: boolean;
 
   // Text to Speech
   currentSpeechId: null | string;
@@ -111,6 +112,7 @@ export const initialState: HomeInitialState = {
 
   // Plugins Utils
   creditUsage: null,
+  hasMqttConnection: false,
 
   // Text to Speech
   currentSpeechId: null,
