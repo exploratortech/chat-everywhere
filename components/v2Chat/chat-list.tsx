@@ -1,8 +1,10 @@
+import { useEffect, useRef } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
 import { type MessageType } from '@/types/v2Chat/chat';
 
 import { ChatMessage } from '@/components/v2Chat/chat-message';
+import { ChatScrollAnchor } from '@/components/v2Chat/chat-scroll-anchor';
 import ImageContainer from '@/components/v2Chat/image-container';
 import { ImageGenerationSpinner } from '@/components/v2Chat/image-generation-spinner';
 import {
@@ -16,7 +18,6 @@ import { SuggestionContainer } from '@/components/v2Chat/ui/suggestion-container
 
 export interface ChatList {
   messages: MessageType[];
-  scrollToButton: () => void;
   suggestions: string[];
   onMessageSent: (message: MessageType) => void;
   isChatResponseLoading: boolean;
@@ -27,7 +28,6 @@ export interface ChatList {
 
 export function ChatList({
   messages,
-  scrollToButton,
   suggestions,
   onMessageSent,
   isChatResponseLoading,
@@ -35,6 +35,20 @@ export function ChatList({
   onLoadMore,
   allMessagesAreLoaded,
 }: ChatList) {
+  const chatScrollAnchorRef = useRef();
+
+  const scrollToBottom = () => {
+    if (!chatScrollAnchorRef.current) return;
+    interface ChatScrollAnchorMethods {
+      scrollToBottom: () => void;
+    }
+    (chatScrollAnchorRef.current as ChatScrollAnchorMethods).scrollToBottom();
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, suggestions]);
+
   if (!messages.length) {
     return null;
   }
@@ -60,7 +74,7 @@ export function ChatList({
       >
         {messages.map((message, index) => (
           <div
-            key={index}
+            key={message.id}
             className={`h-full w-[90vw] md:w-[44rem] max-screen ${
               index === messages.length - 1 ? 'mt-10' : ''
             }`}
@@ -83,11 +97,17 @@ export function ChatList({
               </Alert>
             )}
             {index === 0 && (
-              <SuggestionContainer
-                suggestions={suggestions}
-                isChatResponseLoading={isChatResponseLoading}
-                onMessageSent={onMessageSent}
-              />
+              <>
+                <SuggestionContainer
+                  suggestions={suggestions}
+                  isChatResponseLoading={isChatResponseLoading}
+                  onMessageSent={onMessageSent}
+                />
+                <ChatScrollAnchor
+                  ref={chatScrollAnchorRef}
+                  trackVisibility={isChatResponseLoading}
+                />
+              </>
             )}
           </div>
         ))}

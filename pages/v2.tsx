@@ -25,7 +25,6 @@ import type {
 
 import { ChatList } from '@/components/v2Chat/chat-list';
 import { ChatPanel } from '@/components/v2Chat/chat-panel';
-import { ChatScrollAnchor } from '@/components/v2Chat/chat-scroll-anchor';
 import { EmptyScreen } from '@/components/v2Chat/empty-screen';
 import { Header } from '@/components/v2Chat/header';
 import { InitialScreen } from '@/components/v2Chat/initial-screen';
@@ -36,7 +35,6 @@ import { TooltipProvider } from '@/components/v2Chat/ui/tooltip';
 const V2Chat = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>();
   const [input, setInput] = useState<string>('');
-  const chatScrollAnchorRef = useRef();
   const [enablePullingForUpdates, setEnablePullingForUpdates] = useState(false);
 
   const [openPaymentDialog, setOpenPaymentDialog] = useState<boolean>(false);
@@ -111,14 +109,6 @@ const V2Chat = () => {
   useEffect(() => {
     fetchSuggestions();
   }, [messages]);
-
-  const scrollToBottom = () => {
-    if (!chatScrollAnchorRef.current) return;
-    interface ChatScrollAnchorMethods {
-      scrollToBottom: () => void;
-    }
-    (chatScrollAnchorRef.current as ChatScrollAnchorMethods).scrollToBottom();
-  };
 
   const fetchConversations = async () => {
     if (user === null) return;
@@ -256,10 +246,6 @@ const V2Chat = () => {
         );
       }
       setSuggestions(suggestions);
-
-      setTimeout(() => {
-        scrollToBottom();
-      }, 500);
     } catch (error) {
       setSuggestions([]);
       console.error(error);
@@ -380,17 +366,12 @@ const V2Chat = () => {
               <>
                 <ChatList
                   messages={messages}
-                  scrollToButton={scrollToBottom}
                   suggestions={suggestions}
                   onMessageSent={onMessageSent}
                   isChatResponseLoading={chatResponseLoading}
                   chatMessagesLoading={chatMessagesLoading}
                   onLoadMore={fetchMoreMessages}
                   allMessagesAreLoaded={allMessagesAreLoaded}
-                />
-                <ChatScrollAnchor
-                  ref={chatScrollAnchorRef}
-                  trackVisibility={chatResponseLoading}
                 />
               </>
             ) : (
