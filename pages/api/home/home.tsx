@@ -432,6 +432,7 @@ const Home = () => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
           dispatch({ field: 'hasMqttConnection', value: userProfile.hasMqttConnection });
+          dispatch({ field: 'isConnectedWithLine', value: userProfile.isConnectedWithLine });
           dispatch({
             field: 'user',
             value: {
@@ -445,8 +446,7 @@ const Home = () => {
               proPlanExpirationDate: userProfile.proPlanExpirationDate,
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
-              isInReferralTrial: userProfile.isInReferralTrial,
-              isConnectedWithLine: userProfile.isConnectedWithLine
+              isInReferralTrial: userProfile.isInReferralTrial
             },
           });
           // Set authenticated user context for Application Insights
