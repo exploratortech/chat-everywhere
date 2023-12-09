@@ -59,7 +59,7 @@ export function ChatList({
 
   return (
     <div
-      className="relative w-screen pl-4 lg:pl-0 lg:max-w-3xl overflow-auto flex flex-col-reverse h-[calc(99vh-4rem)] pb-[6rem] justify-start"
+      className="relative w-screen pl-4 sm:pl-0 sm:max-w-3xl overflow-auto flex flex-col-reverse h-[calc(99vh-4rem)] pb-[6rem] justify-start"
       id="scrollableDiv"
     >
       <InfiniteScroll
