@@ -27,7 +27,7 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
 }) => {
   const { t } = useTranslation('feature');
   const {
-    state: { user },
+    state: { user, isConnectedWithLine },
   } = useContext(HomeContext);
   const [loading, setLoading] = useState(false);
   const supabase = useSupabaseClient();
@@ -47,7 +47,7 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
       return;
     }
 
-    if (!user.isConnectedWithLine) {
+    if (!isConnectedWithLine) {
       toast.error(t('Please connect with your Line account first.'));
       homeDispatch({ field: 'showSettingsModel', value: true });
       return;
