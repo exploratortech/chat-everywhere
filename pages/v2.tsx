@@ -42,8 +42,10 @@ const V2Chat = () => {
     useState<string>('');
   const [selectedConversation, setSelectedConversation] =
     useState<ConversationType | null>(null);
+
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [messages, setMessages] = useState<MessageType[]>([]);
+
   const [allMessagesAreLoaded, setAllMessagesAreLoaded] =
     useState<boolean>(false);
   const [chatMessagesLoading, setChatMessagesLoading] =
@@ -51,12 +53,18 @@ const V2Chat = () => {
   const [chatResponseLoading, setChatResponseLoading] =
     useState<boolean>(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const lastHealthCheckTimestampRef = useRef<number | null>(null);
 
   const supabase = useSupabaseClient();
   const user = useUser();
   const session = useSession();
 
   useEffect(() => {
+    if (session && session?.expires_in < 60) {
+      console.log('Session expired, refreshing');
+      supabase.auth.refreshSession();
+    }
+
     if (user && !userProfile) {
       userProfileQuery({
         client: supabase,
@@ -73,6 +81,7 @@ const V2Chat = () => {
     if (!selectedConversationId) {
       setSelectedConversation(null);
       setMessages([]);
+      lastHealthCheckTimestampRef.current = null;
       return;
     }
 
@@ -82,25 +91,43 @@ const V2Chat = () => {
 
     if (!conversation) return;
     setSelectedConversation(conversation);
-    
+
     // For new conversation, give it a few seconds for the new messages to added into the database at Openai
-    if(messages.length !== 1) {
+    if (messages.length !== 1) {
       setChatMessagesLoading(true);
       fetchMessages(conversation.threadId);
+      lastHealthCheckTimestampRef.current = null;
     }
   }, [selectedConversationId]);
 
   useEffect(() => {
-    const triggerFetchMessages = () => {
-      if (enablePullingForUpdates && selectedConversation) {
-        fetchMessages(selectedConversation.threadId);
-      }
-    };
-
-    triggerFetchMessages();
+    if (!session) return;
+    if (selectedConversation) fetchMessages(selectedConversation.threadId);
 
     const interval = setInterval(() => {
-      triggerFetchMessages();
+      if (enablePullingForUpdates && selectedConversation) {
+        fetchMessages(selectedConversation.threadId);
+
+        // Health check every 15 seconds
+        if (
+          lastHealthCheckTimestampRef.current &&
+          Date.now() - lastHealthCheckTimestampRef.current < 15000
+        ) {
+          return;
+        }
+
+        fetch('/api/v2/health-check', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'user-token': session.access_token,
+          },
+          body: JSON.stringify({
+            threadId: selectedConversation?.threadId,
+          }),
+        });
+        lastHealthCheckTimestampRef.current = Date.now();
+      }
     }, 2000);
 
     return () => clearInterval(interval);
@@ -164,6 +191,7 @@ const V2Chat = () => {
       content: messageItem.content[0].text.value,
       metadata: messageItem.metadata,
     }));
+
     setMessages(messages);
     setAllMessagesAreLoaded(false);
 
@@ -172,10 +200,10 @@ const V2Chat = () => {
       setChatResponseLoading(true);
       setEnablePullingForUpdates(true);
     } else {
-      setChatMessagesLoading(false);
       setChatResponseLoading(false);
       setEnablePullingForUpdates(false);
     }
+    setChatMessagesLoading(false);
   };
 
   const fetchMoreMessages = async (latestMessageId: string) => {

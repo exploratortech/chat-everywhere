@@ -6,7 +6,7 @@ import {
 } from '@/utils/server/supabase';
 import {
   addOpenAiMessageToThread,
-  cancelCurrentThreadRun,
+  cancelRunOnThreadIfNeeded,
 } from '@/utils/v2Chat/openAiApiUtils';
 
 import { OpenAIMessageType } from '@/types/v2Chat/chat';
@@ -182,6 +182,8 @@ const sendMessage = async (
     });
   }
 
+  await cancelRunOnThreadIfNeeded(conversationId);
+
   // Add a Message object to Thread
   const messageCreationResponse = await addOpenAiMessageToThread(
     conversationId,
@@ -291,19 +293,6 @@ const setConversationRunInProgress = async (
     .from('user_v2_conversations')
     .update({
       runInProgress,
-    })
-    .eq('threadId', conversationId);
-};
-
-const setConversationProcessLock = async (
-  conversationId: string,
-  processLock: boolean,
-) => {
-  const supabase = getAdminSupabaseClient();
-  await supabase
-    .from('user_v2_conversations')
-    .update({
-      processLock,
     })
     .eq('threadId', conversationId);
 };

@@ -1,3 +1,5 @@
+import { getAdminSupabaseClient } from '@/utils/server/supabase';
+
 import {
   MessageMetaDataType,
   MessageType,
@@ -23,7 +25,7 @@ export const addOpenAiMessageToThread = async (
 
 export const getMessagesByThreadId = async (
   threadId: string,
-  limit: number = 10
+  limit: number = 10,
 ): Promise<OpenAIMessageType[]> => {
   const openAiUrl = `https://api.openai.com/v1/threads/${threadId}/messages?limit=${limit}`;
 
@@ -36,7 +38,7 @@ export const getMessagesByThreadId = async (
 
   const messages: OpenAIMessageType[] = (await response.json()).data;
   return messages;
-}
+};
 
 export const updateMetadataOfMessage = async (
   threadId: string,
@@ -106,11 +108,13 @@ export const getOpenAiLatestRunObject = async (
 
   const runs: OpenAIRunType[] = (await response.json()).data;
   return runs[0];
-}
+};
 
 export const generateImage = async (
   prompt: string,
 ): Promise<OpenAiImageResponseType & { errorMessage?: string }> => {
+  const azureDallE3Url =
+    'https://delle3.openai.azure.com/openai/deployments/dalle3/images/generations?api-version=2023-12-01-preview';
   const openAiUrl = 'https://api.openai.com/v1/images/generations';
 
   const payload = {
@@ -127,10 +131,20 @@ export const generateImage = async (
   const maxRetries = 10;
 
   while (retries < maxRetries) {
-    response = await authorizedOpenAiRequest(openAiUrl, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    if (retries === 0) {
+      response = await authorizedAzureRequest(
+        azureDallE3Url, // Use Azure endpoint by default
+        {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        },
+      );
+    } else {
+      response = await authorizedOpenAiRequest(openAiUrl, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    }
 
     if (response.status !== 429) {
       break;
@@ -210,6 +224,12 @@ export const cancelCurrentThreadRun = async (threadId: string) => {
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
   }
+
+  const supabase = getAdminSupabaseClient();
+  await supabase
+    .from('user_v2_conversations')
+    .update({ runInProgress: false })
+    .eq('threadId', threadId);
 };
 
 export const waitForRunToComplete = async (
@@ -245,20 +265,37 @@ export const waitForRunToComplete = async (
   return run;
 };
 
-export const cancelRunOnThreadIfNeeded = async (
-  messageCreatedAt: number,
-  messageId: string,
-  threadId: string,
-) => {
+// This is a health check function intended to be called by the client periodically
+export const cancelRunOnThreadIfNeeded = async (threadId: string) => {
+  const supabase = getAdminSupabaseClient();
+
   const fiveMinsInSeconds = 5 * 60;
   const currentTimestampInSeconds = Date.now() / 1000;
 
-  if (currentTimestampInSeconds - messageCreatedAt < fiveMinsInSeconds) {
+  const { data: conversationData } = await supabase
+    .from('user_v2_conversations')
+    .select('*')
+    .eq('threadId', threadId)
+    .single();
+
+  const latestMessages = await getMessagesByThreadId(threadId, 2);
+
+  if (latestMessages.length === 0 || !conversationData) {
+    return;
+  }
+
+  if (!conversationData.runInProgress) return;
+
+  const latestMessage = latestMessages[0];
+
+  if (
+    currentTimestampInSeconds - latestMessage.created_at <
+    fiveMinsInSeconds
+  ) {
     return;
   } else {
-    console.log('Message is more than 10 minutes old, cancelling run');
-    
-    await updateMetadataOfMessage(threadId, messageId, {
+    console.log('Message is more than 5 mins old, cancelling run');
+    await updateMetadataOfMessage(threadId, latestMessage.id, {
       imageGenerationStatus: 'failed',
     });
     await cancelCurrentThreadRun(threadId);
@@ -299,6 +336,19 @@ const authorizedOpenAiRequest = async (
   const headers = {
     Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     'OpenAI-Beta': 'assistants=v1',
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  return fetch(url, { ...options, headers });
+};
+
+// Move this function from utils/server/index.ts to here for serverless function compatibility reason
+const authorizedAzureRequest = async (
+  url: string,
+  options: RequestInit = {},
+) => {
+  const headers = {
+    'api-key': process.env.AZURE_DALL_E_API_KEY || '',
     'Content-Type': 'application/json',
     ...options.headers,
   };
