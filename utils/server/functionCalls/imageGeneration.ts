@@ -15,21 +15,27 @@ export const generateDallEImage = async ({
   prompt: string;
   messageId: string;
   threadId: string;
-}): Promise<string> => {
-  console.log('imageGenerationPrompt: ', prompt);
-
+}): Promise<{
+  imagePublicUrl: string;
+  imageRevisedPrompt: string;
+}> => {
   await updateMetadataOfMessage(threadId, messageId, {
     imageGenerationStatus: 'in progress',
   });
 
   const imageGenerationResponse = await generateImage(prompt);
-  const generatedImageInBase64 = imageGenerationResponse.data[0].b64_json;
-  if (!generatedImageInBase64) {
-    if (imageGenerationResponse.errorMessage) {
-      throw new Error(imageGenerationResponse.errorMessage);
-    }
-    throw new Error('Image generation failed');
+  
+  if(!imageGenerationResponse.data) {
+    console.error('imageGenerationResponse: ', imageGenerationResponse);
+    throw new Error(imageGenerationResponse.errorMessage);
   }
+
+  const generatedImageInBase64 = imageGenerationResponse.data[0].b64_json;
+
+  if(!generatedImageInBase64) {
+    throw new Error('Failed to generate image');
+  }
+  
   console.log('Image generated successfully, storing to Supabase storage ...');
 
   // Store image in Supabase storage
@@ -55,5 +61,8 @@ export const generateDallEImage = async ({
     imageUrl: imagePublicUrlData.publicUrl,
   });
 
-  return imagePublicUrlData.publicUrl;
+  return {
+    imagePublicUrl: imagePublicUrlData.publicUrl,
+    imageRevisedPrompt: imageGenerationResponse.data[0].revised_prompt,
+  };
 };

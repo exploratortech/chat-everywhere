@@ -18,14 +18,13 @@ import { OpenAIRunType, v2ConversationType } from '@/types/v2Chat/chat';
 interface RequestBody {
   threadId: string;
   runId: string;
-  messageId: string
+  messageId: string;
 }
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     res.status(405).end('Method Not Allowed');
@@ -33,13 +32,18 @@ export default async function handler(
 
   const authToken = req.headers['auth-token'];
 
-  if(authToken !== process.env.THREAD_RUNNER_AUTH_TOKEN) {
+  if (authToken !== process.env.THREAD_RUNNER_AUTH_TOKEN) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
-  
+
   const { threadId, runId, messageId } = req.body as RequestBody;
-  console.log('Thread runner endpoint is hit with threadId, runId, messageId ', threadId, runId, messageId);
+  console.log(
+    'Thread runner endpoint is hit with threadId, runId, messageId ',
+    threadId,
+    runId,
+    messageId,
+  );
 
   if (!threadId || !runId || !messageId) {
     res.status(400).json({ error: 'Missing threadId or runId or messageId' });
@@ -94,7 +98,7 @@ export default async function handler(
       res.status(200).json({ error: 'Run does not require action' });
       return;
     }
-    
+
     const toolCalls = requiredAction.submit_tool_outputs.tool_calls;
     if (!toolCalls || !messageId) {
       await setThreadRunInProgress(threadId, false);
@@ -125,13 +129,13 @@ export default async function handler(
 
         try {
           const prompt = JSON.parse(toolCall.function.arguments).prompt;
-          const imageUrl = await generateDallEImage({
+          const imageObject = await generateDallEImage({
             prompt,
             messageId: messageId,
             threadId: thread.threadId,
           });
           serverSideTrackEvent('N/A', 'v2 Image generation processed', {
-            v2ImageGenerationUrl: imageUrl,
+            v2ImageGenerationUrl: imageObject.imagePublicUrl,
             v2ImageGenerationDurationInMS: Date.now() - startTime,
           });
           imageGenerated = true;
@@ -139,25 +143,29 @@ export default async function handler(
             threadId,
             runId,
             toolCall.id,
-            "Successfully generated image, image is displayed on user's screen. The prompt is (Do not show this to user unless explicit ask by the user): " +
-              prompt,
+            "Successfully generated image, image is displayed on user's screen. The revised prompt is (Do not show this to user unless explicit ask by the user): " +
+              imageObject.imageRevisedPrompt,
           );
-        } catch (e) {
+        } catch (e: any) {
+          const error = e as Error;
+          console.log('Error during image generation: ', error.message);
+
           await updateMetadataOfMessage(threadId, messageId, {
             imageGenerationStatus: 'failed',
+            imageGenerationError: e.message,
           });
 
           await submitToolOutput(
             threadId,
             runId,
             toolCall.id,
-            'Unable to generate image, please try again later.',
+            'Unable to generate image. Due to: ' + error.message,
           );
         }
         await waitForRunToComplete(threadId, runId, false, 120 * 1000);
       }
     }
-    
+
     await setThreadRunInProgress(threadId, false);
     await setThreadProcessLock(threadId, false);
     console.log('Run completed');
