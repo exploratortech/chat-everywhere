@@ -157,7 +157,7 @@ export default async function handler(
         await waitForRunToComplete(threadId, runId, false, 120 * 1000);
       }
     }
-
+    
     await setThreadRunInProgress(threadId, false);
     await setThreadProcessLock(threadId, false);
     console.log('Run completed');
