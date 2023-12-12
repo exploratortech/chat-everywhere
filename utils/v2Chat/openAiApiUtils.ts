@@ -113,6 +113,8 @@ export const getOpenAiLatestRunObject = async (
 export const generateImage = async (
   prompt: string,
 ): Promise<OpenAiImageResponseType & { errorMessage?: string }> => {
+  const azureDallE3Url =
+    'https://delle3.openai.azure.com/openai/deployments/dalle3/images/generations?api-version=2023-12-01-preview';
   const openAiUrl = 'https://api.openai.com/v1/images/generations';
 
   const payload = {
@@ -129,10 +131,20 @@ export const generateImage = async (
   const maxRetries = 10;
 
   while (retries < maxRetries) {
-    response = await authorizedOpenAiRequest(openAiUrl, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    if (retries === 0) {
+      response = await authorizedAzureRequest(
+        azureDallE3Url, // Use Azure endpoint by default
+        {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        },
+      );
+    } else {
+      response = await authorizedOpenAiRequest(openAiUrl, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    }
 
     if (response.status !== 429) {
       break;
@@ -324,6 +336,19 @@ const authorizedOpenAiRequest = async (
   const headers = {
     Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     'OpenAI-Beta': 'assistants=v1',
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  return fetch(url, { ...options, headers });
+};
+
+// Move this function from utils/server/index.ts to here for serverless function compatibility reason
+const authorizedAzureRequest = async (
+  url: string,
+  options: RequestInit = {},
+) => {
+  const headers = {
+    'api-key': process.env.AZURE_DALL_E_API_KEY || '',
     'Content-Type': 'application/json',
     ...options.headers,
   };
