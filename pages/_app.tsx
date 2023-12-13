@@ -1,4 +1,3 @@
-import { AppInsightsContext } from '@microsoft/applicationinsights-react-js';
 import { Session, SessionContextProvider } from '@supabase/auth-helpers-react';
 import { ReactNode, useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
@@ -10,7 +9,6 @@ import type { AppProps } from 'next/app';
 import { Inter } from 'next/font/google';
 import { GoogleAnalytics } from 'nextjs-google-analytics';
 
-import { enableAzureTracking, reactPlugin } from '@/utils/app/azureAppInsights';
 import { initializePosthog } from '@/utils/app/eventTracking';
 
 import '@/styles/globals.css';
@@ -26,39 +24,27 @@ interface WrapWithProviderProps {
   children: ReactNode;
 }
 
-const WrapWithProvider: React.FC<WrapWithProviderProps> = ({ children }) => {
-  if (enableAzureTracking)
-    return (
-      <AppInsightsContext.Provider value={reactPlugin}>
-        {children}
-      </AppInsightsContext.Provider>
-    );
-  else return <>{children}</>;
-};
-
 function App({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
   const queryClient = new QueryClient();
   const [supabase] = useState(() => createBrowserSupabaseClient());
-  
+
   useEffect(() => {
     initializePosthog();
   }, []);
 
   return (
-    <WrapWithProvider>
-      <SessionContextProvider
-        supabaseClient={supabase}
-        initialSession={pageProps.initialSession}
-      >
-        <div className={inter.className}>
-          <Toaster />
-          <QueryClientProvider client={queryClient}>
-            <Component {...pageProps} />
-            <GoogleAnalytics trackPageViews strategy="lazyOnload" />
-          </QueryClientProvider>
-        </div>
-      </SessionContextProvider>
-    </WrapWithProvider>
+    <SessionContextProvider
+      supabaseClient={supabase}
+      initialSession={pageProps.initialSession}
+    >
+      <div className={inter.className}>
+        <Toaster />
+        <QueryClientProvider client={queryClient}>
+          <Component {...pageProps} />
+          <GoogleAnalytics trackPageViews strategy="lazyOnload" />
+        </QueryClientProvider>
+      </div>
+    </SessionContextProvider>
   );
 }
 

@@ -1,4 +1,3 @@
-import { trackError } from '@/utils/app/azureTelemetry';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -52,8 +51,6 @@ const handler = async (req: Request): Promise<Response> => {
       );
     } catch (error) {
       console.error(error);
-      //Log error to Azure App Insights
-      trackError(error as string);
       return new Response(JSON.stringify({ error: 'Error fetching data' }), {
         status: 500,
       });
