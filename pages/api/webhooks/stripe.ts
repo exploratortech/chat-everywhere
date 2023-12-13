@@ -9,7 +9,6 @@ import { UserProfile } from './../../../types/user';
 
 import getRawBody from 'raw-body';
 import Stripe from 'stripe';
-import { trackError } from '@/utils/app/azureTelemetry';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2022-11-15',
@@ -38,8 +37,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       `Webhook signature verification failed.`,
       (err as any).message,
     );
-    //Log error to Azure App Insights
-    trackError(err as string);
     return res.status(400).send(`Webhook signature verification failed.`);
   }
 
@@ -70,8 +67,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Return a response to acknowledge receipt of the event
     res.json({ received: true });
   } catch (error) {
-    //Log error to Azure App Insights
-    trackError(error as string);
     if (error instanceof Error) {
       const user =
         error.cause && typeof error.cause === 'object' && 'user' in error.cause

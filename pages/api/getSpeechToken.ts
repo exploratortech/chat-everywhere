@@ -1,4 +1,3 @@
-import { trackError } from '@/utils/app/azureTelemetry';
 import {
   getAdminSupabaseClient,
   getUserProfile,
@@ -55,8 +54,6 @@ const handler = async (req: Request): Promise<Response> => {
       }
     } catch (err) {
       console.error(err);
-      //Log error to Azure App Insights
-      trackError(err as string);
       return new Response('Unable to fetch speech token', {
         status: 401,
       });

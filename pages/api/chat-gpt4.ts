@@ -1,6 +1,5 @@
-import { trackError } from '@/utils/app/azureTelemetry';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
-import { serverSideTrackEvent, trackEvent } from '@/utils/app/eventTracking';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
   addCredit,
@@ -87,8 +86,6 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(stream);
   } catch (error) {
     console.error(error);
-    //Log error to Azure App Insights
-    trackError(error as string);
     if (
       error instanceof Error &&
       error.message.includes('maximum context length')
@@ -98,9 +95,6 @@ const handler = async (req: Request): Promise<Response> => {
         statusText: error.message,
       });
     }
-
-    //Log error to Azure App Insights
-    trackError(error as string);
     serverSideTrackEvent(data.user.id, 'Error', {
       currentConversation: JSON.stringify(messageToSend),
       messageToSend: promptToSend,
@@ -116,8 +110,6 @@ const handler = async (req: Request): Promise<Response> => {
             // Add credit back to user's account
             await addCredit(data.user.id, PluginID.GPT4, 1);
           } catch (error) {
-            //Log error to Azure App Insights
-            trackError(error as string);
             // Handle error adding credit back
             return new Response('Error adding credit back', {
               status: 500,

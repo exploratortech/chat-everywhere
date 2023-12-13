@@ -8,8 +8,6 @@ import { trackEvent } from '@/utils/app/eventTracking';
 
 import { Conversation } from '@/types/chat';
 
-import { trackError } from '@/utils/app/azureTelemetry';
-
 interface Props {
   conversation: Conversation;
 }
@@ -107,8 +105,6 @@ export const StoreConversationButton: FC<Props> = ({ conversation }) => {
       }
     } catch (error) {
       toast.error((error as any).message);
-      //Log error to Azure App Insights
-      trackError((error as any).message as string);
     }
 
     setLoading(false);

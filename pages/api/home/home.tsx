@@ -13,8 +13,6 @@ import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
 import { fetchShareableConversation } from '@/utils/app/api';
-import { appInsights, enableAzureTracking } from '@/utils/app/azureAppInsights';
-import { trackError } from '@/utils/app/azureTelemetry';
 import {
   cleanConversationHistory,
   cleanFolders,
@@ -449,21 +447,12 @@ const Home = () => {
               isInReferralTrial: userProfile.isInReferralTrial
             },
           });
-          // Set authenticated user context for Application Insights
-          if (enableAzureTracking) {
-            appInsights.setAuthenticatedUserContext(
-              session.user.id,
-              session.user.email,
-            );
-          }
         })
         .catch((error) => {
           console.log(error);
           toast.error(
             t('Unable to load your information, please try again later.'),
           );
-          //Log error to Azure App Insights
-          trackError(error.message as string);
         });
 
       //Check if survey is filled by logged in user
@@ -640,8 +629,6 @@ const Home = () => {
             field: 'selectedConversation',
             value: newConversation,
           });
-          //Log error to Azure App Insights
-          trackError(error.message as string);
         })
         .finally(() => {
           dispatch({ field: 'loading', value: false });

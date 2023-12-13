@@ -14,7 +14,6 @@ import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics/dist/interactions';
 
 import { getEndpoint } from '@/utils/app/api';
-import { trackError } from '@/utils/app/azureTelemetry';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
@@ -174,8 +173,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               messages: [...selectedConversation.messages],
             },
           });
-          //Log error to Azure App Insights
-          trackError(response.statusText);
           return;
         }
         const data = response.body;
