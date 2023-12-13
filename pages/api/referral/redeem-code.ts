@@ -45,13 +45,13 @@ const handler = async (req: Request): Promise<Response> => {
       referralCode: string;
     };
 
-    // Special 2 weeks trial code mainly for v2 in-field testing
+    // Special 1 week trial code mainly for v2 in-field testing
     if (referralCode === process.env.TEMP_2_WEEKS_TRIAL_CODE) {
       await redeemReferralCode({
         referrerId: null,
         refereeId: userId,
         referralCode,
-        lengthOfTrialInDays: 14,
+        lengthOfTrialInDays: 7,
       });
 
       serverSideTrackEvent(userId, 'v2 Trial redemption success');
