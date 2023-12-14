@@ -2,7 +2,6 @@ import {
   getReferralCodeDetail,
   redeemReferralCode,
 } from '../../../utils/server/supabase';
-import { trackError } from '@/utils/app/azureTelemetry';
 import { getUserProfile, resetUserCredits } from '@/utils/server/supabase';
 
 import { PluginID } from '@/types/plugin';
@@ -78,8 +77,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
-    //Log error to Azure App Insights
-    trackError(error as string);
     console.error(error);
     return new Response('Invalid Code', { status: 400 });
   }

@@ -1,7 +1,5 @@
 import { NextRequest } from 'next/server';
 
-import { trackError } from '@/utils/app/azureTelemetry';
-
 import { ChatEverywhereFeatures } from '@/types/notion';
 
 import { Client } from '@notionhq/client';
@@ -86,8 +84,6 @@ const handler = async (req: NextRequest): Promise<Response> => {
     });
   } catch (error) {
     console.error(error);
-    //Log error to Azure App Insights
-    trackError(error as string);
     return new Response('Error', {
       status: 500,
       statusText: 'Internal server error',

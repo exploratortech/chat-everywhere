@@ -1,5 +1,4 @@
 // This endpoint only allow GPT-3.5 and GPT-3.5 16K models
-import { trackError } from '@/utils/app/azureTelemetry';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
@@ -95,8 +94,6 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(stream);
   } catch (error) {
     console.error(error);
-    //Log error to Azure App Insights
-    trackError(error as string);
     serverSideTrackEvent(userIdentifier || 'not-defined', 'Error', {
       PluginId: pluginId || 'not-defined',
       currentConversation: JSON.stringify(messagesToSend),

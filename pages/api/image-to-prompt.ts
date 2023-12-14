@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-import { trackError } from '@/utils/app/azureTelemetry';
 import { IMAGE_TO_PROMPT_MAX_TIMEOUT } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { ProgressHandler, makeWriteToStream } from '@/utils/app/streamHandler';
@@ -132,9 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
     } catch (error) {
       jobTerminated = true;
 
-      console.log(error);
-      //Log error to Azure App Insights
-      trackError(error as string);
+      console.error(error);
       await progressHandler.updateProgress({
         content:
           'Error occurred while generating image, please try again later.',

@@ -6,7 +6,6 @@ import {
   toolNameMapping,
   tools,
 } from '../../utils/app/online_mode';
-import { trackError } from '@/utils/app/azureTelemetry';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { truncateLogMessage } from '@/utils/server';
 import { trimStringBaseOnTokenLimit } from '@/utils/server/api';
@@ -217,8 +216,6 @@ const handler = async (req: NextRequest, res: any) => {
     console.log('Request closed');
     console.error(e);
     console.log(typeof e);
-    //Log error to Azure App Insights
-    trackError(e as string);
   }
 };
 
