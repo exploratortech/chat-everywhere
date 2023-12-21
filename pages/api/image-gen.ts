@@ -44,6 +44,7 @@ const generateMjPrompt = (
   style: string = DEFAULT_IMAGE_GENERATION_STYLE,
   quality: string = DEFAULT_IMAGE_GENERATION_QUALITY,
   temperature: number = 0.5,
+  originalPrompt?: string,
 ): string => {
   let resultPrompt = userInputText;
 
@@ -72,7 +73,18 @@ const generateMjPrompt = (
     resultPrompt += ' --chaos 50';
   }
 
-  return resultPrompt + ' --v 5.2';
+  if (originalPrompt) {
+    const originalPromptSubstrings = originalPrompt.match(/--\w+ \d+(\.\d+)?(:\d+)?/g);
+    if (originalPromptSubstrings) {
+      originalPromptSubstrings.forEach((substring) => {
+        if (!resultPrompt.includes(substring)) {
+          resultPrompt += ` ${substring}`;
+        }
+      });
+    }
+  }
+
+  return resultPrompt;
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -151,6 +163,7 @@ const handler = async (req: Request): Promise<Response> => {
       progressHandler.updateProgress({
         content: `Enhancing and translating user input prompt ... \n`,
       });
+      
       generationPrompt = await translateAndEnhancePrompt(
         latestUserPromptMessage,
       );
@@ -160,8 +173,9 @@ const handler = async (req: Request): Promise<Response> => {
         requestBody.imageStyle,
         requestBody.imageQuality,
         requestBody.temperature,
+        latestUserPromptMessage,
       );
-
+      
       progressHandler.updateProgress({
         content: `Prompt: ${generationPrompt} \n`,
         removeLastLine: true,
