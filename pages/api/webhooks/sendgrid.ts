@@ -23,13 +23,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const publicKey = process.env.SENDGRID_WEBHOOK_PUBLIC_KEY || '';
   const signature = req.headers[
-    'X-Twilio-Email-Event-Webhook-Signature'
+    'x-twilio-email-event-webhook-signature'
   ] as string;
   const timestamp = req.headers[
-    'X-Twilio-Email-Event-Webhook-Timestamp'
+    'x-twilio-email-event-webhook-timestamp'
   ] as string;
   const payload = req.body;
-
+  
   const eventWebhook = new EventWebhook();
   const key = eventWebhook.convertPublicKeyToECDSA(publicKey);
   const isValidWebHookEvent = eventWebhook.verifySignature(
