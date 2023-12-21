@@ -30,7 +30,6 @@ import HomeContext from '@/pages/api/home/home.context';
 
 import { ImageGenerationComponent } from './components/ImageGenerationComponent';
 import MjImageComponent from './components/MjImageComponent';
-import TokenCounter from './components/TokenCounter';
 
 import { CodeBlock } from '../Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
@@ -39,11 +38,9 @@ import { FeedbackContainer } from './FeedbackContainer';
 import { LineShareButton } from './LineShareButton';
 import { SpeechButton } from './SpeechButton';
 
-import rehypeMathjax from 'rehype-mathjax';
 import rehypeRaw from 'rehype-raw';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
 
 interface Props {
   message: Message;
@@ -380,20 +377,6 @@ export const ChatMessage: FC<Props> = memo(
                         {t('Cancel')}
                       </button>
                     </div>
-                    <TokenCounter
-                      className={` ${
-                        isOverTokenLimit
-                          ? '!text-red-500 dark:text-red-600'
-                          : ''
-                      } ${
-                        isCloseToTokenLimit || isOverTokenLimit
-                          ? 'visible'
-                          : 'invisible'
-                      } absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400`}
-                      value={messageContent}
-                      setIsOverLimit={setIsOverTokenLimit}
-                      setIsCloseToLimit={setIsCloseToTokenLimit}
-                    />
                   </div>
                 ) : (
                   <>
@@ -429,8 +412,8 @@ export const ChatMessage: FC<Props> = memo(
                 <div className="flex flex-row justify-between">
                   <MemoizedReactMarkdown
                     className="prose dark:prose-invert min-w-full"
-                    remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-                    rehypePlugins={[rehypeMathjax, rehypeRaw]}
+                    remarkPlugins={[remarkGfm, remarkBreaks]}
+                    rehypePlugins={[rehypeRaw]}
                     components={{
                       a({ node, children, href, ...props }) {
                         return (

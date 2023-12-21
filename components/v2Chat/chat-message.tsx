@@ -12,7 +12,6 @@ import { IconOpenAI, IconUser } from '@/components/v2Chat/ui/icons';
 import { MemoizedReactMarkdown } from '@/components/v2Chat/ui/markdown';
 
 import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
 
 export interface ChatMessageProps {
   message: MessageType;
@@ -41,7 +40,7 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
       <div className="flex px-1 ml-4 space-y-2 overflow-hidden">
         <MemoizedReactMarkdown
           className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
-          remarkPlugins={[remarkGfm, remarkMath]}
+          remarkPlugins={[remarkGfm]}
           components={{
             p({ children }) {
               return <p className="mb-2 last:mb-0">{children}</p>;

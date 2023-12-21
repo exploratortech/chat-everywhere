@@ -24,8 +24,6 @@ import { Prompt } from '@/types/prompt';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import TokenCounter from './components/TokenCounter';
-
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../VoiceInput/VoiceInputButton';
 import LimiterButton from './LimiterButton';
@@ -425,22 +423,6 @@ export const ChatInput = ({
               onKeyDown={handleKeyDown}
             />
           </div>
-
-          <TokenCounter
-            className={`
-              ${isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''}
-              ${
-                isCloseToTokenLimit || isOverTokenLimit
-                  ? 'visible'
-                  : 'invisible'
-              }
-              ${isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : ''}
-              absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400
-            `}
-            value={content}
-            setIsOverLimit={setIsOverTokenLimit}
-            setIsCloseToLimit={setIsCloseToTokenLimit}
-          />
 
           {intervalRemaining > 0 ? (
             <LimiterButton
