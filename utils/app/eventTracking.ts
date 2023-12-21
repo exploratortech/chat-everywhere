@@ -48,6 +48,10 @@ export const EventNames = [
   'Payment success',
   'New paying customer',
 
+  // Email tracking
+  'Trial end email sent',
+  'Trial end email opened',
+
   // Integration
   'LINE share button clicked',
   'LINE Notify connected',
