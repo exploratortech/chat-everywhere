@@ -487,17 +487,17 @@ export const userProfileQuery = async ({
 
       return dayjs().isBefore(trailExpirationDate);
     })();
-    
-    const {data: mqttConnection, error: mqttConnectionError} = await client
+
+    const { data: mqttConnection, error: mqttConnectionError } = await client
       .from('mqtt_connections')
       .select('id')
       .eq('uuid', userProfile.id);
-    
-    if(mqttConnection && mqttConnection.length > 0 && !mqttConnectionError) {
+
+    if (mqttConnection && mqttConnection.length > 0 && !mqttConnectionError) {
       hasMqttConnection = true;
     }
   }
-  
+
   return {
     id: userProfile.id,
     email: userProfile.email,
@@ -530,4 +530,46 @@ export const updateProAccountsPlan = async (): Promise<void> => {
   if (updateError) {
     throw updateError;
   }
+};
+
+export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
+  const supabase = getAdminSupabaseClient();
+  const nowMinusOneDay = dayjs.utc().subtract(1, 'day').toISOString();
+  const endReferralDay = dayjs.utc().subtract(7, 'day').toISOString();
+
+  const { data: users, error: fetchError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('plan', 'pro')
+    .lte('pro_plan_expiration_date', nowMinusOneDay);
+
+  if (fetchError) {
+    throw fetchError;
+  }
+  
+  const userIds = users?.map((user) => user.id);
+  if (!userIds) {
+    return [];
+  }
+  
+  const trialUserIds: string[] = [];
+
+  for (const userId of userIds) {
+    // Check if user has any referral record in the past 7 days
+    const { data: referralRows, error: referralError } = await supabase
+      .from('referral')
+      .select('referee_id')
+      .eq('referee_id', userId)
+      .gte('referral_date', endReferralDay);
+
+    if (referralError) {
+      throw referralError;
+    }
+    
+    if (referralRows?.length > 0) {
+      trialUserIds.push(userId);
+    }
+  }
+
+  return trialUserIds;
 };
