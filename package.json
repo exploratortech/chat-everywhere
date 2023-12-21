@@ -27,6 +27,7 @@
     "@radix-ui/react-switch": "^1.0.3",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@ramonak/react-progress-bar": "^5.0.3",
+    "@sendgrid/eventwebhook": "^8.0.0",
     "@sparticuz/chromium-min": "^112.0.2",
     "@supabase/auth-helpers-nextjs": "^0.6.1",
     "@supabase/auth-helpers-react": "^0.3.1",
