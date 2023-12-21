@@ -1,12 +1,9 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
 import { EventWebhook } from '@sendgrid/eventwebhook';
-
-export const config = {
-  runtime: 'edge',
-  preferredRegion: 'icn1',
-};
 
 type SendGridPayload = {
   email: string;
@@ -19,17 +16,19 @@ type SendGridPayload = {
   sg_template_id: string;
 };
 
-const handler = async (req: Request): Promise<Response> => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    res.status(405).end('Method Not Allowed');
   }
 
   const publicKey = process.env.SENDGRID_WEBHOOK_PUBLIC_KEY || '';
-  const signature =
-    req.headers.get('X-Twilio-Email-Event-Webhook-Signature') || '';
-  const timestamp =
-    req.headers.get('X-Twilio-Email-Event-Webhook-Timestamp') || '';
-  const payload = await req.text();
+  const signature = req.headers[
+    'X-Twilio-Email-Event-Webhook-Signature'
+  ] as string;
+  const timestamp = req.headers[
+    'X-Twilio-Email-Event-Webhook-Timestamp'
+  ] as string;
+  const payload = req.body;
 
   const eventWebhook = new EventWebhook();
   const key = eventWebhook.convertPublicKeyToECDSA(publicKey);
@@ -40,8 +39,8 @@ const handler = async (req: Request): Promise<Response> => {
     timestamp,
   );
 
-  if(!isValidWebHookEvent) {
-    return new Response('Invalid webhook event', { status: 400 });
+  if (!isValidWebHookEvent) {
+    return res.status(400).send(`Webhook signature verification failed.`);
   }
 
   const eventPayload = JSON.parse(payload) as SendGridPayload[];
@@ -66,7 +65,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
   }
 
-  return new Response('', { status: 200 });
+  return res.status(200);
 };
 
 export default handler;
