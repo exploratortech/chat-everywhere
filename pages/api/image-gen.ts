@@ -72,7 +72,11 @@ const generateMjPrompt = (
     resultPrompt += ' --chaos 50';
   }
 
-  return resultPrompt + ' --v 5.2';
+  if (!resultPrompt.includes('--v')) {
+    resultPrompt += ' --v 5.2'
+  }
+
+  return resultPrompt;
 };
 
 const handler = async (req: Request): Promise<Response> => {
