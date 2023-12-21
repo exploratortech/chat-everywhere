@@ -163,14 +163,10 @@ const handler = async (req: Request): Promise<Response> => {
       progressHandler.updateProgress({
         content: `Enhancing and translating user input prompt ... \n`,
       });
-
-      console.log("User prompt: ", latestUserPromptMessage);
       
       generationPrompt = await translateAndEnhancePrompt(
         latestUserPromptMessage,
       );
-
-      console.log("Processed prompt: ", generationPrompt);
 
       generationPrompt = generateMjPrompt(
         generationPrompt,
@@ -179,8 +175,6 @@ const handler = async (req: Request): Promise<Response> => {
         requestBody.temperature,
         latestUserPromptMessage,
       );
-
-      console.log("Final prompt: ", generationPrompt);
       
       progressHandler.updateProgress({
         content: `Prompt: ${generationPrompt} \n`,
