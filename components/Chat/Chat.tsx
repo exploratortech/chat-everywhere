@@ -86,8 +86,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     async (deleteCount = 0, overrideCurrentMessage?: Message) => {
       const message = overrideCurrentMessage || currentMessage;
 
-      console.log(`chat.tsx`, message?.content);
-
       if (!message) return;
       const plugin = (message.pluginId && Plugins[message.pluginId]) || null;
 

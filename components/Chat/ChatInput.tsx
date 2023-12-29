@@ -108,7 +108,6 @@ export const ChatInput = ({
   const debouncedDispatch = useMemo(
     () =>
       debounce((currentMessage) => {
-        console.log('debounced dispatch, content:', currentMessage.content);
         homeDispatch({
           field: 'currentMessage',
           value: {
@@ -149,7 +148,6 @@ export const ChatInput = ({
       return;
     }
 
-    console.log(`chatinput.tsx`, content);
     if (currentMessage) {
       onSend({
         ...currentMessage,
