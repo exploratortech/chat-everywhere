@@ -32,6 +32,8 @@ import LimiterButton from './LimiterButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
+import { debounce } from 'lodash';
+
 interface Props {
   onSend: () => void;
   onRegenerate: () => void;
@@ -262,16 +264,58 @@ export const ChatInput = ({
         textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'
       }`;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content]);
 
+  const currentMessageRef = useRef(currentMessage);
+
+  useEffect(() => {
+    currentMessageRef.current = currentMessage;
+  }, [currentMessage]);
+
+  const debouncedDispatch = useMemo(
+    () =>
+      debounce((content) => {
+        console.log('debounced dispatch');
+        homeDispatch({
+          field: 'currentMessage',
+          value: {
+            ...currentMessageRef.current,
+            role: 'user',
+            content,
+          },
+        });
+      }, 800),
+    [homeDispatch],
+  );
+
+  useEffect(() => {
+    debouncedDispatch(content);
+  }, [content, debouncedDispatch]);
+
+  // On unmount, save the current message to the context
+  useEffect(() => {
+    console.log('mounted');
     homeDispatch({
       field: 'currentMessage',
       value: {
         ...currentMessage,
-        role: 'user',
-        content,
+        pluginId: null,
       },
     });
-  }, [content]);
+    return () => {
+      console.log('unmounting chat input - dispatching');
+      homeDispatch({
+        field: 'currentMessage',
+        value: {
+          ...currentMessage,
+          role: 'user',
+          content,
+        },
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
@@ -286,16 +330,10 @@ export const ChatInput = ({
     return () => {
       window.removeEventListener('keydown', handleGlobalKeyDown);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFocused, showSettingsModel]);
 
   useEffect(() => {
-    homeDispatch({
-      field: 'currentMessage',
-      value: {
-        ...currentMessage,
-        pluginId: null,
-      },
-    });
     const handleOutsideClick = (e: MouseEvent) => {
       if (
         promptListRef.current &&
