@@ -313,6 +313,14 @@ export const ChatInput = ({
   }, [isFocused, showSettingsModel]);
 
   useEffect(() => {
+    // Create currentMessage
+    homeDispatch({
+      field: 'currentMessage',
+      value: {
+        ...currentMessage,
+        pluginId: null,
+      },
+    });
     const handleOutsideClick = (e: MouseEvent) => {
       if (
         promptListRef.current &&
