@@ -280,9 +280,9 @@ export const ChatInput = ({
         textareaRef.current?.focus();
       }
     };
-  
+
     window.addEventListener('keydown', handleGlobalKeyDown);
-  
+
     return () => {
       window.removeEventListener('keydown', handleGlobalKeyDown);
     };
@@ -374,11 +374,7 @@ export const ChatInput = ({
             }
           `}
         >
-          <EnhancedMenu
-            ref={menuRef}
-            isFocused={isFocused}
-            setIsFocused={setIsFocused}
-          />
+          <EnhancedMenu ref={menuRef} isFocused={isFocused} />
 
           <div className="flex items-start">
             <div className="flex items-center pt-1 pl-1">
