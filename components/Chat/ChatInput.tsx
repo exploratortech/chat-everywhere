@@ -32,8 +32,6 @@ import LimiterButton from './LimiterButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
-import { debounce } from 'lodash';
-
 interface Props {
   onSend: () => void;
   onRegenerate: () => void;
@@ -75,6 +73,7 @@ export const ChatInput = ({
   const { isFocused, setIsFocused, menuRef } = useFocusHandler(textareaRef);
   const [isOverTokenLimit, setIsOverTokenLimit] = useState(false);
   const [isCloseToTokenLimit, setIsCloseToTokenLimit] = useState(false);
+  const [messageIsDispatched, setMessageIsDispatched] = useState(false);
 
   const prompts = useMemo(() => {
     return getNonDeletedCollection(originalPrompts);
@@ -108,7 +107,7 @@ export const ChatInput = ({
     isOnlineModeStreaming,
   );
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (intervalRemaining > 0) {
       return;
     }
@@ -125,13 +124,21 @@ export const ChatInput = ({
       return;
     }
 
-    onSend();
-    setContent('');
-
-    if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
-      textareaRef.current.blur();
-    }
+    await debouncedDispatch(content);
+    setMessageIsDispatched(true);
   };
+  useEffect(() => {
+    if (messageIsDispatched) {
+      console.log('messageIsDispatched');
+      console.log(`chatinput.tsx`, currentMessage?.content);
+      onSend();
+      setContent('');
+      if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
+        textareaRef.current.blur();
+      }
+      setMessageIsDispatched(false);
+    }
+  }, [currentMessage?.content, messageIsDispatched, onSend, textareaRef]);
 
   const handleStopConversation = () => {
     stopConversationRef.current = true;
@@ -267,20 +274,14 @@ export const ChatInput = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
 
-  const currentMessageRef = useRef(currentMessage);
-
-  useEffect(() => {
-    currentMessageRef.current = currentMessage;
-  }, [currentMessage]);
-
   const debouncedDispatch = useMemo(
     () =>
       debounce((content) => {
-        console.log('debounced dispatch');
+        console.log('debounced dispatch, content:', content);
         homeDispatch({
           field: 'currentMessage',
           value: {
-            ...currentMessageRef.current,
+            ...currentMessage,
             role: 'user',
             content,
           },
@@ -518,4 +519,19 @@ export const ChatInput = ({
       </div>
     </div>
   );
+};
+
+const debounce = (func: (...args: any[]) => void, delay: number) => {
+  let debounceTimer: NodeJS.Timeout | null;
+  return function (this: any, ...args: any[]) {
+    const context = this;
+    return new Promise<void>((resolve) => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        func.apply(context, args);
+        console.log('resolved');
+        resolve();
+      }, delay);
+    });
+  };
 };
