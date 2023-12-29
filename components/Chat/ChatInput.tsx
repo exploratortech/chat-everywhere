@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useTransition,
 } from 'react';
 
 import { useTranslation } from 'next-i18next';
@@ -19,6 +20,7 @@ import useLimiter from '@/hooks/useLimiter';
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
 
+import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
 
@@ -32,8 +34,10 @@ import LimiterButton from './LimiterButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
+import { debounce } from 'lodash';
+
 interface Props {
-  onSend: () => void;
+  onSend: (currentMessage: Message) => void;
   onRegenerate: () => void;
   stopConversationRef: MutableRefObject<boolean>;
   textareaRef: MutableRefObject<HTMLTextAreaElement | null>;
@@ -73,7 +77,7 @@ export const ChatInput = ({
   const { isFocused, setIsFocused, menuRef } = useFocusHandler(textareaRef);
   const [isOverTokenLimit, setIsOverTokenLimit] = useState(false);
   const [isCloseToTokenLimit, setIsCloseToTokenLimit] = useState(false);
-  const [messageIsDispatched, setMessageIsDispatched] = useState(false);
+  const [_, startTransition] = useTransition();
 
   const prompts = useMemo(() => {
     return getNonDeletedCollection(originalPrompts);
@@ -94,7 +98,27 @@ export const ChatInput = ({
 
     setContent(value);
     updatePromptListVisibility(value);
+    startTransition(() => {
+      debouncedDispatch({
+        ...currentMessage,
+        content: value,
+      });
+    });
   };
+  const debouncedDispatch = useMemo(
+    () =>
+      debounce((currentMessage) => {
+        console.log('debounced dispatch, content:', currentMessage.content);
+        homeDispatch({
+          field: 'currentMessage',
+          value: {
+            ...currentMessage,
+            role: 'user',
+          },
+        });
+      }, 1000),
+    [homeDispatch],
+  );
 
   const isOnlineModeStreaming = useMemo(() => {
     return (
@@ -107,7 +131,7 @@ export const ChatInput = ({
     isOnlineModeStreaming,
   );
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (intervalRemaining > 0) {
       return;
     }
@@ -115,6 +139,7 @@ export const ChatInput = ({
       return;
     }
 
+    const content = textareaRef.current?.value;
     if (!content) {
       alert(t('Please enter a message'));
       return;
@@ -124,21 +149,20 @@ export const ChatInput = ({
       return;
     }
 
-    await debouncedDispatch(content);
-    setMessageIsDispatched(true);
-  };
-  useEffect(() => {
-    if (messageIsDispatched) {
-      console.log('messageIsDispatched');
-      console.log(`chatinput.tsx`, currentMessage?.content);
-      onSend();
+    console.log(`chatinput.tsx`, content);
+    if (currentMessage) {
+      onSend({
+        ...currentMessage,
+        content,
+      });
       setContent('');
       if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
         textareaRef.current.blur();
       }
-      setMessageIsDispatched(false);
+    } else {
+      alert('currentMessage is null');
     }
-  }, [currentMessage?.content, messageIsDispatched, onSend, textareaRef]);
+  };
 
   const handleStopConversation = () => {
     stopConversationRef.current = true;
@@ -273,50 +297,6 @@ export const ChatInput = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
-
-  const debouncedDispatch = useMemo(
-    () =>
-      debounce((content) => {
-        console.log('debounced dispatch, content:', content);
-        homeDispatch({
-          field: 'currentMessage',
-          value: {
-            ...currentMessage,
-            role: 'user',
-            content,
-          },
-        });
-      }, 800),
-    [homeDispatch],
-  );
-
-  useEffect(() => {
-    debouncedDispatch(content);
-  }, [content, debouncedDispatch]);
-
-  // On unmount, save the current message to the context
-  useEffect(() => {
-    console.log('mounted');
-    homeDispatch({
-      field: 'currentMessage',
-      value: {
-        ...currentMessage,
-        pluginId: null,
-      },
-    });
-    return () => {
-      console.log('unmounting chat input - dispatching');
-      homeDispatch({
-        field: 'currentMessage',
-        value: {
-          ...currentMessage,
-          role: 'user',
-          content,
-        },
-      });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
@@ -519,19 +499,4 @@ export const ChatInput = ({
       </div>
     </div>
   );
-};
-
-const debounce = (func: (...args: any[]) => void, delay: number) => {
-  let debounceTimer: NodeJS.Timeout | null;
-  return function (this: any, ...args: any[]) {
-    const context = this;
-    return new Promise<void>((resolve) => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        func.apply(context, args);
-        console.log('resolved');
-        resolve();
-      }, delay);
-    });
-  };
 };
