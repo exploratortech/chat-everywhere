@@ -14,6 +14,7 @@ import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics/dist/interactions';
 
 import { getEndpoint } from '@/utils/app/api';
+import chat from '@/utils/app/chat';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
@@ -91,26 +92,39 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
       if (selectedConversation) {
         const controller = new AbortController();
-        const updatedConversation = updateConversation(
+        const updatedConversation = chat.updateConversation(
           deleteCount,
           message,
           selectedConversation,
+          homeDispatch,
         );
-        const chatBody = createChatBody(
+        const chatBody = chat.createChatBody(
           updatedConversation,
           plugin,
           selectedConversation,
         );
-        const response = await sendRequest(chatBody, plugin, controller);
+        const response = await chat.sendRequest(
+          chatBody,
+          plugin,
+          controller,
+          outputLanguage,
+          user,
+        );
 
         if (!response.ok) {
-          handleErrorResponse(response, selectedConversation);
+          chat.handleErrorResponse(
+            response,
+            selectedConversation,
+            homeDispatch,
+            toast.error,
+            t,
+          );
           return;
         }
 
         const data = response.body;
         if (!data) {
-          handleNoDataResponse();
+          chat.handleNoDataResponse(homeDispatch);
           return;
         }
 
@@ -124,6 +138,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         );
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       conversations,
       selectedConversation,
@@ -133,123 +148,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       homeDispatch,
     ],
   );
-
-  function updateConversation(
-    deleteCount: number,
-    message: Message,
-    selectedConversation: Conversation,
-  ): Conversation {
-    let updatedConversation: Conversation;
-    if (deleteCount) {
-      const updatedMessages = [...selectedConversation.messages];
-
-      for (let i = 0; i < deleteCount; i++) {
-        updatedMessages.pop();
-      }
-
-      updatedConversation = {
-        ...selectedConversation,
-        messages: [...updatedMessages, message],
-      };
-    } else {
-      updatedConversation = {
-        ...selectedConversation,
-        messages: [...selectedConversation.messages, message],
-      };
-    }
-    homeDispatch({
-      field: 'selectedConversation',
-      value: updatedConversation,
-    });
-    homeDispatch({ field: 'loading', value: true });
-    homeDispatch({ field: 'messageIsStreaming', value: true });
-
-    return updatedConversation;
-  }
-
-  function createChatBody(
-    updatedConversation: Conversation,
-    plugin: Plugin | null,
-    selectedConversation: Conversation,
-  ): ChatBody {
-    const chatBody: ChatBody = {
-      model: updatedConversation.model,
-      messages: updatedConversation.messages,
-      prompt: updatedConversation.prompt,
-      temperature: updatedConversation.temperature,
-    };
-
-    if (plugin?.id === PluginID.IMAGE_GEN) {
-      chatBody.imageQuality =
-        selectedConversation.imageQuality || DEFAULT_IMAGE_GENERATION_QUALITY;
-      chatBody.imageStyle =
-        selectedConversation.imageStyle || DEFAULT_IMAGE_GENERATION_STYLE;
-    }
-
-    return chatBody;
-  }
-
-  async function sendRequest(
-    chatBody: ChatBody,
-    plugin: Plugin | null,
-    controller: AbortController,
-  ): Promise<Response> {
-    const body = JSON.stringify(chatBody);
-
-    const response = await fetch(getEndpoint(plugin), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Output-Language': outputLanguage,
-        'user-token': user?.token || '',
-        'user-browser-id': getOrGenerateUserId() || '',
-        'user-selected-plugin-id': plugin?.id || '',
-      },
-      signal: controller.signal,
-      body,
-    });
-
-    return response;
-  }
-
-  function handleErrorResponse(
-    response: Response,
-    selectedConversation: Conversation,
-  ) {
-    homeDispatch({ field: 'loading', value: false });
-    homeDispatch({ field: 'messageIsStreaming', value: false });
-    if (response.status === 429) {
-      toast.error(
-        t(
-          'We apologize for the inconvenience, but our server is currently experiencing high traffic. Please try again later.',
-        ),
-      );
-    } else if (response.status === 401) {
-      toast.error(
-        t('Sorry something went wrong. Please refresh the page and try again.'),
-      );
-    } else {
-      toast.error(
-        t(
-          'Sorry, something went wrong. Our team has been notified and will look into it.',
-        ),
-      );
-    }
-
-    // remove the last message from the conversation
-    homeDispatch({
-      field: 'selectedConversation',
-      value: {
-        ...selectedConversation,
-        messages: [...selectedConversation.messages],
-      },
-    });
-  }
-
-  function handleNoDataResponse() {
-    homeDispatch({ field: 'loading', value: false });
-    homeDispatch({ field: 'messageIsStreaming', value: false });
-  }
 
   async function handleDataResponse(
     data: ReadableStream<Uint8Array>,
