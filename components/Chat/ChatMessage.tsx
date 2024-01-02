@@ -28,22 +28,13 @@ import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import { ImageGenerationComponent } from './components/ImageGenerationComponent';
-import MjImageComponent from './components/MjImageComponent';
 import TokenCounter from './components/TokenCounter';
 
-import { CodeBlock } from '../Markdown/CodeBlock';
-import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
+import AssistantRespondMessage from './ChatMessage/AssistantRespondMessage';
 import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';
 import { LineShareButton } from './LineShareButton';
 import { SpeechButton } from './SpeechButton';
-
-import rehypeMathjax from 'rehype-mathjax';
-import rehypeRaw from 'rehype-raw';
-import remarkBreaks from 'remark-breaks';
-import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
 
 interface Props {
   message: Message;
@@ -194,103 +185,11 @@ export const ChatMessage: FC<Props> = memo(
       }
     };
 
-    const ImgComponent = useMemo(() => {
-      const Component = ({
-        src,
-        title,
-        alt,
-        node,
-      }: React.DetailedHTMLProps<
-        React.ImgHTMLAttributes<HTMLImageElement> & { node?: any },
-        HTMLImageElement
-      >) => {
-        const aiImageButtons =
-          node?.properties?.dataAiImageButtons &&
-          (node?.properties?.dataAiImageButtons).split(',');
-        const aiImagePrompt =
-          node?.properties?.dataAiImagePrompt &&
-          (node?.properties?.dataAiImagePrompt).split(',');
-        const aiImageButtonMessageId =
-          node?.properties?.dataAiImageButtonMessageId;
-
-        const isValidUrl = (url: string) => {
-          try {
-            new URL(url);
-            return true;
-          } catch (e) {
-            return false;
-          }
-        };
-
-        if (!src) return <></>;
-        if (!isValidUrl(src)) return <b>{`{InValid IMAGE URL}`}</b>;
-
-        if (message.pluginId !== PluginID.IMAGE_GEN) {
-          return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              id={node?.properties?.id}
-              src={src}
-              alt=""
-              className="w-full"
-            />
-          );
-        }
-        if (aiImageButtons) {
-          return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <MjImageComponent
-              src={src}
-              buttons={aiImageButtons}
-              buttonMessageId={aiImageButtonMessageId}
-              prompt={aiImagePrompt}
-            />
-          );
-        }
-
-        return (
-          <ImageGenerationComponent
-            src={src}
-            title={title}
-            messageIndex={messageIndex}
-            generationPrompt={alt || ''}
-          />
-        );
-      };
-      Component.displayName = 'ImgComponent';
-      return Component;
-    }, [message.pluginId, messageIndex]);
-
-    const CodeComponent = useMemo(() => {
-      const Component: React.FC<any> = ({
-        node,
-        inline,
-        className,
-        children,
-        ...props
-      }) => {
-        const match = /language-(\w+)/.exec(className || '');
-        return !inline ? (
-          <CodeBlock
-            key={messageIndex}
-            language={(match && match[1]) || ''}
-            value={String(children).replace(/\n$/, '')}
-            {...props}
-          />
-        ) : (
-          <code className={className} {...props} key={messageIndex}>
-            {children}
-          </code>
-        );
-      };
-      Component.displayName = 'CodeComponent';
-      return Component;
-    }, [messageIndex]);
-
     const formattedMessage = useMemo(
       () => modifyParagraphs(message.content),
       [message.content],
     );
+
     return (
       <div
         className={`group px-4 ${
@@ -427,52 +326,11 @@ export const ChatMessage: FC<Props> = memo(
             ) : (
               <div className="flex w-full flex-col md:justify-between">
                 <div className="flex flex-row justify-between">
-                  <MemoizedReactMarkdown
-                    className="prose dark:prose-invert min-w-full"
-                    remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-                    rehypePlugins={[rehypeMathjax, rehypeRaw]}
-                    components={{
-                      a({ node, children, href, ...props }) {
-                        return (
-                          <a
-                            href={href}
-                            target={
-                              href && href[0] === '#' ? '_self' : '_blank'
-                            }
-                            rel="noreferrer noopener"
-                            {...props}
-                          >
-                            {children}
-                          </a>
-                        );
-                      },
-                      code: CodeComponent,
-                      table({ children }) {
-                        return (
-                          <table className="border-collapse border border-black px-3 py-1 dark:border-white">
-                            {children}
-                          </table>
-                        );
-                      },
-                      th({ children }) {
-                        return (
-                          <th className="break-words border border-black bg-gray-500 px-3 py-1 text-white dark:border-white">
-                            {children}
-                          </th>
-                        );
-                      },
-                      td({ children }) {
-                        return (
-                          <td className="break-words border border-black px-3 py-1 dark:border-white">
-                            {children}
-                          </td>
-                        );
-                      },
-                      img: ImgComponent,
-                    }}
-                  >
-                    {formattedMessage}
-                  </MemoizedReactMarkdown>
+                  <AssistantRespondMessage
+                    formattedMessage={formattedMessage}
+                    messageIndex={messageIndex}
+                    messagePluginId={message.pluginId}
+                  />
                   <div className="flex m-1 tablet:hidden">
                     <CopyButton />
                   </div>
