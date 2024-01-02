@@ -24,12 +24,6 @@ const AssistantRespondMessage = memo(
     messagePluginId: Message['pluginId'];
     messageIndex: number;
   }) => {
-    // DOING: debug re-rendering
-    const renderCount = useRef(0);
-    useEffect(() => {
-      renderCount.current += 1;
-    });
-
     const ImgComponent = useMemo(() => {
       const Component = ({
         src,
@@ -124,53 +118,50 @@ const AssistantRespondMessage = memo(
     }, [messageIndex]);
 
     return (
-      <>
-        <div className="border border-white ">{`${renderCount.current}`}</div>
-        <MemoizedReactMarkdown
-          className="prose dark:prose-invert min-w-full"
-          remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-          rehypePlugins={[rehypeMathjax, rehypeRaw]}
-          components={{
-            a({ node, children, href, ...props }) {
-              return (
-                <a
-                  href={href}
-                  target={href && href[0] === '#' ? '_self' : '_blank'}
-                  rel="noreferrer noopener"
-                  {...props}
-                >
-                  {children}
-                </a>
-              );
-            },
-            code: CodeComponent,
-            table({ children }) {
-              return (
-                <table className="border-collapse border border-black px-3 py-1 dark:border-white">
-                  {children}
-                </table>
-              );
-            },
-            th({ children }) {
-              return (
-                <th className="break-words border border-black bg-gray-500 px-3 py-1 text-white dark:border-white">
-                  {children}
-                </th>
-              );
-            },
-            td({ children }) {
-              return (
-                <td className="break-words border border-black px-3 py-1 dark:border-white">
-                  {children}
-                </td>
-              );
-            },
-            img: ImgComponent,
-          }}
-        >
-          {formattedMessage}
-        </MemoizedReactMarkdown>
-      </>
+      <MemoizedReactMarkdown
+        className="prose dark:prose-invert min-w-full"
+        remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
+        rehypePlugins={[rehypeMathjax, rehypeRaw]}
+        components={{
+          a({ node, children, href, ...props }) {
+            return (
+              <a
+                href={href}
+                target={href && href[0] === '#' ? '_self' : '_blank'}
+                rel="noreferrer noopener"
+                {...props}
+              >
+                {children}
+              </a>
+            );
+          },
+          code: CodeComponent,
+          table({ children }) {
+            return (
+              <table className="border-collapse border border-black px-3 py-1 dark:border-white">
+                {children}
+              </table>
+            );
+          },
+          th({ children }) {
+            return (
+              <th className="break-words border border-black bg-gray-500 px-3 py-1 text-white dark:border-white">
+                {children}
+              </th>
+            );
+          },
+          td({ children }) {
+            return (
+              <td className="break-words border border-black px-3 py-1 dark:border-white">
+                {children}
+              </td>
+            );
+          },
+          img: ImgComponent,
+        }}
+      >
+        {formattedMessage}
+      </MemoizedReactMarkdown>
     );
   },
   (prevProps, nextProps) =>
