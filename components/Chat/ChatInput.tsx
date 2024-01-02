@@ -34,8 +34,6 @@ import LimiterButton from './LimiterButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
-import { debounce } from 'lodash';
-
 interface Props {
   onSend: (currentMessage: Message) => void;
   onRegenerate: () => void;
@@ -77,7 +75,6 @@ export const ChatInput = ({
   const { isFocused, setIsFocused, menuRef } = useFocusHandler(textareaRef);
   const [isOverTokenLimit, setIsOverTokenLimit] = useState(false);
   const [isCloseToTokenLimit, setIsCloseToTokenLimit] = useState(false);
-  const [_, startTransition] = useTransition();
 
   const prompts = useMemo(() => {
     return getNonDeletedCollection(originalPrompts);
@@ -98,26 +95,7 @@ export const ChatInput = ({
 
     setContent(value);
     updatePromptListVisibility(value);
-    startTransition(() => {
-      debouncedDispatch({
-        ...currentMessage,
-        content: value,
-      });
-    });
   };
-  const debouncedDispatch = useMemo(
-    () =>
-      debounce((currentMessage) => {
-        homeDispatch({
-          field: 'currentMessage',
-          value: {
-            ...currentMessage,
-            role: 'user',
-          },
-        });
-      }, 1000),
-    [homeDispatch],
-  );
 
   const isOnlineModeStreaming = useMemo(() => {
     return (
@@ -125,7 +103,7 @@ export const ChatInput = ({
     );
   }, [messageIsStreaming, currentMessage]);
 
-  const { intervalRemaining, startTime, maxInterval } = useLimiter(
+  const { intervalRemaining, maxInterval } = useLimiter(
     user,
     isOnlineModeStreaming,
   );
@@ -152,6 +130,7 @@ export const ChatInput = ({
       onSend({
         ...currentMessage,
         content,
+        role: 'user',
       });
       setContent('');
       if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
