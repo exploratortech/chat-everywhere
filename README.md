@@ -80,3 +80,9 @@ Start chatting and enjoy!
 3. Update the variable `ngrokHost ` and `localSupabaseHost` 
 4. Uncomment the line where url is passed to `url: replaceLocalhost(url)`, in function `nextLegDescribe`
 5. Now that your supabase bucket is accessible from the internet, so that the next leg api can access it.
+
+# Database migration guide
+1. Make the changes in local Supabase emulator
+2. Generate a new migration file with `supabase migration new migration_file_name`
+3. Get database difference with `supabase db diff`
+4. Apply appropriate changes to the new migration file

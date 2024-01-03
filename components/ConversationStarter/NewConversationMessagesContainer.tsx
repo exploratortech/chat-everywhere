@@ -27,6 +27,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   } = useContext(HomeContext);
 
   const [rolePlayMode, setRolePlayMode] = useState(true);
+  const enableSpecialEffect = user?.plan === 'ultra';
 
   const switchButtonOnClick = () => {
     setRolePlayMode(!rolePlayMode);
@@ -76,7 +77,22 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         href="https://intro.chateverywhere.app"
         target="_blank"
         rel="noopener noreferrer"
-        className="font-semibold font-serif underline"
+        className={`font-semibold font-serif underline ${
+          enableSpecialEffect
+            ? 'bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] rounded bg-gray-700 text-indigo-400 mr-0'
+            : ''
+        }`}
+        style={
+          enableSpecialEffect
+            ? {
+                color: '#343541',
+                WebkitBackgroundClip: 'text',
+                WebkitTextStrokeWidth: '3px',
+                WebkitTextStrokeColor: 'transparent',
+                fontSize: '2.25rem',
+              }
+            : {}
+        }
       >
         Chat Everywhere
       </a>

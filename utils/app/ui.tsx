@@ -1,9 +1,9 @@
 import {
   IconBolt,
   IconBrain,
+  IconBuildingBroadcastTower,
   IconNumber4,
   IconPaint,
-  IconBuildingBroadcastTower
 } from '@tabler/icons-react';
 import { IconCheck } from '@tabler/icons-react';
 
@@ -27,6 +27,18 @@ export const PlanDetail = {
       'MidJourney generation (50 images/month + credit)',
       '16K model',
       'LINE connection',
+    ],
+  },
+  ultra: {
+    features: [
+      'Cloud sync',
+      'AI speech',
+      'Online mode',
+      '16K model',
+      'LINE connection',
+      'Unlimited GPT-4',
+      'Unlimited MidJourney generation',
+      'Chat with document (coming soon)',
     ],
   },
   combinedSimplify: [
