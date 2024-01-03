@@ -90,20 +90,28 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       if (!message) return;
       const plugin = (message.pluginId && Plugins[message.pluginId]) || null;
 
+      const {
+        updateConversation,
+        createChatBody,
+        sendRequest,
+        handleErrorResponse,
+        handleNoDataResponse,
+        handleDataResponse,
+      } = chat;
       if (selectedConversation) {
         const controller = new AbortController();
-        const updatedConversation = chat.updateConversation(
+        const updatedConversation = updateConversation(
           deleteCount,
           message,
           selectedConversation,
           homeDispatch,
         );
-        const chatBody = chat.createChatBody(
+        const chatBody = createChatBody(
           updatedConversation,
           plugin,
           selectedConversation,
         );
-        const response = await chat.sendRequest(
+        const response = await sendRequest(
           chatBody,
           plugin,
           controller,
@@ -112,7 +120,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         );
 
         if (!response.ok) {
-          chat.handleErrorResponse(
+          handleErrorResponse(
             response,
             selectedConversation,
             homeDispatch,
@@ -124,7 +132,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         const data = response.body;
         if (!data) {
-          chat.handleNoDataResponse(homeDispatch);
+          handleNoDataResponse(homeDispatch);
           return;
         }
 
@@ -135,6 +143,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           message,
           controller,
           selectedConversation,
+          conversations,
+          stopConversationRef,
+          homeDispatch,
         );
       }
     },
@@ -148,151 +159,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       homeDispatch,
     ],
   );
-
-  async function handleDataResponse(
-    data: ReadableStream<Uint8Array>,
-    updatedConversation: Conversation,
-    plugin: Plugin | null,
-    message: Message,
-    controller: AbortController,
-    selectedConversation: Conversation,
-  ) {
-    if (updatedConversation.messages.length === 1) {
-      const { content } = message;
-      const customName =
-        content.length > 30 ? content.substring(0, 30) + '...' : content;
-      updatedConversation = {
-        ...updatedConversation,
-        name: customName,
-      };
-    }
-    homeDispatch({ field: 'loading', value: false });
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-    let isFirst = true;
-    let text = '';
-    let largeContextResponse = false;
-    let showHintForLargeContextResponse = false;
-
-    while (!done) {
-      if (stopConversationRef.current === true) {
-        controller.abort();
-        done = true;
-        break;
-      }
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      text += chunkValue;
-
-      if (text.includes('[DONE]')) {
-        text = text.replace('[DONE]', '');
-        done = true;
-      }
-
-      if (text.includes('[16K]')) {
-        text = text.replace('[16K]', '');
-        largeContextResponse = true;
-      }
-
-      if (text.includes('[16K-Optional]')) {
-        text = text.replace('[16K-Optional]', '');
-        showHintForLargeContextResponse = true;
-      }
-
-      if (text.includes('[REMOVE_TEMP_HTML]')) {
-        text = removeTempHtmlString(text);
-      }
-
-      if (text.includes('[REMOVE_LAST_LINE]')) {
-        text = text.replace('[REMOVE_LAST_LINE]', '');
-        text = removeSecondLastLine(text);
-      }
-
-      // We can use this command to trigger the initial stream of Edge function response
-      // so we have more than 25 seconds on Vercel Edge network to wait for response
-      if (text.includes('[PLACEHOLDER]')) {
-        text = text.replace('[PLACEHOLDER]', '');
-      }
-
-      if (isFirst) {
-        isFirst = false;
-        const updatedMessages: Message[] = [
-          ...updatedConversation.messages,
-          {
-            role: 'assistant',
-            content: removeRedundantTempHtmlString(text),
-            largeContextResponse,
-            showHintForLargeContextResponse,
-            pluginId: plugin?.id || null,
-          },
-        ];
-        updatedConversation = {
-          ...updatedConversation,
-          messages: updatedMessages,
-          lastUpdateAtUTC: dayjs().valueOf(),
-        };
-        homeDispatch({
-          field: 'selectedConversation',
-          value: updatedConversation,
-        });
-      } else {
-        const updatedMessages: Message[] = updatedConversation.messages.map(
-          (message, index) => {
-            if (index === updatedConversation.messages.length - 1) {
-              return {
-                ...message,
-                content: removeRedundantTempHtmlString(text),
-                largeContextResponse,
-                showHintForLargeContextResponse,
-              };
-            }
-            return message;
-          },
-        );
-        updatedConversation = {
-          ...updatedConversation,
-          messages: updatedMessages,
-          lastUpdateAtUTC: dayjs().valueOf(),
-        };
-        homeDispatch({
-          field: 'selectedConversation',
-          value: updatedConversation,
-        });
-      }
-    }
-
-    saveConversation(updatedConversation);
-    let updatedConversations: Conversation[] = conversations.map(
-      (conversation) => {
-        if (conversation.id === selectedConversation.id) {
-          return updatedConversation;
-        }
-        return conversation;
-      },
-    );
-
-    // If the conversation is new, add it to the list of conversations
-    if (
-      !updatedConversations.find(
-        (conversation) => conversation.id === updatedConversation.id,
-      )
-    ) {
-      updatedConversations.push(updatedConversation);
-      updatedConversations = reorderItem(
-        updatedConversations,
-        updatedConversation.id,
-        0,
-      );
-    }
-
-    homeDispatch({ field: 'conversations', value: updatedConversations });
-    saveConversations(updatedConversations);
-    homeDispatch({ field: 'messageIsStreaming', value: false });
-
-    updateConversationLastUpdatedAtTimeStamp();
-  }
 
   const handleScroll = throttle(() => {
     if (chatContainerRef.current) {
