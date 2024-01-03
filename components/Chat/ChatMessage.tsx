@@ -23,7 +23,7 @@ import { updateConversation } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
 import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 
-import { Conversation, Message } from '@/types/chat';
+import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -39,20 +39,27 @@ import { SpeechButton } from './SpeechButton';
 interface Props {
   message: Message;
   messageIndex: number;
-  displayFooterButtons: boolean;
-  conversation: Conversation;
-  onEdit?: (editedMessage: Message) => void;
+  messageIsStreaming: boolean;
+  onEdit?: (editedMessage: Message, index: number) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, displayFooterButtons, conversation, onEdit, messageIndex }) => {
+  ({ message, onEdit, messageIsStreaming, messageIndex }) => {
     const { t } = useTranslation('chat');
     const { i18n } = useTranslation();
 
     const {
-      state: { selectedConversation, conversations, messageIsStreaming },
+      state: { selectedConversation, conversations },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
+
+    const displayFooterButtons = useMemo(() => {
+      if (!selectedConversation) return false;
+      return (
+        selectedConversation.messages.length - 1 === messageIndex &&
+        !messageIsStreaming
+      );
+    }, [messageIndex, messageIsStreaming, selectedConversation]);
 
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -79,7 +86,7 @@ export const ChatMessage: FC<Props> = memo(
 
     const handleEditMessage = () => {
       if (message.content != messageContent && selectedConversation && onEdit) {
-        onEdit({ ...message, content: messageContent });
+        onEdit({ ...message, content: messageContent }, messageIndex);
       }
       setIsEditing(false);
       event('interaction', {
@@ -341,9 +348,11 @@ export const ChatMessage: FC<Props> = memo(
                       !message.pluginId) && (
                       <SpeechButton inputText={message.content} />
                     )}
-                    {displayFooterButtons && (
+                    {displayFooterButtons && selectedConversation && (
                       <>
-                        <FeedbackContainer conversation={conversation} />
+                        <FeedbackContainer
+                          conversation={selectedConversation}
+                        />
                         <div className="m-1 hidden tablet:flex">
                           <CopyButton className="translate-x-[unset] !text-gray-500 hover:!text-gray-300" />
                         </div>
@@ -369,6 +378,15 @@ export const ChatMessage: FC<Props> = memo(
           </div>
         </div>
       </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // CRITICAL: The onEdit function is not included in the dependency array to avoid re-rendering the component when it changes. Instead, messageIsStreaming is used to trigger a re-render and update the onEdit function props.
+
+    return (
+      prevProps.message.content === nextProps.message.content &&
+      prevProps.messageIndex === nextProps.messageIndex &&
+      prevProps.messageIsStreaming === nextProps.messageIsStreaming
     );
   },
 );

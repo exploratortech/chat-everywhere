@@ -1,5 +1,6 @@
 import { IconArrowDown, IconClearAll } from '@tabler/icons-react';
 import {
+  Fragment,
   MutableRefObject,
   memo,
   useCallback,
@@ -252,6 +253,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
     };
   }, [messagesEndRef]);
+  const onEdit = useCallback(
+    (editedMessage: Message, index: number) => {
+      setCurrentMessage(editedMessage);
+
+      // discard edited message and the ones that come after then resend
+      if (!selectedConversation) return;
+      handleSend(selectedConversation?.messages.length - index, editedMessage);
+    },
+    [handleSend, selectedConversation, setCurrentMessage],
+  );
 
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
@@ -310,26 +321,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 </div>
 
                 {selectedConversation?.messages.map((message, index) => (
-                  <div key={index}>
+                  <Fragment key={index}>
                     <ChatMessage
-                      key={index}
                       message={message}
                       messageIndex={index}
-                      onEdit={(editedMessage) => {
-                        setCurrentMessage(editedMessage);
-                        // discard edited message and the ones that come after then resend
-                        handleSend(
-                          selectedConversation?.messages.length - index,
-                          editedMessage,
-                        );
-                      }}
-                      displayFooterButtons={
-                        selectedConversation.messages.length - 1 === index &&
-                        !messageIsStreaming
-                      }
-                      conversation={selectedConversation}
+                      onEdit={onEdit}
+                      messageIsStreaming={messageIsStreaming}
                     />
-                  </div>
+                  </Fragment>
                 ))}
 
                 {loading && <ChatLoader />}
