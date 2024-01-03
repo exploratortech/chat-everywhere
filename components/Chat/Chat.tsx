@@ -13,26 +13,12 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics/dist/interactions';
 
-import { getEndpoint } from '@/utils/app/api';
 import chat from '@/utils/app/chat';
-import {
-  DEFAULT_IMAGE_GENERATION_QUALITY,
-  DEFAULT_IMAGE_GENERATION_STYLE,
-} from '@/utils/app/const';
-import { saveConversation, saveConversations } from '@/utils/app/conversation';
-import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import {
-  removeRedundantTempHtmlString,
-  removeTempHtmlString,
-} from '@/utils/app/htmlStringHandler';
 import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
-import { reorderItem } from '@/utils/app/rank';
-import { removeSecondLastLine } from '@/utils/app/ui';
-import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 import { throttle } from '@/utils/data/throttle';
 
-import { ChatBody, Conversation, Message } from '@/types/chat';
-import { Plugin, PluginID, Plugins } from '@/types/plugin';
+import { Message } from '@/types/chat';
+import { PluginID, Plugins } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
@@ -42,8 +28,6 @@ import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import { ChatMessage } from './ChatMessage';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
-
-import dayjs from 'dayjs';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
