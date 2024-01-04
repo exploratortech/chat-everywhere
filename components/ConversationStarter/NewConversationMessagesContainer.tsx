@@ -78,7 +78,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         rel="noopener noreferrer"
         className={`font-semibold font-serif underline select-none ${
           isUltraUser
-            ? 'bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] rounded bg-gray-700 text-indigo-400 mr-0'
+            ? 'bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] rounded bg-gray-700 text-indigo-400 mr-0 pr-[3px] pb-[3px]'
             : ''
         }`}
         style={
