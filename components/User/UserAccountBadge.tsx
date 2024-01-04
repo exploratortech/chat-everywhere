@@ -10,7 +10,7 @@ export default function UserAccountBadge() {
     if (user.plan === 'ultra') {
       return (
         <span 
-          className="bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] text-xs font-medium mr-2 py-0.5 rounded bg-gray-700 text-indigo-400 mr-0"
+          className="bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] text-xs font-medium py-0.5 rounded bg-gray-700 text-indigo-400 mr-0"
           style={{color: "transparent", WebkitBackgroundClip: 'text', WebkitTextStrokeWidth: '1px', WebkitTextStrokeColor: 'transparent' }}
         >
           Ultra
