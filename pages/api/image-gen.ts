@@ -96,7 +96,9 @@ const handler = async (req: Request): Promise<Response> => {
   const user = await getUserProfile(data.user.id);
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
-  if (await hasUserRunOutOfCredits(data.user.id, PluginID.IMAGE_GEN)) {
+  const isUserInUltraPlan = user.plan === 'ultra';
+
+  if (!isUserInUltraPlan && await hasUserRunOutOfCredits(data.user.id, PluginID.IMAGE_GEN)) {
     return new Response('Error', {
       status: 402,
       statusText: 'Ran out of Image generation credit',
@@ -308,8 +310,11 @@ const handler = async (req: Request): Promise<Response> => {
               ),
               prompt: generationPrompt,
             });
-            await addUsageEntry(PluginID.IMAGE_GEN, user.id);
-            await subtractCredit(user.id, PluginID.IMAGE_GEN);
+
+            if(!isUserInUltraPlan){
+              await addUsageEntry(PluginID.IMAGE_GEN, user.id);
+              await subtractCredit(user.id, PluginID.IMAGE_GEN);
+            }
 
             imageGenerationProgress = 100;
 

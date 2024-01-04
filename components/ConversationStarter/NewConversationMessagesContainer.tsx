@@ -22,7 +22,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   const { t } = useTranslation('chat');
   const { t: modelTranslate } = useTranslation('model');
   const {
-    state: { user },
+    state: { user, isUltraUser },
     dispatch,
   } = useContext(HomeContext);
 
@@ -76,9 +76,24 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         href="https://intro.chateverywhere.app"
         target="_blank"
         rel="noopener noreferrer"
-        className="font-semibold font-serif underline"
+        className={`font-semibold font-serif underline select-none ${
+          isUltraUser
+            ? 'bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] rounded bg-gray-700 text-indigo-400 mr-0 pr-[3px] pb-[3px]'
+            : ''
+        }`}
+        style={
+          isUltraUser
+            ? {
+                color: '#343541',
+                WebkitBackgroundClip: 'text',
+                WebkitTextStrokeWidth: '3px',
+                WebkitTextStrokeColor: 'transparent',
+                fontSize: '2.25rem',
+              }
+            : {}
+        }
       >
-        Chat Everywhere
+        Chat Everywhere {isUltraUser ? 'Ultra' : ''}
       </a>
 
       {/* Ask for support banner */}

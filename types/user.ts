@@ -8,7 +8,7 @@ export interface User extends UserProfile {
   token: string;
 }
 
-export type SubscriptionPlan = 'free' | 'pro' | 'edu';
+export type SubscriptionPlan = 'free' | 'pro' | 'ultra' | 'edu';
 
 export interface UserConversation {
   id: string;
@@ -32,10 +32,10 @@ export interface UserProfile {
 
 export interface CreditUsage {
   [PluginID.GPT4]: {
-    remainingCredits: number;
+    remainingCredits: number | null;
   };
   [PluginID.IMAGE_GEN]: {
-    remainingCredits: number;
+    remainingCredits: number | null;
   };
 }
 

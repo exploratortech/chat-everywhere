@@ -37,6 +37,8 @@ const handler = async (req: Request): Promise<Response> => {
   const user = await getUserProfile(data.user.id);
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
+  const isUserInUltraPlan = user.plan === 'ultra';
+
   const requestBody = await req.json();
 
   const { button, buttonMessageId, prompt } = requestBody;
@@ -171,7 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
           }
 
           // only upscale command will not be charged
-          if (!isUpscaleCommand) {
+          if (!isUpscaleCommand && !isUserInUltraPlan) {
             await addUsageEntry(PluginID.IMAGE_GEN, user.id);
             await subtractCredit(user.id, PluginID.IMAGE_GEN);
           }

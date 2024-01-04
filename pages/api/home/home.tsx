@@ -429,6 +429,7 @@ const Home = () => {
         .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
+          dispatch({ field: 'isUltraUser', value: userProfile.plan === 'ultra' });
           dispatch({ field: 'hasMqttConnection', value: userProfile.hasMqttConnection });
           dispatch({ field: 'isConnectedWithLine', value: userProfile.isConnectedWithLine });
           dispatch({
