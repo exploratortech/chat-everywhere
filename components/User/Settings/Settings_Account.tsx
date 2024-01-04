@@ -120,7 +120,7 @@ export default function Settings_Account() {
           </div>
           {displayReferralCodeEnterer && <ReferralCodeEnter />}
           <div>
-            {user?.plan === 'pro' && !user?.isInReferralTrial && (
+            {isPaidUser && !user?.isInReferralTrial && (
               <p className="text-xs text-neutral-400">
                 {t(
                   'Thank you for supporting us! If you want to cancel your subscription, please visit ',
