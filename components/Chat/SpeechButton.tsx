@@ -24,7 +24,7 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   const { logGeneralEvent } = useLogger();
 
   const {
-    state: { currentSpeechId, isLoading, isPlaying, user, messageIsStreaming },
+    state: { currentSpeechId, isLoading, isPlaying, user, messageIsStreaming, isPaidUser },
     playMessage,
     stopPlaying,
   } = useContext(HomeContext);
@@ -63,9 +63,8 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
     );
   };
 
-  // Only enable for Pro plan users
-  const isProUser = user && (user.plan === 'pro' || user.plan === 'edu');
-  if (!isProUser || messageIsStreaming) return <></>;
+  // Only enable for paying users
+  if (!isPaidUser || messageIsStreaming) return <></>;
 
   return (
     <div className={`cursor-pointer text-gray-500 hover:text-gray-300`}>
