@@ -132,7 +132,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
 
   return (
     <div className={`
-      relative flex items-center
+      relative flex items-center select-none
       ${ !currentDrag || currentDrag.type === 'conversation' && currentDrag.data.id === conversation.id ? 'pointer-events-auto' : 'pointer-events-none' }
     `}>
       {isRenaming && selectedConversation?.id === conversation.id ? (

@@ -118,7 +118,7 @@ const Folder = ({
   return (
     <>
       <div className={`
-        relative flex items-center
+        relative flex items-center select-none
         ${ !currentDrag || currentDrag.type !== 'folder' || currentDrag.data.id === currentFolder.id ? 'pointer-events-auto' : 'pointer-events-none' }
       `}>
         {isRenaming ? (

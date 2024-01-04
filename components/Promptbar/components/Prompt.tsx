@@ -90,7 +90,7 @@ export const PromptComponent = ({ prompt }: Props) => {
 
   return (
     <div className={`
-      relative flex items-center
+      relative flex items-center select-none
       ${ !currentDrag || currentDrag.type === 'prompt' && currentDrag.data.id ===  prompt.id ? 'pointer-events-auto' : 'pointer-events-none' }
     `}>
       <div
