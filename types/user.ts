@@ -32,10 +32,10 @@ export interface UserProfile {
 
 export interface CreditUsage {
   [PluginID.GPT4]: {
-    remainingCredits: number;
+    remainingCredits: number | null;
   };
   [PluginID.IMAGE_GEN]: {
-    remainingCredits: number;
+    remainingCredits: number | null;
   };
 }
 

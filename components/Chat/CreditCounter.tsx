@@ -25,7 +25,7 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
   )
     return <></>;
 
-  const remainingCredits = pluginId && creditUsage[pluginId].remainingCredits;
+  const remainingCredits = pluginId && creditUsage[pluginId].remainingCredits || 0;
 
   return (
     <div
