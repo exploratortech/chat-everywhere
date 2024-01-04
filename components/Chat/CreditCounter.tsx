@@ -14,13 +14,14 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
   const { t } = useTranslation('chat');
 
   const {
-    state: { creditUsage },
+    state: { creditUsage, isUltraUser },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   if (
     creditUsage === null ||
-    (pluginId !== PluginID.GPT4 && pluginId !== PluginID.IMAGE_GEN)
+    (pluginId !== PluginID.GPT4 && pluginId !== PluginID.IMAGE_GEN) ||
+    isUltraUser
   )
     return <></>;
 

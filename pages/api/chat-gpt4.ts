@@ -19,7 +19,7 @@ const supabase = getAdminSupabaseClient();
 
 export const config = {
   runtime: 'edge',
-  preferredRegion: 'icn1'
+  preferredRegion: 'icn1',
 };
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
@@ -33,7 +33,12 @@ const handler = async (req: Request): Promise<Response> => {
   const user = await getUserProfile(data.user.id);
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
-  if (await hasUserRunOutOfCredits(data.user.id, PluginID.GPT4)) {
+  const isUserInUltraPlan = user.plan === 'ultra';
+
+  if (
+    !isUserInUltraPlan &&
+    (await hasUserRunOutOfCredits(data.user.id, PluginID.GPT4))
+  ) {
     return new Response('Error', {
       status: 402,
       statusText: 'Ran out of GPT-4 credit',
@@ -69,8 +74,10 @@ const handler = async (req: Request): Promise<Response> => {
       }`;
     }
 
-    await addUsageEntry(PluginID.GPT4, data.user.id);
-    await subtractCredit(data.user.id, PluginID.GPT4);
+    if(!isUserInUltraPlan){
+      await addUsageEntry(PluginID.GPT4, data.user.id);
+      await subtractCredit(data.user.id, PluginID.GPT4);
+    }
 
     const stream = await OpenAIStream(
       OpenAIModels[OpenAIModelID.GPT_4],
@@ -98,9 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
     serverSideTrackEvent(data.user.id, 'Error', {
       currentConversation: JSON.stringify(messageToSend),
       messageToSend: promptToSend,
-      errorMessage: error
-      ? (error as Error).message
-      : 'unknown error',
+      errorMessage: error ? (error as Error).message : 'unknown error',
     });
 
     if (error instanceof OpenAIError) {
@@ -108,7 +113,7 @@ const handler = async (req: Request): Promise<Response> => {
         case 429:
           try {
             // Add credit back to user's account
-            await addCredit(data.user.id, PluginID.GPT4, 1);
+            if(!isUserInUltraPlan) await addCredit(data.user.id, PluginID.GPT4, 1);
           } catch (error) {
             // Handle error adding credit back
             return new Response('Error adding credit back', {

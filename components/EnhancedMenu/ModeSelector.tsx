@@ -11,7 +11,7 @@ const ModeSelector = () => {
   const { t } = useTranslation('model');
 
   const {
-    state: { currentMessage, isPaidUser, user, hasMqttConnection },
+    state: { currentMessage, isPaidUser, hasMqttConnection },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
