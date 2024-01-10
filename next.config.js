@@ -1,3 +1,4 @@
+import { withAxiom } from 'next-axiom';
 const { i18n } = require('./next-i18next.config');
 
 const withPWA = require('next-pwa')({
@@ -39,4 +40,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withPWA(nextConfig);
+module.exports = withAxiom(withPWA(nextConfig));
