@@ -109,6 +109,10 @@ export type PayloadType = {
 
   // Integration
   helperFunctionName?: string;
+
+  // Performance tracking
+  timeToFirstTokenInMs?: number;
+  tokenPerSecond?: number;
 };
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';

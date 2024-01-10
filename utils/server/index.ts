@@ -8,7 +8,7 @@ import {
   shortenMessagesBaseOnTokenLimit,
 } from '@/utils/server/api';
 
-import { FunctionCall, Message } from '@/types/chat';
+import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
 import {
@@ -69,6 +69,8 @@ export const OpenAIStream = async (
 
   let attempt = 0;
   let attemptLogs = '';
+  const requestStartTime = Date.now();
+  let timeToFirstTokenInMs = 0;
   const startTime = Date.now();
 
   while (attempt < openAIEndpoints.length) {
@@ -193,9 +195,6 @@ export const OpenAIStream = async (
           let stop = false;
           let error: any = null;
           let respondMessage = '';
-          let functionCallRequired = false;
-          let functionCallName = '';
-          let functionCallResponseMessageInJsonString = '';
 
           const onParse = (event: ParsedEvent | ReconnectInterval) => {
             if (event.type === 'event') {
@@ -203,6 +202,10 @@ export const OpenAIStream = async (
 
               if (data === '[DONE]') {
                 return;
+              }
+
+              if(timeToFirstTokenInMs === 0) {
+                timeToFirstTokenInMs = Date.now() - requestStartTime;
               }
 
               try {
@@ -260,6 +263,7 @@ export const OpenAIStream = async (
               promptMessages: messagesToSendInArray,
               completionMessage: respondMessage,
               totalDurationInMs: Date.now() - startTime,
+              timeToFirstTokenInMs,
             });
 
             stop = true;
@@ -291,18 +295,24 @@ const logEvent = async ({
   promptMessages,
   completionMessage,
   totalDurationInMs,
+  timeToFirstTokenInMs,
 }: {
   userIdentifier?: string;
   eventName?: EventNameTypes | null;
   promptMessages: { role: string; content: string }[];
   completionMessage: string;
   totalDurationInMs: number;
+  timeToFirstTokenInMs: number;
 }) => {
   if (userIdentifier && userIdentifier !== '' && eventName) {
+    const promptTokenLength = await getMessagesTokenCount(promptMessages);
+    const completionTokenLength = await getStringTokenCount(completionMessage);
     await serverSideTrackEvent(userIdentifier, eventName, {
-      promptTokenLength: await getMessagesTokenCount(promptMessages),
-      completionTokenLength: await getStringTokenCount(completionMessage),
+      promptTokenLength: promptTokenLength,
+      completionTokenLength: completionTokenLength,
       generationLengthInSecond: totalDurationInMs / 1000,
+      timeToFirstTokenInMs,
+      tokenPerSecond: completionTokenLength / (totalDurationInMs / 1000),
     });
   }
 };
