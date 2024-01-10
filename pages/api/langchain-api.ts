@@ -149,7 +149,7 @@ const handler = async (req: NextRequest, res: any) => {
 
   const model = new ChatOpenAI({
     temperature: 0,
-    azureOpenAIApiVersion: '2023-07-01-preview',
+    azureOpenAIApiVersion: '2023-12-01-preview',
     azureOpenAIApiKey: process.env.AZURE_OPENAI_GPT_4_KEY_1,
     azureOpenAIApiInstanceName: 'chat-everywhere-uk',
     azureOpenAIApiDeploymentName: 'gpt-4',

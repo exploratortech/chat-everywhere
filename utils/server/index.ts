@@ -86,7 +86,7 @@ export const OpenAIStream = async (
       const modelName = isGPT4Model
         ? process.env.AZURE_OPENAI_GPT_4_MODEL_NAME
         : process.env.AZURE_OPENAI_MODEL_NAME;
-      let url = `${openAIEndpoint}/openai/deployments/${modelName}/chat/completions?api-version=2023-06-01-preview`;
+      let url = `${openAIEndpoint}/openai/deployments/${modelName}/chat/completions?api-version=2023-12-01-preview`;
       if (openAIEndpoint.includes('openai.com')) {
         url = `${openAIEndpoint}/v1/chat/completions`;
       }

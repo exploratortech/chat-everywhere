@@ -13,7 +13,7 @@ export const DEFAULT_TEMPERATURE = parseFloat(
 export const OPENAI_API_TYPE = process.env.OPENAI_API_TYPE || 'openai';
 
 export const OPENAI_API_VERSION =
-  process.env.OPENAI_API_VERSION || '2023-03-15-preview';
+  process.env.OPENAI_API_VERSION || '2023-12-01-preview';
 
 export const OPENAI_ORGANIZATION = process.env.OPENAI_ORGANIZATION || '';
 
@@ -30,15 +30,24 @@ export const DEFAULT_REGION = 'icn1';
 export const IMAGE_TO_PROMPT_MAX_TIMEOUT = 30;
 
 export const AZURE_OPENAI_ENDPOINTS = [
+  process.env.AZURE_OPENAI_ENDPOINT_0,
   process.env.AZURE_OPENAI_ENDPOINT_1,
   process.env.AZURE_OPENAI_ENDPOINT_2,
   process.env.AZURE_OPENAI_ENDPOINT_3,
 ];
 
 export const AZURE_OPENAI_KEYS = [
+  process.env.AZURE_OPENAI_KEY_0,
   process.env.AZURE_OPENAI_KEY_1,
   process.env.AZURE_OPENAI_KEY_2,
   process.env.AZURE_OPENAI_KEY_3,
+];
+
+export const ENDPOINT_TRAFFIC_DISTRIBUTION = [
+  0.75, // Japan East
+  0.10, // Central US
+  0.10, // East US
+  0.05, // UK South
 ];
 
 export const AZURE_OPENAI_GPT_4_ENDPOINTS = [
