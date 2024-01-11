@@ -1,7 +1,19 @@
+import {
+  type EventNameTypes,
+  serverSideTrackEvent,
+} from '@/utils/app/eventTracking';
+
 import { Message } from '@/types/chat';
 
 // @ts-expect-error
 import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
+import {
+  AZURE_OPENAI_ENDPOINTS,
+  AZURE_OPENAI_GPT_4_ENDPOINTS,
+  AZURE_OPENAI_GPT_4_KEYS,
+  AZURE_OPENAI_KEYS,
+  OPENAI_API_HOST,
+} from '../app/const';
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
@@ -122,4 +134,89 @@ export const getStringTokenCount = async (string: string): Promise<number> => {
 
   const tokens = encoding.encode(string);
   return tokens.length;
+};
+
+// Returns an array of all endpoints and keys. The connection will fallback base on this order (Shuffle the order atm)
+export const getEndpointsAndKeys = (
+  includeGPT4: boolean = false,
+  openAIPriority: boolean,
+): [(string | undefined)[], (string | undefined)[]] => {
+  let endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
+  let keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
+
+  if (includeGPT4) {
+    endpoints = [...AZURE_OPENAI_GPT_4_ENDPOINTS];
+    keys = [...AZURE_OPENAI_GPT_4_KEYS];
+  }
+
+  for (let i = endpoints.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tempEndpoint = endpoints[i];
+    const tempKey = keys[i];
+    endpoints[i] = endpoints[j];
+    keys[i] = keys[j];
+    endpoints[j] = tempEndpoint;
+    keys[j] = tempKey;
+  }
+
+  if (openAIPriority) {
+    // Prioritize OpenAI endpoint
+    endpoints.splice(0, 0, OPENAI_API_HOST);
+    keys.splice(0, 0, process.env.OPENAI_API_KEY);
+  } else {
+    endpoints.push(OPENAI_API_HOST);
+    keys.push(process.env.OPENAI_API_KEY);
+  }
+
+  return [endpoints, keys];
+};
+
+// Truncate log message to 4000 characters
+export const truncateLogMessage = (message: string) =>
+  message.length > 2000 ? `${message.slice(0, 2000)}...` : message;
+
+export const authorizedOpenAiRequest = async (
+  url: string,
+  options: RequestInit = {},
+) => {
+  const headers = {
+    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    'OpenAI-Beta': 'assistants=v1',
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  return fetch(url, { ...options, headers });
+};
+
+export const logEvent = async ({
+  userIdentifier,
+  eventName,
+  promptMessages,
+  completionMessage,
+  totalDurationInMs,
+  timeToFirstTokenInMs,
+  endpoint,
+}: {
+  userIdentifier?: string;
+  eventName?: EventNameTypes | null;
+  promptMessages: { role: string; content: string }[];
+  completionMessage: string;
+  totalDurationInMs: number;
+  timeToFirstTokenInMs: number;
+  endpoint?: string;
+}) => {
+  if (userIdentifier && userIdentifier !== '' && eventName) {
+    const promptTokenLength = await getMessagesTokenCount(promptMessages);
+    const completionTokenLength = await getStringTokenCount(completionMessage);
+    await serverSideTrackEvent(userIdentifier, eventName, {
+      promptTokenLength: promptTokenLength,
+      completionTokenLength: completionTokenLength,
+      generationLengthInSecond: totalDurationInMs / 1000,
+      timeToFirstTokenInMs,
+      tokenPerSecond: Math.round(
+        completionTokenLength / (totalDurationInMs / 1000),
+      ),
+      endpoint,
+    });
+  }
 };

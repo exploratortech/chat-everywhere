@@ -12,6 +12,7 @@ import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 import { ChatBody } from '@/types/chat';
 import { type Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
+import { Logger } from "next-axiom";
 
 export const config = {
   runtime: 'edge',
@@ -20,7 +21,7 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   retrieveUserSessionAndLogUsages(req);
-
+  const log = new Logger();
   const userIdentifier = req.headers.get('user-browser-id');
   const pluginId = req.headers.get('user-selected-plugin-id');
   let messagesToSend: Message[] = [];
@@ -94,6 +95,11 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(stream);
   } catch (error) {
     console.error(error);
+    log.error("api/chat error", {
+      message: (error as Error).message,
+      errorObject: error
+    });
+
     serverSideTrackEvent(userIdentifier || 'not-defined', 'Error', {
       PluginId: pluginId || 'not-defined',
       currentConversation: JSON.stringify(messagesToSend),
