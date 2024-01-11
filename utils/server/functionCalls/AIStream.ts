@@ -2,10 +2,8 @@
 // This should be used in tendon with the handler.ts file. For GPT-4 only
 import { DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
-import {
-  getRandomOpenAIEndpointsAndKeys,
-  normalizeMessages,
-} from '@/utils/server/index';
+import { getEndpointsAndKeys } from '@/utils/server/api';
+import { normalizeMessages } from '@/utils/server/index';
 
 import { FunctionCall, Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
@@ -34,10 +32,7 @@ export const AIStream = async ({
   onUpdateToken,
   functionCalls,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
-  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
-    true,
-    false,
-  );
+  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true, false);
 
   let attempt = 0,
     stop = false,

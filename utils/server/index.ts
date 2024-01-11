@@ -4,22 +4,11 @@ import {
   type EventNameTypes,
   serverSideTrackEvent,
 } from '@/utils/app/eventTracking';
-import {
-  getMessagesTokenCount,
-  getStringTokenCount,
-  shortenMessagesBaseOnTokenLimit,
-} from '@/utils/server/api';
+import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
+import { getEndpointsAndKeys, logEvent } from '@/utils/server/api';
 
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
-
-import {
-  AZURE_OPENAI_ENDPOINTS,
-  AZURE_OPENAI_GPT_4_ENDPOINTS,
-  AZURE_OPENAI_GPT_4_KEYS,
-  AZURE_OPENAI_KEYS,
-  OPENAI_API_HOST,
-} from '../app/const';
 
 import {
   ParsedEvent,
@@ -66,7 +55,7 @@ export const OpenAIStream = async (
   const log = new Logger();
 
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
-  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
+  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(
     isGPT4Model,
     openAIPriority,
   );
@@ -277,7 +266,14 @@ export const OpenAIStream = async (
       });
     } catch (error) {
       attempt += 1;
-      console.error(error);
+      console.error(error, attemptLogs);
+
+      log.error('api/chat error', {
+        message: (error as Error).message,
+        errorObject: error,
+        attemptLogs,
+      });
+
       attemptLogs += `Attempt ${attempt}: Error - ${
         (error as Error).message
       }\n`;
@@ -292,90 +288,4 @@ export const OpenAIStream = async (
   }
 
   throw new Error('Error: Unable to make requests');
-};
-
-const logEvent = async ({
-  userIdentifier,
-  eventName,
-  promptMessages,
-  completionMessage,
-  totalDurationInMs,
-  timeToFirstTokenInMs,
-  endpoint,
-}: {
-  userIdentifier?: string;
-  eventName?: EventNameTypes | null;
-  promptMessages: { role: string; content: string }[];
-  completionMessage: string;
-  totalDurationInMs: number;
-  timeToFirstTokenInMs: number;
-  endpoint?: string;
-}) => {
-  if (userIdentifier && userIdentifier !== '' && eventName) {
-    const promptTokenLength = await getMessagesTokenCount(promptMessages);
-    const completionTokenLength = await getStringTokenCount(completionMessage);
-    await serverSideTrackEvent(userIdentifier, eventName, {
-      promptTokenLength: promptTokenLength,
-      completionTokenLength: completionTokenLength,
-      generationLengthInSecond: totalDurationInMs / 1000,
-      timeToFirstTokenInMs,
-      tokenPerSecond: Math.round(
-        completionTokenLength / (totalDurationInMs / 1000),
-      ),
-      endpoint,
-    });
-  }
-};
-
-// Truncate log message to 4000 characters
-export const truncateLogMessage = (message: string) =>
-  message.length > 2000 ? `${message.slice(0, 2000)}...` : message;
-
-// Returns a list of shuffled endpoints and keys. They should be used based
-// on their order in the list.
-export const getRandomOpenAIEndpointsAndKeys = (
-  includeGPT4: boolean = false,
-  openAIPriority: boolean,
-): [(string | undefined)[], (string | undefined)[]] => {
-  let endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
-  let keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
-
-  if (includeGPT4) {
-    endpoints = [...AZURE_OPENAI_GPT_4_ENDPOINTS];
-    keys = [...AZURE_OPENAI_GPT_4_KEYS];
-  }
-
-  for (let i = endpoints.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tempEndpoint = endpoints[i];
-    const tempKey = keys[i];
-    endpoints[i] = endpoints[j];
-    keys[i] = keys[j];
-    endpoints[j] = tempEndpoint;
-    keys[j] = tempKey;
-  }
-
-  if (openAIPriority) {
-    // Prioritize OpenAI endpoint
-    endpoints.splice(0, 0, OPENAI_API_HOST);
-    keys.splice(0, 0, process.env.OPENAI_API_KEY);
-  } else {
-    endpoints.push(OPENAI_API_HOST);
-    keys.push(process.env.OPENAI_API_KEY);
-  }
-
-  return [endpoints, keys];
-};
-
-export const authorizedOpenAiRequest = async (
-  url: string,
-  options: RequestInit = {},
-) => {
-  const headers = {
-    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    'OpenAI-Beta': 'assistants=v1',
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-  return fetch(url, { ...options, headers });
 };
