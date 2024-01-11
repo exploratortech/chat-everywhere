@@ -193,12 +193,6 @@ export const OpenAIStream = async (
 
       clearTimeout(timeout);
 
-      // Test Axiom's logging system
-      log.info("api/chat success", {
-        totalDurationInMs: Date.now() - startTime,
-        timeToFirstTokenInMs,
-      });
-
       return new ReadableStream({
         async start(controller) {
           let buffer: Uint8Array[] = [];
@@ -274,6 +268,7 @@ export const OpenAIStream = async (
               completionMessage: respondMessage,
               totalDurationInMs: Date.now() - startTime,
               timeToFirstTokenInMs,
+              endpoint: openAIEndpoint,
             });
 
             stop = true;
@@ -306,6 +301,7 @@ const logEvent = async ({
   completionMessage,
   totalDurationInMs,
   timeToFirstTokenInMs,
+  endpoint,
 }: {
   userIdentifier?: string;
   eventName?: EventNameTypes | null;
@@ -313,6 +309,7 @@ const logEvent = async ({
   completionMessage: string;
   totalDurationInMs: number;
   timeToFirstTokenInMs: number;
+  endpoint?: string;
 }) => {
   if (userIdentifier && userIdentifier !== '' && eventName) {
     const promptTokenLength = await getMessagesTokenCount(promptMessages);
@@ -322,7 +319,10 @@ const logEvent = async ({
       completionTokenLength: completionTokenLength,
       generationLengthInSecond: totalDurationInMs / 1000,
       timeToFirstTokenInMs,
-      tokenPerSecond: completionTokenLength / (totalDurationInMs / 1000),
+      tokenPerSecond: Math.round(
+        completionTokenLength / (totalDurationInMs / 1000),
+      ),
+      endpoint,
     });
   }
 };
