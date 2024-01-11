@@ -1,4 +1,4 @@
-import { truncateLogMessage } from '.';
+import { truncateLogMessage } from '@/utils/server/api';
 
 import { BaseCallbackHandler } from 'langchain/callbacks';
 import { Serialized } from 'langchain/dist/load/serializable';

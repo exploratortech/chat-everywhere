@@ -168,8 +168,6 @@ export const getEndpointsAndKeys = (
     keys.push(process.env.OPENAI_API_KEY);
   }
 
-  console.log('endpoints', endpoints);
-
   return [endpoints, keys];
 };
 

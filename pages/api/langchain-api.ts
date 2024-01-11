@@ -7,9 +7,8 @@ import {
   tools,
 } from '../../utils/app/online_mode';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
-import { truncateLogMessage } from '@/utils/server';
 import { trimStringBaseOnTokenLimit } from '@/utils/server/api';
-import { getStringTokenCount } from '@/utils/server/api';
+import { getStringTokenCount, truncateLogMessage } from '@/utils/server/api';
 import {
   getAdminSupabaseClient,
   getUserProfile,
