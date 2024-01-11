@@ -1,3 +1,5 @@
+import { Logger } from 'next-axiom';
+
 import {
   type EventNameTypes,
   serverSideTrackEvent,
@@ -61,6 +63,8 @@ export const OpenAIStream = async (
   userIdentifier?: string,
   eventName?: EventNameTypes | null,
 ) => {
+  const log = new Logger();
+
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
   const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
     isGPT4Model,
@@ -189,6 +193,12 @@ export const OpenAIStream = async (
 
       clearTimeout(timeout);
 
+      // Test Axiom's logging system
+      log.info("api/chat success", {
+        totalDurationInMs: Date.now() - startTime,
+        timeToFirstTokenInMs,
+      });
+
       return new ReadableStream({
         async start(controller) {
           let buffer: Uint8Array[] = [];
@@ -204,7 +214,7 @@ export const OpenAIStream = async (
                 return;
               }
 
-              if(timeToFirstTokenInMs === 0) {
+              if (timeToFirstTokenInMs === 0) {
                 timeToFirstTokenInMs = Date.now() - requestStartTime;
               }
 
