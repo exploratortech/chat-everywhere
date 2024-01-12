@@ -94,21 +94,7 @@ export const ChatInput = ({
     updatePromptListVisibility(value);
   };
 
-  const isOnlineModeStreaming = useMemo(() => {
-    return (
-      currentMessage?.pluginId === PluginID.LANGCHAIN_CHAT && messageIsStreaming
-    );
-  }, [messageIsStreaming, currentMessage]);
-
-  const { intervalRemaining, startTime, maxInterval } = useLimiter(
-    user,
-    isOnlineModeStreaming,
-  );
-
   const handleSend = () => {
-    if (intervalRemaining > 0) {
-      return;
-    }
     if (messageIsStreaming || isSpeechRecognitionActive) {
       return;
     }
@@ -350,7 +336,6 @@ export const ChatInput = ({
             <button
               className="absolute top-0 left-0 right-0 mx-auto mb-3 flex w-fit items-center gap-3 rounded border border-neutral-200 bg-white py-2 px-4 text-black hover:opacity-50 dark:border-neutral-600 dark:bg-[#343541] dark:text-white md:mb-0 md:mt-2 disabled:opacity-25"
               onClick={() => onRegenerate()}
-              disabled={intervalRemaining > 0}
             >
               <IconRepeat size={16} /> {t('Regenerate response')}
             </button>
