@@ -136,7 +136,7 @@ export const getStringTokenCount = async (string: string): Promise<number> => {
   return tokens.length;
 };
 
-// Returns an array of all endpoints and keys. The connection will fallback base on this order (Shuffle the order atm)
+// Returns an array of all endpoints and keys. Japan endpoint will be prioritized if requestCountryCode is TW/HK/MO
 export const getEndpointsAndKeys = (
   includeGPT4: boolean = false,
   openAIPriority: boolean,
