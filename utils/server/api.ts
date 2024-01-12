@@ -149,14 +149,17 @@ export const getEndpointsAndKeys = (
     endpoints = [...AZURE_OPENAI_GPT_4_ENDPOINTS];
     keys = [...AZURE_OPENAI_GPT_4_KEYS];
   }
-
+  
   // Reserve Japan endpoint to TW/HK/MO for lowest latency
-  if(requestCountryCode && ["TW", "HK", "MO"].includes(requestCountryCode)){
+  if (requestCountryCode && ['TW', 'HK', 'MO'].includes(requestCountryCode)) {
     endpoints = [process.env.AZURE_OPENAI_ENDPOINT_0, ...endpoints];
     keys = [process.env.AZURE_OPENAI_KEY_0, ...keys];
-    console.log("In TW/HK/MO, using Japan endpoint");
-  }else{
-    console.log("Not in TW/HK/MO, not using Japan endpoint");
+  } else {
+    const shuffledIndices = Array.from(Array(endpoints.length).keys()).sort(
+      () => Math.random() - 0.5,
+    );
+    endpoints = shuffledIndices.map((index) => endpoints[index]);
+    keys = shuffledIndices.map((index) => keys[index]);
   }
 
   return [endpoints, keys];
