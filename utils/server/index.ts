@@ -48,16 +48,16 @@ export const OpenAIStream = async (
   temperature: number,
   messages: Message[],
   customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
-  openAIPriority: boolean = false,
   userIdentifier?: string,
   eventName?: EventNameTypes | null,
+  requestCountryCode?: string,
 ) => {
   const log = new Logger();
 
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
   const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(
     isGPT4Model,
-    openAIPriority,
+    requestCountryCode
   );
 
   let attempt = 0;
@@ -229,6 +229,8 @@ export const OpenAIStream = async (
 
           const parser = createParser(onParse);
 
+          // Dynamically adjust stream speed base on the model
+          let bufferTime = isGPT4Model ? 45 : 10;
           const interval = setInterval(() => {
             if (buffer.length > 0) {
               const data = buffer.shift();
@@ -243,7 +245,7 @@ export const OpenAIStream = async (
               }
               clearInterval(interval);
             }
-          }, 45);
+          }, bufferTime);
 
           (async function () {
             for await (const chunk of res.body as any) {

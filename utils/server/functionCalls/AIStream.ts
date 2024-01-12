@@ -32,7 +32,7 @@ export const AIStream = async ({
   onUpdateToken,
   functionCalls,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
-  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true, false);
+  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true);
 
   let attempt = 0,
     stop = false,

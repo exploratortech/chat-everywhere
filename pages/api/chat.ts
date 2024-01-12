@@ -13,6 +13,7 @@ import { ChatBody } from '@/types/chat';
 import { type Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { Logger } from "next-axiom";
+import { geolocation } from '@vercel/edge';
 
 export const config = {
   runtime: 'edge',
@@ -21,6 +22,8 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   retrieveUserSessionAndLogUsages(req);
+  const { country } = geolocation(req);
+
   const log = new Logger();
   const userIdentifier = req.headers.get('user-browser-id');
   const pluginId = req.headers.get('user-selected-plugin-id');
@@ -87,9 +90,9 @@ const handler = async (req: Request): Promise<Response> => {
       temperatureToUse,
       messagesToSend,
       messageToStreamBack,
-      isPaidUser,
       userIdentifier || undefined,
       pluginId === '' ? 'Default mode message' : null,
+      country
     );
 
     return new Response(stream);

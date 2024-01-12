@@ -136,10 +136,10 @@ export const getStringTokenCount = async (string: string): Promise<number> => {
   return tokens.length;
 };
 
-// Returns an array of all endpoints and keys. The connection will fallback base on this order (Shuffle the order atm)
+// Returns an array of all endpoints and keys. Japan endpoint will be prioritized if requestCountryCode is TW/HK/MO
 export const getEndpointsAndKeys = (
   includeGPT4: boolean = false,
-  openAIPriority: boolean,
+  requestCountryCode?: string,
 ): [(string | undefined)[], (string | undefined)[]] => {
   let endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
   let keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
@@ -148,24 +148,17 @@ export const getEndpointsAndKeys = (
     endpoints = [...AZURE_OPENAI_GPT_4_ENDPOINTS];
     keys = [...AZURE_OPENAI_GPT_4_KEYS];
   }
-
-  for (let i = endpoints.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tempEndpoint = endpoints[i];
-    const tempKey = keys[i];
-    endpoints[i] = endpoints[j];
-    keys[i] = keys[j];
-    endpoints[j] = tempEndpoint;
-    keys[j] = tempKey;
-  }
-
-  if (openAIPriority) {
-    // Prioritize OpenAI endpoint
-    endpoints.splice(0, 0, OPENAI_API_HOST);
-    keys.splice(0, 0, process.env.OPENAI_API_KEY);
+  
+  // Reserve Japan endpoint to TW/HK/MO for lowest latency
+  if (requestCountryCode && ['TW', 'HK', 'MO'].includes(requestCountryCode)) {
+    endpoints = [process.env.AZURE_OPENAI_ENDPOINT_0, ...endpoints];
+    keys = [process.env.AZURE_OPENAI_KEY_0, ...keys];
   } else {
-    endpoints.push(OPENAI_API_HOST);
-    keys.push(process.env.OPENAI_API_KEY);
+    const shuffledIndices = Array.from(Array(endpoints.length).keys()).sort(
+      () => Math.random() - 0.5,
+    );
+    endpoints = shuffledIndices.map((index) => endpoints[index]);
+    keys = shuffledIndices.map((index) => keys[index]);
   }
 
   return [endpoints, keys];
