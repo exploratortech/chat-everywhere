@@ -51,6 +51,7 @@ export const OpenAIStream = async (
   openAIPriority: boolean = false,
   userIdentifier?: string,
   eventName?: EventNameTypes | null,
+  requestCountryCode?: string,
 ) => {
   const log = new Logger();
 
@@ -58,6 +59,7 @@ export const OpenAIStream = async (
   const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(
     isGPT4Model,
     openAIPriority,
+    requestCountryCode
   );
 
   let attempt = 0;

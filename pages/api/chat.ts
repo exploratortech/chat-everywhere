@@ -22,9 +22,7 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   retrieveUserSessionAndLogUsages(req);
-  const geoInfo = geolocation(req);
-
-  console.log(geoInfo);
+  const { country } = geolocation(req);
 
   const log = new Logger();
   const userIdentifier = req.headers.get('user-browser-id');
@@ -95,6 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
       isPaidUser,
       userIdentifier || undefined,
       pluginId === '' ? 'Default mode message' : null,
+      country
     );
 
     return new Response(stream);
