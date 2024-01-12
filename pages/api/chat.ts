@@ -90,7 +90,6 @@ const handler = async (req: Request): Promise<Response> => {
       temperatureToUse,
       messagesToSend,
       messageToStreamBack,
-      isPaidUser,
       userIdentifier || undefined,
       pluginId === '' ? 'Default mode message' : null,
       country

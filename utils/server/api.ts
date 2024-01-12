@@ -139,7 +139,6 @@ export const getStringTokenCount = async (string: string): Promise<number> => {
 // Returns an array of all endpoints and keys. Japan endpoint will be prioritized if requestCountryCode is TW/HK/MO
 export const getEndpointsAndKeys = (
   includeGPT4: boolean = false,
-  openAIPriority: boolean,
   requestCountryCode?: string,
 ): [(string | undefined)[], (string | undefined)[]] => {
   let endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];

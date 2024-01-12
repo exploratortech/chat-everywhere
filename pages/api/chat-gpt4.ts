@@ -85,7 +85,6 @@ const handler = async (req: Request): Promise<Response> => {
       temperatureToUse,
       messageToSend,
       null,
-      false,
       data.user.id,
       'GPT4 mode message',
     );

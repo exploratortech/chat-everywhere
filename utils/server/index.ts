@@ -48,7 +48,6 @@ export const OpenAIStream = async (
   temperature: number,
   messages: Message[],
   customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
-  openAIPriority: boolean = false,
   userIdentifier?: string,
   eventName?: EventNameTypes | null,
   requestCountryCode?: string,
@@ -58,7 +57,6 @@ export const OpenAIStream = async (
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
   const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(
     isGPT4Model,
-    openAIPriority,
     requestCountryCode
   );
 
