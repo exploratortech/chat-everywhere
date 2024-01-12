@@ -29,6 +29,7 @@ import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import { ChatMessage } from './ChatMessage';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
+import VisibilityWrapper from './VisibilityWrapper';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -322,12 +323,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
                 {selectedConversation?.messages.map((message, index) => (
                   <Fragment key={index}>
-                    <ChatMessage
-                      message={message}
-                      messageIndex={index}
-                      onEdit={onEdit}
-                      messageIsStreaming={messageIsStreaming}
-                    />
+                    <VisibilityWrapper>
+                      {(inView) => (
+                        <ChatMessage
+                          message={message}
+                          messageIndex={index}
+                          onEdit={onEdit}
+                          messageIsStreaming={messageIsStreaming}
+                          inView={inView}
+                        />
+                      )}
+                    </VisibilityWrapper>
                   </Fragment>
                 ))}
 

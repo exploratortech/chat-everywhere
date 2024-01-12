@@ -41,6 +41,7 @@ interface Props {
   messageIndex: number;
   messageIsStreaming: boolean;
   onEdit?: (editedMessage: Message, index: number) => void;
+  inView?: boolean;
 }
 
 export const ChatMessage: FC<Props> = memo(
@@ -204,7 +205,9 @@ export const ChatMessage: FC<Props> = memo(
             ? 'border-b border-black/10 bg-gray-50 text-gray-800 dark:border-gray-900/50 dark:bg-[#444654] dark:text-gray-100'
             : 'border-b border-black/10 bg-white text-gray-800 dark:border-gray-900/50 dark:bg-[#343541] dark:text-gray-100'
         }`}
-        style={{ overflowWrap: 'anywhere' }}
+        style={{
+          overflowWrap: 'anywhere',
+        }}
       >
         <div className="relative m-auto flex gap-4 py-4 text-base md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
           <div className="min-w-[40px] text-center font-bold flex flex-col justify-start flex-wrap content-center">
@@ -381,12 +384,16 @@ export const ChatMessage: FC<Props> = memo(
     );
   },
   (prevProps, nextProps) => {
+    // If inView is false, don't re-render the component
+    if (!nextProps.inView) {
+      return true;
+    }
     // CRITICAL: The onEdit function is not included in the dependency array to avoid re-rendering the component when it changes. Instead, messageIsStreaming is used to trigger a re-render and update the onEdit function props.
-
     return (
       prevProps.message.content === nextProps.message.content &&
       prevProps.messageIndex === nextProps.messageIndex &&
-      prevProps.messageIsStreaming === nextProps.messageIsStreaming
+      prevProps.messageIsStreaming === nextProps.messageIsStreaming &&
+      prevProps.inView === nextProps.inView
     );
   },
 );
