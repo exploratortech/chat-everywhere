@@ -229,6 +229,8 @@ export const OpenAIStream = async (
 
           const parser = createParser(onParse);
 
+          // Dynamically adjust stream speed base on the model
+          let bufferTime = isGPT4Model ? 45 : 10;
           const interval = setInterval(() => {
             if (buffer.length > 0) {
               const data = buffer.shift();
@@ -243,7 +245,7 @@ export const OpenAIStream = async (
               }
               clearInterval(interval);
             }
-          }, 45);
+          }, bufferTime);
 
           (async function () {
             for await (const chunk of res.body as any) {
