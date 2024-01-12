@@ -28,7 +28,6 @@ import TokenCounter from './components/TokenCounter';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../VoiceInput/VoiceInputButton';
-import LimiterButton from './LimiterButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
@@ -280,9 +279,9 @@ export const ChatInput = ({
         textareaRef.current?.focus();
       }
     };
-  
+
     window.addEventListener('keydown', handleGlobalKeyDown);
-  
+
     return () => {
       window.removeEventListener('keydown', handleGlobalKeyDown);
     };
@@ -442,23 +441,16 @@ export const ChatInput = ({
             setIsCloseToLimit={setIsCloseToTokenLimit}
           />
 
-          {intervalRemaining > 0 ? (
-            <LimiterButton
-              intervalRemaining={intervalRemaining}
-              maxInterval={maxInterval}
-            />
-          ) : (
-            <button
-              className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
-              onClick={handleSend}
-            >
-              {messageIsStreaming ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
-              ) : (
-                <IconSend size={18} />
-              )}
-            </button>
-          )}
+          <button
+            className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+            onClick={handleSend}
+          >
+            {messageIsStreaming ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
+            ) : (
+              <IconSend size={18} />
+            )}
+          </button>
 
           {showPromptList && filteredPrompts.length > 0 && (
             <div className="absolute bottom-12 w-full z-20">
