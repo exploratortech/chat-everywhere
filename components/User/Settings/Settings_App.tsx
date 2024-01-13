@@ -65,7 +65,7 @@ export default function Settings_App() {
                 name="speechSpeed"
                 value={speechSpeedConfig}
                 onChange={(e) => speechSpeedOnChange(e.target.value)}
-                className="mt-1 block w-full pl-3 pr-10 py-2 focus:outline-none text-sm rounded-md bg-transparent text-end"
+                className="mt-1 block w-full pl-3 pr-10 py-2 focus:outline-none text-sm rounded-md bg-[#171717] text-end"
               >
                 <option value={'slow'}>{t('Slow')}</option>
                 <option value={'normal'}>{t('Normal')}</option>
