@@ -67,7 +67,7 @@ const VoiceInputButton = () => {
   );
 
   useEffect(() => {
-    if (audioStream) {
+    if (audioStream && !isLoading) {
       const audioContext = new window.AudioContext();
       const analyserNode = audioContext.createAnalyser();
       analyserNode.fftSize = 32;
@@ -84,7 +84,7 @@ const VoiceInputButton = () => {
       if (animationFrameId.current)
         cancelAnimationFrame(animationFrameId.current);
     };
-  }, [audioStream, draw]);
+  }, [audioStream, draw, isLoading]);
 
   const renderStatusIndicator = useMemo(() => {
     if ((!isLoading && !isSpeechRecognitionActive) || isMicrophoneDisabled) {
