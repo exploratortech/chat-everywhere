@@ -94,11 +94,23 @@ export const useAzureTts = () => {
       speechConfig.speechSynthesisVoiceName = voiceMap[language];
       const synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
 
-      synthesizer.speakTextAsync(
-        text,
-        () => {
-          setIsLoading(false);
-          synthesizer.close();
+      let ssml = `
+        <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+          <voice name="${voiceMap[language]}">
+            <prosody rate="medium">
+            ${text}
+            </prosody>
+          </voice>
+        </speak>
+      `;
+
+      synthesizer.speakSsmlAsync(
+        ssml,
+        (result) => {
+          if (result) {
+            console.log(JSON.stringify(result));
+            synthesizer.close();
+          }
         },
         (error) => {
           setIsLoading(false);

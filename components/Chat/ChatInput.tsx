@@ -14,7 +14,6 @@ import { useTranslation } from 'next-i18next';
 
 import useDisplayAttribute from '@/hooks/useDisplayAttribute';
 import useFocusHandler from '@/hooks/useFocusInputHandler';
-import useLimiter from '@/hooks/useLimiter';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
