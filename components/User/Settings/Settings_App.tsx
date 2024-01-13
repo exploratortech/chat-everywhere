@@ -50,8 +50,8 @@ export default function Settings_App() {
               {t('Speech configuration')}
             </span>
           </div>
-          <div className="flex mt-4 md:space-x-4 bg-transparent items-center">
-            <div className="md:w-1/2">
+          <div className="flex mt-0 md:space-x-4 bg-transparent items-center">
+            <div className="w-1/2">
               <label
                 htmlFor="speechSpeed"
                 className="block text-sm font-medium"
@@ -59,13 +59,13 @@ export default function Settings_App() {
                 {t('Speech Speed')}
               </label>
             </div>
-            <div className="md:w-1/2">
+            <div className="w-1/2">
               <select
                 id="speechSpeed"
                 name="speechSpeed"
                 value={speechSpeedConfig}
                 onChange={(e) => speechSpeedOnChange(e.target.value)}
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base focus:outline-none sm:text-sm rounded-md bg-transparent text-end"
+                className="mt-1 block w-full pl-3 pr-10 py-2 focus:outline-none text-sm rounded-md bg-transparent text-end"
               >
                 <option value={'slow'}>{t('Slow')}</option>
                 <option value={'normal'}>{t('Normal')}</option>
