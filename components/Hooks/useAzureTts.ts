@@ -12,6 +12,11 @@ import {
   SpeechSynthesizer,
 } from 'microsoft-cognitiveservices-speech-sdk';
 
+export type SpeechSpeedType = 'slow' | 'normal' | 'fast';
+type SpeechConfigType = {
+  speechSpeed: SpeechSpeedType;
+};
+
 export const useAzureTts = () => {
   const { t } = useTranslation('common');
 
@@ -30,6 +35,47 @@ export const useAzureTts = () => {
   player.current.onAudioEnd = () => {
     setIsPlaying(false);
     setIsLoading(false);
+  };
+
+  const getSpeechConfig = (): SpeechConfigType => {
+    const storedSpeechConfig = localStorage.getItem('speechConfig');
+    const defaultSpeechConfig: SpeechConfigType = {
+      speechSpeed: 'normal',
+    };
+
+    if (storedSpeechConfig) {
+      try {
+        return JSON.parse(storedSpeechConfig);
+      } catch {
+        return defaultSpeechConfig;
+      }
+    }
+
+    return defaultSpeechConfig;
+  };
+
+  const getSpeechSpeed = () => {
+    return getSpeechConfig().speechSpeed;
+  };
+
+  const setSpeechSpeed = (speechSpeed: SpeechSpeedType) => {
+    localStorage.setItem(
+      'speechConfig',
+      JSON.stringify({ speechSpeed: speechSpeed }),
+    );
+  };
+
+  const getSpeechSpeedInSsml = (): string => {
+    switch (getSpeechSpeed()) {
+      case 'slow':
+        return '0.75';
+      case 'normal':
+        return '1';
+      case 'fast':
+        return '1.3';
+      default:
+        return '1';
+    }
   };
 
   const fetchTokenIfNeeded = async (userToken: string) => {
@@ -97,7 +143,7 @@ export const useAzureTts = () => {
       let ssml = `
         <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
           <voice name="${voiceMap[language]}">
-            <prosody rate="medium">
+            <prosody rate="${getSpeechSpeedInSsml()}">
             ${text}
             </prosody>
           </voice>
@@ -125,5 +171,13 @@ export const useAzureTts = () => {
     }
   };
 
-  return { isLoading, isPlaying, currentSpeechId, speak, stopPlaying };
+  return {
+    isLoading,
+    isPlaying,
+    currentSpeechId,
+    getSpeechSpeed,
+    speak,
+    stopPlaying,
+    setSpeechSpeed,
+  };
 };

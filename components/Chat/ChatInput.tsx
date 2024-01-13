@@ -26,7 +26,7 @@ import HomeContext from '@/pages/api/home/home.context';
 import TokenCounter from './components/TokenCounter';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
-import VoiceInputButton from '../VoiceInput/VoiceInputButton';
+import VoiceInputButton from '../Voice/VoiceInputButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
