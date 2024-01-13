@@ -135,5 +135,10 @@
   "Cancel": "取消",
   "Edit": "编辑",
   "Test": "测试",
-  "You can send message to the topic specified (with retained flag on), Chat Everywhere will be able to access the latest message.": "設定MQTT裝置來發送訊息到你指定的Topic (請確認訊息中有retain的標籤)。"
+  "You can send message to the topic specified (with retained flag on), Chat Everywhere will be able to access the latest message.": "設定MQTT裝置來發送訊息到你指定的Topic (請確認訊息中有retain的標籤)。",
+  "Speech configuration": "AI朗读设置",
+  "Speech Speed": "语速",
+  "Slow": "慢",
+  "Normal": "正常",
+  "Fast": "快"
 }
