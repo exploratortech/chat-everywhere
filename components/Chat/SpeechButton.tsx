@@ -50,7 +50,7 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   const getPlayerIcon = () => {
     if (isComponentCurrentlyBeingPlayed) {
       if (isLoading) {
-        return <IconLoader fill="none" size={18} />;
+        return <IconLoader fill="none" size={18} className='animate-spin' />;
       } else if (isPlaying) {
         return (
           <IconPlayerStop onClick={playStopOnClick} fill="none" size={18} />
