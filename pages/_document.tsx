@@ -1,3 +1,4 @@
+import { AxiomWebVitals } from 'next-axiom';
 import { DocumentProps, Head, Html, Main, NextScript } from 'next/document';
 
 import i18nextConfig from '../next-i18next.config';
@@ -9,6 +10,7 @@ export default function Document(props: Props) {
     props.__NEXT_DATA__.locale ?? i18nextConfig.i18n.defaultLocale;
   return (
     <Html lang={currentLocale}>
+      <AxiomWebVitals />
       <Head>
         <meta name="application-name" content="Chat Everywhere" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -205,7 +207,7 @@ export default function Document(props: Props) {
           href="/splash-screens/8.3__iPad_Mini_portrait.png"
         />
       </Head>
-      <body className='w-full'>
+      <body className="w-full">
         <Main />
         <NextScript />
       </body>

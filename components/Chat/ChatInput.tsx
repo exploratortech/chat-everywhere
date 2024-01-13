@@ -8,14 +8,12 @@ import {
   useMemo,
   useRef,
   useState,
-  useTransition,
 } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
 import useDisplayAttribute from '@/hooks/useDisplayAttribute';
 import useFocusHandler from '@/hooks/useFocusInputHandler';
-import useLimiter from '@/hooks/useLimiter';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
@@ -29,8 +27,7 @@ import HomeContext from '@/pages/api/home/home.context';
 import TokenCounter from './components/TokenCounter';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
-import VoiceInputButton from '../VoiceInput/VoiceInputButton';
-import LimiterButton from './LimiterButton';
+import VoiceInputButton from '../Voice/VoiceInputButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
@@ -97,21 +94,7 @@ export const ChatInput = ({
     updatePromptListVisibility(value);
   };
 
-  const isOnlineModeStreaming = useMemo(() => {
-    return (
-      currentMessage?.pluginId === PluginID.LANGCHAIN_CHAT && messageIsStreaming
-    );
-  }, [messageIsStreaming, currentMessage]);
-
-  const { intervalRemaining, maxInterval } = useLimiter(
-    user,
-    isOnlineModeStreaming,
-  );
-
   const handleSend = () => {
-    if (intervalRemaining > 0) {
-      return;
-    }
     if (messageIsStreaming || isSpeechRecognitionActive) {
       return;
     }
@@ -355,7 +338,6 @@ export const ChatInput = ({
             <button
               className="absolute top-0 left-0 right-0 mx-auto mb-3 flex w-fit items-center gap-3 rounded border border-neutral-200 bg-white py-2 px-4 text-black hover:opacity-50 dark:border-neutral-600 dark:bg-[#343541] dark:text-white md:mb-0 md:mt-2 disabled:opacity-25"
               onClick={() => onRegenerate()}
-              disabled={intervalRemaining > 0}
             >
               <IconRepeat size={16} /> {t('Regenerate response')}
             </button>
@@ -442,23 +424,16 @@ export const ChatInput = ({
             setIsCloseToLimit={setIsCloseToTokenLimit}
           />
 
-          {intervalRemaining > 0 ? (
-            <LimiterButton
-              intervalRemaining={intervalRemaining}
-              maxInterval={maxInterval}
-            />
-          ) : (
-            <button
-              className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
-              onClick={handleSend}
-            >
-              {messageIsStreaming ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
-              ) : (
-                <IconSend size={18} />
-              )}
-            </button>
-          )}
+          <button
+            className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+            onClick={handleSend}
+          >
+            {messageIsStreaming ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
+            ) : (
+              <IconSend size={18} />
+            )}
+          </button>
 
           {showPromptList && filteredPrompts.length > 0 && (
             <div className="absolute bottom-12 w-full z-20">

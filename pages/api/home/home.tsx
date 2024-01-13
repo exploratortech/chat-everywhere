@@ -63,7 +63,7 @@ import ReferralModel from '@/components/User/ReferralModel';
 import SettingsModel from '@/components/User/Settings/SettingsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
-import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
+import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
 
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';
@@ -429,6 +429,7 @@ const Home = () => {
         .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
+          dispatch({ field: 'isUltraUser', value: userProfile.plan === 'ultra' });
           dispatch({ field: 'hasMqttConnection', value: userProfile.hasMqttConnection });
           dispatch({ field: 'isConnectedWithLine', value: userProfile.isConnectedWithLine });
           dispatch({

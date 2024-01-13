@@ -3,8 +3,6 @@ import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import { event } from 'nextjs-google-analytics';
-
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
@@ -40,11 +38,6 @@ export default function Settings_Account() {
     const userEmail = user?.email;
     const userId = user?.id;
 
-    event('Upgrade button clicked', {
-      category: 'Engagement',
-      label: 'Upgrade',
-      userEmail: userEmail || 'N/A',
-    });
     trackEvent('Upgrade button clicked');
 
     if (!user) {
@@ -92,16 +85,13 @@ export default function Settings_Account() {
                 ))}
               </div>
             </div>
-            <div className="flex flex-col  border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
-              <span className="text-2xl font-bold">Pro</span>
-              <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
-              <div className="text-xs leading-5">
-                <FeatureItem featureName={t('Everything in free plan')} />
-                <FeatureItem featureName={t('Priority response time')} />
-                {PlanDetail.pro.features.map((feature, index) => (
-                  <FeatureItem key={index} featureName={t(feature)} />
-                ))}
-              </div>
+            <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
+              {user?.plan === 'ultra' ? (
+                <UltraPlanContent />
+              ) : (
+                <ProPlanContent />
+              )}
+
               {(!user || !isPaidUser) && (
                 <div className="flex flex-col">
                   <a
@@ -117,6 +107,7 @@ export default function Settings_Account() {
                   </p>
                 </div>
               )}
+
               {user?.plan === 'pro' && user.proPlanExpirationDate && (
                 <div className="text-left text-neutral-500 p-2 text-xs">
                   {`${t('Expires on')}: 
@@ -129,7 +120,7 @@ export default function Settings_Account() {
           </div>
           {displayReferralCodeEnterer && <ReferralCodeEnter />}
           <div>
-            {user?.plan === 'pro' && !user?.isInReferralTrial && (
+            {isPaidUser && !user?.isInReferralTrial && (
               <p className="text-xs text-neutral-400">
                 {t(
                   'Thank you for supporting us! If you want to cancel your subscription, please visit ',
@@ -199,3 +190,41 @@ export default function Settings_Account() {
     </div>
   );
 }
+
+const ProPlanContent = () => {
+  const { t } = useTranslation('model');
+  return (
+    <>
+      <span className="text-2xl font-bold">Pro</span>
+      <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
+      <div className="text-xs leading-5">
+        <FeatureItem featureName={t('Everything in free plan')} />
+        <FeatureItem featureName={t('Priority response time')} />
+        {PlanDetail.pro.features.map((feature, index) => (
+          <FeatureItem key={index} featureName={t(feature)} />
+        ))}
+      </div>
+    </>
+  );
+};
+
+const UltraPlanContent = () => {
+  const { t } = useTranslation('model');
+  return (
+    <>
+      <span 
+          className="text-2xl font-bold bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] font-medium rounded bg-gray-700 text-indigo-400"
+          style={{color: "transparent", WebkitBackgroundClip: 'text', WebkitTextStrokeWidth: '1px', WebkitTextStrokeColor: 'transparent'}}
+        >
+          Ultra
+        </span>
+      <div className="text-xs leading-5">
+        <FeatureItem featureName={t('Everything in free plan')} />
+        <FeatureItem featureName={t('Priority response time')} />
+        {PlanDetail.ultra.features.map((feature, index) => (
+          <FeatureItem key={index} featureName={t(feature)} />
+        ))}
+      </div>
+    </>
+  );
+};

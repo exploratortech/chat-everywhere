@@ -13,7 +13,7 @@ export const DEFAULT_TEMPERATURE = parseFloat(
 export const OPENAI_API_TYPE = process.env.OPENAI_API_TYPE || 'openai';
 
 export const OPENAI_API_VERSION =
-  process.env.OPENAI_API_VERSION || '2023-03-15-preview';
+  process.env.OPENAI_API_VERSION || '2023-12-01-preview';
 
 export const OPENAI_ORGANIZATION = process.env.OPENAI_ORGANIZATION || '';
 
@@ -41,12 +41,22 @@ export const AZURE_OPENAI_KEYS = [
   process.env.AZURE_OPENAI_KEY_3,
 ];
 
+// To be enabled, currently we goes with this order of region regardless of request origin
+export const ENDPOINT_TRAFFIC_DISTRIBUTION = [
+  0.75, // Japan East
+  0.10, // Central US
+  0.10, // East US
+  0.05, // UK South
+];
+
 export const AZURE_OPENAI_GPT_4_ENDPOINTS = [
+  process.env.AZURE_OPENAI_GPT_4_ENDPOINT_0,
   process.env.AZURE_OPENAI_GPT_4_ENDPOINT_1,
   process.env.AZURE_OPENAI_GPT_4_ENDPOINT_2,
 ];
 
 export const AZURE_OPENAI_GPT_4_KEYS = [
+  process.env.AZURE_OPENAI_GPT_4_KEY_0,
   process.env.AZURE_OPENAI_GPT_4_KEY_1,
   process.env.AZURE_OPENAI_GPT_4_KEY_2,
 ];

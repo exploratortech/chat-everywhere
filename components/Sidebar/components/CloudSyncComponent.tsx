@@ -24,7 +24,7 @@ const CloudSyncComponent = () => {
 
   const CloudSyncStatusComponent = () => {
     if (syncingConversation) {
-      return <span>{t('Syncing...')}</span>;
+      return <span>{t('Syncing ...')}</span>;
     } else {
       if (syncSuccess) {
         return (
