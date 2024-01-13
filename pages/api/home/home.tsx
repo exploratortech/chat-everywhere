@@ -63,7 +63,7 @@ import ReferralModel from '@/components/User/ReferralModel';
 import SettingsModel from '@/components/User/Settings/SettingsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
-import VoiceInputActiveOverlay from '@/components/VoiceInput/VoiceInputActiveOverlay';
+import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
 
 import HomeContext from './home.context';
 import { HomeInitialState, initialState } from './home.state';

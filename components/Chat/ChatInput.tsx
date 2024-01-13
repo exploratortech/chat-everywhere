@@ -14,7 +14,6 @@ import { useTranslation } from 'next-i18next';
 
 import useDisplayAttribute from '@/hooks/useDisplayAttribute';
 import useFocusHandler from '@/hooks/useFocusInputHandler';
-import useLimiter from '@/hooks/useLimiter';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
@@ -27,7 +26,7 @@ import HomeContext from '@/pages/api/home/home.context';
 import TokenCounter from './components/TokenCounter';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
-import VoiceInputButton from '../VoiceInput/VoiceInputButton';
+import VoiceInputButton from '../Voice/VoiceInputButton';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 

@@ -90,7 +90,7 @@
   "User has paid": "已付費",
   "Settings": "設定",
   "Account": "帳戶",
-  "App": "介面設定",
+  "App": "功能設定",
   "Data": "數據管理",
   "Sign out": "登出",
   "Sign in": "登入",
@@ -134,5 +134,11 @@
   "Cancel": "取消",
   "Edit": "編輯",
   "Test": "測試",
-  "You can send message to the topic specified (with retained flag on), Chat Everywhere will be able to access the latest message.": "設定MQTT裝置來發送訊息到你指定的Topic (請確認訊息中有retain的標籤)。"
+  "You can send message to the topic specified (with retained flag on), Chat Everywhere will be able to access the latest message.": "設定MQTT裝置來發送訊息到你指定的Topic (請確認訊息中有retain的標籤)。",
+  
+  "Speech configuration": "AI朗讀設定",
+  "Speech Speed": "語速",
+  "Slow": "慢",
+  "Normal": "正常",
+  "Fast": "快"
 }

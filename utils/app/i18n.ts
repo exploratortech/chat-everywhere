@@ -53,7 +53,7 @@ function getAvailableSpeechSourceLanguages() {
 }
 
 const voiceMap: { [language: string]: string } = {
-  'en-Us': 'en-US-JennyNeural',
+  'en-US': 'en-US-JennyNeural',
   'zh-CN': 'zh-CN-XiaoxiaoNeural',
   'zh-TW': 'zh-TW-HsiaoChenNeural',
   'zh-HK': 'zh-HK-HiuMaanNeural',
