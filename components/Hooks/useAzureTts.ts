@@ -68,13 +68,13 @@ export const useAzureTts = () => {
   const getSpeechSpeedInSsml = (): string => {
     switch (getSpeechSpeed()) {
       case 'slow':
-        return '0.75';
+        return '0.9';
       case 'normal':
-        return '1';
+        return '1.1';
       case 'fast':
-        return '1.3';
+        return '1.25';
       default:
-        return '1';
+        return '1.1';
     }
   };
 
@@ -154,7 +154,6 @@ export const useAzureTts = () => {
         ssml,
         (result) => {
           if (result) {
-            console.log(JSON.stringify(result));
             synthesizer.close();
           }
         },
