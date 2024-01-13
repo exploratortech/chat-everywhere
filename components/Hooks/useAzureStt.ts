@@ -38,7 +38,6 @@ export const useAzureStt = () => {
 
   const startSpeechRecognition = async (userToken: string): Promise<void> => {
     setIsLoading(true);
-    dispatch({ field: 'isSpeechRecognitionActive', value: true });
 
     // Prompt for permission to use microphone
     let stream: MediaStream;
@@ -91,6 +90,7 @@ export const useAzureStt = () => {
 
     speechRecognizer.current.sessionStarted = (sender, event) => {
       setIsLoading(false);
+      dispatch({ field: 'isSpeechRecognitionActive', value: true });
       dispatch({ field: 'speechContent', value: '' });
     };
 

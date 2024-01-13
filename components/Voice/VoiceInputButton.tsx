@@ -87,18 +87,13 @@ const VoiceInputButton = () => {
   }, [audioStream, draw]);
 
   const renderStatusIndicator = useMemo(() => {
-    let color = 'bg-green-500';
-    if (isLoading) {
-      color = 'bg-amber-500';
-    } else if (
-      (!isLoading && !isSpeechRecognitionActive) ||
-      isMicrophoneDisabled
-    ) {
+    if ((!isLoading && !isSpeechRecognitionActive) || isMicrophoneDisabled) {
       return null;
     }
+
     return (
       <div
-        className={`absolute w-1.5 h-1.5 m-1.5 top-0 right-0 ${color} rounded-full`}
+        className={`absolute w-1.5 h-1.5 m-1.5 top-0 right-0 bg-green-500 rounded-full`}
       />
     );
   }, [isLoading, isSpeechRecognitionActive, isMicrophoneDisabled]);
@@ -141,27 +136,33 @@ const VoiceInputButton = () => {
           height="36"
           ref={canvasRef}
         />
-        <button
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-2 bg-transparent"
-          onClick={handleClick}
-          onMouseDown={(e) => {
-            // Prevents closing enhanced menu if its opened
-            e.stopPropagation();
-          }}
-        >
-          {isMicrophoneDisabled ? (
-            <IconMicrophoneOff
-              className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full opacity-50"
-              size={18}
-            />
-          ) : (
-            <IconMicrophone
-              className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full"
-              size={18}
-            />
-          )}
-        </button>
-        {renderStatusIndicator}
+        {isLoading ? (
+          <div className="absolute top-[0.7rem] left-3 h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
+        ) : (
+          <>
+            <button
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-2 bg-transparent"
+              onClick={handleClick}
+              onMouseDown={(e) => {
+                // Prevents closing enhanced menu if its opened
+                e.stopPropagation();
+              }}
+            >
+              {isMicrophoneDisabled ? (
+                <IconMicrophoneOff
+                  className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full opacity-50"
+                  size={18}
+                />
+              ) : (
+                <IconMicrophone
+                  className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full"
+                  size={18}
+                />
+              )}
+            </button>
+            {renderStatusIndicator}
+          </>
+        )}
       </div>
     </div>
   );
