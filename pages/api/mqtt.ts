@@ -52,7 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
           }
           clearInterval(interval);
         }
-      }, 20);
+      }, 10);
 
       sendToUser('[PLACEHOLDER]');
 
