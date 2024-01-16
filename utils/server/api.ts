@@ -161,8 +161,6 @@ export const getEndpointsAndKeys = (
     keys = shuffledIndices.map((index) => keys[index]);
   }
 
-  console.log(endpoints, keys);
-
   return [endpoints, keys];
 };
 

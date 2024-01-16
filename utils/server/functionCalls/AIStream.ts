@@ -78,8 +78,6 @@ export const AIStream = async ({
   };
 
   requestHeaders['api-key'] = openAIKey;
-
-  console.log("URL: ", url);
   
   const res = await fetch(url, {
     headers: requestHeaders,
