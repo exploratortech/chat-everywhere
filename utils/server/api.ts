@@ -169,6 +169,7 @@ export const getEndpointsAndKeys = (
   endpoints = endpoints.filter((endpoint) => endpoint !== undefined);
   keys = keys.filter((key) => key !== undefined);
 
+  
   return [endpoints, keys];
 };
 

@@ -45,6 +45,8 @@ export const AIStream = async ({
 
   let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2023-12-01-preview`;
 
+  console.log("Sending request to: " + url);
+  
   const messagesToSend = await shortenMessagesBaseOnTokenLimit(
     '',
     messages,
