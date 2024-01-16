@@ -15,6 +15,7 @@ import {
 } from 'eventsource-parser';
 
 type AIStreamProps = {
+  countryCode: string;
   systemPrompt: string;
   messages: Message[];
   onUpdateToken: (token: string) => void;
@@ -27,12 +28,13 @@ type AIStreamResponseType = {
 }[];
 
 export const AIStream = async ({
+  countryCode,
   systemPrompt,
   messages,
   onUpdateToken,
   functionCalls,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
-  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true);
+  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true, countryCode);
 
   let attempt = 0,
     stop = false,

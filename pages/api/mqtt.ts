@@ -5,6 +5,7 @@ import {
 } from '@/utils/server/supabase';
 
 import { ChatBody } from '@/types/chat';
+import { geolocation } from '@vercel/edge';
 
 const supabase = getAdminSupabaseClient();
 
@@ -16,6 +17,8 @@ export const config = {
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
 const handler = async (req: Request): Promise<Response> => {
+  const { country } = geolocation(req);
+
   const userToken = req.headers.get('user-token');
   const encoder = new TextEncoder();
   let buffer: Uint8Array[] = [];
@@ -65,6 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
         onEnd: () => {
           stop = true;
         },
+        countryCode: country || "",
       });
     },
   });
