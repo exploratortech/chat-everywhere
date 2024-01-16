@@ -151,8 +151,13 @@ export const getEndpointsAndKeys = (
   
   // Reserve Japan endpoint to TW/HK/MO for lowest latency
   if (requestCountryCode && ['TW', 'HK', 'MO'].includes(requestCountryCode)) {
-    endpoints = [process.env.AZURE_OPENAI_ENDPOINT_0, ...endpoints];
-    keys = [process.env.AZURE_OPENAI_KEY_0, ...keys];
+    if (includeGPT4) {
+      endpoints = [process.env.AZURE_OPENAI_GPT_4_ENDPOINT_0, ...endpoints];
+      keys = [process.env.AZURE_OPENAI_GPT_4_KEY_0, ...keys];
+    }else{
+      endpoints = [process.env.AZURE_OPENAI_ENDPOINT_0, ...endpoints];
+      keys = [process.env.AZURE_OPENAI_KEY_0, ...keys];
+    }
   } else {
     const shuffledIndices = Array.from(Array(endpoints.length).keys()).sort(
       () => Math.random() - 0.5,
@@ -161,6 +166,10 @@ export const getEndpointsAndKeys = (
     keys = shuffledIndices.map((index) => keys[index]);
   }
 
+  endpoints = endpoints.filter((endpoint) => endpoint !== undefined);
+  keys = keys.filter((key) => key !== undefined);
+
+  
   return [endpoints, keys];
 };
 

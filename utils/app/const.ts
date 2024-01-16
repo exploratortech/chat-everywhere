@@ -50,13 +50,11 @@ export const ENDPOINT_TRAFFIC_DISTRIBUTION = [
 ];
 
 export const AZURE_OPENAI_GPT_4_ENDPOINTS = [
-  process.env.AZURE_OPENAI_GPT_4_ENDPOINT_0,
   process.env.AZURE_OPENAI_GPT_4_ENDPOINT_1,
   process.env.AZURE_OPENAI_GPT_4_ENDPOINT_2,
 ];
 
 export const AZURE_OPENAI_GPT_4_KEYS = [
-  process.env.AZURE_OPENAI_GPT_4_KEY_0,
   process.env.AZURE_OPENAI_GPT_4_KEY_1,
   process.env.AZURE_OPENAI_GPT_4_KEY_2,
 ];

@@ -15,6 +15,7 @@ import {
 } from 'eventsource-parser';
 
 type AIStreamProps = {
+  countryCode: string;
   systemPrompt: string;
   messages: Message[];
   onUpdateToken: (token: string) => void;
@@ -27,12 +28,13 @@ type AIStreamResponseType = {
 }[];
 
 export const AIStream = async ({
+  countryCode,
   systemPrompt,
   messages,
   onUpdateToken,
   functionCalls,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
-  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true);
+  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true, countryCode);
 
   let attempt = 0,
     stop = false,
@@ -45,6 +47,8 @@ export const AIStream = async ({
 
   let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2023-12-01-preview`;
 
+  console.log("Sending request to: " + url);
+  
   const messagesToSend = await shortenMessagesBaseOnTokenLimit(
     '',
     messages,
@@ -78,7 +82,7 @@ export const AIStream = async ({
   };
 
   requestHeaders['api-key'] = openAIKey;
-
+  
   const res = await fetch(url, {
     headers: requestHeaders,
     method: 'POST',
