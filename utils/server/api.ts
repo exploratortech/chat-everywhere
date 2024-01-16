@@ -163,8 +163,10 @@ export const getEndpointsAndKeys = (
   }
 
   if (includeGPT4) {
+    console.log([gpt4Endpoints, gpt4Keys]);
     return [gpt4Endpoints, gpt4Keys];
   }else{
+    console.log([endpoints, keys]);
     return [endpoints, keys];
   }
 };
