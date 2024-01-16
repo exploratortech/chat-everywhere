@@ -143,32 +143,33 @@ export const getEndpointsAndKeys = (
 ): [(string | undefined)[], (string | undefined)[]] => {
   let endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
   let keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
-  let gpt4Endpoints: (string | undefined)[] = [...AZURE_OPENAI_GPT_4_ENDPOINTS];
-  let gpt4Keys: (string | undefined)[] = [...AZURE_OPENAI_GPT_4_KEYS];
+
+  if (includeGPT4) {
+    endpoints = [...AZURE_OPENAI_GPT_4_ENDPOINTS];
+    keys = [...AZURE_OPENAI_GPT_4_KEYS];
+  }
   
   // Reserve Japan endpoint to TW/HK/MO for lowest latency
   if (requestCountryCode && ['TW', 'HK', 'MO'].includes(requestCountryCode)) {
-    endpoints = [process.env.AZURE_OPENAI_ENDPOINT_0, ...endpoints];
-    keys = [process.env.AZURE_OPENAI_KEY_0, ...keys];
-    gpt4Endpoints = [process.env.AZURE_OPENAI_GPT_4_ENDPOINT_0, ...gpt4Endpoints];
-    gpt4Keys = [process.env.AZURE_OPENAI_GPT_4_KEY_0, ...gpt4Keys];
+    if (includeGPT4) {
+      endpoints = [process.env.AZURE_OPENAI_GPT_4_ENDPOINT_0, ...endpoints];
+      keys = [process.env.AZURE_OPENAI_GPT_4_KEY_0, ...keys];
+    }else{
+      endpoints = [process.env.AZURE_OPENAI_ENDPOINT_0, ...endpoints];
+      keys = [process.env.AZURE_OPENAI_KEY_0, ...keys];
+    }
   } else {
     const shuffledIndices = Array.from(Array(endpoints.length).keys()).sort(
       () => Math.random() - 0.5,
     );
     endpoints = shuffledIndices.map((index) => endpoints[index]);
     keys = shuffledIndices.map((index) => keys[index]);
-    gpt4Endpoints = shuffledIndices.map((index) => gpt4Endpoints[index]);
-    gpt4Keys = shuffledIndices.map((index) => gpt4Keys[index]);
   }
 
-  if (includeGPT4) {
-    console.log([gpt4Endpoints, gpt4Keys]);
-    return [gpt4Endpoints, gpt4Keys];
-  }else{
-    console.log([endpoints, keys]);
-    return [endpoints, keys];
-  }
+  endpoints = endpoints.filter((endpoint) => endpoint !== undefined);
+  keys = keys.filter((key) => key !== undefined);
+
+  return [endpoints, keys];
 };
 
 // Truncate log message to 4000 characters
