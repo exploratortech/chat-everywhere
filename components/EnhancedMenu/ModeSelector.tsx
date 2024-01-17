@@ -79,6 +79,7 @@ const ModeSelector = () => {
               </option>
               <option
                 value={PluginID.IMAGE_GEN}
+                disabled
                 className="dark:bg-[#343541] dark:text-white text-yellow-600"
               >
                 {t('AI Image')}
