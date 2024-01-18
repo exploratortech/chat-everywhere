@@ -2,6 +2,7 @@
 import { Logger } from 'next-axiom';
 
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { ERROR_MESSAGES } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
@@ -99,7 +100,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(stream);
   } catch (error) {
+    if (
+      (error as Error).message ===
+      ERROR_MESSAGES.content_filter_triggered.message
+    ) {
+      return new Response('Error', {
+        status: ERROR_MESSAGES.content_filter_triggered.httpCode,
+      });
+    }
     console.error(error);
+
     log.error('api/chat error', {
       message: (error as Error).message,
       errorObject: error,

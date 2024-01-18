@@ -44,8 +44,8 @@ export const AZURE_OPENAI_KEYS = [
 // To be enabled, currently we goes with this order of region regardless of request origin
 export const ENDPOINT_TRAFFIC_DISTRIBUTION = [
   0.75, // Japan East
-  0.10, // Central US
-  0.10, // East US
+  0.1, // Central US
+  0.1, // East US
   0.05, // UK South
 ];
 
@@ -58,3 +58,10 @@ export const AZURE_OPENAI_GPT_4_KEYS = [
   process.env.AZURE_OPENAI_GPT_4_KEY_1,
   process.env.AZURE_OPENAI_GPT_4_KEY_2,
 ];
+
+export const ERROR_MESSAGES = {
+  content_filter_triggered: {
+    message: 'Content filter triggered',
+    httpCode: 405,
+  },
+};

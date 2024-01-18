@@ -17,6 +17,7 @@ import { getEndpoint } from '@/utils/app/api';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
+  ERROR_MESSAGES
 } from '@/utils/app/const';
 import { saveConversation, saveConversations } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
@@ -159,9 +160,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 'Sorry something went wrong. Please refresh the page and try again.',
               ),
             );
+          } else if (response.status === ERROR_MESSAGES.content_filter_triggered.httpCode) {
+            toast.error(
+              t(
+                'Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.',
+              ),{
+                icon: '⚠️',
+              }
+            );
           } else {
             toast.error(
-              t('Sorry, something went wrong. Our team has been notified and will look into it.')
+              t(
+                'Sorry, something went wrong. Our team has been notified and will look into it.',
+              ),
             );
           }
 
