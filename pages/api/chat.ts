@@ -1,5 +1,8 @@
 // This endpoint only allow GPT-3.5 and GPT-3.5 16K models
+import { Logger } from 'next-axiom';
+
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { ERROR_MESSAGES } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
@@ -12,12 +15,12 @@ import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 import { ChatBody } from '@/types/chat';
 import { type Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
-import { Logger } from "next-axiom";
+
 import { geolocation } from '@vercel/edge';
 
 export const config = {
   runtime: 'edge',
-  preferredRegion: 'icn1'
+  preferredRegion: 'icn1',
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -92,24 +95,31 @@ const handler = async (req: Request): Promise<Response> => {
       messageToStreamBack,
       userIdentifier || undefined,
       pluginId === '' ? 'Default mode message' : null,
-      country
+      country,
     );
 
     return new Response(stream);
   } catch (error) {
+    if (
+      (error as Error).message ===
+      ERROR_MESSAGES.content_filter_triggered.message
+    ) {
+      return new Response('Error', {
+        status: ERROR_MESSAGES.content_filter_triggered.httpCode,
+      });
+    }
     console.error(error);
-    log.error("api/chat error", {
+
+    log.error('api/chat error', {
       message: (error as Error).message,
-      errorObject: error
+      errorObject: error,
     });
 
     serverSideTrackEvent(userIdentifier || 'not-defined', 'Error', {
       PluginId: pluginId || 'not-defined',
       currentConversation: JSON.stringify(messagesToSend),
       messageToSend: promptToSend,
-      errorMessage: error
-        ? (error as Error).message
-        : 'unknown error',
+      errorMessage: error ? (error as Error).message : 'unknown error',
     });
 
     if (error instanceof OpenAIError) {

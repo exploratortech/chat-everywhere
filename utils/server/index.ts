@@ -1,5 +1,6 @@
 import { Logger } from 'next-axiom';
 
+import { ERROR_MESSAGES } from '@/utils/app/const';
 import {
   type EventNameTypes,
   serverSideTrackEvent,
@@ -144,6 +145,9 @@ export const OpenAIStream = async (
 
       if (res.status !== 200) {
         const result = await res.json();
+        if (result.error.code === 'content_filter') {
+          throw new Error(ERROR_MESSAGES.content_filter_triggered.message);
+        }
         if (result.error) {
           console.error(
             new OpenAIError(
@@ -273,6 +277,11 @@ export const OpenAIStream = async (
     } catch (error) {
       attempt += 1;
       console.error(error, attemptLogs);
+
+      // Propagate custom error to terminate the retry mechanism
+      if((error as Error).message === ERROR_MESSAGES.content_filter_triggered.message) {
+        throw new Error(ERROR_MESSAGES.content_filter_triggered.message);
+      }
 
       log.error('api/chat error', {
         message: (error as Error).message,
