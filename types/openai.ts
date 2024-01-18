@@ -25,7 +25,7 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     maxLength: 12000,
     tokenLimit: 4000,
     completionTokenLimit: 800,
-    deploymentName: 'gpt-3-5-turbo',
+    deploymentName: 'gpt-35',
   },
   [OpenAIModelID.GPT_3_5_AZ]: {
     id: OpenAIModelID.GPT_3_5_AZ,
