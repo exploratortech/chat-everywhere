@@ -4,6 +4,7 @@ export interface OpenAIModel {
   maxLength: number; // maximum length of a message
   tokenLimit: number;
   completionTokenLimit: number;
+  deploymentName?: string;
 }
 
 export enum OpenAIModelID {
@@ -23,34 +24,39 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     name: 'GPT-3.5',
     maxLength: 12000,
     tokenLimit: 4000,
-    completionTokenLimit: 800
+    completionTokenLimit: 800,
+    deploymentName: 'gpt-3-5-turbo',
   },
   [OpenAIModelID.GPT_3_5_AZ]: {
     id: OpenAIModelID.GPT_3_5_AZ,
     name: 'GPT-3.5',
     maxLength: 12000,
     tokenLimit: 4000,
-    completionTokenLimit: 800
+    completionTokenLimit: 800,
+    deploymentName: 'gpt-35',
   },
   [OpenAIModelID.GPT_3_5_16K]: {
     id: OpenAIModelID.GPT_3_5_16K,
     name: 'GPT-3.5-16K',
     maxLength: 48000,
     tokenLimit: 16000,
-    completionTokenLimit: 4000
+    completionTokenLimit: 4000,
+    deploymentName: 'gpt-35-16k',
   },
   [OpenAIModelID.GPT_4]: {
     id: OpenAIModelID.GPT_4,
     name: 'GPT-4',
     maxLength: 24000,
     tokenLimit: 8000,
-    completionTokenLimit: 2000
+    completionTokenLimit: 2000,
+    deploymentName: 'gpt-4',
   },
   [OpenAIModelID.GPT_4_32K]: {
     id: OpenAIModelID.GPT_4_32K,
     name: 'GPT-4-32K',
     maxLength: 96000,
     tokenLimit: 32000,
-    completionTokenLimit: 8000
+    completionTokenLimit: 8000,
+    deploymentName: 'gpt-4-32k',
   },
 };
