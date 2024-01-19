@@ -20,7 +20,7 @@ import {
 export default function Settings_MQTT() {
   const { t } = useTranslation('model');
   const {
-    state: { user, isPaidUser },
+    state: { user, userPlanFeatures },
     dispatch,
   } = useContext(HomeContext);
   const [loading, setLoading] = useState(true);
@@ -252,7 +252,7 @@ export default function Settings_MQTT() {
     );
   };
 
-  if (!user || !isPaidUser) return <></>;
+  if (!user || !userPlanFeatures.canUseMQTT()) return <></>;
 
   return (
     <div>

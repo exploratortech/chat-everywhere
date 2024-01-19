@@ -1,6 +1,6 @@
 import { SubscriptionPlan } from '@/types/user';
 
-enum PlanLevel {
+export enum PlanLevel {
   Free = 0,
   Basic = 1,
   Pro = 2,
@@ -46,25 +46,27 @@ class UserPlanFeatures {
   canUseSpeechBtn(): boolean {
     return this.planLevel > PlanLevel.Basic;
   }
+  canUseCloudSync(): boolean {
+    return this.planLevel > PlanLevel.Basic;
+  }
+  canUseAiImage(): boolean {
+    return this.planLevel > PlanLevel.Basic;
+  }
+  canUseGPT4_Model(): boolean {
+    return this.planLevel > PlanLevel.Basic;
+  }
 
   canUseGPT3_5_16KModel(): boolean {
     return this.planLevel > PlanLevel.Free;
   }
-  canUseGPT4_Model(): boolean {
-    return this.planLevel > PlanLevel.Free;
-  }
-
   canUseOnlineMode(): boolean {
     return this.planLevel > PlanLevel.Free;
   }
   canUseMQTT(): boolean {
     return this.planLevel > PlanLevel.Free;
   }
-  canUseAiImage(): boolean {
+  canUseLineConnect(): boolean {
     return this.planLevel > PlanLevel.Free;
-  }
-  canUseCloudSync(): boolean {
-    return this.planLevel > PlanLevel.Basic;
   }
 }
 

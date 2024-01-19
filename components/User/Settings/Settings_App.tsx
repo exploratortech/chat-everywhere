@@ -12,7 +12,7 @@ export default function Settings_App() {
   const [speechSpeedConfig, setSpeechSpeedConfig] =
     useState<SpeechSpeedType>('normal');
   const {
-    state: { lightMode, isPaidUser },
+    state: { lightMode, userPlanFeatures },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -42,7 +42,7 @@ export default function Settings_App() {
           })
         }
       />
-      {isPaidUser && (
+      {userPlanFeatures.canUseSpeechBtn() && (
         <>
           <div className="inline-flex items-center justify-center w-full">
             <hr className="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />

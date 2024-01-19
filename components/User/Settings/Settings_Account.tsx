@@ -3,6 +3,7 @@ import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
+import { PlanLevel } from '@/utils/app/UserPlanFeatures';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
@@ -21,7 +22,7 @@ export default function Settings_Account() {
   const [displayReferralCodeEnterer, setDisplayReferralCodeEnterer] =
     useState(false);
   const {
-    state: { user, isPaidUser },
+    state: { user, userPlanFeatures },
     dispatch,
   } = useContext(HomeContext);
 
@@ -61,14 +62,14 @@ export default function Settings_Account() {
 
       <div className="mx-auto max-w-2xl">
         <div className="rounded-2xl flex flex-col">
-          {!isPaidUser && (
+          {userPlanFeatures.planLevel <= PlanLevel.Basic && (
             <span className="text-sm mb-2">
               {t(
                 'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime!',
               )}
             </span>
           )}
-          {isPaidUser && user?.isInReferralTrial && (
+          {userPlanFeatures.isPaidUser() && user?.isInReferralTrial && (
             <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
               <IconCircleCheck className="text-green-500" size={19} />
               <p className="flex items-center">
@@ -92,7 +93,7 @@ export default function Settings_Account() {
                 <ProPlanContent />
               )}
 
-              {(!user || !isPaidUser) && (
+              {(!user || !userPlanFeatures.isPaidUser) && (
                 <div className="flex flex-col">
                   <a
                     target="_blank"
@@ -120,7 +121,7 @@ export default function Settings_Account() {
           </div>
           {displayReferralCodeEnterer && <ReferralCodeEnter />}
           <div>
-            {isPaidUser && !user?.isInReferralTrial && (
+            {userPlanFeatures.isPaidUser() && !user?.isInReferralTrial && (
               <p className="text-xs text-neutral-400">
                 {t(
                   'Thank you for supporting us! If you want to cancel your subscription, please visit ',
@@ -159,7 +160,7 @@ export default function Settings_Account() {
         <div className="flex justify-end mt-4">
           {user && (
             <div className="flex flex-row items-center">
-              {!isPaidUser && (
+              {!userPlanFeatures.isPaidUser() && (
                 <span
                   className="pr-2 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer text-xs"
                   onClick={() =>
@@ -212,12 +213,17 @@ const UltraPlanContent = () => {
   const { t } = useTranslation('model');
   return (
     <>
-      <span 
-          className="text-2xl font-bold bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] font-medium rounded bg-gray-700 text-indigo-400"
-          style={{color: "transparent", WebkitBackgroundClip: 'text', WebkitTextStrokeWidth: '1px', WebkitTextStrokeColor: 'transparent'}}
-        >
-          Ultra
-        </span>
+      <span
+        className="text-2xl font-bold bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] font-medium rounded bg-gray-700 text-indigo-400"
+        style={{
+          color: 'transparent',
+          WebkitBackgroundClip: 'text',
+          WebkitTextStrokeWidth: '1px',
+          WebkitTextStrokeColor: 'transparent',
+        }}
+      >
+        Ultra
+      </span>
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
         <FeatureItem featureName={t('Priority response time')} />
