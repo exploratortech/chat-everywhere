@@ -434,11 +434,6 @@ const Home = () => {
             field: 'userPlanFeatures',
             value: new UserPlanFeatures(userProfile.plan),
           });
-          dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
-          dispatch({
-            field: 'isUltraUser',
-            value: userProfile.plan === 'ultra',
-          });
           dispatch({
             field: 'hasMqttConnection',
             value: userProfile.hasMqttConnection,
