@@ -50,6 +50,19 @@ class UserPlanFeatures {
   canUseGPT3_5_16KModel(): boolean {
     return this.planLevel > PlanLevel.Free;
   }
+  canUseGPT4_Model(): boolean {
+    return this.planLevel > PlanLevel.Free;
+  }
+
+  canUseOnlineMode(): boolean {
+    return this.planLevel > PlanLevel.Free;
+  }
+  canUseMQTT(): boolean {
+    return this.planLevel > PlanLevel.Free;
+  }
+  canUseAiImage(): boolean {
+    return this.planLevel > PlanLevel.Free;
+  }
 }
 
 export default UserPlanFeatures;
