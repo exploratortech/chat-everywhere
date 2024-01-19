@@ -9,11 +9,23 @@ export default function UserAccountBadge() {
   if (user) {
     if (user.plan === 'ultra') {
       return (
-        <span 
+        <span
           className="bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] text-xs font-medium py-0.5 rounded bg-gray-700 text-indigo-400 mr-0"
-          style={{color: "transparent", WebkitBackgroundClip: 'text', WebkitTextStrokeWidth: '1px', WebkitTextStrokeColor: 'transparent' }}
+          style={{
+            color: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextStrokeWidth: '1px',
+            WebkitTextStrokeColor: 'transparent',
+          }}
         >
           Ultra
+        </span>
+      );
+    }
+    if (user.plan === 'basic') {
+      return (
+        <span className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+          Basic
         </span>
       );
     }
