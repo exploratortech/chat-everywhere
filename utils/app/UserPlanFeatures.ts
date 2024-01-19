@@ -34,11 +34,21 @@ class UserPlanFeatures {
     }
   }
 
+  isPaidUser(): boolean {
+    return this.planLevel > PlanLevel.Free;
+  }
+  // ----------------- Limits -----------------
   hasChatLimit(): boolean {
     return this.planLevel === PlanLevel.Free;
   }
+
+  // ----------------- Features -----------------
   canUseSpeechBtn(): boolean {
     return this.planLevel > PlanLevel.Basic;
+  }
+
+  canUseGPT3_5_16KModel(): boolean {
+    return this.planLevel > PlanLevel.Free;
   }
 }
 
