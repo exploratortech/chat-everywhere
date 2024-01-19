@@ -12,6 +12,8 @@ import { event } from 'nextjs-google-analytics';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
+import UserPlan from '@/utils/app/UserPlanFeatures';
+import UserPlanFeatures from '@/utils/app/UserPlanFeatures';
 import { fetchShareableConversation } from '@/utils/app/api';
 import {
   cleanConversationHistory,
@@ -428,10 +430,23 @@ const Home = () => {
       })
         .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
+          dispatch({
+            field: 'userPlanFeatures',
+            value: new UserPlanFeatures(userProfile.plan),
+          });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
-          dispatch({ field: 'isUltraUser', value: userProfile.plan === 'ultra' });
-          dispatch({ field: 'hasMqttConnection', value: userProfile.hasMqttConnection });
-          dispatch({ field: 'isConnectedWithLine', value: userProfile.isConnectedWithLine });
+          dispatch({
+            field: 'isUltraUser',
+            value: userProfile.plan === 'ultra',
+          });
+          dispatch({
+            field: 'hasMqttConnection',
+            value: userProfile.hasMqttConnection,
+          });
+          dispatch({
+            field: 'isConnectedWithLine',
+            value: userProfile.isConnectedWithLine,
+          });
           dispatch({
             field: 'user',
             value: {
@@ -445,7 +460,7 @@ const Home = () => {
               proPlanExpirationDate: userProfile.proPlanExpirationDate,
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
-              isInReferralTrial: userProfile.isInReferralTrial
+              isInReferralTrial: userProfile.isInReferralTrial,
             },
           });
         })

@@ -1,10 +1,12 @@
+import UserPlanFeatures from '@/utils/app/UserPlanFeatures';
+
 import { Conversation, Message } from '@/types/chat';
+import { DragData } from '@/types/drag';
 import { ErrorMessage } from '@/types/error';
 import { FolderInterface } from '@/types/folder';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 import { CreditUsage, User } from '@/types/user';
-import { DragData } from '@/types/drag';
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -47,6 +49,7 @@ export interface HomeInitialState {
   showFeaturesModel: boolean;
   showFeaturePageOnLoad: string | null;
   user: User | null;
+  userPlanFeatures: UserPlanFeatures;
   isPaidUser: boolean;
   isUltraUser: boolean;
   isSurveyFilled: boolean;
@@ -108,6 +111,7 @@ export const initialState: HomeInitialState = {
   showFeaturesModel: false,
   showFeaturePageOnLoad: null,
   user: null,
+  userPlanFeatures: new UserPlanFeatures('free'),
   isPaidUser: false,
   isUltraUser: false,
   isSurveyFilled: false,
