@@ -37,6 +37,9 @@ class UserPlanFeatures {
   hasChatLimit(): boolean {
     return this.planLevel === PlanLevel.Free;
   }
+  canUseSpeechBtn(): boolean {
+    return this.planLevel > PlanLevel.Basic;
+  }
 }
 
 export default UserPlanFeatures;
