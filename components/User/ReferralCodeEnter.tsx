@@ -85,10 +85,6 @@ export const ReferralCodeEnter = () => {
           field: 'userPlanFeatures',
           value: new UserPlanFeatures(profile.plan),
         });
-        dispatch({
-          field: 'isPaidUser',
-          value: true,
-        });
 
         toast.success(t('Referral code has been redeemed'));
         trackEvent('Referral code redemption success', {
