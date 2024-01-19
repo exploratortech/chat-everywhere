@@ -63,6 +63,9 @@ class UserPlanFeatures {
   canUseAiImage(): boolean {
     return this.planLevel > PlanLevel.Free;
   }
+  canUseCloudSync(): boolean {
+    return this.planLevel > PlanLevel.Basic;
+  }
 }
 
 export default UserPlanFeatures;

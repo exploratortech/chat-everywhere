@@ -104,7 +104,7 @@ const Home = () => {
       showChatbar,
       showPromptbar,
       user,
-      isPaidUser,
+      userPlanFeatures,
       conversationLastSyncAt,
       forceSyncConversation,
       replaceRemoteData,
@@ -334,7 +334,7 @@ const Home = () => {
   useEffect(() => {
     if (messageIsStreaming) return;
     if (!user) return;
-    if (!isPaidUser) return;
+    if (!userPlanFeatures.canUseCloudSync()) return;
 
     const conversationLastUpdatedAt = localStorage.getItem(
       'conversationLastUpdatedAt',
@@ -410,7 +410,7 @@ const Home = () => {
     user,
     supabase,
     dispatch,
-    isPaidUser,
+    userPlanFeatures,
     forceSyncConversation,
     conversationLastSyncAt,
     messageIsStreaming,
@@ -494,8 +494,8 @@ const Home = () => {
   useEffect(() => {
     if (!user) return;
     updateUserInfo(user);
-    fetchAndUpdateCreditUsage(user.id, isPaidUser);
-  }, [user, isPaidUser, conversations]);
+    fetchAndUpdateCreditUsage(user.id, userPlanFeatures.isPaidUser());
+  }, [user, userPlanFeatures, conversations]);
 
   const handleUserLogout = async () => {
     await supabase.auth.signOut();
