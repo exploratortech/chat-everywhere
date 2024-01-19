@@ -34,19 +34,9 @@ class UserPlanFeatures {
     }
   }
 
-  canUseProFeatures(): boolean {
-    return this.planLevel >= PlanLevel.Pro;
+  hasChatLimit(): boolean {
+    return this.planLevel === PlanLevel.Free;
   }
-
-  canUseEduFeatures(): boolean {
-    return this.planLevel >= PlanLevel.Edu;
-  }
-
-  canUseUltraFeatures(): boolean {
-    return this.planLevel >= PlanLevel.Ultra;
-  }
-
-  // Add more methods as needed for different features
 }
 
 export default UserPlanFeatures;
