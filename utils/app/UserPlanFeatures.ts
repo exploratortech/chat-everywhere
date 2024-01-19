@@ -10,7 +10,7 @@ enum PlanLevel {
 
 type PlanString = string | SubscriptionPlan;
 
-class UserPlan {
+class UserPlanFeatures {
   planLevel: PlanLevel;
 
   constructor(plan: PlanString) {
@@ -49,4 +49,4 @@ class UserPlan {
   // Add more methods as needed for different features
 }
 
-export default UserPlan;
+export default UserPlanFeatures;
