@@ -37,6 +37,7 @@ class UserPlanFeatures {
   isPaidUser(): boolean {
     return this.planLevel > PlanLevel.Free;
   }
+
   // ----------------- Limits -----------------
   hasChatLimit(): boolean {
     return this.planLevel === PlanLevel.Free;
