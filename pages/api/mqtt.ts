@@ -1,3 +1,4 @@
+import getPlanLevel, { PlanLevel } from '@/utils/app/planLevel';
 import { llmHandler } from '@/utils/server/functionCalls/llmHandler';
 import {
   getAdminSupabaseClient,
@@ -5,6 +6,7 @@ import {
 } from '@/utils/server/supabase';
 
 import { ChatBody } from '@/types/chat';
+
 import { geolocation } from '@vercel/edge';
 
 const supabase = getAdminSupabaseClient();
@@ -27,7 +29,9 @@ const handler = async (req: Request): Promise<Response> => {
   if (!data || error || !userToken) return unauthorizedResponse;
 
   const user = await getUserProfile(data.user.id);
-  if (!user || user.plan === 'free') return unauthorizedResponse;
+  if (!user) return unauthorizedResponse;
+  const userPlanLevel = getPlanLevel(user.plan);
+  if (userPlanLevel < PlanLevel.Basic) return unauthorizedResponse;
 
   const { messages } = (await req.json()) as ChatBody;
 
@@ -68,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
         onEnd: () => {
           stop = true;
         },
-        countryCode: country || "",
+        countryCode: country || '',
       });
     },
   });

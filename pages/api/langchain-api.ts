@@ -7,6 +7,7 @@ import {
   tools,
 } from '../../utils/app/online_mode';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+import getPlanLevel, { PlanLevel } from '@/utils/app/planLevel';
 import { trimStringBaseOnTokenLimit } from '@/utils/server/api';
 import { getStringTokenCount, truncateLogMessage } from '@/utils/server/api';
 import {
@@ -37,7 +38,9 @@ const handler = async (req: NextRequest, res: any) => {
   if (!data || error) return unauthorizedResponse;
 
   const user = await getUserProfile(data.user.id);
-  if (!user || user.plan === 'free') return unauthorizedResponse;
+  if (!user) return unauthorizedResponse;
+  const userPlanLevel = getPlanLevel(user.plan);
+  if (userPlanLevel < PlanLevel.Pro) return unauthorizedResponse;
 
   let promptTokenLength = 0,
     completionTokenLength = 0;

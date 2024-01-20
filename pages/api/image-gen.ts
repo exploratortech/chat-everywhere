@@ -10,6 +10,7 @@ import {
   serverSideTrackEvent,
 } from '@/utils/app/eventTracking';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
+import getPlanLevel, { PlanLevel } from '@/utils/app/planLevel';
 import {
   ProgressHandler,
   makeCreateImageSelector,
@@ -32,7 +33,7 @@ const supabase = getAdminSupabaseClient();
 
 export const config = {
   runtime: 'edge',
-  preferredRegion: 'icn1'
+  preferredRegion: 'icn1',
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -74,7 +75,9 @@ const generateMjPrompt = (
   }
 
   if (originalPrompt) {
-    const originalPromptSubstrings = originalPrompt.match(/--\w+ \d+(\.\d+)?(:\d+)?/g);
+    const originalPromptSubstrings = originalPrompt.match(
+      /--\w+ \d+(\.\d+)?(:\d+)?/g,
+    );
     if (originalPromptSubstrings) {
       originalPromptSubstrings.forEach((substring) => {
         if (!resultPrompt.includes(substring)) {
@@ -94,11 +97,16 @@ const handler = async (req: Request): Promise<Response> => {
   if (!data || error) return unauthorizedResponse;
 
   const user = await getUserProfile(data.user.id);
-  if (!user || user.plan === 'free') return unauthorizedResponse;
+  if (!user) return unauthorizedResponse;
+  const userPlanLevel = getPlanLevel(user.plan);
+  if (userPlanLevel < PlanLevel.Pro) return unauthorizedResponse;
 
-  const isUserInUltraPlan = user.plan === 'ultra';
+  const isUserInUltraPlan = userPlanLevel === PlanLevel.Ultra;
 
-  if (!isUserInUltraPlan && await hasUserRunOutOfCredits(data.user.id, PluginID.IMAGE_GEN)) {
+  if (
+    !isUserInUltraPlan &&
+    (await hasUserRunOutOfCredits(data.user.id, PluginID.IMAGE_GEN))
+  ) {
     return new Response('Error', {
       status: 402,
       statusText: 'Ran out of Image generation credit',
@@ -165,7 +173,7 @@ const handler = async (req: Request): Promise<Response> => {
       progressHandler.updateProgress({
         content: `Enhancing and translating user input prompt ... \n`,
       });
-      
+
       generationPrompt = await translateAndEnhancePrompt(
         latestUserPromptMessage,
       );
@@ -177,7 +185,7 @@ const handler = async (req: Request): Promise<Response> => {
         requestBody.temperature,
         latestUserPromptMessage,
       );
-      
+
       progressHandler.updateProgress({
         content: `Prompt: ${generationPrompt} \n`,
         removeLastLine: true,
@@ -203,7 +211,8 @@ const handler = async (req: Request): Promise<Response> => {
       errorTraceMessage =
         'From endpoint: https://api.thenextleg.io/v2/imagine: ' +
         imageGenerationResponseText +
-        ' --- ' + errorTraceMessage;
+        ' --- ' +
+        errorTraceMessage;
 
       const imageGenerationResponseJson = JSON.parse(
         imageGenerationResponseText,
@@ -246,7 +255,9 @@ const handler = async (req: Request): Promise<Response> => {
           imageGenerationProgressResponseText,
         );
 
-        errorTraceMessage = `From endpoint: ${generationProgressEndpoint}: ${imageGenerationProgressResponseText} --- ` + errorTraceMessage;
+        errorTraceMessage =
+          `From endpoint: ${generationProgressEndpoint}: ${imageGenerationProgressResponseText} --- ` +
+          errorTraceMessage;
 
         if (!imageGenerationProgressResponse.ok) {
           console.log(imageGenerationProgressResponse.status);
@@ -311,7 +322,7 @@ const handler = async (req: Request): Promise<Response> => {
               prompt: generationPrompt,
             });
 
-            if(!isUserInUltraPlan){
+            if (!isUserInUltraPlan) {
               await addUsageEntry(PluginID.IMAGE_GEN, user.id);
               await subtractCredit(user.id, PluginID.IMAGE_GEN);
             }
@@ -336,7 +347,8 @@ const handler = async (req: Request): Promise<Response> => {
                   : `${generationProgress}% complete`
               } ... ${getTotalGenerationTime()}s \n`,
               removeLastLine: true,
-              previewImageUrl: imageGenerationProgressResponseJson?.progressImageUrl,
+              previewImageUrl:
+                imageGenerationProgressResponseJson?.progressImageUrl,
               percentage:
                 typeof generationProgress === 'number'
                   ? `${generationProgress}`

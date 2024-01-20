@@ -1,5 +1,6 @@
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+import getPlanLevel, { PlanLevel } from '@/utils/app/planLevel';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
   addCredit,
@@ -31,9 +32,11 @@ const handler = async (req: Request): Promise<Response> => {
   if (!data || error) return unauthorizedResponse;
 
   const user = await getUserProfile(data.user.id);
-  if (!user || user.plan === 'free') return unauthorizedResponse;
+  if (!user) return unauthorizedResponse;
+  const userPlanLevel = getPlanLevel(user.plan);
+  if (userPlanLevel < PlanLevel.Pro) return unauthorizedResponse;
 
-  const isUserInUltraPlan = user.plan === 'ultra';
+  const isUserInUltraPlan = userPlanLevel === PlanLevel.Ultra;
 
   if (
     !isUserInUltraPlan &&
@@ -74,7 +77,7 @@ const handler = async (req: Request): Promise<Response> => {
       }`;
     }
 
-    if(!isUserInUltraPlan){
+    if (!isUserInUltraPlan) {
       await addUsageEntry(PluginID.GPT4, data.user.id);
       await subtractCredit(data.user.id, PluginID.GPT4);
     }
@@ -112,7 +115,8 @@ const handler = async (req: Request): Promise<Response> => {
         case 429:
           try {
             // Add credit back to user's account
-            if(!isUserInUltraPlan) await addCredit(data.user.id, PluginID.GPT4, 1);
+            if (!isUserInUltraPlan)
+              await addCredit(data.user.id, PluginID.GPT4, 1);
           } catch (error) {
             // Handle error adding credit back
             return new Response('Error adding credit back', {
