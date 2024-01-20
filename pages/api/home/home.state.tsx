@@ -1,4 +1,4 @@
-import UserPlanFeatures from '@/utils/app/UserPlanFeatures';
+import SubscriptionPlan from '@/utils/app/SubscriptionPlan';
 
 import { Conversation, Message } from '@/types/chat';
 import { DragData } from '@/types/drag';
@@ -49,7 +49,7 @@ export interface HomeInitialState {
   showFeaturesModel: boolean;
   showFeaturePageOnLoad: string | null;
   user: User | null;
-  userPlanFeatures: UserPlanFeatures;
+  subscriptionPlan: SubscriptionPlan;
   isSurveyFilled: boolean;
 
   // Plugins Utils
@@ -109,7 +109,7 @@ export const initialState: HomeInitialState = {
   showFeaturesModel: false,
   showFeaturePageOnLoad: null,
   user: null,
-  userPlanFeatures: new UserPlanFeatures('free'),
+  subscriptionPlan: new SubscriptionPlan('free'),
   isSurveyFilled: false,
 
   // Plugins Utils

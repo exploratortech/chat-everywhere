@@ -11,7 +11,7 @@ const ModeSelector = () => {
   const { t } = useTranslation('model');
 
   const {
-    state: { currentMessage, userPlanFeatures, hasMqttConnection },
+    state: { currentMessage, subscriptionPlan, hasMqttConnection },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -46,7 +46,7 @@ const ModeSelector = () => {
           onChange={(e) => {
             if (
               e.target.value === PluginID.LANGCHAIN_CHAT &&
-              !userPlanFeatures.canUseOnlineMode()
+              !subscriptionPlan.canUseOnlineMode()
             ) {
               alert(
                 t(
@@ -72,7 +72,7 @@ const ModeSelector = () => {
           >
             {t('Online mode')}
           </option>
-          {userPlanFeatures.canUseGPT4_Model() && (
+          {subscriptionPlan.canUseGPT4_Model() && (
             <option
               value={PluginID.GPT4}
               className="dark:bg-[#343541] dark:text-white text-yellow-600"
@@ -80,7 +80,7 @@ const ModeSelector = () => {
               {t('GPT-4')}
             </option>
           )}
-          {userPlanFeatures.canUseAiImage() && (
+          {subscriptionPlan.canUseAiImage() && (
             <option
               value={PluginID.IMAGE_GEN}
               disabled
@@ -90,7 +90,7 @@ const ModeSelector = () => {
             </option>
           )}
 
-          {userPlanFeatures.canUseMQTT() && hasMqttConnection && (
+          {subscriptionPlan.canUseMQTT() && hasMqttConnection && (
             <option
               value={PluginID.mqtt}
               className="dark:bg-[#343541] dark:text-white text-yellow-600"

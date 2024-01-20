@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from '@/types/user';
+import { SubscriptionPlan as SubscriptionPlanType } from '@/types/user';
 
 export enum PlanLevel {
   Free = 0,
@@ -8,9 +8,9 @@ export enum PlanLevel {
   Ultra = 4,
 }
 
-type PlanString = string | SubscriptionPlan;
+export type PlanString = string | SubscriptionPlanType;
 
-class UserPlanFeatures {
+class SubscriptionPlan {
   planLevel: PlanLevel;
 
   constructor(plan: PlanString) {
@@ -71,4 +71,4 @@ class UserPlanFeatures {
   }
 }
 
-export default UserPlanFeatures;
+export default SubscriptionPlan;

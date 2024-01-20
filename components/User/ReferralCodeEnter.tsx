@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 
-import UserPlanFeatures from '@/utils/app/UserPlanFeatures';
+import SubscriptionPlan from '@/utils/app/SubscriptionPlan';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { userProfileQuery } from '@/utils/server/supabase';
 
@@ -82,8 +82,8 @@ export const ReferralCodeEnter = () => {
         });
 
         dispatch({
-          field: 'userPlanFeatures',
-          value: new UserPlanFeatures(profile.plan),
+          field: 'subscriptionPlan',
+          value: new SubscriptionPlan(profile.plan),
         });
 
         toast.success(t('Referral code has been redeemed'));

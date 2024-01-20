@@ -12,8 +12,8 @@ import { event } from 'nextjs-google-analytics';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
-import UserPlan from '@/utils/app/UserPlanFeatures';
-import UserPlanFeatures from '@/utils/app/UserPlanFeatures';
+import UserPlan from '@/utils/app/SubscriptionPlan';
+import SubscriptionPlan from '@/utils/app/SubscriptionPlan';
 import { fetchShareableConversation } from '@/utils/app/api';
 import {
   cleanConversationHistory,
@@ -104,7 +104,7 @@ const Home = () => {
       showChatbar,
       showPromptbar,
       user,
-      userPlanFeatures,
+      subscriptionPlan,
       conversationLastSyncAt,
       forceSyncConversation,
       replaceRemoteData,
@@ -334,7 +334,7 @@ const Home = () => {
   useEffect(() => {
     if (messageIsStreaming) return;
     if (!user) return;
-    if (!userPlanFeatures.canUseCloudSync()) return;
+    if (!subscriptionPlan.canUseCloudSync()) return;
 
     const conversationLastUpdatedAt = localStorage.getItem(
       'conversationLastUpdatedAt',
@@ -410,7 +410,7 @@ const Home = () => {
     user,
     supabase,
     dispatch,
-    userPlanFeatures,
+    subscriptionPlan,
     forceSyncConversation,
     conversationLastSyncAt,
     messageIsStreaming,
@@ -431,8 +431,8 @@ const Home = () => {
         .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({
-            field: 'userPlanFeatures',
-            value: new UserPlanFeatures(userProfile.plan),
+            field: 'subscriptionPlan',
+            value: new SubscriptionPlan(userProfile.plan),
           });
           dispatch({
             field: 'hasMqttConnection',
@@ -489,8 +489,8 @@ const Home = () => {
   useEffect(() => {
     if (!user) return;
     updateUserInfo(user);
-    fetchAndUpdateCreditUsage(user.id, userPlanFeatures.isPaidUser());
-  }, [user, userPlanFeatures, conversations]);
+    fetchAndUpdateCreditUsage(user.id, subscriptionPlan.isPaidUser());
+  }, [user, subscriptionPlan, conversations]);
 
   const handleUserLogout = async () => {
     await supabase.auth.signOut();

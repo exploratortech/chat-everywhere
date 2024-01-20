@@ -11,7 +11,7 @@ import HomeContext from '@/pages/api/home/home.context';
 
 export const LineConnectionButton = () => {
   const {
-    state: { user, userPlanFeatures, isConnectedWithLine },
+    state: { user, subscriptionPlan, isConnectedWithLine },
     dispatch,
   } = useContext(HomeContext);
   const { t } = useTranslation('model');
@@ -74,10 +74,10 @@ export const LineConnectionButton = () => {
       ) : (
         <button
           className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent ${
-            !user || (!userPlanFeatures.canUseLineConnect() && '!text-gray-400')
+            !user || (!subscriptionPlan.canUseLineConnect() && '!text-gray-400')
           }`}
           onClick={lineConnectOnClick}
-          disabled={!user || !userPlanFeatures.canUseLineConnect()}
+          disabled={!user || !subscriptionPlan.canUseLineConnect()}
         >
           {t('Connect with LINE')}
         </button>

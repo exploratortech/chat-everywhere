@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { PlanLevel } from '@/utils/app/UserPlanFeatures';
+import { PlanLevel } from '@/utils/app/SubscriptionPlan';
 
 import { PluginID } from '@/types/plugin';
 
@@ -16,14 +16,14 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
   const { t } = useTranslation('chat');
 
   const {
-    state: { creditUsage, userPlanFeatures },
+    state: { creditUsage, subscriptionPlan },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   if (
     creditUsage === null ||
     (pluginId !== PluginID.GPT4 && pluginId !== PluginID.IMAGE_GEN) ||
-    userPlanFeatures.planLevel === PlanLevel.Ultra
+    subscriptionPlan.planLevel === PlanLevel.Ultra
   )
     return <></>;
 

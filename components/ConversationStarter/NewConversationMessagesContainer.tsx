@@ -3,7 +3,7 @@ import { FC, useContext, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
 
-import { PlanLevel } from '@/utils/app/UserPlanFeatures';
+import { PlanLevel } from '@/utils/app/SubscriptionPlan';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
@@ -23,7 +23,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   const { t } = useTranslation('chat');
   const { t: modelTranslate } = useTranslation('model');
   const {
-    state: { user, userPlanFeatures },
+    state: { user, subscriptionPlan },
     dispatch,
   } = useContext(HomeContext);
 
@@ -78,12 +78,12 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         target="_blank"
         rel="noopener noreferrer"
         className={`font-semibold font-serif underline select-none ${
-          userPlanFeatures.planLevel === PlanLevel.Ultra
+          subscriptionPlan.planLevel === PlanLevel.Ultra
             ? 'bg-gradient-to-r text-white from-[#fd68a6] to-[#6c62f7] rounded bg-gray-700 mr-0 pr-[3px] pb-[3px] dark:from-[#fd68a6] dark:to-[#6c62f7] dark:text-[#343541]'
             : ''
         }`}
         style={
-          userPlanFeatures.planLevel === PlanLevel.Ultra
+          subscriptionPlan.planLevel === PlanLevel.Ultra
             ? {
                 WebkitBackgroundClip: 'text',
                 WebkitTextStrokeWidth: '3px',
@@ -94,7 +94,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         }
       >
         Chat Everywhere{' '}
-        {userPlanFeatures.planLevel === PlanLevel.Ultra ? 'Ultra' : ''}
+        {subscriptionPlan.planLevel === PlanLevel.Ultra ? 'Ultra' : ''}
       </a>
 
       {/* Ask for support banner */}

@@ -30,7 +30,7 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
       isPlaying,
       user,
       messageIsStreaming,
-      userPlanFeatures,
+      subscriptionPlan,
     },
     playMessage,
     stopPlaying,
@@ -71,7 +71,7 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   };
 
   // Only enable for paying users
-  if (!userPlanFeatures.canUseSpeechBtn() || messageIsStreaming) return <></>;
+  if (!subscriptionPlan.canUseSpeechBtn() || messageIsStreaming) return <></>;
 
   return (
     <div className={`cursor-pointer text-gray-500 hover:text-gray-300`}>
