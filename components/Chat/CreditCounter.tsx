@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { PlanLevel } from '@/utils/app/SubscriptionPlan';
+import { PlanLevel } from '@/utils/app/planLevel';
 
 import { PluginID } from '@/types/plugin';
 

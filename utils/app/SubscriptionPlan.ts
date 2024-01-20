@@ -1,12 +1,6 @@
 import { SubscriptionPlan as SubscriptionPlanType } from '@/types/user';
 
-export enum PlanLevel {
-  Free = 0,
-  Basic = 1,
-  Pro = 2,
-  Edu = 3,
-  Ultra = 4,
-}
+import getPlanLevel, { PlanLevel } from './planLevel';
 
 export type PlanString = string | SubscriptionPlanType;
 
@@ -14,24 +8,7 @@ class SubscriptionPlan {
   planLevel: PlanLevel;
 
   constructor(plan: PlanString) {
-    this.planLevel = this.getPlanLevel(plan);
-  }
-
-  private getPlanLevel(plan: PlanString): PlanLevel {
-    switch (plan) {
-      case 'free':
-        return PlanLevel.Free;
-      case 'basic':
-        return PlanLevel.Basic;
-      case 'pro':
-        return PlanLevel.Pro;
-      case 'edu':
-        return PlanLevel.Edu;
-      case 'ultra':
-        return PlanLevel.Ultra;
-      default:
-        return PlanLevel.Free; // Default to Free if plan is unrecognized
-    }
+    this.planLevel = getPlanLevel(plan);
   }
 
   isPaidUser(): boolean {

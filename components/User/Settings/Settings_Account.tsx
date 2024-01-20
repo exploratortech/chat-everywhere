@@ -3,8 +3,8 @@ import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import { PlanLevel } from '@/utils/app/SubscriptionPlan';
 import { trackEvent } from '@/utils/app/eventTracking';
+import { PlanLevel } from '@/utils/app/planLevel';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import HomeContext from '@/pages/api/home/home.context';

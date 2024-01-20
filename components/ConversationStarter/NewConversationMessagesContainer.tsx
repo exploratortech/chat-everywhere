@@ -3,8 +3,8 @@ import { FC, useContext, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
 
-import { PlanLevel } from '@/utils/app/SubscriptionPlan';
 import { trackEvent } from '@/utils/app/eventTracking';
+import { PlanLevel } from '@/utils/app/planLevel';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import HomeContext from '@/pages/api/home/home.context';
