@@ -4,6 +4,7 @@ import { PluginID } from '@/types/plugin';
 import { RawRefereeProfile } from '@/types/referral';
 import { UserProfile, UserProfileQueryProps } from '@/types/user';
 
+import getPlanLevel, { PlanLevel } from '../app/planLevel';
 import {
   CodeGenerationPayloadType,
   generateReferralCodeAndExpirationDate,
@@ -157,7 +158,7 @@ export const hasUserRunOutOfCredits = async (
   return userCredits.balance <= 0;
 };
 
-export const isPaidUserByAuthToken = async (
+export const isProUserByAuthToken = async (
   userToken: string | null,
 ): Promise<boolean> => {
   try {
@@ -170,7 +171,8 @@ export const isPaidUserByAuthToken = async (
     const user = await getUserProfile(data.user.id);
     if (!user) return false;
 
-    if (user.plan === 'free') return false;
+    const userPlanLevel = getPlanLevel(user.plan);
+    if (userPlanLevel < PlanLevel.Pro) return false;
 
     return true;
   } catch (e) {
@@ -546,12 +548,12 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
   if (fetchError) {
     throw fetchError;
   }
-  
+
   const userIds = users?.map((user) => user.id);
   if (!userIds) {
     return [];
   }
-  
+
   const trialUserIds: string[] = [];
 
   for (const userId of userIds) {
@@ -565,7 +567,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
     if (referralError) {
       throw referralError;
     }
-    
+
     if (referralRows?.length > 0) {
       trialUserIds.push(userId);
     }
