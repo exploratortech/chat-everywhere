@@ -44,10 +44,16 @@ class UserPlanFeatures {
   }
 
   // ----------------- Features -----------------
-  canUseSpeechBtn(): boolean {
-    return this.planLevel > PlanLevel.Basic;
-  }
   canUseCloudSync(): boolean {
+    return this.planLevel > PlanLevel.Free;
+  }
+  canUseMQTT(): boolean {
+    return this.planLevel > PlanLevel.Free;
+  }
+  canUseLineConnect(): boolean {
+    return this.planLevel > PlanLevel.Free;
+  }
+  canUseSpeechBtn(): boolean {
     return this.planLevel > PlanLevel.Basic;
   }
   canUseAiImage(): boolean {
@@ -58,16 +64,10 @@ class UserPlanFeatures {
   }
 
   canUseGPT3_5_16KModel(): boolean {
-    return this.planLevel > PlanLevel.Free;
+    return this.planLevel > PlanLevel.Basic;
   }
   canUseOnlineMode(): boolean {
-    return this.planLevel > PlanLevel.Free;
-  }
-  canUseMQTT(): boolean {
-    return this.planLevel > PlanLevel.Free;
-  }
-  canUseLineConnect(): boolean {
-    return this.planLevel > PlanLevel.Free;
+    return this.planLevel > PlanLevel.Basic;
   }
 }
 
