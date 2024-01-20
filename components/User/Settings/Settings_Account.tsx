@@ -11,6 +11,7 @@ import HomeContext from '@/pages/api/home/home.context';
 
 import { ReferralCodeEnter } from '../ReferralCodeEnter';
 import { LineConnectionButton } from './LineConnectionButton';
+import UpgradeButton from './UpgradeButton';
 
 import dayjs from 'dayjs';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
@@ -31,15 +32,31 @@ export default function Settings_Account() {
     dispatch({ field: 'showLoginSignUpModel', value: true });
   };
 
-  const upgradeLinkOnClick = () => {
-    const paymentLink =
-      process.env.NEXT_PUBLIC_ENV === 'production'
-        ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
-        : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
+  const upgradeLinkOnClick = (plan: PlanLevel.Basic | PlanLevel.Pro) => {
+    let paymentLink = '';
+    switch (plan) {
+      case PlanLevel.Basic:
+        trackEvent(`Upgrade button clicked Basic plan}`);
+        // TODO: update this
+        paymentLink =
+          process.env.NEXT_PUBLIC_ENV === 'production'
+            ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
+            : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
+        break;
+      case PlanLevel.Pro:
+        trackEvent(`Upgrade button clicked Pro plan}`);
+        paymentLink =
+          process.env.NEXT_PUBLIC_ENV === 'production'
+            ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
+            : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
+        break;
+      default:
+        break;
+    }
+    if (!paymentLink) return;
+
     const userEmail = user?.email;
     const userId = user?.id;
-
-    trackEvent('Upgrade button clicked');
 
     if (!user) {
       toast.error('Please sign-up before upgrading to pro plan');
@@ -87,26 +104,38 @@ export default function Settings_Account() {
               </div>
             </div>
             <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
-              {user?.plan === 'ultra' ? (
+              <BasicPlanContent />
+
+              {(!user || subscriptionPlan.planLevel < PlanLevel.Basic) && (
+                <UpgradeButton
+                  upgradeLinkOnClick={() => {
+                    upgradeLinkOnClick(PlanLevel.Basic);
+                  }}
+                />
+              )}
+
+              {user?.plan === 'pro' && user.proPlanExpirationDate && (
+                <div className="text-left text-neutral-500 p-2 text-xs">
+                  {`${t('Expires on')}: 
+                            ${dayjs(user.proPlanExpirationDate).format(
+                              'll',
+                            )}`}{' '}
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
+              {subscriptionPlan.planLevel === PlanLevel.Ultra ? (
                 <UltraPlanContent />
               ) : (
                 <ProPlanContent />
               )}
 
-              {(!user || !subscriptionPlan.isPaidUser) && (
-                <div className="flex flex-col">
-                  <a
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => upgradeLinkOnClick()}
-                    className="px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
-                  >
-                    {t('Upgrade')}
-                  </a>
-                  <p className="text-xs text-neutral-400 mt-2">
-                    {t('No Strings Attached - Cancel Anytime!')}
-                  </p>
-                </div>
+              {(!user || subscriptionPlan.planLevel < PlanLevel.Basic) && (
+                <UpgradeButton
+                  upgradeLinkOnClick={() => {
+                    upgradeLinkOnClick(PlanLevel.Pro);
+                  }}
+                />
               )}
 
               {user?.plan === 'pro' && user.proPlanExpirationDate && (
@@ -192,6 +221,22 @@ export default function Settings_Account() {
   );
 }
 
+const BasicPlanContent = () => {
+  const { t } = useTranslation('model');
+  return (
+    <>
+      <span className="text-2xl font-bold">Basic</span>
+      <span className="text-sm mb-2">{t('USD$4.99 / month')}</span>
+      <div className="text-xs leading-5">
+        <FeatureItem featureName={t('Everything in free plan')} />
+        <FeatureItem featureName={t('Priority response time')} />
+        {PlanDetail.basic.features.map((feature, index) => (
+          <FeatureItem key={index} featureName={t(feature)} />
+        ))}
+      </div>
+    </>
+  );
+};
 const ProPlanContent = () => {
   const { t } = useTranslation('model');
   return (
@@ -199,7 +244,7 @@ const ProPlanContent = () => {
       <span className="text-2xl font-bold">Pro</span>
       <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
       <div className="text-xs leading-5">
-        <FeatureItem featureName={t('Everything in free plan')} />
+        <FeatureItem featureName={t('Everything in Basic plan')} />
         <FeatureItem featureName={t('Priority response time')} />
         {PlanDetail.pro.features.map((feature, index) => (
           <FeatureItem key={index} featureName={t(feature)} />

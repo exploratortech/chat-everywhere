@@ -18,9 +18,13 @@ export const PlanDetail = {
       'Prompt manager',
     ],
   },
+  basic: {
+    features: ['Cloud sync', 'MQTT', 'LINE connection'],
+  },
   pro: {
     features: [
       'Cloud sync',
+      'MQTT',
       'AI speech',
       'Online mode',
       'GPT-4 (50 response/month + credit)',
