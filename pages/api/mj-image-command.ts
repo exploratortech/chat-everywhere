@@ -5,7 +5,7 @@ import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import {
   ProgressHandler,
-  makeCreateImageSelector,
+  makeCreateImageSelectorV2,
   makeWriteToStream,
 } from '@/utils/app/streamHandler';
 import buttonCommand from '@/utils/server/next-lag/buttonCommands';
@@ -69,7 +69,7 @@ const handler = async (req: Request): Promise<Response> => {
   const getTotalGenerationTime = () =>
     Math.round((Date.now() - generationStartedAt) / 1000);
 
-  const createImageSelector = makeCreateImageSelector(writeToStream);
+  const createImageSelector = makeCreateImageSelectorV2(writeToStream);
   const progressHandler = new ProgressHandler(writeToStream);
 
   progressHandler.updateProgress({ content: `Command: ${button} ... \n` });
@@ -163,26 +163,16 @@ const handler = async (req: Request): Promise<Response> => {
             await createImageSelector({
               previousButtonCommand: button,
               buttonMessageId,
-              imageList: [
-                {
-                  imageUrl: imageUrl,
-                  imageAlt: imageAlt,
-                  buttons: buttons,
-                },
-              ],
+              imageUrl,
+              buttons,
               prompt: prompt || '',
             });
           } else {
             await createImageSelector({
               previousButtonCommand: button,
               buttonMessageId,
-              imageList: imageUrlList.map(
-                (imageUrl: string, index: number) => ({
-                  imageUrl: imageUrl,
-                  imageAlt: imageAlt,
-                  buttons: [`U${index + 1}`, `V${index + 1}`],
-                }),
-              ),
+              imageUrl,
+              buttons,
               prompt: prompt || '',
             });
           }

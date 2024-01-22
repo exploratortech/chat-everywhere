@@ -12,7 +12,7 @@ import {
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import {
   ProgressHandler,
-  makeCreateImageSelector,
+  makeCreateImageSelectorV2,
   makeWriteToStream,
 } from '@/utils/app/streamHandler';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
@@ -122,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
   let jobTerminated = false;
 
   const writeToStream = makeWriteToStream(writer, encoder);
-  const createImageSelector = makeCreateImageSelector(writeToStream);
+  const createImageSelector = makeCreateImageSelectorV2(writeToStream);
   const progressHandler = new ProgressHandler(writeToStream);
 
   const requestBody = (await req.json()) as ChatBody;
@@ -329,13 +329,8 @@ const handler = async (req: Request): Promise<Response> => {
             await createImageSelector({
               previousButtonCommand: '',
               buttonMessageId,
-              imageList: imageUrlList.map(
-                (imageUrl: string, index: number) => ({
-                  imageUrl: imageUrl,
-                  imageAlt: imageAlt,
-                  buttons: [`U${index + 1}`, `V${index + 1}`],
-                }),
-              ),
+              imageUrl,
+              buttons,
               prompt: generationPrompt,
             });
 
