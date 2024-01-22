@@ -29,7 +29,7 @@ import { PluginID } from '@/types/plugin';
 import HomeContext from '@/pages/api/home/home.context';
 
 import { ImageGenerationComponent } from './components/ImageGenerationComponent';
-import MjImageComponent from './components/MjImageComponent';
+import MjImageComponentV2 from './components/MjImageComponentV2';
 import TokenCounter from './components/TokenCounter';
 
 import { CodeBlock } from '../Markdown/CodeBlock';
@@ -238,7 +238,7 @@ export const ChatMessage: FC<Props> = memo(
         }
         if (aiImageButtons) {
           return (
-            <MjImageComponent
+            <MjImageComponentV2
               src={src}
               buttons={aiImageButtons}
               buttonMessageId={aiImageButtonMessageId}
