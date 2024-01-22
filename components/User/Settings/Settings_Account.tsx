@@ -38,10 +38,9 @@ export default function Settings_Account() {
     switch (plan) {
       case PlanLevel.Basic:
         trackEvent(`Upgrade button clicked Basic plan}`);
-        // TODO: update production link
         paymentLink =
           process.env.NEXT_PUBLIC_ENV === 'production'
-            ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
+            ? 'https://buy.stripe.com/fZe5ojemudgVak014t'
             : 'https://buy.stripe.com/test_00g29DgLGbrc60E3cl';
         break;
       case PlanLevel.Pro:
