@@ -68,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
           {
             method: 'GET',
             headers: {
-              'Authorization': `Bearer ${process.env.THE_NEXT_LEG_API_KEY}`
+              Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY}`,
             },
           },
         );
@@ -110,7 +110,7 @@ const handler = async (req: Request): Promise<Response> => {
           progressHandler.updateProgress({
             content: `Start to generate \n`,
           });
-          textGenerationProgress = generationProgress;
+          textGenerationProgress = generationProgress || 0;
         } else {
           progressHandler.updateProgress({
             content: `${
