@@ -1,8 +1,9 @@
-import { IconCircleCheck } from '@tabler/icons-react';
+import { IconCheckbox, IconCircleCheck } from '@tabler/icons-react';
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
+import { cn } from '@/utils/app/cn';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { PlanLevel } from '@/utils/app/planLevel';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
@@ -37,11 +38,11 @@ export default function Settings_Account() {
     switch (plan) {
       case PlanLevel.Basic:
         trackEvent(`Upgrade button clicked Basic plan}`);
-        // TODO: update this
+        // TODO: update production link
         paymentLink =
           process.env.NEXT_PUBLIC_ENV === 'production'
             ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
-            : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
+            : 'https://buy.stripe.com/test_00g29DgLGbrc60E3cl';
         break;
       case PlanLevel.Pro:
         trackEvent(`Upgrade button clicked Pro plan}`);
@@ -95,16 +96,30 @@ export default function Settings_Account() {
             </div>
           )}
           <div className="flex flex-col md:flex-row justify-center gap-4 mb-3">
-            <div className="flex flex-col  border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
-              <span className="text-2xl font-bold">Free</span>
-              <div className="text-xs leading-5">
-                {PlanDetail.free.features.map((feature, index) => (
-                  <FeatureItem key={index} featureName={t(feature)} />
-                ))}
-              </div>
+            <div
+              className={cn(
+                'flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2',
+                {
+                  'border-4': subscriptionPlan.planLevel === PlanLevel.Free,
+                },
+              )}
+            >
+              <FreePlanContent
+                isSelectedPlan={subscriptionPlan.planLevel === PlanLevel.Free}
+              />
             </div>
-            <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
-              <BasicPlanContent />
+
+            <div
+              className={cn(
+                'flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2',
+                {
+                  'border-4': subscriptionPlan.planLevel === PlanLevel.Basic,
+                },
+              )}
+            >
+              <BasicPlanContent
+                isSelectedPlan={subscriptionPlan.planLevel === PlanLevel.Basic}
+              />
 
               {(!user || subscriptionPlan.planLevel < PlanLevel.Basic) && (
                 <UpgradeButton
@@ -114,7 +129,7 @@ export default function Settings_Account() {
                 />
               )}
 
-              {user?.plan === 'pro' && user.proPlanExpirationDate && (
+              {user?.plan === 'basic' && user.proPlanExpirationDate && (
                 <div className="text-left text-neutral-500 p-2 text-xs">
                   {`${t('Expires on')}: 
                             ${dayjs(user.proPlanExpirationDate).format(
@@ -123,11 +138,26 @@ export default function Settings_Account() {
                 </div>
               )}
             </div>
-            <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
+            <div
+              className={cn(
+                'flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2',
+                {
+                  'border-4':
+                    subscriptionPlan.planLevel === PlanLevel.Pro ||
+                    subscriptionPlan.planLevel === PlanLevel.Ultra,
+                },
+              )}
+            >
               {subscriptionPlan.planLevel === PlanLevel.Ultra ? (
-                <UltraPlanContent />
+                <UltraPlanContent
+                  isSelectedPlan={
+                    subscriptionPlan.planLevel === PlanLevel.Ultra
+                  }
+                />
               ) : (
-                <ProPlanContent />
+                <ProPlanContent
+                  isSelectedPlan={subscriptionPlan.planLevel === PlanLevel.Pro}
+                />
               )}
 
               {(!user || subscriptionPlan.planLevel < PlanLevel.Basic) && (
@@ -138,14 +168,15 @@ export default function Settings_Account() {
                 />
               )}
 
-              {user?.plan === 'pro' && user.proPlanExpirationDate && (
-                <div className="text-left text-neutral-500 p-2 text-xs">
-                  {`${t('Expires on')}: 
+              {(user?.plan === 'pro' || user?.plan === 'ultra') &&
+                user.proPlanExpirationDate && (
+                  <div className="text-left text-neutral-500 p-2 text-xs">
+                    {`${t('Expires on')}: 
                             ${dayjs(user.proPlanExpirationDate).format(
                               'll',
                             )}`}{' '}
-                </div>
-              )}
+                  </div>
+                )}
             </div>
           </div>
           {displayReferralCodeEnterer && <ReferralCodeEnter />}
@@ -221,11 +252,31 @@ export default function Settings_Account() {
   );
 }
 
-const BasicPlanContent = () => {
+const FreePlanContent = ({ isSelectedPlan }: PlanContent) => {
   const { t } = useTranslation('model');
   return (
     <>
-      <span className="text-2xl font-bold">Basic</span>
+      <span className="text-2xl flex gap-2 items-center font-bold">
+        Free
+        {isSelectedPlan && <IconCheckbox />}
+      </span>
+      <div className="text-xs leading-5">
+        {PlanDetail.free.features.map((feature, index) => (
+          <FeatureItem key={index} featureName={t(feature)} />
+        ))}
+      </div>
+    </>
+  );
+};
+const BasicPlanContent = ({ isSelectedPlan }: PlanContent) => {
+  const { t } = useTranslation('model');
+
+  return (
+    <>
+      <span className="text-2xl flex gap-2 items-center font-bold">
+        Basic
+        {isSelectedPlan && <IconCheckbox />}
+      </span>
       <span className="text-sm mb-2">{t('USD$4.99 / month')}</span>
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
@@ -237,11 +288,17 @@ const BasicPlanContent = () => {
     </>
   );
 };
-const ProPlanContent = () => {
+
+const ProPlanContent = ({ isSelectedPlan }: PlanContent) => {
   const { t } = useTranslation('model');
+
   return (
     <>
-      <span className="text-2xl font-bold">Pro</span>
+      <span className="text-2xl flex gap-2 items-center font-bold">
+        Pro
+        {isSelectedPlan && <IconCheckbox />}
+      </span>
+
       <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in Basic plan')} />
@@ -254,7 +311,7 @@ const ProPlanContent = () => {
   );
 };
 
-const UltraPlanContent = () => {
+const UltraPlanContent = ({ isSelectedPlan }: PlanContent) => {
   const { t } = useTranslation('model');
   return (
     <>
@@ -279,3 +336,7 @@ const UltraPlanContent = () => {
     </>
   );
 };
+
+interface PlanContent {
+  isSelectedPlan: boolean;
+}
