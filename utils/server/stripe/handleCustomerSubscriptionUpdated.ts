@@ -35,19 +35,13 @@ export default async function handleCustomerSubscriptionUpdated(
       });
     }
   } else {
-    // Monthly Pro Plan Subscription recurring payment, extend expiration date
-    if (!stripeSubscriptionId) {
-      const customerId = session.customer as string;
-      const email = await getCustomerEmailByCustomerID(customerId);
+    // Replace the Pro plan expiration date with the cancel_at date
+    if (stripeSubscriptionId) {
       await updateUserAccount({
-        upgrade: true,
-        email,
-      });
-    } else {
-      await updateUserAccount({
-        upgrade: true,
+        upgrade: false,
+        extending: true,
         stripeSubscriptionId,
-        proPlanExpirationDate: undefined,
+        proPlanExpirationDate: cancelAtDate,
       });
     }
   }

@@ -14,6 +14,8 @@ import Stripe from 'stripe';
 
 const MONTHLY_PRO_PLAN_SUBSCRIPTION =
   process.env.STRIPE_PLAN_CODE_MONTHLY_PRO_PLAN_SUBSCRIPTION;
+const MONTHLY_BASIC_PLAN_SUBSCRIPTION =
+  process.env.STRIPE_PLAN_CODE_MONTHLY_BASIC_PLAN_SUBSCRIPTION;
 const ONE_TIME_PRO_PLAN_FOR_1_MONTH =
   process.env.STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH;
 
@@ -39,17 +41,20 @@ export default async function handleCheckoutSessionCompleted(
     throw new Error('missing Email from Stripe webhook');
   }
 
+  // -----  TOP-UP CREDIT START -----
   const isTopUpCreditRequest =
-    (planCode === IMAGE_CREDIT || planCode === GPT4_CREDIT) && credit;
+    (isSame(planCode, IMAGE_CREDIT) || isSame(planCode, GPT4_CREDIT)) && credit;
   // Handle TopUp Image Credit / GPT4 Credit
   if (isTopUpCreditRequest) {
     return await addCreditToUser(
       email,
       +credit,
-      planCode === IMAGE_CREDIT ? PluginID.IMAGE_GEN : PluginID.GPT4,
+      isSame(planCode, IMAGE_CREDIT) ? PluginID.IMAGE_GEN : PluginID.GPT4,
     );
   }
+  // -----  TOP-UP CREDIT END -----
 
+  // -----  MONTHLY PLAN UPDATE START -----
   const sinceDate = dayjs.unix(session.created).utc().toDate();
   const proPlanExpirationDate = await getProPlanExpirationDate(
     planGivingWeeks,
@@ -69,6 +74,7 @@ export default async function handleCheckoutSessionCompleted(
   if (userId) {
     await updateUserAccount({
       upgrade: true,
+      plan: isSame(planCode, MONTHLY_BASIC_PLAN_SUBSCRIPTION) ? 'basic' : 'pro',
       userId,
       stripeSubscriptionId,
       proPlanExpirationDate: proPlanExpirationDate,
@@ -77,11 +83,13 @@ export default async function handleCheckoutSessionCompleted(
     // Update user account by Email
     await updateUserAccount({
       upgrade: true,
+      plan: isSame(planCode, MONTHLY_BASIC_PLAN_SUBSCRIPTION) ? 'basic' : 'pro',
       email: email!,
       stripeSubscriptionId,
       proPlanExpirationDate: proPlanExpirationDate,
     });
   }
+  // -----  MONTHLY PLAN UPDATE END -----
 }
 
 async function getProPlanExpirationDate(
@@ -118,9 +126,7 @@ async function getProPlanExpirationDate(
       // when user is not pro yet
       return dayjs(sinceDate).add(+planGivingWeeks, 'week').toDate();
     }
-  } else if (
-    planCode?.toUpperCase() === ONE_TIME_PRO_PLAN_FOR_1_MONTH?.toUpperCase()
-  ) {
+  } else if (isSame(planCode, ONE_TIME_PRO_PLAN_FOR_1_MONTH)) {
     // Only store expiration for one month plan
     return dayjs(sinceDate).add(1, 'month').toDate();
   } else {
@@ -163,4 +169,9 @@ async function addCreditToUser(
     >,
     credit,
   );
+}
+
+function isSame(str1: string | undefined, str2: string | undefined) {
+  if (!str1 || !str2) return false;
+  return str1.toUpperCase() === str2.toUpperCase();
 }
