@@ -238,7 +238,6 @@ export const ChatMessage: FC<Props> = memo(
         }
         if (aiImageButtons) {
           return (
-            // eslint-disable-next-line @next/next/no-img-element
             <MjImageComponent
               src={src}
               buttons={aiImageButtons}
