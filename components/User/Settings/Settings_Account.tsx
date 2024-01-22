@@ -166,6 +166,17 @@ export default function Settings_Account() {
                   }}
                 />
               )}
+              {(user || subscriptionPlan.planLevel === PlanLevel.Basic) && (
+                <UpgradeButton
+                  upgradeLinkOnClick={() => {
+                    alert(
+                      t(
+                        `Please contact Jack at jack@exploratorlabs.com to upgrade to the Pro plan`,
+                      ),
+                    );
+                  }}
+                />
+              )}
 
               {(user?.plan === 'pro' || user?.plan === 'ultra') &&
                 user.proPlanExpirationDate && (
