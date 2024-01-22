@@ -86,8 +86,17 @@ const handler = async (req: Request): Promise<Response> => {
     ) {
       await sleep(3500);
       const imageGenerationProgressResponse = await fetch(
-        `https://api.thenextleg.io/v2/message/${messageId}?authToken=${process.env.THE_NEXT_LEG_API_KEY}`,
-        { method: 'GET' },
+        `https://api.mymidjourney.ai/api/v1/midjourney/button${messageId}`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY}`,
+          },
+          body: JSON.stringify({
+            messageId,
+            button: button,
+          }),
+        },
       );
 
       if (!imageGenerationProgressResponse.ok) {
@@ -104,7 +113,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log({ imageGenerationProgressResponseJson });
       if (generationProgress === 100) {
         const buttonMessageId =
-          imageGenerationProgressResponseJson.response.buttonMessageId;
+          imageGenerationProgressResponseJson.response.messageId;
         progressHandler.updateProgress({
           content: `Completed in ${getTotalGenerationTime()}s \n`,
           state: 'completed',
@@ -182,14 +191,10 @@ const handler = async (req: Request): Promise<Response> => {
 
           await writeToStream('[DONE]');
           writer.close();
-          await serverSideTrackEvent(
-            data.user.id,
-            'AI image button clicked',
-            {
-              aiImageButtonCommand: button,
-              generationLengthInSecond: (Date.now() - startTime) / 1000,
-            }
-          )
+          await serverSideTrackEvent(data.user.id, 'AI image button clicked', {
+            aiImageButtonCommand: button,
+            generationLengthInSecond: (Date.now() - startTime) / 1000,
+          });
           return;
         }
       } else {
