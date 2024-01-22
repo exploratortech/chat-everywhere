@@ -28,8 +28,11 @@ import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import { ImageGenerationComponent } from './components/ImageGenerationComponent';
+import MjImageComponentV2 from './components/MjImageComponentV2';
 import TokenCounter from './components/TokenCounter';
 
+import { CodeBlock } from '../Markdown/CodeBlock';
 import AssistantRespondMessage from './ChatMessage/AssistantRespondMessage';
 import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';

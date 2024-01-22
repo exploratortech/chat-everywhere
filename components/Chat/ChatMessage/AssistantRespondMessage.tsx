@@ -4,7 +4,7 @@ import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
 import { ImageGenerationComponent } from '../components/ImageGenerationComponent';
-import MjImageComponent from '../components/MjImageComponent';
+import MjImageComponentV2 from '../components/MjImageComponentV2';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 
@@ -69,7 +69,7 @@ const AssistantRespondMessage = memo(
         if (aiImageButtons) {
           return (
             // eslint-disable-next-line @next/next/no-img-element
-            <MjImageComponent
+            <MjImageComponentV2
               src={src}
               buttons={aiImageButtons}
               buttonMessageId={aiImageButtonMessageId}
