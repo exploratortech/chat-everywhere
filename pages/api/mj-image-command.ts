@@ -85,17 +85,14 @@ const handler = async (req: Request): Promise<Response> => {
         (imageGenerationProgress && imageGenerationProgress < 100))
     ) {
       await sleep(3500);
+      const generationProgressEndpoint = `https://api.mymidjourney.ai/api/v1/midjourney/message/${messageId}`;
       const imageGenerationProgressResponse = await fetch(
-        `https://api.mymidjourney.ai/api/v1/midjourney/button${messageId}`,
+        generationProgressEndpoint,
         {
-          method: 'POST',
+          method: 'GET',
           headers: {
             Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY}`,
           },
-          body: JSON.stringify({
-            messageId,
-            button: button,
-          }),
         },
       );
 
@@ -112,17 +109,26 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log({ imageGenerationProgressResponseJson });
       if (generationProgress === 100) {
-        const buttonMessageId =
-          imageGenerationProgressResponseJson.response.messageId;
+        const finalResponse: {
+          prompt: string;
+          uri: string;
+          progress: number;
+          buttons: string[];
+          messageId: string;
+          createdAt: string;
+          updatedAt: string;
+        } = imageGenerationProgressResponseJson;
+        const buttonMessageId = finalResponse.messageId;
+
         progressHandler.updateProgress({
           content: `Completed in ${getTotalGenerationTime()}s \n`,
           state: 'completed',
         });
 
-        const imageUrl = imageGenerationProgressResponseJson.response.imageUrl;
-        const buttons = imageGenerationProgressResponseJson.response.buttons;
-        const imageUrlList =
-          imageGenerationProgressResponseJson.response.imageUrls;
+        const imageUrl = finalResponse.uri;
+        const imageUrlList = new Array(4).fill(imageUrl);
+
+        const buttons = finalResponse.buttons;
 
         const imageAlt = 'Upscaled image';
 

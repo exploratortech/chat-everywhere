@@ -10,7 +10,7 @@ const buttonCommand = async (button: string, buttonMessageId: string) => {
       method: 'POST',
       body: JSON.stringify({
         button,
-        buttonMessageId,
+        messageId: buttonMessageId,
       }),
     },
   );
