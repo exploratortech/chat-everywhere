@@ -4,7 +4,7 @@ const buttonCommand = async (button: string, buttonMessageId: string) => {
     'Content-Type': 'application/json',
   };
   const buttonCommandsResponse = await fetch(
-    'https://api.thenextleg.io/v2/button',
+    'https://api.mymidjourney.ai/api/v1/midjourney/button',
     {
       headers: requestHeader,
       method: 'POST',

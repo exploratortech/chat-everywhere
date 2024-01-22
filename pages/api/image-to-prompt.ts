@@ -64,8 +64,13 @@ const handler = async (req: Request): Promise<Response> => {
       ) {
         await sleep(3500);
         const generationProgressResponse = await fetch(
-          `https://api.thenextleg.io/v2/message/${messageId}?authToken=${process.env.THE_NEXT_LEG_API_KEY}`,
-          { method: 'GET' },
+          `https://api.mymidjourney.ai/api/v1/midjourney/message/${messageId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${process.env.THE_NEXT_LEG_API_KEY}`
+            },
+          },
         );
         if (!generationProgressResponse.ok) {
           console.log(await generationProgressResponse.status);
@@ -167,7 +172,7 @@ async function nextLegDescribe(url: string) {
     'Content-Type': 'application/json',
   };
   const describeResponse = await fetch(
-    `https://api.thenextleg.io/v2/describe`,
+    `https://api.mymidjourney.ai/api/v1/midjourney/describe`,
     {
       method: 'POST',
       headers: requestHeader,
