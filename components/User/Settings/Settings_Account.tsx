@@ -166,7 +166,7 @@ export default function Settings_Account() {
                   }}
                 />
               )}
-              {(user || subscriptionPlan.planLevel === PlanLevel.Basic) && (
+              {user && subscriptionPlan.planLevel === PlanLevel.Basic && (
                 <UpgradeButton
                   upgradeLinkOnClick={() => {
                     alert(
