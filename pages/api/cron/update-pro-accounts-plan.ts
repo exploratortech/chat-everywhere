@@ -1,8 +1,8 @@
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import {
+  downgradeExpiredPaidAccountsPlan,
   getAdminSupabaseClient,
   getTrialExpiredUserProfiles,
-  updateProAccountsPlan,
 } from '@/utils/server/supabase';
 
 import dayjs from 'dayjs';
@@ -16,6 +16,7 @@ export const config = {
   runtime: 'edge',
 };
 
+// This cron job is for sending out trial end email and downgrade expired paid accounts
 const handler = async (req: Request): Promise<Response> => {
   try {
     const trialEndUserIds = await getTrialExpiredUserProfiles();
@@ -33,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    await updateProAccountsPlan();
+    await downgradeExpiredPaidAccountsPlan();
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {
     console.error(error);

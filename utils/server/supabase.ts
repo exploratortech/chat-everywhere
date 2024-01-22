@@ -515,8 +515,8 @@ export const userProfileQuery = async ({
   } as UserProfile;
 };
 
-export const updateProAccountsPlan = async (): Promise<void> => {
-  // UPDATE ALL USER WHOSE HAS PRO PLAN
+export const downgradeExpiredPaidAccountsPlan = async (): Promise<void> => {
+  // UPDATE ALL USER WHOSE HAS PAID PLAN (BASIC / PRO / ULTRA)
   // AND THEIR EXPIRED DATE IS LESS THAN (TODAY - 1 DAY) TO FREE PLAN
   // GIVE ONE DAY PAYMENT GRACE PERIOD
 
@@ -526,7 +526,7 @@ export const updateProAccountsPlan = async (): Promise<void> => {
   const { error: updateError } = await supabase
     .from('profiles')
     .update({ plan: 'free' })
-    .eq('plan', 'pro')
+    .in('plan', ['pro', 'basic', 'ultra'])
     .lte('pro_plan_expiration_date', nowMinusOneDay);
 
   if (updateError) {
