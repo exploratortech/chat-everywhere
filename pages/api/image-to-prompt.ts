@@ -68,7 +68,7 @@ const handler = async (req: Request): Promise<Response> => {
           {
             method: 'GET',
             headers: {
-              Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY}`,
+              Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY}`,
             },
           },
         );
@@ -169,7 +169,7 @@ export default handler;
 
 async function nextLegDescribe(url: string) {
   const requestHeader = {
-    Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
+    Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY || ''}`,
     'Content-Type': 'application/json',
   };
   const describeResponse = await fetch(
