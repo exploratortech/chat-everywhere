@@ -53,13 +53,14 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
       return;
     }
 
+    setLoading(true);
+    
     if (imageFileUrl) {
       const response = await fetch(imageFileUrl);
       const blob = await response.arrayBuffer();
       imageFileInBase64 = encode(blob);
     }
 
-    setLoading(true);
     if (displayInProgressToast) {
       toast(t('Sharing message to LINE...'));
     }
