@@ -109,6 +109,7 @@ const handler = async (req: Request): Promise<Response> => {
         } else if (textGenerationProgress === null) {
           progressHandler.updateProgress({
             content: `Start to generate \n`,
+            removeLastLine: true
           });
           textGenerationProgress = generationProgress || 0;
         } else {
