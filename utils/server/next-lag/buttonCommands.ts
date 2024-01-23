@@ -1,6 +1,6 @@
 const buttonCommand = async (button: string, buttonMessageId: string) => {
   const requestHeader = {
-    Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
+    Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY || ''}`,
     'Content-Type': 'application/json',
   };
   const buttonCommandsResponse = await fetch(

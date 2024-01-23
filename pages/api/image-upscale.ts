@@ -27,7 +27,7 @@ const handler = async (req: Request): Promise<Response> => {
   const { buttonMessageId, imagePosition, operation } = requestBody;
 
   const requestHeader = {
-    Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
+    Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY || ''}`,
     'Content-Type': 'application/json',
   };
 
