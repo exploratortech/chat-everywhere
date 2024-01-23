@@ -64,8 +64,13 @@ const handler = async (req: Request): Promise<Response> => {
       ) {
         await sleep(3500);
         const generationProgressResponse = await fetch(
-          `https://api.thenextleg.io/v2/message/${messageId}?authToken=${process.env.THE_NEXT_LEG_API_KEY}`,
-          { method: 'GET' },
+          `https://api.mymidjourney.ai/api/v1/midjourney/message/${messageId}`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY}`,
+            },
+          },
         );
         if (!generationProgressResponse.ok) {
           console.log(await generationProgressResponse.status);
@@ -104,8 +109,9 @@ const handler = async (req: Request): Promise<Response> => {
         } else if (textGenerationProgress === null) {
           progressHandler.updateProgress({
             content: `Start to generate \n`,
+            removeLastLine: true
           });
-          textGenerationProgress = generationProgress;
+          textGenerationProgress = generationProgress || 0;
         } else {
           progressHandler.updateProgress({
             content: `${
@@ -163,11 +169,11 @@ export default handler;
 
 async function nextLegDescribe(url: string) {
   const requestHeader = {
-    Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
+    Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY || ''}`,
     'Content-Type': 'application/json',
   };
   const describeResponse = await fetch(
-    `https://api.thenextleg.io/v2/describe`,
+    `https://api.mymidjourney.ai/api/v1/midjourney/describe`,
     {
       method: 'POST',
       headers: requestHeader,
