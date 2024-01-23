@@ -197,6 +197,7 @@ const handler = async (req: Request): Promise<Response> => {
         if (imageGenerationProgress === null) {
           progressHandler.updateProgress({
             content: `Start to generate \n`,
+            removeLastLine: true
           });
         } else {
           progressHandler.updateProgress({

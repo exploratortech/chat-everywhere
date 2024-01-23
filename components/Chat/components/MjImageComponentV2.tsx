@@ -246,12 +246,12 @@ export default function MjImageComponentV2({
           className={`w-full m-0 transition-all duration-500 `}
         />
         <button
-          className={`absolute top-0 right-0 p-1 cursor-pointer`}
+          className={`absolute top-0 right-0 p-1 cursor-pointer z-10`}
           onClick={helpButtonOnClick}
         >
           <IconHelp size={isMobileLayout ? 16 : undefined} />
         </button>
-        <button className={`absolute bottom-0 right-0 p-1`}>
+        <button className={`absolute bottom-0 right-0 p-1 z-10`}>
           <LineShareButton
             imageFileUrl={src}
             size={20}
