@@ -1,5 +1,5 @@
 import { IconHelp } from '@tabler/icons-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -15,10 +15,7 @@ import {
   removeRedundantTempHtmlString,
   removeTempHtmlString,
 } from '@/utils/app/htmlStringHandler';
-import {
-  getUpdatedAssistantMjConversation,
-  getUpdatedAssistantMjConversationV2,
-} from '@/utils/app/mjImage';
+import { getUpdatedAssistantMjConversationV2 } from '@/utils/app/mjImage';
 import { removeSecondLastLine } from '@/utils/app/ui';
 
 import { Conversation, Message } from '@/types/chat';
@@ -52,10 +49,13 @@ export default function MjImageComponentV2({
     ['V1', 'V2', 'V3', 'V4'].every((v) => buttons.includes(v));
   const { t: commonT } = useTranslation('common');
   const { t: mjImageT } = useTranslation('mjImage');
+  const buttonCommandBlackList = ['Vary (Region)'];
+  const validButtons = buttons.filter(
+    (button) => !buttonCommandBlackList.includes(button),
+  );
 
   const runButtonCommand = useCallback(
     async (button: string) => {
-      console.log('runButtonCommand', button);
       if (!user) return;
       let updatedConversation: Conversation;
       if (!selectedConversation) return;
@@ -290,7 +290,7 @@ export default function MjImageComponentV2({
             <div
               className={`flex flex-wrap gap-2 items-center h-full mobile:text-sm`}
             >
-              {buttons.map((command, index) => {
+              {validButtons.map((command, index) => {
                 return (
                   <button
                     key={`${command}-${index}`}
