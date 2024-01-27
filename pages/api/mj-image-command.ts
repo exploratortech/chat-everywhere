@@ -6,7 +6,7 @@ import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import getPlanLevel, { PlanLevel } from '@/utils/app/planLevel';
 import {
   ProgressHandler,
-  makeCreateImageSelector,
+  makeCreateImageSelectorV2,
   makeWriteToStream,
 } from '@/utils/app/streamHandler';
 import buttonCommand from '@/utils/server/next-lag/buttonCommands';
@@ -72,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
   const getTotalGenerationTime = () =>
     Math.round((Date.now() - generationStartedAt) / 1000);
 
-  const createImageSelector = makeCreateImageSelector(writeToStream);
+  const createImageSelector = makeCreateImageSelectorV2(writeToStream);
   const progressHandler = new ProgressHandler(writeToStream);
 
   progressHandler.updateProgress({ content: `Command: ${button} ... \n` });
@@ -88,9 +88,15 @@ const handler = async (req: Request): Promise<Response> => {
         (imageGenerationProgress && imageGenerationProgress < 100))
     ) {
       await sleep(3500);
+      const generationProgressEndpoint = `https://api.mymidjourney.ai/api/v1/midjourney/message/${messageId}`;
       const imageGenerationProgressResponse = await fetch(
-        `https://api.thenextleg.io/v2/message/${messageId}?authToken=${process.env.THE_NEXT_LEG_API_KEY}`,
-        { method: 'GET' },
+        generationProgressEndpoint,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY}`,
+          },
+        },
       );
 
       if (!imageGenerationProgressResponse.ok) {
@@ -106,17 +112,26 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log({ imageGenerationProgressResponseJson });
       if (generationProgress === 100) {
-        const buttonMessageId =
-          imageGenerationProgressResponseJson.response.buttonMessageId;
+        const finalResponse: {
+          prompt: string;
+          uri: string;
+          progress: number;
+          buttons: string[];
+          messageId: string;
+          createdAt: string;
+          updatedAt: string;
+        } = imageGenerationProgressResponseJson;
+        const buttonMessageId = finalResponse.messageId;
+
         progressHandler.updateProgress({
           content: `Completed in ${getTotalGenerationTime()}s \n`,
           state: 'completed',
         });
 
-        const imageUrl = imageGenerationProgressResponseJson.response.imageUrl;
-        const buttons = imageGenerationProgressResponseJson.response.buttons;
-        const imageUrlList =
-          imageGenerationProgressResponseJson.response.imageUrls;
+        const imageUrl = finalResponse.uri;
+        const imageUrlList = new Array(4).fill(imageUrl);
+
+        const buttons = finalResponse.buttons;
 
         const imageAlt = 'Upscaled image';
 
@@ -151,26 +166,16 @@ const handler = async (req: Request): Promise<Response> => {
             await createImageSelector({
               previousButtonCommand: button,
               buttonMessageId,
-              imageList: [
-                {
-                  imageUrl: imageUrl,
-                  imageAlt: imageAlt,
-                  buttons: buttons,
-                },
-              ],
+              imageUrl,
+              buttons,
               prompt: prompt || '',
             });
           } else {
             await createImageSelector({
               previousButtonCommand: button,
               buttonMessageId,
-              imageList: imageUrlList.map(
-                (imageUrl: string, index: number) => ({
-                  imageUrl: imageUrl,
-                  imageAlt: imageAlt,
-                  buttons: [`U${index + 1}`, `V${index + 1}`],
-                }),
-              ),
+              imageUrl,
+              buttons,
               prompt: prompt || '',
             });
           }
@@ -195,6 +200,7 @@ const handler = async (req: Request): Promise<Response> => {
         if (imageGenerationProgress === null) {
           progressHandler.updateProgress({
             content: `Start to generate \n`,
+            removeLastLine: true
           });
         } else {
           progressHandler.updateProgress({
