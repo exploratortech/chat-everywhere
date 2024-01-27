@@ -7,6 +7,7 @@ import { getEndpoint } from './api';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
+  ERROR_MESSAGES,
 } from './const';
 import {
   saveConversation,
@@ -121,6 +122,17 @@ function handleErrorResponse(
   } else if (response.status === 401) {
     toastError(
       t('Sorry something went wrong. Please refresh the page and try again.'),
+    );
+  } else if (
+    response.status === ERROR_MESSAGES.content_filter_triggered.httpCode
+  ) {
+    toastError(
+      t(
+        'Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.',
+      ),
+      {
+        icon: '⚠️',
+      },
     );
   } else {
     toastError(
