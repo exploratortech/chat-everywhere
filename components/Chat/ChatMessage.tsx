@@ -28,11 +28,8 @@ import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import { ImageGenerationComponent } from './components/ImageGenerationComponent';
-import MjImageComponentV2 from './components/MjImageComponentV2';
 import TokenCounter from './components/TokenCounter';
 
-import { CodeBlock } from '../Markdown/CodeBlock';
 import AssistantRespondMessage from './ChatMessage/AssistantRespondMessage';
 import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';
@@ -44,7 +41,6 @@ interface Props {
   messageIndex: number;
   messageIsStreaming: boolean;
   onEdit?: (editedMessage: Message, index: number) => void;
-  inView?: boolean;
 }
 
 export const ChatMessage: FC<Props> = memo(
@@ -384,19 +380,6 @@ export const ChatMessage: FC<Props> = memo(
           </div>
         </div>
       </div>
-    );
-  },
-  (prevProps, nextProps) => {
-    // If inView is false, don't re-render the component
-    if (!nextProps.inView) {
-      return true;
-    }
-    // CRITICAL: The onEdit function is not included in the dependency array to avoid re-rendering the component when it changes. Instead, messageIsStreaming is used to trigger a re-render and update the onEdit function props.
-    return (
-      prevProps.message.content === nextProps.message.content &&
-      prevProps.messageIndex === nextProps.messageIndex &&
-      prevProps.messageIsStreaming === nextProps.messageIsStreaming &&
-      prevProps.inView === nextProps.inView
     );
   },
 );
