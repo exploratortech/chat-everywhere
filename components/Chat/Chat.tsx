@@ -27,9 +27,8 @@ import { NewConversationMessagesContainer } from '../ConversationStarter/NewConv
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
-import { ChatMessage } from './ChatMessage';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
-import VisibilityWrapper from './VisibilityWrapper';
+import VirtualList from './VirtualList';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -266,13 +265,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   );
 
   return (
-    <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
+    <div className="relative flex-1 bg-white dark:bg-[#343541]">
       {modelError ? (
         <ErrorMessageDiv error={modelError} />
       ) : (
         <>
           <div
-            className="max-h-full overflow-x-hidden"
+            className="max-h-full h-full overflow-x-hidden flex flex-col"
             ref={chatContainerRef}
             onScroll={handleScroll}
           >
@@ -321,26 +320,21 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   )}
                 </div>
 
-                {selectedConversation?.messages.map((message, index) => (
-                  <Fragment key={index}>
-                    <VisibilityWrapper>
-                      {(inView) => (
-                        <ChatMessage
-                          message={message}
-                          messageIndex={index}
-                          onEdit={onEdit}
-                          messageIsStreaming={messageIsStreaming}
-                          inView={inView}
-                        />
-                      )}
-                    </VisibilityWrapper>
-                  </Fragment>
-                ))}
+                <div className="flex-1">
+                  {selectedConversation?.messages && (
+                    <VirtualList
+                      key={selectedConversation.id}
+                      messages={selectedConversation.messages}
+                      messageIsStreaming={messageIsStreaming}
+                      onEdit={onEdit}
+                    />
+                  )}
+                </div>
 
                 {loading && <ChatLoader />}
 
                 <div
-                  className="h-[162px] bg-white dark:bg-[#343541]"
+                  className="h-[1px] bg-white dark:bg-[#343541]"
                   ref={messagesEndRef}
                 />
               </>
