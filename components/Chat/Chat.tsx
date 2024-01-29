@@ -15,7 +15,6 @@ import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics/dist/interactions';
 
 import chat from '@/utils/app/chat';
-
 import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 import { throttle } from '@/utils/data/throttle';
 
@@ -62,11 +61,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   );
 
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
-  const [showScrollDownButton, setShowScrollDownButton] =
-    useState<boolean>(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = useCallback(
@@ -145,29 +141,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       homeDispatch,
     ],
   );
-
-  const handleScroll = throttle(() => {
-    if (chatContainerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } =
-        chatContainerRef.current;
-      const bottomTolerance = 30;
-
-      if (scrollTop + clientHeight < scrollHeight - bottomTolerance) {
-        setAutoScrollEnabled(false);
-        setShowScrollDownButton(true);
-      } else {
-        setAutoScrollEnabled(true);
-        setShowScrollDownButton(false);
-      }
-    }
-  }, 100);
-
-  const handleScrollDown = () => {
-    chatContainerRef.current?.scrollTo({
-      top: chatContainerRef.current.scrollHeight,
-      behavior: 'smooth',
-    });
-  };
 
   const onClearAll = () => {
     if (
@@ -271,11 +244,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         <ErrorMessageDiv error={modelError} />
       ) : (
         <>
-          <div
-            className="max-h-full h-full overflow-x-hidden flex flex-col"
-            ref={chatContainerRef}
-            onScroll={handleScroll}
-          >
+          <div className="max-h-full h-full overflow-x-hidden flex flex-col">
             {selectedConversation?.messages.length === 0 ? (
               <>
                 <div className="mx-auto flex max-w-[350px] flex-col space-y-10 pt-12 md:px-4 sm:max-w-[600px] ">
@@ -351,16 +320,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             onRegenerate={onRegenerate}
           />
         </>
-      )}
-      {showScrollDownButton && (
-        <div className="absolute bottom-0 right-0 mb-4 mr-4 pb-20">
-          <button
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-200 text-gray-700 shadow-md hover:shadow-lg dark:bg-gray-700 dark:text-gray-200"
-            onClick={handleScrollDown}
-          >
-            <IconArrowDown size={18} />
-          </button>
-        </div>
       )}
     </div>
   );
