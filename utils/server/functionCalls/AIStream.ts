@@ -2,10 +2,8 @@
 // This should be used in tendon with the handler.ts file. For GPT-4 only
 import { DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
-import {
-  getRandomOpenAIEndpointsAndKeys,
-  normalizeMessages,
-} from '@/utils/server/index';
+import { getEndpointsAndKeys } from '@/utils/server/api';
+import { normalizeMessages } from '@/utils/server/index';
 
 import { FunctionCall, Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
@@ -17,6 +15,7 @@ import {
 } from 'eventsource-parser';
 
 type AIStreamProps = {
+  countryCode: string;
   systemPrompt: string;
   messages: Message[];
   onUpdateToken: (token: string) => void;
@@ -29,15 +28,13 @@ type AIStreamResponseType = {
 }[];
 
 export const AIStream = async ({
+  countryCode,
   systemPrompt,
   messages,
   onUpdateToken,
   functionCalls,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
-  const [openAIEndpoints, openAIKeys] = getRandomOpenAIEndpointsAndKeys(
-    true,
-    false,
-  );
+  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true, countryCode);
 
   let attempt = 0,
     stop = false,
@@ -48,8 +45,10 @@ export const AIStream = async ({
   const openAIKey = openAIKeys[attempt] || '';
   const model = OpenAIModels[OpenAIModelID.GPT_4];
 
-  let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2023-07-01-preview`;
+  let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2023-12-01-preview`;
 
+  console.log("Sending request to: " + url);
+  
   const messagesToSend = await shortenMessagesBaseOnTokenLimit(
     '',
     messages,
@@ -83,7 +82,7 @@ export const AIStream = async ({
   };
 
   requestHeaders['api-key'] = openAIKey;
-
+  
   const res = await fetch(url, {
     headers: requestHeaders,
     method: 'POST',

@@ -7,9 +7,8 @@ import {
   tools,
 } from '../../utils/app/online_mode';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
-import { truncateLogMessage } from '@/utils/server';
 import { trimStringBaseOnTokenLimit } from '@/utils/server/api';
-import { getStringTokenCount } from '@/utils/server/api';
+import { getStringTokenCount, truncateLogMessage } from '@/utils/server/api';
 import {
   getAdminSupabaseClient,
   getUserProfile,
@@ -149,7 +148,7 @@ const handler = async (req: NextRequest, res: any) => {
 
   const model = new ChatOpenAI({
     temperature: 0,
-    azureOpenAIApiVersion: '2023-07-01-preview',
+    azureOpenAIApiVersion: '2023-12-01-preview',
     azureOpenAIApiKey: process.env.AZURE_OPENAI_GPT_4_KEY_1,
     azureOpenAIApiInstanceName: 'chat-everywhere-uk',
     azureOpenAIApiDeploymentName: 'gpt-4',
