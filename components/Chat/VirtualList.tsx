@@ -17,29 +17,6 @@ const VirtualList = ({
 }) => {
   const virtuoso = useRef<VirtuosoHandle>(null);
 
-  const RenderItem = ({
-    index,
-    message,
-  }: {
-    index: number;
-    message: Message;
-  }) => {
-    return (
-      <div
-        style={{
-          paddingBottom: index === messages.length - 1 ? '128px' : '0',
-        }}
-      >
-        <ChatMessage
-          message={message}
-          messageIndex={index}
-          onEdit={onEdit}
-          messageIsStreaming={messageIsStreaming}
-        />
-      </div>
-    );
-  };
-
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
 
@@ -60,9 +37,22 @@ const VirtualList = ({
           overflowX: 'hidden',
         }}
         data={messages}
-        itemContent={(index, message) => (
-          <RenderItem index={index} message={message} />
-        )}
+        itemContent={(index, message) => {
+          return (
+            <div
+              style={{
+                paddingBottom: index === messages.length - 1 ? '128px' : '0',
+              }}
+            >
+              <ChatMessage
+                message={message}
+                messageIndex={index}
+                onEdit={onEdit}
+                messageIsStreaming={messageIsStreaming}
+              />
+            </div>
+          );
+        }}
         followOutput={'smooth'}
         atTopThreshold={300}
         overscan={500}
