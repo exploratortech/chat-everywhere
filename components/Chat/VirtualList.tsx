@@ -47,6 +47,7 @@ const VirtualList = ({
     virtuoso.current?.scrollToIndex({
       index: messages.length - 1,
       behavior: 'smooth',
+      align: 'end',
     });
   };
 
