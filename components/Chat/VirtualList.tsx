@@ -1,6 +1,8 @@
 import { IconArrowDown } from '@tabler/icons-react';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+
+import { useAutoScroll } from '@/hooks/useAutoScroll';
 
 import { Message } from '@/types/chat';
 
@@ -20,13 +22,23 @@ const VirtualList = ({
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
 
-  const handleScrollDown = () => {
+  const handleScrollDown = useCallback(() => {
+    console.log('scrolling down');
     virtuoso.current?.scrollToIndex({
       index: messages.length - 1,
       behavior: 'smooth',
       align: 'end',
     });
-  };
+  }, [messages.length]);
+
+  const [atBottom, setAtBottom] = useState<boolean>(false);
+
+  // Inside your VirtualList component
+  useAutoScroll(messageIsStreaming && atBottom, handleScrollDown, 200);
+
+  useEffect(() => {
+    setShowScrollDownButton(!atBottom);
+  }, [atBottom]);
 
   return (
     <>
@@ -56,12 +68,10 @@ const VirtualList = ({
         atTopThreshold={300}
         overscan={500}
         initialTopMostItemIndex={messages.length - 1}
-        rangeChanged={({ endIndex }) => {
-          if (endIndex < messages.length - 1) {
-            setShowScrollDownButton(true);
-          } else {
-            setShowScrollDownButton(false);
-          }
+        atBottomThreshold={100}
+        atBottomStateChange={(atBottom) => {
+          console.log({ atBottom });
+          setAtBottom(atBottom);
         }}
       />
       {showScrollDownButton && (
