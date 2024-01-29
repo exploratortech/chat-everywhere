@@ -23,7 +23,6 @@ const VirtualList = ({
     useState<boolean>(false);
 
   const handleScrollDown = useCallback(() => {
-    console.log('scrolling down');
     virtuoso.current?.scrollToIndex({
       index: messages.length - 1,
       behavior: 'smooth',
@@ -70,7 +69,6 @@ const VirtualList = ({
         initialTopMostItemIndex={messages.length - 1}
         atBottomThreshold={100}
         atBottomStateChange={(atBottom) => {
-          console.log({ atBottom });
           setAtBottom(atBottom);
         }}
       />
