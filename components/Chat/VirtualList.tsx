@@ -53,7 +53,6 @@ const VirtualList = ({
             </div>
           );
         }}
-        followOutput={'smooth'}
         atTopThreshold={300}
         overscan={500}
         initialTopMostItemIndex={messages.length - 1}
