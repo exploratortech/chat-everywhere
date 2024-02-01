@@ -2,7 +2,7 @@ import { IconArrowDown } from '@tabler/icons-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 
-import { useAutoScroll } from '@/hooks/useAutoScroll';
+import { throttle } from '@/utils/data/throttle';
 
 import { Message } from '@/types/chat';
 
@@ -18,26 +18,46 @@ const VirtualList = ({
   onEdit: any;
 }) => {
   const virtuoso = useRef<VirtuosoHandle>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
 
-  const handleScrollDown = useCallback(() => {
+  // BUTTON TO SCROLL DOWN
+  const handleScrollDown = () => {
     virtuoso.current?.scrollToIndex({
       index: messages.length - 1,
       behavior: 'smooth',
       align: 'end',
     });
-  }, [messages.length]);
+  };
+  // SCROLL DOWN ON NEW MESSAGE
+  const scrollDown = () => {
+    if (autoScrollEnabled) {
+      messagesEndRef.current?.scrollIntoView(true);
+    }
+  };
 
-  const [atBottom, setAtBottom] = useState<boolean>(false);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(false);
 
-  // Inside your VirtualList component
-  useAutoScroll(messageIsStreaming && atBottom, handleScrollDown, 200);
+  const handleScroll = throttle((scrollEvent) => {
+    const { scrollTop, scrollHeight, clientHeight } = scrollEvent.target;
+
+    const bottomTolerance = 30;
+
+    if (scrollTop + clientHeight < scrollHeight - bottomTolerance) {
+      setAutoScrollEnabled(false);
+      setShowScrollDownButton(true);
+    } else {
+      setAutoScrollEnabled(true);
+      setShowScrollDownButton(false);
+    }
+  }, 100);
+  const throttledScrollDown = throttle(scrollDown, 250);
 
   useEffect(() => {
-    setShowScrollDownButton(!atBottom);
-  }, [atBottom]);
+    throttledScrollDown();
+  }, [messages, throttledScrollDown]);
 
   return (
     <>
@@ -64,12 +84,14 @@ const VirtualList = ({
             </div>
           );
         }}
+        onScroll={handleScroll}
         atTopThreshold={300}
         overscan={500}
         initialTopMostItemIndex={messages.length - 1}
-        atBottomThreshold={100}
-        atBottomStateChange={(atBottom) => {
-          setAtBottom(atBottom);
+        components={{
+          Footer: () => {
+            return <div ref={messagesEndRef} className="h-10"></div>;
+          },
         }}
       />
       {showScrollDownButton && (
