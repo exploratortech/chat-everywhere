@@ -158,19 +158,35 @@ export const getEndpointsAndKeys = (
       endpoints = [process.env.AZURE_OPENAI_ENDPOINT_0, ...endpoints];
       keys = [process.env.AZURE_OPENAI_KEY_0, ...keys];
     }
+
+    const shuffled = shuffleEndpointsAndKeys(endpoints, keys, 0.3); // Shuffle endpoints randomly for TW/HK/MO users with 30% probability
+    endpoints = shuffled.endpoints;
+    keys = shuffled.keys;
   } else {
-    const shuffledIndices = Array.from(Array(endpoints.length).keys()).sort(
-      () => Math.random() - 0.5,
-    );
-    endpoints = shuffledIndices.map((index) => endpoints[index]);
-    keys = shuffledIndices.map((index) => keys[index]);
+    const shuffled = shuffleEndpointsAndKeys(endpoints, keys, 1); // Always shuffle endpoints and keys for non-TW/HK/MO users
+    endpoints = shuffled.endpoints;
+    keys = shuffled.keys;
   }
 
   endpoints = endpoints.filter((endpoint) => endpoint !== undefined);
   keys = keys.filter((key) => key !== undefined);
 
-  
   return [endpoints, keys];
+};
+
+const shuffleEndpointsAndKeys = (
+  endpoints: (string | undefined)[],
+  keys: (string | undefined)[],
+  shuffleProbability: number
+): { endpoints: (string | undefined)[], keys: (string | undefined)[] } => {
+  if (Math.random() < shuffleProbability) {
+    const shuffledIndices = Array.from(Array(endpoints.length).keys()).sort(() => Math.random() - 0.5);
+    return {
+      endpoints: shuffledIndices.map((index) => endpoints[index]),
+      keys: shuffledIndices.map((index) => keys[index])
+    };
+  }
+  return { endpoints, keys };
 };
 
 // Truncate log message to 4000 characters
