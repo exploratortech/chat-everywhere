@@ -4,6 +4,9 @@ import MjImageProgress from '@/components/Chat/components/MjImageProgress';
 import MjImageSelector, {
   MjImageSelectorProps,
 } from '@/components/Chat/components/MjImageSelector';
+import MjImageSelectorV2, {
+  MjImageSelectorV2Props,
+} from '@/components/Chat/components/MjImageSelectorV2';
 
 import { generateComponentHTML } from './htmlStringHandler';
 
@@ -21,6 +24,27 @@ export const makeWriteToStream = (
 
 export type WriteToStream = ReturnType<typeof makeWriteToStream>;
 
+export const makeCreateImageSelectorV2 = (writeToStream: WriteToStream) => {
+  return async ({
+    buttonMessageId,
+    imageUrl,
+    buttons,
+    previousButtonCommand,
+    prompt,
+  }: MjImageSelectorV2Props) => {
+    const html = await generateComponentHTML({
+      component: MjImageSelectorV2,
+      props: {
+        buttonMessageId,
+        imageUrl,
+        buttons,
+        previousButtonCommand,
+        prompt,
+      },
+    });
+    return writeToStream(html);
+  };
+};
 export const makeCreateImageSelector = (writeToStream: WriteToStream) => {
   return async ({
     buttonMessageId,

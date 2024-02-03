@@ -12,7 +12,7 @@ import {
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import {
   ProgressHandler,
-  makeCreateImageSelector,
+  makeCreateImageSelectorV2,
   makeWriteToStream,
 } from '@/utils/app/streamHandler';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
@@ -32,7 +32,7 @@ const supabase = getAdminSupabaseClient();
 
 export const config = {
   runtime: 'edge',
-  preferredRegion: 'icn1'
+  preferredRegion: 'icn1',
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -74,7 +74,9 @@ const generateMjPrompt = (
   }
 
   if (originalPrompt) {
-    const originalPromptSubstrings = originalPrompt.match(/--\w+ \d+(\.\d+)?(:\d+)?/g);
+    const originalPromptSubstrings = originalPrompt.match(
+      /--\w+ \d+(\.\d+)?(:\d+)?/g,
+    );
     if (originalPromptSubstrings) {
       originalPromptSubstrings.forEach((substring) => {
         if (!resultPrompt.includes(substring)) {
@@ -96,7 +98,12 @@ const handler = async (req: Request): Promise<Response> => {
   const user = await getUserProfile(data.user.id);
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
-  if (await hasUserRunOutOfCredits(data.user.id, PluginID.IMAGE_GEN)) {
+  const isUserInUltraPlan = user.plan === 'ultra';
+
+  if (
+    !isUserInUltraPlan &&
+    (await hasUserRunOutOfCredits(data.user.id, PluginID.IMAGE_GEN))
+  ) {
     return new Response('Error', {
       status: 402,
       statusText: 'Ran out of Image generation credit',
@@ -115,7 +122,7 @@ const handler = async (req: Request): Promise<Response> => {
   let jobTerminated = false;
 
   const writeToStream = makeWriteToStream(writer, encoder);
-  const createImageSelector = makeCreateImageSelector(writeToStream);
+  const createImageSelector = makeCreateImageSelectorV2(writeToStream);
   const progressHandler = new ProgressHandler(writeToStream);
 
   const requestBody = (await req.json()) as ChatBody;
@@ -154,7 +161,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   const imageGeneration = async () => {
     const requestHeader = {
-      Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
+      Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY || ''}`,
       'Content-Type': 'application/json',
     };
 
@@ -163,7 +170,7 @@ const handler = async (req: Request): Promise<Response> => {
       progressHandler.updateProgress({
         content: `Enhancing and translating user input prompt ... \n`,
       });
-      
+
       generationPrompt = await translateAndEnhancePrompt(
         latestUserPromptMessage,
       );
@@ -175,18 +182,18 @@ const handler = async (req: Request): Promise<Response> => {
         requestBody.temperature,
         latestUserPromptMessage,
       );
-      
+
       progressHandler.updateProgress({
         content: `Prompt: ${generationPrompt} \n`,
         removeLastLine: true,
       });
       const imageGenerationResponse = await fetch(
-        `https://api.thenextleg.io/v2/imagine`,
+        `https://api.mymidjourney.ai/api/v1/midjourney/imagine`,
         {
           method: 'POST',
           headers: requestHeader,
           body: JSON.stringify({
-            msg: generationPrompt,
+            prompt: generationPrompt,
           }),
         },
       );
@@ -194,14 +201,17 @@ const handler = async (req: Request): Promise<Response> => {
       const imageGenerationResponseText = await imageGenerationResponse.text();
 
       if (!imageGenerationResponse.ok) {
+        console.log(imageGenerationResponse);
+
         await logEvent('Image generation failed');
         throw new Error('Image generation failed');
       }
 
       errorTraceMessage =
-        'From endpoint: https://api.thenextleg.io/v2/imagine: ' +
+        'From endpoint: https://api.mymidjourney.ai/api/v1/midjourney/imagine: ' +
         imageGenerationResponseText +
-        ' --- ' + errorTraceMessage;
+        ' --- ' +
+        errorTraceMessage;
 
       const imageGenerationResponseJson = JSON.parse(
         imageGenerationResponseText,
@@ -217,8 +227,11 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error('Image generation failed');
       }
 
+      console.log(imageGenerationResponseText);
+      console.log(imageGenerationResponseJson);
+
       const imageGenerationMessageId = imageGenerationResponseJson.messageId;
-      const generationProgressEndpoint = `https://api.thenextleg.io/v2/message/${imageGenerationMessageId}?authToken=${process.env.THE_NEXT_LEG_API_KEY}`;
+      const generationProgressEndpoint = `https://api.mymidjourney.ai/api/v1/midjourney/message/${imageGenerationMessageId}`;
 
       // Check every 3.5 seconds if the image generation is done
       let generationStartedAt = Date.now();
@@ -235,7 +248,12 @@ const handler = async (req: Request): Promise<Response> => {
         await sleep(3500);
         const imageGenerationProgressResponse = await fetch(
           generationProgressEndpoint,
-          { method: 'GET' },
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY}`,
+            },
+          },
         );
 
         const imageGenerationProgressResponseText =
@@ -244,7 +262,9 @@ const handler = async (req: Request): Promise<Response> => {
           imageGenerationProgressResponseText,
         );
 
-        errorTraceMessage = `From endpoint: ${generationProgressEndpoint}: ${imageGenerationProgressResponseText} --- ` + errorTraceMessage;
+        errorTraceMessage =
+          `From endpoint: ${generationProgressEndpoint}: ${imageGenerationProgressResponseText} --- ` +
+          errorTraceMessage;
 
         if (!imageGenerationProgressResponse.ok) {
           console.log(imageGenerationProgressResponse.status);
@@ -257,17 +277,27 @@ const handler = async (req: Request): Promise<Response> => {
 
         console.log({ imageGenerationProgressResponseJson });
         if (generationProgress === 100) {
-          const buttonMessageId =
-            imageGenerationProgressResponseJson.response.buttonMessageId;
+          const finalResponse: {
+            prompt: string;
+            uri: string;
+            progress: number;
+            buttons: string[];
+            messageId: string;
+            createdAt: string;
+            updatedAt: string;
+          } = imageGenerationProgressResponseJson;
+
+          const buttonMessageId = finalResponse.messageId;
           progressHandler.updateProgress({
             content: `Completed in ${getTotalGenerationTime()}s \n`,
             state: 'completed',
           });
 
-          const imageUrl =
-            imageGenerationProgressResponseJson.response.imageUrl;
-          const imageUrlList =
-            imageGenerationProgressResponseJson.response.imageUrls;
+          const imageUrl = finalResponse.uri;
+          const imageUrlList = new Array(4).fill(imageUrl);
+
+          const buttons = finalResponse.buttons;
+
           const imageAlt = latestUserPromptMessage
             .replace(/\s+/g, '-')
             .slice(0, 20);
@@ -299,17 +329,15 @@ const handler = async (req: Request): Promise<Response> => {
             await createImageSelector({
               previousButtonCommand: '',
               buttonMessageId,
-              imageList: imageUrlList.map(
-                (imageUrl: string, index: number) => ({
-                  imageUrl: imageUrl,
-                  imageAlt: imageAlt,
-                  buttons: [`U${index + 1}`, `V${index + 1}`],
-                }),
-              ),
+              imageUrl,
+              buttons,
               prompt: generationPrompt,
             });
-            await addUsageEntry(PluginID.IMAGE_GEN, user.id);
-            await subtractCredit(user.id, PluginID.IMAGE_GEN);
+
+            if (!isUserInUltraPlan) {
+              await addUsageEntry(PluginID.IMAGE_GEN, user.id);
+              await subtractCredit(user.id, PluginID.IMAGE_GEN);
+            }
 
             imageGenerationProgress = 100;
 
@@ -322,6 +350,7 @@ const handler = async (req: Request): Promise<Response> => {
           if (imageGenerationProgress === null) {
             progressHandler.updateProgress({
               content: `Start to generate \n`,
+              removeLastLine: true,
             });
           } else {
             progressHandler.updateProgress({
@@ -331,7 +360,8 @@ const handler = async (req: Request): Promise<Response> => {
                   : `${generationProgress}% complete`
               } ... ${getTotalGenerationTime()}s \n`,
               removeLastLine: true,
-              previewImageUrl: imageGenerationProgressResponseJson?.progressImageUrl,
+              previewImageUrl:
+                imageGenerationProgressResponseJson?.progressImageUrl,
               percentage:
                 typeof generationProgress === 'number'
                   ? `${generationProgress}`

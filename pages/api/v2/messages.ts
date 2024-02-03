@@ -1,5 +1,5 @@
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
-import { authorizedOpenAiRequest } from '@/utils/server';
+import { authorizedOpenAiRequest } from '@/utils/server/api';
 import {
   getAdminSupabaseClient,
   getUserProfile,

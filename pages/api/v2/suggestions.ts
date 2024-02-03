@@ -1,5 +1,5 @@
 // This endpoint is for front-end to pass in the chat history, and get a nicely formatted suggestions back.
-import { authorizedOpenAiRequest } from '@/utils/server';
+import { authorizedOpenAiRequest } from '@/utils/server/api';
 import {
   getAdminSupabaseClient,
   getUserProfile,

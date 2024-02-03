@@ -48,6 +48,7 @@ export interface HomeInitialState {
   showFeaturePageOnLoad: string | null;
   user: User | null;
   isPaidUser: boolean;
+  isUltraUser: boolean;
   isSurveyFilled: boolean;
 
   // Plugins Utils
@@ -108,6 +109,7 @@ export const initialState: HomeInitialState = {
   showFeaturePageOnLoad: null,
   user: null,
   isPaidUser: false,
+  isUltraUser: false,
   isSurveyFilled: false,
 
   // Plugins Utils

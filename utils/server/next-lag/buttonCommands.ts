@@ -1,16 +1,16 @@
 const buttonCommand = async (button: string, buttonMessageId: string) => {
   const requestHeader = {
-    Authorization: `Bearer ${process.env.THE_NEXT_LEG_API_KEY || ''}`,
+    Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY || ''}`,
     'Content-Type': 'application/json',
   };
   const buttonCommandsResponse = await fetch(
-    'https://api.thenextleg.io/v2/button',
+    'https://api.mymidjourney.ai/api/v1/midjourney/button',
     {
       headers: requestHeader,
       method: 'POST',
       body: JSON.stringify({
         button,
-        buttonMessageId,
+        messageId: buttonMessageId,
       }),
     },
   );

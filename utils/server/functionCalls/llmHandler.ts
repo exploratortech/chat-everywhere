@@ -18,6 +18,7 @@ import { UserProfile } from '@/types/user';
 type handlerType = {
   user: UserProfile;
   messages: Message[];
+  countryCode: string;
   onUpdate: (payload: string) => void;
   onEnd: () => void;
 };
@@ -38,6 +39,7 @@ const llmHandlerPrompt =
 export const llmHandler = async ({
   user,
   messages,
+  countryCode,
   onUpdate,
   onEnd,
 }: handlerType) => {
@@ -78,6 +80,7 @@ export const llmHandler = async ({
   try {
     while (isFunctionCallRequired) {
       const requestedFunctionCalls = await AIStream({
+        countryCode: countryCode,
         systemPrompt: llmHandlerPrompt,
         messages: innerWorkingMessages,
         onUpdateToken: (token: string) => {
