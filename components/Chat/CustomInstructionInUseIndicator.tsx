@@ -1,10 +1,12 @@
 import { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
 
 const CustomInstructionInUseIndicator = () => {
+  const { t } = useTranslation('chat');
   const {
     state: { selectedConversation, currentMessage },
   } = useContext(HomeContext);
@@ -24,14 +26,19 @@ const CustomInstructionInUseIndicator = () => {
         <div className="h-2 w-2 bg-green-500 rounded-full absolute"></div>
         <div className="h-2 w-2 bg-green-500 rounded-full animate-ping absolute"></div>
         <span className="absolute top-6 scale-0 rounded bg-gray-800 p-2 text-xs text-white group-hover:scale-100 !w-max">
-          {`Custom Instruction (${customInstructionPromptName}) is in use`}
+          {t('Custom Instruction ({{customInstructionPromptName}}) is in use', {
+            customInstructionPromptName,
+          })}
         </span>
       </div>
     );
   } else if (selectedConversation?.customInstructionPrompt) {
     return (
-      <div className="relative h-2 w-2 mx-2">
+      <div className="group relative h-2 w-2 mx-2">
         <div className="h-2 w-2 bg-red-500 rounded-full absolute"></div>
+        <span className="absolute top-6 scale-0 rounded bg-gray-800 p-2 text-xs text-white !w-max">
+          {`Custom Instruction only available in Chat mode`}
+        </span>
       </div>
     );
   }
