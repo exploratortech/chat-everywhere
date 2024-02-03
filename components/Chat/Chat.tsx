@@ -28,6 +28,7 @@ import { NewConversationMessagesContainer } from '../ConversationStarter/NewConv
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
+import CustomInstructionInUseIndicator from './CustomInstructionInUseIndicator';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
 import VirtualList from './VirtualList';
 
@@ -316,9 +317,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             ) : (
               <>
                 <div
-                  className="justify-center border flex tablet:hidden
+                  className="justify-center items-center border flex tablet:hidden
                   border-b-neutral-300 bg-neutral-100 py-[0.625rem] text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 sticky top-0 z-10"
                 >
+                  <CustomInstructionInUseIndicator />
                   {selectedConversation?.name}
 
                   <button

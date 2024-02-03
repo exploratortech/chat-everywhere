@@ -10,7 +10,7 @@ const PromptIcon = ({
   size?: number;
 }) => {
   return prompt.isCustomInstruction ? (
-    <IconBulb color="#ffbf00" size={size} />
+    <IconBulb color="#5EC26A" size={size} />
   ) : (
     <IconBulbFilled size={size} />
   );
