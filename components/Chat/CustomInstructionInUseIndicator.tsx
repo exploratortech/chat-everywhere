@@ -56,7 +56,7 @@ const CustomInstructionInUseIndicator = () => {
         <div className="group relative h-2 w-2 mx-2">
           <div className="h-2 w-2 bg-red-500 rounded-full absolute"></div>
           <span className="absolute top-6 scale-0 rounded bg-gray-800 p-2 text-xs text-white !w-max">
-            {`Custom Instruction only available in Chat mode`}
+            {t('Custom Instruction only available in Chat mode')}
           </span>
         </div>
         {showModal && (
