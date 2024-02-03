@@ -1,5 +1,7 @@
 import { useContext } from 'react';
 
+import { Prompt } from '@/types/prompt';
+
 import HomeContext from '@/pages/api/home/home.context';
 
 import PromptIcon from '../Promptbar/components/PromptIcon';
@@ -7,14 +9,14 @@ import PromptIcon from '../Promptbar/components/PromptIcon';
 const CustomInstructionList = ({
   customInstructionOnClick,
 }: {
-  customInstructionOnClick: (prompt: string) => void;
+  customInstructionOnClick: (customInstructionPrompt: Prompt) => void;
 }) => {
   const {
     state: { prompts },
     dispatch,
   } = useContext(HomeContext);
   const customInstructions = prompts.filter(
-    (prompt) => prompt.isCustomInstruction,
+    (prompt) => prompt.isCustomInstruction && !prompt.deleted,
   );
   return (
     <div className="my-6">
@@ -25,7 +27,7 @@ const CustomInstructionList = ({
             key={prompt.id}
             className="mb-2 cursor-pointer rounded-md border border-neutral-200 bg-transparent p-1 pr-2 text-neutral-400 dark:border-neutral-600 dark:text-white flex justify-center items-center"
             onClick={() => {
-              customInstructionOnClick(prompt.content);
+              customInstructionOnClick(prompt);
             }}
           >
             <div className="px-2">

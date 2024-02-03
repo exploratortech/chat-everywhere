@@ -6,6 +6,8 @@ import { event } from 'nextjs-google-analytics';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
+import { Prompt } from '@/types/prompt';
+
 import HomeContext from '@/pages/api/home/home.context';
 
 import CustomInstructionList from './CustomInstructionList';
@@ -15,7 +17,7 @@ import { SamplePrompts } from './SamplePrompts';
 
 type Props = {
   promptOnClick: (prompt: string) => void;
-  customInstructionOnClick: (prompt: string) => void;
+  customInstructionOnClick: (customInstructionPrompt: Prompt) => void;
 };
 
 export const NewConversationMessagesContainer: FC<Props> = ({

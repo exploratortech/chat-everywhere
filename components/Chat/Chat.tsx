@@ -18,8 +18,9 @@ import chat from '@/utils/app/chat';
 import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 import { throttle } from '@/utils/data/throttle';
 
-import { Message } from '@/types/chat';
+import { Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
+import { Prompt } from '@/types/prompt';
 
 import HomeContext from '@/pages/api/home/home.context';
 
@@ -66,13 +67,20 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = useCallback(
-    async (deleteCount = 0, overrideCurrentMessage?: Message) => {
+    async (
+      deleteCount = 0,
+      overrideCurrentMessage?: Message,
+      customInstructionPrompt?: Prompt,
+    ) => {
       const message = overrideCurrentMessage || currentMessage;
+      const isCreatingConversationWithCustomInstruction =
+        !!customInstructionPrompt;
 
       if (!message) return;
       const plugin = (message.pluginId && Plugins[message.pluginId]) || null;
 
       const {
+        addCustomInstructions,
         updateConversation,
         createChatBody,
         sendRequest,
@@ -81,13 +89,33 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         handleDataResponse,
       } = chat;
       if (selectedConversation) {
+        let updatedConversation: Conversation = selectedConversation;
+
+        if (isCreatingConversationWithCustomInstruction) {
+          updatedConversation = addCustomInstructions(
+            customInstructionPrompt,
+            updatedConversation,
+          );
+        }
+
         const controller = new AbortController();
-        const updatedConversation = updateConversation(
+        updatedConversation = updateConversation(
           deleteCount,
           message,
-          selectedConversation,
-          homeDispatch,
+          updatedConversation,
         );
+        homeDispatch({
+          field: 'selectedConversation',
+          value: isCreatingConversationWithCustomInstruction
+            ? {
+                ...updatedConversation,
+                messages: [...updatedConversation.messages.slice(1)],
+              }
+            : updatedConversation,
+        });
+        homeDispatch({ field: 'loading', value: true });
+        homeDispatch({ field: 'messageIsStreaming', value: true });
+
         const chatBody = createChatBody(
           updatedConversation,
           plugin,
@@ -101,6 +129,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           user,
         );
 
+        if (isCreatingConversationWithCustomInstruction) {
+          selectedConversation.messages.shift();
+          updatedConversation.messages.shift();
+        }
         if (!response.ok) {
           handleErrorResponse(
             response,
@@ -250,16 +282,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 <div className="mx-auto flex max-w-[350px] flex-col space-y-10 pt-12 md:px-4 sm:max-w-[600px] ">
                   <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
                     <NewConversationMessagesContainer
-                      customInstructionOnClick={(prompt: string) => {
-                        // DOING:
+                      customInstructionOnClick={(
+                        customInstructionPrompt: Prompt,
+                      ) => {
                         const message: Message = {
                           role: 'user',
-                          content: prompt,
+                          content:
+                            'Provide a very short welcome message based on your prompt, the role your are playing is based on the prompt.',
                           pluginId: null,
                         };
 
                         setCurrentMessage(message);
-                        handleSend(0, message);
+                        handleSend(0, message, customInstructionPrompt);
                       }}
                       promptOnClick={(prompt: string) => {
                         const message: Message = {
