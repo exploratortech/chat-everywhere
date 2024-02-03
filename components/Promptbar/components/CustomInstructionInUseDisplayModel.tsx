@@ -44,7 +44,7 @@ const CustomInstructionInUseDisplayModel: FC<
 
           <div
             ref={modalRef}
-            className="dark:border-netural-400 inline-block max-h-[400px] transform overflow-y-auto rounded-lg border border-gray-300 bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all dark:bg-[#202123] sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg mobile:w-[calc(100dvw-1rem)] sm:p-6 sm:align-middle"
+            className="dark:border-netural-400 inline-block max-h-[400px] transform overflow-y-auto rounded-lg border border-gray-300 bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all dark:bg-[#202123] sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg mobile:max-h-[70dvh] mobile:h-[70dvh] mobile:w-[calc(100dvw-1rem)] sm:p-6 sm:align-middle"
             role="dialog"
           >
             <div className="text-center text-lg mb-4 font-bold whitespace-pre-wrap">
