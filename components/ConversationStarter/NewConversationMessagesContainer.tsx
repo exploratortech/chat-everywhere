@@ -8,16 +8,19 @@ import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import HomeContext from '@/pages/api/home/home.context';
 
+import CustomInstructionList from './CustomInstructionList';
 import { FootNoteMessage } from './FootNoteMessage';
 import { RolePlayPrompts } from './RolePlayPrompts';
 import { SamplePrompts } from './SamplePrompts';
 
 type Props = {
   promptOnClick: (prompt: string) => void;
+  customInstructionOnClick: (prompt: string) => void;
 };
 
 export const NewConversationMessagesContainer: FC<Props> = ({
   promptOnClick,
+  customInstructionOnClick,
 }) => {
   const { t } = useTranslation('chat');
   const { t: modelTranslate } = useTranslation('model');
@@ -135,6 +138,9 @@ export const NewConversationMessagesContainer: FC<Props> = ({
           ? t('Switch to Sample Prompts')
           : t('Switch to Role Play')}
       </button>
+      <CustomInstructionList
+        customInstructionOnClick={customInstructionOnClick}
+      />
       <FootNoteMessage displayV2Link={user?.isInReferralTrial || false} />
     </div>
   );

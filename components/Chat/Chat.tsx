@@ -250,6 +250,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 <div className="mx-auto flex max-w-[350px] flex-col space-y-10 pt-12 md:px-4 sm:max-w-[600px] ">
                   <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
                     <NewConversationMessagesContainer
+                      customInstructionOnClick={(prompt: string) => {
+                        // DOING:
+                        const message: Message = {
+                          role: 'user',
+                          content: prompt,
+                          pluginId: null,
+                        };
+
+                        setCurrentMessage(message);
+                        handleSend(0, message);
+                      }}
                       promptOnClick={(prompt: string) => {
                         const message: Message = {
                           role: 'user',
