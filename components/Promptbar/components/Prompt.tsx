@@ -20,6 +20,7 @@ import HomeContext from '@/pages/api/home/home.context';
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 
 import PromptbarContext from '../PromptBar.context';
+import PromptIcon from './PromptIcon';
 import { PromptModal } from './PromptModal';
 
 interface Props {
@@ -118,8 +119,7 @@ export const PromptComponent = ({ prompt }: Props) => {
         }}
         tabIndex={0}
       >
-        {prompt.isCustomInstruction && <IconBulb color="#ffbf00" size={18} />}
-        {!prompt.isCustomInstruction && <IconBulbFilled size={18} />}
+        <PromptIcon prompt={prompt} />
 
         <div
           className={`${
