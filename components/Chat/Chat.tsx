@@ -541,8 +541,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}
-            onSend={() => {
-              handleSend(0);
+            onSend={(currentMessage) => {
+              handleSend(0, currentMessage);
             }}
             onRegenerate={onRegenerate}
           />
