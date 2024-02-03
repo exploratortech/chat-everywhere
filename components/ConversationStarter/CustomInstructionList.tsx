@@ -20,8 +20,8 @@ const CustomInstructionList = ({
   );
   return (
     <div className="my-6">
-      <h2>Custom Instructions</h2>
-      <div className="mt-5 flex flex-col text-sm overflow-y-auto h-64 max-h-max font-normal">
+      <h2 className="text-lg">Custom Instructions</h2>
+      <div className="mt-3 flex flex-col text-sm overflow-y-auto h-64 max-h-max font-normal">
         {customInstructions.map((prompt, index) => (
           <div
             key={prompt.id}
