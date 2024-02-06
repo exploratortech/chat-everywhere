@@ -42,7 +42,7 @@ function TokenCounter({
   const debouncedValue = useDebounce<string>(value, 500);
 
   const {
-    state: { currentMessage, isPaidUser },
+    state: { currentMessage, subscriptionPlan },
   } = useContext(HomeContext);
 
   const modelMaxTokenLength = useMemo(() => {
@@ -54,12 +54,12 @@ function TokenCounter({
         );
       default:
         // Only enable 16k model for pro users
-        const defaultModel = isPaidUser
+        const defaultModel = subscriptionPlan.canUseGPT3_5_16KModel()
           ? OpenAIModels[OpenAIModelID.GPT_3_5_16K]
           : OpenAIModels[OpenAIModelID.GPT_3_5];
         return defaultModel.tokenLimit - defaultModel.completionTokenLimit;
     }
-  }, [currentMessage?.pluginId, isPaidUser]);
+  }, [currentMessage?.pluginId, subscriptionPlan]);
 
   const maxToken = useMemo(() => {
     return modelMaxTokenLength - promptTokensLength;

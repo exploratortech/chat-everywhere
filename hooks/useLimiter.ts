@@ -1,24 +1,28 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import SubscriptionPlan from '@/utils/app/SubscriptionPlan';
+
 import { User } from '@/types/user';
 
 import usePreviousState from './usePreviousState';
 
-function useLimiter(user: User | null, messageIsStreaming: boolean) {
+function useLimiter(
+  user: User,
+  subscriptionPlan: SubscriptionPlan | null,
+  messageIsStreaming: boolean,
+) {
   const previousMessageIsStreaming = usePreviousState(messageIsStreaming);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [intervalRemaining, setIntervalRemaining] = useState(0);
 
   const maxInterval = useMemo(() => {
-    const isProUser = user && (user.plan === 'pro' || user.plan === 'edu');
-    if (isProUser) return 0;
+    if (!subscriptionPlan?.hasChatLimit()) return 0;
 
-    const isFreeUser = user && user.plan === 'free';
-    const interval = isFreeUser
+    const interval = user
       ? process.env.NEXT_PUBLIC_FREE_USER_MESSAGE_INTERVAL
       : process.env.NEXT_PUBLIC_NON_LOGIN_USER_MESSAGE_INTERVAL;
     return interval ? parseInt(interval) : 0;
-  }, [user]);
+  }, [user, subscriptionPlan]);
 
   useEffect(() => {
     if (previousMessageIsStreaming && !messageIsStreaming) {

@@ -8,6 +8,7 @@
   "Prompt manager": "提示語",
   "Share conversations": "分享對話",
   "Everything in free plan": "免費方案中的所有功能",
+  "Everything in basic plan": "基本方案中的所有功能",
   "Unlimited messages": "無限訊息",
   "Priority response time": "優先回覆",
   "Cloud sync": "雲同步",
@@ -135,10 +136,10 @@
   "Edit": "編輯",
   "Test": "測試",
   "You can send message to the topic specified (with retained flag on), Chat Everywhere will be able to access the latest message.": "設定MQTT裝置來發送訊息到你指定的Topic (請確認訊息中有retain的標籤)。",
-  
   "Speech configuration": "AI朗讀設定",
   "Speech Speed": "語速",
   "Slow": "慢",
   "Normal": "正常",
-  "Fast": "快"
+  "Fast": "快",
+  "Please contact Jack at jack@exploratorlabs.com to upgrade to the Pro plan": "請聯繫Jack (jack@exploratorlabs.com) 來升級到專業版"
 }

@@ -1,15 +1,18 @@
-import { IconCircleCheck } from '@tabler/icons-react';
+import { IconCheckbox, IconCircleCheck } from '@tabler/icons-react';
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
+import { cn } from '@/utils/app/cn';
 import { trackEvent } from '@/utils/app/eventTracking';
+import { PlanLevel } from '@/utils/app/planLevel';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import HomeContext from '@/pages/api/home/home.context';
 
 import { ReferralCodeEnter } from '../ReferralCodeEnter';
 import { LineConnectionButton } from './LineConnectionButton';
+import UpgradeButton from './UpgradeButton';
 
 import dayjs from 'dayjs';
 import LocalizedFormat from 'dayjs/plugin/localizedFormat';
@@ -21,7 +24,7 @@ export default function Settings_Account() {
   const [displayReferralCodeEnterer, setDisplayReferralCodeEnterer] =
     useState(false);
   const {
-    state: { user, isPaidUser },
+    state: { user, subscriptionPlan },
     dispatch,
   } = useContext(HomeContext);
 
@@ -30,15 +33,30 @@ export default function Settings_Account() {
     dispatch({ field: 'showLoginSignUpModel', value: true });
   };
 
-  const upgradeLinkOnClick = () => {
-    const paymentLink =
-      process.env.NEXT_PUBLIC_ENV === 'production'
-        ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
-        : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
+  const upgradeLinkOnClick = (plan: PlanLevel.Basic | PlanLevel.Pro) => {
+    let paymentLink = '';
+    switch (plan) {
+      case PlanLevel.Basic:
+        trackEvent(`Upgrade button clicked Basic plan}`);
+        paymentLink =
+          process.env.NEXT_PUBLIC_ENV === 'production'
+            ? 'https://buy.stripe.com/fZe5ojemudgVak014t'
+            : 'https://buy.stripe.com/test_00g29DgLGbrc60E3cl';
+        break;
+      case PlanLevel.Pro:
+        trackEvent(`Upgrade button clicked Pro plan}`);
+        paymentLink =
+          process.env.NEXT_PUBLIC_ENV === 'production'
+            ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
+            : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
+        break;
+      default:
+        break;
+    }
+    if (!paymentLink) return;
+
     const userEmail = user?.email;
     const userId = user?.id;
-
-    trackEvent('Upgrade button clicked');
 
     if (!user) {
       toast.error('Please sign-up before upgrading to pro plan');
@@ -61,14 +79,14 @@ export default function Settings_Account() {
 
       <div className="mx-auto max-w-2xl">
         <div className="rounded-2xl flex flex-col">
-          {!isPaidUser && (
+          {subscriptionPlan.planLevel <= PlanLevel.Basic && (
             <span className="text-sm mb-2">
               {t(
                 'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime!',
               )}
             </span>
           )}
-          {isPaidUser && user?.isInReferralTrial && (
+          {subscriptionPlan.isPaidUser() && user?.isInReferralTrial && (
             <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
               <IconCircleCheck className="text-green-500" size={19} />
               <p className="flex items-center">
@@ -77,38 +95,40 @@ export default function Settings_Account() {
             </div>
           )}
           <div className="flex flex-col md:flex-row justify-center gap-4 mb-3">
-            <div className="flex flex-col  border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
-              <span className="text-2xl font-bold">Free</span>
-              <div className="text-xs leading-5">
-                {PlanDetail.free.features.map((feature, index) => (
-                  <FeatureItem key={index} featureName={t(feature)} />
-                ))}
-              </div>
+            <div
+              className={cn(
+                'flex flex-col border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2',
+                {
+                  'border-4': subscriptionPlan.planLevel === PlanLevel.Free,
+                },
+              )}
+            >
+              <FreePlanContent
+                isSelectedPlan={subscriptionPlan.planLevel === PlanLevel.Free}
+              />
             </div>
-            <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
-              {user?.plan === 'ultra' ? (
-                <UltraPlanContent />
-              ) : (
-                <ProPlanContent />
+
+            <div
+              className={cn(
+                'flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2',
+                {
+                  'border-4': subscriptionPlan.planLevel === PlanLevel.Basic,
+                },
+              )}
+            >
+              <BasicPlanContent
+                isSelectedPlan={subscriptionPlan.planLevel === PlanLevel.Basic}
+              />
+
+              {(!user || subscriptionPlan.planLevel < PlanLevel.Basic) && (
+                <UpgradeButton
+                  upgradeLinkOnClick={() => {
+                    upgradeLinkOnClick(PlanLevel.Basic);
+                  }}
+                />
               )}
 
-              {(!user || !isPaidUser) && (
-                <div className="flex flex-col">
-                  <a
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => upgradeLinkOnClick()}
-                    className="px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
-                  >
-                    {t('Upgrade')}
-                  </a>
-                  <p className="text-xs text-neutral-400 mt-2">
-                    {t('No Strings Attached - Cancel Anytime!')}
-                  </p>
-                </div>
-              )}
-
-              {user?.plan === 'pro' && user.proPlanExpirationDate && (
+              {user?.plan === 'basic' && user.proPlanExpirationDate && (
                 <div className="text-left text-neutral-500 p-2 text-xs">
                   {`${t('Expires on')}: 
                             ${dayjs(user.proPlanExpirationDate).format(
@@ -117,10 +137,61 @@ export default function Settings_Account() {
                 </div>
               )}
             </div>
+            <div
+              className={cn(
+                'flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2',
+                {
+                  'border-4':
+                    subscriptionPlan.planLevel === PlanLevel.Pro ||
+                    subscriptionPlan.planLevel === PlanLevel.Ultra,
+                },
+              )}
+            >
+              {subscriptionPlan.planLevel === PlanLevel.Ultra ? (
+                <UltraPlanContent
+                  isSelectedPlan={
+                    subscriptionPlan.planLevel === PlanLevel.Ultra
+                  }
+                />
+              ) : (
+                <ProPlanContent
+                  isSelectedPlan={subscriptionPlan.planLevel === PlanLevel.Pro}
+                />
+              )}
+
+              {(!user || subscriptionPlan.planLevel < PlanLevel.Basic) && (
+                <UpgradeButton
+                  upgradeLinkOnClick={() => {
+                    upgradeLinkOnClick(PlanLevel.Pro);
+                  }}
+                />
+              )}
+              {user && subscriptionPlan.planLevel === PlanLevel.Basic && (
+                <UpgradeButton
+                  upgradeLinkOnClick={() => {
+                    alert(
+                      t(
+                        `Please contact Jack at jack@exploratorlabs.com to upgrade to the Pro plan`,
+                      ),
+                    );
+                  }}
+                />
+              )}
+
+              {(user?.plan === 'pro' || user?.plan === 'ultra') &&
+                user.proPlanExpirationDate && (
+                  <div className="text-left text-neutral-500 p-2 text-xs">
+                    {`${t('Expires on')}: 
+                            ${dayjs(user.proPlanExpirationDate).format(
+                              'll',
+                            )}`}{' '}
+                  </div>
+                )}
+            </div>
           </div>
           {displayReferralCodeEnterer && <ReferralCodeEnter />}
           <div>
-            {isPaidUser && !user?.isInReferralTrial && (
+            {subscriptionPlan.isPaidUser() && !user?.isInReferralTrial && (
               <p className="text-xs text-neutral-400">
                 {t(
                   'Thank you for supporting us! If you want to cancel your subscription, please visit ',
@@ -159,7 +230,7 @@ export default function Settings_Account() {
         <div className="flex justify-end mt-4">
           {user && (
             <div className="flex flex-row items-center">
-              {!isPaidUser && (
+              {!subscriptionPlan.isPaidUser() && (
                 <span
                   className="pr-2 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer text-xs"
                   onClick={() =>
@@ -191,14 +262,56 @@ export default function Settings_Account() {
   );
 }
 
-const ProPlanContent = () => {
+const FreePlanContent = ({ isSelectedPlan }: PlanContent) => {
   const { t } = useTranslation('model');
   return (
     <>
-      <span className="text-2xl font-bold">Pro</span>
-      <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
+      <span className="text-2xl flex gap-2 items-center font-bold">
+        Free
+        {isSelectedPlan && <IconCheckbox />}
+      </span>
+      <div className="text-xs leading-5">
+        {PlanDetail.free.features.map((feature, index) => (
+          <FeatureItem key={index} featureName={t(feature)} />
+        ))}
+      </div>
+    </>
+  );
+};
+const BasicPlanContent = ({ isSelectedPlan }: PlanContent) => {
+  const { t } = useTranslation('model');
+
+  return (
+    <>
+      <span className="text-2xl flex gap-2 items-center font-bold">
+        Basic
+        {isSelectedPlan && <IconCheckbox />}
+      </span>
+      <span className="text-sm mb-2">{t('USD$4.99 / month')}</span>
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
+        <FeatureItem featureName={t('Priority response time')} />
+        {PlanDetail.basic.features.map((feature, index) => (
+          <FeatureItem key={index} featureName={t(feature)} />
+        ))}
+      </div>
+    </>
+  );
+};
+
+const ProPlanContent = ({ isSelectedPlan }: PlanContent) => {
+  const { t } = useTranslation('model');
+
+  return (
+    <>
+      <span className="text-2xl flex gap-2 items-center font-bold">
+        Pro
+        {isSelectedPlan && <IconCheckbox />}
+      </span>
+
+      <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
+      <div className="text-xs leading-5">
+        <FeatureItem featureName={t('Everything in Basic plan')} />
         <FeatureItem featureName={t('Priority response time')} />
         {PlanDetail.pro.features.map((feature, index) => (
           <FeatureItem key={index} featureName={t(feature)} />
@@ -208,16 +321,21 @@ const ProPlanContent = () => {
   );
 };
 
-const UltraPlanContent = () => {
+const UltraPlanContent = ({ isSelectedPlan }: PlanContent) => {
   const { t } = useTranslation('model');
   return (
     <>
-      <span 
-          className="text-2xl font-bold bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] font-medium rounded bg-gray-700 text-indigo-400"
-          style={{color: "transparent", WebkitBackgroundClip: 'text', WebkitTextStrokeWidth: '1px', WebkitTextStrokeColor: 'transparent'}}
-        >
-          Ultra
-        </span>
+      <span
+        className="text-2xl font-bold bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] font-medium rounded bg-gray-700 text-indigo-400"
+        style={{
+          color: 'transparent',
+          WebkitBackgroundClip: 'text',
+          WebkitTextStrokeWidth: '1px',
+          WebkitTextStrokeColor: 'transparent',
+        }}
+      >
+        Ultra
+      </span>
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
         <FeatureItem featureName={t('Priority response time')} />
@@ -228,3 +346,7 @@ const UltraPlanContent = () => {
     </>
   );
 };
+
+interface PlanContent {
+  isSelectedPlan: boolean;
+}

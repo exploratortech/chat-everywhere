@@ -1,5 +1,7 @@
 import React, { useContext } from 'react';
 
+import getPlanLevel, { PlanLevel } from '@/utils/app/planLevel';
+
 import HomeContext from '@/pages/api/home/home.context';
 
 export default function UserAccountBadge() {
@@ -7,18 +9,31 @@ export default function UserAccountBadge() {
     state: { user },
   } = useContext(HomeContext);
   if (user) {
-    if (user.plan === 'ultra') {
+    const userPlanLevel = getPlanLevel(user.plan);
+    if (userPlanLevel === PlanLevel.Ultra) {
       return (
-        <span 
+        <span
           className="bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] text-xs font-medium py-0.5 rounded bg-gray-700 text-indigo-400 mr-0"
-          style={{color: "transparent", WebkitBackgroundClip: 'text', WebkitTextStrokeWidth: '1px', WebkitTextStrokeColor: 'transparent' }}
+          style={{
+            color: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextStrokeWidth: '1px',
+            WebkitTextStrokeColor: 'transparent',
+          }}
         >
           Ultra
         </span>
       );
     }
+    if (userPlanLevel === PlanLevel.Basic) {
+      return (
+        <span className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+          Basic
+        </span>
+      );
+    }
 
-    if (user.plan === 'pro') {
+    if (userPlanLevel === PlanLevel.Pro) {
       return (
         <span className="bg-indigo-100 text-indigo-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-indigo-400 border border-indigo-400">
           Pro
@@ -26,7 +41,7 @@ export default function UserAccountBadge() {
       );
     }
 
-    if (user.plan === 'edu') {
+    if (userPlanLevel === PlanLevel.Edu) {
       return (
         <span className="text-xs font-medium mr-2 px-2.5 py-0.5 rounded bg-gray-700 text-green-400 border border-green-400">
           Edu

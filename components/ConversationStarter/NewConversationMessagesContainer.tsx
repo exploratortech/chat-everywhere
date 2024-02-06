@@ -4,6 +4,7 @@ import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
 
 import { trackEvent } from '@/utils/app/eventTracking';
+import { PlanLevel } from '@/utils/app/planLevel';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -22,7 +23,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   const { t } = useTranslation('chat');
   const { t: modelTranslate } = useTranslation('model');
   const {
-    state: { user, isUltraUser },
+    state: { user, subscriptionPlan },
     dispatch,
   } = useContext(HomeContext);
 
@@ -77,12 +78,12 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         target="_blank"
         rel="noopener noreferrer"
         className={`font-semibold font-serif underline select-none ${
-          isUltraUser
+          subscriptionPlan.planLevel === PlanLevel.Ultra
             ? 'bg-gradient-to-r text-white from-[#fd68a6] to-[#6c62f7] rounded bg-gray-700 mr-0 pr-[3px] pb-[3px] dark:from-[#fd68a6] dark:to-[#6c62f7] dark:text-[#343541]'
             : ''
         }`}
         style={
-          isUltraUser
+          subscriptionPlan.planLevel === PlanLevel.Ultra
             ? {
                 WebkitBackgroundClip: 'text',
                 WebkitTextStrokeWidth: '3px',
@@ -92,7 +93,8 @@ export const NewConversationMessagesContainer: FC<Props> = ({
             : {}
         }
       >
-        Chat Everywhere {isUltraUser ? 'Ultra' : ''}
+        Chat Everywhere{' '}
+        {subscriptionPlan.planLevel === PlanLevel.Ultra ? 'Ultra' : ''}
       </a>
 
       {/* Ask for support banner */}

@@ -2,15 +2,16 @@ import { useSession } from '@supabase/auth-helpers-react';
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { getHomeUrl } from '@/utils/app/api';
 
 import Image from 'next/image';
+
+import { getHomeUrl } from '@/utils/app/api';
 
 import HomeContext from '@/pages/api/home/home.context';
 
 export const LineConnectionButton = () => {
   const {
-    state: { user, isPaidUser, isConnectedWithLine },
+    state: { user, subscriptionPlan, isConnectedWithLine },
     dispatch,
   } = useContext(HomeContext);
   const { t } = useTranslation('model');
@@ -73,10 +74,10 @@ export const LineConnectionButton = () => {
       ) : (
         <button
           className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent ${
-            !user || (!isPaidUser && '!text-gray-400')
+            !user || (!subscriptionPlan.canUseLineConnect() && '!text-gray-400')
           }`}
           onClick={lineConnectOnClick}
-          disabled={!user || !isPaidUser}
+          disabled={!user || !subscriptionPlan.canUseLineConnect()}
         >
           {t('Connect with LINE')}
         </button>

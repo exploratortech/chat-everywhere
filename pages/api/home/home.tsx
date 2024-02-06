@@ -12,6 +12,8 @@ import { event } from 'nextjs-google-analytics';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
+import UserPlan from '@/utils/app/SubscriptionPlan';
+import SubscriptionPlan from '@/utils/app/SubscriptionPlan';
 import { fetchShareableConversation } from '@/utils/app/api';
 import {
   cleanConversationHistory,
@@ -102,7 +104,7 @@ const Home = () => {
       showChatbar,
       showPromptbar,
       user,
-      isPaidUser,
+      subscriptionPlan,
       conversationLastSyncAt,
       forceSyncConversation,
       replaceRemoteData,
@@ -332,7 +334,7 @@ const Home = () => {
   useEffect(() => {
     if (messageIsStreaming) return;
     if (!user) return;
-    if (!isPaidUser) return;
+    if (!subscriptionPlan.canUseCloudSync()) return;
 
     const conversationLastUpdatedAt = localStorage.getItem(
       'conversationLastUpdatedAt',
@@ -408,7 +410,7 @@ const Home = () => {
     user,
     supabase,
     dispatch,
-    isPaidUser,
+    subscriptionPlan,
     forceSyncConversation,
     conversationLastSyncAt,
     messageIsStreaming,
@@ -428,10 +430,18 @@ const Home = () => {
       })
         .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
-          dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
-          dispatch({ field: 'isUltraUser', value: userProfile.plan === 'ultra' });
-          dispatch({ field: 'hasMqttConnection', value: userProfile.hasMqttConnection });
-          dispatch({ field: 'isConnectedWithLine', value: userProfile.isConnectedWithLine });
+          dispatch({
+            field: 'subscriptionPlan',
+            value: new SubscriptionPlan(userProfile.plan),
+          });
+          dispatch({
+            field: 'hasMqttConnection',
+            value: userProfile.hasMqttConnection,
+          });
+          dispatch({
+            field: 'isConnectedWithLine',
+            value: userProfile.isConnectedWithLine,
+          });
           dispatch({
             field: 'user',
             value: {
@@ -445,7 +455,7 @@ const Home = () => {
               proPlanExpirationDate: userProfile.proPlanExpirationDate,
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
-              isInReferralTrial: userProfile.isInReferralTrial
+              isInReferralTrial: userProfile.isInReferralTrial,
             },
           });
         })
@@ -479,8 +489,8 @@ const Home = () => {
   useEffect(() => {
     if (!user) return;
     updateUserInfo(user);
-    fetchAndUpdateCreditUsage(user.id, isPaidUser);
-  }, [user, isPaidUser, conversations]);
+    fetchAndUpdateCreditUsage(user.id, subscriptionPlan.isPaidUser());
+  }, [user, subscriptionPlan, conversations]);
 
   const handleUserLogout = async () => {
     await supabase.auth.signOut();

@@ -11,7 +11,7 @@ const ModeSelector = () => {
   const { t } = useTranslation('model');
 
   const {
-    state: { currentMessage, isPaidUser, hasMqttConnection },
+    state: { currentMessage, subscriptionPlan, hasMqttConnection },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -44,7 +44,10 @@ const ModeSelector = () => {
           placeholder={t('Select a lang') || ''}
           value={currentSelectedPluginId}
           onChange={(e) => {
-            if (e.target.value === PluginID.LANGCHAIN_CHAT && !isPaidUser) {
+            if (
+              e.target.value === PluginID.LANGCHAIN_CHAT &&
+              !subscriptionPlan.canUseOnlineMode()
+            ) {
               alert(
                 t(
                   'Sorry online mode is only for Pro user, please sign up and purchase Pro plan to use this feature.',
@@ -69,29 +72,31 @@ const ModeSelector = () => {
           >
             {t('Online mode')}
           </option>
-          {isPaidUser && (
-            <>
-              <option
-                value={PluginID.GPT4}
-                className="dark:bg-[#343541] dark:text-white text-yellow-600"
-              >
-                {t('GPT-4')}
-              </option>
-              <option
-                value={PluginID.IMAGE_GEN}
-                className="dark:bg-[#343541] dark:text-white text-yellow-600"
-              >
-                {t('AI Image')}
-              </option>
-              {hasMqttConnection && (
-                <option
-                  value={PluginID.mqtt}
-                  className="dark:bg-[#343541] dark:text-white text-yellow-600"
-                >
-                  {t('MQTT')}
-                </option>
-              )}
-            </>
+          {subscriptionPlan.canUseGPT4_Model() && (
+            <option
+              value={PluginID.GPT4}
+              className="dark:bg-[#343541] dark:text-white text-yellow-600"
+            >
+              {t('GPT-4')}
+            </option>
+          )}
+          {subscriptionPlan.canUseAiImage() && (
+            <option
+              value={PluginID.IMAGE_GEN}
+              disabled
+              className="dark:bg-[#343541] dark:text-white text-yellow-600"
+            >
+              {t('AI Image')}
+            </option>
+          )}
+
+          {subscriptionPlan.canUseMQTT() && hasMqttConnection && (
+            <option
+              value={PluginID.mqtt}
+              className="dark:bg-[#343541] dark:text-white text-yellow-600"
+            >
+              {t('MQTT')}
+            </option>
           )}
         </select>
       </div>

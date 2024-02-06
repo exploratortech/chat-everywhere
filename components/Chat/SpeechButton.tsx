@@ -24,7 +24,14 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   const { logGeneralEvent } = useLogger();
 
   const {
-    state: { currentSpeechId, isLoading, isPlaying, user, messageIsStreaming, isPaidUser },
+    state: {
+      currentSpeechId,
+      isLoading,
+      isPlaying,
+      user,
+      messageIsStreaming,
+      subscriptionPlan,
+    },
     playMessage,
     stopPlaying,
   } = useContext(HomeContext);
@@ -50,7 +57,7 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   const getPlayerIcon = () => {
     if (isComponentCurrentlyBeingPlayed) {
       if (isLoading) {
-        return <IconLoader fill="none" size={18} className='animate-spin' />;
+        return <IconLoader fill="none" size={18} className="animate-spin" />;
       } else if (isPlaying) {
         return (
           <IconPlayerStop onClick={playStopOnClick} fill="none" size={18} />
@@ -64,7 +71,7 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   };
 
   // Only enable for paying users
-  if (!isPaidUser || messageIsStreaming) return <></>;
+  if (!subscriptionPlan.canUseSpeechBtn() || messageIsStreaming) return <></>;
 
   return (
     <div className={`cursor-pointer text-gray-500 hover:text-gray-300`}>

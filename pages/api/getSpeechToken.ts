@@ -1,3 +1,4 @@
+import getPlanLevel, { PlanLevel } from '@/utils/app/planLevel';
 import {
   getAdminSupabaseClient,
   getUserProfile,
@@ -19,6 +20,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   const user = await getUserProfile(data.user.id);
   if (!user) return unauthorizedResponse;
+  const userPlanLevel = getPlanLevel(user.plan);
+  if (userPlanLevel < PlanLevel.Pro) return unauthorizedResponse;
 
   const res = new Response();
   res.headers.set('Content-Type', 'application/json');

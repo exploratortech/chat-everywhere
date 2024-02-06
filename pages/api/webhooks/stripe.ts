@@ -3,7 +3,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { sendReportForStripeWebhookError } from '@/utils/server/resend';
 import handleCheckoutSessionCompleted from '@/utils/server/stripe/handleCheckoutSessionCompleted';
 import handleCustomerSubscriptionDeleted from '@/utils/server/stripe/handleCustomerSubscriptionDeleted';
-import handleCustomerSubscriptionUpdated from '@/utils/server/stripe/handleCustomerSubscriptionUpdated';
 
 import { UserProfile } from './../../../types/user';
 
@@ -43,15 +42,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     switch (event.type) {
       case 'checkout.session.completed':
-        // One time payment / Initial Monthly Pro Plan Subscription
+        // One time payment / Initial Monthly Pro / Basic Plan Subscription
         await handleCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
-        );
-        break;
-      case 'customer.subscription.updated':
-        // Monthly Pro Plan Subscription recurring payment
-        await handleCustomerSubscriptionUpdated(
-          event.data.object as Stripe.Subscription,
         );
         break;
       case 'customer.subscription.deleted':

@@ -12,7 +12,7 @@ const CloudSyncComponent = () => {
   const {
     state: {
       user,
-      isPaidUser,
+      subscriptionPlan,
       syncingConversation,
       syncSuccess,
       conversationLastSyncAt,
@@ -20,7 +20,7 @@ const CloudSyncComponent = () => {
     dispatch: dispatch,
   } = useContext(HomeContext);
 
-  const isCloudSyncEnabled = user && isPaidUser;
+  const isCloudSyncEnabled = user && subscriptionPlan.canUseCloudSync();
 
   const CloudSyncStatusComponent = () => {
     if (syncingConversation) {

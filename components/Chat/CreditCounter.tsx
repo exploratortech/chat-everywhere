@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import { PlanLevel } from '@/utils/app/planLevel';
+
 import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/pages/api/home/home.context';
@@ -14,18 +16,19 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
   const { t } = useTranslation('chat');
 
   const {
-    state: { creditUsage, isUltraUser },
+    state: { creditUsage, subscriptionPlan },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   if (
     creditUsage === null ||
     (pluginId !== PluginID.GPT4 && pluginId !== PluginID.IMAGE_GEN) ||
-    isUltraUser
+    subscriptionPlan.planLevel === PlanLevel.Ultra
   )
     return <></>;
 
-  const remainingCredits = pluginId && creditUsage[pluginId].remainingCredits || 0;
+  const remainingCredits =
+    (pluginId && creditUsage[pluginId].remainingCredits) || 0;
 
   return (
     <div

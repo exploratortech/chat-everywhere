@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { IMAGE_GEN_MAX_TIMEOUT } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
+import getPlanLevel, { PlanLevel } from '@/utils/app/planLevel';
 import {
   ProgressHandler,
   makeCreateImageSelectorV2,
@@ -35,9 +36,11 @@ const handler = async (req: Request): Promise<Response> => {
   if (!data || error) return unauthorizedResponse;
 
   const user = await getUserProfile(data.user.id);
-  if (!user || user.plan === 'free') return unauthorizedResponse;
+  if (!user) return unauthorizedResponse;
+  const userPlanLevel = getPlanLevel(user.plan);
+  if (userPlanLevel < PlanLevel.Pro) return unauthorizedResponse;
 
-  const isUserInUltraPlan = user.plan === 'ultra';
+  const isUserInUltraPlan = userPlanLevel === PlanLevel.Ultra;
 
   const requestBody = await req.json();
 

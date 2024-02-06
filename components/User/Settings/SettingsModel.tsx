@@ -9,8 +9,8 @@ import HomeContext from '@/pages/api/home/home.context';
 import Settings_Account from './Settings_Account';
 import Settings_App from './Settings_App';
 import Settings_Data from './Settings_Data';
-import Sidebar from './Sidebar';
 import Settings_MQTT from './Settings_MQTT';
+import Sidebar from './Sidebar';
 
 type Props = {
   onClose: () => void;
@@ -35,7 +35,7 @@ export default function SettingsModel({ onClose }: Props) {
     state: { showing },
   } = settingsContext;
   const {
-    state: { user, isPaidUser },
+    state: { user, subscriptionPlan },
   } = useContext(HomeContext);
 
   return (
@@ -70,7 +70,7 @@ export default function SettingsModel({ onClose }: Props) {
                 <Dialog.Panel className="w-full max-w-[70vw] xl:max-w-3xl tablet:max-w-[90vw] h-[calc(80vh-100px)] transform overflow-hidden rounded-2xl text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
                   <Sidebar
                     className="bg-neutral-800 flex-shrink-0 flex-grow-0"
-                    disableFooterItems={!user || !isPaidUser}
+                    disableFooterItems={!user || !subscriptionPlan.isPaidUser()}
                   />
                   <div className="p-6 bg-neutral-900 flex-grow relative overflow-y-auto">
                     {showing === 'account' && <Settings_Account />}

@@ -8,7 +8,7 @@ export interface User extends UserProfile {
   token: string;
 }
 
-export type SubscriptionPlan = 'free' | 'pro' | 'ultra' | 'edu';
+export type SubscriptionPlan = 'free' | 'pro' | 'ultra' | 'edu' | 'basic';
 
 export interface UserConversation {
   id: string;

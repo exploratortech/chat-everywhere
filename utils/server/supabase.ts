@@ -4,6 +4,7 @@ import { PluginID } from '@/types/plugin';
 import { RawRefereeProfile } from '@/types/referral';
 import { UserProfile, UserProfileQueryProps } from '@/types/user';
 
+import getPlanLevel, { PlanLevel } from '../app/planLevel';
 import {
   CodeGenerationPayloadType,
   generateReferralCodeAndExpirationDate,
@@ -157,7 +158,7 @@ export const hasUserRunOutOfCredits = async (
   return userCredits.balance <= 0;
 };
 
-export const isPaidUserByAuthToken = async (
+export const isProUserByAuthToken = async (
   userToken: string | null,
 ): Promise<boolean> => {
   try {
@@ -170,7 +171,8 @@ export const isPaidUserByAuthToken = async (
     const user = await getUserProfile(data.user.id);
     if (!user) return false;
 
-    if (user.plan === 'free') return false;
+    const userPlanLevel = getPlanLevel(user.plan);
+    if (userPlanLevel < PlanLevel.Pro) return false;
 
     return true;
   } catch (e) {
@@ -513,8 +515,8 @@ export const userProfileQuery = async ({
   } as UserProfile;
 };
 
-export const updateProAccountsPlan = async (): Promise<void> => {
-  // UPDATE ALL USER WHOSE HAS PRO PLAN
+export const downgradeExpiredPaidAccountsPlan = async (): Promise<void> => {
+  // UPDATE ALL USER WHOSE HAS PAID PLAN (BASIC / PRO / ULTRA)
   // AND THEIR EXPIRED DATE IS LESS THAN (TODAY - 1 DAY) TO FREE PLAN
   // GIVE ONE DAY PAYMENT GRACE PERIOD
 
@@ -524,7 +526,7 @@ export const updateProAccountsPlan = async (): Promise<void> => {
   const { error: updateError } = await supabase
     .from('profiles')
     .update({ plan: 'free' })
-    .eq('plan', 'pro')
+    .in('plan', ['pro', 'basic', 'ultra'])
     .lte('pro_plan_expiration_date', nowMinusOneDay);
 
   if (updateError) {
@@ -546,12 +548,12 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
   if (fetchError) {
     throw fetchError;
   }
-  
+
   const userIds = users?.map((user) => user.id);
   if (!userIds) {
     return [];
   }
-  
+
   const trialUserIds: string[] = [];
 
   for (const userId of userIds) {
@@ -565,7 +567,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
     if (referralError) {
       throw referralError;
     }
-    
+
     if (referralRows?.length > 0) {
       trialUserIds.push(userId);
     }

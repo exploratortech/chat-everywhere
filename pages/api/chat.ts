@@ -9,7 +9,7 @@ import {
   getMessagesTokenCount,
   shortenMessagesBaseOnTokenLimit,
 } from '@/utils/server/api';
-import { isPaidUserByAuthToken } from '@/utils/server/supabase';
+import { isProUserByAuthToken } from '@/utils/server/supabase';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
 import { ChatBody } from '@/types/chat';
@@ -56,7 +56,7 @@ const handler = async (req: Request): Promise<Response> => {
     const requireToUseLargerContextWindowModel =
       (await getMessagesTokenCount(messages)) + 1000 > defaultTokenLimit; // Add buffer token to take system prompt into account
 
-    const isPaidUser = await isPaidUserByAuthToken(
+    const isPaidUser = await isProUserByAuthToken(
       req.headers.get('user-token'),
     );
     const useLargerContextWindowModel =

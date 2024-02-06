@@ -1,3 +1,5 @@
+import { SubscriptionPlan } from '@/types/user';
+
 import { getAdminSupabaseClient } from '../supabase';
 
 // Skip any account operation on Edu accounts
@@ -17,14 +19,14 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
     const { error: updatedUserError } = await supabase
       .from('profiles')
       .update({
-        plan: 'pro',
+        plan: props.plan,
         stripe_subscription_id: props.stripeSubscriptionId,
         pro_plan_expiration_date: props.proPlanExpirationDate || null,
       })
       .eq('id', props.userId);
 
     if (updatedUserError) throw updatedUserError;
-    console.log(`User ${props.userId} updated to pro`);
+    console.log(`User ${props.userId} updated to ${props.plan}`);
   } else if (isUpgradeUserAccountByEmailProps(props)) {
     // Update user account by Email
     const { data: userProfile } = await supabase
@@ -38,13 +40,13 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
     const { error: updatedUserError } = await supabase
       .from('profiles')
       .update({
-        plan: 'pro',
+        plan: props.plan,
         stripe_subscription_id: props.stripeSubscriptionId,
         pro_plan_expiration_date: props.proPlanExpirationDate || null,
       })
       .eq('email', props.email);
     if (updatedUserError) throw updatedUserError;
-    console.log(`User ${props.email} updated to pro`);
+    console.log(`User ${props.email} updated to ${props.plan}`);
   } else if (isDowngradeUserAccountProps(props)) {
     // Downgrade user account
 
@@ -86,7 +88,6 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
     console.log(`User subscription ${props.email} downgrade back to free`);
   } else if (isExtendProPlanProps(props)) {
     // Extend pro plan
-
     const { data: userProfile } = await supabase
       .from('profiles')
       .select('plan')
@@ -112,6 +113,8 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
 
 interface UpgradeUserAccountProps {
   upgrade: true;
+  extending?: false;
+  plan: SubscriptionPlan;
   userId: string;
   stripeSubscriptionId?: string;
   proPlanExpirationDate?: Date;
@@ -119,6 +122,8 @@ interface UpgradeUserAccountProps {
 
 interface UpgradeUserAccountByEmailProps {
   upgrade: true;
+  extending?: false;
+  plan: SubscriptionPlan;
   email: string;
   stripeSubscriptionId?: string;
   proPlanExpirationDate?: Date;
@@ -126,19 +131,25 @@ interface UpgradeUserAccountByEmailProps {
 
 interface DowngradeUserAccountProps {
   upgrade: false;
+  extending?: false;
+  plan?: SubscriptionPlan;
   stripeSubscriptionId: string;
   proPlanExpirationDate?: Date;
 }
 interface DowngradeUserAccountByEmailProps {
   upgrade: false;
+  extending?: false;
+  plan?: SubscriptionPlan;
   email: string;
   proPlanExpirationDate?: Date;
 }
 
 interface ExtendProPlanProps {
-  upgrade: true;
+  upgrade: false;
+  extending: true;
+  plan?: SubscriptionPlan;
   stripeSubscriptionId: string;
-  proPlanExpirationDate: Date | undefined;
+  proPlanExpirationDate: Date;
 }
 
 type UpdateUserAccountProps =
@@ -154,6 +165,7 @@ function isUpgradeUserAccountProps(
 ): props is UpgradeUserAccountProps {
   return (
     props.upgrade === true &&
+    'plan' in props &&
     'userId' in props &&
     typeof props.userId === 'string' &&
     (props.proPlanExpirationDate instanceof Date ||
@@ -166,6 +178,7 @@ function isUpgradeUserAccountByEmailProps(
 ): props is UpgradeUserAccountByEmailProps {
   return (
     props.upgrade === true &&
+    'plan' in props &&
     'email' in props &&
     typeof props.email === 'string' &&
     (props.proPlanExpirationDate instanceof Date ||
@@ -200,10 +213,11 @@ function isDowngradeUserAccountByEmailProps(
 function isExtendProPlanProps(
   props: UpdateUserAccountProps,
 ): props is ExtendProPlanProps {
-  return (
-    (props.upgrade === true &&
-      typeof props.stripeSubscriptionId === 'string' &&
-      props.proPlanExpirationDate instanceof Date) ||
-    props.proPlanExpirationDate === undefined
+  return !!(
+    props.upgrade === false &&
+    'extending' in props &&
+    props.extending &&
+    typeof props.stripeSubscriptionId === 'string' &&
+    props.proPlanExpirationDate instanceof Date
   );
 }
