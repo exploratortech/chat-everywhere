@@ -83,7 +83,12 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
           >
             <div className="text-sm font-bold text-black dark:text-neutral-200">
               {t('Name')}
-              {`viewportHeight: ${viewportHeight}`}
+              <div
+                className=""
+                onClick={() => {
+                  setViewportHeight(window.visualViewport?.height || 0);
+                }}
+              >{`viewportHeight: ${viewportHeight}`}</div>
             </div>
             <input
               ref={nameInputRef}
