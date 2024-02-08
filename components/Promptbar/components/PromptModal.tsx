@@ -15,15 +15,20 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
     window.visualViewport?.height || 0,
   );
   useEffect(() => {
+    const visualViewport = window.visualViewport;
+
+    if (!visualViewport) {
+      return;
+    }
     const handleResize = () => {
       console.log('resize', window.visualViewport?.height);
       setViewportHeight(window.visualViewport?.height || 0);
     };
 
-    window.addEventListener('resize', handleResize);
+    visualViewport.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      visualViewport.removeEventListener('resize', handleResize);
     };
   }, []); // Empty array ensures effect runs once on mount and cleans up on unmount
   const { t } = useTranslation('promptbar');
