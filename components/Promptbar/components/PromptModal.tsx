@@ -11,6 +11,12 @@ interface Props {
 }
 
 export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
+  const { t } = useTranslation('promptbar');
+  const [name, setName] = useState(prompt.name);
+  const [description, setDescription] = useState(prompt.description);
+  const [content, setContent] = useState(prompt.content);
+
+  const modalContainerRef = useRef<HTMLDivElement>(null);
   const [viewportHeight, setViewportHeight] = useState(
     window.visualViewport?.height || 0,
   );
@@ -21,8 +27,10 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
       return;
     }
     const handleResize = () => {
-      console.log('resize', window.visualViewport?.height);
       setViewportHeight(window.visualViewport?.height || 0);
+      if (modalContainerRef.current) {
+        modalContainerRef.current.style.height = `${visualViewport.height}px`;
+      }
     };
 
     visualViewport.addEventListener('resize', handleResize);
@@ -31,11 +39,6 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
       visualViewport.removeEventListener('resize', handleResize);
     };
   }, []); // Empty array ensures effect runs once on mount and cleans up on unmount
-  const { t } = useTranslation('promptbar');
-  const [name, setName] = useState(prompt.name);
-  const [description, setDescription] = useState(prompt.description);
-  const [content, setContent] = useState(prompt.content);
-
   const modalRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -75,7 +78,10 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
       onKeyDown={handleEnter}
     >
       <div className="fixed inset-0 z-10 overflow-hidden">
-        <div className="flex items-center justify-center min-h-[100dvh] px-4 pt-4 pb-20 mobile:p-0 text-center sm:block sm:p-0">
+        <div
+          ref={modalContainerRef}
+          className="flex items-center justify-center sm:min-h-[100dvh] px-4 pt-4 pb-20 mobile:p-0 text-center sm:block sm:p-0"
+        >
           <div
             className="hidden sm:inline-block sm:h-[100dvh] sm:align-middle"
             aria-hidden="true"
