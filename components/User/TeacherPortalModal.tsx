@@ -12,14 +12,13 @@ import { CodeGenerationPayloadType } from '@/utils/server/referralCode';
 import HomeContext from '@/pages/api/home/home.context';
 
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
-import ReferralProgramData from '../Referral/ReferralProgramData';
 import Spinner from '../Spinner/Spinner';
 
 type Props = {
   onClose: () => void;
 };
 
-const ReferralModel = memo(({ onClose }: Props) => {
+const TeacherPortalModal = memo(({ onClose }: Props) => {
   const { t } = useTranslation('model');
   const { t: sideBarT } = useTranslation('sidebar');
   const {
@@ -27,8 +26,13 @@ const ReferralModel = memo(({ onClose }: Props) => {
     dispatch,
   } = useContext(HomeContext);
 
-  const getReferralCode = async () => {
-    const response = await fetch('/api/referral/get-code', {
+  const [oneTimeCodeResponse, setOneTimeCodeResponse] = useState<{
+    code: string;
+    expiresAt: string;
+  } | null>(null);
+
+  const getOneTimeCode = async () => {
+    const response = await fetch('/api/teacher-portal/get-code', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -43,15 +47,11 @@ const ReferralModel = memo(({ onClose }: Props) => {
 
   useEffect(() => {
     // if user has no referral code, get one from server
-    if (user && !user?.referralCode) {
-      getReferralCode().then((res) => {
-        dispatch({
-          field: 'user',
-          value: {
-            ...user,
-            referralCode: res.code,
-            referralCodeExpirationDate: res.expiresAt,
-          },
+    if (user) {
+      getOneTimeCode().then((res) => {
+        setOneTimeCodeResponse({
+          code: res.code,
+          expiresAt: res.expiresAt,
         });
       });
     }
@@ -63,48 +63,6 @@ const ReferralModel = memo(({ onClose }: Props) => {
     navigator.clipboard.writeText(user?.referralCode || '');
     toast.success(t('Copied to clipboard'));
   };
-
-  const {
-    isLoading: isRegenerating,
-    isError,
-    error: queryError,
-    refetch: queryReferralCodeRefetch,
-  } = useQuery<{ code: string; expiresAt: string }, Error>(
-    'regenerateReferralCode',
-    async () => {
-      const response = await fetch('/api/referral/regenerate-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'user-id': user!.id,
-        },
-      });
-
-      const data = (await response.json()) as {
-        code: string;
-        expiresAt: string;
-      };
-      return data;
-    },
-    {
-      enabled: false,
-      retry: false,
-      onError: (error) => {
-        console.error(error);
-      },
-      onSuccess: (code) => {
-        dispatch({
-          field: 'user',
-          value: {
-            ...user,
-            referralCode: code.code,
-            referralCodeExpirationDate: code.expiresAt,
-          },
-        });
-        toast.success(t('A new referral code has been regenerated'));
-      },
-    },
-  );
 
   return (
     <Transition appear show={true} as={Fragment}>
@@ -135,7 +93,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
             >
               <Dialog.Panel className="w-full max-w-[100rem] tablet:max-w-[90vw] h-fit transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
                 <div className="mb-3 flex flex-row justify-between items-center">
-                  <h1 className="text-xl">{sideBarT('Referral Program')}</h1>
+                  <h1 className="text-xl">{sideBarT('Teacher Portal')}</h1>
                   <button className="w-max min-h-[34px]" onClick={onClose}>
                     <IconX></IconX>
                   </button>
@@ -153,22 +111,22 @@ const ReferralModel = memo(({ onClose }: Props) => {
                         onClick={handleCopy}
                         className="cursor-pointer flex-shrink-0"
                       >
-                        {`${t('Your referral code is')}: `}
+                        {`${t('Your one-time code is')}: `}
                         <span className="inline  bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1">
-                          {user?.referralCode}
+                          {oneTimeCodeResponse?.code}
                         </span>
                       </div>
-                      {user?.referralCodeExpirationDate && (
+                      {oneTimeCodeResponse?.expiresAt && (
                         <CodeTimeLeft
-                          endOfDay={user?.referralCodeExpirationDate}
+                          endOfDay={oneTimeCodeResponse.expiresAt}
                         />
                       )}
                     </div>
-                    <button
+                    {/* <button
                       className="mx-auto my-3 flex w-fit items-center gap-3 rounded border text-sm py-2 px-4 hover:opacity-50 border-neutral-600  text-white md:mb-0 md:mt-2"
                       onClick={() => {
                         trackEvent('Regenerate referral code clicked');
-                        queryReferralCodeRefetch();
+                        // queryReferralCodeRefetch();
                       }}
                       disabled={isRegenerating}
                     >
@@ -178,8 +136,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
                         <IconRefresh />
                       )}
                       <div>{t('Regenerate code')}</div>
-                    </button>
-                    <ReferralProgramData />
+                    </button> */}
                   </div>
                 )}
               </Dialog.Panel>
@@ -191,6 +148,6 @@ const ReferralModel = memo(({ onClose }: Props) => {
   );
 });
 
-ReferralModel.displayName = 'ReferralModel';
+TeacherPortalModal.displayName = 'TeacherPortalModal';
 
-export default ReferralModel;
+export default TeacherPortalModal;

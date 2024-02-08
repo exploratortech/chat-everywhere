@@ -135,10 +135,11 @@
   "Edit": "編輯",
   "Test": "測試",
   "You can send message to the topic specified (with retained flag on), Chat Everywhere will be able to access the latest message.": "設定MQTT裝置來發送訊息到你指定的Topic (請確認訊息中有retain的標籤)。",
-  
+
   "Speech configuration": "AI朗讀設定",
   "Speech Speed": "語速",
   "Slow": "慢",
   "Normal": "正常",
-  "Fast": "快"
+  "Fast": "快",
+  "Your one-time code is": "您的一次性密碼是"
 }

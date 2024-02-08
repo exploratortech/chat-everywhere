@@ -62,6 +62,7 @@ import { AuthModel } from '@/components/User/AuthModel';
 import ReferralModel from '@/components/User/ReferralModel';
 import SettingsModel from '@/components/User/Settings/SettingsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
+import TeacherPortalModal from '@/components/User/TeacherPortalModal';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
 
@@ -95,6 +96,7 @@ const Home = () => {
       showSettingsModel,
       showLoginSignUpModel,
       showReferralModel,
+      showTeacherPortalModel,
       showUsageModel,
       showSurveyModel,
       showNewsModel,
@@ -429,9 +431,18 @@ const Home = () => {
         .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
-          dispatch({ field: 'isUltraUser', value: userProfile.plan === 'ultra' });
-          dispatch({ field: 'hasMqttConnection', value: userProfile.hasMqttConnection });
-          dispatch({ field: 'isConnectedWithLine', value: userProfile.isConnectedWithLine });
+          dispatch({
+            field: 'isUltraUser',
+            value: userProfile.plan === 'ultra',
+          });
+          dispatch({
+            field: 'hasMqttConnection',
+            value: userProfile.hasMqttConnection,
+          });
+          dispatch({
+            field: 'isConnectedWithLine',
+            value: userProfile.isConnectedWithLine,
+          });
           dispatch({
             field: 'user',
             value: {
@@ -445,7 +456,7 @@ const Home = () => {
               proPlanExpirationDate: userProfile.proPlanExpirationDate,
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
-              isInReferralTrial: userProfile.isInReferralTrial
+              isInReferralTrial: userProfile.isInReferralTrial,
             },
           });
         })
@@ -733,6 +744,13 @@ const Home = () => {
                 <ReferralModel
                   onClose={() =>
                     dispatch({ field: 'showReferralModel', value: false })
+                  }
+                />
+              )}
+              {showTeacherPortalModel && (
+                <TeacherPortalModal
+                  onClose={() =>
+                    dispatch({ field: 'showTeacherPortalModel', value: false })
                   }
                 />
               )}

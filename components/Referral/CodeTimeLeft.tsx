@@ -31,11 +31,7 @@ const calculateTimeLeft = (endOfDayInput: string) => {
     .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
-export default function ReferralCodeTimeLeft({
-  endOfDay,
-}: {
-  endOfDay: string;
-}) {
+export default function CodeTimeLeft({ endOfDay }: { endOfDay: string }) {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(endOfDay));
   const { t } = useTranslation('model');
 

@@ -1,10 +1,10 @@
 import {
   IconBrandFacebook,
+  IconBrandGoogle,
   IconCurrencyDollar,
   IconLogin,
   IconNews,
   IconSettings,
-  IconBrandGoogle
 } from '@tabler/icons-react';
 import { useContext } from 'react';
 
@@ -29,9 +29,7 @@ export const ChatbarSettings = () => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const {
-    handleClearConversations,
-  } = useContext(ChatbarContext);
+  const { handleClearConversations } = useContext(ChatbarContext);
 
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
@@ -48,6 +46,15 @@ export const ChatbarSettings = () => {
     if (isEduUser) {
       homeDispatch({
         field: 'showReferralModel',
+        value: true,
+      });
+    }
+  };
+
+  const teacherPortalBtnOnClick = () => {
+    if (isEduUser) {
+      homeDispatch({
+        field: 'showTeacherPortalModel',
         value: true,
       });
     }
@@ -77,17 +84,26 @@ export const ChatbarSettings = () => {
           <SidebarButton
             text={t('Sign in')}
             icon={<IconLogin size={18} />}
-            suffixIcon={<IconBrandGoogle size={18} color='#DB4437' stroke={3}/>}
+            suffixIcon={
+              <IconBrandGoogle size={18} color="#DB4437" stroke={3} />
+            }
             onClick={signInOnClick}
           />
         )}
 
         {isEduUser && (
-          <SidebarButton
-            text={t('Referral Program')}
-            icon={<IconCurrencyDollar size={18} />}
-            onClick={() => referralBtnOnClick()}
-          />
+          <>
+            <SidebarButton
+              text={t('Teacher Portal')}
+              icon={<IconCurrencyDollar size={18} />}
+              onClick={() => teacherPortalBtnOnClick()}
+            />
+            <SidebarButton
+              text={t('Referral Program')}
+              icon={<IconCurrencyDollar size={18} />}
+              onClick={() => referralBtnOnClick()}
+            />
+          </>
         )}
         {isProUser && (
           <SidebarButton

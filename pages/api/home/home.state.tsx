@@ -1,10 +1,10 @@
 import { Conversation, Message } from '@/types/chat';
+import { DragData } from '@/types/drag';
 import { ErrorMessage } from '@/types/error';
 import { FolderInterface } from '@/types/folder';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 import { CreditUsage, User } from '@/types/user';
-import { DragData } from '@/types/drag';
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -41,6 +41,7 @@ export interface HomeInitialState {
   showSettingsModel: boolean;
   showLoginSignUpModel: boolean;
   showReferralModel: boolean;
+  showTeacherPortalModel: boolean;
   showUsageModel: boolean;
   showSurveyModel: boolean;
   showNewsModel: boolean;
@@ -102,6 +103,7 @@ export const initialState: HomeInitialState = {
   showSettingsModel: false,
   showLoginSignUpModel: false,
   showReferralModel: false,
+  showTeacherPortalModel: false,
   showUsageModel: false,
   showSurveyModel: false,
   showNewsModel: false,
