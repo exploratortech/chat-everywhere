@@ -6,6 +6,7 @@ import { UserProfile, UserProfileQueryProps } from '@/types/user';
 
 import {
   CodeGenerationPayloadType,
+  generateOneCodeAndExpirationDate,
   generateReferralCodeAndExpirationDate,
 } from './referralCode';
 
@@ -240,6 +241,70 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
   }
 };
 
+export const getTeacherOneTimeCode = async (
+  userId: string,
+): Promise<CodeGenerationPayloadType> => {
+  try {
+    const supabase = getAdminSupabaseClient();
+    const { data: record, error } = await supabase
+      .from('teacher_one_time_codes')
+      .select('code, expired_at')
+      .eq('teacher_profile_id', userId)
+      .eq('is_valid', true);
+
+    if (!record || record.length === 0) {
+      let generatedCode = '';
+      let codeExists = true;
+      while (codeExists) {
+        const { code: newGeneratedCode, expiresAt: expirationDate } =
+          generateOneCodeAndExpirationDate();
+
+        generatedCode = newGeneratedCode;
+        const { data: existingCodes, error: existingCodesError } = await supabase
+          .from('teacher_one_time_codes')
+          .select('code')
+          .eq('code', generatedCode)
+          .eq('is_valid', true);
+
+        if (existingCodesError) {
+          console.log('existingCodesError', existingCodesError);
+          throw existingCodesError;
+        }
+
+        codeExists = existingCodes.length > 0;
+        if (!codeExists) {
+          const { data, error } = await supabase
+            .from('teacher_one_time_codes')
+            .insert({
+              code: generatedCode,
+              expired_at: expirationDate,
+              teacher_profile_id: userId,
+              is_valid: true,
+            })
+            .single();
+
+          if (error) {
+            throw error;
+          }
+
+          return {
+            code: generatedCode,
+            expiresAt: expirationDate,
+          };
+        }
+      }
+    }
+
+    const existed_record = record?.pop();
+    return {
+      code: existed_record?.code,
+      expiresAt: existed_record?.expired_at,
+    };
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+};
 export const getReferralCode = async (
   userId: string,
 ): Promise<CodeGenerationPayloadType> => {
