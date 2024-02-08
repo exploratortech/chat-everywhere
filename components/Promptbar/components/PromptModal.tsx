@@ -20,6 +20,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
   const [viewportHeight, setViewportHeight] = useState(
     window.visualViewport?.height || 0,
   );
+
   useEffect(() => {
     const visualViewport = window.visualViewport;
 
@@ -74,14 +75,12 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
 
   return (
     <div
+      ref={modalContainerRef}
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
       onKeyDown={handleEnter}
     >
       <div className="fixed inset-0 z-10 overflow-hidden">
-        <div
-          ref={modalContainerRef}
-          className="flex items-center justify-center sm:min-h-[100dvh] px-4 pt-4 pb-20 mobile:p-0 text-center sm:block sm:p-0"
-        >
+        <div className="flex items-center justify-center sm:min-h-[100dvh] px-4 pt-4 pb-20 mobile:p-0 text-center sm:block sm:p-0">
           <div
             className="hidden sm:inline-block sm:h-[100dvh] sm:align-middle"
             aria-hidden="true"
