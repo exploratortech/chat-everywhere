@@ -16,32 +16,10 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
   const [description, setDescription] = useState(prompt.description);
   const [content, setContent] = useState(prompt.content);
 
-  const modalContainerRef = useRef<HTMLDivElement>(null);
   const [viewportHeight, setViewportHeight] = useState(
     window.visualViewport?.height || 0,
   );
 
-  useEffect(() => {
-    const visualViewport = window.visualViewport;
-
-    if (!visualViewport) {
-      return;
-    }
-    const handleResize = () => {
-      setViewportHeight(window.visualViewport?.height || 0);
-      if (modalContainerRef.current) {
-        modalContainerRef.current.style.height = `${visualViewport.height}px`;
-        document.body.style.height = `${visualViewport.height}px`;
-        document.documentElement.style.height = `${visualViewport.height}px`;
-      }
-    };
-
-    visualViewport.addEventListener('resize', handleResize);
-
-    return () => {
-      visualViewport.removeEventListener('resize', handleResize);
-    };
-  }, []); // Empty array ensures effect runs once on mount and cleans up on unmount
   const modalRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,7 +55,6 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
 
   return (
     <div
-      ref={modalContainerRef}
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
       onKeyDown={handleEnter}
     >
