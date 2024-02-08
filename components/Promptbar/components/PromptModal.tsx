@@ -11,6 +11,21 @@ interface Props {
 }
 
 export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
+  const [viewportHeight, setViewportHeight] = useState(
+    window.visualViewport?.height || 0,
+  );
+  useEffect(() => {
+    const handleResize = () => {
+      console.log('resize', window.visualViewport?.height);
+      setViewportHeight(window.visualViewport?.height || 0);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []); // Empty array ensures effect runs once on mount and cleans up on unmount
   const { t } = useTranslation('promptbar');
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
@@ -68,6 +83,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
           >
             <div className="text-sm font-bold text-black dark:text-neutral-200">
               {t('Name')}
+              {`viewportHeight: ${viewportHeight}`}
             </div>
             <input
               ref={nameInputRef}
