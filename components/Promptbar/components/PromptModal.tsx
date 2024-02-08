@@ -31,6 +31,8 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
       setViewportHeight(window.visualViewport?.height || 0);
       if (modalContainerRef.current) {
         modalContainerRef.current.style.height = `${visualViewport.height}px`;
+        document.body.style.height = `${visualViewport.height}px`;
+        document.documentElement.style.height = `${visualViewport.height}px`;
       }
     };
 
