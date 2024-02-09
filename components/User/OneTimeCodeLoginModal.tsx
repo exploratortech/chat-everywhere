@@ -1,4 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconX } from '@tabler/icons-react';
 import React, { Fragment, memo, useState } from 'react';
 
@@ -6,6 +7,7 @@ import { useTranslation } from 'next-i18next';
 
 import Spinner from '../Spinner/Spinner';
 
+import { SupabaseClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -17,12 +19,51 @@ type Props = {
   onOpen: () => void;
   onClose: () => void;
 };
+async function oneTimeCodeLogin(code: string, uniqueId: string) {
+  const res = await fetch('/api/one-time-code-login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ code, uniqueId }),
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to login');
+  }
+
+  return res.json();
+}
 
 const OneTimeCodeLoginModal = memo(
   ({ className = '', open, onOpen, onClose }: Props) => {
     const [isLoading, setIsLoading] = useState(false);
+    const [code, setCode] = useState('');
+    const [uniqueId, setUniqueId] = useState('');
     const { t } = useTranslation('model');
     const { t: authT } = useTranslation('auth');
+    const supabase = useSupabaseClient();
+
+    const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      setIsLoading(true);
+      try {
+        const res = await oneTimeCodeLogin(code, uniqueId);
+        const { randomEmail, randomPassword } = res;
+        const { error } = await supabase.auth.signInWithPassword({
+          email: randomEmail,
+          password: randomPassword,
+        });
+        if (error) {
+          throw error;
+        }
+        onClose(); // Close the modal on successful login
+      } catch (error) {
+        console.error(t('Login failed'));
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
     return (
       <Transition appear show={open} as={Fragment}>
@@ -67,7 +108,7 @@ const OneTimeCodeLoginModal = memo(
                     </div>
                   )}
                   {!isLoading && (
-                    <form className="space-y-6" action="#" method="POST">
+                    <form className="space-y-6" onSubmit={handleLogin}>
                       <div>
                         <label
                           htmlFor="one-time-code"
@@ -81,23 +122,27 @@ const OneTimeCodeLoginModal = memo(
                             name="one-time-code"
                             type="text"
                             required
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
                             className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
                           />
                         </div>
                       </div>
                       <div>
                         <label
-                          htmlFor="Name"
+                          htmlFor="unique-id"
                           className="block text-sm font-medium text-neutral-200"
                         >
                           Name
                         </label>
                         <div className="mt-1">
                           <input
-                            id="Name"
-                            name="Name"
+                            id="unique-id"
+                            name="unique-id"
                             type="text"
                             required
+                            value={uniqueId}
+                            onChange={(e) => setUniqueId(e.target.value)}
                             className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
                           />
                         </div>
