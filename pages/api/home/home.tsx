@@ -59,6 +59,7 @@ import OrientationBlock from '@/components/Mobile/OrientationBlock';
 import NewsModel from '@/components/News/NewsModel';
 import Promptbar from '@/components/Promptbar';
 import { AuthModel } from '@/components/User/AuthModel';
+import OneTimeCodeLoginModal from '@/components/User/OneTimeCodeLoginModal';
 import ReferralModel from '@/components/User/ReferralModel';
 import SettingsModel from '@/components/User/Settings/SettingsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
@@ -95,6 +96,7 @@ const Home = () => {
       prompts,
       showSettingsModel,
       showLoginSignUpModel,
+      showOneTimeCodeLoginModel,
       showReferralModel,
       showTeacherPortalModel,
       showUsageModel,
@@ -430,6 +432,7 @@ const Home = () => {
       })
         .then((userProfile) => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
+          dispatch({ field: 'showOneTimeCodeLoginModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
           dispatch({
             field: 'isUltraUser',
@@ -740,6 +743,21 @@ const Home = () => {
                 />
               )}
 
+              <OneTimeCodeLoginModal
+                open={showOneTimeCodeLoginModel}
+                onOpen={() =>
+                  dispatch({
+                    field: 'showOneTimeCodeLoginModel',
+                    value: true,
+                  })
+                }
+                onClose={() =>
+                  dispatch({
+                    field: 'showOneTimeCodeLoginModel',
+                    value: false,
+                  })
+                }
+              />
               {showReferralModel && (
                 <ReferralModel
                   onClose={() =>
@@ -754,7 +772,6 @@ const Home = () => {
                   }
                 />
               )}
-
               {showUsageModel && session && (
                 <UsageCreditModel
                   onClose={() =>
@@ -776,7 +793,6 @@ const Home = () => {
                   dispatch({ field: 'showNewsModel', value: false })
                 }
               />
-
               <FeaturesModel
                 open={showFeaturesModel}
                 onClose={() =>

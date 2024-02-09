@@ -118,6 +118,20 @@ export const ChatbarSettings = () => {
             }}
           />
         )}
+        {!user && (
+          <SidebarButton
+            className="flex-grow"
+            text={t('One-time code login')}
+            icon={<IconNews size={18} />}
+            onClick={() => {
+              homeDispatch({
+                field: 'showOneTimeCodeLoginModel',
+                value: true,
+              });
+            }}
+          />
+        )}
+
         <div className="flex w-full">
           <SidebarButton
             className="flex-grow"

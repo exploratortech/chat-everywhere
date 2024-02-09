@@ -305,6 +305,7 @@ export const getTeacherOneTimeCode = async (
     throw e;
   }
 };
+
 export const getReferralCode = async (
   userId: string,
 ): Promise<CodeGenerationPayloadType> => {
