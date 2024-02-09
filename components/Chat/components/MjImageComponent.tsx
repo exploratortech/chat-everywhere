@@ -24,6 +24,7 @@ import { Conversation, Message } from '@/types/chat';
 import HomeContext from '@/pages/api/home/home.context';
 
 import { LineShareButton } from '../LineShareButton';
+import StudentShareMessageButton from '../StudentShareMessageButton';
 
 import dayjs from 'dayjs';
 
@@ -310,6 +311,13 @@ export default function MjImageComponent({
             size={20}
             displayInProgressToast={true}
           />
+        </button>
+        <button
+          className={`${
+            showButtons ? 'block' : 'hidden'
+          } absolute bottom-0 right-7 p-1`}
+        >
+          <StudentShareMessageButton imageFileUrl={src} size={20} />
         </button>
       </div>
     </div>

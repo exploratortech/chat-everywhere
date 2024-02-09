@@ -23,6 +23,7 @@ import { Conversation, Message } from '@/types/chat';
 import HomeContext from '@/pages/api/home/home.context';
 
 import { LineShareButton } from '../LineShareButton';
+import StudentShareMessageButton from '../StudentShareMessageButton';
 
 import dayjs from 'dayjs';
 
@@ -257,6 +258,9 @@ export default function MjImageComponentV2({
             size={20}
             displayInProgressToast={true}
           />
+        </button>
+        <button className={`absolute bottom-0 right-7 p-1 z-10`}>
+          <StudentShareMessageButton imageFileUrl={src} size={20} />
         </button>
         {isImageGrid && (
           <div className="grid grid-cols-2 grid-rows-2 absolute top-0 right-0 w-full h-full">

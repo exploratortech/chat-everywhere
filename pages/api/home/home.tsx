@@ -434,6 +434,7 @@ const Home = () => {
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({ field: 'showOneTimeCodeLoginModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
+          dispatch({ field: 'isTempUser', value: userProfile.isTempUser });
           dispatch({
             field: 'isUltraUser',
             value: userProfile.plan === 'ultra',

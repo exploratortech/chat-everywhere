@@ -503,12 +503,13 @@ export const userProfileQuery = async ({
     referral_code: any;
     referral_code_expiration_date: any;
     line_access_token?: string;
+    temporary_account_profiles: any[];
   } | null = null;
   if (userId) {
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, temporary_account_profiles(*)',
       )
       .eq('id', userId)
       .single();
@@ -521,7 +522,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, temporary_account_profiles(*)',
       )
       .eq('email', email)
       .single();
@@ -586,6 +587,7 @@ export const userProfileQuery = async ({
     isInReferralTrial: isInReferralTrial,
     isConnectedWithLine: !!userProfile.line_access_token,
     hasMqttConnection: hasMqttConnection,
+    isTempUser: userProfile.temporary_account_profiles.length > 0,
   } as UserProfile;
 };
 

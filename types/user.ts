@@ -28,6 +28,7 @@ export interface UserProfile {
   isInReferralTrial: boolean;
   isConnectedWithLine: boolean;
   hasMqttConnection: boolean;
+  isTempUser: boolean;
 }
 
 export interface CreditUsage {

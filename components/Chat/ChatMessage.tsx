@@ -35,6 +35,7 @@ import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';
 import { LineShareButton } from './LineShareButton';
 import { SpeechButton } from './SpeechButton';
+import StudentShareMessageButton from './StudentShareMessageButton';
 
 interface Props {
   message: Message;
@@ -49,9 +50,10 @@ export const ChatMessage: FC<Props> = memo(
     const { i18n } = useTranslation();
 
     const {
-      state: { selectedConversation, conversations },
+      state: { isTempUser, selectedConversation, conversations },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
+    const isStudentAccount = isTempUser;
 
     const displayFooterButtons = useMemo(() => {
       if (!selectedConversation) return false;
@@ -327,6 +329,11 @@ export const ChatMessage: FC<Props> = memo(
                           <IconTrash size={18} />
                         </button>
                         <LineShareButton messageContent={message.content} />
+                        {isStudentAccount && (
+                          <StudentShareMessageButton
+                            messageContent={message.content}
+                          />
+                        )}
                       </div>
                     )}
                   </>
@@ -368,6 +375,12 @@ export const ChatMessage: FC<Props> = memo(
                             messageContent={message.content}
                             className="ml-2"
                           />
+                          {isStudentAccount && (
+                            <StudentShareMessageButton
+                              messageContent={message.content}
+                              className="ml-2"
+                            />
+                          )}
                         </>
                       )}
                   </div>
