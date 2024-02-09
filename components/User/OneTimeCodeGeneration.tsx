@@ -50,7 +50,7 @@ const OneTimeCodeGeneration = memo(() => {
   }, []);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(user?.referralCode || '');
+    navigator.clipboard.writeText(oneTimeCodeResponse?.code || '');
     toast.success(t('Copied to clipboard'));
   };
 
