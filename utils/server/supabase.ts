@@ -247,7 +247,7 @@ export const getTeacherOneTimeCode = async (
   try {
     const supabase = getAdminSupabaseClient();
     const { data: record, error } = await supabase
-      .from('teacher_one_time_codes')
+      .from('one_time_codes')
       .select('code, expired_at')
       .eq('teacher_profile_id', userId)
       .eq('is_valid', true);
@@ -260,11 +260,12 @@ export const getTeacherOneTimeCode = async (
           generateOneCodeAndExpirationDate();
 
         generatedCode = newGeneratedCode;
-        const { data: existingCodes, error: existingCodesError } = await supabase
-          .from('teacher_one_time_codes')
-          .select('code')
-          .eq('code', generatedCode)
-          .eq('is_valid', true);
+        const { data: existingCodes, error: existingCodesError } =
+          await supabase
+            .from('one_time_codes')
+            .select('code')
+            .eq('code', generatedCode)
+            .eq('is_valid', true);
 
         if (existingCodesError) {
           console.log('existingCodesError', existingCodesError);
@@ -274,7 +275,7 @@ export const getTeacherOneTimeCode = async (
         codeExists = existingCodes.length > 0;
         if (!codeExists) {
           const { data, error } = await supabase
-            .from('teacher_one_time_codes')
+            .from('one_time_codes')
             .insert({
               code: generatedCode,
               expired_at: expirationDate,
@@ -612,12 +613,12 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
   if (fetchError) {
     throw fetchError;
   }
-  
+
   const userIds = users?.map((user) => user.id);
   if (!userIds) {
     return [];
   }
-  
+
   const trialUserIds: string[] = [];
 
   for (const userId of userIds) {
@@ -631,7 +632,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
     if (referralError) {
       throw referralError;
     }
-    
+
     if (referralRows?.length > 0) {
       trialUserIds.push(userId);
     }

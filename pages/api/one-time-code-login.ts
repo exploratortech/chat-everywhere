@@ -19,13 +19,13 @@ const handler = async (req: Request): Promise<Response> => {
   };
 
   // 1. Verify the code
-  const isValid = await verifyCode(code);
-  if (!isValid) {
+  const codeId = await verifyCode(code);
+  if (!codeId) {
     return new Response('Invalid code', { status: 400 });
   }
 
   // 2. Create a temp user with the uniqueId and code
-  const user = await createTempUser(code, uniqueId);
+  const user = await createTempUser(code, codeId, uniqueId);
 
   // 3. Return login info to the client
   return new Response(JSON.stringify(user), { status: 200 });
@@ -35,19 +35,21 @@ export default handler;
 
 async function verifyCode(code: string) {
   const { data, error } = await supabase
-    .from('teacher_one_time_codes')
-    .select('code, expired_at')
+    .from('one_time_codes')
+    .select('id, code, expired_at')
     .eq('code', code)
     .eq('is_valid', true);
   if (error) {
     throw error;
   }
 
-  console.log({ data });
-  return data.length > 0;
+  if (data.length > 0) {
+    return data[0].id;
+  }
+  return null;
 }
 
-async function createTempUser(code: string, uniqueId: string) {
+async function createTempUser(code: string, codeId: string, uniqueId: string) {
   const randomUniqueId =
     uuidv4().replace(/-/g, '') + `-${uniqueId.replace(/\W/g, '')}`;
   const randomEmail = `temp-user-${randomUniqueId}-${code}@chateverywhere.app`;
@@ -61,6 +63,21 @@ async function createTempUser(code: string, uniqueId: string) {
     throw createUserRes.error;
   }
   const userId = createUserRes.data.user.id;
+
+  // create a temporary account profile
+  const { error: createTempProfileError } = await supabase
+    .from('temporary_account_profiles')
+    .insert([
+      {
+        one_time_code_id: codeId,
+        profile_id: userId,
+        uniqueId: uniqueId,
+      },
+    ]);
+  if (createTempProfileError) {
+    throw createTempProfileError;
+  }
+
   // update profile
   const { error: updateProfileError } = await supabase
     .from('profiles')
