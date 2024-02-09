@@ -1,5 +1,6 @@
 import { DefaultMonthlyCredits } from '@/utils/config';
 
+import { OneTimeCodePayload } from '@/types/one-time-code';
 import { PluginID } from '@/types/plugin';
 import { RawRefereeProfile } from '@/types/referral';
 import { UserProfile, UserProfileQueryProps } from '@/types/user';
@@ -241,14 +242,14 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
   }
 };
 
-export const getTeacherOneTimeCode = async (
+export const getOneTimeCode = async (
   userId: string,
-): Promise<CodeGenerationPayloadType> => {
+): Promise<OneTimeCodePayload | undefined> => {
   try {
     const supabase = getAdminSupabaseClient();
     const { data: record, error } = await supabase
       .from('one_time_codes')
-      .select('code, expired_at')
+      .select('id, code, expired_at')
       .eq('teacher_profile_id', userId)
       .eq('is_valid', true);
 
@@ -291,16 +292,24 @@ export const getTeacherOneTimeCode = async (
           return {
             code: generatedCode,
             expiresAt: expirationDate,
+            tempAccountProfiles: [],
           };
         }
       }
+    } else {
+      const existed_record = record?.pop();
+      // get temp account profiles
+      const { data: tempProfiles, error: tempAccountProfilesError } =
+        await supabase
+          .from('temporary_account_profiles')
+          .select('id, created_at, uniqueId')
+          .eq('one_time_code_id', existed_record?.id);
+      return {
+        code: existed_record?.code,
+        expiresAt: existed_record?.expired_at,
+        tempAccountProfiles: tempProfiles || [],
+      };
     }
-
-    const existed_record = record?.pop();
-    return {
-      code: existed_record?.code,
-      expiresAt: existed_record?.expired_at,
-    };
   } catch (e) {
     console.log(e);
     throw e;

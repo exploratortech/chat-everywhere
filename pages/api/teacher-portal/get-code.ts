@@ -1,4 +1,4 @@
-import {  getTeacherOneTimeCode, getUserProfile } from '@/utils/server/supabase';
+import { getOneTimeCode, getUserProfile } from '@/utils/server/supabase';
 
 export const config = {
   runtime: 'edge',
@@ -14,8 +14,14 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!userProfile || userProfile.plan !== 'edu') return unauthorizedResponse;
 
-    const { code, expiresAt } = await getTeacherOneTimeCode(userId);
-    return new Response(JSON.stringify({ code, expiresAt }), { status: 200 });
+    const teacherCode = await getOneTimeCode(userId);
+    if (!teacherCode) return new Response('Error', { status: 500 });
+    const { code, expiresAt, tempAccountProfiles } = teacherCode;
+
+    return new Response(
+      JSON.stringify({ code, expiresAt, tempAccountProfiles }),
+      { status: 200 },
+    );
   } catch (error) {
     console.error(error);
     return new Response('Error', { status: 500 });

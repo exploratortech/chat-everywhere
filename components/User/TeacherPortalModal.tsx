@@ -1,18 +1,17 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { IconRefresh, IconX } from '@tabler/icons-react';
+import { IconX } from '@tabler/icons-react';
 import React, { Fragment, memo, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
-import { trackEvent } from '@/utils/app/eventTracking';
-import { CodeGenerationPayloadType } from '@/utils/server/referralCode';
+import { OneTimeCodePayload } from '@/types/one-time-code';
 
 import HomeContext from '@/pages/api/home/home.context';
 
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import Spinner from '../Spinner/Spinner';
+import TemporaryAccountProfileList from './TemporaryAccountProfileList';
 
 type Props = {
   onClose: () => void;
@@ -26,10 +25,8 @@ const TeacherPortalModal = memo(({ onClose }: Props) => {
     dispatch,
   } = useContext(HomeContext);
 
-  const [oneTimeCodeResponse, setOneTimeCodeResponse] = useState<{
-    code: string;
-    expiresAt: string;
-  } | null>(null);
+  const [oneTimeCodeResponse, setOneTimeCodeResponse] =
+    useState<OneTimeCodePayload | null>(null);
 
   const getOneTimeCode = async () => {
     const response = await fetch('/api/teacher-portal/get-code', {
@@ -40,7 +37,7 @@ const TeacherPortalModal = memo(({ onClose }: Props) => {
       },
     });
 
-    return (await response.json()) as CodeGenerationPayloadType;
+    return (await response.json()) as OneTimeCodePayload;
   };
 
   const [isLoading, setIsLoading] = useState(true);
@@ -52,6 +49,7 @@ const TeacherPortalModal = memo(({ onClose }: Props) => {
         setOneTimeCodeResponse({
           code: res.code,
           expiresAt: res.expiresAt,
+          tempAccountProfiles: res.tempAccountProfiles,
         });
       });
     }
@@ -122,21 +120,14 @@ const TeacherPortalModal = memo(({ onClose }: Props) => {
                         />
                       )}
                     </div>
-                    {/* <button
-                      className="mx-auto my-3 flex w-fit items-center gap-3 rounded border text-sm py-2 px-4 hover:opacity-50 border-neutral-600  text-white md:mb-0 md:mt-2"
-                      onClick={() => {
-                        trackEvent('Regenerate referral code clicked');
-                        // queryReferralCodeRefetch();
-                      }}
-                      disabled={isRegenerating}
-                    >
-                      {isRegenerating ? (
-                        <Spinner size="16px" />
-                      ) : (
-                        <IconRefresh />
-                      )}
-                      <div>{t('Regenerate code')}</div>
-                    </button> */}
+
+                    {oneTimeCodeResponse?.code && (
+                      <TemporaryAccountProfileList
+                        tempAccountProfiles={
+                          oneTimeCodeResponse.tempAccountProfiles
+                        }
+                      />
+                    )}
                   </div>
                 )}
               </Dialog.Panel>
