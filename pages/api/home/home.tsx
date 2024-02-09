@@ -63,7 +63,7 @@ import OneTimeCodeLoginModal from '@/components/User/OneTimeCodeLoginModal';
 import ReferralModel from '@/components/User/ReferralModel';
 import SettingsModel from '@/components/User/Settings/SettingsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
-import TeacherPortalModal from '@/components/User/TeacherPortalModal';
+import TeacherPortalModal from '@/components/User/TeacherPortal/TeacherPortalModal';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
 

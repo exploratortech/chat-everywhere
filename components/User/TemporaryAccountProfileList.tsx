@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 
 import { TempAccountProfiles } from '@/types/one-time-code';
 
+import dayjs from 'dayjs';
+
 const TemporaryAccountProfileList = ({
   tempAccountProfiles,
 }: {
@@ -10,7 +12,9 @@ const TemporaryAccountProfileList = ({
   const { t } = useTranslation('model');
   return (
     <div className="my-4">
-      <h2 className="text-lg font-bold">{t('Account that used the code')}</h2>
+      <h2 className="text-lg font-bold mb-4">
+        {t('Account that used the code')}
+      </h2>
       <table className="table-fixed w-full">
         <thead>
           <tr>
@@ -22,7 +26,7 @@ const TemporaryAccountProfileList = ({
           {tempAccountProfiles.map((profile) => (
             <tr key={`temp-account-${profile.id}`}>
               <td>{profile.uniqueId}</td>
-              <td>{profile.created_at}</td>
+              <td>{dayjs(profile.created_at).format('YYYY-MM-DD HH:mm')}</td>
             </tr>
           ))}
         </tbody>

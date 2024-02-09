@@ -2,6 +2,7 @@ import {
   IconBrandFacebook,
   IconBrandGoogle,
   IconCurrencyDollar,
+  IconHighlight,
   IconLogin,
   IconNews,
   IconSettings,
@@ -95,7 +96,7 @@ export const ChatbarSettings = () => {
           <>
             <SidebarButton
               text={t('Teacher Portal')}
-              icon={<IconCurrencyDollar size={18} />}
+              icon={<IconHighlight size={18} />}
               onClick={() => teacherPortalBtnOnClick()}
             />
             <SidebarButton
