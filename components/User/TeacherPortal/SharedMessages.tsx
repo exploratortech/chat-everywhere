@@ -24,10 +24,10 @@ const SharedMessages = memo(() => {
     state: { user },
   } = useContext(HomeContext);
   const [pagination, setPagination] = useState<PaginationType>({
-    current_page: 1,
-    total_pages: 1,
-    next_page: 1,
-    prev_page: 1,
+    current_page: 0,
+    total_pages: 0,
+    next_page: 0,
+    prev_page: 0,
   });
 
   const [sharedMessages, setSharedMessages] = useState<
@@ -35,6 +35,9 @@ const SharedMessages = memo(() => {
   >(null);
 
   const fetchSharedMessages = async (page = 1) => {
+    if (pagination.current_page === page) {
+      return;
+    }
     setIsLoading(true);
     const payload = {
       accessToken: (await supabase.auth.getSession()).data.session
@@ -106,12 +109,16 @@ const SharedMessages = memo(() => {
           />
         ))}
       </div>
-      <div className="my-4">
-        <Pagination
-          pagination={pagination}
-          handlePageChange={handlePageChange}
-        />
-      </div>
+
+      {!isLoading && sharedMessages && sharedMessages.length > 0 && (
+        <div className="my-4">
+          <Pagination
+            pagination={pagination}
+            handlePageChange={handlePageChange}
+          />
+        </div>
+      )}
+
       <ZoomInSharedMessageItem
         submission={selectedSubmission}
         open={!!selectedSubmission}
