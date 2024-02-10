@@ -256,13 +256,35 @@ export const getOneTimeCode = async (
 
     if (invalidate && record && record.length > 0) {
       // invalidate the existing code
-      const { data, error } = await supabase
-        .from('one_time_codes')
-        .update({ is_valid: false })
-        .eq('id', record[0].id);
-      if (error) {
-        console.log('invalidate failed error', error);
-        throw error;
+      for (const r of record) {
+        const oneTimeCodeId = r.id;
+        const { error } = await supabase
+          .from('one_time_codes')
+          .update({ is_valid: false })
+          .eq('id', oneTimeCodeId);
+
+        if (error) {
+          console.log('invalidate failed error', error);
+          throw error;
+        }
+        // 1. find all temp account profiles with the oneTimeCodeId
+        const { data: tempAccountProfiles, error: tempAccountProfilesError } =
+          await supabase
+            .from('temporary_account_profiles')
+            .select('profile_id, uniqueId')
+            .eq('one_time_code_id', oneTimeCodeId);
+        if (tempAccountProfilesError) {
+          console.log(
+            'fetch tempAccountProfilesError',
+            tempAccountProfilesError,
+          );
+          throw tempAccountProfilesError;
+        }
+
+        for (const tempProfile of tempAccountProfiles || []) {
+          // 2. delete all temp account profiles
+          await deleteUserById(tempProfile.profile_id);
+        }
       }
     }
     if (invalidate || !record || record.length === 0) {
@@ -663,3 +685,23 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
 
   return trialUserIds;
 };
+
+async function deleteUserById(id: string) {
+  // delete profile
+  const supabase = getAdminSupabaseClient();
+  const { error: deleteProfileError } = await supabase
+    .from('profiles')
+    .delete()
+    .eq('id', id);
+  if (deleteProfileError) {
+    console.error({ deleteProfileError });
+    throw deleteProfileError;
+  }
+  // delete supabase user
+  const { error } = await supabase.auth.admin.deleteUser(id);
+  if (error) {
+    console.error({ supabaseDeleteErrer: error });
+    throw error;
+  }
+  return true;
+}

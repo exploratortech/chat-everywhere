@@ -93,21 +93,3 @@ async function createTempUser(code: string, codeId: string, uniqueId: string) {
     randomPassword,
   };
 }
-
-// TODO: will be used in cron job
-async function deleteUserById(id: string) {
-  // delete profile
-  const { error: deleteProfileError } = await supabase
-    .from('profiles')
-    .delete()
-    .eq('id', id);
-  if (deleteProfileError) {
-    throw deleteProfileError;
-  }
-  // delete supabase user
-  const { error } = await supabase.auth.admin.deleteUser(id);
-  if (error) {
-    throw error;
-  }
-  return true;
-}
