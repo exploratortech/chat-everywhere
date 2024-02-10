@@ -1,8 +1,4 @@
-import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
-
-import { decode } from 'base64-arraybuffer';
-import { v4 } from 'uuid';
 
 export const config = {
   runtime: 'edge',
@@ -14,10 +10,9 @@ const handler = async (req: Request) => {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  const { accessToken, messageContent, imageFile } = (await req.json()) as {
+  const { accessToken, page } = (await req.json()) as {
     accessToken: string;
-    messageContent: string;
-    imageFile: string | null;
+    page: number;
   };
 
   const supabase = getAdminSupabaseClient();
@@ -41,7 +36,6 @@ const handler = async (req: Request) => {
 
   const teacherProfileId = userId;
 
-  const page = parseInt(req.url?.split('?page=')[1] || '1', 10);
   const pageSize = 10;
   const {
     data: messagesData,
@@ -78,9 +72,21 @@ const handler = async (req: Request) => {
     });
   }
 
+  // Calculate total pages
+  const totalPages = Math.ceil((count || 1) / pageSize);
+  // Adjust next_page and prev_page to ensure they are within valid range
+  const nextPage = page < totalPages ? page + 1 : null;
+  const prevPage = page > 1 ? page - 1 : null;
+
   return new Response(
     JSON.stringify({
       submissions: messagesData,
+      pagination: {
+        current_page: page,
+        total_pages: totalPages,
+        next_page: nextPage,
+        prev_page: prevPage,
+      },
     }),
     {
       status: 200,

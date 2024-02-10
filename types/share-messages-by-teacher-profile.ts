@@ -1,3 +1,5 @@
+import { Pagination } from '@supabase/supabase-js';
+
 export interface StudentMessageSubmission {
   id: number;
   message_content: string;
@@ -7,6 +9,8 @@ export interface StudentMessageSubmission {
     uniqueId: string;
   };
 }
+
 export type ShareMessagesByTeacherProfilePayload = {
   submissions: StudentMessageSubmission[];
+  pagination: Pagination;
 };

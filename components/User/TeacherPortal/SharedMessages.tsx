@@ -3,11 +3,13 @@ import React, { memo, useContext, useEffect, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import { Pagination as PaginationType } from '@/types/pagination';
 import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
 
 import HomeContext from '@/pages/api/home/home.context';
 
 import Spinner from '../../Spinner/Spinner';
+import Pagination from './Pagination';
 import SharedMessageItem from './SharedMessageItem';
 
 const SharedMessages = memo(() => {
@@ -17,15 +19,23 @@ const SharedMessages = memo(() => {
   const {
     state: { user },
   } = useContext(HomeContext);
+  const [pagination, setPagination] = useState<PaginationType>({
+    current_page: 1,
+    total_pages: 1,
+    next_page: 1,
+    prev_page: 1,
+  });
 
   const [sharedMessages, setSharedMessages] = useState<
     ShareMessagesByTeacherProfilePayload['submissions'] | null
   >(null);
 
-  const getSharedMessagesWithTeacher = async () => {
+  const fetchSharedMessages = async (page = 1) => {
+    setIsLoading(true);
     const payload = {
       accessToken: (await supabase.auth.getSession()).data.session
         ?.access_token,
+      page,
     };
     try {
       const response = await fetch('/api/get-shared-messages-with-teacher', {
@@ -36,30 +46,36 @@ const SharedMessages = memo(() => {
         body: JSON.stringify(payload),
       });
       if (response.status !== 200 || !response.ok) {
-        setIsLoading(false);
-        return null;
+        throw new Error('Failed to fetch shared messages');
       }
-      setIsLoading(false);
-      return (await response.json()) as ShareMessagesByTeacherProfilePayload;
+      const data =
+        (await response.json()) as ShareMessagesByTeacherProfilePayload;
+      setSharedMessages(data.submissions || null);
+      setPagination({
+        current_page: data.pagination.current_page,
+        total_pages: data.pagination.total_pages,
+        next_page: data.pagination.next_page,
+        prev_page: data.pagination.prev_page,
+      });
     } catch (error) {
       console.error(
         'There has been a problem with your fetch operation:',
         error,
       );
+    } finally {
       setIsLoading(false);
-      return null;
     }
   };
 
   useEffect(() => {
     if (user) {
-      getSharedMessagesWithTeacher().then((res) => {
-        setSharedMessages(res?.submissions || null);
-      });
+      fetchSharedMessages();
     }
-    setIsLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user]);
+
+  const handlePageChange = (page: number) => {
+    fetchSharedMessages(page);
+  };
 
   return (
     <div className="">
@@ -80,6 +96,12 @@ const SharedMessages = memo(() => {
             submission={submission}
           />
         ))}
+      </div>
+      <div className="my-4">
+        <Pagination
+          pagination={pagination}
+          handlePageChange={handlePageChange}
+        />
       </div>
     </div>
   );
