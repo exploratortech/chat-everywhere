@@ -5,6 +5,7 @@ import { PluginID } from '@/types/plugin';
 import { RawRefereeProfile } from '@/types/referral';
 import { UserProfile, UserProfileQueryProps } from '@/types/user';
 
+import { deleteUserById } from './deleteUserById';
 import {
   CodeGenerationPayloadType,
   generateOneCodeAndExpirationDate,
@@ -685,23 +686,3 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
 
   return trialUserIds;
 };
-
-async function deleteUserById(id: string) {
-  // delete profile
-  const supabase = getAdminSupabaseClient();
-  const { error: deleteProfileError } = await supabase
-    .from('profiles')
-    .delete()
-    .eq('id', id);
-  if (deleteProfileError) {
-    console.error({ deleteProfileError });
-    throw deleteProfileError;
-  }
-  // delete supabase user
-  const { error } = await supabase.auth.admin.deleteUser(id);
-  if (error) {
-    console.error({ supabaseDeleteErrer: error });
-    throw error;
-  }
-  return true;
-}
