@@ -42,10 +42,17 @@ export default function MjImageComponent({
   prompt,
 }: MjImageComponentProps) {
   const {
-    state: { user, selectedConversation, conversations, messageIsStreaming },
+    state: {
+      user,
+      isTempUser,
+      selectedConversation,
+      conversations,
+      messageIsStreaming,
+    },
     dispatch: homeDispatch,
     stopConversationRef,
   } = useContext(HomeContext);
+  const isStudentAccount = isTempUser;
   const { t: commonT } = useTranslation('common');
   const { t: mjImageT } = useTranslation('mjImage');
 
@@ -312,13 +319,15 @@ export default function MjImageComponent({
             displayInProgressToast={true}
           />
         </button>
-        <button
-          className={`${
-            showButtons ? 'block' : 'hidden'
-          } absolute bottom-0 right-7 p-1`}
-        >
-          <StudentShareMessageButton imageFileUrl={src} size={20} />
-        </button>
+        {isStudentAccount && (
+          <button
+            className={`${
+              showButtons ? 'block' : 'hidden'
+            } absolute bottom-0 right-7 p-1`}
+          >
+            <StudentShareMessageButton imageFileUrl={src} size={20} />
+          </button>
+        )}
       </div>
     </div>
   );
