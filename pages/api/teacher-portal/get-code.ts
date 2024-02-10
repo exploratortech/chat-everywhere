@@ -9,12 +9,13 @@ const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 const handler = async (req: Request): Promise<Response> => {
   try {
     const userId = req.headers.get('user-id');
+    const invalidate = req.headers.get('invalidate') === 'true';
     if (!userId) return unauthorizedResponse;
     const userProfile = await getUserProfile(userId);
 
     if (!userProfile || userProfile.plan !== 'edu') return unauthorizedResponse;
 
-    const teacherCode = await getOneTimeCode(userId);
+    const teacherCode = await getOneTimeCode(userId, invalidate);
     if (!teacherCode) return new Response('Error', { status: 500 });
     const { code, expiresAt, tempAccountProfiles } = teacherCode;
 

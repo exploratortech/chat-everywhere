@@ -244,6 +244,7 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
 
 export const getOneTimeCode = async (
   userId: string,
+  invalidate: boolean = false,
 ): Promise<OneTimeCodePayload | undefined> => {
   try {
     const supabase = getAdminSupabaseClient();
@@ -253,7 +254,18 @@ export const getOneTimeCode = async (
       .eq('teacher_profile_id', userId)
       .eq('is_valid', true);
 
-    if (!record || record.length === 0) {
+    if (invalidate && record && record.length > 0) {
+      // invalidate the existing code
+      const { data, error } = await supabase
+        .from('one_time_codes')
+        .update({ is_valid: false })
+        .eq('id', record[0].id);
+      if (error) {
+        console.log('invalidate failed error', error);
+        throw error;
+      }
+    }
+    if (invalidate || !record || record.length === 0) {
       let generatedCode = '';
       let codeExists = true;
       while (codeExists) {
