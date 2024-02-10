@@ -35,7 +35,6 @@ const OneTimeCodeGeneration = memo(() => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // if user has no referral code, get one from server
     if (user) {
       getOneTimeCode().then((res) => {
         setOneTimeCodeResponse({
