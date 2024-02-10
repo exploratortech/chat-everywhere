@@ -38,23 +38,33 @@ const handler = async (req: Request) => {
   }
 
   const userId = userRes.data.user.id;
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('temporary_account_profiles(id)')
-    .eq('id', userId)
-    .single();
-  if (!data || error) {
-    console.error('Error fetching user profile:', error);
-    return new Response('Error fetching user profile', { status: 500 });
+
+  const { data: profileData, error: profileError } = await supabase.rpc(
+    'get_temp_account_teacher_profile',
+    { p_profile_id: userId },
+  );
+
+  if (!profileData || profileError) {
+    console.error('Error fetching temp account teacher profile:', profileError);
+    return new Response('Error fetching temp account teacher profile:', {
+      status: 500,
+    });
   }
+  console.log({ profileData });
+  // profile_id	temp_account_id	code	teacher_profile_id
   if (
-    !data?.temporary_account_profiles ||
-    !data?.temporary_account_profiles.length
+    !profileData.length ||
+    !profileData[0].temp_account_id ||
+    !profileData[0].teacher_profile_id
   ) {
-    console.error('No temporary account found');
-    return new Response('No temporary account found', { status: 400 });
+    console.error('No temp_account_id found or no teacher_profile_id found');
+    return new Response(
+      'No temp_account_id found or no teacher_profile_id found',
+      { status: 400 },
+    );
   }
-  const temporaryAccountId = data?.temporary_account_profiles[0].id;
+  const temporaryAccountId = profileData[0].temp_account_id;
+  const teacherProfileId = profileData[0].teacher_profile_id;
 
   let imagePublicUrl = '';
 
@@ -90,6 +100,7 @@ const handler = async (req: Request) => {
         message_content: messageContent,
         temporary_account_profile_id: temporaryAccountId,
         image_file_url: imagePublicUrl,
+        teacher_profile_id: teacherProfileId,
       },
     ]);
 
