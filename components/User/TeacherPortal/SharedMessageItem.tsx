@@ -9,14 +9,21 @@ import dayjs from 'dayjs';
 const SharedMessageItem = ({
   submission,
   className = '',
+  onSelected,
 }: {
   submission: StudentMessageSubmission;
   className?: string;
+  onSelected?: (submission: StudentMessageSubmission) => void;
 }) => {
   const { t } = useTranslation('model');
   return (
     <div
       className={`bg-neutral-800 text-neutral-200 p-4 rounded-lg shadow-md ${className}`}
+      onClick={() => {
+        if (onSelected) {
+          onSelected(submission);
+        }
+      }}
     >
       <div className="font-bold">
         {submission.temporary_account_profiles.uniqueId}
@@ -34,6 +41,7 @@ const SharedMessageItem = ({
             messagePluginId={null}
           />
         ) : (
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={submission.image_file_url} alt="Shared content" />
         )}
       </div>

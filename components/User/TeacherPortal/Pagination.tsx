@@ -9,6 +9,10 @@ const Pagination = ({
   pagination: PaginationType;
   handlePageChange: (page: number) => void;
 }) => {
+  const prevButtonHidden = pagination.current_page <= 1 ? 'hidden' : '';
+  const nextButtonHidden =
+    pagination.current_page >= pagination.total_pages ? 'hidden' : '';
+
   return (
     <ReactPaginate
       previousLabel={'‹ Prev'}
@@ -21,20 +25,18 @@ const Pagination = ({
         handlePageChange(selectedItem.selected + 1)
       }
       containerClassName={'flex justify-center gap-2'}
-      activeClassName={'px-1 !text-black bg-white border-neutral-800'}
-      previousClassName={
-        'px-1 py-1 border shadow border-neutral-100 border-opacity-50 text-white hover:bg-neutral-300 hover:text-black'
+      activeClassName={
+        'select-none px-1 !text-black bg-white border-neutral-800'
       }
-      nextClassName={
-        'px-1 py-1 border shadow border-neutral-100 border-opacity-50 text-white hover:bg-neutral-300 hover:text-black'
-      }
+      previousClassName={`select-none px-1 py-1 border shadow border-neutral-100 border-opacity-50 text-white hover:bg-neutral-300 hover:text-black ${prevButtonHidden}`}
+      nextClassName={`select-none px-1 py-1 border shadow border-neutral-100 border-opacity-50 text-white hover:bg-neutral-300 hover:text-black ${nextButtonHidden}`}
       breakClassName={
-        'px-1 py-1 border shadow border-neutral-800 border-opacity-50 text-neutral-100 hover:text-black'
+        'select-none px-1 py-1 border shadow border-neutral-800 border-opacity-50 text-neutral-100 hover:text-black'
       }
       pageClassName={
-        'px-1 py-1 border shadow border-neutral-800 border-opacity-50 text-white hover:bg-neutral-300 hover:text-black'
+        'select-none px-1 py-1 min-w-[25px] text-center border shadow border-neutral-800 border-opacity-50 text-white hover:bg-neutral-300 hover:text-black'
       }
-      initialPage={pagination.current_page - 1} // react-paginate uses zero indexing for pages
+      initialPage={pagination.current_page - 1}
     />
   );
 };

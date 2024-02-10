@@ -4,13 +4,17 @@ import React, { memo, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'next-i18next';
 
 import { Pagination as PaginationType } from '@/types/pagination';
-import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
+import {
+  ShareMessagesByTeacherProfilePayload,
+  StudentMessageSubmission,
+} from '@/types/share-messages-by-teacher-profile';
 
 import HomeContext from '@/pages/api/home/home.context';
 
 import Spinner from '../../Spinner/Spinner';
 import Pagination from './Pagination';
 import SharedMessageItem from './SharedMessageItem';
+import ZoomInSharedMessageItem from './ZoomInSharedMessageItem';
 
 const SharedMessages = memo(() => {
   const { t } = useTranslation('model');
@@ -71,7 +75,11 @@ const SharedMessages = memo(() => {
     if (user) {
       fetchSharedMessages();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<StudentMessageSubmission | null>(null);
 
   const handlePageChange = (page: number) => {
     fetchSharedMessages(page);
@@ -91,7 +99,8 @@ const SharedMessages = memo(() => {
       <div className="flex flex-wrap gap-4">
         {sharedMessages?.map((submission) => (
           <SharedMessageItem
-            className="max-w-[300px] max-h-[300px] w-full overflow-hidden"
+            onSelected={(submission) => setSelectedSubmission(submission)}
+            className="cursor-pointer max-w-[300px] max-h-[300px] w-full overflow-hidden"
             key={submission.id}
             submission={submission}
           />
@@ -103,6 +112,14 @@ const SharedMessages = memo(() => {
           handlePageChange={handlePageChange}
         />
       </div>
+      <ZoomInSharedMessageItem
+        submission={selectedSubmission}
+        open={!!selectedSubmission}
+        onOpen={() => {}}
+        onClose={() => {
+          setSelectedSubmission(null);
+        }}
+      />
     </div>
   );
 });

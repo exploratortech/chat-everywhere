@@ -330,9 +330,11 @@ export const ChatMessage: FC<Props> = memo(
                         </button>
                         <LineShareButton messageContent={message.content} />
                         {isStudentAccount && (
-                          <StudentShareMessageButton
-                            messageContent={message.content}
-                          />
+                          <div className="ml-2 flex items-center">
+                            <StudentShareMessageButton
+                              messageContent={message.content}
+                            />
+                          </div>
                         )}
                       </div>
                     )}
