@@ -5,8 +5,6 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 
-import { trackEvent } from '@/utils/app/eventTracking';
-
 import HomeContext from '@/pages/api/home/home.context';
 
 import { encode } from 'base64-arraybuffer';
@@ -35,50 +33,41 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
   let imageFileInBase64: String | null = null;
 
   const shareOnClick = async () => {
-    // setLoading(true);
-    // if (imageFileUrl) {
-    //   const response = await fetch(imageFileUrl);
-    //   const blob = await response.arrayBuffer();
-    //   imageFileInBase64 = encode(blob);
-    // }
-    // const payload = {
-    //   accessToken: (await supabase.auth.getSession()).data.session
-    //     ?.access_token,
-    //   messageContent: messageContent,
-    //   imageFile: imageFileInBase64,
-    // };
-    // try {
-    //   const response = await fetch('/api/share-to-line', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(payload),
-    //   });
-    //   if (response.status === 400 || response.status === 500 || !response.ok) {
-    //     toast.error(t('Failed to share message, please try again later'));
-    //     setLoading(false);
-    //     return;
-    //   }
-    //   if (response.status === 401) {
-    //     toast.error(
-    //       t(
-    //         'Your Line connection has expired, please re-connect on the setting page',
-    //       ),
-    //     );
-    //     setLoading(false);
-    //     return;
-    //   }
-    //   toast.success(t('Message shared successfully'));
-    //   setLoading(false);
-    // } catch (error) {
-    //   console.error(
-    //     'There has been a problem with your fetch operation:',
-    //     error,
-    //   );
-    //   toast.error(t('Failed to share message, please try again later'));
-    //   setLoading(false);
-    // }
+    setLoading(true);
+    if (imageFileUrl) {
+      const response = await fetch(imageFileUrl);
+      const blob = await response.arrayBuffer();
+      imageFileInBase64 = encode(blob);
+    }
+    const payload = {
+      accessToken: (await supabase.auth.getSession()).data.session
+        ?.access_token,
+      messageContent: messageContent,
+      imageFile: imageFileInBase64,
+    };
+    try {
+      const response = await fetch('/api/create-message-submission', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      if (response.status !== 200 || !response.ok) {
+        toast.error(t('Failed to share message, please try again later'));
+        setLoading(false);
+        return;
+      }
+      toast.success(t('Message shared successfully'));
+      setLoading(false);
+    } catch (error) {
+      console.error(
+        'There has been a problem with your fetch operation:',
+        error,
+      );
+      toast.error(t('Failed to share message, please try again later'));
+      setLoading(false);
+    }
   };
 
   return (
