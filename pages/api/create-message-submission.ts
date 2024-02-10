@@ -23,7 +23,7 @@ const handler = async (req: Request) => {
   const supabase = getAdminSupabaseClient();
 
   if (!accessToken || (messageContent === '' && !imageFile)) {
-    return new Response('Missing sessionId or messageContent or imageFile', {
+    return new Response('Missing accessToken or messageContent or imageFile', {
       status: 400,
     });
   }
