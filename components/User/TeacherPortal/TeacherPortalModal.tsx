@@ -7,7 +7,7 @@ import { ActionType, useCreateReducer } from '@/hooks/useCreateReducer';
 import HomeContext from '@/pages/api/home/home.context';
 
 import OneTimeCodeGeneration from '../OneTimeCodeGeneration';
-import SharedMessages from '../SharedMessages';
+import SharedMessages from './SharedMessages';
 import Sidebar from './Sidebar';
 
 type Props = {
