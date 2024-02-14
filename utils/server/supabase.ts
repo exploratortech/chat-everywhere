@@ -268,24 +268,6 @@ export const getOneTimeCode = async (
           console.log('invalidate failed error', error);
           throw error;
         }
-        // 1. find all temp account profiles with the oneTimeCodeId
-        const { data: tempAccountProfiles, error: tempAccountProfilesError } =
-          await supabase
-            .from('temporary_account_profiles')
-            .select('profile_id, uniqueId')
-            .eq('one_time_code_id', oneTimeCodeId);
-        if (tempAccountProfilesError) {
-          console.log(
-            'fetch tempAccountProfilesError',
-            tempAccountProfilesError,
-          );
-          throw tempAccountProfilesError;
-        }
-
-        for (const tempProfile of tempAccountProfiles || []) {
-          // 2. delete all temp account profiles
-          await deleteUserById(tempProfile.profile_id);
-        }
       }
     }
     if (invalidate || !record || record.length === 0) {
