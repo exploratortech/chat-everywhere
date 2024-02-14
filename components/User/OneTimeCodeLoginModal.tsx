@@ -1,13 +1,12 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { IconX } from '@tabler/icons-react';
 import React, { Fragment, memo, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
 import Spinner from '../Spinner/Spinner';
 
-import { SupabaseClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -28,8 +27,14 @@ async function oneTimeCodeLogin(code: string, uniqueId: string) {
     body: JSON.stringify({ code, uniqueId }),
   });
 
-  if (!res.ok) {
-    throw new Error('Failed to login');
+  if (res.status !== 200) {
+    const data = await res.json();
+    if (data.error) {
+      toast.error(data.error);
+      throw new Error(data.error);
+    }
+    toast.error('An unknown error occurred');
+    throw new Error('An unknown error occurred');
   }
 
   return res.json();

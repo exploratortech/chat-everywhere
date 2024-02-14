@@ -18,8 +18,19 @@ const handler = async (req: Request): Promise<Response> => {
     uniqueId: string;
   };
 
-  // 1. Verify the code
-  const codeId = await verifyCode(code);
+  // 1. Verify the code and referrer account
+  let codeId;
+  try {
+    codeId = await verifyCodeAndReferrerAccount(code);
+  } catch (error) {
+    if (error instanceof Error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 400,
+      });
+    } else {
+      return new Response('An unknown error occurred', { status: 400 });
+    }
+  }
   if (!codeId) {
     return new Response('Invalid code', { status: 400 });
   }
@@ -33,20 +44,25 @@ const handler = async (req: Request): Promise<Response> => {
 
 export default handler;
 
-async function verifyCode(code: string) {
-  const { data, error } = await supabase
-    .from('one_time_codes')
-    .select('id, code, expired_at')
-    .eq('code', code)
-    .eq('is_valid', true);
+async function verifyCodeAndReferrerAccount(code: string) {
+  const { data, error } = await supabase.rpc('check_otc_quota_and_validity', {
+    otc_code: code,
+  });
+
   if (error) {
     throw error;
   }
 
-  if (data.length > 0) {
-    return data[0].id;
+  if (data[0].has_quota === false) {
+    throw new Error('Referrer exceeded the quota');
   }
-  return null;
+  if (data[0].code_is_valid === false) {
+    throw new Error('Invalid code');
+  }
+  if (data[0].referrer_is_teacher_account === false) {
+    throw new Error('Referrer is not a teacher account');
+  }
+  return data[0].otc_id;
 }
 
 async function createTempUser(code: string, codeId: string, uniqueId: string) {
