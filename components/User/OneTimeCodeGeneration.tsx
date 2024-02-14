@@ -106,6 +106,8 @@ const OneTimeCodeGeneration = memo(() => {
       {!isLoading && oneTimeCodeResponse?.code && (
         <TemporaryAccountProfileList
           tempAccountProfiles={oneTimeCodeResponse.tempAccountProfiles}
+          maxQuota={oneTimeCodeResponse.maxQuota}
+          totalActiveTempAccount={oneTimeCodeResponse.totalActiveTempAccount}
         />
       )}
     </div>

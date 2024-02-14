@@ -9,8 +9,12 @@ import dayjs from 'dayjs';
 
 const TemporaryAccountProfileList = ({
   tempAccountProfiles,
+  maxQuota = 0,
+  totalActiveTempAccount = 0,
 }: {
   tempAccountProfiles: TempAccountProfiles[];
+  maxQuota: number;
+  totalActiveTempAccount: number;
 }) => {
   const { t } = useTranslation('model');
   const handleCopy = (code: string) => {
@@ -19,7 +23,10 @@ const TemporaryAccountProfileList = ({
   };
   return (
     <div className="my-4">
-      <h2 className="text-lg font-bold mb-4">{t('Active student account')}</h2>
+      <h2 className="text-lg font-bold mb-4">
+        {t('Active student account')}{' '}
+        <label>{`(${totalActiveTempAccount}/${maxQuota})`}</label>
+      </h2>
       <table className="table-fixed w-full">
         <thead>
           <tr>
@@ -36,7 +43,7 @@ const TemporaryAccountProfileList = ({
               <td>
                 <span
                   onClick={() => handleCopy(profile.code)}
-                  className="inline bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1"
+                  className="cursor-pointer inline bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1"
                 >
                   {profile.code}
                 </span>
