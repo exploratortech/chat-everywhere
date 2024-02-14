@@ -13,7 +13,8 @@ const handler = async (req: Request): Promise<Response> => {
     if (!userId) return unauthorizedResponse;
     const userProfile = await getUserProfile(userId);
 
-    if (!userProfile || userProfile.plan !== 'edu') return unauthorizedResponse;
+    if (!userProfile || !userProfile.isTeacherAccount)
+      return unauthorizedResponse;
 
     const teacherCode = await getOneTimeCode(userId, invalidate);
     if (!teacherCode) return new Response('Error', { status: 500 });

@@ -29,6 +29,7 @@ export interface UserProfile {
   isConnectedWithLine: boolean;
   hasMqttConnection: boolean;
   isTempUser: boolean;
+  isTeacherAccount: boolean;
 }
 
 export interface CreditUsage {

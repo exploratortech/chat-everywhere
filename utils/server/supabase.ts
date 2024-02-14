@@ -539,12 +539,13 @@ export const userProfileQuery = async ({
     referral_code_expiration_date: any;
     line_access_token?: string;
     temporary_account_profiles: any[];
+    is_teacher_account: boolean;
   } | null = null;
   if (userId) {
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, temporary_account_profiles(*)',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(*)',
       )
       .eq('id', userId)
       .single();
@@ -557,7 +558,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, temporary_account_profiles(*)',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(*)',
       )
       .eq('email', email)
       .single();
@@ -623,6 +624,7 @@ export const userProfileQuery = async ({
     isConnectedWithLine: !!userProfile.line_access_token,
     hasMqttConnection: hasMqttConnection,
     isTempUser: userProfile.temporary_account_profiles.length > 0,
+    isTeacherAccount: userProfile.is_teacher_account,
   } as UserProfile;
 };
 

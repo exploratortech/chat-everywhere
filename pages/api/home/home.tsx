@@ -436,6 +436,10 @@ const Home = () => {
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
           dispatch({ field: 'isTempUser', value: userProfile.isTempUser });
           dispatch({
+            field: 'isTeacherAccount',
+            value: userProfile.isTeacherAccount,
+          });
+          dispatch({
             field: 'isUltraUser',
             value: userProfile.plan === 'ultra',
           });

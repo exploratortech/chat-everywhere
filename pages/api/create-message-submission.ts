@@ -50,8 +50,7 @@ const handler = async (req: Request) => {
       status: 500,
     });
   }
-  console.log({ profileData });
-  // profile_id	temp_account_id	code	teacher_profile_id
+
   if (
     !profileData.length ||
     !profileData[0].temp_account_id ||

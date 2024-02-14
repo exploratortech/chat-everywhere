@@ -52,7 +52,8 @@ export interface HomeInitialState {
   isPaidUser: boolean;
   isUltraUser: boolean;
   isSurveyFilled: boolean;
-  isTempUser: false;
+  isTempUser: boolean;
+  isTeacherAccount: boolean;
 
   // Plugins Utils
   creditUsage: CreditUsage | null;
@@ -117,6 +118,7 @@ export const initialState: HomeInitialState = {
   isUltraUser: false,
   isSurveyFilled: false,
   isTempUser: false,
+  isTeacherAccount: false,
 
   // Plugins Utils
   creditUsage: null,

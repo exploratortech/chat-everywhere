@@ -26,7 +26,7 @@ export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
 
   const {
-    state: { conversations, user },
+    state: { conversations, user, isTeacherAccount },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -53,7 +53,7 @@ export const ChatbarSettings = () => {
   };
 
   const teacherPortalBtnOnClick = () => {
-    if (isEduUser) {
+    if (isTeacherAccount) {
       homeDispatch({
         field: 'showTeacherPortalModel',
         value: true,
@@ -92,19 +92,19 @@ export const ChatbarSettings = () => {
           />
         )}
 
+        {isTeacherAccount && (
+          <SidebarButton
+            text={t('Teacher Portal')}
+            icon={<IconHighlight size={18} />}
+            onClick={() => teacherPortalBtnOnClick()}
+          />
+        )}
         {isEduUser && (
-          <>
-            <SidebarButton
-              text={t('Teacher Portal')}
-              icon={<IconHighlight size={18} />}
-              onClick={() => teacherPortalBtnOnClick()}
-            />
-            <SidebarButton
-              text={t('Referral Program')}
-              icon={<IconCurrencyDollar size={18} />}
-              onClick={() => referralBtnOnClick()}
-            />
-          </>
+          <SidebarButton
+            text={t('Referral Program')}
+            icon={<IconCurrencyDollar size={18} />}
+            onClick={() => referralBtnOnClick()}
+          />
         )}
         {isProUser && (
           <SidebarButton
