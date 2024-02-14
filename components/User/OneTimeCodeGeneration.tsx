@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import { OneTimeCodePayload } from '@/types/one-time-code';
+import { OneTimeCodeInfoPayload } from '@/types/one-time-code';
 
 import HomeContext from '@/pages/api/home/home.context';
 
@@ -19,7 +19,7 @@ const OneTimeCodeGeneration = memo(() => {
   } = useContext(HomeContext);
 
   const [oneTimeCodeResponse, setOneTimeCodeResponse] =
-    useState<OneTimeCodePayload | null>(null);
+    useState<OneTimeCodeInfoPayload | null>(null);
 
   const getOneTimeCode = async (invalidate: boolean = false) => {
     const response = await fetch(`/api/teacher-portal/get-code`, {
@@ -31,7 +31,7 @@ const OneTimeCodeGeneration = memo(() => {
       },
     });
 
-    return (await response.json()) as OneTimeCodePayload;
+    return (await response.json()) as OneTimeCodeInfoPayload;
   };
 
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +43,8 @@ const OneTimeCodeGeneration = memo(() => {
           code: res.code,
           expiresAt: res.expiresAt,
           tempAccountProfiles: res.tempAccountProfiles,
+          maxQuota: res.maxQuota,
+          totalActiveTempAccount: res.totalActiveTempAccount,
         });
       });
     }
@@ -87,6 +89,8 @@ const OneTimeCodeGeneration = memo(() => {
                   code: res.code,
                   expiresAt: res.expiresAt,
                   tempAccountProfiles: res.tempAccountProfiles,
+                  maxQuota: res.maxQuota,
+                  totalActiveTempAccount: res.totalActiveTempAccount,
                 });
               })
               .finally(() => {

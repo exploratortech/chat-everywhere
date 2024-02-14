@@ -1,14 +1,11 @@
 import { DefaultMonthlyCredits } from '@/utils/config';
 
-import { OneTimeCodePayload } from '@/types/one-time-code';
 import { PluginID } from '@/types/plugin';
 import { RawRefereeProfile } from '@/types/referral';
 import { UserProfile, UserProfileQueryProps } from '@/types/user';
 
-import { deleteUserById } from './deleteUserById';
 import {
   CodeGenerationPayloadType,
-  generateOneCodeAndExpirationDate,
   generateReferralCodeAndExpirationDate,
 } from './referralCode';
 
@@ -243,95 +240,7 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
   }
 };
 
-export const getOneTimeCode = async (
-  userId: string,
-  invalidate: boolean = false,
-): Promise<OneTimeCodePayload | undefined> => {
-  try {
-    const supabase = getAdminSupabaseClient();
-    const { data: record, error } = await supabase
-      .from('one_time_codes')
-      .select('id, code, expired_at')
-      .eq('teacher_profile_id', userId)
-      .eq('is_valid', true);
-
-    if (invalidate && record && record.length > 0) {
-      // invalidate the existing code
-      for (const r of record) {
-        const oneTimeCodeId = r.id;
-        const { error } = await supabase
-          .from('one_time_codes')
-          .update({ is_valid: false })
-          .eq('id', oneTimeCodeId);
-
-        if (error) {
-          console.log('invalidate failed error', error);
-          throw error;
-        }
-      }
-    }
-    if (invalidate || !record || record.length === 0) {
-      let generatedCode = '';
-      let codeExists = true;
-      while (codeExists) {
-        const { code: newGeneratedCode, expiresAt: expirationDate } =
-          generateOneCodeAndExpirationDate();
-
-        generatedCode = newGeneratedCode;
-        const { data: existingCodes, error: existingCodesError } =
-          await supabase
-            .from('one_time_codes')
-            .select('code')
-            .eq('code', generatedCode)
-            .eq('is_valid', true);
-
-        if (existingCodesError) {
-          console.log('existingCodesError', existingCodesError);
-          throw existingCodesError;
-        }
-
-        codeExists = existingCodes.length > 0;
-        if (!codeExists) {
-          const { data, error } = await supabase
-            .from('one_time_codes')
-            .insert({
-              code: generatedCode,
-              expired_at: expirationDate,
-              teacher_profile_id: userId,
-              is_valid: true,
-            })
-            .single();
-
-          if (error) {
-            throw error;
-          }
-
-          return {
-            code: generatedCode,
-            expiresAt: expirationDate,
-            tempAccountProfiles: [],
-          };
-        }
-      }
-    } else {
-      const existed_record = record?.pop();
-      // get temp account profiles
-      const { data: tempProfiles, error: tempAccountProfilesError } =
-        await supabase
-          .from('temporary_account_profiles')
-          .select('id, created_at, uniqueId')
-          .eq('one_time_code_id', existed_record?.id);
-      return {
-        code: existed_record?.code,
-        expiresAt: existed_record?.expired_at,
-        tempAccountProfiles: tempProfiles || [],
-      };
-    }
-  } catch (e) {
-    console.log(e);
-    throw e;
-  }
-};
+export { getOneTimeCodeInfo } from './supabase/getOneTimeCodeInfo';
 
 export const getReferralCode = async (
   userId: string,
