@@ -59,12 +59,6 @@ const handler = async (req: Request) => {
     .order('created_at', { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1);
 
-  console.log({
-    messagesData,
-    messagesError,
-    count,
-  });
-
   if (messagesError) {
     console.error('Error fetching messages:', messagesError);
     return new Response('Error fetching messages', {
