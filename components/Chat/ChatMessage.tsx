@@ -26,9 +26,8 @@ import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import TokenCounter from './components/TokenCounter';
+import HomeContext from '@/components/home/home.context';
 
 import AssistantRespondMessage from './ChatMessage/AssistantRespondMessage';
 import { CreditCounter } from './CreditCounter';

@@ -1,8 +1,7 @@
 import { withCommonServerSideProps } from '@/utils/withCommonServerSideProps';
 
+import Home from '../components/home/home';
 import DefaultLayout from '@/components/layout/default';
-
-import Home from './api/home/home';
 
 export default function Index() {
   return (

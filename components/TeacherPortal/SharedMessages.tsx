@@ -17,7 +17,7 @@ import {
   StudentMessageSubmission,
 } from '@/types/share-messages-by-teacher-profile';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import Spinner from '../Spinner/Spinner';
 import Pagination from './Pagination';

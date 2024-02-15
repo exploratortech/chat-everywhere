@@ -21,7 +21,7 @@ import { removeSecondLastLine } from '@/utils/app/ui';
 
 import { Conversation, Message } from '@/types/chat';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { LineShareButton } from '../LineShareButton';
 import StudentShareMessageButton from '../StudentShareMessageButton';

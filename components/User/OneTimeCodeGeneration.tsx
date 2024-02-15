@@ -7,7 +7,7 @@ import { useTranslation } from 'next-i18next';
 
 import { OneTimeCodeInfoPayload } from '@/types/one-time-code';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import Spinner from '../Spinner/Spinner';

@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 
 import { getAvailableSpeechSourceLanguages } from '@/utils/app/i18n';
 import { saveOutputLanguage } from '@/utils/app/outputLanguage';
-
-import HomeContext from '@/pages/api/home/home.context';
 import { saveSpeechRecognitionLanguage } from '@/utils/app/speechRecognitionLanguage.ts';
+
+import HomeContext from '@/components/home/home.context';
 
 const SpeechRecognitionLanguageSelector = () => {
   const { t } = useTranslation('model');
@@ -28,7 +28,10 @@ const SpeechRecognitionLanguageSelector = () => {
           placeholder={t('Select a lang') || ''}
           value={speechRecognitionLanguage}
           onChange={(e) => {
-            homeDispatch({ field: 'speechRecognitionLanguage', value: e.target.value });
+            homeDispatch({
+              field: 'speechRecognitionLanguage',
+              value: e.target.value,
+            });
             saveSpeechRecognitionLanguage(e.target.value);
           }}
         >
@@ -45,6 +48,6 @@ const SpeechRecognitionLanguageSelector = () => {
       </div>
     </div>
   );
-}
+};
 
 export default SpeechRecognitionLanguageSelector;

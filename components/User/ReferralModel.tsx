@@ -9,7 +9,7 @@ import { useTranslation } from 'next-i18next';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { CodeGenerationPayloadType } from '@/utils/server/referralCode';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import ReferralProgramData from '../Referral/ReferralProgramData';

@@ -3,10 +3,10 @@ import { FC, useContext } from 'react';
 
 import { Conversation } from '@/types/chat';
 
-import HomeContext from '@/pages/api/home/home.context';
+import { SidebarToggleButton } from '../Sidebar/components/SidebarToggleButton';
+import HomeContext from '@/components/home/home.context';
 
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
-import { SidebarToggleButton } from '../Sidebar/components/SidebarToggleButton';
 
 interface Props {
   selectedConversation: Conversation;
@@ -18,10 +18,7 @@ export const Navbar: FC<Props> = ({
   onNewConversation,
 }) => {
   const {
-    state: {
-      showChatbar,
-      showPromptbar,
-    },
+    state: { showChatbar, showPromptbar },
     toggleChatbar,
     togglePromptbar,
   } = useContext(HomeContext);
@@ -41,7 +38,8 @@ export const Navbar: FC<Props> = ({
       </div>
 
       <div className="flex-grow flex-shrink max-w-[240px] mx-auto text-center overflow-hidden text-ellipsis whitespace-nowrap">
-        {selectedConversation.name !== 'New conversation' && selectedConversation.name}
+        {selectedConversation.name !== 'New conversation' &&
+          selectedConversation.name}
       </div>
 
       <div>

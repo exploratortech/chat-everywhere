@@ -7,9 +7,8 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import { useLogger } from '@/components/Hooks/useLogger';
+import HomeContext from '@/components/home/home.context';
 
 import { v4 } from 'uuid';
 
@@ -24,7 +23,14 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   const { logGeneralEvent } = useLogger();
 
   const {
-    state: { currentSpeechId, isLoading, isPlaying, user, messageIsStreaming, isPaidUser },
+    state: {
+      currentSpeechId,
+      isLoading,
+      isPlaying,
+      user,
+      messageIsStreaming,
+      isPaidUser,
+    },
     playMessage,
     stopPlaying,
   } = useContext(HomeContext);
@@ -50,7 +56,7 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   const getPlayerIcon = () => {
     if (isComponentCurrentlyBeingPlayed) {
       if (isLoading) {
-        return <IconLoader fill="none" size={18} className='animate-spin' />;
+        return <IconLoader fill="none" size={18} className="animate-spin" />;
       } else if (isPlaying) {
         return (
           <IconPlayerStop onClick={playStopOnClick} fill="none" size={18} />

@@ -49,15 +49,12 @@ import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 
-import HomeContext from '../../pages/api/home/home.context';
-import {
-  HomeInitialState,
-  initialState,
-} from '../../pages/api/home/home.state';
-
 import { useAzureTts } from '@/components/Hooks/useAzureTts';
 import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
 import OrientationBlock from '@/components/Mobile/OrientationBlock';
+
+import HomeContext from '../home/home.context';
+import { HomeInitialState, initialState } from '../home/home.state';
 
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';

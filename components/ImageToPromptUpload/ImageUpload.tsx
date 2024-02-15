@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import DropZone from './Dropzone';
 import ImagePreviewModel from './ImagePreviewModel';
@@ -96,13 +96,19 @@ const ImageToPromptUpload = () => {
         user,
       });
     } catch (e) {
-      const isErrorMessage =  e && typeof e === 'object' && 'message' in e && typeof e.message === 'string'
-      const isMaxSizeError = isErrorMessage && (e.message as string).includes('maximum allowed size')
+      const isErrorMessage =
+        e &&
+        typeof e === 'object' &&
+        'message' in e &&
+        typeof e.message === 'string';
+      const isMaxSizeError =
+        isErrorMessage &&
+        (e.message as string).includes('maximum allowed size');
       if (isMaxSizeError) {
         toast.error(imageToPromptT('The Max Image Size is 20MB'));
       } else if (isErrorMessage) {
         toast.error(e.message as string);
-      } 
+      }
       console.log(e);
     }
 

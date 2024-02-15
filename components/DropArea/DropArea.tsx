@@ -1,7 +1,8 @@
 import { useContext, useRef } from 'react';
 
-import HomeContext from '@/pages/api/home/home.context';
 import { DragDataType } from '@/types/drag';
+
+import HomeContext from '@/components/home/home.context';
 
 interface Props {
   allowedDragTypes?: DragDataType[];
@@ -10,13 +11,19 @@ interface Props {
   onDrop: (e: React.DragEvent<HTMLElement>, index: number) => void;
 }
 
-const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop }: Props) => {
+const DropArea = ({
+  allowedDragTypes = [],
+  canDrop = () => false,
+  index,
+  onDrop,
+}: Props) => {
   const {
     state: { currentDrag },
   } = useContext(HomeContext);
 
   const indicatorRef = useRef<HTMLDivElement>(null);
-  const isDragTypeAllowed = !!currentDrag && allowedDragTypes.includes(currentDrag.type);
+  const isDragTypeAllowed =
+    !!currentDrag && allowedDragTypes.includes(currentDrag.type);
 
   const handleDrop = (e: any) => {
     onDrop(e, index);
@@ -25,8 +32,7 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
 
   const onDragEnter = (e: any) => {
     if (canDrop() && isDragTypeAllowed) {
-      if (indicatorRef.current)
-        indicatorRef.current.style.height = '2rem';
+      if (indicatorRef.current) indicatorRef.current.style.height = '2rem';
     }
   };
 
@@ -39,9 +45,8 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
   };
 
   const removeHighlight = (e: any) => {
-    if (indicatorRef.current)
-      indicatorRef.current.style.height = '0px';
-  }
+    if (indicatorRef.current) indicatorRef.current.style.height = '0px';
+  };
 
   return (
     <div
@@ -54,7 +59,11 @@ const DropArea = ({ allowedDragTypes = [], canDrop = () => false, index, onDrop 
       <div
         className={`
           absolute h-8 my-auto top-0 left-0 right-0 -translate-y-1/2
-          ${ isDragTypeAllowed ? 'pointer-events-auto h-[3rem]' : 'pointer-events-none h-8' }
+          ${
+            isDragTypeAllowed
+              ? 'pointer-events-auto h-[3rem]'
+              : 'pointer-events-none h-8'
+          }
         `}
         onDrop={handleDrop}
         onDragEnter={onDragEnter}
