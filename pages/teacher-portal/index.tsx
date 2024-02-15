@@ -1,4 +1,9 @@
+import { useEffect } from 'react';
+
+import { useRouter } from 'next/router';
+
 import { useCreateReducer } from '@/hooks/useCreateReducer';
+import useUserProfile from '@/hooks/useUserProfile';
 
 import { withCommonServerSideProps } from '@/utils/withCommonServerSideProps';
 
@@ -7,6 +12,7 @@ import Sidebar from '@/components/TeacherPortal/Sidebar';
 import { TeacherPortalContext } from '@/components/TeacherPortal/teacher-portal.context';
 import { portalState } from '@/components/TeacherPortal/teacher-portal.state';
 import OneTimeCodeGeneration from '@/components/User/OneTimeCodeGeneration';
+import HomeContext from '@/components/home/home.context';
 import DefaultLayout from '@/components/layout/default';
 
 const TeacherPortal = () => {
@@ -19,6 +25,7 @@ const TeacherPortal = () => {
   return (
     <DefaultLayout>
       <TeacherPortalContext.Provider value={{ ...PortalState }}>
+        <RedirectToHomePage />
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center text-center mobile:block">
             <div className="w-full tablet:max-w-[90vw] transform overflow-hidden text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex h-[100dvh] tablet:max-h-[unset] !max-w-[unset] !rounded-none">
@@ -36,5 +43,23 @@ const TeacherPortal = () => {
 };
 
 export default TeacherPortal;
+
+function RedirectToHomePage() {
+  const { data: userProfile, status, isFetched } = useUserProfile({});
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'success' && isFetched) {
+      if (!userProfile?.isTeacherAccount) {
+        router.replace('/');
+      }
+    }
+    if (status === 'error') {
+      router.replace('/');
+    }
+  }, [status, isFetched, userProfile, router]);
+
+  return null;
+}
 
 export const getServerSideProps = withCommonServerSideProps();

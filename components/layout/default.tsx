@@ -11,6 +11,7 @@ import { event } from 'nextjs-google-analytics';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
+import useUserProfile from '@/hooks/useUserProfile';
 
 import { fetchShareableConversation } from '@/utils/app/api';
 import {
@@ -396,17 +397,18 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     selectedConversation,
   ]);
 
+  const { refetch: fetchUserProfile } = useUserProfile({
+    userId: session?.user.id,
+  });
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
       // User info has been updated for this session
       if (session.user.id === user?.id) return;
-
-      userProfileQuery({
-        client: supabase,
-        userId: session.user.id,
-      })
-        .then((userProfile) => {
+      fetchUserProfile()
+        .then((result) => {
+          const userProfile = result.data;
+          if (!userProfile) return;
           dispatch({ field: 'showLoginSignUpModel', value: false });
           dispatch({ field: 'showOneTimeCodeLoginModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
