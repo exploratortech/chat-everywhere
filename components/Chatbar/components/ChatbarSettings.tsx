@@ -10,13 +10,13 @@ import {
 import { useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import HomeContext from '@/components/home/home.context';
-
 import CloudSyncStatusComponent from '../../Sidebar/components/CloudSyncComponent';
 import UserAccountBadge from '@/components/User/UserAccountBadge';
+import HomeContext from '@/components/home/home.context';
 
 import { SidebarButton } from '../../Sidebar/SidebarButton';
 import ChatbarContext from '../Chatbar.context';
@@ -52,9 +52,10 @@ export const ChatbarSettings = () => {
     }
   };
 
+  const router = useRouter();
   const teacherPortalBtnOnClick = () => {
     if (isTeacherAccount) {
-      // TODO:
+      router.push('/teacher-portal');
     }
   };
 
