@@ -40,7 +40,7 @@ export default function Sidebar({ className = '' }: Props) {
     {
       icon: <IconRating12Plus />,
       name: t('One-time code'),
-      value: 'account',
+      value: 'one-time-code',
       callback: () => {
         trackEvent('Account button clicked');
         dispatch({
@@ -52,7 +52,7 @@ export default function Sidebar({ className = '' }: Props) {
     {
       icon: <IconBuildingBroadcastTower />,
       name: t('Shared message'),
-      value: 'app',
+      value: 'shared-message',
       callback: () => {
         trackEvent('App button clicked');
         dispatch({
