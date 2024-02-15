@@ -64,7 +64,7 @@ const SharedMessages = memo(() => {
   return (
     <div className="">
       <h1 className="font-bold mb-4">{t('Shared Messages')}</h1>
-      {isLoading && (
+      {isLoading && !sharedMessages && (
         <div className="flex mt-[50%]">
           <Spinner size="16px" className="mx-auto" />
         </div>
@@ -83,7 +83,7 @@ const SharedMessages = memo(() => {
         ))}
       </div>
 
-      {!isLoading && sharedMessages && sharedMessages.length > 0 && (
+      {sharedMessages && sharedMessages.length > 0 && (
         <div className="my-4">
           <Pagination
             pagination={pagination}
