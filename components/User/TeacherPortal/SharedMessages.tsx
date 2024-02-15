@@ -1,5 +1,13 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import React, { memo, useContext, useEffect, useState } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  memo,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
@@ -18,13 +26,11 @@ import ZoomInSharedMessageItem from './ZoomInSharedMessageItem';
 
 const SharedMessages = memo(() => {
   const { t } = useTranslation('model');
-  const supabase = useSupabaseClient();
-  const [isLoading, setIsLoading] = useState(true);
   const {
     state: { user },
   } = useContext(HomeContext);
   const [pagination, setPagination] = useState<PaginationType>({
-    current_page: 0,
+    current_page: 1,
     total_pages: 0,
     next_page: 0,
     prev_page: 0,
@@ -34,45 +40,15 @@ const SharedMessages = memo(() => {
     ShareMessagesByTeacherProfilePayload['submissions'] | null
   >(null);
 
-  const fetchSharedMessages = async (page = 1) => {
-    if (pagination.current_page === page) {
-      return;
-    }
-    setIsLoading(true);
-    const payload = {
-      accessToken: (await supabase.auth.getSession()).data.session
-        ?.access_token,
-      page,
-    };
-    try {
-      const response = await fetch('/api/get-shared-messages-with-teacher', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-      if (response.status !== 200 || !response.ok) {
-        throw new Error('Failed to fetch shared messages');
-      }
-      const data =
-        (await response.json()) as ShareMessagesByTeacherProfilePayload;
-      setSharedMessages(data.submissions || null);
-      setPagination({
-        current_page: data.pagination.current_page,
-        total_pages: data.pagination.total_pages,
-        next_page: data.pagination.next_page,
-        prev_page: data.pagination.prev_page,
-      });
-    } catch (error) {
-      console.error(
-        'There has been a problem with your fetch operation:',
-        error,
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<StudentMessageSubmission | null>(null);
+
+  const { refetch: fetchSharedMessages, isFetching: isLoading } =
+    useFetchSharedMessages(
+      pagination.current_page,
+      setSharedMessages,
+      setPagination,
+    );
 
   useEffect(() => {
     if (user) {
@@ -81,11 +57,8 @@ const SharedMessages = memo(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const [selectedSubmission, setSelectedSubmission] =
-    useState<StudentMessageSubmission | null>(null);
-
   const handlePageChange = (page: number) => {
-    fetchSharedMessages(page);
+    setPagination((prev) => ({ ...prev, current_page: page }));
   };
 
   return (
@@ -134,3 +107,55 @@ const SharedMessages = memo(() => {
 SharedMessages.displayName = 'SharedMessages';
 
 export default SharedMessages;
+
+export const useFetchSharedMessages = (
+  page: number = 1,
+  setSharedMessages: Dispatch<
+    SetStateAction<ShareMessagesByTeacherProfilePayload['submissions'] | null>
+  >,
+  setPagination: Dispatch<SetStateAction<PaginationType>>,
+) => {
+  const supabase = useSupabaseClient();
+  return useQuery(
+    ['studentSharedMessages', page],
+    async () => {
+      const payload = {
+        accessToken: (await supabase.auth.getSession()).data.session
+          ?.access_token,
+        page,
+      };
+      const response = await fetch('/api/get-shared-messages-with-teacher', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      if (response.status !== 200 || !response.ok) {
+        throw new Error('Failed to fetch shared messages');
+      }
+      const data = await response.json();
+      return data;
+    },
+    {
+      keepPreviousData: true,
+      refetchInterval: 10000,
+      refetchOnWindowFocus: true,
+      onSuccess: (data) => {
+        setSharedMessages(data.submissions || null);
+        setPagination({
+          current_page: data.pagination.current_page,
+          total_pages: data.pagination.total_pages,
+          next_page: data.pagination.next_page,
+          prev_page: data.pagination.prev_page,
+        });
+      },
+      onError: (error) => {
+        console.error(
+          'There has been a problem with your fetch operation:',
+          error,
+        );
+      },
+    },
+  );
+};
