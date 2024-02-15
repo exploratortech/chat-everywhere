@@ -135,7 +135,6 @@
   "Edit": "編輯",
   "Test": "測試",
   "You can send message to the topic specified (with retained flag on), Chat Everywhere will be able to access the latest message.": "設定MQTT裝置來發送訊息到你指定的Topic (請確認訊息中有retain的標籤)。",
-
   "Speech configuration": "AI朗讀設定",
   "Speech Speed": "語速",
   "Slow": "慢",
@@ -146,5 +145,12 @@
   "Active student account": "啟用的學生帳戶",
   "One-time Code": "一次性代碼",
   "Shared Messages": "分享訊息",
-  "Submitted at {{date}}": "提交於 {{date}}"
+  "Submitted at {{date}}": "提交於 {{date}}",
+  "Unique ID": "唯一ID",
+  "Code": "代碼",
+  "Created At": "創建時間",
+  "Expired At": "過期時間",
+  "Remove": "移除",
+  "Temporary account removed": "臨時帳戶已移除",
+  "Failed to remove temporary account": "無法移除臨時帳戶"
 }
