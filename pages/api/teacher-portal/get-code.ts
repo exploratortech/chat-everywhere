@@ -30,7 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({
         code,
         expiresAt,
-        tempAccountProfiles,
+        tempAccountProfiles: tempAccountProfiles || [],
         maxQuota,
         totalActiveTempAccount,
       }),
