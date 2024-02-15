@@ -15,25 +15,35 @@ export const getOneTimeCodeInfo = async (
   try {
     const supabase = getAdminSupabaseClient();
 
-    const [recordResult, allValidOneTimeCodesResult] = await Promise.all([
-      supabase.rpc('get_latest_valid_one_time_code_info', {
-        teacher_profile_id_param: userId,
-      }),
-      supabase
-        .from('one_time_codes')
-        .select('id')
-        .eq('teacher_profile_id', userId)
-        .eq('is_valid', true),
-    ]);
+    const [profileResult, recordResult, allValidOneTimeCodesResult] =
+      await Promise.all([
+        supabase
+          .from('profiles')
+          .select('one_time_code_duration')
+          .eq('id', userId)
+          .single(),
+        supabase.rpc('get_latest_valid_one_time_code_info', {
+          teacher_profile_id_param: userId,
+        }),
+        supabase
+          .from('one_time_codes')
+          .select('id')
+          .eq('teacher_profile_id', userId)
+          .eq('is_valid', true),
+      ]);
 
+    const { data: profile, error: profileError } = profileResult;
     const { data: record, error: recordError } = recordResult;
     const { data: allValidOneTimeCodes, error: allValidOneTimeCodesError } =
       allValidOneTimeCodesResult;
 
-    if (recordError || allValidOneTimeCodesError) {
-      console.log('recordError', recordError);
-      console.log('allValidOneTimeCodesError', allValidOneTimeCodesError);
-      throw recordError || allValidOneTimeCodesError;
+    if (profileError || recordError || allValidOneTimeCodesError) {
+      console.error('Error fetching data:', {
+        profileError,
+        recordError,
+        allValidOneTimeCodesError,
+      });
+      throw profileError || recordError || allValidOneTimeCodesError;
     }
 
     // Invalidate the existing code if requested
@@ -59,7 +69,7 @@ export const getOneTimeCodeInfo = async (
       let generatedCode, expirationDate;
       do {
         ({ code: generatedCode, expiresAt: expirationDate } =
-          generateOneCodeAndExpirationDate());
+          generateOneCodeAndExpirationDate(profile?.one_time_code_duration));
 
         const { data: existingCodes, error: existingCodesError } =
           await supabase
