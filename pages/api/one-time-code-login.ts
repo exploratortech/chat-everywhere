@@ -66,9 +66,8 @@ async function verifyCodeAndReferrerAccount(code: string) {
 }
 
 async function createTempUser(code: string, codeId: string, uniqueId: string) {
-  const randomUniqueId =
-    uuidv4().replace(/-/g, '') + `-${uniqueId.replace(/\W/g, '')}`;
-  const randomEmail = `temp-user-${randomUniqueId}-${code}@chateverywhere.app`;
+  const randomUniqueId = uuidv4().replace(/-/g, '');
+  const randomEmail = `temp-user-${code}-${randomUniqueId}@chateverywhere.app`;
   const randomPassword = uuidv4();
   const createUserRes = await supabase.auth.admin.createUser({
     email: randomEmail,
