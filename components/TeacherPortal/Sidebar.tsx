@@ -7,9 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import HomeContext from '@/pages/api/home/home.context';
-
-import { TeacherPortalContext } from './TeacherPortalModal';
+import { TeacherPortalContext } from './teacher-portal.context';
 
 type Props = {
   className?: string;
@@ -27,13 +25,7 @@ export default function Sidebar({ className = '' }: Props) {
   const {
     state: { showing },
     dispatch,
-    closeModel,
   } = useContext(TeacherPortalContext);
-  const {
-    state: { user },
-    dispatch: homeDispatch,
-    handleUserLogout,
-  } = useContext(HomeContext);
   const { t } = useTranslation('model');
   const iconClass = 'h-[18px] tablet:h-[22px] tablet:w-[36px]';
   const items: sideBarItemType[] = [

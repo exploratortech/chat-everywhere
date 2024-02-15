@@ -19,7 +19,7 @@ import {
 
 import HomeContext from '@/pages/api/home/home.context';
 
-import Spinner from '../../Spinner/Spinner';
+import Spinner from '../Spinner/Spinner';
 import Pagination from './Pagination';
 import SharedMessageItem from './SharedMessageItem';
 import ZoomInSharedMessageItem from './ZoomInSharedMessageItem';

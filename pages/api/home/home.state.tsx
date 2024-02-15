@@ -42,7 +42,6 @@ export interface HomeInitialState {
   showLoginSignUpModel: boolean;
   showOneTimeCodeLoginModel: boolean;
   showReferralModel: boolean;
-  showTeacherPortalModel: boolean;
   showUsageModel: boolean;
   showSurveyModel: boolean;
   showNewsModel: boolean;
@@ -107,7 +106,6 @@ export const initialState: HomeInitialState = {
   showLoginSignUpModel: false,
   showOneTimeCodeLoginModel: false,
   showReferralModel: false,
-  showTeacherPortalModel: false,
   showUsageModel: false,
   showSurveyModel: false,
   showNewsModel: false,

@@ -54,10 +54,7 @@ export const ChatbarSettings = () => {
 
   const teacherPortalBtnOnClick = () => {
     if (isTeacherAccount) {
-      homeDispatch({
-        field: 'showTeacherPortalModel',
-        value: true,
-      });
+      // TODO:
     }
   };
 
