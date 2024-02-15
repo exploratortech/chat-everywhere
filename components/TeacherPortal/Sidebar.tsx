@@ -1,9 +1,12 @@
 import {
+  IconArrowBack,
   IconBuildingBroadcastTower,
   IconRating12Plus,
 } from '@tabler/icons-react';
 import React, { cloneElement, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { useRouter } from 'next/router';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
@@ -27,6 +30,11 @@ export default function Sidebar({ className = '' }: Props) {
     dispatch,
   } = useContext(TeacherPortalContext);
   const { t } = useTranslation('model');
+  const router = useRouter();
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push('/');
+  };
   const iconClass = 'h-[18px] tablet:h-[22px] tablet:w-[36px]';
   const items: sideBarItemType[] = [
     {
@@ -83,7 +91,17 @@ export default function Sidebar({ className = '' }: Props) {
         <div className="py-6 flex flex-col">{getRenderItems(items)}</div>
       </div>
 
-      <div className="flex flex-col"></div>
+      <div className="flex flex-col">
+        <a
+          href="#"
+          className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"
+          onClick={handleBackClick}
+        >
+          <IconArrowBack className={iconClass} />
+
+          <div className="tablet:hidden">{t('Back')}</div>
+        </a>
+      </div>
     </div>
   );
 }
