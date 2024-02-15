@@ -81,6 +81,10 @@ Start chatting and enjoy!
 4. Uncomment the line where url is passed to `url: replaceLocalhost(url)`, in function `nextLegDescribe`
 5. Now that your supabase bucket is accessible from the internet, so that the next leg api can access it.
 
+# Set up the Teacher Portal for Local development
+1. Create a supabase bucket `student_message_submissions_image` and make it public in the Local supabase server.
+
+
 # Database migration guide
 1. Make the changes in local Supabase emulator
 2. Generate a new migration file with `supabase migration new migration_file_name`
