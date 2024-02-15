@@ -3,6 +3,15 @@ import { useTranslation } from 'react-i18next';
 
 import { TempAccountProfiles } from '@/types/one-time-code';
 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
 
 import dayjs from 'dayjs';
@@ -27,36 +36,40 @@ const TemporaryAccountProfileList = ({
         {t('Active student account')}{' '}
         <label>{`(${totalActiveTempAccount}/${maxQuota})`}</label>
       </h2>
-      <table className="table-fixed w-full">
-        <thead>
-          <tr>
-            <th>Unique ID</th>
-            <th>Code Used</th>
-            <th>Created At</th>
-            <th>Expired At</th>
-          </tr>
-        </thead>
-        <tbody>
+      <Table>
+        <TableHeader>
+          <TableRow className="border-[#4c4c4c]">
+            <TableHead>Unique ID</TableHead>
+            <TableHead>Code Used</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead>Expired At</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {tempAccountProfiles.map((profile) => (
-            <tr key={`temp-account-${profile.id}`} className="text-sm">
-              <td>{profile.uniqueId}</td>
-              <td>
+            <TableRow
+              key={`temp-account-${profile.id}`}
+              className="text-sm border-[#4c4c4c]"
+            >
+              <TableCell>{profile.uniqueId}</TableCell>
+              <TableCell>
                 <span
                   onClick={() => handleCopy(profile.code)}
                   className="cursor-pointer inline bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1"
                 >
                   {profile.code}
                 </span>
-              </td>
-              <td>{dayjs(profile.created_at).format('YYYY-MM-DD HH:mm')}</td>
-              <td>
+              </TableCell>
+              <TableCell>
+                {dayjs(profile.created_at).format('YYYY-MM-DD HH:mm')}
+              </TableCell>
+              <TableCell>
                 <CodeTimeLeft endOfDay={profile.expired_at} />
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-      ​
+        </TableBody>
+      </Table>
     </div>
   );
 };
