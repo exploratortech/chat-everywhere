@@ -22,7 +22,6 @@ import HomeContext from '@/components/home/home.context';
 import Spinner from '../Spinner/Spinner';
 import Pagination from './Pagination';
 import SharedMessageItem from './SharedMessageItem';
-import ZoomInSharedMessageItem from './ZoomInSharedMessageItem';
 
 const SharedMessages = memo(() => {
   const { t } = useTranslation('model');
@@ -39,9 +38,6 @@ const SharedMessages = memo(() => {
   const [sharedMessages, setSharedMessages] = useState<
     ShareMessagesByTeacherProfilePayload['submissions'] | null
   >(null);
-
-  const [selectedSubmission, setSelectedSubmission] =
-    useState<StudentMessageSubmission | null>(null);
 
   const { refetch: fetchSharedMessages, isFetching: isLoading } =
     useFetchSharedMessages(
@@ -75,8 +71,7 @@ const SharedMessages = memo(() => {
       <div className="flex flex-wrap gap-4">
         {sharedMessages?.map((submission) => (
           <SharedMessageItem
-            onSelected={(submission) => setSelectedSubmission(submission)}
-            className="cursor-pointer max-w-[300px] max-h-[300px] w-full overflow-hidden"
+            className=""
             key={submission.id}
             submission={submission}
           />
@@ -91,15 +86,6 @@ const SharedMessages = memo(() => {
           />
         </div>
       )}
-
-      <ZoomInSharedMessageItem
-        submission={selectedSubmission}
-        open={!!selectedSubmission}
-        onOpen={() => {}}
-        onClose={() => {
-          setSelectedSubmission(null);
-        }}
-      />
     </div>
   );
 });
