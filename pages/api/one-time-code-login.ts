@@ -28,6 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
         status: 400,
       });
     } else {
+      console.error('Unknown error:', error);
       return new Response('An unknown error occurred', { status: 400 });
     }
   }
@@ -53,13 +54,20 @@ async function verifyCodeAndReferrerAccount(code: string) {
     throw error;
   }
 
-  if (data[0].has_quota === false) {
-    throw new Error('Referrer exceeded the quota');
-  }
-  if (data[0].code_is_valid === false) {
+  if (!data || !data.length) {
+    console.error('check_otc_quota_and_validity:', data);
     throw new Error('Invalid code');
   }
-  if (data[0].referrer_is_teacher_account === false) {
+  if (!data[0]?.has_quota) {
+    throw new Error('Referrer exceeded the quota');
+  }
+  if (!data[0].code_is_valid) {
+    throw new Error('Invalid code');
+  }
+  if (!data[0].code_is_not_expired) {
+    throw new Error('Code is expired');
+  }
+  if (!data[0].referrer_is_teacher_account) {
     throw new Error('Referrer is not a teacher account');
   }
   return data[0].otc_id;
