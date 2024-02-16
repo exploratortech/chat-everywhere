@@ -110,7 +110,7 @@ export const useGetOneTimeCode = (
     },
     {
       enabled: !!userId,
-      refetchInterval: 10000, // 10 seconds
+      refetchInterval: 3000, // 3 seconds
       refetchOnWindowFocus: true,
     },
   );

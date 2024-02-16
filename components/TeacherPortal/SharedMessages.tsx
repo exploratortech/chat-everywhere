@@ -125,7 +125,7 @@ export const useFetchSharedMessages = (
     },
     {
       keepPreviousData: true,
-      refetchInterval: 10000,
+      refetchInterval: 3000, // 3 seconds
       refetchOnWindowFocus: true,
       onSuccess: (data) => {
         setSharedMessages(data.submissions || null);
