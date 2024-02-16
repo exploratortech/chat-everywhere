@@ -31,7 +31,15 @@ const OneTimeCodeGeneration = memo(() => {
   // Trigger code invalidation and refetch
   const regenerateCode = () => {
     setInvalidateCode(true);
-    oneTimeCodeQuery.refetch().finally(() => setInvalidateCode(false));
+    oneTimeCodeQuery
+      .refetch()
+      .then(() => {
+        toast.success(t('Code regenerated'));
+      })
+      .catch(() => {
+        toast.error(t('Failed to regenerate code'));
+      })
+      .finally(() => setInvalidateCode(false));
   };
 
   return (

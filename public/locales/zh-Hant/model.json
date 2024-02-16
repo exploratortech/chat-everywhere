@@ -154,5 +154,7 @@
   "Temporary account removed": "臨時帳戶已移除",
   "Failed to remove temporary account": "無法移除臨時帳戶",
   "Teacher Portal": "教師專區",
-  "Back": "返回"
+  "Back": "返回",
+  "Code regenerated": "代碼已重新生成",
+  "Failed to regenerate code": "無法重新生成代碼"
 }
