@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 
+import { trackEvent } from '@/utils/app/eventTracking';
+
 import HomeContext from '@/components/home/home.context';
 
 import { encode } from 'base64-arraybuffer';
@@ -60,6 +62,7 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
       }
       toast.success(t('Message shared successfully'));
       setLoading(false);
+      trackEvent('Temp account message submission');
     } catch (error) {
       console.error(
         'There has been a problem with your fetch operation:',

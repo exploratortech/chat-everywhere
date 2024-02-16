@@ -1,3 +1,4 @@
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -40,6 +41,9 @@ const handler = async (req: Request): Promise<Response> => {
   const user = await createTempUser(code, codeId, uniqueId);
 
   // 3. Return login info to the client
+  serverSideTrackEvent(user.userId, 'One-time code redeemed', {
+    tempAccountName: uniqueId,
+  });
   return new Response(JSON.stringify(user), { status: 200 });
 };
 

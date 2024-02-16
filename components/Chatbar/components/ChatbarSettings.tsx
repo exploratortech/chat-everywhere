@@ -55,6 +55,7 @@ export const ChatbarSettings = () => {
   const router = useRouter();
   const teacherPortalBtnOnClick = () => {
     if (isTeacherAccount) {
+      trackEvent('Teacher portal clicked');
       router.push('/teacher-portal');
     }
   };
