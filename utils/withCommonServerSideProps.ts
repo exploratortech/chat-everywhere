@@ -44,7 +44,7 @@ export const withCommonServerSideProps =
     return {
       props: {
         ...commonProps,
-        ...additionalProps,
       },
+      ...additionalProps,
     };
   };
