@@ -18,9 +18,7 @@ const SharedMessageItem = ({
   const { t } = useTranslation('model');
   const SubmissionContent = ({ overflow }: { overflow: boolean }) => (
     <div>
-      <div className="font-bold">
-        {submission.temporary_account_profiles.uniqueId}
-      </div>
+      <div className="font-bold">{submission.student_name}</div>
       <div className="text-sm text-neutral-400">
         {t('Submitted at {{date}}', {
           date: dayjs(submission.created_at).format('YYYY-MM-DD HH:mm'),

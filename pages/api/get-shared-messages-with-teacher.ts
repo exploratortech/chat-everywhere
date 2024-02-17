@@ -49,9 +49,7 @@ const handler = async (req: Request) => {
       message_content,
       image_file_url,
       created_at,
-      temporary_account_profiles (
-        uniqueId
-      )
+      student_name
     `,
       { count: 'exact' },
     )

@@ -64,6 +64,7 @@ const handler = async (req: Request) => {
   }
   const temporaryAccountId = profileData[0].temp_account_id;
   const teacherProfileId = profileData[0].teacher_profile_id;
+  const student_name = profileData[0].uniqueid;
 
   let imagePublicUrl = '';
 
@@ -100,6 +101,7 @@ const handler = async (req: Request) => {
         temporary_account_profile_id: temporaryAccountId,
         image_file_url: imagePublicUrl,
         teacher_profile_id: teacherProfileId,
+        student_name: student_name,
       },
     ]);
 

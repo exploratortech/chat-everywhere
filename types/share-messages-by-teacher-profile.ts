@@ -5,9 +5,7 @@ export interface StudentMessageSubmission {
   message_content: string;
   image_file_url: string;
   created_at: string;
-  temporary_account_profiles: {
-    uniqueId: string;
-  };
+  student_name: string;
 }
 
 export type ShareMessagesByTeacherProfilePayload = {
