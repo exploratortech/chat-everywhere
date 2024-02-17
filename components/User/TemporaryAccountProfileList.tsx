@@ -2,6 +2,7 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from 'react-query';
+import { trackEvent } from '@/utils/app/eventTracking';
 
 import { TempAccountProfiles } from '@/types/one-time-code';
 
@@ -44,6 +45,7 @@ const TemporaryAccountProfileList = ({
         onSuccess: () => {
           toast.success(t('Temporary account removed'));
           queryClient.invalidateQueries(['getOneTimeCode']);
+          trackEvent('Teacher portal remove temp account');
         },
         onError: (error) => {
           toast.error(t('Failed to remove temporary account'));

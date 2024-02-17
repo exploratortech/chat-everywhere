@@ -1,9 +1,11 @@
 import { IconRefresh } from '@tabler/icons-react';
-import React, { memo, useContext, useEffect, useState } from 'react';
+import React, { memo, useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
+
+import { trackEvent } from '@/utils/app/eventTracking';
 
 import { OneTimeCodeInfoPayload } from '@/types/one-time-code';
 
@@ -39,7 +41,10 @@ const OneTimeCodeGeneration = memo(() => {
       .catch(() => {
         toast.error(t('Failed to regenerate code'));
       })
-      .finally(() => setInvalidateCode(false));
+      .finally(() => {
+        setInvalidateCode(false);
+        trackEvent('Teacher portal generate code');
+      });
   };
 
   return (
