@@ -37,14 +37,21 @@ export const withCommonServerSideProps =
     };
 
     let additionalProps = {};
+    let additionalResult: Partial<GetServerSidePropsResult<any>> = {};
     if (additionalLogic) {
-      additionalProps = await additionalLogic(context);
+      const result = await additionalLogic(context);
+      if ('props' in result) {
+        additionalProps = result.props;
+      } else {
+        additionalResult = result;
+      }
     }
 
     return {
       props: {
         ...commonProps,
+        ...additionalProps,
       },
-      ...additionalProps,
+      ...additionalResult,
     };
   };
