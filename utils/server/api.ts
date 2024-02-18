@@ -141,22 +141,20 @@ export const getEndpointsAndKeys = (
   includeGPT4: boolean = false,
   requestCountryCode?: string,
 ): [(string | undefined)[], (string | undefined)[]] => {
-  let endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
-  let keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
+  const endpoints: (string | undefined)[] = includeGPT4
+    ? [...AZURE_OPENAI_GPT_4_ENDPOINTS]
+    : [...AZURE_OPENAI_ENDPOINTS];
+  const keys: (string | undefined)[] = includeGPT4
+    ? [...AZURE_OPENAI_GPT_4_KEYS]
+    : [...AZURE_OPENAI_KEYS];
 
-  if (includeGPT4) {
-    endpoints = [...AZURE_OPENAI_GPT_4_ENDPOINTS];
-    keys = [...AZURE_OPENAI_GPT_4_KEYS];
-  }
+  const shuffled = shuffleEndpointsAndKeys([...endpoints], [...keys], 1);
+  const filteredEndpoints = shuffled.endpoints.filter(
+    (endpoint) => endpoint !== undefined,
+  );
+  const filteredKeys = shuffled.keys.filter((key) => key !== undefined);
 
-  const shuffled = shuffleEndpointsAndKeys(endpoints, keys, 1); 
-  endpoints = shuffled.endpoints;
-  keys = shuffled.keys;
-
-  endpoints = endpoints.filter((endpoint) => endpoint !== undefined);
-  keys = keys.filter((key) => key !== undefined);
-
-  return [endpoints, keys];
+  return [filteredEndpoints, filteredKeys];
 };
 
 const shuffleEndpointsAndKeys = (
