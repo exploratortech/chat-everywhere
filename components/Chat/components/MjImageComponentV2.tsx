@@ -20,9 +20,10 @@ import { removeSecondLastLine } from '@/utils/app/ui';
 
 import { Conversation, Message } from '@/types/chat';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { LineShareButton } from '../LineShareButton';
+import StudentShareMessageButton from '../StudentShareMessageButton';
 
 import dayjs from 'dayjs';
 
@@ -40,10 +41,17 @@ export default function MjImageComponentV2({
   prompt,
 }: MjImageComponentProps) {
   const {
-    state: { user, selectedConversation, conversations, messageIsStreaming },
+    state: {
+      user,
+      isTempUser,
+      selectedConversation,
+      conversations,
+      messageIsStreaming,
+    },
     dispatch: homeDispatch,
     stopConversationRef,
   } = useContext(HomeContext);
+  const isStudentAccount = isTempUser;
   const isImageGrid =
     ['U1', 'U2', 'U3', 'U4'].every((u) => buttons.includes(u)) ||
     ['V1', 'V2', 'V3', 'V4'].every((v) => buttons.includes(v));
@@ -251,13 +259,21 @@ export default function MjImageComponentV2({
         >
           <IconHelp size={isMobileLayout ? 16 : undefined} />
         </button>
-        <button className={`absolute bottom-0 right-0 p-1 z-10`}>
-          <LineShareButton
-            imageFileUrl={src}
-            size={20}
-            displayInProgressToast={true}
-          />
-        </button>
+        {!isStudentAccount && (
+          <button className={`absolute bottom-0 right-0 p-1 z-10`}>
+            <LineShareButton
+              imageFileUrl={src}
+              size={20}
+              displayInProgressToast={true}
+            />
+          </button>
+        )}
+        {isStudentAccount && (
+          <button className={`absolute bottom-0 right-0 p-1 z-10`}>
+            <StudentShareMessageButton imageFileUrl={src} size={20} />
+          </button>
+        )}
+
         {isImageGrid && (
           <div className="grid grid-cols-2 grid-rows-2 absolute top-0 right-0 w-full h-full">
             <NumberDisplay number={1} />

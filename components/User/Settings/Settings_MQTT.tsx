@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { mqttConnectionType, newMqttConnectionType } from '@/types/data';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import {
   MQTTConnectionForm,

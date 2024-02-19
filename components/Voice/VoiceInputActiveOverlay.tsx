@@ -1,16 +1,13 @@
 import { useContext } from 'react';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 const VoiceInputActiveOverlay = () => {
   const {
-    state: {
-      isSpeechRecognitionActive,
-    },
+    state: { isSpeechRecognitionActive },
   } = useContext(HomeContext);
 
-  if (!isSpeechRecognitionActive)
-    return null;
+  if (!isSpeechRecognitionActive) return null;
 
   return (
     <div

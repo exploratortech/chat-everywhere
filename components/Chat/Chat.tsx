@@ -21,7 +21,7 @@ import { throttle } from '@/utils/data/throttle';
 import { Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { NewConversationMessagesContainer } from '../ConversationStarter/NewConversationMessagesContainer';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';

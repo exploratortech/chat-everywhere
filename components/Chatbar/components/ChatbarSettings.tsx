@@ -1,21 +1,22 @@
 import {
   IconBrandFacebook,
+  IconBrandGoogle,
   IconCurrencyDollar,
+  IconHighlight,
   IconLogin,
   IconNews,
   IconSettings,
-  IconBrandGoogle
 } from '@tabler/icons-react';
 import { useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import CloudSyncStatusComponent from '../../Sidebar/components/CloudSyncComponent';
 import UserAccountBadge from '@/components/User/UserAccountBadge';
+import HomeContext from '@/components/home/home.context';
 
 import { SidebarButton } from '../../Sidebar/SidebarButton';
 import ChatbarContext from '../Chatbar.context';
@@ -25,13 +26,11 @@ export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
 
   const {
-    state: { conversations, user },
+    state: { conversations, user, isTeacherAccount },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const {
-    handleClearConversations,
-  } = useContext(ChatbarContext);
+  const { handleClearConversations } = useContext(ChatbarContext);
 
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
@@ -50,6 +49,14 @@ export const ChatbarSettings = () => {
         field: 'showReferralModel',
         value: true,
       });
+    }
+  };
+
+  const router = useRouter();
+  const teacherPortalBtnOnClick = () => {
+    if (isTeacherAccount) {
+      trackEvent('Teacher portal clicked');
+      router.push('/teacher-portal');
     }
   };
 
@@ -77,11 +84,20 @@ export const ChatbarSettings = () => {
           <SidebarButton
             text={t('Sign in')}
             icon={<IconLogin size={18} />}
-            suffixIcon={<IconBrandGoogle size={18} color='#DB4437' stroke={3}/>}
+            suffixIcon={
+              <IconBrandGoogle size={18} color="#DB4437" stroke={3} />
+            }
             onClick={signInOnClick}
           />
         )}
 
+        {isTeacherAccount && (
+          <SidebarButton
+            text={t('Teacher Portal')}
+            icon={<IconHighlight size={18} />}
+            onClick={() => teacherPortalBtnOnClick()}
+          />
+        )}
         {isEduUser && (
           <SidebarButton
             text={t('Referral Program')}
@@ -102,6 +118,20 @@ export const ChatbarSettings = () => {
             }}
           />
         )}
+        {!user && (
+          <SidebarButton
+            className="flex-grow"
+            text={t('One-time code login')}
+            icon={<IconNews size={18} />}
+            onClick={() => {
+              homeDispatch({
+                field: 'showOneTimeCodeLoginModel',
+                value: true,
+              });
+            }}
+          />
+        )}
+
         <div className="flex w-full">
           <SidebarButton
             className="flex-grow"

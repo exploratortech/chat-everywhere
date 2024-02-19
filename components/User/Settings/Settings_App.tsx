@@ -2,10 +2,9 @@ import { IconMoon, IconSun } from '@tabler/icons-react';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import { SpeechSpeedType, useAzureTts } from '@/components/Hooks/useAzureTts';
 import { SidebarButton } from '@/components/Sidebar/SidebarButton';
+import HomeContext from '@/components/home/home.context';
 
 export default function Settings_App() {
   const { t } = useTranslation('model');

@@ -1,10 +1,10 @@
 import { Conversation, Message } from '@/types/chat';
+import { DragData } from '@/types/drag';
 import { ErrorMessage } from '@/types/error';
 import { FolderInterface } from '@/types/folder';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 import { CreditUsage, User } from '@/types/user';
-import { DragData } from '@/types/drag';
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
@@ -40,6 +40,7 @@ export interface HomeInitialState {
   // User Auth
   showSettingsModel: boolean;
   showLoginSignUpModel: boolean;
+  showOneTimeCodeLoginModel: boolean;
   showReferralModel: boolean;
   showUsageModel: boolean;
   showSurveyModel: boolean;
@@ -50,6 +51,8 @@ export interface HomeInitialState {
   isPaidUser: boolean;
   isUltraUser: boolean;
   isSurveyFilled: boolean;
+  isTempUser: boolean;
+  isTeacherAccount: boolean;
 
   // Plugins Utils
   creditUsage: CreditUsage | null;
@@ -101,6 +104,7 @@ export const initialState: HomeInitialState = {
   // User Auth
   showSettingsModel: false,
   showLoginSignUpModel: false,
+  showOneTimeCodeLoginModel: false,
   showReferralModel: false,
   showUsageModel: false,
   showSurveyModel: false,
@@ -111,6 +115,8 @@ export const initialState: HomeInitialState = {
   isPaidUser: false,
   isUltraUser: false,
   isSurveyFilled: false,
+  isTempUser: false,
+  isTeacherAccount: false,
 
   // Plugins Utils
   creditUsage: null,

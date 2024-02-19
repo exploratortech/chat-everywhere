@@ -6,7 +6,7 @@ import { Conversation, Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 import { User } from '@/types/user';
 
-import { HomeInitialState } from '@/pages/api/home/home.state';
+import { HomeInitialState } from '@/components/home/home.state';
 
 import {
   saveConversation,

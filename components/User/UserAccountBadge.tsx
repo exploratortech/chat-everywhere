@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 export default function UserAccountBadge() {
   const {
@@ -9,9 +9,14 @@ export default function UserAccountBadge() {
   if (user) {
     if (user.plan === 'ultra') {
       return (
-        <span 
+        <span
           className="bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] text-xs font-medium py-0.5 rounded bg-gray-700 text-indigo-400 mr-0"
-          style={{color: "transparent", WebkitBackgroundClip: 'text', WebkitTextStrokeWidth: '1px', WebkitTextStrokeColor: 'transparent' }}
+          style={{
+            color: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextStrokeWidth: '1px',
+            WebkitTextStrokeColor: 'transparent',
+          }}
         >
           Ultra
         </span>

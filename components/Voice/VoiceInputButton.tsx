@@ -6,7 +6,7 @@ import { useTranslation } from 'next-i18next';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { useAzureStt } from '../Hooks/useAzureStt';
 

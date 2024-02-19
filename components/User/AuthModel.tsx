@@ -1,15 +1,14 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Auth, UpdatePassword } from '@supabase/auth-ui-react';
 import { FC, Fragment, useContext, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { SupabaseClient } from '@supabase/supabase-js';
-
-import { toast } from 'react-hot-toast';
 
 type Props = {
   onClose: () => void;

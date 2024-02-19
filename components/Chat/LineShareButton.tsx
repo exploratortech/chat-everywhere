@@ -5,10 +5,11 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 
-import HomeContext from '@/pages/api/home/home.context';
+import { trackEvent } from '@/utils/app/eventTracking';
+
+import HomeContext from '@/components/home/home.context';
 
 import { encode } from 'base64-arraybuffer';
-import { trackEvent } from '@/utils/app/eventTracking';
 
 interface LineShareButtonProps {
   displayInProgressToast?: boolean;
@@ -54,7 +55,7 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
     }
 
     setLoading(true);
-    
+
     if (imageFileUrl) {
       const response = await fetch(imageFileUrl);
       const blob = await response.arrayBuffer();

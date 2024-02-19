@@ -1,5 +1,5 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 
 import { GetServerSideProps } from 'next';
@@ -11,6 +11,7 @@ import { event } from 'nextjs-google-analytics';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
+import useUserProfile from '@/hooks/useUserProfile';
 
 import { fetchShareableConversation } from '@/utils/app/api';
 import {
@@ -49,34 +50,23 @@ import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 
-import { Chat } from '@/components/Chat/Chat';
-import { Chatbar } from '@/components/Chatbar/Chatbar';
-import FeaturesModel from '@/components/Features/FeaturesModel';
 import { useAzureTts } from '@/components/Hooks/useAzureTts';
 import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
-import { Navbar } from '@/components/Mobile/Navbar';
 import OrientationBlock from '@/components/Mobile/OrientationBlock';
-import NewsModel from '@/components/News/NewsModel';
-import Promptbar from '@/components/Promptbar';
-import { AuthModel } from '@/components/User/AuthModel';
-import ReferralModel from '@/components/User/ReferralModel';
-import SettingsModel from '@/components/User/Settings/SettingsModel';
-import { SurveyModel } from '@/components/User/SurveyModel';
-import { UsageCreditModel } from '@/components/User/UsageCreditModel';
-import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
 
-import HomeContext from './home.context';
-import { HomeInitialState, initialState } from './home.state';
+import HomeContext from '../home/home.context';
+import { HomeInitialState, initialState } from '../home/home.state';
 
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 
-const Home = () => {
+const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const defaultModelId = fallbackModelID;
   const { t } = useTranslation('chat');
   const { isLoading, isPlaying, currentSpeechId, speak, stopPlaying } =
     useAzureTts();
-  const [containerHeight, setContainerHeight] = useState('100vh');
   const router = useRouter();
   const session = useSession();
   const supabase = useSupabaseClient();
@@ -92,13 +82,6 @@ const Home = () => {
       conversations,
       selectedConversation,
       prompts,
-      showSettingsModel,
-      showLoginSignUpModel,
-      showReferralModel,
-      showUsageModel,
-      showSurveyModel,
-      showNewsModel,
-      showFeaturesModel,
       showChatbar,
       showPromptbar,
       user,
@@ -233,8 +216,6 @@ const Home = () => {
     if (isTabletLayout) {
       dispatch({ field: 'showChatbar', value: false });
     }
-
-    const lastConversation = conversations[conversations.length - 1];
 
     const newConversation: Conversation = getNewConversation();
 
@@ -416,22 +397,38 @@ const Home = () => {
     selectedConversation,
   ]);
 
+  const { refetch: fetchUserProfile } = useUserProfile({
+    userId: session?.user.id,
+  });
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
       // User info has been updated for this session
       if (session.user.id === user?.id) return;
-
-      userProfileQuery({
-        client: supabase,
-        userId: session.user.id,
-      })
-        .then((userProfile) => {
+      fetchUserProfile()
+        .then((result) => {
+          const userProfile = result.data;
+          if (!userProfile) return;
           dispatch({ field: 'showLoginSignUpModel', value: false });
+          dispatch({ field: 'showOneTimeCodeLoginModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
-          dispatch({ field: 'isUltraUser', value: userProfile.plan === 'ultra' });
-          dispatch({ field: 'hasMqttConnection', value: userProfile.hasMqttConnection });
-          dispatch({ field: 'isConnectedWithLine', value: userProfile.isConnectedWithLine });
+          dispatch({ field: 'isTempUser', value: userProfile.isTempUser });
+          dispatch({
+            field: 'isTeacherAccount',
+            value: userProfile.isTeacherAccount,
+          });
+          dispatch({
+            field: 'isUltraUser',
+            value: userProfile.plan === 'ultra',
+          });
+          dispatch({
+            field: 'hasMqttConnection',
+            value: userProfile.hasMqttConnection,
+          });
+          dispatch({
+            field: 'isConnectedWithLine',
+            value: userProfile.isConnectedWithLine,
+          });
           dispatch({
             field: 'user',
             value: {
@@ -445,7 +442,7 @@ const Home = () => {
               proPlanExpirationDate: userProfile.proPlanExpirationDate,
               hasReferrer: userProfile.hasReferrer,
               hasReferee: userProfile.hasReferee,
-              isInReferralTrial: userProfile.isInReferralTrial
+              isInReferralTrial: userProfile.isInReferralTrial,
             },
           });
         })
@@ -489,36 +486,6 @@ const Home = () => {
     toast.success(t('You have been logged out'));
     clearUserInfo();
   };
-
-  // ON LOAD --------------------------------------------
-
-  useEffect(() => {
-    const updateHeight = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-
-      // If you want to set the height directly in the state
-      setContainerHeight(`100dvh`);
-    };
-
-    updateHeight();
-    window.addEventListener('resize', updateHeight);
-
-    // Display notice message from url if exist
-    const { notice, noticeType } = router.query;
-    if (notice) {
-      toast.dismiss();
-      if (noticeType === 'error') {
-        toast.error(t(notice as string));
-      } else {
-        toast.success(t(notice as string));
-      }
-      router.replace(router.pathname, router.pathname, { shallow: true });
-    }
-    return () => {
-      window.removeEventListener('resize', updateHeight);
-    };
-  }, []);
 
   useEffect(() => {
     const theme = localStorage.getItem('theme');
@@ -698,105 +665,9 @@ const Home = () => {
             content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1"
           />
         </Head>
-        {selectedConversation && (
-          <main
-            className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white `}
-            style={{ height: containerHeight }}
-          >
-            <Navbar
-              selectedConversation={selectedConversation}
-              onNewConversation={handleNewConversation}
-            />
-
-            <div className="flex items-stretch flex-1 w-full overflow-x-hidden">
-              <Chatbar />
-              <div className="flex flex-1">
-                <Chat stopConversationRef={stopConversationRef} />
-              </div>
-              {showSettingsModel && (
-                <SettingsModel
-                  onClose={() =>
-                    dispatch({ field: 'showSettingsModel', value: false })
-                  }
-                />
-              )}
-              {showLoginSignUpModel && (
-                <AuthModel
-                  supabase={supabase}
-                  onClose={() =>
-                    dispatch({ field: 'showLoginSignUpModel', value: false })
-                  }
-                />
-              )}
-
-              {showReferralModel && (
-                <ReferralModel
-                  onClose={() =>
-                    dispatch({ field: 'showReferralModel', value: false })
-                  }
-                />
-              )}
-
-              {showUsageModel && session && (
-                <UsageCreditModel
-                  onClose={() =>
-                    dispatch({ field: 'showUsageModel', value: false })
-                  }
-                />
-              )}
-              {showSurveyModel && (
-                <SurveyModel
-                  onClose={() =>
-                    dispatch({ field: 'showSurveyModel', value: false })
-                  }
-                />
-              )}
-              <NewsModel
-                open={showNewsModel}
-                onOpen={() => dispatch({ field: 'showNewsModel', value: true })}
-                onClose={() =>
-                  dispatch({ field: 'showNewsModel', value: false })
-                }
-              />
-
-              <FeaturesModel
-                open={showFeaturesModel}
-                onClose={() =>
-                  dispatch({ field: 'showFeaturesModel', value: false })
-                }
-              />
-              <Promptbar />
-            </div>
-            <VoiceInputActiveOverlay />
-          </main>
-        )}
+        <>{children}</>
       </HomeContext.Provider>
     </OrientationBlock>
   );
 };
-export default Home;
-
-export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale ?? 'en', [
-        'common',
-        'chat',
-        'sidebar',
-        'model',
-        'markdown',
-        'promptbar',
-        'prompts',
-        'roles',
-        'rolesContent',
-        'feature',
-        'survey',
-        'news',
-        'features',
-        'auth',
-        'mjImage',
-        'imageToPrompt',
-      ])),
-    },
-  };
-};
+export default DefaultLayout;

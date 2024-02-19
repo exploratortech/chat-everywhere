@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo } from 'react';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 interface CircularProgressProps {
   milliseconds: number;

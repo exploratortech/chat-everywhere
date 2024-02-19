@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import CircularProgress from './CircularProgress';
 
@@ -23,14 +23,10 @@ export default function LimiterButton({
   const limiterToolTip = useMemo(() => {
     const isFreeUser = user && user.plan === 'free';
     if (isFreeUser) {
-      return (
-        t('Upgrade to remove wait time') || ''
-      );
+      return t('Upgrade to remove wait time') || '';
     }
     return (
-      t(
-        'Please sign in to reduce wait time, or upgrade to remove it',
-      ) || ''
+      t('Please sign in to reduce wait time, or upgrade to remove it') || ''
     );
   }, [t]);
   return (

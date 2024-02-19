@@ -5,6 +5,10 @@
       "schedule": "0 * * * *"
     },
     {
+      "path": "/api/cron/delete-expired-temp-accounts-and-code",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/cron/update-pro-accounts-plan",
       "schedule": "0 16 * * *"
     }
@@ -17,7 +21,5 @@
       "maxDuration": 120
     }
   },
-  "regions": [
-    "icn1"
-  ]
+  "regions": ["icn1"]
 }

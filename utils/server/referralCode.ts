@@ -6,6 +6,23 @@ export type CodeGenerationPayloadType = {
   expiresAt: string;
 };
 
+export const generateOneCodeAndExpirationDate = (
+  durationSeconds: number = 86400, // 1 day
+): CodeGenerationPayloadType => {
+  const expirationInSeconds = durationSeconds;
+
+  const newOneTimeCode = voucher_codes
+    .generate({ length: 6, count: 1, charset: '0123456789' })
+    .pop();
+
+  if (!newOneTimeCode) throw new Error('Failed to generate referral code');
+
+  return {
+    code: newOneTimeCode,
+    expiresAt: dayjs().add(expirationInSeconds, 'seconds').toISOString(),
+  };
+};
+
 export const generateReferralCodeAndExpirationDate =
   (): CodeGenerationPayloadType => {
     const expirationDateCount = parseInt(

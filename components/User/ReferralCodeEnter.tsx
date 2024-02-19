@@ -9,7 +9,7 @@ import { userProfileQuery } from '@/utils/server/supabase';
 
 import { UserProfile } from '@/types/user';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { SettingsModelContext } from './Settings/SettingsModel';
 
@@ -33,7 +33,7 @@ export const ReferralCodeEnter = () => {
   } = useQuery<{ profile: UserProfile }, Error>(
     'redeemReferralCode',
     async () => {
-      if(user === null) throw new Error('User is not logged in');
+      if (user === null) throw new Error('User is not logged in');
 
       const response = await fetch('/api/referral/redeem-code', {
         method: 'POST',

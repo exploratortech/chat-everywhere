@@ -2,7 +2,7 @@ import { IconCloud, IconCloudOff } from '@tabler/icons-react';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import dayjs from 'dayjs';
 

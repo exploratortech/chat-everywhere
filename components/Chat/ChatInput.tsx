@@ -23,9 +23,8 @@ import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import TokenCounter from './components/TokenCounter';
+import HomeContext from '@/components/home/home.context';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../Voice/VoiceInputButton';

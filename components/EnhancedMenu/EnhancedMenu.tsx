@@ -9,7 +9,7 @@ import React, {
 
 import { PluginID } from '@/types/plugin';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import ImageToPromptUpload from '../ImageToPromptUpload/ImageUpload';
 import ChangeOutputLanguageButton from './ChangeOutputLanguageButton';
