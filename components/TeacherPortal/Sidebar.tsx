@@ -3,6 +3,7 @@ import {
   IconBuildingBroadcastTower,
   IconMessages,
   IconRating12Plus,
+  IconInfoSquareRounded
 } from '@tabler/icons-react';
 import React, { cloneElement, useContext } from 'react';
 import { toast } from 'react-hot-toast';
@@ -106,7 +107,8 @@ export default function Sidebar({ className = '' }: Props) {
               target="_blank"
               className="underline"
             >
-              {' '} {t('click here')}{' '}
+              {' '}
+              {t('click here')}{' '}
             </a>
             {t('to join our focus group to share your feedback.')}
           </p>
@@ -134,6 +136,14 @@ export default function Sidebar({ className = '' }: Props) {
       </div>
 
       <div className="flex flex-col">
+        <a
+          className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2`}
+          target="_blank"
+          href="https://explorator.notion.site/a68dbc8f3df241a49b62add843a8d364"
+        >
+          <IconInfoSquareRounded className={iconClass} />
+          <div className="tablet:hidden">{t('Instructions')}</div>
+        </a>
         <a
           href="#"
           className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2`}
