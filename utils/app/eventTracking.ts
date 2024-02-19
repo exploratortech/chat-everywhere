@@ -123,7 +123,7 @@ export type PayloadType = {
   endpoint?: string;
 
   // Teacher portal
-  tempAccountName: string;
+  tempAccountName?: string;
 };
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
