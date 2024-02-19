@@ -101,7 +101,7 @@ const handler = async (req: Request) => {
         temporary_account_profile_id: temporaryAccountId,
         image_file_url: imagePublicUrl,
         teacher_profile_id: teacherProfileId,
-        student_name: student_name,
+        student_name: student_name || '',
       },
     ]);
 
