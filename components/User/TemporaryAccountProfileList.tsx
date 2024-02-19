@@ -58,16 +58,17 @@ const TemporaryAccountProfileList = ({
   return (
     <div className="my-4">
       <h2 className="text-lg font-bold mb-4">
-        {t('Active student account')}{' '}
+        {t('Active accounts')}{' '}
         <label>{`(${totalActiveTempAccount}/${maxQuota})`}</label>
       </h2>
       <Table>
         <TableHeader>
           <TableRow className="border-[#4c4c4c]">
-            <TableHead>{t('Unique ID')}</TableHead>
+            <TableHead>{t('Name')}</TableHead>
             <TableHead>{t('Code')}</TableHead>
             <TableHead>{t('Created At')}</TableHead>
             <TableHead>{t('Expired At')}</TableHead>
+            <TableHead></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
