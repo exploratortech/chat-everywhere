@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { en } from '@supabase/auth-ui-shared';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';

@@ -51,7 +51,7 @@ export default function Sidebar({ className = '' }: Props) {
     },
     {
       icon: <IconBuildingBroadcastTower />,
-      name: t('Shared message'),
+      name: t('Shared messages'),
       value: 'shared-message',
       callback: () => {
         trackEvent('App button clicked');

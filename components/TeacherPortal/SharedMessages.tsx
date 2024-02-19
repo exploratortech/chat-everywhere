@@ -14,7 +14,6 @@ import { useTranslation } from 'next-i18next';
 import { Pagination as PaginationType } from '@/types/pagination';
 import {
   ShareMessagesByTeacherProfilePayload,
-  StudentMessageSubmission,
 } from '@/types/share-messages-by-teacher-profile';
 
 import HomeContext from '@/components/home/home.context';
@@ -59,7 +58,7 @@ const SharedMessages = memo(() => {
 
   return (
     <div className="">
-      <h1 className="font-bold mb-4">{t('Shared Messages')}</h1>
+      <h1 className="font-bold mb-4">{t('Shared messages')}</h1>
       {isLoading && !sharedMessages && (
         <div className="flex mt-[50%]">
           <Spinner size="16px" className="mx-auto" />

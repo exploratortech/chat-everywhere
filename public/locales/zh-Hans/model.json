@@ -140,5 +140,22 @@
   "Speech Speed": "语速",
   "Slow": "慢",
   "Normal": "正常",
-  "Fast": "快"
+  "Fast": "快",
+  "Your one-time code is": "您的一次性代码是",
+  "One-time code login": "一次性代码登录",
+  "Active accounts": "已激活账户",
+  "One-time code": "一次性代码",
+  "Shared messages": "分享消息",
+  "Submitted at {{date}}": "提交于 {{date}}",
+  "Code": "代码",
+  "Created At": "创建时间",
+  "Expired At": "过期时间",
+  "Expired": "已过期",
+  "Remove": "移除",
+  "Temporary account removed": "临时账户已移除",
+  "Failed to remove temporary account": "无法移除临时账户",
+  "Teacher Portal": "教师专区",
+  "Back": "返回",
+  "Code regenerated": "代码已重新生成",
+  "Failed to regenerate code": "无法重新生成代码"
 }
