@@ -4,6 +4,7 @@ import {
   IconCaretRight,
   IconFolder,
   IconMessage,
+  IconX,
 } from '@tabler/icons-react';
 import React, { Fragment, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -69,7 +70,30 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
             >
               <Dialog.Panel className="flex flex-col w-full max-w-[70vw] xl:max-w-3xl tablet:max-w-[90vw] h-[calc(80vh-100px)] transform overflow-hidden rounded-2xl text-left align-middle shadow-xl transition-all text-neutral-200 mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none bg-neutral-900">
                 <h1 className="font-bold mb-4 px-6 pt-6">{t('Clear Conversations')}</h1>
-                <div className="flex flex-col px-6 overflow-y-auto">
+                <Button
+                  className="p-1 absolute top-5 right-5"
+                  onClick={onClose}
+                  variant="ghost"
+                  type="button"
+                >
+                  <IconX />
+                </Button>
+                <div className="relative flex flex-col px-6 overflow-y-auto">
+                  <div className="flex justify-end self-stretch sticky top-0 py-2 bg-neutral-900 z-[1000]">
+                    <div className="flex items-center">
+                      <label
+                        className="select-none"
+                        htmlFor="clear-conversation-all-input"
+                      >
+                        {t('Select All')}
+                      </label>
+                      <input
+                        className="w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
+                        id="clear-conversation-all-input"
+                        type="checkbox"
+                      />
+                    </div>
+                  </div>
                   {filteredFolders.map((folder) => (
                     <FolderItem
                       key={folder.id}
