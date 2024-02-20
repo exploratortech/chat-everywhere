@@ -191,7 +191,6 @@ export const Chatbar = () => {
       value={{
         ...chatBarContextValue,
         handleDeleteConversation,
-        handleClearConversations,
         handleImportConversations: (data: SupportedExportFormats) => {
           handleImportConversations(
             data,

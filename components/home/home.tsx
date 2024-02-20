@@ -21,6 +21,7 @@ import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay'
 import DefaultLayout from '@/components/layout/default';
 
 import HomeContext from './home.context';
+import ClearConversationsModal from '../Chatbar/components/ClearConversationsModal';
 
 const Home = () => {
   const router = useRouter();
@@ -41,6 +42,7 @@ const Home = () => {
       showSurveyModel,
       showNewsModel,
       showFeaturesModel,
+      showClearConversationsModal,
     },
     handleNewConversation,
     stopConversationRef,
@@ -119,6 +121,15 @@ const Home = () => {
           onClose={() =>
             dispatch({
               field: 'showOneTimeCodeLoginModel',
+              value: false,
+            })
+          }
+        />
+        <ClearConversationsModal
+          open={showClearConversationsModal}
+          onClose={() =>
+            dispatch({
+              field: 'showClearConversationsModal',
               value: false,
             })
           }

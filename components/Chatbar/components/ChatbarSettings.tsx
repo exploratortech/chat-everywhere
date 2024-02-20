@@ -19,7 +19,6 @@ import UserAccountBadge from '@/components/User/UserAccountBadge';
 import HomeContext from '@/components/home/home.context';
 
 import { SidebarButton } from '../../Sidebar/SidebarButton';
-import ChatbarContext from '../Chatbar.context';
 import { ClearConversations } from './ClearConversations';
 
 export const ChatbarSettings = () => {
@@ -29,8 +28,6 @@ export const ChatbarSettings = () => {
     state: { conversations, user, isTeacherAccount },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
-
-  const { handleClearConversations } = useContext(ChatbarContext);
 
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
@@ -64,9 +61,7 @@ export const ChatbarSettings = () => {
     <div className="min-h-min">
       <CloudSyncStatusComponent />
       <div className="flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm overflow-auto">
-        {conversations.length > 0 ? (
-          <ClearConversations onClearConversations={handleClearConversations} />
-        ) : null}
+        {conversations.length > 0 ? <ClearConversations /> : null}
 
         <SidebarButton
           text={t('Settings')}
