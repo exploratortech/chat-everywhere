@@ -40,11 +40,17 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
   const context = useCreateReducer<ClearConversationsModalState>({
     initialState: {
       selectedConversations: new Set<string>(),
+      selectedFolders: new Set<string>(),
+      deletingFolders: true,
     },
   });
 
   const {
-    state: { selectedConversations },
+    state: {
+      selectedConversations,
+      selectedFolders,
+      deletingFolders,
+    },
     dispatch,
   } = context;
 
@@ -60,6 +66,12 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
     [conversations],
   );
 
+  const itemCount = useMemo(() => (
+    deletingFolders
+      ? selectedConversations.size + selectedFolders.size
+      : selectedConversations.size
+  ), [deletingFolders, selectedConversations, selectedFolders]);
+
   const addConversations = useCallback((...ids: string[]) => {
     const updatedSet = new Set<string>(selectedConversations);
     ids.forEach((id) => updatedSet.add(id));
@@ -71,6 +83,37 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
     ids.forEach((id) => updatedSet.delete(id));
     dispatch({ field: 'selectedConversations', value: updatedSet });
   }, [selectedConversations, dispatch]);
+
+  const addFolders = useCallback((...ids: string[]) => {
+    const updatedSet = new Set<string>(selectedFolders);
+    ids.forEach((id) => updatedSet.add(id));
+    dispatch({ field: 'selectedFolders', value: updatedSet });
+  }, [selectedFolders, dispatch]);
+
+  const removeFolders = useCallback((...ids: string[]) => {
+    const updatedSet = new Set<string>(selectedFolders);
+    ids.forEach((id) => updatedSet.delete(id));
+    dispatch({ field: 'selectedFolders', value: updatedSet });
+  }, [selectedFolders, dispatch]);
+
+  const handleSelectAll = useCallback((checked: boolean) => {
+    const conversationIds = filteredConversations.map((conversation) => conversation.id);
+    const folderIds = filteredFolders.map((folder) => folder.id);
+    if (checked) {
+      addConversations(...conversationIds);
+      addFolders(...folderIds);
+    } else {
+      removeConversations(...conversationIds);
+      removeFolders(...folderIds);
+    }
+  }, [
+    filteredConversations,
+    filteredFolders,
+    addConversations,
+    removeConversations,
+    addFolders,
+    removeFolders,
+  ]);
 
   return (
     <Transition appear show={open} as={Fragment}>
@@ -96,6 +139,8 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
             ...context,
             addConversations,
             removeConversations,
+            addFolders,
+            removeFolders,
           }}
         >
           <div className="fixed inset-0 overflow-y-auto">
@@ -126,10 +171,11 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
                           className="select-none"
                           htmlFor="clear-conversation-all-input"
                         >
-                          {t('Select All')}
+                          {t('Select all')}
                         </label>
                         <input
                           className="w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
+                          onChange={(event) => handleSelectAll(event.currentTarget.checked)}
                           id="clear-conversation-all-input"
                           type="checkbox"
                         />
@@ -155,23 +201,35 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
                       ))
                     }
                   </div>
-                  <div className="flex flex-row justify-end p-6 gap-x-2 bg-neutral-900">
-                    <Button
-                      className="h-10"
-                      variant="outline"
-                      type="button"
-                      onClick={onClose}
-                    >
-                      {t('Cancel')}
-                    </Button>
-                    <Button
-                      className="h-10"
-                      variant="default"
-                      type="button"
-                      disabled={selectedConversations.size === 0}
-                    >
-                      {t('Delete')} {`(${selectedConversations.size})`}
-                    </Button>
+                  <div className="flex justify-between p-6 gap-x-2 bg-neutral-900">
+                    <div className="flex items-center">
+                      <label htmlFor="clear-folders-checkbox">{t('Clear folders')}</label>
+                      <input
+                        id="clear-folders-checkbox"
+                        className="w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
+                        checked={deletingFolders}
+                        onChange={() => dispatch({ field: 'deletingFolders', value: !deletingFolders })}
+                        type="checkbox"
+                      />
+                    </div>
+                    <div className="flex gap-x-2">
+                      <Button
+                        className="h-10"
+                        variant="outline"
+                        type="button"
+                        onClick={onClose}
+                      >
+                        {t('Cancel')}
+                      </Button>
+                      <Button
+                        className="h-10"
+                        variant="default"
+                        type="button"
+                        disabled={itemCount === 0}
+                      >
+                        {t('Delete')} {`(${itemCount})`}
+                      </Button>
+                    </div>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
@@ -190,9 +248,11 @@ type FolderItemProp = {
 
 function FolderItem({ folder, conversations }: FolderItemProp) {
   const {
-    state: { selectedConversations },
+    state: { selectedFolders },
     addConversations,
     removeConversations,
+    addFolders,
+    removeFolders,
   } = useContext(ClearConversationsModalContext);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -204,20 +264,21 @@ function FolderItem({ folder, conversations }: FolderItemProp) {
   );
 
   useEffect(() => {
-    setChecked(
-      conversationIds.length > 0
-      && !conversationIds.some((id) => !selectedConversations.has(id))
-    );
-  }, [conversationIds, selectedConversations]);
+    setChecked(selectedFolders.has(folder.id));
+  }, [setChecked, selectedFolders, folder]);
 
   return (
     <>
       <CheckboxItem
         checked={checked}
         onCheck={(checked: boolean) => {
-          checked
-            ? addConversations(...conversationIds)
-            : removeConversations(...conversationIds);
+          if (checked) {
+            addConversations(...conversationIds);
+            addFolders(folder.id);
+          } else {
+            removeConversations(...conversationIds);
+            removeFolders(folder.id);
+          }
         }}
       >
         <div

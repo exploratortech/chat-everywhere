@@ -4,6 +4,8 @@ import { ActionType } from "@/hooks/useCreateReducer";
 
 export interface ClearConversationsModalState {
   selectedConversations: Set<string>;
+  selectedFolders: Set<string>;
+  deletingFolders: boolean;
 }
 
 export interface ClearConversationsModalContextProps {
@@ -11,6 +13,8 @@ export interface ClearConversationsModalContextProps {
   dispatch: Dispatch<ActionType<ClearConversationsModalState>>;
   addConversations: (...ids: string[]) => void;
   removeConversations: (...ids: string[]) => void;
+  addFolders: (...ids: string[]) => void;
+  removeFolders: (...ids: string[]) => void;
 }
 
 const ClearConversationsModalContext = createContext<ClearConversationsModalContextProps>(undefined!);
