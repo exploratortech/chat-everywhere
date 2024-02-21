@@ -168,8 +168,9 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
                       className="h-10"
                       variant="default"
                       type="button"
+                      disabled={selectedConversations.size === 0}
                     >
-                      {t('Delete')} {'(1)'}
+                      {t('Delete')} {`(${selectedConversations.size})`}
                     </Button>
                   </div>
                 </Dialog.Panel>
