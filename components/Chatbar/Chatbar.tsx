@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
@@ -12,9 +12,6 @@ import {
   saveConversation,
   saveConversations,
 } from '@/utils/app/conversation';
-import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import { trackEvent } from '@/utils/app/eventTracking';
-import { saveFolders } from '@/utils/app/folders';
 import {
   handleExportData,
   handleImportConversations,
@@ -71,43 +68,6 @@ export const Chatbar = () => {
   } = chatBarContextValue;
 
   const [isImportingData, setIsImportingData] = useState(false);
-
-  const handleClearConversations = () => {
-    defaultModelId &&
-      homeDispatch({
-        field: 'selectedConversation',
-        value: {
-          id: uuidv4(),
-          name: 'New conversation',
-          messages: [],
-          model: OpenAIModels[defaultModelId],
-          prompt: DEFAULT_SYSTEM_PROMPT,
-          temperature: DEFAULT_TEMPERATURE,
-          folderId: null,
-        },
-      });
-
-    homeDispatch({ field: 'conversations', value: [] });
-
-    localStorage.removeItem('conversationHistory');
-    localStorage.removeItem('selectedConversation');
-
-    const updatedFolders = folders.filter((f) => f.type !== 'chat');
-
-    homeDispatch({ field: 'folders', value: updatedFolders });
-    saveFolders(updatedFolders);
-    updateConversationLastUpdatedAtTimeStamp();
-
-    homeDispatch({ field: 'forceSyncConversation', value: true });
-    homeDispatch({ field: 'replaceRemoteData', value: true });
-
-    event('interaction', {
-      category: 'Conversation',
-      label: 'Clear conversations',
-    });
-
-    trackEvent('Clear conversation clicked');
-  };
 
   const handleDeleteConversation = (conversation: Conversation) => {
     const updatedConversations = conversations.map((c) => {

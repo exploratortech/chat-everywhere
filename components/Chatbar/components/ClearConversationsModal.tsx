@@ -16,20 +16,31 @@ import React, {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import { v4 as uuidv4 } from 'uuid';
+import { event } from 'nextjs-google-analytics';
 
 import HomeContext from '@/components/home/home.context';
 import { Button } from '@/components/v2Chat/ui/button';
-import { getNonDeletedCollection } from '@/utils/app/conversation';
+import {
+  getNonDeletedCollection,
+  saveConversations,
+  updateConversationLastUpdatedAtTimeStamp,
+} from '@/utils/app/conversation';
 import { FolderInterface } from '@/types/folder';
 import { Conversation } from '@/types/chat';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import ClearConversationsModalContext, {
   ClearConversationsModalState,
 } from './ClearConversationsModal.context';
+import { OpenAIModels } from '@/types/openai';
+import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { saveFolders } from '@/utils/app/folders';
+import { trackEvent } from '@/utils/app/eventTracking';
 
 export default function ClearConversationsModal() {
   const {
     state: {
+      defaultModelId,
       folders,
       conversations,
       showClearConversationsModal,
@@ -61,7 +72,8 @@ export default function ClearConversationsModal() {
   const { t } = useTranslation('model');
 
   const filteredFolders = useMemo(() =>
-    getNonDeletedCollection(folders),
+    getNonDeletedCollection(folders)
+      .filter((folder) => folder.type === 'chat'),
     [folders],
   );
 
@@ -133,6 +145,51 @@ export default function ClearConversationsModal() {
       dispatch({ field: 'confirmingDeletion', value: false });
     }, 300);
   }, [homeDispatch, dispatch]);
+
+  const clearConversations = () => {
+    defaultModelId &&
+      homeDispatch({
+        field: 'selectedConversation',
+        value: {
+          id: uuidv4(),
+          name: 'New conversation',
+          messages: [],
+          model: OpenAIModels[defaultModelId],
+          prompt: DEFAULT_SYSTEM_PROMPT,
+          temperature: DEFAULT_TEMPERATURE,
+          folderId: null,
+        },
+      });
+
+    const updatedConversations = filteredConversations.filter((conversation) =>
+      !selectedConversations.has(conversation.id)
+    );
+    homeDispatch({ field: 'conversations', value: updatedConversations });
+    saveConversations(updatedConversations);
+    localStorage.removeItem('selectedConversation');
+
+    if (deletingFolders) {
+      const updatedFolders = filteredFolders.filter((folder) =>
+        !selectedFolders.has(folder.id)
+      );
+      homeDispatch({ field: 'folders', value: updatedFolders });
+      saveFolders(updatedFolders);
+    }
+
+    updateConversationLastUpdatedAtTimeStamp();
+
+    homeDispatch({ field: 'forceSyncConversation', value: true });
+    homeDispatch({ field: 'replaceRemoteData', value: true });
+
+    event('interaction', {
+      category: 'Conversation',
+      label: 'Clear conversations',
+    });
+
+    trackEvent('Clear conversation clicked');
+
+    handleClose();
+  };
 
   return (
     <Transition appear show={showClearConversationsModal} as={Fragment}>
@@ -244,6 +301,7 @@ export default function ClearConversationsModal() {
                       {confirmingDeletion ? (
                         <Button
                           className="h-10"
+                          onClick={clearConversations}
                           variant="default"
                           type="button"
                         >
