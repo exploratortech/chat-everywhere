@@ -18,6 +18,14 @@ import { Prompt } from '@/types/prompt';
 import HomeContext from '@/pages/api/home/home.context';
 
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 import PromptbarContext from '../PromptBar.context';
 import PromptIcon from './PromptIcon';
@@ -102,61 +110,69 @@ export const PromptComponent = ({ prompt }: Props) => {
       }
     `}
     >
-      <div
-        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 translate-x-0 z-10"
-        draggable="true"
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowModal(true);
-        }}
-        onDragStart={handleDragStart}
-        onDragEnd={removeDragData}
-        onKeyDown={handleButtonFocusKeyDown}
-        onMouseLeave={() => {
-          setIsDeleting(false);
-          setIsRenaming(false);
-          setRenameValue('');
-        }}
-        tabIndex={0}
-      >
-        <PromptIcon prompt={prompt} />
+      <Dialog>
+        <DialogTrigger className="w-full">
+          <div className="relative w-full flex justify-between items-center">
+            <div
+              className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 translate-x-0 z-10"
+              draggable="true"
+              onDragStart={handleDragStart}
+              onDragEnd={removeDragData}
+              onKeyDown={handleButtonFocusKeyDown}
+              onMouseLeave={() => {
+                setIsDeleting(false);
+                setIsRenaming(false);
+                setRenameValue('');
+              }}
+              tabIndex={0}
+            >
+              <PromptIcon prompt={prompt} />
 
-        <div
-          className={`${
-            isDeleting || isRenaming ? 'pr-12' : 'pr-4'
-          } relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3`}
-        >
-          {prompt.name}
-        </div>
-      </div>
+              <div
+                className={`${
+                  isDeleting || isRenaming ? 'pr-12' : 'pr-4'
+                } relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3`}
+              >
+                {prompt.name}
+              </div>
+            </div>
+            {(isDeleting || isRenaming) && (
+              <div className="absolute right-1 z-10 flex text-gray-300">
+                <SidebarActionButton handleClick={handleDelete}>
+                  <IconCheck size={18} />
+                </SidebarActionButton>
 
-      {(isDeleting || isRenaming) && (
-        <div className="absolute right-1 z-10 flex text-gray-300">
-          <SidebarActionButton handleClick={handleDelete}>
-            <IconCheck size={18} />
-          </SidebarActionButton>
+                <SidebarActionButton handleClick={handleCancelDelete}>
+                  <IconX size={18} />
+                </SidebarActionButton>
+              </div>
+            )}
 
-          <SidebarActionButton handleClick={handleCancelDelete}>
-            <IconX size={18} />
-          </SidebarActionButton>
-        </div>
-      )}
+            {!isDeleting && !isRenaming && (
+              <div className="absolute right-1 z-10 flex text-gray-300">
+                <SidebarActionButton handleClick={handleOpenDeleteModal}>
+                  <IconTrash size={18} />
+                </SidebarActionButton>
+              </div>
+            )}
+          </div>
+        </DialogTrigger>
+        <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[100dvh]">
+          <PromptModal
+            prompt={prompt}
+            onClose={() => setShowModal(false)}
+            onUpdatePrompt={handleUpdate}
+          />
+        </DialogContent>
+      </Dialog>
 
-      {!isDeleting && !isRenaming && (
-        <div className="absolute right-1 z-10 flex text-gray-300">
-          <SidebarActionButton handleClick={handleOpenDeleteModal}>
-            <IconTrash size={18} />
-          </SidebarActionButton>
-        </div>
-      )}
-
-      {showModal && (
+      {/* {showModal && (
         <PromptModal
           prompt={prompt}
           onClose={() => setShowModal(false)}
           onUpdatePrompt={handleUpdate}
         />
-      )}
+      )} */}
     </div>
   );
 };
