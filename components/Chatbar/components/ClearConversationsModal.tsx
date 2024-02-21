@@ -27,14 +27,14 @@ import ClearConversationsModalContext, {
   ClearConversationsModalState,
 } from './ClearConversationsModal.context';
 
-type Props = {
-  open: boolean;
-  onClose: () => void;
-};
-
-export default function ClearConversationsModal({ open, onClose }: Props) {
+export default function ClearConversationsModal() {
   const {
-    state: { folders, conversations },
+    state: {
+      folders,
+      conversations,
+      showClearConversationsModal,
+    },
+    dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const context = useCreateReducer<ClearConversationsModalState>({
@@ -115,12 +115,23 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
     removeFolders,
   ]);
 
+  const handleClose = useCallback(() => {
+    homeDispatch({ field: 'showClearConversationsModal', value: false });
+
+    // Reset state
+    setTimeout(() => {
+      dispatch({ field: 'deletingFolders', value: true });
+      dispatch({ field: 'selectedConversations', value: new Set() });
+      dispatch({ field: 'selectedFolders', value: new Set() });
+    }, 300);
+  }, [homeDispatch, dispatch]);
+
   return (
-    <Transition appear show={open} as={Fragment}>
+    <Transition appear show={showClearConversationsModal} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-50"
-        onClose={onClose}
+        onClose={handleClose}
       >
         <Transition.Child
           as={Fragment}
@@ -158,7 +169,7 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
                   <h1 className="font-bold mb-4 px-6 pt-6">{t('Clear Conversations')}</h1>
                   <Button
                     className="p-1 absolute top-5 right-5"
-                    onClick={onClose}
+                    onClick={handleClose}
                     variant="ghost"
                     type="button"
                   >
@@ -217,7 +228,7 @@ export default function ClearConversationsModal({ open, onClose }: Props) {
                         className="h-10"
                         variant="outline"
                         type="button"
-                        onClick={onClose}
+                        onClick={handleClose}
                       >
                         {t('Cancel')}
                       </Button>

@@ -42,7 +42,6 @@ const Home = () => {
       showSurveyModel,
       showNewsModel,
       showFeaturesModel,
-      showClearConversationsModal,
     },
     handleNewConversation,
     stopConversationRef,
@@ -125,15 +124,7 @@ const Home = () => {
             })
           }
         />
-        <ClearConversationsModal
-          open={showClearConversationsModal}
-          onClose={() =>
-            dispatch({
-              field: 'showClearConversationsModal',
-              value: false,
-            })
-          }
-        />
+        <ClearConversationsModal />
         {showReferralModel && (
           <ReferralModel
             onClose={() =>
