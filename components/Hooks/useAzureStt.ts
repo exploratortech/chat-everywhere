@@ -3,7 +3,7 @@ import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import {
   AudioConfig,

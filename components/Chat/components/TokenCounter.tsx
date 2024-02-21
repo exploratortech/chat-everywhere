@@ -7,7 +7,7 @@ import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
 
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import cl100k_base from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken } from '@dqbd/tiktoken/lite';

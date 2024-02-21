@@ -9,10 +9,9 @@ import {
 
 import { SupportedExportFormats } from '@/types/export';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import { Import } from '@/components/Settings/Import';
 import { SidebarButton } from '@/components/Sidebar/SidebarButton';
+import HomeContext from '@/components/home/home.context';
 
 export default function Settings_Data() {
   const { t } = useTranslation('model');
@@ -28,7 +27,7 @@ export default function Settings_Data() {
 
   return (
     <div>
-      <h1 className="font-bold mb-4">{t("Data")}</h1>
+      <h1 className="font-bold mb-4">{t('Data')}</h1>
       <Import onImport={handleImport} />
       <SidebarButton
         text={t('Export data')}

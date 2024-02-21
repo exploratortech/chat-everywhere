@@ -72,6 +72,14 @@ export const EventNames = [
   'v2 Payment link clicked',
   'v2 Referral code redemption failed',
 
+  // Teacher portal
+  'Teacher portal clicked',
+  'Teacher portal generate code',
+  'Teacher portal remove temp account',
+  'One-time code redeemed',
+  'Temp account message submission',
+  'Join LINE group button clicked',
+
   // Error tracing
   'Error',
   'v2 Error',
@@ -114,6 +122,9 @@ export type PayloadType = {
   timeToFirstTokenInMs?: number;
   tokenPerSecond?: number;
   endpoint?: string;
+
+  // Teacher portal
+  tempAccountName?: string;
 };
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
@@ -137,6 +148,8 @@ export const updateUserInfo = (user: User) => {
     email: user.email,
     plan: user.plan,
     env: process.env.NEXT_PUBLIC_ENV,
+    isTeacherAccount: user.isTeacherAccount,
+    isTempUser: user.isTempUser,
   });
 
   posthog.alias(user.id, getOrGenerateUserId());

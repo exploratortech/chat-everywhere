@@ -8,7 +8,7 @@ import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import { Prompt } from '@/types/prompt';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import CustomInstructionList from './CustomInstructionList';
 import { FootNoteMessage } from './FootNoteMessage';

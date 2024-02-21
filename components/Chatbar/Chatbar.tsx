@@ -24,11 +24,10 @@ import { Conversation } from '@/types/chat';
 import { SupportedExportFormats } from '@/types/export';
 import { OpenAIModels } from '@/types/openai';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import { ChatFolders } from './components/ChatFolders';
 import { ChatbarSettings } from './components/ChatbarSettings';
 import { Conversations } from './components/Conversations';
+import HomeContext from '@/components/home/home.context';
 
 import Sidebar from '../Sidebar';
 import ChatbarContext from './Chatbar.context';
@@ -201,7 +200,7 @@ export const Chatbar = () => {
             setIsImportingData,
           );
         },
-        handleExportData
+        handleExportData,
       }}
     >
       <Sidebar<Conversation>
@@ -210,9 +209,9 @@ export const Chatbar = () => {
         addItemButtonTitle={t('New chat')}
         itemComponent={
           <Conversations
-            conversations={
-              filteredConversations.filter((conversation) => conversation.folderId == null)
-            }
+            conversations={filteredConversations.filter(
+              (conversation) => conversation.folderId == null,
+            )}
           />
         }
         itemsIsImporting={isImportingData}

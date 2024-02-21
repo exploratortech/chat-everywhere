@@ -14,7 +14,7 @@ import { trackEvent } from '@/utils/app/eventTracking';
 import { RefereeProfile } from '@/types/referral';
 import { SubscriptionPlan } from '@/types/user';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import dayjs from 'dayjs';
 

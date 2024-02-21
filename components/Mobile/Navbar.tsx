@@ -3,9 +3,8 @@ import { FC, useContext } from 'react';
 
 import { Conversation } from '@/types/chat';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import { SidebarToggleButton } from '../Sidebar/components/SidebarToggleButton';
+import HomeContext from '@/components/home/home.context';
 
 import CustomInstructionInUseIndicator from '../Chat/CustomInstructionInUseIndicator';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';

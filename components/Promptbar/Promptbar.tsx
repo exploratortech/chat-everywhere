@@ -4,25 +4,26 @@ import { useTranslation } from 'react-i18next';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
+import {
+  getNonDeletedCollection,
+  updateConversationLastUpdatedAtTimeStamp,
+} from '@/utils/app/conversation';
 import { savePrompts } from '@/utils/app/prompts';
 import { generateRank } from '@/utils/app/rank';
 
 import { OpenAIModels } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import { PromptFolders } from './components/PromptFolders';
 import { Prompts } from './components/Prompts';
+import HomeContext from '@/components/home/home.context';
 
 import Sidebar from '../Sidebar';
 import PromptbarContext from './PromptBar.context';
 import { PromptbarInitialState, initialState } from './Promptbar.state';
 
-import { updateConversationLastUpdatedAtTimeStamp, getNonDeletedCollection } from '@/utils/app/conversation';
-
-import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
+import { v4 as uuidv4 } from 'uuid';
 
 const Promptbar = () => {
   const { t } = useTranslation('promptbar');
@@ -32,13 +33,7 @@ const Promptbar = () => {
   });
 
   const {
-    state: {
-      prompts,
-      defaultModelId,
-      showChatbar,
-      showPromptbar,
-      currentDrag,
-    },
+    state: { prompts, defaultModelId, showChatbar, showPromptbar, currentDrag },
     dispatch: homeDispatch,
     handleCreateFolder,
     togglePromptbar,
@@ -86,7 +81,7 @@ const Promptbar = () => {
           deleted: true,
         };
       }
-      
+
       return p;
     });
 
@@ -132,18 +127,23 @@ const Promptbar = () => {
     if (searchTerm) {
       promptDispatch({
         field: 'filteredPrompts',
-        value: getNonDeletedCollection(prompts.filter((prompt) => {
-          const searchable =
-            prompt.name.toLowerCase() +
-            ' ' +
-            prompt.description.toLowerCase() +
-            ' ' +
-            prompt.content.toLowerCase();
-          return searchable.includes(searchTerm.toLowerCase());
-        })),
+        value: getNonDeletedCollection(
+          prompts.filter((prompt) => {
+            const searchable =
+              prompt.name.toLowerCase() +
+              ' ' +
+              prompt.description.toLowerCase() +
+              ' ' +
+              prompt.content.toLowerCase();
+            return searchable.includes(searchTerm.toLowerCase());
+          }),
+        ),
       });
     } else {
-      promptDispatch({ field: 'filteredPrompts', value: getNonDeletedCollection(prompts) });
+      promptDispatch({
+        field: 'filteredPrompts',
+        value: getNonDeletedCollection(prompts),
+      });
     }
   }, [searchTerm, prompts]);
 
@@ -162,9 +162,9 @@ const Promptbar = () => {
         addItemButtonTitle={t('New prompt')}
         itemComponent={
           <Prompts
-            prompts={
-              filteredPrompts.filter((prompt) => prompt.folderId == null)
-            }
+            prompts={filteredPrompts.filter(
+              (prompt) => prompt.folderId == null,
+            )}
           />
         }
         folderComponent={<PromptFolders />}

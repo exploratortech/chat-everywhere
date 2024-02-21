@@ -22,7 +22,7 @@ import { Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { NewConversationMessagesContainer } from '../ConversationStarter/NewConversationMessagesContainer';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';

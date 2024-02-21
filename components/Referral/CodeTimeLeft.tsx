@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { en } from '@supabase/auth-ui-shared';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -31,11 +30,7 @@ const calculateTimeLeft = (endOfDayInput: string) => {
     .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
-export default function ReferralCodeTimeLeft({
-  endOfDay,
-}: {
-  endOfDay: string;
-}) {
+export default function CodeTimeLeft({ endOfDay }: { endOfDay: string }) {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(endOfDay));
   const { t } = useTranslation('model');
 
