@@ -2,9 +2,9 @@ import { useContext } from 'react';
 
 import { Prompt } from '@/types/prompt';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import PromptIcon from '../Promptbar/components/PromptIcon';
+
+import HomeContext from '../home/home.context';
 
 const CustomInstructionList = ({
   customInstructionOnClick,

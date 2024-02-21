@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 
 import { PluginID } from '@/types/plugin';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import CustomInstructionInUseDisplayModel from '../Promptbar/components/CustomInstructionInUseDisplayModel';
+
+import HomeContext from '../home/home.context';
 
 const CustomInstructionInUseIndicator = () => {
   const { t } = useTranslation('chat');
