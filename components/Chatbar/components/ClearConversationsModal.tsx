@@ -42,6 +42,7 @@ export default function ClearConversationsModal() {
       selectedConversations: new Set<string>(),
       selectedFolders: new Set<string>(),
       deletingFolders: true,
+      selectingAll: false,
     },
   });
 
@@ -50,6 +51,7 @@ export default function ClearConversationsModal() {
       selectedConversations,
       selectedFolders,
       deletingFolders,
+      selectingAll,
     },
     dispatch,
   } = context;
@@ -106,6 +108,7 @@ export default function ClearConversationsModal() {
       removeConversations(...conversationIds);
       removeFolders(...folderIds);
     }
+    dispatch({ field: 'selectingAll', value: checked });
   }, [
     filteredConversations,
     filteredFolders,
@@ -113,6 +116,7 @@ export default function ClearConversationsModal() {
     removeConversations,
     addFolders,
     removeFolders,
+    dispatch,
   ]);
 
   const handleClose = useCallback(() => {
@@ -120,9 +124,10 @@ export default function ClearConversationsModal() {
 
     // Reset state
     setTimeout(() => {
-      dispatch({ field: 'deletingFolders', value: true });
       dispatch({ field: 'selectedConversations', value: new Set() });
       dispatch({ field: 'selectedFolders', value: new Set() });
+      dispatch({ field: 'deletingFolders', value: true });
+      dispatch({ field: 'selectingAll', value: false });
     }, 300);
   }, [homeDispatch, dispatch]);
 
@@ -187,6 +192,7 @@ export default function ClearConversationsModal() {
                         <input
                           className="w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
                           onChange={(event) => handleSelectAll(event.currentTarget.checked)}
+                          checked={selectingAll}
                           id="clear-conversation-all-input"
                           type="checkbox"
                         />
@@ -260,6 +266,7 @@ type FolderItemProp = {
 function FolderItem({ folder, conversations }: FolderItemProp) {
   const {
     state: { selectedFolders },
+    dispatch,
     addConversations,
     removeConversations,
     addFolders,
@@ -290,6 +297,7 @@ function FolderItem({ folder, conversations }: FolderItemProp) {
             removeConversations(...conversationIds);
             removeFolders(folder.id);
           }
+          dispatch({ field: 'selectingAll', value: false });
         }}
       >
         <div
@@ -324,6 +332,7 @@ type ConversationItemProp = {
 function ConversationItem({ conversation }: ConversationItemProp) {
   const {
     state: { selectedConversations },
+    dispatch,
     addConversations,
     removeConversations,
   } = useContext(ClearConversationsModalContext);
@@ -332,11 +341,12 @@ function ConversationItem({ conversation }: ConversationItemProp) {
     <CheckboxItem
       padded={!!conversation.folderId}
       checked={selectedConversations.has(conversation.id)}
-      onCheck={(checked: boolean) =>
+      onCheck={(checked: boolean) => {
         checked
           ? addConversations(conversation.id)
-          : removeConversations(conversation.id)
-      }
+          : removeConversations(conversation.id);
+        dispatch({ field: 'selectingAll', value: false });
+      }}
     >
       <div className={`flex w-full items-center gap-3 rounded-lg p-3 text-sm translate-x-0`}>
         <IconMessage size={18} />
