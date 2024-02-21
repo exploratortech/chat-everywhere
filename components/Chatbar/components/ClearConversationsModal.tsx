@@ -279,7 +279,7 @@ export default function ClearConversationsModal() {
                       ))
                     }
                   </div>
-                  <div className="flex justify-between p-6 gap-x-2 bg-neutral-900">
+                  <div className="flex flex-col items-stretch xs:flex-row justify-between p-6 gap-x-2 gap-y-4 bg-neutral-900">
                     <div className="flex items-center">
                       <label htmlFor="clear-folders-checkbox">{t('Clear folders')}</label>
                       <input
@@ -295,7 +295,7 @@ export default function ClearConversationsModal() {
                     </div>
                     <div className="flex gap-x-2">
                       <Button
-                        className="h-10"
+                        className="flex-1 xs:flex-auto h-10"
                         variant="outline"
                         type="button"
                         onClick={handleClose}
@@ -304,7 +304,7 @@ export default function ClearConversationsModal() {
                       </Button>
                       {confirmingDeletion ? (
                         <Button
-                          className="h-10"
+                          className="flex-1 xs:flex-auto h-10"
                           onClick={clearConversations}
                           variant="default"
                           type="button"
@@ -313,7 +313,7 @@ export default function ClearConversationsModal() {
                         </Button>
                       ) : (
                         <Button
-                          className="h-10"
+                          className="flex-1 xs:flex-auto h-10"
                           onClick={() => {
                             dispatch({ field: 'confirmingDeletion', value: true });
                             setTimeout(() => {
