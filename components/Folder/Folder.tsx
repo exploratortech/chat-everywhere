@@ -15,12 +15,12 @@ import {
   useState,
 } from 'react';
 
+import { getNonDeletedCollection } from '@/utils/app/conversation';
+
 import { FolderInterface } from '@/types/folder';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
-import { getNonDeletedCollection } from '@/utils/app/conversation';
+import HomeContext from '@/components/home/home.context';
 
 interface Props {
   currentFolder: FolderInterface;
@@ -65,17 +65,16 @@ const Folder = ({
   };
 
   const handleButtonFocusKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (["Space", "Enter"].includes(e.code)) {
+    if (['Space', 'Enter'].includes(e.code)) {
       setIsOpen(!isOpen);
     }
-  }
+  };
 
   const dropHandler = (e: any) => {
     if (currentDrag && currentDrag.type !== 'folder') {
       setIsOpen(true);
       handleDrop(currentFolder);
-      if (buttonRef.current)
-        buttonRef.current.style.background = 'none';
+      if (buttonRef.current) buttonRef.current.style.background = 'none';
     }
   };
 
@@ -117,10 +116,18 @@ const Folder = ({
 
   return (
     <>
-      <div className={`
+      <div
+        className={`
         relative flex items-center
-        ${ !currentDrag || currentDrag.type !== 'folder' || currentDrag.data.id === currentFolder.id ? 'pointer-events-auto' : 'pointer-events-none' }
-      `}>
+        ${
+          !currentDrag ||
+          currentDrag.type !== 'folder' ||
+          currentDrag.data.id === currentFolder.id
+            ? 'pointer-events-auto'
+            : 'pointer-events-none'
+        }
+      `}
+      >
         {isRenaming ? (
           <div className="flex w-full items-center gap-3 bg-[#343541]/90 p-3">
             {isOpen ? (

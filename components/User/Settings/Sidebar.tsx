@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { SettingsModelContext } from './SettingsModel';
 

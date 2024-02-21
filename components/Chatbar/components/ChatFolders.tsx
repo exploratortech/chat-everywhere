@@ -7,7 +7,7 @@ import { generateRank, reorderItem } from '@/utils/app/rank';
 import { FolderInterface } from '@/types/folder';
 import { Conversation } from '@/types/chat';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import Folder from '@/components/Folder';
 import DropArea from '@/components/DropArea/DropArea';

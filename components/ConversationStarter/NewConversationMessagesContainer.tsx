@@ -6,7 +6,7 @@ import { event } from 'nextjs-google-analytics';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { FootNoteMessage } from './FootNoteMessage';
 import { RolePlayPrompts } from './RolePlayPrompts';

@@ -2,11 +2,12 @@ import { useSession } from '@supabase/auth-helpers-react';
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { getHomeUrl } from '@/utils/app/api';
 
 import Image from 'next/image';
 
-import HomeContext from '@/pages/api/home/home.context';
+import { getHomeUrl } from '@/utils/app/api';
+
+import HomeContext from '@/components/home/home.context';
 
 export const LineConnectionButton = () => {
   const {

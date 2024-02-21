@@ -26,15 +26,15 @@ import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import TokenCounter from './components/TokenCounter';
+import HomeContext from '@/components/home/home.context';
 
 import AssistantRespondMessage from './ChatMessage/AssistantRespondMessage';
 import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';
 import { LineShareButton } from './LineShareButton';
 import { SpeechButton } from './SpeechButton';
+import StudentShareMessageButton from './StudentShareMessageButton';
 
 interface Props {
   message: Message;
@@ -49,9 +49,10 @@ export const ChatMessage: FC<Props> = memo(
     const { i18n } = useTranslation();
 
     const {
-      state: { selectedConversation, conversations },
+      state: { isTempUser, selectedConversation, conversations },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
+    const isStudentAccount = isTempUser;
 
     const displayFooterButtons = useMemo(() => {
       if (!selectedConversation) return false;
@@ -327,6 +328,13 @@ export const ChatMessage: FC<Props> = memo(
                           <IconTrash size={18} />
                         </button>
                         <LineShareButton messageContent={message.content} />
+                        {isStudentAccount && (
+                          <div className="ml-2 flex items-center">
+                            <StudentShareMessageButton
+                              messageContent={message.content}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                   </>
@@ -364,10 +372,18 @@ export const ChatMessage: FC<Props> = memo(
                       !message.pluginId) &&
                       !messageIsStreaming && (
                         <>
-                          <LineShareButton
-                            messageContent={message.content}
-                            className="ml-2"
-                          />
+                          {!isStudentAccount && (
+                            <LineShareButton
+                              messageContent={message.content}
+                              className="ml-2"
+                            />
+                          )}
+                          {isStudentAccount && (
+                            <StudentShareMessageButton
+                              messageContent={message.content}
+                              className="ml-2"
+                            />
+                          )}
                         </>
                       )}
                   </div>

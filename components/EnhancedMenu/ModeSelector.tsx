@@ -5,7 +5,7 @@ import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 
 import { PluginID } from '@/types/plugin';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 const ModeSelector = () => {
   const { t } = useTranslation('model');

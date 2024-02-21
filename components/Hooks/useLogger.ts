@@ -1,9 +1,10 @@
 import { useContext } from 'react';
-import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 
 import { event } from 'nextjs-google-analytics/dist/interactions';
 
-import HomeContext from '@/pages/api/home/home.context';
+import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
+
+import HomeContext from '@/components/home/home.context';
 
 export const useLogger = () => {
   const {
@@ -21,7 +22,7 @@ export const useLogger = () => {
         } else {
           logEventName += ' (free account)';
         }
-      }else{
+      } else {
         logEventName += ' (no-login)';
       }
 

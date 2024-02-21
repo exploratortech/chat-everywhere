@@ -9,9 +9,9 @@ import { useTranslation } from 'next-i18next';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { CodeGenerationPayloadType } from '@/utils/server/referralCode';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
-import ReferralCodeTimeLeft from '../Referral/ReferralCodeTimeLeft';
+import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import ReferralProgramData from '../Referral/ReferralProgramData';
 import Spinner from '../Spinner/Spinner';
 
@@ -159,7 +159,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
                         </span>
                       </div>
                       {user?.referralCodeExpirationDate && (
-                        <ReferralCodeTimeLeft
+                        <CodeTimeLeft
                           endOfDay={user?.referralCodeExpirationDate}
                         />
                       )}

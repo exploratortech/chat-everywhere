@@ -30,12 +30,14 @@ export const DEFAULT_REGION = 'icn1';
 export const IMAGE_TO_PROMPT_MAX_TIMEOUT = 30;
 
 export const AZURE_OPENAI_ENDPOINTS = [
+  process.env.AZURE_OPENAI_ENDPOINT_0,
   process.env.AZURE_OPENAI_ENDPOINT_1,
   process.env.AZURE_OPENAI_ENDPOINT_2,
   process.env.AZURE_OPENAI_ENDPOINT_3,
 ];
 
 export const AZURE_OPENAI_KEYS = [
+  process.env.AZURE_OPENAI_KEY_0,
   process.env.AZURE_OPENAI_KEY_1,
   process.env.AZURE_OPENAI_KEY_2,
   process.env.AZURE_OPENAI_KEY_3,
@@ -50,11 +52,13 @@ export const ENDPOINT_TRAFFIC_DISTRIBUTION = [
 ];
 
 export const AZURE_OPENAI_GPT_4_ENDPOINTS = [
+  process.env.AZURE_OPENAI_GPT_4_ENDPOINT_0,
   process.env.AZURE_OPENAI_GPT_4_ENDPOINT_1,
   process.env.AZURE_OPENAI_GPT_4_ENDPOINT_2,
 ];
 
 export const AZURE_OPENAI_GPT_4_KEYS = [
+  process.env.AZURE_OPENAI_GPT_4_KEY_0,
   process.env.AZURE_OPENAI_GPT_4_KEY_1,
   process.env.AZURE_OPENAI_GPT_4_KEY_2,
 ];

@@ -12,10 +12,10 @@ import {
   SupportedExportFormats,
 } from '@/types/export';
 
-import { HomeInitialState } from '@/pages/api/home/home.state';
+import { HomeInitialState } from '@/components/home/home.state';
 
-import { RANK_INTERVAL } from './const';
 import { cleanConversationHistory, cleanFolders, cleanPrompts } from './clean';
+import { RANK_INTERVAL } from './const';
 import { trackEvent } from './eventTracking';
 
 import dayjs from 'dayjs';

@@ -4,7 +4,7 @@ import { useTranslation } from 'next-i18next';
 
 import { PluginID } from '@/types/plugin';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 type Props = {
   pluginId: PluginID | null;
@@ -25,7 +25,8 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
   )
     return <></>;
 
-  const remainingCredits = pluginId && creditUsage[pluginId].remainingCredits || 0;
+  const remainingCredits =
+    (pluginId && creditUsage[pluginId].remainingCredits) || 0;
 
   return (
     <div

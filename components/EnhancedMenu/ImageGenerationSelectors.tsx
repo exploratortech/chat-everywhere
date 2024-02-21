@@ -7,7 +7,7 @@ import {
 } from '@/utils/app/const';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 // Subject to changes in the future: style_preset at https://platform.stability.ai/rest-api#tag/v1generation/operation/textToImage
 const AVAILABLE_STYLES = {

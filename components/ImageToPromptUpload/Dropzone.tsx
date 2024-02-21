@@ -4,7 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 interface DropZoneProps {
   onDropCallback: (file: File) => void;
@@ -34,7 +34,6 @@ function DropZone({ onDropCallback }: DropZoneProps) {
       } text-neutral-900 dark:border-neutral-600 dark:text-white  pr-1 focus:outline-none`}
       {...getRootProps()}
       onClick={() => {
-        
         document.getElementById('upload-images-to-text')?.click();
       }}
     >

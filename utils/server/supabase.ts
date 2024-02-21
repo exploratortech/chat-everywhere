@@ -240,6 +240,8 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
   }
 };
 
+export { getOneTimeCodeInfo } from './supabase/getOneTimeCodeInfo';
+
 export const getReferralCode = async (
   userId: string,
 ): Promise<CodeGenerationPayloadType> => {
@@ -427,12 +429,14 @@ export const userProfileQuery = async ({
     referral_code: any;
     referral_code_expiration_date: any;
     line_access_token?: string;
+    temporary_account_profiles: any[];
+    is_teacher_account: boolean;
   } | null = null;
   if (userId) {
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(*)',
       )
       .eq('id', userId)
       .single();
@@ -445,7 +449,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(*)',
       )
       .eq('email', email)
       .single();
@@ -510,6 +514,8 @@ export const userProfileQuery = async ({
     isInReferralTrial: isInReferralTrial,
     isConnectedWithLine: !!userProfile.line_access_token,
     hasMqttConnection: hasMqttConnection,
+    isTempUser: userProfile.temporary_account_profiles.length > 0,
+    isTeacherAccount: userProfile.is_teacher_account,
   } as UserProfile;
 };
 
@@ -546,12 +552,12 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
   if (fetchError) {
     throw fetchError;
   }
-  
+
   const userIds = users?.map((user) => user.id);
   if (!userIds) {
     return [];
   }
-  
+
   const trialUserIds: string[] = [];
 
   for (const userId of userIds) {
@@ -565,7 +571,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
     if (referralError) {
       throw referralError;
     }
-    
+
     if (referralRows?.length > 0) {
       trialUserIds.push(userId);
     }
