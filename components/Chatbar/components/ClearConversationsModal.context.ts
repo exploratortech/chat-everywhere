@@ -7,6 +7,7 @@ export interface ClearConversationsModalState {
   selectedFolders: Set<string>;
   deletingFolders: boolean;
   selectingAll: boolean;
+  confirmingDeletion: boolean;
 }
 
 export interface ClearConversationsModalContextProps {

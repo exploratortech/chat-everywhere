@@ -43,6 +43,7 @@ export default function ClearConversationsModal() {
       selectedFolders: new Set<string>(),
       deletingFolders: true,
       selectingAll: false,
+      confirmingDeletion: false,
     },
   });
 
@@ -52,6 +53,7 @@ export default function ClearConversationsModal() {
       selectedFolders,
       deletingFolders,
       selectingAll,
+      confirmingDeletion,
     },
     dispatch,
   } = context;
@@ -128,6 +130,7 @@ export default function ClearConversationsModal() {
       dispatch({ field: 'selectedFolders', value: new Set() });
       dispatch({ field: 'deletingFolders', value: true });
       dispatch({ field: 'selectingAll', value: false });
+      dispatch({ field: 'confirmingDeletion', value: false });
     }, 300);
   }, [homeDispatch, dispatch]);
 
@@ -238,14 +241,30 @@ export default function ClearConversationsModal() {
                       >
                         {t('Cancel')}
                       </Button>
-                      <Button
-                        className="h-10"
-                        variant="default"
-                        type="button"
-                        disabled={itemCount === 0}
-                      >
-                        {t('Delete')} {`(${itemCount})`}
-                      </Button>
+                      {confirmingDeletion ? (
+                        <Button
+                          className="h-10"
+                          variant="default"
+                          type="button"
+                        >
+                          {t('Are you sure?')}
+                        </Button>
+                      ) : (
+                        <Button
+                          className="h-10"
+                          onClick={() => {
+                            dispatch({ field: 'confirmingDeletion', value: true });
+                            setTimeout(() => {
+                              dispatch({ field: 'confirmingDeletion', value: false });
+                            }, 5000);
+                          }}
+                          variant="default"
+                          type="button"
+                          disabled={itemCount === 0}
+                        >
+                          {t('Delete')} {`(${itemCount})`}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </Dialog.Panel>
