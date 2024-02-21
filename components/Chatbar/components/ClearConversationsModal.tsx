@@ -123,6 +123,7 @@ export default function ClearConversationsModal() {
       removeFolders(...folderIds);
     }
     dispatch({ field: 'selectingAll', value: checked });
+    dispatch({ field: 'confirmingDeletion', value: false });
   }, [
     filteredConversations,
     filteredFolders,
@@ -240,7 +241,7 @@ export default function ClearConversationsModal() {
                   >
                     <IconX />
                   </Button>
-                  <div className="relative flex flex-col px-6 overflow-y-auto">
+                  <div className="relative flex-1 flex flex-col px-6 overflow-y-auto">
                     <div className="flex justify-end self-stretch sticky top-0 py-2 bg-neutral-900 z-[1000]">
                       <div className="flex items-center">
                         <label
@@ -250,7 +251,7 @@ export default function ClearConversationsModal() {
                           {t('Select all')}
                         </label>
                         <input
-                          className="w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
+                          className="form-checkbox w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
                           onChange={(event) => handleSelectAll(event.currentTarget.checked)}
                           checked={selectingAll}
                           id="clear-conversation-all-input"
@@ -283,9 +284,12 @@ export default function ClearConversationsModal() {
                       <label htmlFor="clear-folders-checkbox">{t('Clear folders')}</label>
                       <input
                         id="clear-folders-checkbox"
-                        className="w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
+                        className="form-checkbox w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
                         checked={deletingFolders}
-                        onChange={() => dispatch({ field: 'deletingFolders', value: !deletingFolders })}
+                        onChange={() => {
+                          dispatch({ field: 'deletingFolders', value: !deletingFolders });
+                          dispatch({ field: 'confirmingDeletion', value: false });
+                        }}
                         type="checkbox"
                       />
                     </div>
@@ -375,6 +379,7 @@ function FolderItem({ folder, conversations }: FolderItemProp) {
             removeFolders(folder.id);
           }
           dispatch({ field: 'selectingAll', value: false });
+          dispatch({ field: 'confirmingDeletion', value: false });
         }}
       >
         <div
@@ -423,6 +428,7 @@ function ConversationItem({ conversation }: ConversationItemProp) {
           ? addConversations(conversation.id)
           : removeConversations(conversation.id);
         dispatch({ field: 'selectingAll', value: false });
+        dispatch({ field: 'confirmingDeletion', value: false });
       }}
     >
       <div className={`flex w-full items-center gap-3 rounded-lg p-3 text-sm translate-x-0`}>
@@ -458,7 +464,7 @@ function CheckboxItem({
       {padded && (<div className="w-[1px] h-full ml-5 dark:bg-white/50" />)}
       {children}
       <input
-        className="w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
+        className="form-checkbox w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
         onChange={() => {
           setIsChecked(!isChecked);
           onCheck && onCheck(!isChecked);
