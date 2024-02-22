@@ -214,6 +214,7 @@ const Folder = ({
                 handleClick={(e) => {
                   e.stopPropagation();
                   handleNewConversation(currentFolder.id);
+                  setIsOpen(true);
                 }}
               >
                 <IconPlus size={18} />
