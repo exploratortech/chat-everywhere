@@ -3,6 +3,7 @@ import {
   IconCaretRight,
   IconCheck,
   IconPencil,
+  IconPlus,
   IconTrash,
   IconX,
 } from '@tabler/icons-react';
@@ -39,6 +40,7 @@ const Folder = ({
     handleUpdateFolder,
     setDragData,
     removeDragData,
+    handleNewConversation,
   } = useContext(HomeContext);
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -208,6 +210,14 @@ const Folder = ({
 
           {!isDeleting && !isRenaming && (
             <>
+              <SidebarActionButton
+                handleClick={(e) => {
+                  e.stopPropagation();
+                  handleNewConversation(currentFolder.id);
+                }}
+              >
+                <IconPlus size={18} />
+              </SidebarActionButton>
               <SidebarActionButton
                 handleClick={(e) => {
                   e.stopPropagation();

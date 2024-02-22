@@ -211,13 +211,13 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   // CONVERSATION OPERATIONS  --------------------------------------------
 
-  const handleNewConversation = () => {
+  const handleNewConversation = (folderId?: string) => {
     //  CLOSE CHATBAR ON MOBILE LAYOUT WHEN SELECTING CONVERSATION
     if (isTabletLayout) {
       dispatch({ field: 'showChatbar', value: false });
     }
 
-    const newConversation: Conversation = getNewConversation();
+    const newConversation: Conversation = getNewConversation(folderId);
 
     const updatedConversations = [newConversation, ...conversations];
 
@@ -253,7 +253,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  const getNewConversation = () => {
+  const getNewConversation = (folderId: string | null = null) => {
     const lastConversation = conversations[conversations.length - 1];
 
     const newConversation: Conversation = {
@@ -269,7 +269,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       prompt: DEFAULT_SYSTEM_PROMPT,
       temperature: DEFAULT_TEMPERATURE,
       rank: generateRank(getNonDeletedCollection(conversations), 0),
-      folderId: null,
+      folderId,
       lastUpdateAtUTC: dayjs().valueOf(),
     };
     return newConversation;
