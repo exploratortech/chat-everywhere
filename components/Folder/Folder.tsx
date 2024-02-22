@@ -15,8 +15,6 @@ import {
   useState,
 } from 'react';
 
-import { getNonDeletedCollection } from '@/utils/app/conversation';
-
 import { FolderInterface } from '@/types/folder';
 
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
@@ -36,7 +34,7 @@ const Folder = ({
   folderComponent,
 }: Props) => {
   const {
-    state: { currentDrag, folders },
+    state: { currentDrag },
     handleDeleteFolder,
     handleUpdateFolder,
     setDragData,
