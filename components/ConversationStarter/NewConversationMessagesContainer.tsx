@@ -10,7 +10,6 @@ import { Prompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 
-import CustomInstructionList from './CustomInstructionList';
 import { FootNoteMessage } from './FootNoteMessage';
 import { RolePlayPrompts } from './RolePlayPrompts';
 import { SamplePrompts } from './SamplePrompts';
@@ -128,7 +127,10 @@ export const NewConversationMessagesContainer: FC<Props> = ({
       </div>
 
       {rolePlayMode ? (
-        <RolePlayPrompts roleOnClick={roleOnClick} />
+        <RolePlayPrompts
+          roleOnClick={roleOnClick}
+          customInstructionOnClick={customInstructionOnClick}
+        />
       ) : (
         <SamplePrompts promptOnClick={promptOnClick} />
       )}
@@ -140,9 +142,6 @@ export const NewConversationMessagesContainer: FC<Props> = ({
           ? t('Switch to Sample Prompts')
           : t('Switch to Role Play')}
       </button>
-      <CustomInstructionList
-        customInstructionOnClick={customInstructionOnClick}
-      />
       <FootNoteMessage displayV2Link={user?.isInReferralTrial || false} />
     </div>
   );
