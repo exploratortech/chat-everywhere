@@ -197,6 +197,9 @@ async function handleDataResponse(
     const chunkValue = decoder.decode(value);
     text += chunkValue;
 
+    if (text.includes('[REPLACE_ALL]')) {
+      text = chunkValue.replace('[REPLACE_ALL]', '');
+    }
     if (text.includes('[DONE]')) {
       text = text.replace('[DONE]', '');
       done = true;

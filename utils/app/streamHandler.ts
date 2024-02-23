@@ -14,9 +14,16 @@ export const makeWriteToStream = (
   writer: WritableStreamDefaultWriter<any>,
   encoder: TextEncoder,
 ) => {
-  return async (text: string, removeLastLine?: boolean) => {
+  return async (
+    text: string,
+    removeLastLine?: boolean,
+    replaceAll?: boolean,
+  ) => {
     if (removeLastLine) {
       await writer.write(encoder.encode('[REMOVE_LAST_LINE]'));
+    }
+    if (replaceAll) {
+      await writer.write(encoder.encode('[REPLACE_ALL]'));
     }
     await writer.write(encoder.encode(text));
   };
