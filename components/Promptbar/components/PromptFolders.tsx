@@ -43,17 +43,14 @@ export const PromptFolders = () => {
       const prompt = currentDrag.data as Prompt;
 
       // Filter for prompts that are in the folder
-      const filter = (otherPrompt: Prompt) => otherPrompt.folderId === folder.id;
-      const refinedFilteredPrompts = filteredPrompts.filter(filter);
+      const refinedFilteredPrompts = filteredPrompts
+        .filter((p) => p.folderId === folder.id);
 
       const updatedPrompts = reorderItem(
         prompts,
         prompt.id,
         generateRank(refinedFilteredPrompts, index),
-        {
-          filter,
-          updates: { folderId: folder.id },
-        },
+        { updates: { folderId: folder.id } },
       );
 
       dispatch({ field: 'prompts', value: updatedPrompts });

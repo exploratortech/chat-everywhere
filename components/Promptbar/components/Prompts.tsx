@@ -2,7 +2,7 @@ import { FC, Fragment, useContext } from 'react';
 
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { savePrompts } from '@/utils/app/prompts';
-import { generateRank, reorderItem } from '@/utils/app/rank';
+import { generateRank, reorderItem, reorderItem2 } from '@/utils/app/rank';
 
 import { Prompt } from '@/types/prompt';
 
@@ -28,10 +28,13 @@ export const Prompts: FC<Props> = ({ prompts }) => {
   const handleDrop = (e: React.DragEvent<HTMLElement>, index: number): void => {
     if (currentDrag) {
       const prompt = currentDrag.data as Prompt;
-      const reorderedPrompts = reorderItem(
+      const reorderedPrompts = reorderItem2(
         unfilteredPrompts,
         prompt.id,
-        generateRank(prompts, index),
+        generateRank(
+          unfilteredPrompts.filter((p) => p.folderId == null),
+          index,
+        ),
         { updates: { folderId: null } },
       );
       dispatch({ field: 'prompts', value: reorderedPrompts });

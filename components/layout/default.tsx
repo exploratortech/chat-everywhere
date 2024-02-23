@@ -36,7 +36,7 @@ import {
 import { saveFolders } from '@/utils/app/folders';
 import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
-import { generateRank, sortByRank } from '@/utils/app/rank';
+import { areRanksBalanced2, generateRank, rebalanceRanks2, sortByRank, sortByRankAndFolder } from '@/utils/app/rank';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
@@ -219,7 +219,11 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
     const newConversation: Conversation = getNewConversation(folderId);
 
-    const updatedConversations = [newConversation, ...conversations];
+    let updatedConversations = [newConversation, ...conversations];
+
+    if (!areRanksBalanced2(updatedConversations)) {
+      updatedConversations = rebalanceRanks2(updatedConversations);
+    }
 
     dispatch({ field: 'selectedConversation', value: newConversation });
     dispatch({ field: 'conversations', value: updatedConversations });
@@ -256,6 +260,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   const getNewConversation = (folderId: string | null = null) => {
     const lastConversation = conversations[conversations.length - 1];
 
+    let filteredConversations: Conversation[] = getNonDeletedCollection(conversations)
+      .filter((c) => c.folderId === folderId);
+
     const newConversation: Conversation = {
       id: uuidv4(),
       name: `${t('New Conversation')}`,
@@ -268,7 +275,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       },
       prompt: DEFAULT_SYSTEM_PROMPT,
       temperature: DEFAULT_TEMPERATURE,
-      rank: generateRank(getNonDeletedCollection(conversations), 0),
+      rank: generateRank(filteredConversations, 0),
       folderId,
       lastUpdateAtUTC: dayjs().valueOf(),
     };
@@ -522,7 +529,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
     const prompts = localStorage.getItem('prompts');
     if (prompts) {
-      const parsedPrompts: Prompt[] = JSON.parse(prompts).sort(sortByRank);
+      const parsedPrompts = sortByRankAndFolder<Prompt>(JSON.parse(prompts));
       cleanedPrompts = cleanPrompts(parsedPrompts);
       dispatch({ field: 'prompts', value: cleanedPrompts });
     }
@@ -545,8 +552,8 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     const conversationHistory = localStorage.getItem('conversationHistory');
     cleanedConversationHistory = [];
     if (conversationHistory) {
-      const parsedConversationHistory: Conversation[] =
-        JSON.parse(conversationHistory).sort(sortByRank);
+      const parsedConversationHistory =
+        sortByRankAndFolder<Conversation>(JSON.parse(conversationHistory));
       cleanedConversationHistory = cleanConversationHistory(
         parsedConversationHistory,
       );
