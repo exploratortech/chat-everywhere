@@ -2,21 +2,15 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from 'react-query';
+
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { TempAccountProfiles } from '@/types/one-time-code';
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import { Button } from '../ui/button';
+import { columns } from './TemporaryAccountProfileList/Columns';
+import DataTable from './TemporaryAccountProfileList/DataTable';
 
 import dayjs from 'dayjs';
 
@@ -38,9 +32,9 @@ const TemporaryAccountProfileList = ({
 
   const { mutate: removeTempAccount, isLoading } = useRemoveTempAccount();
 
-  const handleRemove = (tempAccountId: string) => {
+  const handleRemove = (tempAccountIds: number[]) => {
     removeTempAccount(
-      { tempAccountId },
+      { tempAccountIds },
       {
         onSuccess: () => {
           toast.success(t('Temporary account removed'));
@@ -61,50 +55,11 @@ const TemporaryAccountProfileList = ({
         {t('Active accounts')}{' '}
         <label>{`(${totalActiveTempAccount}/${maxQuota})`}</label>
       </h2>
-      <Table>
-        <TableHeader>
-          <TableRow className="border-[#4c4c4c]">
-            <TableHead>{t('Name')}</TableHead>
-            <TableHead>{t('Code')}</TableHead>
-            <TableHead>{t('Created At')}</TableHead>
-            <TableHead>{t('Expired At')}</TableHead>
-            <TableHead></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {tempAccountProfiles.map((profile) => (
-            <TableRow
-              key={`temp-account-${profile.id}`}
-              className="text-sm border-[#4c4c4c]"
-            >
-              <TableCell>{profile.uniqueId}</TableCell>
-              <TableCell>
-                <span
-                  onClick={() => handleCopy(profile.code)}
-                  className="cursor-pointer inline bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1"
-                >
-                  {profile.code}
-                </span>
-              </TableCell>
-              <TableCell>
-                {dayjs(profile.created_at).format('YYYY-MM-DD HH:mm')}
-              </TableCell>
-              <TableCell>
-                <CodeTimeLeft endOfDay={profile.expired_at} />
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="destructive"
-                  onClick={() => handleRemove(`${profile.id}`)}
-                  disabled={isLoading}
-                >
-                  {t('Remove')}
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <DataTable
+        columns={columns}
+        data={tempAccountProfiles}
+        handleRemoveAccounts={handleRemove}
+      />
     </div>
   );
 };
@@ -113,33 +68,38 @@ export default TemporaryAccountProfileList;
 
 function useRemoveTempAccount() {
   const supabase = useSupabaseClient();
-  return useMutation(async ({ tempAccountId }: { tempAccountId: string }) => {
-    const payload = {
-      accessToken: (await supabase.auth.getSession()).data.session
-        ?.access_token,
-      tempAccountId,
-    };
-    try {
-      const response = await fetch(`/api/teacher-portal/remove-temp-account`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+  return useMutation(
+    async ({ tempAccountIds }: { tempAccountIds: number[] }) => {
+      const payload = {
+        accessToken: (await supabase.auth.getSession()).data.session
+          ?.access_token,
+        tempAccountIds,
+      };
+      try {
+        const response = await fetch(
+          `/api/teacher-portal/remove-temp-accounts`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          },
+        );
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        // Handle success response
+        console.log('Successfully removed temporary account', data);
+        return data;
+      } catch (error) {
+        // Handle error response
+        console.error('Error removing temporary account:', error);
+        throw error;
       }
-
-      const data = await response.json();
-      // Handle success response
-      console.log('Successfully removed temporary account', data);
-      return data;
-    } catch (error) {
-      // Handle error response
-      console.error('Error removing temporary account:', error);
-      throw error;
-    }
-  });
+    },
+  );
 }
