@@ -36,7 +36,7 @@
     "@supabase/auth-ui-react": "^0.4.2",
     "@supabase/supabase-js": "^2.15.0",
     "@tabler/icons-react": "^2.9.0",
-    "@tanstack/react-table": "^8.9.3",
+    "@tanstack/react-table": "^8.12.0",
     "@types/lodash": "^4.14.202",
     "@vercel/edge": "^1.1.1",
     "base64-arraybuffer": "^1.0.2",
