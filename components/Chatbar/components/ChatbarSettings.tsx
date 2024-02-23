@@ -7,7 +7,7 @@ import {
   IconNews,
   IconSettings,
 } from '@tabler/icons-react';
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
@@ -19,21 +19,30 @@ import UserAccountBadge from '@/components/User/UserAccountBadge';
 import HomeContext from '@/components/home/home.context';
 
 import { SidebarButton } from '../../Sidebar/SidebarButton';
-import ChatbarContext from '../Chatbar.context';
 import { ClearConversations } from './ClearConversations';
+import { getNonDeletedCollection } from '@/utils/app/conversation';
 
 export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
 
   const {
-    state: { conversations, user, isTeacherAccount },
+    state: { conversations, folders, user, isTeacherAccount },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const { handleClearConversations } = useContext(ChatbarContext);
-
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
+
+  const filteredConversations = useMemo(() =>
+    getNonDeletedCollection(conversations),
+    [conversations],
+  );
+
+  const filteredFolders = useMemo(() =>
+    getNonDeletedCollection(folders)
+      .filter((folder) => folder.type === 'chat'),
+    [folders],
+  );
 
   const signInOnClick = () => {
     trackEvent('Sign in button clicked');
@@ -64,9 +73,7 @@ export const ChatbarSettings = () => {
     <div className="min-h-min">
       <CloudSyncStatusComponent />
       <div className="flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm overflow-auto">
-        {conversations.length > 0 ? (
-          <ClearConversations onClearConversations={handleClearConversations} />
-        ) : null}
+        {filteredConversations.length > 0 || filteredFolders.length > 0 ? <ClearConversations /> : null}
 
         <SidebarButton
           text={t('Settings')}
