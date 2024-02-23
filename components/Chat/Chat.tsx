@@ -1,6 +1,5 @@
-import { IconArrowDown, IconClearAll } from '@tabler/icons-react';
+import { IconClearAll } from '@tabler/icons-react';
 import {
-  Fragment,
   MutableRefObject,
   memo,
   useCallback,
