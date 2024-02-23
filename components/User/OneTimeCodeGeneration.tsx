@@ -1,3 +1,4 @@
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconRefresh } from '@tabler/icons-react';
 import React, { memo, useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
@@ -95,14 +96,20 @@ export const useGetOneTimeCode = (
   invalidate: boolean,
   userId: string | undefined,
 ) => {
+  const supabase = useSupabaseClient();
   return useQuery(
-    ['getOneTimeCode', { invalidate, userId }],
+    ['getOneTimeCode', { invalidate }],
     async () => {
+      const accessToken = (await supabase.auth.getSession()).data.session
+        ?.access_token;
+      if (!accessToken) {
+        return;
+      }
       const response = await fetch(`/api/teacher-portal/get-code`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'user-id': userId || '',
+          'access-token': accessToken,
           invalidate: invalidate ? 'true' : 'false',
         },
       });
