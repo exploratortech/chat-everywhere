@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useRouter } from 'next/router';
 
+import ClearConversationsModal from '../Chatbar/components/ClearConversationsModal';
 import { Chat } from '@/components/Chat/Chat';
 import { Chatbar } from '@/components/Chatbar/Chatbar';
 import FeaturesModel from '@/components/Features/FeaturesModel';
@@ -18,10 +19,8 @@ import SettingsModel from '@/components/User/Settings/SettingsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
-import DefaultLayout from '@/components/layout/default';
 
 import HomeContext from './home.context';
-import ClearConversationsModal from '../Chatbar/components/ClearConversationsModal';
 
 const Home = () => {
   const router = useRouter();
