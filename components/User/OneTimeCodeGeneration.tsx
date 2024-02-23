@@ -14,7 +14,7 @@ import HomeContext from '@/components/home/home.context';
 
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import Spinner from '../Spinner/Spinner';
-import TemporaryAccountProfileList from './TemporaryAccountProfileList';
+import TemporaryAccountProfileList from '../TeacherPortal/TemporaryAccountProfileList';
 
 const OneTimeCodeGeneration = memo(() => {
   const { t } = useTranslation('model');
