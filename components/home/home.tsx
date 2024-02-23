@@ -21,6 +21,7 @@ import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay'
 import DefaultLayout from '@/components/layout/default';
 
 import HomeContext from './home.context';
+import ClearConversationsModal from '../Chatbar/components/ClearConversationsModal';
 
 const Home = () => {
   const router = useRouter();
@@ -123,6 +124,7 @@ const Home = () => {
             })
           }
         />
+        <ClearConversationsModal />
         {showReferralModel && (
           <ReferralModel
             onClose={() =>
