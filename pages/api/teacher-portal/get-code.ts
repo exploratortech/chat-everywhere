@@ -1,3 +1,4 @@
+import { getHomeUrl } from '@/utils/app/api';
 import {
   getAdminSupabaseClient,
   getOneTimeCodeInfo,
@@ -37,9 +38,8 @@ const handler = async (req: Request): Promise<Response> => {
     if (
       oneTimeCodeInfo?.tempAccountProfiles.some((profile) => profile.is_expired)
     ) {
-      const host = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : 'http://localhost:3000';
+      const host = getHomeUrl();
+
       await fetch(`${host}/api/cron/delete-expired-temp-accounts-and-code`);
       oneTimeCodeInfo = await getOneTimeCodeInfo(userId, invalidate);
     }
