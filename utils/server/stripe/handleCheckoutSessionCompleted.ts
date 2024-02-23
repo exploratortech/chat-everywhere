@@ -159,7 +159,9 @@ async function addCreditToUser(
     userId,
     creditType as Exclude<
       PluginID,
-      PluginID.LANGCHAIN_CHAT | PluginID.IMAGE_TO_PROMPT
+      | PluginID.LANGCHAIN_CHAT
+      | PluginID.IMAGE_TO_PROMPT
+      | PluginID.DALLE_IMAGE_GEN
     >,
     credit,
   );
