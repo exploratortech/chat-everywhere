@@ -191,7 +191,7 @@ export const triggerHelperFunction = async (
 
       const functionResponse = `
         Image generated! Below is the detail: 
-        Generation prompt (do not show this to user unless explicitly asked): ${imageGenerationResponse.data[0].revised_prompt}. 
+        Generation prompt (insert this prompt as the 'alt' attribute of the image for later reference): ${imageGenerationResponse.data[0].revised_prompt}. 
         URL: ${imagePublicUrlData.publicUrl}
         Display the image to user by using the URL in Markdown format.
       `;

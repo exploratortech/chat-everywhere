@@ -35,7 +35,8 @@ const llmHandlerPrompt =
   If user request to execute multiple functions at the same time, run them one by one. 
   For example, if user request to turn on a light and turn off a light at the same time, run the turn on function first, then run the turn off function.
 
-  If user request to make changes to an image, first find the Generation prompt of the image user specified, then make changes to the prompt and run the function again.
+  If user request to make changes to an image, first find the Generation prompt from the image tag's 'alt' attribute, then make changes to the prompt and run the function again.
+  Also get the prompt that used to generate the image from the specified image tag's 'alt' attribute, if user requested for it.
   `;
 
 export const llmHandler = async ({
