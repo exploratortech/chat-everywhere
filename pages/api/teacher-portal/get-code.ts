@@ -30,7 +30,20 @@ const handler = async (req: Request): Promise<Response> => {
     if (!userProfile || !userProfile.isTeacherAccount)
       return unauthorizedResponse;
 
-    const oneTimeCodeInfo = await getOneTimeCodeInfo(userId, invalidate);
+    let oneTimeCodeInfo;
+    oneTimeCodeInfo = await getOneTimeCodeInfo(userId, invalidate);
+
+    // REMOVE THE EXPIRED ACCOUNT AND CODES AND FETCH AGAIN
+    if (
+      oneTimeCodeInfo?.tempAccountProfiles.some((profile) => profile.is_expired)
+    ) {
+      const host = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : 'http://localhost:3000';
+      await fetch(`${host}/api/cron/delete-expired-temp-accounts-and-code`);
+      oneTimeCodeInfo = await getOneTimeCodeInfo(userId, invalidate);
+    }
+
     if (!oneTimeCodeInfo) return new Response('Error', { status: 500 });
     const {
       code,
