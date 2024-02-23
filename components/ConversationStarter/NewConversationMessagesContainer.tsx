@@ -6,6 +6,8 @@ import { event } from 'nextjs-google-analytics';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
+import { Prompt } from '@/types/prompt';
+
 import HomeContext from '@/components/home/home.context';
 
 import { FootNoteMessage } from './FootNoteMessage';
@@ -14,10 +16,12 @@ import { SamplePrompts } from './SamplePrompts';
 
 type Props = {
   promptOnClick: (prompt: string) => void;
+  customInstructionOnClick: (customInstructionPrompt: Prompt) => void;
 };
 
 export const NewConversationMessagesContainer: FC<Props> = ({
   promptOnClick,
+  customInstructionOnClick,
 }) => {
   const { t } = useTranslation('chat');
   const { t: modelTranslate } = useTranslation('model');
@@ -123,7 +127,10 @@ export const NewConversationMessagesContainer: FC<Props> = ({
       </div>
 
       {rolePlayMode ? (
-        <RolePlayPrompts roleOnClick={roleOnClick} />
+        <RolePlayPrompts
+          roleOnClick={roleOnClick}
+          customInstructionOnClick={customInstructionOnClick}
+        />
       ) : (
         <SamplePrompts promptOnClick={promptOnClick} />
       )}

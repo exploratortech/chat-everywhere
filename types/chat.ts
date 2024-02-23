@@ -1,5 +1,6 @@
 import { OpenAIModel } from './openai';
 import { PluginID } from './plugin';
+import { Prompt } from './prompt';
 
 export interface Message {
   role: Role;
@@ -43,6 +44,8 @@ export interface Conversation {
   // Image generations parameters
   imageStyle?: string;
   imageQuality?: string;
+  // Custom instructions
+  customInstructionPrompt?: Prompt;
 }
 
 export interface FunctionCall {

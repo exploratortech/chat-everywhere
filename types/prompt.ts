@@ -8,6 +8,7 @@ export interface Prompt {
   model: OpenAIModel;
   folderId: string | null;
   lastUpdateAtUTC: number; // timestamp in UTC in milliseconds
-  rank: number
+  rank: number;
+  isCustomInstruction?: boolean;
   deleted?: boolean;
 }

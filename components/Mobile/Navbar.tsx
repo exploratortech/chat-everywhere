@@ -6,6 +6,7 @@ import { Conversation } from '@/types/chat';
 import { SidebarToggleButton } from '../Sidebar/components/SidebarToggleButton';
 import HomeContext from '@/components/home/home.context';
 
+import CustomInstructionInUseIndicator from '../Chat/CustomInstructionInUseIndicator';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 
 interface Props {
@@ -38,8 +39,12 @@ export const Navbar: FC<Props> = ({
       </div>
 
       <div className="flex-grow flex-shrink max-w-[240px] mx-auto text-center overflow-hidden text-ellipsis whitespace-nowrap">
-        {selectedConversation.name !== 'New conversation' &&
-          selectedConversation.name}
+        {selectedConversation.name !== 'New conversation' && (
+          <div className="flex items-center justify-center gap-2">
+            <CustomInstructionInUseIndicator />
+            {selectedConversation.name}
+          </div>
+        )}
       </div>
 
       <div>

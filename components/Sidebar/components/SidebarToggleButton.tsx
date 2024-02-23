@@ -11,7 +11,7 @@ export const SidebarToggleButton = ({
 }: Props) => {
   return (
     <button
-      className={` w-10 h-10 tablet:w-6 tablet:h-6 tablet:top-1 flex justify-center items-center z-50 top-0 transition-all ease-linear text-neutral-700 ${className} `}
+      className={` w-10 h-10 tablet:w-6 tablet:h-6 tablet:top-1 flex justify-center items-center top-0 transition-all ease-linear text-neutral-700 ${className} `}
       onClick={onClick}
     >
       <div className={` block relative w-[20px] h-[20px] `}>
