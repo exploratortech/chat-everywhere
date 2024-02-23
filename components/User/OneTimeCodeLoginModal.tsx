@@ -18,7 +18,8 @@ type Props = {
   onOpen: () => void;
   onClose: () => void;
 };
-async function oneTimeCodeLogin(code: string, uniqueId: string) {
+
+async function oneTimeCodeLogin(code: string, uniqueId: string, t: any) {
   const res = await fetch('/api/one-time-code-login', {
     method: 'POST',
     headers: {
@@ -30,7 +31,7 @@ async function oneTimeCodeLogin(code: string, uniqueId: string) {
   if (res.status !== 200) {
     const data = await res.json();
     if (data.error) {
-      toast.error(data.error);
+      toast.error(t(data.error));
       throw new Error(data.error);
     }
     toast.error('An unknown error occurred');
@@ -53,7 +54,7 @@ const OneTimeCodeLoginModal = memo(
       event.preventDefault();
       setIsLoading(true);
       try {
-        const res = await oneTimeCodeLogin(code, uniqueId);
+        const res = await oneTimeCodeLogin(code, uniqueId, authT);
         const { randomEmail, randomPassword } = res;
         const { error } = await supabase.auth.signInWithPassword({
           email: randomEmail,
@@ -103,10 +104,6 @@ const OneTimeCodeLoginModal = memo(
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-3xl tablet:max-w-max h-max transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
-                  <div className="mb-3 flex flex-row justify-between items-center">
-                    <p className="text-lg">{t('One-time code login')}</p>
-                  </div>
-
                   {isLoading && (
                     <div className="flex mt-[50%]">
                       <Spinner size="16px" className="mx-auto" />
@@ -119,7 +116,7 @@ const OneTimeCodeLoginModal = memo(
                           htmlFor="one-time-code"
                           className="block text-sm font-medium text-neutral-200"
                         >
-                          {authT('Your one-time code is')}
+                          {authT('Your one-time code')}
                         </label>
                         <div className="mt-1">
                           <input
@@ -128,7 +125,7 @@ const OneTimeCodeLoginModal = memo(
                             type="text"
                             required
                             value={code}
-                            onChange={(e) => setCode(e.target.value)}
+                            onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
                             className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
                           />
                         </div>
@@ -138,7 +135,7 @@ const OneTimeCodeLoginModal = memo(
                           htmlFor="unique-id"
                           className="block text-sm font-medium text-neutral-200"
                         >
-                          Name
+                          {t('Name')}
                         </label>
                         <div className="mt-1">
                           <input
@@ -155,7 +152,7 @@ const OneTimeCodeLoginModal = memo(
                       <div>
                         <button
                           type="submit"
-                          className="w-full px-4 py-2 mt-6 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
+                          className="w-full px-4 py-2 mt-2 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
                         >
                           {authT('Sign in')}
                         </button>

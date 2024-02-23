@@ -136,54 +136,39 @@ export const getStringTokenCount = async (string: string): Promise<number> => {
   return tokens.length;
 };
 
-// Returns an array of all endpoints and keys. Japan endpoint will be prioritized if requestCountryCode is TW/HK/MO
+// Returns an array of all endpoints and keys. Japan endpoint will be prioritized if requestCountryCode is TW/HK/MO (disabled for now due to instability)
 export const getEndpointsAndKeys = (
   includeGPT4: boolean = false,
   requestCountryCode?: string,
 ): [(string | undefined)[], (string | undefined)[]] => {
-  let endpoints: (string | undefined)[] = [...AZURE_OPENAI_ENDPOINTS];
-  let keys: (string | undefined)[] = [...AZURE_OPENAI_KEYS];
+  const endpoints: (string | undefined)[] = includeGPT4
+    ? [...AZURE_OPENAI_GPT_4_ENDPOINTS]
+    : [...AZURE_OPENAI_ENDPOINTS];
+  const keys: (string | undefined)[] = includeGPT4
+    ? [...AZURE_OPENAI_GPT_4_KEYS]
+    : [...AZURE_OPENAI_KEYS];
 
-  if (includeGPT4) {
-    endpoints = [...AZURE_OPENAI_GPT_4_ENDPOINTS];
-    keys = [...AZURE_OPENAI_GPT_4_KEYS];
-  }
-  
-  // Reserve Japan endpoint to TW/HK/MO for lowest latency
-  if (requestCountryCode && ['TW', 'HK', 'MO'].includes(requestCountryCode)) {
-    if (includeGPT4) {
-      endpoints = [process.env.AZURE_OPENAI_GPT_4_ENDPOINT_0, ...endpoints];
-      keys = [process.env.AZURE_OPENAI_GPT_4_KEY_0, ...keys];
-    }else{
-      endpoints = [process.env.AZURE_OPENAI_ENDPOINT_0, ...endpoints];
-      keys = [process.env.AZURE_OPENAI_KEY_0, ...keys];
-    }
+  const shuffled = shuffleEndpointsAndKeys([...endpoints], [...keys], 1);
+  const filteredEndpoints = shuffled.endpoints.filter(
+    (endpoint) => endpoint !== undefined,
+  );
+  const filteredKeys = shuffled.keys.filter((key) => key !== undefined);
 
-    const shuffled = shuffleEndpointsAndKeys(endpoints, keys, 0.3); // Shuffle endpoints randomly for TW/HK/MO users with 30% probability
-    endpoints = shuffled.endpoints;
-    keys = shuffled.keys;
-  } else {
-    const shuffled = shuffleEndpointsAndKeys(endpoints, keys, 1); // Always shuffle endpoints and keys for non-TW/HK/MO users
-    endpoints = shuffled.endpoints;
-    keys = shuffled.keys;
-  }
-
-  endpoints = endpoints.filter((endpoint) => endpoint !== undefined);
-  keys = keys.filter((key) => key !== undefined);
-
-  return [endpoints, keys];
+  return [filteredEndpoints, filteredKeys];
 };
 
 const shuffleEndpointsAndKeys = (
   endpoints: (string | undefined)[],
   keys: (string | undefined)[],
-  shuffleProbability: number
-): { endpoints: (string | undefined)[], keys: (string | undefined)[] } => {
+  shuffleProbability: number,
+): { endpoints: (string | undefined)[]; keys: (string | undefined)[] } => {
   if (Math.random() < shuffleProbability) {
-    const shuffledIndices = Array.from(Array(endpoints.length).keys()).sort(() => Math.random() - 0.5);
+    const shuffledIndices = Array.from(Array(endpoints.length).keys()).sort(
+      () => Math.random() - 0.5,
+    );
     return {
       endpoints: shuffledIndices.map((index) => endpoints[index]),
-      keys: shuffledIndices.map((index) => keys[index])
+      keys: shuffledIndices.map((index) => keys[index]),
     };
   }
   return { endpoints, keys };

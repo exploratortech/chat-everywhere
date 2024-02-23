@@ -78,6 +78,7 @@ export const EventNames = [
   'Teacher portal remove temp account',
   'One-time code redeemed',
   'Temp account message submission',
+  'Join LINE group button clicked',
 
   // Error tracing
   'Error',

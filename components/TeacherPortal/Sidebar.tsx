@@ -1,14 +1,20 @@
 import {
   IconArrowBack,
   IconBuildingBroadcastTower,
+  IconMessages,
   IconRating12Plus,
+  IconInfoSquareRounded
 } from '@tabler/icons-react';
 import React, { cloneElement, useContext } from 'react';
+import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 
 import { trackEvent } from '@/utils/app/eventTracking';
+
+import { Button } from '@/components/ui/button';
 
 import { TeacherPortalContext } from './teacher-portal.context';
 
@@ -51,7 +57,7 @@ export default function Sidebar({ className = '' }: Props) {
     },
     {
       icon: <IconBuildingBroadcastTower />,
-      name: t('Shared message'),
+      name: t('Shared messages'),
       value: 'shared-message',
       callback: () => {
         trackEvent('App button clicked');
@@ -82,16 +88,71 @@ export default function Sidebar({ className = '' }: Props) {
       </a>
     ));
 
+  const joinLINEGroupOnClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    trackEvent('Join LINE group button clicked');
+    toast(
+      (tInstance) => (
+        <div className="flex flex-col items-center">
+          <Image
+            src="/assets/teacher_portal_qrcode.jpg"
+            alt="QR Code"
+            width={200}
+            height={200}
+          />
+          <p className="text-center mb-5">
+            {t('Scan the QR code or')}
+            <a
+              href="https://line.me/R/ti/g/cR6EoQ_ggL"
+              target="_blank"
+              className="underline"
+            >
+              {' '}
+              {t('click here')}{' '}
+            </a>
+            {t('to join our focus group to share your feedback.')}
+          </p>
+          <Button
+            variant="secondary"
+            onClick={() => toast.dismiss(tInstance.id)}
+          >
+            {t('Close')}
+          </Button>
+        </div>
+      ),
+      {
+        duration: 60000,
+      },
+    );
+  };
+
   return (
     <div className={`${className} flex justify-between flex-col`}>
       <div>
         <b className="pt-6 px-6 block select-none tablet:hidden">
-          {t('Teacher Portal')}
+          {t('Teacher Portal')} (Beta)
         </b>
         <div className="py-6 flex flex-col">{getRenderItems(items)}</div>
       </div>
 
       <div className="flex flex-col">
+        <a
+          className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2`}
+          target="_blank"
+          href="https://explorator.notion.site/a68dbc8f3df241a49b62add843a8d364"
+        >
+          <IconInfoSquareRounded className={iconClass} />
+          <div className="tablet:hidden">{t('Instructions')}</div>
+        </a>
+        <a
+          href="#"
+          className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2`}
+          onClick={joinLINEGroupOnClick}
+        >
+          <IconMessages className={iconClass} />
+          <div className="tablet:hidden">{t('Join research group')}</div>
+        </a>
+
         <a
           href="#"
           className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"

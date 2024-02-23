@@ -49,7 +49,7 @@ const OneTimeCodeGeneration = memo(() => {
 
   return (
     <div className="">
-      <h1 className="text-lg font-bold mb-4">{t('One-time Code')}</h1>
+      <h1 className="text-lg font-bold mb-4">{t('One-time code')}</h1>
       {oneTimeCodeQuery.isLoading && (
         <div className="flex mt-[50%]">
           <Spinner size="16px" className="mx-auto" />
