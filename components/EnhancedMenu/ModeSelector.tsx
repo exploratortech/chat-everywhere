@@ -83,6 +83,12 @@ const ModeSelector = () => {
               >
                 {t('AI Image')}
               </option>
+              <option
+                value={PluginID.DALLE_IMAGE_GEN}
+                className="dark:bg-[#343541] dark:text-white text-yellow-600"
+              >
+                {t('DALL-E AI Image')}
+              </option>
               {hasMqttConnection && (
                 <option
                   value={PluginID.mqtt}

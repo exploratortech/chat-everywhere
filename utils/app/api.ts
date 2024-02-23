@@ -23,7 +23,11 @@ export const getEndpoint = (plugin: Plugin | null) => {
     return 'api/image-gen';
   }
 
-  if(plugin.id === PluginID.mqtt) {
+  if (plugin.id === PluginID.DALLE_IMAGE_GEN) {
+    return 'api/dalle-image-generation';
+  }
+
+  if (plugin.id === PluginID.mqtt) {
     return 'api/mqtt';
   }
 
@@ -66,11 +70,12 @@ export async function fetchShareableConversation(
 }
 
 export const getHomeUrl = (): string => {
-  let homeUrl = process.env.NODE_ENV === 'development'
-    ? `http://localhost:3000`
-    : `https://${process.env.VERCEL_URL}`;
+  let homeUrl =
+    process.env.NODE_ENV === 'development'
+      ? `http://localhost:3000`
+      : `https://${process.env.VERCEL_URL}`;
 
-  if(process.env.NEXT_PUBLIC_ENV === 'production') {
+  if (process.env.NEXT_PUBLIC_ENV === 'production') {
     homeUrl = 'https://chateverywhere.app';
   }
   return homeUrl;

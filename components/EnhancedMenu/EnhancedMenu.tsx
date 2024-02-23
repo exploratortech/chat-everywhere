@@ -76,12 +76,15 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
           </div>
           <div className="flex flex-col md:flex-row w-full justify-between">
             <ModeSelector />
-            <ConversationStyleSelector />
-            {currentMessage?.pluginId !== PluginID.IMAGE_GEN && (
-              <>
-                <ChangeOutputLanguageButton />
-              </>
+            {currentMessage?.pluginId !== PluginID.DALLE_IMAGE_GEN && (
+              <ConversationStyleSelector />
             )}
+            {currentMessage?.pluginId !== PluginID.IMAGE_GEN &&
+              currentMessage?.pluginId !== PluginID.DALLE_IMAGE_GEN && (
+                <>
+                  <ChangeOutputLanguageButton />
+                </>
+              )}
           </div>
           {currentMessage?.pluginId === PluginID.IMAGE_GEN && (
             <ImageGenerationSelectors />

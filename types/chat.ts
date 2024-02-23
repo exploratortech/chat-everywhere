@@ -10,6 +10,7 @@ export interface Message {
     | PluginID.GPT4
     | PluginID.IMAGE_GEN
     | PluginID.IMAGE_TO_PROMPT
+    | PluginID.DALLE_IMAGE_GEN
     | PluginID.mqtt
     | null;
   largeContextResponse?: boolean; // Use to indicate if the response is from a gpt3.5 16k model
