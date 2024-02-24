@@ -28,7 +28,6 @@ const handler = async (req: Request): Promise<Response> => {
   if (!userProfile || !userProfile.isTeacherAccount)
     return unauthorizedResponse;
 
-  console.log(userId);
   const tagsResponse = await supabase
     .from('teacher_tags')
     .select('*, tags!inner(*)')
