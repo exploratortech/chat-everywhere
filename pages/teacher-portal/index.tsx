@@ -8,12 +8,12 @@ import { withCommonServerSideProps } from '@/utils/withCommonServerSideProps';
 import { Tag } from '@/types/tags';
 
 import Spinner from '@/components/Spinner';
+import OneTimeCodeGeneration from '@/components/TeacherPortal/OneTimeCodeGeneration';
 import SharedMessages from '@/components/TeacherPortal/SharedMessages';
 import Sidebar from '@/components/TeacherPortal/Sidebar';
 import Tags from '@/components/TeacherPortal/Tags';
 import { TeacherPortalContext } from '@/components/TeacherPortal/teacher-portal.context';
 import { portalState } from '@/components/TeacherPortal/teacher-portal.state';
-import OneTimeCodeGeneration from '@/components/User/OneTimeCodeGeneration';
 import DefaultLayout from '@/components/layout/default';
 
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';

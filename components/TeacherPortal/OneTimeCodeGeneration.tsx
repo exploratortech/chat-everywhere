@@ -15,7 +15,7 @@ import HomeContext from '@/components/home/home.context';
 
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import Spinner from '../Spinner/Spinner';
-import TemporaryAccountProfileList from '../TeacherPortal/TemporaryAccountProfileList';
+import TemporaryAccountProfileList from './TemporaryAccountProfileList';
 
 const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
   const { t } = useTranslation('model');
@@ -65,9 +65,11 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
               {oneTimeCodeQuery.data?.code}
             </span>
           </div>
-          {oneTimeCodeQuery.data?.expiresAt && (
-            <CodeTimeLeft endOfDay={oneTimeCodeQuery.data.expiresAt} />
-          )}
+          <div className="flex gap-2">
+            {oneTimeCodeQuery.data?.expiresAt && (
+              <CodeTimeLeft endOfDay={oneTimeCodeQuery.data.expiresAt} />
+            )}
+          </div>
         </div>
       )}
       <button
