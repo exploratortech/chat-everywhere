@@ -1,4 +1,5 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import toast from 'react-hot-toast';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 const useTeacherTags = () => {
@@ -20,6 +21,28 @@ const useTeacherTags = () => {
     return data as { tags: { id: number; name: string }[] };
   };
 
+  const addTag = async (tagName: string) => {
+    const accessToken = (await supabase.auth.getSession()).data.session
+      ?.access_token;
+    if (!accessToken) {
+      throw new Error('No access token');
+    }
+    const response = await fetch('/api/teacher-portal/add-teacher-tag', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'access-token': accessToken,
+      },
+      body: JSON.stringify({ tag_name: tagName }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to add tag');
+    }
+    return (await response.json()) as {
+      isAdded: boolean;
+    };
+  };
+
   const removeTags = async (tagIds: number[]) => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token;
@@ -37,14 +60,29 @@ const useTeacherTags = () => {
     if (!response.ok) {
       throw new Error('Failed to remove tags');
     }
-    return response.json();
+    return (await response.json()) as {
+      isRemoved: boolean;
+    };
   };
 
   return {
     fetchQuery: useQuery('teacher-tags', fetchTags),
+    addTeacherTag: useMutation(addTag, {
+      onSuccess: (res) => {
+        if (res.isAdded) {
+          queryClient.invalidateQueries('teacher-tags');
+        } else {
+          toast.error('Failed to add tag');
+        }
+      },
+    }),
     removeTeacherTags: useMutation(removeTags, {
-      onSuccess: () => {
-        queryClient.invalidateQueries('teacher-tags');
+      onSuccess: (res) => {
+        if (res.isRemoved) {
+          queryClient.invalidateQueries('teacher-tags');
+        } else {
+          toast.error('Failed to remove tags');
+        }
       },
     }),
   };
