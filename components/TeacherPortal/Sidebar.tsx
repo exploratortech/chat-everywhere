@@ -1,9 +1,10 @@
 import {
   IconArrowBack,
   IconBuildingBroadcastTower,
+  IconInfoSquareRounded,
   IconMessages,
   IconRating12Plus,
-  IconInfoSquareRounded
+  IconTags,
 } from '@tabler/icons-react';
 import React, { cloneElement, useContext } from 'react';
 import { toast } from 'react-hot-toast';
@@ -48,7 +49,7 @@ export default function Sidebar({ className = '' }: Props) {
       name: t('One-time code'),
       value: 'one-time-code',
       callback: () => {
-        trackEvent('Account button clicked');
+        trackEvent('One-time code button clicked');
         dispatch({
           field: 'showing',
           value: 'one-time-code',
@@ -60,10 +61,22 @@ export default function Sidebar({ className = '' }: Props) {
       name: t('Shared messages'),
       value: 'shared-message',
       callback: () => {
-        trackEvent('App button clicked');
+        trackEvent('Share message button clicked');
         dispatch({
           field: 'showing',
           value: 'shared-message',
+        });
+      },
+    },
+    {
+      icon: <IconTags />,
+      name: t('Tags'),
+      value: 'shared-message',
+      callback: () => {
+        trackEvent('Tags button clicked');
+        dispatch({
+          field: 'showing',
+          value: 'tags',
         });
       },
     },

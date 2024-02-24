@@ -41,6 +41,7 @@ const TeacherPortal = () => {
               <div className="p-6 bg-neutral-900 flex-grow relative overflow-y-auto">
                 {showing === 'one-time-code' && <OneTimeCodeGeneration />}
                 {showing === 'shared-message' && <SharedMessages />}
+                {showing === 'tags' && <SharedMessages />}
               </div>
             </div>
           </div>
