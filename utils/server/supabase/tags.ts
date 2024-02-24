@@ -49,4 +49,34 @@ export async function removeTagsFromTeacherProfile(
   return true;
 }
 
-// TODO: add tag to teacher profile
+export async function addTagToTeacherProfile(
+  teacher_profile_id: string,
+  tag_name: string,
+): Promise<boolean> {
+  // create tag in tags table
+  let { data: tag, error: tagError } = await supabase
+    .from('tags')
+    .insert({ name: tag_name })
+    .select();
+
+  if (tagError) {
+    console.error(tagError);
+    return false;
+  }
+  if (!tag || tag.length === 0) {
+    console.log('Tag not found after creation');
+    return false;
+  }
+
+  // associate tag with teacher
+  const { error: teacherTagError } = await supabase
+    .from('teacher_tags')
+    .insert([{ teacher_profile_id: teacher_profile_id, tag_id: tag[0].id }]);
+
+  if (teacherTagError) {
+    console.error(teacherTagError);
+    return false;
+  }
+
+  return true;
+}
