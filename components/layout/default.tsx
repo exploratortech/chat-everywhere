@@ -36,7 +36,15 @@ import {
 import { saveFolders } from '@/utils/app/folders';
 import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
-import { areRanksBalanced2, generateRank, rebalanceRanks2, sortByRank, sortByRankAndFolder } from '@/utils/app/rank';
+import {
+  areFoldersBalanced,
+  areItemsBalanced,
+  generateRank,
+  rebalanceFolders,
+  rebalanceItems,
+  sortByRank,
+  sortByRankAndFolder,
+} from '@/utils/app/rank';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
@@ -140,6 +148,10 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
     const updatedFolders = [...folders, newFolder];
 
+    if (!areFoldersBalanced(updatedFolders)) {
+      rebalanceFolders(updatedFolders);
+    }
+
     dispatch({ field: 'folders', value: updatedFolders });
     saveFolders(updatedFolders);
     updateConversationLastUpdatedAtTimeStamp();
@@ -221,8 +233,8 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
     let updatedConversations = [newConversation, ...conversations];
 
-    if (!areRanksBalanced2(updatedConversations)) {
-      updatedConversations = rebalanceRanks2(updatedConversations);
+    if (!areItemsBalanced(updatedConversations)) {
+      updatedConversations = rebalanceItems(updatedConversations);
     }
 
     dispatch({ field: 'selectedConversation', value: newConversation });
@@ -529,7 +541,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
     const prompts = localStorage.getItem('prompts');
     if (prompts) {
-      const parsedPrompts = sortByRankAndFolder<Prompt>(JSON.parse(prompts));
+      const parsedPrompts = sortByRankAndFolder(JSON.parse(prompts));
       cleanedPrompts = cleanPrompts(parsedPrompts);
       dispatch({ field: 'prompts', value: cleanedPrompts });
     }
@@ -552,8 +564,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     const conversationHistory = localStorage.getItem('conversationHistory');
     cleanedConversationHistory = [];
     if (conversationHistory) {
-      const parsedConversationHistory =
-        sortByRankAndFolder<Conversation>(JSON.parse(conversationHistory));
+      const parsedConversationHistory = sortByRankAndFolder(JSON.parse(conversationHistory));
       cleanedConversationHistory = cleanConversationHistory(
         parsedConversationHistory,
       );

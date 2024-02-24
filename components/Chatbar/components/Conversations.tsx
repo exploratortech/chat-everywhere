@@ -4,7 +4,7 @@ import HomeContext from '@/components/home/home.context';
 
 import { Conversation } from '@/types/chat';
 
-import { generateRank, reorderItem, reorderItem2 } from '@/utils/app/rank';
+import { generateRank, reorderItem } from '@/utils/app/rank';
 
 import { ConversationComponent } from './Conversation';
 import DropArea from '@/components/DropArea/DropArea';
@@ -30,7 +30,7 @@ export const Conversations = ({ conversations }: Props) => {
   const handleDrop = (e: React.DragEvent<HTMLElement>, index: number): void => {
     if (currentDrag) {
       const conversation = currentDrag.data as Conversation;
-      const reorderedConversations = reorderItem2(
+      const reorderedConversations = reorderItem(
         unfilteredConversations,
         conversation.id,
         generateRank(

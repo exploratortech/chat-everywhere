@@ -2,7 +2,7 @@ import React, { Fragment, useContext, useMemo } from 'react';
 
 import { getNonDeletedCollection, saveConversations, updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { saveFolders } from '@/utils/app/folders';
-import { generateRank, reorderItem, reorderItem2 } from '@/utils/app/rank';
+import { generateRank, reorderFolder, reorderItem } from '@/utils/app/rank';
 
 import { FolderInterface } from '@/types/folder';
 import { Conversation } from '@/types/chat';
@@ -46,7 +46,7 @@ export const ChatFolders = ({ searchTerm }: Props) => {
       const refinedFilteredConversations = filteredConversations
         .filter((c) => c.folderId === folder.id);
 
-      const updatedConversations = reorderItem2(
+      const updatedConversations = reorderItem(
         conversations,
         conversation.id,
         generateRank(refinedFilteredConversations, index),
@@ -67,11 +67,10 @@ export const ChatFolders = ({ searchTerm }: Props) => {
     if (currentDrag && currentDrag.type === 'folder') {
       const folder: FolderInterface = currentDrag.data as FolderInterface;
       if (folder.type !== 'chat') return;
-      const reorderedFolders = reorderItem(
+      const reorderedFolders = reorderFolder(
         folders,
         folder.id,
         generateRank(filteredFolders, index),
-        { filter: (folder: FolderInterface) => folder.type === 'chat' },
       );
       dispatch({ field: 'folders', value: reorderedFolders });
       saveFolders(reorderedFolders);
