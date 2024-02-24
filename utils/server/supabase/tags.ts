@@ -80,3 +80,37 @@ export async function addTagToTeacherProfile(
 
   return true;
 }
+
+export async function getOneTimeCodeTags(
+  one_time_code_id: string,
+): Promise<number[]> {
+  const { data: tags, error } = await supabase
+    .from('one_time_code_tags')
+    .select('tag_id')
+    .eq('one_time_code_id', one_time_code_id);
+
+  if (error) {
+    console.error(error);
+    throw new Error('Failed to get one time code tags');
+  }
+
+  return tags.map((tag) => tag.tag_id);
+}
+
+export async function setTagsToOneTimeCode(
+  one_time_code_id: string,
+  tag_ids: number[],
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc('set_tags_to_one_time_code', {
+    one_time_code_id_param: one_time_code_id,
+    tag_ids_param: tag_ids,
+  });
+
+  console.log(data);
+  if (error) {
+    console.error(error);
+    return false;
+  }
+
+  return true;
+}

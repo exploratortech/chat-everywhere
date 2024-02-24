@@ -6,6 +6,8 @@ import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
+import useTeacherOneTimeCodeTagsManagement from '@/hooks/useTeacherOneTimeCodeTagsManagement';
+
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { OneTimeCodeInfoPayload } from '@/types/one-time-code';
@@ -67,7 +69,10 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
             </span>
           </div>
           <div className="flex gap-2 items-center">
-            <AddTagsDropdown tags={tags} />
+            <AddTagsDropdown
+              tags={tags}
+              oneTimeCodeId={oneTimeCodeQuery.data?.code_id}
+            />
             {oneTimeCodeQuery.data?.expiresAt && (
               <CodeTimeLeft endOfDay={oneTimeCodeQuery.data.expiresAt} />
             )}

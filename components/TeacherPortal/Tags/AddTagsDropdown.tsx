@@ -2,6 +2,8 @@ import { DropdownMenuCheckboxItemProps } from '@radix-ui/react-dropdown-menu';
 import { IconTag } from '@tabler/icons-react';
 import * as React from 'react';
 
+import useTeacherOneTimeCodeTagsManagement from '@/hooks/useTeacherOneTimeCodeTagsManagement';
+
 import { Tag } from '@/types/tags';
 
 import { Button } from '@/components/ui/button';
@@ -15,56 +17,70 @@ import {
 
 import { cn } from '@/lib/utils';
 
-const AddTagsDropdown = ({ tags }: { tags: Tag[] }) => {
-  const [selectedTags, setSelectedTags] = React.useState<Tag[]>([]);
+const AddTagsDropdown = React.memo(
+  ({ tags, oneTimeCodeId }: { tags: Tag[]; oneTimeCodeId: string }) => {
+    const [selectedTags, setSelectedTags] = React.useState<Tag[]>([]);
 
-  const handleTagSelectionChange = (tag: Tag, checked: boolean) => {
-    setSelectedTags((currentSelectedTags) => {
-      if (checked) {
-        return [...currentSelectedTags, tag];
-      } else {
-        return currentSelectedTags.filter((t) => t.id !== tag.id);
+    const { getCodeTagsQuery } = useTeacherOneTimeCodeTagsManagement(
+      oneTimeCodeId || '',
+    );
+    const { data: selectedTagIds } = getCodeTagsQuery;
+    React.useEffect(() => {
+      if (selectedTagIds) {
+        setSelectedTags(tags.filter((tag) => selectedTagIds.includes(tag.id)));
       }
-    });
-  };
+    }, [selectedTagIds, tags]);
 
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size={'icon'}
-          className={cn(
-            '!ring-0',
-            selectedTags.length > 0 ? 'bg-neutral-700' : '',
-          )}
-        >
-          <IconTag className="w-4 h-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 flex flex-col gap-4 p-4 border-0 shadow-lg bg-neutral-800">
-        {tags.map((tag) => (
-          <div key={tag.id} className="flex items-center space-x-2">
-            <Checkbox
-              id={`dropdown-tag-${tag.id}`}
-              checked={selectedTags.some((t) => t.id === tag.id)}
-              onCheckedChange={(checked: boolean) => {
-                handleTagSelectionChange(tag, checked);
-              }}
-            >
-              {tag.name}
-            </Checkbox>
-            <label
-              htmlFor={`dropdown-tag-${tag.id}`}
-              className="cursor-pointer w-full text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              {tag.name}
-            </label>
-          </div>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
+    const handleTagSelectionChange = (tag: Tag, checked: boolean) => {
+      setSelectedTags((currentSelectedTags) => {
+        if (checked) {
+          return [...currentSelectedTags, tag];
+        } else {
+          return currentSelectedTags.filter((t) => t.id !== tag.id);
+        }
+      });
+    };
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size={'icon'}
+            className={cn(
+              '!ring-0',
+              selectedTags.length > 0 ? 'bg-neutral-700' : '',
+            )}
+          >
+            <IconTag className="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56 flex flex-col gap-4 p-4 border-0 shadow-lg bg-neutral-800">
+          {tags.map((tag) => (
+            <div key={tag.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={`dropdown-tag-${tag.id}`}
+                checked={selectedTags.some((t) => t.id === tag.id)}
+                onCheckedChange={(checked: boolean) => {
+                  handleTagSelectionChange(tag, checked);
+                }}
+              >
+                {tag.name}
+              </Checkbox>
+              <label
+                htmlFor={`dropdown-tag-${tag.id}`}
+                className="cursor-pointer w-full text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {tag.name}
+              </label>
+            </div>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  },
+);
+
+AddTagsDropdown.displayName = 'AddTagsDropdown';
 
 export default AddTagsDropdown;
