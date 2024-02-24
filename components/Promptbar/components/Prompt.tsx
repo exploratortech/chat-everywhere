@@ -123,7 +123,7 @@ export const PromptComponent = ({ prompt }: Props) => {
             isDeleting || isRenaming ? 'pr-12' : 'pr-4'
           } relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3`}
         >
-          {prompt.name} ({prompt.rank})
+          {prompt.name}
         </div>
       </div>
 
