@@ -45,7 +45,6 @@ const NewTagButton = ({
           <div className="grid flex-1 gap-2">
             <Input
               id="link"
-              defaultValue=""
               placeholder={t('Enter tag name') as string}
               value={tagName}
               onChange={(e) => setTagName(e.target.value)}
