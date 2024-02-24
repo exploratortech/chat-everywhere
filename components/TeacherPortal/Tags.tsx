@@ -1,5 +1,6 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconPlus } from '@tabler/icons-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from 'react-query';
 
@@ -11,7 +12,7 @@ import Tag from './Tags/Tag';
 const Tags = () => {
   const supabase = useSupabaseClient();
   const { t } = useTranslation('model');
-  const { data, isLoading, error } = useQuery('tags', async () => {
+  const { data, isLoading } = useQuery('tags', async () => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token;
     if (!accessToken) {
@@ -20,6 +21,7 @@ const Tags = () => {
     return await fetchTags(accessToken);
   });
   const tags = data?.tags || [];
+  const [selectedTags, setSelectedTags] = useState<number[]>([]);
   return (
     <div className="">
       <h1 className="font-bold mb-4">{t('Tags')}</h1>
@@ -29,12 +31,31 @@ const Tags = () => {
             <Spinner size="16px" className="mx-auto" />
           </div>
         ) : (
-          tags.map((tag) => <Tag key={tag.id} label={tag.name} count={2} />)
+          tags.map((tag) => (
+            <Tag
+              key={tag.id}
+              label={tag.name}
+              count={2}
+              onSelect={() => {
+                if (selectedTags.includes(tag.id)) {
+                  setSelectedTags(selectedTags.filter((id) => id !== tag.id));
+                } else {
+                  setSelectedTags([...selectedTags, tag.id]);
+                }
+              }}
+              selected={selectedTags.includes(tag.id)}
+            />
+          ))
         )}
       </div>
       <div className="flex items-center">
         <NewTagButton />
-        <Button onClick={() => {}} variant="outline" disabled>
+        <Button
+          onClick={() => {}}
+          variant={selectedTags.length === 0 ? 'outline' : 'destructive'}
+          disabled={selectedTags.length === 0}
+          className="transition-[background]"
+        >
           Remove
         </Button>
       </div>
