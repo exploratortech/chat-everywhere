@@ -27,7 +27,6 @@ export const ChatFolders = ({ searchTerm }: Props) => {
       folders,
     },
     dispatch,
-    handleUpdateConversation,
   } = useContext(HomeContext);
 
   const {

@@ -41,6 +41,7 @@ const Folder = ({
     setDragData,
     removeDragData,
     handleNewConversation,
+    handleCreatePrompt,
   } = useContext(HomeContext);
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -213,7 +214,10 @@ const Folder = ({
               <SidebarActionButton
                 handleClick={(e) => {
                   e.stopPropagation();
-                  handleNewConversation(currentFolder.id);
+                  switch (currentFolder.type) {
+                    case 'chat': handleNewConversation(currentFolder.id);
+                    case 'prompt': handleCreatePrompt(currentFolder.id);
+                  }
                   setIsOpen(true);
                 }}
               >

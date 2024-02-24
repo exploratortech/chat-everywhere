@@ -21,6 +21,7 @@ export interface HomeContextProps {
     conversation: Conversation,
     data: KeyValuePair,
   ) => void;
+  handleCreatePrompt: (folderId?: string | null) => void;
   handleUserLogout: () => void;
   playMessage: (message: string, speechId: string) => void;
   stopPlaying: () => void;

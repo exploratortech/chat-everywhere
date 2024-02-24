@@ -146,10 +146,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       ),
     };
 
-    const updatedFolders = [...folders, newFolder];
-
+    let updatedFolders = [...folders, newFolder];
     if (!areFoldersBalanced(updatedFolders)) {
-      rebalanceFolders(updatedFolders);
+      updatedFolders = rebalanceFolders(updatedFolders);
     }
 
     dispatch({ field: 'folders', value: updatedFolders });
@@ -232,7 +231,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     const newConversation: Conversation = getNewConversation(folderId);
 
     let updatedConversations = [newConversation, ...conversations];
-
     if (!areItemsBalanced(updatedConversations)) {
       updatedConversations = rebalanceItems(updatedConversations);
     }
@@ -292,6 +290,36 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       lastUpdateAtUTC: dayjs().valueOf(),
     };
     return newConversation;
+  };
+
+  // PROMPTS ---------------------------------------------
+  const handleCreatePrompt = (folderId: string | null = null) => {
+    const filteredPrompts: Prompt[] = getNonDeletedCollection(prompts)
+      .filter((p) => p.folderId === folderId);
+
+    if (defaultModelId) {
+      const newPrompt: Prompt = {
+        id: uuidv4(),
+        name: `Prompt ${prompts.length + 1}`,
+        description: '',
+        content: '',
+        model: OpenAIModels[defaultModelId],
+        folderId: folderId,
+        lastUpdateAtUTC: dayjs().valueOf(),
+        rank: generateRank(filteredPrompts),
+      };
+
+      let updatedPrompts = [...prompts, newPrompt];
+      if (!areItemsBalanced(updatedPrompts)) {
+        updatedPrompts = rebalanceItems(updatedPrompts);
+      }
+
+      dispatch({ field: 'prompts', value: updatedPrompts });
+
+      savePrompts(updatedPrompts);
+
+      updateConversationLastUpdatedAtTimeStamp();
+    }
   };
 
   // SIDEBAR ---------------------------------------------
@@ -659,6 +687,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           handleUpdateFolder,
           handleSelectConversation,
           handleUpdateConversation,
+          handleCreatePrompt,
           handleUserLogout,
           playMessage: (text, speechId) =>
             speak(
