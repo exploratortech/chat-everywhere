@@ -6,6 +6,7 @@ import { withCommonServerSideProps } from '@/utils/withCommonServerSideProps';
 
 import SharedMessages from '@/components/TeacherPortal/SharedMessages';
 import Sidebar from '@/components/TeacherPortal/Sidebar';
+import Tags from '@/components/TeacherPortal/Tags';
 import { TeacherPortalContext } from '@/components/TeacherPortal/teacher-portal.context';
 import { portalState } from '@/components/TeacherPortal/teacher-portal.state';
 import OneTimeCodeGeneration from '@/components/User/OneTimeCodeGeneration';
@@ -41,7 +42,7 @@ const TeacherPortal = () => {
               <div className="p-6 bg-neutral-900 flex-grow relative overflow-y-auto">
                 {showing === 'one-time-code' && <OneTimeCodeGeneration />}
                 {showing === 'shared-message' && <SharedMessages />}
-                {showing === 'tags' && <SharedMessages />}
+                {showing === 'tags' && <Tags />}
               </div>
             </div>
           </div>
