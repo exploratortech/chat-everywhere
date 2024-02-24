@@ -71,7 +71,7 @@ export default function Sidebar({ className = '' }: Props) {
     {
       icon: <IconTags />,
       name: t('Tags'),
-      value: 'shared-message',
+      value: 'tags',
       callback: () => {
         trackEvent('Tags button clicked');
         dispatch({
