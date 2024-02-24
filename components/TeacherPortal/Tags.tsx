@@ -1,8 +1,7 @@
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { IconPlus } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from 'react-query';
+
+import useTeacherTags from '@/hooks/useTeacherTags';
 
 import Spinner from '../Spinner';
 import { Button } from '../ui/button';
@@ -10,16 +9,10 @@ import NewTagButton from './Tags/NewTagButton';
 import Tag from './Tags/Tag';
 
 const Tags = () => {
-  const supabase = useSupabaseClient();
   const { t } = useTranslation('model');
-  const { data, isLoading } = useQuery('tags', async () => {
-    const accessToken = (await supabase.auth.getSession()).data.session
-      ?.access_token;
-    if (!accessToken) {
-      throw new Error('No access token');
-    }
-    return await fetchTags(accessToken);
-  });
+  const { fetchQuery, removeTeacherTags } = useTeacherTags();
+  const { data, isLoading } = fetchQuery;
+  const { mutate: removeTags } = removeTeacherTags;
   const tags = data?.tags || [];
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
   return (
@@ -51,7 +44,9 @@ const Tags = () => {
       <div className="flex items-center">
         <NewTagButton />
         <Button
-          onClick={() => {}}
+          onClick={() => {
+            removeTags(selectedTags);
+          }}
           variant={selectedTags.length === 0 ? 'outline' : 'destructive'}
           disabled={selectedTags.length === 0}
           className="transition-[background]"
@@ -64,13 +59,3 @@ const Tags = () => {
 };
 
 export default Tags;
-
-const fetchTags = async (accessToken: string) => {
-  const response = await fetch('/api/teacher-portal/teacher-tags', {
-    headers: {
-      'access-token': accessToken, // Replace 'YOUR_ACCESS_TOKEN_HERE' with the actual access token
-    },
-  });
-  const data = await response.json();
-  return data as { tags: { id: number; name: string }[] };
-};
