@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
+import useTeacherTags from '@/hooks/useTeacherTags';
 
 import { withCommonServerSideProps } from '@/utils/withCommonServerSideProps';
 
+import { Tag } from '@/types/tags';
+
+import Spinner from '@/components/Spinner';
 import SharedMessages from '@/components/TeacherPortal/SharedMessages';
 import Sidebar from '@/components/TeacherPortal/Sidebar';
 import Tags from '@/components/TeacherPortal/Tags';
@@ -25,8 +29,11 @@ const TeacherPortal = () => {
   // State to track if the component has mounted (i.e., we're on the client side)
   const [hasMounted, setHasMounted] = useState(false);
 
+  const { fetchQuery } = useTeacherTags();
+  const { data, isLoading } = fetchQuery;
+  const tags: Tag[] = data || [];
+
   useEffect(() => {
-    // Set hasMounted to true when the component mounts
     setHasMounted(true);
   }, []);
 
@@ -39,11 +46,19 @@ const TeacherPortal = () => {
               {hasMounted && (
                 <Sidebar className="bg-neutral-800 flex-shrink-0 flex-grow-0" />
               )}
-              <div className="p-6 bg-neutral-900 flex-grow relative overflow-y-auto">
-                {showing === 'one-time-code' && <OneTimeCodeGeneration />}
-                {showing === 'shared-message' && <SharedMessages />}
-                {showing === 'tags' && <Tags />}
-              </div>
+              {isLoading ? (
+                <div className="flex mt-[50%]">
+                  <Spinner size="16px" className="mx-auto" />
+                </div>
+              ) : (
+                <div className="p-6 bg-neutral-900 flex-grow relative overflow-y-auto">
+                  {showing === 'one-time-code' && (
+                    <OneTimeCodeGeneration tags={tags} />
+                  )}
+                  {showing === 'shared-message' && <SharedMessages />}
+                  {showing === 'tags' && <Tags tags={tags} />}
+                </div>
+              )}
             </div>
           </div>
         </div>

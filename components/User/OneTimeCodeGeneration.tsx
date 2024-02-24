@@ -9,6 +9,7 @@ import { useTranslation } from 'next-i18next';
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { OneTimeCodeInfoPayload } from '@/types/one-time-code';
+import { Tag } from '@/types/tags';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -16,7 +17,7 @@ import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import Spinner from '../Spinner/Spinner';
 import TemporaryAccountProfileList from '../TeacherPortal/TemporaryAccountProfileList';
 
-const OneTimeCodeGeneration = memo(() => {
+const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
   const { t } = useTranslation('model');
   const {
     state: { user },

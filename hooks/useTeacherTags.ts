@@ -2,6 +2,8 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
+import { Tag } from '@/types/tags';
+
 const useTeacherTags = () => {
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
@@ -18,7 +20,7 @@ const useTeacherTags = () => {
       },
     });
     const data = await response.json();
-    return data as { tags: { id: number; name: string }[] };
+    return data.tags as Tag[];
   };
 
   const addTag = async (tagName: string) => {
@@ -66,7 +68,7 @@ const useTeacherTags = () => {
   };
 
   return {
-    fetchQuery: useQuery('teacher-tags', fetchTags),
+    fetchQuery: useQuery('teacher-tags', fetchTags, { staleTime: 600000 }),
     addTeacherTag: useMutation(addTag, {
       onSuccess: (res) => {
         if (res.isAdded) {
