@@ -5,6 +5,7 @@ import { useQuery } from 'react-query';
 
 import Spinner from '../Spinner';
 import { Button } from '../ui/button';
+import NewTagButton from './Tags/NewTagButton';
 import Tag from './Tags/Tag';
 
 const Tags = () => {
@@ -32,16 +33,7 @@ const Tags = () => {
         )}
       </div>
       <div className="flex items-center">
-        <Button
-          variant={'ghost'}
-          size={'default'}
-          className=" text-neutral-500"
-        >
-          <div className="flex items-center gap-1">
-            <IconPlus size={18} />
-            {t('Add new tag')}
-          </div>
-        </Button>
+        <NewTagButton />
         <Button onClick={() => {}} variant="outline" disabled>
           Remove
         </Button>

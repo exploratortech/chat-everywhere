@@ -167,5 +167,10 @@
   "Select all": "全選",
   "Clear folders": "移除資料夾和內容",
   "Are you sure?": "確定嗎？",
-  "Tags": "標籤"
+  "Tags": "標籤",
+  "Add new tag": "添加新標籤",
+  "New Tag": "新標籤",
+  "Enter tag name below": "在下方輸入標籤名稱",
+  "Create": "創建",
+  "Enter tag name": "輸入標籤名稱"
 }
