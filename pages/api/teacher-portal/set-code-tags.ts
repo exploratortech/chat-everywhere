@@ -24,7 +24,7 @@ const handler = async (req: Request): Promise<Response> => {
   if (!code_id) {
     return new Response('No code_id provided', { status: 400 });
   }
-  if (!tag_ids || tag_ids.length === 0) {
+  if (!tag_ids) {
     return new Response('No tag_ids provided', { status: 400 });
   }
 

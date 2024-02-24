@@ -21,10 +21,10 @@ const AddTagsDropdown = React.memo(
   ({ tags, oneTimeCodeId }: { tags: Tag[]; oneTimeCodeId: string }) => {
     const [selectedTags, setSelectedTags] = React.useState<Tag[]>([]);
 
-    const { getCodeTagsQuery } = useTeacherOneTimeCodeTagsManagement(
-      oneTimeCodeId || '',
-    );
+    const { getCodeTagsQuery, setCodeTagsMutation } =
+      useTeacherOneTimeCodeTagsManagement(oneTimeCodeId || '');
     const { data: selectedTagIds } = getCodeTagsQuery;
+    const { mutate: setCodeTags } = setCodeTagsMutation;
     React.useEffect(() => {
       if (selectedTagIds) {
         setSelectedTags(tags.filter((tag) => selectedTagIds.includes(tag.id)));
@@ -34,8 +34,12 @@ const AddTagsDropdown = React.memo(
     const handleTagSelectionChange = (tag: Tag, checked: boolean) => {
       setSelectedTags((currentSelectedTags) => {
         if (checked) {
+          setCodeTags([...currentSelectedTags, tag].map((t) => t.id));
           return [...currentSelectedTags, tag];
         } else {
+          setCodeTags(
+            currentSelectedTags.filter((t) => t.id !== tag.id).map((t) => t.id),
+          );
           return currentSelectedTags.filter((t) => t.id !== tag.id);
         }
       });
