@@ -1,5 +1,5 @@
 import { IconPlus } from '@tabler/icons-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -15,8 +15,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
-const NewTagButton = () => {
+const NewTagButton = ({
+  onAddTag,
+}: {
+  onAddTag: (tag_name: string) => void;
+}) => {
   const { t } = useTranslation('model');
+  const [tagName, setTagName] = useState('');
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -42,12 +47,18 @@ const NewTagButton = () => {
               id="link"
               defaultValue=""
               placeholder={t('Enter tag name') as string}
+              value={tagName}
+              onChange={(e) => setTagName(e.target.value)}
             />
           </div>
         </div>
         <DialogFooter className="sm:justify-start">
           <DialogClose asChild>
-            <Button type="button" variant="secondary">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => onAddTag(tagName)}
+            >
               {t('Create')}
             </Button>
           </DialogClose>

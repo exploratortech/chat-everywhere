@@ -10,9 +10,10 @@ import Tag from './Tags/Tag';
 
 const Tags = () => {
   const { t } = useTranslation('model');
-  const { fetchQuery, removeTeacherTags } = useTeacherTags();
+  const { fetchQuery, removeTeacherTags, addTeacherTag } = useTeacherTags();
   const { data, isLoading } = fetchQuery;
   const { mutate: removeTags } = removeTeacherTags;
+  const { mutate: addTag } = addTeacherTag;
   const tags = data?.tags || [];
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
   return (
@@ -42,7 +43,11 @@ const Tags = () => {
         )}
       </div>
       <div className="flex items-center">
-        <NewTagButton />
+        <NewTagButton
+          onAddTag={(tag_name) => {
+            addTag(tag_name);
+          }}
+        />
         <Button
           onClick={() => {
             removeTags(selectedTags);
