@@ -1,7 +1,9 @@
 import {
+  IconBulbFilled,
   IconCaretDown,
   IconCaretRight,
   IconCheck,
+  IconMessagePlus,
   IconPencil,
   IconPlus,
   IconTrash,
@@ -221,7 +223,10 @@ const Folder = ({
                   setIsOpen(true);
                 }}
               >
-                <IconPlus size={18} />
+                {currentFolder.type === 'chat'
+                  ? <IconMessagePlus size={18} />
+                  : <IconPlus size={18} />
+                }
               </SidebarActionButton>
               <SidebarActionButton
                 handleClick={(e) => {
