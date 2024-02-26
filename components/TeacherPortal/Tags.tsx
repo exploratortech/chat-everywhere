@@ -24,7 +24,7 @@ const Tags = ({ tags }: { tags: TagType[] }) => {
           <Tag
             key={tag.id}
             label={tag.name}
-            count={2}
+            count={tag.message_count}
             onSelect={() => {
               if (selectedTags.includes(tag.id)) {
                 setSelectedTags(selectedTags.filter((id) => id !== tag.id));
