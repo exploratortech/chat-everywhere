@@ -91,7 +91,8 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^9.0.0",
-    "voucher-code-generator": "^1.3.0"
+    "voucher-code-generator": "^1.3.0",
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@mozilla/readability": "^0.4.4",
