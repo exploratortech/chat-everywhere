@@ -56,7 +56,10 @@ const NewTagButton = ({
             <Button
               type="button"
               variant="secondary"
-              onClick={() => onAddTag(tagName)}
+              onClick={() => {
+                onAddTag(tagName);
+                setTagName('');
+              }}
             >
               {t('Create')}
             </Button>
