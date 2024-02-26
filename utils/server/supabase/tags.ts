@@ -3,18 +3,17 @@ import { getAdminSupabaseClient } from '../supabase';
 const supabase = getAdminSupabaseClient();
 
 export async function getTeacherTags(teacher_profile_id: string) {
-  const { data, error } = await supabase
-    .from('teacher_tags')
-    .select('*, tags!inner(*)')
-    .eq('teacher_profile_id', teacher_profile_id);
+  const { data, error } = await supabase.rpc('get_teacher_tag_and_tag_count', {
+    teacher_profile_id_param: teacher_profile_id,
+  });
+
   if (error) {
     console.error(error);
     return [];
   }
 
-  return data?.map((teacherTag) => teacherTag.tags) || [];
+  return data || [];
 }
-
 export async function removeTagsFromTeacherProfile(
   teacher_profile_id: string,
   tag_ids: number[],
