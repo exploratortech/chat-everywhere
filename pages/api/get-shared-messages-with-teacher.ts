@@ -49,7 +49,8 @@ const handler = async (req: Request) => {
       message_content,
       image_file_url,
       created_at,
-      student_name
+      student_name,
+      message_tags!inner(tag_id, tags(name))
     `,
       { count: 'exact' },
     )
@@ -64,6 +65,13 @@ const handler = async (req: Request) => {
     });
   }
 
+  const formattedMessagesData = messagesData.map((message) => ({
+    ...message,
+    message_tags: message.message_tags.map((tag) => ({
+      id: tag.tag_id,
+      name: (tag.tags as unknown as { name: string }).name,
+    })),
+  }));
   // Calculate total pages
   const totalPages = Math.ceil((count || 1) / pageSize);
   // Adjust next_page and prev_page to ensure they are within valid range
@@ -72,7 +80,7 @@ const handler = async (req: Request) => {
 
   return new Response(
     JSON.stringify({
-      submissions: messagesData,
+      submissions: formattedMessagesData,
       pagination: {
         current_page: page,
         total_pages: totalPages,
