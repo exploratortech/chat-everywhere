@@ -12,3 +12,10 @@ export interface Prompt {
   isCustomInstruction?: boolean;
   deleted?: boolean;
 }
+
+export type TeacherPrompt = Omit<
+  Prompt,
+  'folderId' | 'lastUpdateAtUTC' | 'rank' | 'isCustomInstruction' | 'deleted'
+> & {
+  is_enable: boolean;
+};
