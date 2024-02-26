@@ -12,6 +12,7 @@ import OneTimeCodeGeneration from '@/components/TeacherPortal/OneTimeCodeGenerat
 import SharedMessages from '@/components/TeacherPortal/SharedMessages';
 import Sidebar from '@/components/TeacherPortal/Sidebar';
 import Tags from '@/components/TeacherPortal/Tags';
+import TeacherPrompt from '@/components/TeacherPortal/TeacherPrompt';
 import { TeacherPortalContext } from '@/components/TeacherPortal/teacher-portal.context';
 import { portalState } from '@/components/TeacherPortal/teacher-portal.state';
 import DefaultLayout from '@/components/layout/default';
@@ -59,6 +60,7 @@ const TeacherPortal = () => {
                     <SharedMessages tags={tags} />
                   )}
                   {showing === 'tags' && <Tags tags={tags} />}
+                  {showing === 'teacher-prompt' && <TeacherPrompt />}
                 </div>
               )}
             </div>
