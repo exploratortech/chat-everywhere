@@ -26,7 +26,9 @@ const Tags = ({ tags }: { tags: TagType[] }) => {
     const proceedWithRemoval =
       allTagsHaveNoMessages ||
       confirm(
-        'Selected tags have messages. Are you sure you want to remove all selected tags?',
+        t(
+          'Selected tags have student submissions. Are you sure you want to remove all selected tags?',
+        ) as string,
       );
 
     if (proceedWithRemoval) {

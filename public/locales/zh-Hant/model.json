@@ -172,5 +172,6 @@
   "New Tag": "新標籤",
   "Enter tag name below": "在下方輸入標籤名稱",
   "Create": "創建",
-  "Enter tag name": "輸入標籤名稱"
+  "Enter tag name": "輸入標籤名稱",
+  "Selected tags have student submissions. Are you sure you want to remove all selected tags?": "選擇的標籤有學生提交的文件。您確定要移除所有選擇的標籤嗎？"
 }
