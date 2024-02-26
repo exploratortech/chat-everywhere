@@ -3,6 +3,7 @@ import {
   IconBuildingBroadcastTower,
   IconInfoSquareRounded,
   IconMessages,
+  IconPrompt,
   IconRating12Plus,
   IconTags,
 } from '@tabler/icons-react';
@@ -77,6 +78,18 @@ export default function Sidebar({ className = '' }: Props) {
         dispatch({
           field: 'showing',
           value: 'tags',
+        });
+      },
+    },
+    {
+      icon: <IconPrompt />,
+      name: t('Teacher Prompt'),
+      value: 'teacher-prompt',
+      callback: () => {
+        trackEvent('teacher-prompt button clicked');
+        dispatch({
+          field: 'showing',
+          value: 'teacher-prompt',
         });
       },
     },
