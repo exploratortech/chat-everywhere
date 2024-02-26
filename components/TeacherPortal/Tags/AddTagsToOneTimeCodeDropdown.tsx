@@ -1,4 +1,3 @@
-import { DropdownMenuCheckboxItemProps } from '@radix-ui/react-dropdown-menu';
 import { IconTag } from '@tabler/icons-react';
 import * as React from 'react';
 
@@ -11,13 +10,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 import { cn } from '@/lib/utils';
 
-const AddTagsDropdown = React.memo(
+const AddTagsToOneTimeCodeDropdown = React.memo(
   ({ tags, oneTimeCodeId }: { tags: Tag[]; oneTimeCodeId: string }) => {
     const [selectedTags, setSelectedTags] = React.useState<Tag[]>([]);
 
@@ -85,6 +83,6 @@ const AddTagsDropdown = React.memo(
   },
 );
 
-AddTagsDropdown.displayName = 'AddTagsDropdown';
+AddTagsToOneTimeCodeDropdown.displayName = 'AddTagsToOneTimeCodeDropdown ';
 
-export default AddTagsDropdown;
+export default AddTagsToOneTimeCodeDropdown;

@@ -18,7 +18,7 @@ import HomeContext from '@/components/home/home.context';
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import Spinner from '../Spinner/Spinner';
 import HelpTagTooltip from './HelpTagTooltip';
-import AddTagsDropdown from './Tags/AddTagsDropdown';
+import AddTagsToOneTimeCodeDropdown from './Tags/AddTagsToOneTimeCodeDropdown';
 import TemporaryAccountProfileList from './TemporaryAccountProfileList';
 
 const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
@@ -70,7 +70,7 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
             </span>
           </div>
           <div className="flex gap-2 items-center">
-            <AddTagsDropdown
+            <AddTagsToOneTimeCodeDropdown
               tags={tags}
               oneTimeCodeId={oneTimeCodeQuery.data?.code_id}
             />
