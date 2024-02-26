@@ -55,7 +55,9 @@ const TeacherPortal = () => {
                   {showing === 'one-time-code' && (
                     <OneTimeCodeGeneration tags={tags} />
                   )}
-                  {showing === 'shared-message' && <SharedMessages />}
+                  {showing === 'shared-message' && (
+                    <SharedMessages tags={tags} />
+                  )}
                   {showing === 'tags' && <Tags tags={tags} />}
                 </div>
               )}
