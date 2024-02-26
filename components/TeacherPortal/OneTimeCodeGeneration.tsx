@@ -17,6 +17,7 @@ import HomeContext from '@/components/home/home.context';
 
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import Spinner from '../Spinner/Spinner';
+import HelpTagTooltip from './HelpTagTooltip';
 import AddTagsDropdown from './Tags/AddTagsDropdown';
 import TemporaryAccountProfileList from './TemporaryAccountProfileList';
 
@@ -73,6 +74,7 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
               tags={tags}
               oneTimeCodeId={oneTimeCodeQuery.data?.code_id}
             />
+            <HelpTagTooltip />
             {oneTimeCodeQuery.data?.expiresAt && (
               <CodeTimeLeft endOfDay={oneTimeCodeQuery.data.expiresAt} />
             )}
