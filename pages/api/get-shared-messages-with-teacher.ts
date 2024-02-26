@@ -10,9 +10,12 @@ const handler = async (req: Request) => {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  const { accessToken, page } = (await req.json()) as {
+  const { accessToken, page, filter } = (await req.json()) as {
     accessToken: string;
     page: number;
+    filter: {
+      tag_ids: number[];
+    };
   };
 
   const supabase = getAdminSupabaseClient();
@@ -36,12 +39,8 @@ const handler = async (req: Request) => {
 
   const teacherProfileId = userId;
 
-  const pageSize = 10;
-  const {
-    data: messagesData,
-    error: messagesError,
-    count,
-  } = await supabase
+  const pageSize = 20;
+  let query = supabase
     .from('student_message_submissions')
     .select(
       `
@@ -55,8 +54,22 @@ const handler = async (req: Request) => {
       { count: 'exact' },
     )
     .eq('teacher_profile_id', teacherProfileId)
-    .order('created_at', { ascending: false })
-    .range((page - 1) * pageSize, page * pageSize - 1);
+    .order('created_at', { ascending: false });
+
+  // Apply tag_ids filter if provided
+  if (filter.tag_ids?.length) {
+    query = query.filter(
+      'message_tags.tag_id',
+      'in',
+      `(${filter.tag_ids.join(',')})`,
+    );
+  }
+
+  const {
+    data: messagesData,
+    error: messagesError,
+    count,
+  } = await query.range((page - 1) * pageSize, page * pageSize - 1);
 
   if (messagesError) {
     console.error('Error fetching messages:', messagesError);
