@@ -7,14 +7,12 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
 import { Pagination as PaginationType } from '@/types/pagination';
-import {
-  ShareMessagesByTeacherProfilePayload,
-} from '@/types/share-messages-by-teacher-profile';
+import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -101,6 +99,7 @@ export const useFetchSharedMessages = (
   setPagination: Dispatch<SetStateAction<PaginationType>>,
 ) => {
   const supabase = useSupabaseClient();
+  const queryClient = useQueryClient();
   return useQuery(
     ['studentSharedMessages', page],
     async () => {
@@ -134,6 +133,7 @@ export const useFetchSharedMessages = (
           next_page: data.pagination.next_page,
           prev_page: data.pagination.prev_page,
         });
+        queryClient.invalidateQueries('teacher-tags');
       },
       onError: (error) => {
         console.error(

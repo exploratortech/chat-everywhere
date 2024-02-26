@@ -5,7 +5,6 @@ import useTeacherTags from '@/hooks/useTeacherTags';
 
 import { Tag as TagType } from '@/types/tags';
 
-import Spinner from '../Spinner';
 import { Button } from '../ui/button';
 import NewTagButton from './Tags/NewTagButton';
 import Tag from './Tags/Tag';
@@ -16,6 +15,28 @@ const Tags = ({ tags }: { tags: TagType[] }) => {
   const { mutateAsync: removeTags } = removeTeacherTags;
   const { mutate: addTag } = addTeacherTag;
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
+
+  const handleRemoveTag = () => {
+    const selectedTagDetails = tags.filter((tag) =>
+      selectedTags.includes(tag.id),
+    );
+    const allTagsHaveNoMessages = selectedTagDetails.every(
+      (tag) => tag.message_count === 0,
+    );
+    const proceedWithRemoval =
+      allTagsHaveNoMessages ||
+      confirm(
+        'Selected tags have messages. Are you sure you want to remove all selected tags?',
+      );
+
+    if (proceedWithRemoval) {
+      removeTags(selectedTags).then((res) => {
+        if (res.isRemoved) {
+          setSelectedTags([]);
+        }
+      });
+    }
+  };
   return (
     <div className="">
       <h1 className="font-bold mb-4">{t('Tags')}</h1>
@@ -43,13 +64,7 @@ const Tags = ({ tags }: { tags: TagType[] }) => {
           }}
         />
         <Button
-          onClick={() => {
-            removeTags(selectedTags).then((res) => {
-              if (res.isRemoved) {
-                setSelectedTags([]);
-              }
-            });
-          }}
+          onClick={handleRemoveTag}
           variant={selectedTags.length === 0 ? 'outline' : 'destructive'}
           disabled={selectedTags.length === 0}
           className="transition-[background]"
