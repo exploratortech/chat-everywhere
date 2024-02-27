@@ -14,6 +14,8 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics/dist/interactions';
 
+import useCustomInstructionDefaultMode from '@/hooks/useCustomInstructionDefaultMode';
+
 import chat from '@/utils/app/chat';
 import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 import { throttle } from '@/utils/data/throttle';
@@ -260,6 +262,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
     };
   }, [messagesEndRef]);
+
   const onEdit = useCallback(
     (editedMessage: Message, index: number) => {
       setCurrentMessage(editedMessage);
@@ -270,6 +273,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     },
     [handleSend, selectedConversation, setCurrentMessage],
   );
+
+  useCustomInstructionDefaultMode(selectedConversation);
 
   return (
     <div className="relative flex-1 bg-white dark:bg-[#343541]">
