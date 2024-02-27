@@ -4,8 +4,8 @@ import { useTranslation } from 'next-i18next';
 
 import useTeacherPrompt from '@/hooks/useTeacherPrompt';
 
-import { OpenAIModel, OpenAIModels } from '@/types/openai';
-import { TeacherPrompt } from '@/types/prompt';
+import { PluginID } from '@/types/plugin';
+import { Prompt, TeacherPrompt } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
@@ -22,32 +22,36 @@ interface Props {
   onUpdatePrompt: (prompt: TeacherPrompt) => void;
 }
 interface ModelSelectProps {
-  model: OpenAIModel;
-  setModel: (model: OpenAIModel) => void;
+  mode: Prompt['default_mode'];
+  setMode: (mode: Prompt['default_mode']) => void;
 }
 
-const ModelSelect = ({ model, setModel }: ModelSelectProps) => {
-  const handleChange = (value: string) => {
-    const selectedModel = Object.values(OpenAIModels).find(
-      (model) => model.id === value,
-    );
-    if (selectedModel) {
-      setModel(selectedModel);
-    }
-  };
+const ModeSelector = ({ mode, setMode }: ModelSelectProps) => {
+  const { t } = useTranslation('model');
+  const ModeOptions = [
+    { value: 'default', label: t('Default mode') },
+    { value: PluginID.LANGCHAIN_CHAT, label: t('Online mode') },
+    { value: PluginID.GPT4, label: t('GPT-4') },
+    { value: PluginID.IMAGE_GEN, label: t('AI Image') },
+  ];
   return (
-    <Select onValueChange={handleChange} defaultValue={model.id}>
+    <Select
+      onValueChange={(value) => {
+        setMode(value as Prompt['default_mode']);
+      }}
+      defaultValue={mode}
+    >
       <SelectTrigger className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:bg-[#40414F] dark:text-neutral-100">
         <SelectValue />
       </SelectTrigger>
       <SelectContent className="bg-white dark:bg-[#40414F]">
-        {Object.values(OpenAIModels).map((model) => (
+        {ModeOptions.map((option) => (
           <SelectItem
-            key={model.id}
-            value={model.id}
+            key={option.value}
+            value={option.value}
             className="px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
-            {model.name}
+            {option.label}
           </SelectItem>
         ))}
       </SelectContent>
@@ -60,7 +64,7 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
   const [content, setContent] = useState(prompt.content);
-  const [model, setModel] = useState(prompt.model);
+  const [mode, setMode] = useState(prompt.default_mode);
   const [isEnable, setIsEnable] = useState(prompt.is_enable);
   const { removeMutation } = useTeacherPrompt();
   const { mutate: removePrompt } = removeMutation;
@@ -75,8 +79,8 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
         name,
         description,
         content: content.trim(),
-        model,
         is_enable: isEnable,
+        default_mode: mode,
       });
     }
   };
@@ -122,9 +126,9 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
         rows={7}
       />
       <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
-        {t('Model')}
+        {t('Default Mode')}
       </div>
-      <ModelSelect model={model} setModel={setModel} />
+      <ModeSelector mode={mode} setMode={setMode} />
 
       <div className="mt-6 flex items-center justify-between">
         <div className="text-sm font-bold text-black dark:text-neutral-200">
@@ -157,9 +161,10 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
                   description,
                   content: content.trim(),
                   is_enable: isEnable,
-                  model,
+                  default_mode: mode,
                 };
 
+                console.log(updatedPrompt);
                 onUpdatePrompt(updatedPrompt);
               }}
             >
