@@ -30,7 +30,7 @@ const calculateTimeLeft = (endOfDayInput: string) => {
     .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
-export default function CodeTimeLeft({ endOfDay }: { endOfDay: string }) {
+export default function CodeTimeLeft({ endOfDay, timeOnly=false }: { endOfDay: string, timeOnly?: boolean}) {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(endOfDay));
   const { t } = useTranslation('model');
 
@@ -51,7 +51,7 @@ export default function CodeTimeLeft({ endOfDay }: { endOfDay: string }) {
   }
   return (
     <div className="text-sm text-neutral-500">
-      {`${t('Expires in')} ${timeLeft}`}
+      {timeOnly ? timeLeft : `${t('Expires in')} ${timeLeft}`}
     </div>
   );
 }

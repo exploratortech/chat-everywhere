@@ -1,10 +1,4 @@
-import {
-  IconBulb,
-  IconBulbFilled,
-  IconCheck,
-  IconTrash,
-  IconX,
-} from '@tabler/icons-react';
+import { IconCheck, IconTrash, IconX } from '@tabler/icons-react';
 import {
   KeyboardEvent,
   MouseEventHandler,
@@ -17,14 +11,7 @@ import { Prompt } from '@/types/prompt';
 
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 import HomeContext from '@/components/home/home.context';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 import PromptbarContext from '../PromptBar.context';
 import PromptIcon from './PromptIcon';
@@ -164,14 +151,6 @@ export const PromptComponent = ({ prompt }: Props) => {
           />
         </DialogContent>
       </Dialog>
-
-      {/* {showModal && (
-        <PromptModal
-          prompt={prompt}
-          onClose={() => setShowModal(false)}
-          onUpdatePrompt={handleUpdate}
-        />
-      )} */}
     </div>
   );
 };

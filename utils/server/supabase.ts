@@ -413,6 +413,7 @@ export const redeemReferralCode = async ({
   }
 };
 
+// USE IN CLIENT SIDE AND SERVER SIDE, TO BE OPTIMIZED
 export const userProfileQuery = async ({
   client,
   userId,

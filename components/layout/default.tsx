@@ -11,6 +11,7 @@ import { event } from 'nextjs-google-analytics';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
+import useTeacherPromptForStudent from '@/hooks/useTeacherPromptForStudent';
 import useUserProfile from '@/hooks/useUserProfile';
 
 import { fetchShareableConversation } from '@/utils/app/api';
@@ -400,6 +401,8 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   const { refetch: fetchUserProfile } = useUserProfile({
     userId: session?.user.id,
   });
+  const { refetch: fetchTeacherPrompts } = useTeacherPromptForStudent();
+
   // USER AUTH ------------------------------------------
   useEffect(() => {
     if (session?.user) {
@@ -413,6 +416,16 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           dispatch({ field: 'showOneTimeCodeLoginModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
           dispatch({ field: 'isTempUser', value: userProfile.isTempUser });
+          if (userProfile.isTempUser) {
+            fetchTeacherPrompts().then((res) => {
+              if (res.data) {
+                dispatch({
+                  field: 'teacherPrompts',
+                  value: res.data.prompts,
+                });
+              }
+            });
+          }
           dispatch({
             field: 'isTeacherAccount',
             value: userProfile.isTeacherAccount,

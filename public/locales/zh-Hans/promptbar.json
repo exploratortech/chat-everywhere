@@ -10,5 +10,8 @@
   "Prompt": "提示词",
   "Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}": "提示内容。使用 {{}} 表示一个变量。例如：{{name}} 是一个 {{adjective}} {{noun}}",
   "Save": "保存",
-  "Custom Instruction": "提示词模版"
+  "Custom Instruction": "设定为角色扮演",
+  "Mode": "对话模式",
+  "Show to students": "向学生展示",
+  "Remove": "删除"
 }

@@ -153,8 +153,9 @@ function formatOneTimeCodeInfo(
   code: string,
   expiresAt: string,
   tempProfiles: TempAccountProfiles[] = [],
-) {
+): OneTimeCodeInfoPayload {
   return {
+    code_id: record.code_id,
     code,
     expiresAt,
     tempAccountProfiles: (tempProfiles || []).map((profile) => ({
