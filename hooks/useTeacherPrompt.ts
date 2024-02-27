@@ -35,7 +35,7 @@ const useTeacherPrompt = () => {
         'Content-Type': 'application/json',
         'access-token': accessToken,
       },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ prompt: { ...prompt, id: undefined } }),
     });
     if (!response.ok) {
       throw new Error('Failed to create prompt');
