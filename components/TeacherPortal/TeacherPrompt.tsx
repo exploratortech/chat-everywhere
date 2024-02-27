@@ -15,7 +15,7 @@ const TeacherPrompt = () => {
   return (
     <div className="">
       <h1 className="font-bold mb-4">{t('Teacher Prompt')}</h1>
-      <div className="flex flex-col gap-4 min-h-[10rem] content-start">
+      <div className="flex flex-col gap-4 mb-8 content-start">
         {prompts &&
           prompts.map((prompt, index) => (
             <Fragment key={index}>
@@ -23,7 +23,7 @@ const TeacherPrompt = () => {
             </Fragment>
           ))}
       </div>
-      <div className="my-4">
+      <div>
         <NewTeacherPromptButton
           onCreatePrompt={(prompt) => createPrompt(prompt)}
         />
