@@ -17,9 +17,6 @@ export async function getTeacherPrompt(
     throw res.error;
   }
 
-  for (const prompt of res.data) {
-    prompt.model = JSON.parse(prompt.model);
-  }
   return res.data;
 }
 
@@ -29,10 +26,7 @@ export async function updateTeacherPrompt(
 ): Promise<boolean> {
   const { error } = await supabase
     .from('teacher_prompts')
-    .update({
-      ...prompt,
-      model: JSON.stringify(prompt.model),
-    })
+    .update(prompt)
     .eq('teacher_profile_id', teacher_profile_id)
     .eq('id', prompt.id);
 
