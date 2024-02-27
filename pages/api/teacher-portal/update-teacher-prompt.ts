@@ -19,20 +19,31 @@ const handler = async (req: Request): Promise<Response> => {
   if (!userProfile || !userProfile.isTeacherAccount)
     return unauthorizedResponse;
 
-  // check if the prompt id is provided from body
   const requestBody = (await req.json()) as {
     prompt: TeacherPrompt;
   };
-  const promptId = requestBody?.prompt?.id;
-  if (!promptId) {
-    return new Response('No prompt id provided', { status: 400 });
+  const prompt = requestBody?.prompt;
+  if (!prompt) {
+    return new Response('No prompt provided', { status: 400 });
   }
 
-  return new Response(
-    JSON.stringify({
-      is_updated: await updateTeacherPrompt(userProfile.id, requestBody.prompt),
-    }),
-    { status: 200 },
-  );
+  try {
+    return new Response(
+      JSON.stringify({
+        is_updated: await updateTeacherPrompt(
+          userProfile.id,
+          requestBody.prompt,
+        ),
+      }),
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error(error);
+    return new Response('Error', {
+      status: 500,
+      statusText: 'Internal server error',
+    });
+  }
 };
+
 export default handler;
