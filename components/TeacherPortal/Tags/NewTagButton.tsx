@@ -61,7 +61,7 @@ const NewTagButton = ({
                 setTagName('');
               }}
             >
-              {t('Create')}
+              {t('Submit')}
             </Button>
           </DialogClose>
         </DialogFooter>
