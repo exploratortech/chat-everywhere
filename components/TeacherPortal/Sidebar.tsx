@@ -50,7 +50,6 @@ export default function Sidebar({ className = '' }: Props) {
       name: t('One-time code'),
       value: 'one-time-code',
       callback: () => {
-        trackEvent('One-time code button clicked');
         dispatch({
           field: 'showing',
           value: 'one-time-code',
@@ -62,7 +61,6 @@ export default function Sidebar({ className = '' }: Props) {
       name: t('Shared messages'),
       value: 'shared-message',
       callback: () => {
-        trackEvent('Share message button clicked');
         dispatch({
           field: 'showing',
           value: 'shared-message',
@@ -74,7 +72,6 @@ export default function Sidebar({ className = '' }: Props) {
       name: t('Tags'),
       value: 'tags',
       callback: () => {
-        trackEvent('Tags button clicked');
         dispatch({
           field: 'showing',
           value: 'tags',
@@ -86,7 +83,6 @@ export default function Sidebar({ className = '' }: Props) {
       name: t('Teacher Prompt'),
       value: 'teacher-prompt',
       callback: () => {
-        trackEvent('teacher-prompt button clicked');
         dispatch({
           field: 'showing',
           value: 'teacher-prompt',

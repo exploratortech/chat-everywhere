@@ -71,7 +71,7 @@ const Tags = ({ tags }: { tags: TagType[] }) => {
           disabled={selectedTags.length === 0}
           className="transition-[background]"
         >
-          Remove
+          {t('Remove')}
         </Button>
       </div>
     </div>

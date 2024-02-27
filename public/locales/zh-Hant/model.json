@@ -176,10 +176,15 @@
   "Selected tags have student submissions. Are you sure you want to remove all selected tags?": "選擇的標籤有學生提交的文件。您確定要移除所有選擇的標籤嗎？",
   "The tag links to the current one-time code for the student account. Updates to the tag affect new message submissions, while existing submissions remain unchanged.": "標籤連結到學生帳戶的當前一次性代碼。更新標籤會影響新的訊息提交，但已有提交的信息不會受到影響。",
   "No Submissions found": "沒有找到提交",
-  "Teacher Prompt": "教師導覽",
-  "Show to students": "向學生展示",
-  "Add new teacher prompt": "新增教師提示",
+  "Teacher Prompt": "指導提示詞",
+  "Add new teacher prompt": "新增指導提示詞",
   "Default Mode": "預設模式",
   "No results.": "暫無學生註冊",
-  "Registered At": "登入時間"
+  "Registered At": "登入時間",
+  "Prompt created successfully": "指導提示詞創建成功",
+  "Error creating prompt": "創建指導提示詞時出錯, 請稍後再試",
+  "Prompt updated successfully": "指導提示詞已更新",
+  "Error updating prompt": "更新指導提示詞時出錯, 請稍後再試",
+  "Prompt removed successfully": "指導提示詞已移除",
+  "Error removing prompt": "移除指導提示詞時出錯, 請稍後再試"
 }

@@ -3,10 +3,12 @@ import toast from 'react-hot-toast';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { TeacherPrompt } from '@/types/prompt';
+import { useTranslation } from 'react-i18next';
 
 const useTeacherPrompt = () => {
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
+  const { t } = useTranslation('model');
 
   const fetchPrompts = async () => {
     const accessToken = (await supabase.auth.getSession()).data.session
@@ -90,30 +92,30 @@ const useTeacherPrompt = () => {
     createMutation: useMutation(createPrompt, {
       onSuccess: () => {
         queryClient.invalidateQueries('teacher-prompts');
-        toast.success('Prompt created successfully');
+        toast.success(t('Prompt created successfully'));
       },
       onError: (error) => {
-        toast.error('Error creating prompt');
+        toast.error(t('Error creating prompt'));
         console.error(error);
       },
     }),
     updateMutation: useMutation(updatePrompt, {
       onSuccess: () => {
         queryClient.invalidateQueries('teacher-prompts');
-        toast.success('Prompt updated successfully');
+        toast.success(t('Prompt updated successfully'));
       },
       onError: (error) => {
-        toast.error('Error updating prompt');
+        toast.error(t('Error updating prompt'));
         console.error(error);
       },
     }),
     removeMutation: useMutation(removePrompt, {
       onSuccess: () => {
         queryClient.invalidateQueries('teacher-prompts');
-        toast.success('Prompt removed successfully');
+        toast.success(t('Prompt removed successfully'));
       },
       onError: (error) => {
-        toast.error('Error removing prompt');
+        toast.error(t('Error removing prompt'));
         console.error(error);
       },
     }),

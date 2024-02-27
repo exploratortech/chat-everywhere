@@ -39,7 +39,7 @@ const ModeSelector = ({ mode, setMode }: ModelSelectProps) => {
       onValueChange={(value) => {
         setMode(value as Prompt['default_mode']);
       }}
-      defaultValue={mode}
+      defaultValue={mode || 'default'}
     >
       <SelectTrigger className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:bg-[#40414F] dark:text-neutral-100">
         <SelectValue />
@@ -112,7 +112,7 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
         rows={7}
       />
       <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
-        {t('Default Mode')}
+        {t('Mode')}
       </div>
       <ModeSelector mode={mode} setMode={setMode} />
 
