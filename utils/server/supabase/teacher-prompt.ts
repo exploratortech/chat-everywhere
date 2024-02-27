@@ -1,9 +1,47 @@
+import { OpenAIModel } from '@/types/openai';
 import { TeacherPrompt } from '@/types/prompt';
 
 import { getAdminSupabaseClient } from '../supabase';
 
 const supabase = getAdminSupabaseClient();
 
+export async function getTeacherPromptForStudent(student_profile_id: string) {
+  // Step 1: Locate teacher profile id by getting the temp profile by student profile id
+  // with join on one time code table to get the teacher profile id
+  const tempProfileRes = await supabase
+    .from('temporary_account_profiles')
+    .select('one_time_codes(teacher_profile_id)')
+    .eq('profile_id', student_profile_id)
+    .single();
+
+  if (tempProfileRes.error || !tempProfileRes.data) {
+    throw tempProfileRes.error;
+  }
+
+  if (
+    !tempProfileRes.data.one_time_codes ||
+    tempProfileRes.data.one_time_codes.length === 0
+  ) {
+    console.log('No one time code found for the student profile id');
+    throw new Error('No one time code found for the student profile id');
+  }
+  const teacher_profile_id = (tempProfileRes.data.one_time_codes as any)
+    .teacher_profile_id;
+
+  // Step 2: Get the teacher prompt by teacher profile id and filter out only the is_enable = true
+  const promptsRes = await supabase
+    .from('teacher_prompts')
+    .select('*')
+    .eq('teacher_profile_id', teacher_profile_id)
+    .eq('is_enable', true);
+
+  if (promptsRes.error) {
+    console.log(promptsRes.error);
+    throw promptsRes.error;
+  }
+
+  return promptsRes.data;
+}
 export async function getTeacherPrompt(
   teacher_profile_id: string,
 ): Promise<TeacherPrompt[]> {
