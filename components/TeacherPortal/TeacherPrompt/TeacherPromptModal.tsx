@@ -2,9 +2,12 @@ import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import useTeacherPrompt from '@/hooks/useTeacherPrompt';
+
 import { OpenAIModel, OpenAIModels } from '@/types/openai';
 import { TeacherPrompt } from '@/types/prompt';
 
+import { Button } from '@/components/ui/button';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 import {
   Select,
@@ -59,6 +62,8 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
   const [content, setContent] = useState(prompt.content);
   const [model, setModel] = useState(prompt.model);
   const [isEnable, setIsEnable] = useState(prompt.is_enable);
+  const { removeMutation } = useTeacherPrompt();
+  const { mutate: removePrompt } = removeMutation;
 
   // const modalRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -140,25 +145,36 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
         </label>
       </div>
       <DialogFooter className="sm:justify-start">
-        <DialogClose asChild>
-          <button
-            type="button"
-            className="w-full px-4 py-2 mt-6 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
-            onClick={() => {
-              const updatedPrompt = {
-                ...prompt,
-                name,
-                description,
-                content: content.trim(),
-                is_enable: isEnable,
-                model,
-              };
+        <DialogClose>
+          <div className="flex flex-col gap-6">
+            <Button
+              type="button"
+              className="w-full px-4 py-2 mt-6 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
+              onClick={() => {
+                const updatedPrompt = {
+                  ...prompt,
+                  name,
+                  description,
+                  content: content.trim(),
+                  is_enable: isEnable,
+                  model,
+                };
 
-              onUpdatePrompt(updatedPrompt);
-            }}
-          >
-            {t('Save')}
-          </button>
+                onUpdatePrompt(updatedPrompt);
+              }}
+            >
+              {t('Save')}
+            </Button>
+            <Button
+              onClick={() => {
+                removePrompt(prompt.id);
+              }}
+              variant={'destructive'}
+              className=""
+            >
+              Remove
+            </Button>
+          </div>
         </DialogClose>
       </DialogFooter>
     </div>

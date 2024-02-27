@@ -23,9 +23,11 @@ const TeacherPrompt = () => {
             </Fragment>
           ))}
       </div>
-      <NewTeacherPromptButton
-        onCreatePrompt={(prompt) => createPrompt(prompt)}
-      />
+      <div className="my-4">
+        <NewTeacherPromptButton
+          onCreatePrompt={(prompt) => createPrompt(prompt)}
+        />
+      </div>
     </div>
   );
 };
