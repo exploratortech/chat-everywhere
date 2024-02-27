@@ -7,6 +7,8 @@ import CustomInstructionInUseDisplayModel from '../Promptbar/components/CustomIn
 
 import HomeContext from '../home/home.context';
 
+import { cn } from '@/lib/utils';
+
 const CustomInstructionInUseIndicator = () => {
   const { t } = useTranslation('chat');
   const {
@@ -19,6 +21,8 @@ const CustomInstructionInUseIndicator = () => {
 
   const [showModal, setShowModal] = useState(false);
   if (selectedConversation?.customInstructionPrompt && isInChatMode) {
+    const isTeacherCustomInstructionPrompt =
+      selectedConversation.customInstructionPrompt.is_teacher_prompt;
     const customInstructionPromptName =
       selectedConversation.customInstructionPrompt.name.trim().length > 10
         ? selectedConversation.customInstructionPrompt.name
@@ -31,8 +35,19 @@ const CustomInstructionInUseIndicator = () => {
           className="group relative h-2 w-2 mx-2 cursor-pointer"
           onClick={() => setShowModal(true)}
         >
-          <div className="h-2 w-2 bg-green-500 rounded-full absolute"></div>
-          <div className="h-2 w-2 bg-green-500 rounded-full animate-ping absolute"></div>
+          <div
+            className={cn(
+              'h-2 w-2',
+              isTeacherCustomInstructionPrompt ? 'bg-blue-500' : 'bg-green-500',
+              'rounded-full absolute',
+            )}
+          ></div>
+          <div
+            className={cn(
+              'h-2 w-2 rounded-full animate-ping absolute',
+              isTeacherCustomInstructionPrompt ? 'bg-blue-500' : 'bg-green-500',
+            )}
+          ></div>
           <span className="absolute top-6 scale-0 rounded bg-gray-800 p-2 text-xs text-white group-hover:scale-100 !w-max">
             {t(
               'Custom Instruction ({{customInstructionPromptName}}) is in use',

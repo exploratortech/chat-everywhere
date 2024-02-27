@@ -16,6 +16,16 @@ const CustomInstructionInUseDisplayModel: FC<
   const { t: chatT } = useTranslation('chat');
   const modalRef = useRef<HTMLDivElement>(null);
 
+  const isTeacherCustomInstructionPrompt = prompt.is_teacher_prompt;
+  const title = chatT(
+    isTeacherCustomInstructionPrompt
+      ? 'Teacher Custom Instruction ({{customInstructionPromptName}}) is in use'
+      : 'Custom Instruction ({{customInstructionPromptName}}) is in use',
+    {
+      customInstructionPromptName: prompt.name,
+    },
+  );
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -48,12 +58,7 @@ const CustomInstructionInUseDisplayModel: FC<
             role="dialog"
           >
             <div className="text-center text-lg mb-4 font-bold whitespace-pre-wrap">
-              {chatT(
-                'Custom Instruction ({{customInstructionPromptName}}) is in use',
-                {
-                  customInstructionPromptName: prompt.name,
-                },
-              )}
+              {title}
             </div>
 
             <div className="text-sm font-bold text-black dark:text-neutral-200">
