@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next';
 
 import useTeacherPrompt from '@/hooks/useTeacherPrompt';
 
+import NewTeacherPromptButton from './TeacherPrompt/NewTeacherPromptButton';
 import { TeacherPromptComponent } from './TeacherPrompt/TeacherPromptComponent';
 
 const TeacherPrompt = () => {
   const { t } = useTranslation('model');
-  const { fetchQuery } = useTeacherPrompt();
+  const { fetchQuery, createMutation } = useTeacherPrompt();
   const { data: prompts } = fetchQuery;
+  const { mutate: createPrompt } = createMutation;
 
   return (
     <div className="">
@@ -21,6 +23,9 @@ const TeacherPrompt = () => {
             </Fragment>
           ))}
       </div>
+      <NewTeacherPromptButton
+        onCreatePrompt={(prompt) => createPrompt(prompt)}
+      />
     </div>
   );
 };
