@@ -2,20 +2,62 @@ import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import { OpenAIModel, OpenAIModels } from '@/types/openai';
 import { TeacherPrompt } from '@/types/prompt';
 
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Props {
   prompt: TeacherPrompt;
   onUpdatePrompt: (prompt: TeacherPrompt) => void;
 }
+interface ModelSelectProps {
+  model: OpenAIModel;
+  setModel: (model: OpenAIModel) => void;
+}
+
+const ModelSelect = ({ model, setModel }: ModelSelectProps) => {
+  const handleChange = (value: string) => {
+    const selectedModel = Object.values(OpenAIModels).find(
+      (model) => model.id === value,
+    );
+    if (selectedModel) {
+      setModel(selectedModel);
+    }
+  };
+  return (
+    <Select onValueChange={handleChange} defaultValue={model.id}>
+      <SelectTrigger className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:bg-[#40414F] dark:text-neutral-100">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent className="bg-white dark:bg-[#40414F]">
+        {Object.values(OpenAIModels).map((model) => (
+          <SelectItem
+            key={model.id}
+            value={model.id}
+            className="px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          >
+            {model.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+};
 
 export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
   const { t } = useTranslation('promptbar');
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
   const [content, setContent] = useState(prompt.content);
+  const [model, setModel] = useState(prompt.model);
   const [isEnable, setIsEnable] = useState(prompt.is_enable);
 
   // const modalRef = useRef<HTMLDivElement>(null);
@@ -28,6 +70,7 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
         name,
         description,
         content: content.trim(),
+        model,
         is_enable: isEnable,
       });
     }
@@ -73,6 +116,10 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
         onChange={(e) => setContent(e.target.value)}
         rows={7}
       />
+      <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
+        {t('Model')}
+      </div>
+      <ModelSelect model={model} setModel={setModel} />
 
       <div className="mt-6 flex items-center justify-between">
         <div className="text-sm font-bold text-black dark:text-neutral-200">
@@ -104,6 +151,7 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
                 description,
                 content: content.trim(),
                 is_enable: isEnable,
+                model,
               };
 
               onUpdatePrompt(updatedPrompt);
