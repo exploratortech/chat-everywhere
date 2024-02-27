@@ -173,7 +173,7 @@
   "Enter tag name below": "在下方輸入標籤名稱",
   "Enter tag name": "輸入標籤名稱",
   "Selected tags have student submissions. Are you sure you want to remove all selected tags?": "選擇的標籤有學生提交的文件。您確定要移除所有選擇的標籤嗎？",
-  "The tag links to the current one-time code for the student account. Updates to the tag affect new message submissions, while existing submissions remain unchanged.": "選擇好的標籤只會連結到新登入的學生帳戶，他們分享的訊息會有對應的標籤以方便搜尋。",
+  "The tag links to the current one-time code for the student account. Updates to the tag affect new message submissions, while existing submissions remain unchanged.": "選擇對應的標籤來標記學生分享的訊息以方便搜尋。更新標籤將影響新的提交訊息，而已提交的訊息將保持不變。",
   "No Submissions found": "沒有提交的訊息",
   "Teacher Prompt": "指導提示詞",
   "Add new teacher prompt": "新增指導提示詞",
