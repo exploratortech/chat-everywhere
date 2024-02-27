@@ -1,4 +1,4 @@
-import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
@@ -69,28 +69,14 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
   const { removeMutation } = useTeacherPrompt();
   const { mutate: removePrompt } = removeMutation;
 
-  // const modalRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
-
-  const handleEnter = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      onUpdatePrompt({
-        ...prompt,
-        name,
-        description,
-        content: content.trim(),
-        is_enable: isEnable,
-        default_mode: mode,
-      });
-    }
-  };
 
   useEffect(() => {
     nameInputRef.current?.focus();
   }, []);
 
   return (
-    <div onKeyDown={handleEnter}>
+    <div>
       <div className="text-sm font-bold text-black dark:text-neutral-200">
         {t('Name')}
       </div>
@@ -164,7 +150,6 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
                   default_mode: mode,
                 };
 
-                console.log(updatedPrompt);
                 onUpdatePrompt(updatedPrompt);
               }}
             >
@@ -177,7 +162,7 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
               variant={'destructive'}
               className=""
             >
-              Remove
+              {t('Remove')}
             </Button>
           </div>
         </DialogClose>
