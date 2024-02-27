@@ -58,5 +58,7 @@
   "Sorry, something went wrong. Our team has been notified and will look into it.": "抱歉，出现了一些问题。我们的团队已经收到通知并将尽快解决。",
   "Sorry something went wrong. Please refresh the page and try again.": "抱歉，出现了一些问题。请刷新页面并重试。",
   "Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.": "抱歉，我们的安全系统在您的消息中发现了不适当的内容。请尝试更换主题并再次尝试。",
-  "AI image generation is temporarily unavailable. We are working to get it back online as soon as possible.": "AI图像生成暂时无法使用。我们正在努力尽快恢复在线状态。"
+  "AI image generation is temporarily unavailable. We are working to get it back online as soon as possible.": "AI图像生成暂时无法使用。我们正在努力尽快恢复在线状态。",
+  "Custom Instruction ({{customInstructionPromptName}}) is in use": "提示词模版 ({{customInstructionPromptName}}) 正在使用中",
+  "Custom Instruction only available in Chat mode": "提示词模版仅在聊天模式下可用"
 }

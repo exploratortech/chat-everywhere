@@ -7,6 +7,7 @@ import { generateOneCodeAndExpirationDate } from '../referralCode';
 import { getAdminSupabaseClient } from '../supabase';
 
 import { SupabaseClient } from '@supabase/supabase-js';
+import dayjs from 'dayjs';
 
 export const getOneTimeCodeInfo = async (
   userId: string,
@@ -152,11 +153,15 @@ function formatOneTimeCodeInfo(
   code: string,
   expiresAt: string,
   tempProfiles: TempAccountProfiles[] = [],
-) {
+): OneTimeCodeInfoPayload {
   return {
+    code_id: record.code_id,
     code,
     expiresAt,
-    tempAccountProfiles: tempProfiles,
+    tempAccountProfiles: (tempProfiles || []).map((profile) => ({
+      ...profile,
+      is_expired: dayjs(profile.expired_at).isBefore(dayjs()),
+    })),
     maxQuota: record.referrer_max_temp_account_quota,
     totalActiveTempAccount: record.current_total_referrer_temp_account_number,
   };

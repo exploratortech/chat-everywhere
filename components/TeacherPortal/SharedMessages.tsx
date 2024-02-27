@@ -7,22 +7,24 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
 import { Pagination as PaginationType } from '@/types/pagination';
-import {
-  ShareMessagesByTeacherProfilePayload,
-} from '@/types/share-messages-by-teacher-profile';
+import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
+import { Tag } from '@/types/tags';
 
+import useShareMessageFilterStore from '@/components/TeacherPortal/share-message-filter.store';
 import HomeContext from '@/components/home/home.context';
 
 import Spinner from '../Spinner/Spinner';
+import { Separator } from '../v2Chat/ui/separator';
 import Pagination from './Pagination';
+import Filter from './ShareMessages/Filter';
 import SharedMessageItem from './SharedMessageItem';
 
-const SharedMessages = memo(() => {
+const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
   const { t } = useTranslation('model');
   const {
     state: { user },
@@ -59,14 +61,19 @@ const SharedMessages = memo(() => {
   return (
     <div className="">
       <h1 className="font-bold mb-4">{t('Shared messages')}</h1>
+      <div className="flex flex-col gap-2 my-4">
+        <Filter tags={tags} />
+        <Separator />
+      </div>
       {isLoading && !sharedMessages && (
         <div className="flex mt-[50%]">
           <Spinner size="16px" className="mx-auto" />
         </div>
       )}
       {!isLoading && (!sharedMessages || !sharedMessages?.length) && (
-        <div>No Submissions</div>
+        <div>{t('No Submissions found')}</div>
       )}
+
       <div className="flex flex-wrap gap-4">
         {sharedMessages?.map((submission) => (
           <SharedMessageItem
@@ -101,13 +108,23 @@ export const useFetchSharedMessages = (
   setPagination: Dispatch<SetStateAction<PaginationType>>,
 ) => {
   const supabase = useSupabaseClient();
+  const queryClient = useQueryClient();
+  const { selectedTags } = useShareMessageFilterStore();
+
   return useQuery(
-    ['studentSharedMessages', page],
+    [
+      'studentSharedMessages',
+      page,
+      selectedTags.map((tag) => tag.id).join(','),
+    ],
     async () => {
       const payload = {
         accessToken: (await supabase.auth.getSession()).data.session
           ?.access_token,
         page,
+        filter: {
+          tag_ids: selectedTags.map((tag) => tag.id),
+        },
       };
       const response = await fetch('/api/get-shared-messages-with-teacher', {
         method: 'POST',
@@ -134,6 +151,7 @@ export const useFetchSharedMessages = (
           next_page: data.pagination.next_page,
           prev_page: data.pagination.prev_page,
         });
+        queryClient.invalidateQueries('teacher-tags');
       },
       onError: (error) => {
         console.error(
