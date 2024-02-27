@@ -2,6 +2,8 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 import React from 'react';
@@ -33,6 +35,8 @@ export function DataTable<TData extends TempAccountProfiles, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
   });
 
   return (
@@ -109,14 +113,6 @@ export function DataTable<TData extends TempAccountProfiles, TValue>({
           </Button>
         </div>
       </div>
-
-      {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div>
-          {table.getFilteredSelectedRowModel().rows.map((row) => (
-            <div key={row.original.id}>{row.original.id}</div>
-          ))}
-        </div>
-      )}
     </>
   );
 }

@@ -7,12 +7,8 @@ import { trackEvent } from '@/utils/app/eventTracking';
 
 import { TempAccountProfiles } from '@/types/one-time-code';
 
-import CodeTimeLeft from '../Referral/CodeTimeLeft';
-import { Button } from '../ui/button';
 import { columns } from './TemporaryAccountProfileList/Columns';
 import DataTable from './TemporaryAccountProfileList/DataTable';
-
-import dayjs from 'dayjs';
 
 const TemporaryAccountProfileList = ({
   tempAccountProfiles,
@@ -25,10 +21,6 @@ const TemporaryAccountProfileList = ({
 }) => {
   const { t } = useTranslation('model');
   const queryClient = useQueryClient();
-  const handleCopy = (code: string) => {
-    navigator.clipboard.writeText(code);
-    toast.success(t('Copied to clipboard'));
-  };
 
   const { mutate: removeTempAccount, isLoading } = useRemoveTempAccount();
 
