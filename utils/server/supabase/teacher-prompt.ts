@@ -19,3 +19,21 @@ export async function getTeacherPrompt(
 
   return res.data;
 }
+
+export async function updateTeacherPrompt(
+  teacher_profile_id: string,
+  prompt: Partial<TeacherPrompt>,
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('teacher_prompts')
+    .update(prompt)
+    .eq('teacher_profile_id', teacher_profile_id)
+    .eq('id', prompt.id);
+
+  if (error) {
+    console.log(error);
+    throw error;
+  }
+
+  return data ? true : false;
+}
