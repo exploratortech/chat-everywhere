@@ -11,7 +11,7 @@ import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 
 interface Props {
   selectedConversation: Conversation;
-  onNewConversation: () => void;
+  onNewConversation: (folderId?: string) => void;
 }
 
 export const Navbar: FC<Props> = ({
@@ -50,7 +50,7 @@ export const Navbar: FC<Props> = ({
       <div>
         <IconPlus
           className="cursor-pointer hover:text-neutral-400"
-          onClick={onNewConversation}
+          onClick={() => onNewConversation()}
         />
       </div>
 

@@ -33,9 +33,12 @@ export const Conversations = ({ conversations }: Props) => {
       const reorderedConversations = reorderItem(
         unfilteredConversations,
         conversation.id,
-        generateRank(conversations, index),
-        { updates: { folderId: null }},
-      );
+        generateRank(
+          unfilteredConversations.filter((c) => c.folderId == null),
+          index,
+        ),
+        { updates: { folderId: null } },
+      )
       dispatch({ field: 'conversations', value: reorderedConversations });
       saveConversations(reorderedConversations);
       updateConversationLastUpdatedAtTimeStamp();

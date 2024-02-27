@@ -37,7 +37,15 @@ import {
 import { saveFolders } from '@/utils/app/folders';
 import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
-import { generateRank, sortByRank } from '@/utils/app/rank';
+import {
+  areFoldersBalanced,
+  areItemsBalanced,
+  generateRank,
+  rebalanceFolders,
+  rebalanceItems,
+  sortByRank,
+  sortByRankAndFolder,
+} from '@/utils/app/rank';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
@@ -139,7 +147,10 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       ),
     };
 
-    const updatedFolders = [...folders, newFolder];
+    let updatedFolders = [...folders, newFolder];
+    if (!areFoldersBalanced(updatedFolders)) {
+      updatedFolders = rebalanceFolders(updatedFolders);
+    }
 
     dispatch({ field: 'folders', value: updatedFolders });
     saveFolders(updatedFolders);
@@ -212,15 +223,18 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   // CONVERSATION OPERATIONS  --------------------------------------------
 
-  const handleNewConversation = () => {
+  const handleNewConversation = (folderId?: string) => {
     //  CLOSE CHATBAR ON MOBILE LAYOUT WHEN SELECTING CONVERSATION
     if (isTabletLayout) {
       dispatch({ field: 'showChatbar', value: false });
     }
 
-    const newConversation: Conversation = getNewConversation();
+    const newConversation: Conversation = getNewConversation(folderId);
 
-    const updatedConversations = [newConversation, ...conversations];
+    let updatedConversations = [newConversation, ...conversations];
+    if (!areItemsBalanced(updatedConversations)) {
+      updatedConversations = rebalanceItems(updatedConversations);
+    }
 
     dispatch({ field: 'selectedConversation', value: newConversation });
     dispatch({ field: 'conversations', value: updatedConversations });
@@ -254,8 +268,11 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     });
   };
 
-  const getNewConversation = () => {
+  const getNewConversation = (folderId: string | null = null) => {
     const lastConversation = conversations[conversations.length - 1];
+
+    let filteredConversations: Conversation[] = getNonDeletedCollection(conversations)
+      .filter((c) => c.folderId === folderId);
 
     const newConversation: Conversation = {
       id: uuidv4(),
@@ -269,11 +286,41 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       },
       prompt: DEFAULT_SYSTEM_PROMPT,
       temperature: DEFAULT_TEMPERATURE,
-      rank: generateRank(getNonDeletedCollection(conversations), 0),
-      folderId: null,
+      rank: generateRank(filteredConversations, 0),
+      folderId,
       lastUpdateAtUTC: dayjs().valueOf(),
     };
     return newConversation;
+  };
+
+  // PROMPTS ---------------------------------------------
+  const handleCreatePrompt = (folderId: string | null = null) => {
+    const filteredPrompts: Prompt[] = getNonDeletedCollection(prompts)
+      .filter((p) => p.folderId === folderId);
+
+    if (defaultModelId) {
+      const newPrompt: Prompt = {
+        id: uuidv4(),
+        name: `Prompt ${prompts.length + 1}`,
+        description: '',
+        content: '',
+        model: OpenAIModels[defaultModelId],
+        folderId: folderId,
+        lastUpdateAtUTC: dayjs().valueOf(),
+        rank: generateRank(filteredPrompts),
+      };
+
+      let updatedPrompts = [...prompts, newPrompt];
+      if (!areItemsBalanced(updatedPrompts)) {
+        updatedPrompts = rebalanceItems(updatedPrompts);
+      }
+
+      dispatch({ field: 'prompts', value: updatedPrompts });
+
+      savePrompts(updatedPrompts);
+
+      updateConversationLastUpdatedAtTimeStamp();
+    }
   };
 
   // SIDEBAR ---------------------------------------------
@@ -535,7 +582,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
     const prompts = localStorage.getItem('prompts');
     if (prompts) {
-      const parsedPrompts: Prompt[] = JSON.parse(prompts).sort(sortByRank);
+      const parsedPrompts = sortByRankAndFolder(JSON.parse(prompts));
       cleanedPrompts = cleanPrompts(parsedPrompts);
       dispatch({ field: 'prompts', value: cleanedPrompts });
     }
@@ -558,8 +605,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     const conversationHistory = localStorage.getItem('conversationHistory');
     cleanedConversationHistory = [];
     if (conversationHistory) {
-      const parsedConversationHistory: Conversation[] =
-        JSON.parse(conversationHistory).sort(sortByRank);
+      const parsedConversationHistory = sortByRankAndFolder(JSON.parse(conversationHistory));
       cleanedConversationHistory = cleanConversationHistory(
         parsedConversationHistory,
       );
@@ -654,6 +700,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           handleUpdateFolder,
           handleSelectConversation,
           handleUpdateConversation,
+          handleCreatePrompt,
           handleUserLogout,
           playMessage: (text, speechId) =>
             speak(
