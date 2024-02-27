@@ -179,5 +179,7 @@
   "Teacher Prompt": "教師導覽",
   "Show to students": "向學生展示",
   "Add new teacher prompt": "新增教師提示",
-  "Default Mode": "預設模式"
+  "Default Mode": "預設模式",
+  "No results.": "暫無學生註冊",
+  "Registered At": "登入時間"
 }

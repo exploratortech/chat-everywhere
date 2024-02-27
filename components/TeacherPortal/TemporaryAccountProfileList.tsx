@@ -7,7 +7,7 @@ import { trackEvent } from '@/utils/app/eventTracking';
 
 import { TempAccountProfiles } from '@/types/one-time-code';
 
-import { columns } from './TemporaryAccountProfileList/Columns';
+import { getColumns } from './TemporaryAccountProfileList/Columns';
 import DataTable from './TemporaryAccountProfileList/DataTable';
 
 const TemporaryAccountProfileList = ({
@@ -48,7 +48,7 @@ const TemporaryAccountProfileList = ({
         <label>{`(${totalActiveTempAccount}/${maxQuota})`}</label>
       </h2>
       <DataTable
-        columns={columns}
+        columns={getColumns(t)}
         data={tempAccountProfiles}
         handleRemoveAccounts={handleRemove}
       />

@@ -2,11 +2,12 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getSortedRowModel,
   getFilteredRowModel,
+  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { TempAccountProfiles } from '@/types/one-time-code';
 
@@ -31,6 +32,8 @@ export function DataTable<TData extends TempAccountProfiles, TValue>({
   data,
   handleRemoveAccounts,
 }: DataTableProps<TempAccountProfiles, any>) {
+  const { t } = useTranslation('model');
+
   const table = useReactTable<TempAccountProfiles>({
     data,
     columns,
@@ -85,7 +88,7 @@ export function DataTable<TData extends TempAccountProfiles, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {t('No results')}
                 </TableCell>
               </TableRow>
             )}
@@ -93,10 +96,6 @@ export function DataTable<TData extends TempAccountProfiles, TValue>({
         </Table>
       </div>
       <div className="flex my-4 items-center">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{' '}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
         <div className="">
           <Button
             onClick={() =>
@@ -109,7 +108,9 @@ export function DataTable<TData extends TempAccountProfiles, TValue>({
             variant="destructive"
             disabled={table.getFilteredSelectedRowModel().rows.length === 0}
           >
-            Remove
+            {t('Remove')}{' '}
+            {table.getFilteredSelectedRowModel().rows.length !== 0 &&
+              `(${table.getFilteredSelectedRowModel().rows.length})`}
           </Button>
         </div>
       </div>
