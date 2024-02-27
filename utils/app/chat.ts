@@ -1,5 +1,6 @@
 import { ChatBody, Conversation, Message } from '@/types/chat';
 import { Plugin, PluginID } from '@/types/plugin';
+import { Prompt } from '@/types/prompt';
 import { User } from '@/types/user';
 
 import { getOrGenerateUserId } from '../data/taggingHelper';
@@ -23,11 +24,22 @@ import { removeSecondLastLine } from './ui';
 
 import dayjs from 'dayjs';
 
+function addCustomInstructions(
+  prompt: Prompt,
+  selectedConversation: Conversation,
+) {
+  const updatedConversation: Conversation = {
+    ...selectedConversation,
+    prompt: prompt.content,
+    customInstructionPrompt: prompt,
+  };
+
+  return updatedConversation;
+}
 function updateConversation(
   deleteCount: number,
   message: Message,
   selectedConversation: Conversation,
-  homeDispatch: Function,
 ): Conversation {
   let updatedConversation: Conversation;
   if (deleteCount) {
@@ -47,12 +59,6 @@ function updateConversation(
       messages: [...selectedConversation.messages, message],
     };
   }
-  homeDispatch({
-    field: 'selectedConversation',
-    value: updatedConversation,
-  });
-  homeDispatch({ field: 'loading', value: true });
-  homeDispatch({ field: 'messageIsStreaming', value: true });
 
   return updatedConversation;
 }
@@ -168,10 +174,13 @@ async function handleDataResponse(
   stopConversationRef: React.MutableRefObject<boolean>,
   homeDispatch: Function,
 ) {
-  if (updatedConversation.messages.length === 1) {
+  if (updatedConversation.messages.length < 2) {
     const { content } = message;
-    const customName =
-      content.length > 30 ? content.substring(0, 30) + '...' : content;
+    const customName = updatedConversation.customInstructionPrompt
+      ? updatedConversation.customInstructionPrompt.name
+      : content.length > 30
+      ? content.substring(0, 30) + '...'
+      : content;
     updatedConversation = {
       ...updatedConversation,
       name: customName,
@@ -305,6 +314,7 @@ async function handleDataResponse(
   updateConversationLastUpdatedAtTimeStamp();
 }
 const chat = {
+  addCustomInstructions,
   updateConversation,
   createChatBody,
   sendRequest,

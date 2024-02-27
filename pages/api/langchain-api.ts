@@ -156,7 +156,11 @@ const handler = async (req: NextRequest, res: any) => {
   });
 
   let promptToSend = `${selectedOutputLanguage}
-  You are Chat Everywhere, a helpful AI assistant like ChatGPT, who has access to the internet and can answer any question the user asks.
+  ${
+    requestBody.prompt ||
+    `You are Chat Everywhere, a helpful AI assistant like ChatGPT, who has access to the internet and can answer any question the user asks.`
+  }
+  
   
   The current date and time is ${new Date().toLocaleString()}.
   Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:

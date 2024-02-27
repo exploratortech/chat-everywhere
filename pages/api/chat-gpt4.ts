@@ -74,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
       }`;
     }
 
-    if(!isUserInUltraPlan){
+    if (!isUserInUltraPlan) {
       await addUsageEntry(PluginID.GPT4, data.user.id);
       await subtractCredit(data.user.id, PluginID.GPT4);
     }
@@ -112,7 +112,8 @@ const handler = async (req: Request): Promise<Response> => {
         case 429:
           try {
             // Add credit back to user's account
-            if(!isUserInUltraPlan) await addCredit(data.user.id, PluginID.GPT4, 1);
+            if (!isUserInUltraPlan)
+              await addCredit(data.user.id, PluginID.GPT4, 1);
           } catch (error) {
             // Handle error adding credit back
             return new Response('Error adding credit back', {
