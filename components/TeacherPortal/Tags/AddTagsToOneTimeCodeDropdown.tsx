@@ -44,41 +44,52 @@ const AddTagsToOneTimeCodeDropdown = React.memo(
     };
 
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size={'icon'}
-            className={cn(
-              '!ring-0',
-              selectedTags.length > 0 ? 'bg-neutral-700' : '',
-            )}
-          >
-            <IconTag className="w-4 h-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 flex flex-col gap-4 p-4 border-0 shadow-lg bg-neutral-800">
-          {tags.map((tag) => (
-            <div key={tag.id} className="flex items-center space-x-2">
-              <Checkbox
-                id={`dropdown-tag-${tag.id}`}
-                checked={selectedTags.some((t) => t.id === tag.id)}
-                onCheckedChange={(checked: boolean) => {
-                  handleTagSelectionChange(tag, checked);
-                }}
-              >
+      <div className="flex flex-row gap-2">
+        <div className="flex flex-rows items-center gap-2">
+          {
+            selectedTags.map((tag) => (
+              <span key={tag.id} className="text-neutral-400 text-xs">
                 {tag.name}
-              </Checkbox>
-              <label
-                htmlFor={`dropdown-tag-${tag.id}`}
-                className="cursor-pointer w-full text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {tag.name}
-              </label>
-            </div>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+              </span>
+            ))
+          }
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size={'icon'}
+              className={cn(
+                '!ring-0',
+                selectedTags.length > 0 ? 'bg-neutral-700' : '',
+              )}
+            >
+              <IconTag className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56 flex flex-col gap-4 p-4 border-0 shadow-lg bg-neutral-800">
+            {tags.map((tag) => (
+              <div key={tag.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`dropdown-tag-${tag.id}`}
+                  checked={selectedTags.some((t) => t.id === tag.id)}
+                  onCheckedChange={(checked: boolean) => {
+                    handleTagSelectionChange(tag, checked);
+                  }}
+                >
+                  {tag.name}
+                </Checkbox>
+                <label
+                  htmlFor={`dropdown-tag-${tag.id}`}
+                  className="cursor-pointer w-full text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  {tag.name}
+                </label>
+              </div>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     );
   },
 );
