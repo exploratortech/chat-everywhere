@@ -11,6 +11,7 @@ export interface Prompt {
   rank: number;
   isCustomInstruction?: boolean;
   deleted?: boolean;
+  is_teacher_prompt?: boolean;
 }
 
 export type TeacherPrompt = Omit<
