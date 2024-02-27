@@ -49,7 +49,7 @@ const handler = async (req: Request) => {
       image_file_url,
       created_at,
       student_name,
-      message_tags!inner(tag_id, tags(name))
+      message_tags!left(tag_id, tags(name))
     `,
       { count: 'exact' },
     )
@@ -78,13 +78,20 @@ const handler = async (req: Request) => {
     });
   }
 
-  const formattedMessagesData = messagesData.map((message) => ({
+  let formattedMessagesData = messagesData.map((message) => ({
     ...message,
     message_tags: message.message_tags.map((tag) => ({
       id: tag.tag_id,
       name: (tag.tags as unknown as { name: string }).name,
     })),
   }));
+
+  // Filter out messages with no tags, if tag_ids filter is provided
+  if (filter.tag_ids?.length) {
+    formattedMessagesData = formattedMessagesData.filter(
+      (message) => message.message_tags.length > 0,
+    );
+  }
   // Calculate total pages
   const totalPages = Math.ceil((count || 1) / pageSize);
   // Adjust next_page and prev_page to ensure they are within valid range
