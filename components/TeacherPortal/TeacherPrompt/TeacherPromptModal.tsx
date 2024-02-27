@@ -103,6 +103,7 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
                 name,
                 description,
                 content: content.trim(),
+                is_enable: isEnable,
               };
 
               onUpdatePrompt(updatedPrompt);

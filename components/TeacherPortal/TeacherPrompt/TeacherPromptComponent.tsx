@@ -1,4 +1,4 @@
-import { MouseEventHandler, useState } from 'react';
+import useTeacherPrompt from '@/hooks/useTeacherPrompt';
 
 import { TeacherPrompt } from '@/types/prompt';
 
@@ -13,13 +13,12 @@ interface Props {
 }
 
 export const TeacherPromptComponent = ({ prompt }: Props) => {
+  const { updateMutation } = useTeacherPrompt();
+  const { mutate: updatePrompt } = updateMutation;
   const handleUpdate = (prompt: TeacherPrompt) => {
-    console.log('handleUpdate', prompt);
-    // handleUpdatePrompt(prompt);
-    // promptDispatch({ field: 'searchTerm', value: '' });
+    updatePrompt(prompt);
   };
 
-  // TODO: add is enable display
   return (
     <Dialog>
       <DialogTrigger className="w-full">
