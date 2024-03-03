@@ -146,13 +146,16 @@ export const useFetchSharedMessages = (
           tag_ids: selectedTags.map((tag) => tag.id),
         },
       };
-      const response = await fetch('/api/get-shared-messages-with-teacher', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        '/api/teacher-portal/get-shared-messages-with-teacher',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
       if (response.status !== 200 || !response.ok) {
         throw new Error('Failed to fetch shared messages');
       }
