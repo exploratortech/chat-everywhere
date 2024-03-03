@@ -40,7 +40,7 @@ const Tags = ({ tags }: { tags: TagType[] }) => {
     }
   };
   return (
-    <div className="">
+    <div>
       <h1 className="font-bold mb-4">{t('Tags')}</h1>
       <div className="flex gap-4 flex-wrap mb-8 content-start">
         {tags.map((tag) => (

@@ -96,7 +96,7 @@ export function DataTable<TData extends TempAccountProfiles, TValue>({
         </Table>
       </div>
       <div className="flex my-4 items-center">
-        <div className="">
+        <div>
           <Button
             onClick={() =>
               handleRemoveAccounts(

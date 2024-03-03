@@ -71,7 +71,7 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
   };
 
   return (
-    <div className="">
+    <div>
       <h1 className="font-bold mb-4">{t('Shared messages')}</h1>
       <div className="flex flex-col gap-2 my-4">
         <Filter tags={tags} />
@@ -89,7 +89,6 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
       <div className="flex flex-wrap gap-4">
         {sharedMessages?.map((submission) => (
           <SharedMessageItem
-            className=""
             key={submission.id}
             submission={submission}
             onSelectMessage={handleSelectMessage}

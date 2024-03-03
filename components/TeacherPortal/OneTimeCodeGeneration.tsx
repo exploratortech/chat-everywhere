@@ -54,7 +54,7 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
   };
 
   return (
-    <div className="">
+    <div>
       <h1 className="font-bold mb-4">{t('One-time code')}</h1>
       {oneTimeCodeQuery.isLoading && (
         <div className="flex mt-[50%]">

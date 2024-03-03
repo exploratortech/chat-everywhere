@@ -104,7 +104,7 @@ export const ReferralCodeEnter = () => {
 
   return (
     <div className="my-2 text-sm">
-      <h2 className="">{t('Referral code')}</h2>
+      <h2>{t('Referral code')}</h2>
       <form
         className="flex items-center gap-2 justify-between"
         onSubmit={handleSubmit}
