@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
 
 import AssistantRespondMessage from '@/components/Chat/ChatMessage/AssistantRespondMessage';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 import { Button } from '../ui/button';
 import Tag from './Tags/Tag';
@@ -69,14 +69,14 @@ const SharedMessageItem = ({
       <div
         onClick={() => onSelectMessage(submission.id)}
         className={cn(
-          'group bg-neutral-800 relative cursor-pointer max-w-[300px] max-h-[250px] w-[300px] h-[250px] overflow-hidden text-neutral-200 p-4 rounded-lg shadow-md',
+          'group bg-neutral-800 relative cursor-pointer max-w-[300px] max-h-[250px] w-[300px] h-[250px] overflow-hidden text-neutral-200 p-4 rounded-lg shadow-md transition-all duration-100',
           className,
           isSelected ? 'border-4 border-white' : '',
         )}
       >
         <SubmissionContent
           overflow={false}
-          className="group-hover:blur-[2px]"
+          className="group-hover:blur-[2px] pointer-events-none"
         />
         <div className="group-hover:visible invisible absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <Button

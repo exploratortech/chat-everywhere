@@ -132,11 +132,7 @@ export const useFetchSharedMessages = (
   const { selectedTags } = useShareMessageFilterStore();
 
   return useQuery(
-    [
-      'studentSharedMessages',
-      page,
-      selectedTags.map((tag) => tag.id).join(','),
-    ],
+    ['shared-messages-with-teacher'],
     async () => {
       const payload = {
         accessToken: (await supabase.auth.getSession()).data.session

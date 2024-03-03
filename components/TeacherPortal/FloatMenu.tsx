@@ -1,6 +1,7 @@
-import { IconClearAll, IconSquareX } from '@tabler/icons-react';
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import useSharedMessagesWithTeacher from '@/hooks/useSharedMessagesWithTeacher';
 
 import { Button } from '../ui/button';
 
@@ -14,7 +15,16 @@ const FloatMenu = ({
   setSelectedMessageIds: Dispatch<SetStateAction<number[]>>;
 }) => {
   const { t } = useTranslation('model');
-  const handleRemove = () => {};
+  const { removeMutation } = useSharedMessagesWithTeacher();
+
+  const handleRemove = useCallback(() => {
+    removeMutation.mutate(selectedMessageIds.map(String), {
+      onSuccess: () => {
+        setSelectedMessageIds([]);
+      },
+    });
+  }, [removeMutation, selectedMessageIds, setSelectedMessageIds]);
+
   return (
     <div
       className={cn(
