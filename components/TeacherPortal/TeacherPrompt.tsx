@@ -13,7 +13,7 @@ const TeacherPrompt = () => {
   const { mutate: createPrompt } = createMutation;
 
   return (
-    <div className="">
+    <div>
       <h1 className="font-bold mb-4">{t('Teacher Prompt')}</h1>
       <div className="flex flex-col gap-4 mb-8 content-start">
         {prompts &&

@@ -160,7 +160,6 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
                 removePrompt(prompt.id);
               }}
               variant={'destructive'}
-              className=""
             >
               {t('Remove')}
             </Button>

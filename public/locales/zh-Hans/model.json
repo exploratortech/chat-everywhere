@@ -186,5 +186,7 @@
   "Prompt updated successfully": "指导提示词已更新",
   "Error updating prompt": "更新指导提示词时出错，请稍后再试",
   "Prompt removed successfully": "指导提示词已移除",
-  "Error removing prompt": "移除指导提示词时出错，请稍后再试"
+  "Error removing prompt": "移除指导提示词时出错，请稍后再试",
+  "View full message": "查看完整讯息"
 }
+

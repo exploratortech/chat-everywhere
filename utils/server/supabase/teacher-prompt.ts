@@ -1,4 +1,3 @@
-import { OpenAIModel } from '@/types/openai';
 import { TeacherPrompt } from '@/types/prompt';
 
 import { getAdminSupabaseClient } from '../supabase';

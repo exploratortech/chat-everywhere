@@ -29,7 +29,12 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
 
   const [invalidateCode, setInvalidateCode] = useState(false);
 
-  const oneTimeCodeQuery = useGetOneTimeCode(invalidateCode, user?.id);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const oneTimeCodeQuery = useGetOneTimeCode(
+    invalidateCode,
+    user?.id,
+    selectedTags,
+  );
 
   const handleCopy = () => {
     navigator.clipboard.writeText(oneTimeCodeQuery.data?.code || '');
@@ -54,7 +59,7 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
   };
 
   return (
-    <div className="">
+    <div>
       <h1 className="font-bold mb-4">{t('One-time code')}</h1>
       {oneTimeCodeQuery.isLoading && (
         <div className="flex mt-[50%]">
@@ -71,6 +76,8 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
           </div>
           <div className="flex gap-2 items-center">
             <AddTagsToOneTimeCodeDropdown
+              selectedTags={selectedTags}
+              setSelectedTags={setSelectedTags}
               tags={tags}
               oneTimeCodeId={oneTimeCodeQuery.data?.code_id}
             />
@@ -107,6 +114,7 @@ export default OneTimeCodeGeneration;
 export const useGetOneTimeCode = (
   invalidate: boolean,
   userId: string | undefined,
+  selectedTags: Tag[] = [],
 ) => {
   const supabase = useSupabaseClient();
   return useQuery(
@@ -123,6 +131,7 @@ export const useGetOneTimeCode = (
           'Content-Type': 'application/json',
           'access-token': accessToken,
           invalidate: invalidate ? 'true' : 'false',
+          tag_ids_for_invalidate: selectedTags.map((tag) => tag.id).join(','),
         },
       });
 
