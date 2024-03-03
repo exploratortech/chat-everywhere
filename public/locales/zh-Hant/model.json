@@ -188,5 +188,6 @@
   "Error removing prompt": "移除指導提示詞時出錯, 請稍後再試",
   "Clear": "清除",
   "Messages removed successfully": "訊息已移除",
-  "Error removing messages": "移除訊息時出錯, 請稍後再試"
+  "Error removing messages": "移除訊息時出錯, 請稍後再試",
+  "View full message": "查看完整訊息"
 }
