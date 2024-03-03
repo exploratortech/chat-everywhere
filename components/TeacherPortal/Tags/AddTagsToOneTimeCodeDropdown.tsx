@@ -1,5 +1,5 @@
 import { IconTag } from '@tabler/icons-react';
-import * as React from 'react';
+import { Dispatch, SetStateAction, memo, useEffect, useState } from 'react';
 
 import useTeacherOneTimeCodeTagsManagement from '@/hooks/useTeacherOneTimeCodeTagsManagement';
 
@@ -15,19 +15,27 @@ import {
 
 import { cn } from '@/lib/utils';
 
-const AddTagsToOneTimeCodeDropdown = React.memo(
-  ({ tags, oneTimeCodeId }: { tags: Tag[]; oneTimeCodeId: string }) => {
-    const [selectedTags, setSelectedTags] = React.useState<Tag[]>([]);
-
+const AddTagsToOneTimeCodeDropdown = memo(
+  ({
+    tags,
+    oneTimeCodeId,
+    selectedTags,
+    setSelectedTags,
+  }: {
+    tags: Tag[];
+    oneTimeCodeId: string;
+    selectedTags: Tag[];
+    setSelectedTags: Dispatch<SetStateAction<Tag[]>>;
+  }) => {
     const { getCodeTagsQuery, setCodeTagsMutation } =
       useTeacherOneTimeCodeTagsManagement(oneTimeCodeId || '');
     const { data: selectedTagIds } = getCodeTagsQuery;
     const { mutate: setCodeTags } = setCodeTagsMutation;
-    React.useEffect(() => {
+    useEffect(() => {
       if (selectedTagIds) {
         setSelectedTags(tags.filter((tag) => selectedTagIds.includes(tag.id)));
       }
-    }, [selectedTagIds, tags]);
+    }, [selectedTagIds, setSelectedTags, tags]);
 
     const handleTagSelectionChange = (tag: Tag, checked: boolean) => {
       setSelectedTags((currentSelectedTags) => {
@@ -46,13 +54,11 @@ const AddTagsToOneTimeCodeDropdown = React.memo(
     return (
       <div className="flex flex-row gap-2">
         <div className="flex flex-rows items-center gap-2">
-          {
-            selectedTags.map((tag) => (
-              <span key={tag.id} className="text-neutral-400 text-xs">
-                {tag.name}
-              </span>
-            ))
-          }
+          {selectedTags.map((tag) => (
+            <span key={tag.id} className="text-neutral-400 text-xs">
+              {tag.name}
+            </span>
+          ))}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
