@@ -1,6 +1,5 @@
 export const portalState = {
-  // showing: 'one-time-code' as
-  showing: 'shared-message' as
+  showing: 'one-time-code' as
     | 'one-time-code'
     | 'shared-message'
     | 'tags'
