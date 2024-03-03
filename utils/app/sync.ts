@@ -6,9 +6,9 @@ import { User, UserConversation } from '@/types/user';
 
 import { cleanConversationHistory } from './clean';
 import { cleanData, getExportableData } from './importExport';
+import { sortByRankAndFolder, sortByRankAndFolderType } from './rank';
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { sortByRank } from './rank';
 
 type MergeableObjectCollectionHash = {
   [id: string]: MergeableObject;
@@ -181,11 +181,12 @@ export const syncData = async (
     remoteConversations = cleanConversationHistory(remoteDataObject.history);
   }
 
-  mergedHistory = mergeTwoMergeableCollections(
-    localConversations,
-    remoteConversations,
-  ) as Conversation[];
-  mergedHistory.sort(sortByRank);
+  mergedHistory = sortByRankAndFolder(
+    mergeTwoMergeableCollections(
+      localConversations,
+      remoteConversations,
+    ) as Conversation[],
+  );
 
   // Merge folders
   let remoteFolders: FolderInterface[] = [];
@@ -195,11 +196,12 @@ export const syncData = async (
     remoteFolders = remoteDataObject.folders;
   }
 
-  mergedFolders = mergeTwoMergeableCollections(
-    localFolders,
-    remoteFolders,
-  ) as FolderInterface[];
-  mergedFolders.sort(sortByRank);
+  mergedFolders = sortByRankAndFolderType(
+      mergeTwoMergeableCollections(
+      localFolders,
+      remoteFolders,
+    ) as FolderInterface[]
+  );
 
   // Merge prompts
   let remotePrompts: Prompt[] = [];
@@ -209,11 +211,12 @@ export const syncData = async (
     remotePrompts = remoteDataObject.prompts;
   }
 
-  mergedPrompts = mergeTwoMergeableCollections(
-    localPrompts,
-    remotePrompts,
-  ) as Prompt[];
-  mergedPrompts.sort(sortByRank);
+  mergedPrompts = sortByRankAndFolder(
+    mergeTwoMergeableCollections(
+      localPrompts,
+      remotePrompts,
+    ) as Prompt[],
+  );
 
   const storableConversationExport: LatestExportFormat = {
     history: mergedHistory,

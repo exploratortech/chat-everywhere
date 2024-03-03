@@ -36,6 +36,7 @@ const Promptbar = () => {
     state: { prompts, defaultModelId, showChatbar, showPromptbar, currentDrag },
     dispatch: homeDispatch,
     handleCreateFolder,
+    handleCreatePrompt,
     togglePromptbar,
   } = useContext(HomeContext);
 
@@ -49,29 +50,6 @@ const Promptbar = () => {
     state: { searchTerm, filteredPrompts },
     dispatch: promptDispatch,
   } = promptBarContextValue;
-
-  const handleCreatePrompt = () => {
-    if (defaultModelId) {
-      const newPrompt: Prompt = {
-        id: uuidv4(),
-        name: `Prompt ${prompts.length + 1}`,
-        description: '',
-        content: '',
-        model: OpenAIModels[defaultModelId],
-        folderId: null,
-        lastUpdateAtUTC: dayjs().valueOf(),
-        rank: generateRank(filteredPrompts),
-      };
-
-      const updatedPrompts = [...prompts, newPrompt];
-
-      homeDispatch({ field: 'prompts', value: updatedPrompts });
-
-      savePrompts(updatedPrompts);
-
-      updateConversationLastUpdatedAtTimeStamp();
-    }
-  };
 
   const handleDeletePrompt = (prompt: Prompt) => {
     const updatedPrompts = prompts.map((p) => {
@@ -151,7 +129,6 @@ const Promptbar = () => {
     <PromptbarContext.Provider
       value={{
         ...promptBarContextValue,
-        handleCreatePrompt,
         handleDeletePrompt,
         handleUpdatePrompt,
       }}

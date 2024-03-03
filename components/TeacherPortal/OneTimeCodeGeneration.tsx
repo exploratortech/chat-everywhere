@@ -6,17 +6,22 @@ import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
+import useTeacherOneTimeCodeTagsManagement from '@/hooks/useTeacherOneTimeCodeTagsManagement';
+
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { OneTimeCodeInfoPayload } from '@/types/one-time-code';
+import { Tag } from '@/types/tags';
 
 import HomeContext from '@/components/home/home.context';
 
 import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import Spinner from '../Spinner/Spinner';
+import HelpTagTooltip from './HelpTagTooltip';
+import AddTagsToOneTimeCodeDropdown from './Tags/AddTagsToOneTimeCodeDropdown';
 import TemporaryAccountProfileList from './TemporaryAccountProfileList';
 
-const OneTimeCodeGeneration = memo(() => {
+const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
   const { t } = useTranslation('model');
   const {
     state: { user },
@@ -50,7 +55,7 @@ const OneTimeCodeGeneration = memo(() => {
 
   return (
     <div className="">
-      <h1 className="text-lg font-bold mb-4">{t('One-time code')}</h1>
+      <h1 className="font-bold mb-4">{t('One-time code')}</h1>
       {oneTimeCodeQuery.isLoading && (
         <div className="flex mt-[50%]">
           <Spinner size="16px" className="mx-auto" />
@@ -60,13 +65,20 @@ const OneTimeCodeGeneration = memo(() => {
         <div className="flex select-none justify-between items-center flex-wrap gap-2">
           <div onClick={handleCopy} className="cursor-pointer flex-shrink-0">
             {`${t('Your one-time code is')}: `}
-            <span className="inline bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1">
+            <span className="inline bg-sky-100 font-bold text-sm text-neutral-900 font-mono rounded dark:bg-neutral-600 dark:text-neutral-200 text-primary-500 p-1">
               {oneTimeCodeQuery.data?.code}
             </span>
           </div>
-          {oneTimeCodeQuery.data?.expiresAt && (
-            <CodeTimeLeft endOfDay={oneTimeCodeQuery.data.expiresAt} />
-          )}
+          <div className="flex gap-2 items-center">
+            <AddTagsToOneTimeCodeDropdown
+              tags={tags}
+              oneTimeCodeId={oneTimeCodeQuery.data?.code_id}
+            />
+            <HelpTagTooltip />
+            {oneTimeCodeQuery.data?.expiresAt && (
+              <CodeTimeLeft endOfDay={oneTimeCodeQuery.data.expiresAt} />
+            )}
+          </div>
         </div>
       )}
       <button

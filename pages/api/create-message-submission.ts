@@ -65,6 +65,7 @@ const handler = async (req: Request) => {
   const temporaryAccountId = profileData[0].temp_account_id;
   const teacherProfileId = profileData[0].teacher_profile_id;
   const student_name = profileData[0].uniqueid;
+  const tagIds = profileData[0].tag_ids.filter((id: string) => id !== null) || [];  
 
   let imagePublicUrl = '';
 
@@ -93,26 +94,27 @@ const handler = async (req: Request) => {
     imagePublicUrl = data.publicUrl || '';
   }
 
-  const messageSubmissionResponse = await supabase
-    .from('student_message_submissions')
-    .insert([
-      {
-        message_content: messageContent,
-        temporary_account_profile_id: temporaryAccountId,
-        image_file_url: imagePublicUrl,
-        teacher_profile_id: teacherProfileId,
-        student_name: student_name || '',
-      },
-    ]);
+  const messageAndTagsResponse = await supabase.rpc(
+    'insert_student_message_with_tags',
+    {
+      _message_content: messageContent,
+      _temporary_account_profile_id: temporaryAccountId,
+      _image_file_url: imagePublicUrl,
+      _teacher_profile_id: teacherProfileId,
+      _student_name: student_name || '',
+      _tag_ids: tagIds,
+    },
+  );
 
-  if (messageSubmissionResponse.error) {
+  if (messageAndTagsResponse.error) {
     console.error(
-      'Error creating message submission:',
-      messageSubmissionResponse.error,
+      'Error inserting message and tags via pg function:',
+      messageAndTagsResponse.error,
     );
-    return new Response('Error creating message submission', { status: 500 });
+    return new Response('Error inserting message and tags', { status: 500 });
   }
-  return new Response(JSON.stringify(messageSubmissionResponse.data), {
+
+  return new Response(JSON.stringify(messageAndTagsResponse.data), {
     status: 200,
   });
 };

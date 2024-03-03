@@ -1,8 +1,11 @@
 import {
+  IconBulbFilled,
   IconCaretDown,
   IconCaretRight,
   IconCheck,
+  IconMessagePlus,
   IconPencil,
+  IconPlus,
   IconTrash,
   IconX,
 } from '@tabler/icons-react';
@@ -14,8 +17,6 @@ import {
   useRef,
   useState,
 } from 'react';
-
-import { getNonDeletedCollection } from '@/utils/app/conversation';
 
 import { FolderInterface } from '@/types/folder';
 
@@ -36,11 +37,13 @@ const Folder = ({
   folderComponent,
 }: Props) => {
   const {
-    state: { currentDrag, folders },
+    state: { currentDrag },
     handleDeleteFolder,
     handleUpdateFolder,
     setDragData,
     removeDragData,
+    handleNewConversation,
+    handleCreatePrompt,
   } = useContext(HomeContext);
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -210,6 +213,21 @@ const Folder = ({
 
           {!isDeleting && !isRenaming && (
             <>
+              <SidebarActionButton
+                handleClick={(e) => {
+                  e.stopPropagation();
+                  switch (currentFolder.type) {
+                    case 'chat': handleNewConversation(currentFolder.id);
+                    case 'prompt': handleCreatePrompt(currentFolder.id);
+                  }
+                  setIsOpen(true);
+                }}
+              >
+                {currentFolder.type === 'chat'
+                  ? <IconMessagePlus size={18} />
+                  : <IconPlus size={18} />
+                }
+              </SidebarActionButton>
               <SidebarActionButton
                 handleClick={(e) => {
                   e.stopPropagation();

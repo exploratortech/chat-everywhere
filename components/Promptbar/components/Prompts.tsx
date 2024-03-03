@@ -31,7 +31,10 @@ export const Prompts: FC<Props> = ({ prompts }) => {
       const reorderedPrompts = reorderItem(
         unfilteredPrompts,
         prompt.id,
-        generateRank(prompts, index),
+        generateRank(
+          unfilteredPrompts.filter((p) => p.folderId == null),
+          index,
+        ),
         { updates: { folderId: null } },
       );
       dispatch({ field: 'prompts', value: reorderedPrompts });

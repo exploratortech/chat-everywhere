@@ -46,6 +46,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (!oneTimeCodeInfo) return new Response('Error', { status: 500 });
     const {
+      code_id,
       code,
       expiresAt,
       tempAccountProfiles,
@@ -55,6 +56,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(
       JSON.stringify({
+        code_id,
         code,
         expiresAt,
         tempAccountProfiles: tempAccountProfiles || [],

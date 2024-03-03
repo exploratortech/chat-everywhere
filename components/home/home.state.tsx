@@ -3,7 +3,7 @@ import { DragData } from '@/types/drag';
 import { ErrorMessage } from '@/types/error';
 import { FolderInterface } from '@/types/folder';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
-import { Prompt } from '@/types/prompt';
+import { Prompt, TeacherPrompt } from '@/types/prompt';
 import { CreditUsage, User } from '@/types/user';
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -71,6 +71,9 @@ export interface HomeInitialState {
   speechContent: string;
   isSpeechRecognitionActive: boolean;
   speechRecognitionLanguage: string;
+
+  // Teacher Portal
+  teacherPrompts: TeacherPrompt[];
 }
 
 export const initialState: HomeInitialState = {
@@ -136,4 +139,7 @@ export const initialState: HomeInitialState = {
   speechContent: '',
   isSpeechRecognitionActive: false,
   speechRecognitionLanguage: 'en-US',
+
+  // Teacher Portal
+  teacherPrompts: [],
 };

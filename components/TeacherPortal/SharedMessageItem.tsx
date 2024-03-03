@@ -5,7 +5,8 @@ import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-prof
 import AssistantRespondMessage from '@/components/Chat/ChatMessage/AssistantRespondMessage';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
-import { cn } from '@/lib/utils';
+import Tag from './Tags/Tag';
+
 import dayjs from 'dayjs';
 
 const SharedMessageItem = ({
@@ -19,6 +20,11 @@ const SharedMessageItem = ({
   const SubmissionContent = ({ overflow }: { overflow: boolean }) => (
     <div>
       <div className="font-bold">{submission.student_name}</div>
+      <div className="flex gap-2 my-2 flex-wrap">
+        {submission.message_tags.map((tag) => (
+          <Tag key={tag.id} label={tag.name} />
+        ))}
+      </div>
       <div className="text-sm text-neutral-400">
         {t('Submitted at {{date}}', {
           date: dayjs(submission.created_at).format('YYYY-MM-DD HH:mm'),

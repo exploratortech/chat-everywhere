@@ -15,11 +15,11 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  const { accessToken, tempAccountId } = (await req.json()) as {
+  const { accessToken, tempAccountIds } = (await req.json()) as {
     accessToken: string;
-    tempAccountId: string;
+    tempAccountIds: number[];
   };
-  if (!accessToken || !tempAccountId) {
+  if (!accessToken || !tempAccountIds) {
     return new Response('Missing accessToken or tempAccountId', {
       status: 400,
     });
@@ -58,8 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
       )
     `,
     )
-    .eq('id', tempAccountId)
-    .single();
+    .in('id', tempAccountIds);
 
   if (tempAccountError) {
     console.error(
@@ -74,14 +73,23 @@ const handler = async (req: Request): Promise<Response> => {
     console.error('Temporary account not found');
     return new Response('Temporary account not found', { status: 404 });
   }
-  if (tempAccountInfo.one_time_codes.teacher_profile_id !== teacherProfileId) {
+  if (
+    tempAccountInfo.every(
+      (tempAccount) =>
+        tempAccount.one_time_codes.teacher_profile_id !== teacherProfileId,
+    )
+  ) {
     console.error('Teacher profile id does not match');
     return unauthorizedResponse;
   }
 
   // remove the temporary account
   try {
-    await deleteUserById(tempAccountInfo.profiles.id);
+    await Promise.all(
+      tempAccountInfo.map((tempAccount) =>
+        deleteUserById(tempAccount.profiles.id),
+      ),
+    );
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error removing temporary account:', error.message);

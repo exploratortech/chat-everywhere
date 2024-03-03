@@ -1,9 +1,9 @@
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
-import { RANK_INTERVAL } from "./const";
-import { getNonDeletedCollection } from "./conversation";
+import { RANK_INTERVAL } from './const';
+import type { FolderInterface } from '@/types/folder';
 
-// Sorts by ascending rank. Places deleted items at the end of the list
+// Sorts by ascending rank. Places deleted items at the end of the list.
 export const sortByRank = (a: any, b: any): number => {
   if (a.deleted) return 1;
   if (b.deleted) return -1;
@@ -11,10 +11,44 @@ export const sortByRank = (a: any, b: any): number => {
   return a.rank - b.rank;
 };
 
+// Sorts collection based on folders. Effectively groups items within
+// a collection with other items that belong to the same group/no group.
+// Deleted items are placed at the end of the list.
+export const sortByFolder = (a: any, b: any): number => {
+  if (a.deleted) return 1;
+  if (b.deleted) return -1;
+  if (!a.folderId && b.folderId) return 1;
+  if (a.folderId && !b.folderId) return -1;
+  if (!a.folderId && !b.folderId || a.folderId === b.folderId) return 0;
+  // How the following comparison is done doesn't matter.
+  return a.folderId > b.folderId ? 1 : -1;
+};
+
+// Only use for collections where items have folderIds.
+export const sortByRankAndFolder = (collection: any[]) => {
+  return [...collection].sort(sortByRank).sort(sortByFolder);
+};
+
+export const sortByFolderType = (a: FolderInterface, b: FolderInterface) => {
+  if (a.deleted) return 1;
+  if (b.deleted) return -1;
+  return a.type > b.type ? 1 : -1;
+};
+
+export const sortByRankAndFolderType = (folders: FolderInterface[]) => {
+  return [...folders].sort(sortByRank).sort(sortByFolderType);
+}
+
 // Calculates the new rank of an item given the index of where to move it.
+// 'filteredCollection' should be a collection of items sorted by rank with
+// a common folderId. 'insertAt' is relative to 'filteredCollection'.
 export const generateRank = (filteredCollection: any[], insertAt?: number): number => {
   // Set the default insertAt value to the length of the filtered items
-  if (insertAt == null || insertAt < 0 || insertAt > filteredCollection.length) {
+  if (
+    insertAt == null ||
+    insertAt < 0 ||
+    insertAt > filteredCollection.length
+  ) {
     insertAt = filteredCollection.length;
   }
 
@@ -24,11 +58,12 @@ export const generateRank = (filteredCollection: any[], insertAt?: number): numb
     if (!bottomItem || !bottomItem.rank) return RANK_INTERVAL;
     return Math.floor(bottomItem.rank / 2);
   }
-  
+
   // Appending an item to the end
   if (insertAt === filteredCollection.length) {
     const topItem = filteredCollection[insertAt - 1];
-    if (!topItem || !topItem.rank) (filteredCollection.length + 1) * RANK_INTERVAL;
+    if (!topItem || !topItem.rank)
+      return (filteredCollection.length + 1) * RANK_INTERVAL;
     return topItem.rank + RANK_INTERVAL;
   }
 
@@ -41,22 +76,26 @@ export const generateRank = (filteredCollection: any[], insertAt?: number): numb
   } else if (!topItem.rank) {
     return Math.floor(bottomItem.rank / 2);
   } else if (!bottomItem.rank) {
-    return Math.floor((topItem.rank + filteredCollection.length * RANK_INTERVAL) / 2);
+    return Math.floor(
+      (topItem.rank + filteredCollection.length * RANK_INTERVAL) / 2,
+    );
   }
 
   return Math.floor((topItem.rank + bottomItem.rank) / 2);
-}
+};
 
-// Checks if the ranks are balanced by seeing if there are any duplicate,
-// adjacent items or items with rank values <=0 in the collection. The
-// argument is the collection of items sorted by rank.
-export const areRanksBalanced = (collection: any[]): boolean => {
+// For folders only
+// The collection has to be sorted by rank and folder type but doesn't need to filtered.
+export const areFoldersBalanced = (collection: FolderInterface[]): boolean => {
   for (let i = 0; i < collection.length - 1; i++) {
     const item1 = collection[i];
     const item2 = collection[i + 1];
+    if (item1.deleted || item2.deleted) continue;
     if (
-      item1.rank === item2.rank ||
-      (item1.rank <= 0 || item2.rank <= 0)) {
+      (item1.rank === item2.rank && item1.type === item2.type)
+      || item1.rank <= 0
+      || item2.rank <= 0
+    ) {
       return false;
     }
   }
@@ -64,83 +103,135 @@ export const areRanksBalanced = (collection: any[]): boolean => {
   return true;
 };
 
+// For conversations and prompts
+// The collection has to be sorted by rank and folder but doesn't need to filtered.
+export const areItemsBalanced = (collection: any[]): boolean => {
+  for (let i = 0; i < collection.length - 1; i++) {
+    const item1 = collection[i];
+    const item2 = collection[i + 1];
+    if (item1.deleted || item2.deleted) continue;
+    if (
+      (item1.rank === item2.rank && item1.folderId === item2.folderId)
+      || item1.rank <= 0
+      || item2.rank <= 0
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
+
 // Rebalances the ranks of the collection. Requires that the collection is in
 // sorted order by ranks and that items with conflicting ranks are adjacent
 // to each other.
-export const rebalanceRanks = (
-  collection: any[],
+export const rebalanceFolders = (folders: FolderInterface[]): FolderInterface[] => {
+  if (!folders.length) return folders;
+
+  const lastUpdateAtUTC = dayjs().valueOf();
+  let currentFolderType = folders[0].type;
+  let currentRank = RANK_INTERVAL;
+
+  return folders.map((folder) => {
+    if (!folder) return folder;
+
+    // Checking if the current item is part of the same folder type. If not, then
+    // reset the current rank counter.
+    if (folder.type !== currentFolderType) {
+      currentFolderType = folder.type;
+      currentRank = RANK_INTERVAL;
+    }
+
+    const updatedFolder: FolderInterface = {
+      ...folder,
+      rank: currentRank,
+      lastUpdateAtUTC,
+    }
+
+    currentRank += RANK_INTERVAL;
+
+    return updatedFolder;
+  });
+};
+
+// The collection has to be sorted by rank and folder but doesn't need to filtered.
+export const rebalanceItems = (collection: any[]): any[] => {
+  if (!collection.length) return collection;
+
+  const lastUpdateAtUTC = dayjs().valueOf();
+  let currentFolderId = collection[0].folderId;
+  let currentRank = RANK_INTERVAL;
+
+  return collection.map((item) => {
+    if (item.deleted) return item;
+
+    // Checking if the current item is part of another sub-collection. If so,
+    // reset the current rank counter.
+    if (item.folderId !== currentFolderId) {
+      currentFolderId = item.folderId;
+      currentRank = RANK_INTERVAL;
+    }
+
+    const updatedItem: any = {
+      ...item,
+      rank: currentRank,
+      lastUpdateAtUTC,
+    };
+
+    currentRank += RANK_INTERVAL;
+
+    return updatedItem;
+  });
+};
+
+export const reorderFolder = (
+  folders: FolderInterface[],
   itemId: string,
   rank: number,
 ): any[] => {
-  const rebalancedCollection: any[] = [];
-
-  let currentRank = RANK_INTERVAL;
-  for (let i = 0; i < collection.length; i++) {
-    const currentItem = collection[i];
-
-    if (currentItem.deleted) {
-      rebalancedCollection.push(currentItem);
-      continue;
-    }
-
-    // This block ensures that the moved item gets inserted after the
-    // conflicting item when the item is moved in the middle/to the end of
-    // the list.
-    if (currentItem.rank === rank && i + 1 < collection.length) {
-      const afterFolder = collection[i + 1];
-      if (afterFolder.rank === rank && currentItem.id === itemId) {
-        rebalancedCollection.push({
-          ...afterFolder,
-          rank: currentRank,
+  let updatedFolders = sortByRankAndFolderType(
+    folders.map((folder) => {
+      if (folder.id === itemId) {
+        return {
+          ...folder,
+          rank,
           lastUpdateAtUTC: dayjs().valueOf(),
-        });
-        currentRank += RANK_INTERVAL;
-        i++; // Skip the next item as we just inserted it already
+        };
       }
+      return folder;
     }
+  ));
 
-    rebalancedCollection.push({
-      ...currentItem,
-      rank: currentRank,
-      lastUpdateAtUTC: dayjs().valueOf(),
-    });
-
-    currentRank += RANK_INTERVAL;
+  if (!areFoldersBalanced(updatedFolders)) {
+    updatedFolders = rebalanceFolders(updatedFolders);
   }
 
-  return rebalancedCollection;
+  return updatedFolders;
 };
 
 export const reorderItem = (
-  collection: any[],
+  unfilteredCollection: any[], // Should be sorted by rank and folder
   itemId: string,
   rank: number,
   options?: {
-    filter?: (item: any) => boolean, // additional filter
-    updates?: any, // updates that you might want to apply while reordering
-  }
-): any[] => {
-  let updatedCollection = collection.map((item) => {
-    if (item.id === itemId) {
-      return {
-        ...item,
-        ...(options?.updates || {}),
-        rank,
-        lastUpdateAtUTC: dayjs().valueOf()
-      };
+    updates?: any; // updates that you might want to apply while reordering
+  },
+) => {
+  let updatedCollection = sortByRankAndFolder(
+    unfilteredCollection.map((item) => {
+      if (item.id === itemId) {
+        return {
+          ...item,
+          ...(options?.updates || {}),
+          rank,
+          lastUpdateAtUTC: dayjs().valueOf(),
+        }
+      }
+      return item;
     }
-    return item;
-  });
+  ));
 
-  updatedCollection.sort(sortByRank);
-
-  let filteredCollection = getNonDeletedCollection(updatedCollection)
-  if (options?.filter) {
-    filteredCollection = filteredCollection.filter(options.filter);
-  }
-
-  if (!areRanksBalanced(filteredCollection)) {
-    updatedCollection = rebalanceRanks(updatedCollection, itemId, rank);
+  if (!areItemsBalanced(updatedCollection)) {
+    updatedCollection = rebalanceItems(updatedCollection);
   }
 
   return updatedCollection;
