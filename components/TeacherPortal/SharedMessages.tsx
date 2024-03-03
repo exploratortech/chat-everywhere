@@ -20,6 +20,7 @@ import HomeContext from '@/components/home/home.context';
 
 import Spinner from '../Spinner/Spinner';
 import { Separator } from '../v2Chat/ui/separator';
+import FloatMenu from './FloatMenu';
 import Pagination from './Pagination';
 import Filter from './ShareMessages/Filter';
 import SharedMessageItem from './SharedMessageItem';
@@ -40,6 +41,8 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
     ShareMessagesByTeacherProfilePayload['submissions'] | null
   >(null);
 
+  const [selectedMessageIds, setSelectedMessageIds] = useState<number[]>([]);
+
   const { refetch: fetchSharedMessages, isFetching: isLoading } =
     useFetchSharedMessages(
       pagination.current_page,
@@ -56,6 +59,15 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
 
   const handlePageChange = (page: number) => {
     setPagination((prev) => ({ ...prev, current_page: page }));
+  };
+
+  const handleSelectMessage = (id: number) => {
+    setSelectedMessageIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((messageId) => messageId !== id);
+      }
+      return [...prev, id];
+    });
   };
 
   return (
@@ -80,6 +92,8 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
             className=""
             key={submission.id}
             submission={submission}
+            onSelectMessage={handleSelectMessage}
+            isSelected={selectedMessageIds.includes(submission.id)}
           />
         ))}
       </div>
@@ -92,6 +106,13 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
           />
         </div>
       )}
+
+      <div className="sticky flex justify-center bottom-8 w-full pointer-events-none">
+        <FloatMenu
+          selectedMessageIds={selectedMessageIds}
+          setSelectedMessageIds={setSelectedMessageIds}
+        />
+      </div>
     </div>
   );
 });

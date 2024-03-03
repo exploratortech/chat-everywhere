@@ -185,5 +185,6 @@
   "Prompt updated successfully": "指導提示詞已更新",
   "Error updating prompt": "更新指導提示詞時出錯, 請稍後再試",
   "Prompt removed successfully": "指導提示詞已移除",
-  "Error removing prompt": "移除指導提示詞時出錯, 請稍後再試"
+  "Error removing prompt": "移除指導提示詞時出錯, 請稍後再試",
+  "Clear": "清除"
 }
