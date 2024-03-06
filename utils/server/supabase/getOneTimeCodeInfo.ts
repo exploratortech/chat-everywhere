@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 export const getOneTimeCodeInfo = async (
   userId: string,
   invalidate: boolean = false,
+  tag_ids_for_invalidate: number[] = [],
 ): Promise<OneTimeCodeInfoPayload | undefined> => {
   try {
     const supabase = getAdminSupabaseClient();
@@ -85,7 +86,7 @@ export const getOneTimeCodeInfo = async (
         }
 
         if (existingCodes.length === 0) {
-          const { error } = await supabase
+          const { data, error } = await supabase
             .from('one_time_codes')
             .insert({
               code: generatedCode,
@@ -93,11 +94,37 @@ export const getOneTimeCodeInfo = async (
               teacher_profile_id: userId,
               is_valid: true,
             })
+            .select('id')
             .single();
 
           if (error) {
             throw error;
           }
+          const oneTimeCodeId = data.id;
+
+          // If there are tag_ids, insert them into one_time_code_tags
+          if (tag_ids_for_invalidate.length > 0) {
+            const tagInsertErrors = await Promise.all(
+              tag_ids_for_invalidate.map((tag_id) =>
+                supabase
+                  .from('one_time_code_tags')
+                  .insert({
+                    one_time_code_id: oneTimeCodeId,
+                    tag_id: tag_id,
+                  })
+                  .then(({ error }) => error),
+              ),
+            );
+
+            const firstTagInsertError = tagInsertErrors.find(
+              (error) => !!error,
+            );
+            if (firstTagInsertError) {
+              console.error('Tag insertion failed:', firstTagInsertError);
+              throw firstTagInsertError;
+            }
+          }
+
           break; // Exit loop if code is unique
         }
       } while (true);

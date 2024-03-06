@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NotionRenderer } from 'react-notion-x';
 
 import Spinner from '../Spinner/Spinner';
@@ -57,7 +57,6 @@ function FeaturePage({ pageId, internalLinkOnClick }: Props) {
           })}
         </div>
         <NotionRenderer
-          className=""
           recordMap={recordMap}
           fullPage={false}
           darkMode={true}

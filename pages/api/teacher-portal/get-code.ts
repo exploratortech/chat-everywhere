@@ -16,6 +16,30 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const accessToken = req.headers.get('access-token');
     const invalidate = req.headers.get('invalidate') === 'true';
+    let tag_ids_for_invalidate: number[] = [];
+
+    if (invalidate) {
+      const tag_ids_for_invalidate_header = req.headers.get(
+        'tag_ids_for_invalidate',
+      );
+
+      const tag_ids: number[] = tag_ids_for_invalidate_header
+        ? tag_ids_for_invalidate_header
+            .split(',')
+            .map(Number)
+            .filter((num) => !isNaN(num))
+        : [];
+      if (
+        tag_ids_for_invalidate_header &&
+        tag_ids.length !== tag_ids_for_invalidate_header.split(',').length
+      ) {
+        return new Response('Invalid tag_ids_for_invalidate format', {
+          status: 400,
+        });
+      }
+      tag_ids_for_invalidate = tag_ids;
+    }
+
     if (!accessToken) return unauthorizedResponse;
 
     const { data, error } = await supabase.auth.getUser(accessToken);
@@ -32,7 +56,11 @@ const handler = async (req: Request): Promise<Response> => {
       return unauthorizedResponse;
 
     let oneTimeCodeInfo;
-    oneTimeCodeInfo = await getOneTimeCodeInfo(userId, invalidate);
+    oneTimeCodeInfo = await getOneTimeCodeInfo(
+      userId,
+      invalidate,
+      tag_ids_for_invalidate,
+    );
 
     // REMOVE THE EXPIRED ACCOUNT AND CODES AND FETCH AGAIN
     if (

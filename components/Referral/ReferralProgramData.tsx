@@ -141,7 +141,7 @@ const RefereesTable = ({ referees }: { referees: RefereeProfile[] }) => {
               </tr>
             ))}
           </thead>
-          <tbody className="">
+          <tbody>
             {table.getRowModel().rows.map((row, rIndex) => (
               <tr key={row.id}>
                 {row.getVisibleCells().map((cell, i) => (

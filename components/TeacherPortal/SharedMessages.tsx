@@ -20,6 +20,7 @@ import HomeContext from '@/components/home/home.context';
 
 import Spinner from '../Spinner/Spinner';
 import { Separator } from '../v2Chat/ui/separator';
+import FloatMenu from './FloatMenu';
 import Pagination from './Pagination';
 import Filter from './ShareMessages/Filter';
 import SharedMessageItem from './SharedMessageItem';
@@ -40,6 +41,8 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
     ShareMessagesByTeacherProfilePayload['submissions'] | null
   >(null);
 
+  const [selectedMessageIds, setSelectedMessageIds] = useState<number[]>([]);
+
   const { refetch: fetchSharedMessages, isFetching: isLoading } =
     useFetchSharedMessages(
       pagination.current_page,
@@ -58,8 +61,17 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
     setPagination((prev) => ({ ...prev, current_page: page }));
   };
 
+  const handleSelectMessage = (id: number) => {
+    setSelectedMessageIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((messageId) => messageId !== id);
+      }
+      return [...prev, id];
+    });
+  };
+
   return (
-    <div className="">
+    <div>
       <h1 className="font-bold mb-4">{t('Shared messages')}</h1>
       <div className="flex flex-col gap-2 my-4">
         <Filter tags={tags} />
@@ -77,9 +89,10 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
       <div className="flex flex-wrap gap-4">
         {sharedMessages?.map((submission) => (
           <SharedMessageItem
-            className=""
             key={submission.id}
             submission={submission}
+            onSelectMessage={handleSelectMessage}
+            isSelected={selectedMessageIds.includes(submission.id)}
           />
         ))}
       </div>
@@ -92,6 +105,13 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
           />
         </div>
       )}
+
+      <div className="sticky flex justify-center bottom-8 w-full pointer-events-none">
+        <FloatMenu
+          selectedMessageIds={selectedMessageIds}
+          setSelectedMessageIds={setSelectedMessageIds}
+        />
+      </div>
     </div>
   );
 });
@@ -112,11 +132,7 @@ export const useFetchSharedMessages = (
   const { selectedTags } = useShareMessageFilterStore();
 
   return useQuery(
-    [
-      'studentSharedMessages',
-      page,
-      selectedTags.map((tag) => tag.id).join(','),
-    ],
+    ['shared-messages-with-teacher'],
     async () => {
       const payload = {
         accessToken: (await supabase.auth.getSession()).data.session
@@ -126,13 +142,16 @@ export const useFetchSharedMessages = (
           tag_ids: selectedTags.map((tag) => tag.id),
         },
       };
-      const response = await fetch('/api/get-shared-messages-with-teacher', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        '/api/teacher-portal/get-shared-messages-with-teacher',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
       if (response.status !== 200 || !response.ok) {
         throw new Error('Failed to fetch shared messages');
       }
