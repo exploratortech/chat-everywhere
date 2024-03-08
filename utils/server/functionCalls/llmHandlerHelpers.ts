@@ -4,8 +4,13 @@ import { generateImage } from '@/utils/v2Chat/openAiApiUtils';
 
 import { FunctionCall } from '@/types/chat';
 import { mqttConnectionType } from '@/types/data';
+import { PluginID } from '@/types/plugin';
 
-import { getAdminSupabaseClient } from '../supabase';
+import {
+  addUsageEntry,
+  getAdminSupabaseClient,
+  subtractCredit,
+} from '../supabase';
 
 import { decode } from 'base64-arraybuffer';
 import { v4 } from 'uuid';
@@ -153,32 +158,64 @@ export const triggerHelperFunction = async (
         return 'Failed to generate image';
       }
 
-      console.log(
-        'Image generated successfully, storing to Supabase storage ...',
-      );
+      const storeImage = async (imageBase64: string) => {
+        console.log(
+          'Image generated successfully, storing to Supabase storage ...',
+        );
+        const supabase = getAdminSupabaseClient();
+        const imageFileName = `${v4()}.png`;
+        const { error: fileUploadError } = await supabase.storage
+          .from('ai-images')
+          .upload(imageFileName, decode(imageBase64), {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: 'image/png',
+          });
+        if (fileUploadError) throw fileUploadError;
 
-      // Store image in Supabase storage
-      const supabase = getAdminSupabaseClient();
-      const imageFileName = `${v4()}.png`;
-      const { error: fileUploadError } = await supabase.storage
-        .from('ai-images')
-        .upload(imageFileName, decode(generatedImageInBase64), {
-          cacheControl: '3600',
-          upsert: false,
-          contentType: 'image/png',
-        });
-      if (fileUploadError) throw fileUploadError;
+        const { data: imagePublicUrlData } = await supabase.storage
+          .from('ai-images')
+          .getPublicUrl(imageFileName);
 
-      const { data: imagePublicUrlData } = await supabase.storage
-        .from('ai-images')
-        .getPublicUrl(imageFileName);
+        if (!imagePublicUrlData) throw new Error('Image generation failed');
 
-      if (!imagePublicUrlData) throw new Error('Image generation failed');
+        return imagePublicUrlData.publicUrl;
+      };
+
+      const subtractUserCredit = async () => {
+        console.log('Subtracting credit from user');
+        try {
+          await addUsageEntry(PluginID.IMAGE_GEN, userId);
+          await subtractCredit(userId, PluginID.IMAGE_GEN);
+        } catch (e) {
+          throw 'Not enough credit';
+        }
+      };
+
+      // Run storeImage and substractUserCredit in parallel
+      let imagePublicUrlPromise = storeImage(generatedImageInBase64);
+      let subtractUserCreditPromise = subtractUserCredit();
+
+      let imagePublicUrl: string;
+      try {
+        const [storeImageRes] = await Promise.all([
+          imagePublicUrlPromise,
+          subtractUserCreditPromise,
+        ]);
+        imagePublicUrl = storeImageRes;
+      } catch (error) {
+        console.error('Error in parallel execution: ', error);
+        return 'Failed to process image or subtract user credit';
+      }
+
+      if (!imagePublicUrl) {
+        return 'Failed to store image';
+      }
 
       const functionResponse = `
         Image generated! Below is the detail: 
         Generation prompt (insert this prompt as the 'alt' attribute of the image for later reference): ${imageGenerationResponse.data[0].revised_prompt}. 
-        URL: ${imagePublicUrlData.publicUrl}
+        URL: ${imagePublicUrl}
         Display the image to user by using the URL in Markdown format.
       `;
       console.log(functionResponse);
