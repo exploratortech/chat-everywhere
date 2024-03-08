@@ -3,14 +3,7 @@
 // This would seat between the endpoint and LLM.
 import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
 import { AIStream } from '@/utils/server/functionCalls/AIStream';
-import {
-  getFunctionCallsFromMqttConnections,
-  getHelperFunctionCalls,
-  getReceiverFunctionCallsFromMqttConnections,
-  retrieveMqttConnectionPayload,
-  triggerHelperFunction,
-  triggerMqttConnection,
-} from '@/utils/server/functionCalls/llmHandlerHelpers';
+import { triggerHelperFunction } from '@/utils/server/functionCalls/llmHandlerHelpers';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
 import { FunctionCall, Message } from '@/types/chat';
@@ -44,7 +37,19 @@ export const aiPainterLlmHandler = async ({
   let isFunctionCallRequired = true;
   let innerWorkingMessages = messages;
 
-  functionCallsToSend.push(...getAllFunctionCalls());
+  functionCallsToSend.push({
+    name: 'generate-image',
+    description: 'Generate an image from a prompt',
+    parameters: {
+      type: 'object',
+      properties: {
+        prompt: {
+          type: 'string',
+          description: 'Prompt to generate the image. MUST BE IN ENGLISH.',
+        },
+      },
+    },
+  });
 
   try {
     while (isFunctionCallRequired) {
@@ -95,24 +100,4 @@ export const aiPainterLlmHandler = async ({
   } finally {
     onEnd();
   }
-};
-
-export const getAllFunctionCalls = (): FunctionCall[] => {
-  const functionCallsToSend: FunctionCall[] = [];
-
-  functionCallsToSend.push({
-    name: 'generate-image',
-    description: 'Generate an image from a prompt',
-    parameters: {
-      type: 'object',
-      properties: {
-        prompt: {
-          type: 'string',
-          description: 'Prompt to generate the image. MUST BE IN ENGLISH.',
-        },
-      },
-    },
-  });
-
-  return functionCallsToSend;
 };
