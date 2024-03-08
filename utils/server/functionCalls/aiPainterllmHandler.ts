@@ -20,9 +20,13 @@ type handlerType = {
 const llmHandlerPrompt =
   DEFAULT_SYSTEM_PROMPT +
   `
-  Remember, your capabilities are now focused on processing general-purpose chat and image generation tasks. 
+  Remember, your capabilities are now focused on processing image generation tasks, and you have the ability to call the generate-image function.
+  If you don't know what to do, please assume the user input is the prompt and call the generate-image function with the prompt as the parameter.
 
   For image generation, if a user requests changes to an existing image, first find the Generation prompt from the image tag's 'alt' attribute. Then, make the requested changes to the prompt and run the function again to generate a new image. Additionally, if a user requests the prompt that was used to generate an existing image, retrieve it from the specified image tag's 'alt' attribute.
+
+  If failed to generate image, there is no need to show the prompt to user, only tell the user why it failed.
+  If you never called the generate-image function, please give a reason why you didn't call it.
   `;
 
 export const aiPainterLlmHandler = async ({
