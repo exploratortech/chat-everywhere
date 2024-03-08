@@ -1,13 +1,20 @@
 import { getHomeUrl } from '@/utils/app/api';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+import { generateImage } from '@/utils/v2Chat/openAiApiUtils';
 
 import { FunctionCall } from '@/types/chat';
 import { mqttConnectionType } from '@/types/data';
+
+import { getAdminSupabaseClient } from '../supabase';
+
+import { decode } from 'base64-arraybuffer';
+import { v4 } from 'uuid';
 
 // This object is used as enum
 const helperFunctionNames = {
   weather: 'get-weather',
   line: 'send-message-to-line',
+  aiPainter: 'generate-image',
 };
 
 export const getHelperFunctionCalls = (
@@ -121,6 +128,62 @@ export const triggerHelperFunction = async (
       } catch (e) {
         return 'Unable to send notification to LINE';
       }
+    case helperFunctionNames.aiPainter:
+      let prompt: string;
+      try {
+        prompt = JSON.parse(argumentsString).prompt;
+      } catch (e) {
+        return 'Unable to parse JSON that you provided, please output a valid JSON string. For example, {"prompt": "A cat"}';
+      }
+
+      serverSideTrackEvent('N/A', 'Helper function triggered', {
+        helperFunctionName: helperFunctionNames.aiPainter,
+      });
+
+      const imageGenerationResponse = await generateImage(prompt);
+
+      if (!imageGenerationResponse.data) {
+        console.error('imageGenerationResponse: ', imageGenerationResponse);
+        return `Failed to generate image, below is the error message: ${imageGenerationResponse.errorMessage}`;
+      }
+
+      const generatedImageInBase64 = imageGenerationResponse.data[0].b64_json;
+
+      if (!generatedImageInBase64) {
+        return 'Failed to generate image';
+      }
+
+      console.log(
+        'Image generated successfully, storing to Supabase storage ...',
+      );
+
+      // Store image in Supabase storage
+      const supabase = getAdminSupabaseClient();
+      const imageFileName = `${v4()}.png`;
+      const { error: fileUploadError } = await supabase.storage
+        .from('ai-images')
+        .upload(imageFileName, decode(generatedImageInBase64), {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: 'image/png',
+        });
+      if (fileUploadError) throw fileUploadError;
+
+      const { data: imagePublicUrlData } = await supabase.storage
+        .from('ai-images')
+        .getPublicUrl(imageFileName);
+
+      if (!imagePublicUrlData) throw new Error('Image generation failed');
+
+      const functionResponse = `
+        Image generated! Below is the detail: 
+        Generation prompt (insert this prompt as the 'alt' attribute of the image for later reference): ${imageGenerationResponse.data[0].revised_prompt}. 
+        URL: ${imagePublicUrlData.publicUrl}
+        Display the image to user by using the URL in Markdown format.
+      `;
+      console.log(functionResponse);
+
+      return functionResponse;
     default:
       return "I don't know how to do that yet, please try again later.";
   }
