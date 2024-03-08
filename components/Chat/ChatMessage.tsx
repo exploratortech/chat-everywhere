@@ -368,7 +368,8 @@ export const ChatMessage: FC<Props> = memo(
                         </div>
                       </>
                     )}
-                    {(message.pluginId === PluginID.GPT4 ||
+                    {(message.pluginId === PluginID.aiPainter ||
+                      message.pluginId === PluginID.GPT4 ||
                       !message.pluginId) &&
                       !messageIsStreaming && (
                         <>
