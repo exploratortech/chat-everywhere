@@ -74,7 +74,6 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Only close the stream if there is no more data to send, manual stop, or no more function call is pending
         if (buffer.length === 0 && stop) {
-          controller.enqueue('[REMOVE_TEMP_HTML]\n');
           if (error) {
             controller.error(error);
           } else {
@@ -99,6 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
           sendErrorMessage(payload);
         },
         onEnd: () => {
+          sendToUser('[REMOVE_TEMP_HTML]\n');
           stop = true;
         },
         countryCode: country || '',
