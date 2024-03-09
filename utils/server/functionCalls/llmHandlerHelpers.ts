@@ -201,13 +201,15 @@ export const triggerHelperFunction = async (
 
       // Run storeImage and substractUserCredit in parallel
       let imagePublicUrlPromise = storeImage(generatedImageInBase64);
-      let subtractUserCreditPromise = subtractUserCredit();
+      // TODO: Enable Temp disable subtract credit
+      // let subtractUserCreditPromise = subtractUserCredit();
 
       let imagePublicUrl: string;
       try {
         const [storeImageRes] = await Promise.all([
           imagePublicUrlPromise,
-          subtractUserCreditPromise,
+          // TODO: Enable Temp disable subtract credit
+          // subtractUserCreditPromise,
         ]);
         imagePublicUrl = storeImageRes;
       } catch (error) {
