@@ -3,6 +3,7 @@ import { memo, useEffect, useMemo, useRef } from 'react';
 import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
+import AiPainter from '../components/AiPainter';
 import { ImageGenerationComponent } from '../components/ImageGenerationComponent';
 import MjImageComponentV2 from '../components/MjImageComponentV2';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
@@ -34,15 +35,6 @@ const AssistantRespondMessage = memo(
         React.ImgHTMLAttributes<HTMLImageElement> & { node?: any },
         HTMLImageElement
       >) => {
-        const aiImageButtons =
-          node?.properties?.dataAiImageButtons &&
-          (node?.properties?.dataAiImageButtons).split(',');
-        const aiImagePrompt =
-          node?.properties?.dataAiImagePrompt &&
-          (node?.properties?.dataAiImagePrompt).split(',');
-        const aiImageButtonMessageId =
-          node?.properties?.dataAiImageButtonMessageId;
-
         const isValidUrl = (url: string) => {
           try {
             new URL(url);
@@ -55,7 +47,11 @@ const AssistantRespondMessage = memo(
         if (!src) return <></>;
         if (!isValidUrl(src)) return <b>{`{InValid IMAGE URL}`}</b>;
 
-        if (messagePluginId !== PluginID.IMAGE_GEN) {
+        // NORMAL IMAGE
+        if (
+          messagePluginId !== PluginID.IMAGE_GEN &&
+          messagePluginId !== PluginID.aiPainter
+        ) {
           return (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -66,9 +62,28 @@ const AssistantRespondMessage = memo(
             />
           );
         }
-        if (aiImageButtons) {
+
+        // AI PAINTER IMAGE (DALL-E)
+        if (messagePluginId === PluginID.aiPainter) {
+          const imageAlt = node?.properties?.alt;
+
           return (
             // eslint-disable-next-line @next/next/no-img-element
+            <AiPainter src={src} alt={imageAlt} />
+          );
+        }
+
+        // MJ IMAGE
+        const aiImageButtons =
+          node?.properties?.dataAiImageButtons &&
+          (node?.properties?.dataAiImageButtons).split(',');
+        const aiImagePrompt =
+          node?.properties?.dataAiImagePrompt &&
+          (node?.properties?.dataAiImagePrompt).split(',');
+        const aiImageButtonMessageId =
+          node?.properties?.dataAiImageButtonMessageId;
+        if (aiImageButtons) {
+          return (
             <MjImageComponentV2
               src={src}
               buttons={aiImageButtons}

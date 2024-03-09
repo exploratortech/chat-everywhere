@@ -23,8 +23,11 @@ export const getEndpoint = (plugin: Plugin | null) => {
     return 'api/image-gen';
   }
 
-  if(plugin.id === PluginID.mqtt) {
+  if (plugin.id === PluginID.mqtt) {
     return 'api/mqtt';
+  }
+  if (plugin.id === PluginID.aiPainter) {
+    return 'api/ai-painter';
   }
 
   return 'api/chat';
@@ -66,11 +69,12 @@ export async function fetchShareableConversation(
 }
 
 export const getHomeUrl = (): string => {
-  let homeUrl = process.env.NODE_ENV === 'development'
-    ? `http://localhost:3000`
-    : `https://${process.env.VERCEL_URL}`;
+  let homeUrl =
+    process.env.NODE_ENV === 'development'
+      ? `http://localhost:3000`
+      : `https://${process.env.VERCEL_URL}`;
 
-  if(process.env.NEXT_PUBLIC_ENV === 'production') {
+  if (process.env.NEXT_PUBLIC_ENV === 'production') {
     homeUrl = 'https://chateverywhere.app';
   }
   return homeUrl;

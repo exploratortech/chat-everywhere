@@ -12,6 +12,7 @@ export enum PluginID {
   IMAGE_GEN = 'image-gen',
   IMAGE_TO_PROMPT = 'image-to-prompt',
   mqtt = 'mqtt',
+  aiPainter = 'ai-painter',
 }
 
 export enum PluginName {
@@ -20,6 +21,7 @@ export enum PluginName {
   IMAGE_GEN = 'image-gen',
   IMAGE_TO_PROMPT = 'image-to-prompt',
   mqtt = 'MQTT',
+  aiPainter = 'AI Painter',
 }
 
 export const Plugins: Record<PluginID, Plugin> = {
@@ -46,6 +48,11 @@ export const Plugins: Record<PluginID, Plugin> = {
   [PluginID.mqtt]: {
     id: PluginID.mqtt,
     name: PluginName.mqtt,
+    requiredKeys: [],
+  },
+  [PluginID.aiPainter]: {
+    id: PluginID.aiPainter,
+    name: PluginName.aiPainter,
     requiredKeys: [],
   },
 };
