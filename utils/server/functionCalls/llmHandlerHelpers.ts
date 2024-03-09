@@ -224,7 +224,6 @@ export const triggerHelperFunction = async (
         URL: ${imagePublicUrl}
         Display the image to user by using the URL in Markdown format.
       `;
-      console.log(functionResponse);
 
       return functionResponse;
     default:
