@@ -74,15 +74,12 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Only close the stream if there is no more data to send, manual stop, or no more function call is pending
         if (buffer.length === 0 && stop) {
-          controller.enqueue('[REMOVE_TEMP_HTML]');
-          setTimeout(() => {
-            if (error) {
-              controller.error(error);
-            } else {
-              controller.close();
-            }
-          }, 1000);
-
+          controller.enqueue('[REMOVE_TEMP_HTML]\n');
+          if (error) {
+            controller.error(error);
+          } else {
+            controller.close();
+          }
           clearInterval(interval);
         }
       }, 10);
