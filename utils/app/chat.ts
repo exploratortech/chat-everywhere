@@ -91,7 +91,6 @@ async function sendRequest(
   controller: AbortController,
   outputLanguage: string,
   user: User | null,
-  locale:string
 ): Promise<Response> {
   const body = JSON.stringify(chatBody);
 
@@ -103,7 +102,6 @@ async function sendRequest(
       'user-token': user?.token || '',
       'user-browser-id': getOrGenerateUserId() || '',
       'user-selected-plugin-id': plugin?.id || '',
-      'locale':locale
     },
     signal: controller.signal,
     body,

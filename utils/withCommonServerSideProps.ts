@@ -33,7 +33,6 @@ export const withCommonServerSideProps =
         'auth',
         'mjImage',
         'imageToPrompt',
-        'aiPainter'
       ])),
     };
 

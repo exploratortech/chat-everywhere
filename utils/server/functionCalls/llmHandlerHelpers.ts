@@ -67,6 +67,7 @@ export const triggerHelperFunction = async (
   helperFunctionName: string,
   argumentsString: string,
   userId: string,
+  onProgressUpdate?: (payload: string) => void,
 ): Promise<string> => {
   console.log('Trying to trigger helperFunction: ', helperFunctionName);
 
@@ -179,6 +180,11 @@ export const triggerHelperFunction = async (
 
         if (!imagePublicUrlData) throw new Error('Image generation failed');
 
+        if (onProgressUpdate) {
+          onProgressUpdate(
+            'Artwork is done, now adding the final touches...✨',
+          );
+        }
         return imagePublicUrlData.publicUrl;
       };
 

@@ -8,14 +8,13 @@ import { triggerHelperFunction } from '@/utils/server/functionCalls/llmHandlerHe
 import { FunctionCall, Message } from '@/types/chat';
 import { UserProfile } from '@/types/user';
 
-import { i18nServerTranslate } from '../i18nServerInstance';
-
 type handlerType = {
   user: UserProfile;
   messages: Message[];
   countryCode: string;
   onUpdate: (payload: string) => void;
   onProgressUpdate: (payload: string) => void;
+  onErrorUpdate: (payload: string) => void;
   onEnd: () => void;
 };
 
@@ -37,6 +36,7 @@ export const aiPainterLlmHandler = async ({
   countryCode,
   onUpdate,
   onProgressUpdate,
+  onErrorUpdate,
   onEnd,
 }: handlerType) => {
   const functionCallsToSend: FunctionCall[] = [];
@@ -80,19 +80,14 @@ export const aiPainterLlmHandler = async ({
         let executionResult: string;
 
         // Execute helper function
-        onProgressUpdate(
-          await i18nServerTranslate(
-            'Creating artwork...🎨',
-            'aiPainter',
-            'zh-Hant',
-          ),
-        );
+        onProgressUpdate('Creating artwork...🎨');
         const helperFunctionResult = await triggerHelperFunction(
           functionCall.name,
           functionCall.arguments,
           user.id,
+          onProgressUpdate,
         );
-        onProgressUpdate(`努力輸出給用戶中...*\n`);
+        onProgressUpdate(`Ready to show you...💌`);
         executionResult = helperFunctionResult;
 
         innerWorkingMessages.push({
@@ -104,7 +99,7 @@ export const aiPainterLlmHandler = async ({
       }
     }
   } catch (err) {
-    onUpdate('*[ERROR]*');
+    onErrorUpdate('An error occurred, please try again.');
     console.error(err);
   } finally {
     onEnd();

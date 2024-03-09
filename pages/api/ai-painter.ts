@@ -18,7 +18,6 @@ export const config = {
   preferredRegion: 'icn1',
 };
 
-
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
 const handler = async (req: Request): Promise<Response> => {
@@ -51,6 +50,16 @@ const handler = async (req: Request): Promise<Response> => {
     });
     sendToUser(html);
   };
+  const sendErrorMessage = async (message: string) => {
+    const html = await generateComponentHTML({
+      component: AiPainterProgress,
+      props: {
+        content: message,
+        state: 'error',
+      },
+    });
+    sendToUser(html);
+  };
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -65,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         // Only close the stream if there is no more data to send, manual stop, or no more function call is pending
         if (buffer.length === 0 && stop) {
-          controller.enqueue('[REMOVE_TEMP_HTML]')
+          controller.enqueue('[REMOVE_TEMP_HTML]');
 
           if (error) {
             controller.error(error);
@@ -86,6 +95,9 @@ const handler = async (req: Request): Promise<Response> => {
         },
         onProgressUpdate: (payload) => {
           sendLoadingMessage(payload);
+        },
+        onErrorUpdate: (payload) => {
+          sendErrorMessage(payload);
         },
         onEnd: () => {
           stop = true;
