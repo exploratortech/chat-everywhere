@@ -41,6 +41,8 @@ interface Props {
 export const Chat = memo(({ stopConversationRef }: Props) => {
   const { t } = useTranslation('chat');
   const { t: commonT } = useTranslation('common');
+  const { i18n } = useTranslation();
+  const locale = i18n.language;
 
   const {
     state: {
@@ -130,6 +132,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           controller,
           outputLanguage,
           user,
+          locale,
         );
 
         if (isCreatingConversationWithCustomInstruction) {
