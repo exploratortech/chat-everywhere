@@ -1,3 +1,5 @@
+import { sleep } from 'react-query/types/core/utils';
+
 import { generateComponentHTML } from '@/utils/app/htmlStringHandler';
 import { aiPainterLlmHandler } from '@/utils/server/functionCalls/aiPainterllmHandler';
 import {
@@ -75,12 +77,14 @@ const handler = async (req: Request): Promise<Response> => {
         // Only close the stream if there is no more data to send, manual stop, or no more function call is pending
         if (buffer.length === 0 && stop) {
           controller.enqueue('[REMOVE_TEMP_HTML]');
+          sleep(1000).then(() => {
+            if (error) {
+              controller.error(error);
+            } else {
+              controller.close();
+            }
+          });
 
-          if (error) {
-            controller.error(error);
-          } else {
-            controller.close();
-          }
           clearInterval(interval);
         }
       }, 10);
