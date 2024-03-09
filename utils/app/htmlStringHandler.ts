@@ -41,6 +41,9 @@ export function removeTempHtmlString(
   replaceString: string = '',
 ) {
   content = content.replace(
+    "[REMOVE_TEMP_HTML]",'',
+  );
+  content = content.replace(
     /<!-- Temp HTML start -->(.*?)<!-- Temp HTML end -->/gs,
     replaceString,
   );
