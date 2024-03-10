@@ -20,6 +20,12 @@ const AiPainter: React.FC<AiPainterProps> = ({ src, alt }) => {
     state: { isTempUser },
   } = useContext(HomeContext);
   const isStudentAccount = isTempUser;
+  const filename =
+    'chateverywhere-' +
+    alt.split(' ').slice(0, 10).join('_') +
+    `-${dayjs().valueOf()}` +
+    '.png';
+  console.log(filename);
   return (
     <div className="flex flex-col gap-4 ">
       <div className="relative">
@@ -47,10 +53,7 @@ const AiPainter: React.FC<AiPainterProps> = ({ src, alt }) => {
       <button
         className="max-w-max cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
         onClick={() => {
-          downloadFile(
-            src,
-            'chateverywhere-' + prompt + dayjs().valueOf() + '.png',
-          );
+          downloadFile(src, filename);
         }}
       >
         {mjImageT('Download Image')}
