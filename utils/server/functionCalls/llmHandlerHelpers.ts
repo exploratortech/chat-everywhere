@@ -1,13 +1,25 @@
 import { getHomeUrl } from '@/utils/app/api';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+import { generateImage } from '@/utils/v2Chat/openAiApiUtils';
 
 import { FunctionCall } from '@/types/chat';
 import { mqttConnectionType } from '@/types/data';
+import { PluginID } from '@/types/plugin';
+
+import {
+  addUsageEntry,
+  getAdminSupabaseClient,
+  subtractCredit,
+} from '../supabase';
+
+import { decode } from 'base64-arraybuffer';
+import { v4 } from 'uuid';
 
 // This object is used as enum
 const helperFunctionNames = {
   weather: 'get-weather',
   line: 'send-message-to-line',
+  aiPainter: 'generate-image',
 };
 
 export const getHelperFunctionCalls = (
@@ -55,6 +67,7 @@ export const triggerHelperFunction = async (
   helperFunctionName: string,
   argumentsString: string,
   userId: string,
+  onProgressUpdate?: (payload: string) => void,
 ): Promise<string> => {
   console.log('Trying to trigger helperFunction: ', helperFunctionName);
 
@@ -121,6 +134,101 @@ export const triggerHelperFunction = async (
       } catch (e) {
         return 'Unable to send notification to LINE';
       }
+    case helperFunctionNames.aiPainter:
+      let prompt: string;
+      try {
+        prompt = JSON.parse(argumentsString).prompt;
+      } catch (e) {
+        return 'Unable to parse JSON that you provided, please output a valid JSON string. For example, {"prompt": "A cat"}';
+      }
+
+      serverSideTrackEvent('N/A', 'Helper function triggered', {
+        helperFunctionName: helperFunctionNames.aiPainter,
+      });
+      serverSideTrackEvent('N/A', 'DallE image generation');
+
+      const imageGenerationResponse = await generateImage(prompt);
+
+      if (!imageGenerationResponse.data) {
+        console.error('imageGenerationResponse: ', imageGenerationResponse);
+        return `Failed to generate image, below is the error message: ${imageGenerationResponse.errorMessage}`;
+      }
+
+      const generatedImageInBase64 = imageGenerationResponse.data[0].b64_json;
+
+      if (!generatedImageInBase64) {
+        return 'Failed to generate image';
+      }
+
+      const storeImage = async (imageBase64: string) => {
+        console.log(
+          'Image generated successfully, storing to Supabase storage ...',
+        );
+        const supabase = getAdminSupabaseClient();
+        const imageFileName = `${v4()}.png`;
+        const { error: fileUploadError } = await supabase.storage
+          .from('ai-images')
+          .upload(imageFileName, decode(imageBase64), {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: 'image/png',
+          });
+        if (fileUploadError) throw fileUploadError;
+
+        const { data: imagePublicUrlData } = await supabase.storage
+          .from('ai-images')
+          .getPublicUrl(imageFileName);
+
+        if (!imagePublicUrlData) throw new Error('Image generation failed');
+
+        if (onProgressUpdate) {
+          onProgressUpdate(
+            'Artwork is done, now adding the final touches...✨',
+          );
+        }
+        return imagePublicUrlData.publicUrl;
+      };
+
+      const subtractUserCredit = async () => {
+        console.log('Subtracting credit from user');
+        try {
+          await addUsageEntry(PluginID.IMAGE_GEN, userId);
+          await subtractCredit(userId, PluginID.IMAGE_GEN);
+        } catch (e) {
+          throw 'Not enough credit';
+        }
+      };
+
+      // Run storeImage and substractUserCredit in parallel
+      let imagePublicUrlPromise = storeImage(generatedImageInBase64);
+      // TODO: Enable Temp disable subtract credit
+      // let subtractUserCreditPromise = subtractUserCredit();
+
+      let imagePublicUrl: string;
+      try {
+        const [storeImageRes] = await Promise.all([
+          imagePublicUrlPromise,
+          // TODO: Enable Temp disable subtract credit
+          // subtractUserCreditPromise,
+        ]);
+        imagePublicUrl = storeImageRes;
+      } catch (error) {
+        console.error('Error in parallel execution: ', error);
+        return 'Failed to process image or subtract user credit';
+      }
+
+      if (!imagePublicUrl) {
+        return 'Failed to store image';
+      }
+
+      const functionResponse = `
+        Image generated! Below is the detail: 
+        Generation prompt (insert this prompt as the 'alt' attribute of the image for later reference): ${imageGenerationResponse.data[0].revised_prompt}. 
+        URL: ${imagePublicUrl}
+        Display the image to user by using the URL in Markdown format.
+      `;
+
+      return functionResponse;
     default:
       return "I don't know how to do that yet, please try again later.";
   }

@@ -1,6 +1,7 @@
 import {
   IconBolt,
   IconBrain,
+  IconBrush,
   IconBuildingBroadcastTower,
   IconNumber4,
   IconPaint,
@@ -74,6 +75,8 @@ export const getPluginIcon = (
       return <IconNumber4 size={size} />;
     case PluginID.IMAGE_GEN:
       return <IconPaint size={size} />;
+    case PluginID.aiPainter:
+      return <IconBrush size={size} />;
     case PluginID.mqtt:
       return <IconBuildingBroadcastTower size={size} />;
     default:

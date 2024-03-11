@@ -32,7 +32,6 @@ const ModeSelector = ({ mode, setMode }: ModelSelectProps) => {
     { value: 'default', label: t('Default mode') },
     { value: PluginID.LANGCHAIN_CHAT, label: t('Online mode') },
     { value: PluginID.GPT4, label: t('GPT-4') },
-    // { value: PluginID.IMAGE_GEN, label: t('AI Image') },
   ];
   return (
     <Select

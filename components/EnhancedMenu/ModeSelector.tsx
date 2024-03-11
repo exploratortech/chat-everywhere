@@ -91,6 +91,12 @@ const ModeSelector = () => {
                   {t('MQTT')}
                 </option>
               )}
+              <option
+                value={PluginID.aiPainter}
+                className="dark:bg-[#343541] dark:text-white text-yellow-600"
+              >
+                {t('AI Painter')}
+              </option>
             </>
           )}
         </select>

@@ -43,6 +43,7 @@ export const EventNames = [
   'AI image to prompt',
   'AI image button clicked',
   'Image to prompt',
+  'DallE image generation',
 
   // Payment
   'Payment success',
