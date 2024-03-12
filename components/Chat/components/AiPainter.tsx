@@ -35,20 +35,20 @@ const AiPainter: React.FC<AiPainterProps> = ({ src, alt }) => {
           className={`w-full m-0 transition-all duration-500 `}
         />
 
-        {!isStudentAccount && (
-          <button className={`absolute bottom-0 right-0 p-1 z-10`}>
+        <div className="absolute bottom-0 right-0 p-1 z-10 flex gap-2">
+          <button>
             <LineShareButton
               imageFileUrl={src}
               size={20}
               displayInProgressToast={true}
             />
           </button>
-        )}
-        {isStudentAccount && (
-          <button className={`absolute bottom-0 right-0 p-1 z-10`}>
-            <StudentShareMessageButton imageFileUrl={src} size={20} />
-          </button>
-        )}
+          {isStudentAccount && (
+            <button>
+              <StudentShareMessageButton imageFileUrl={src} size={20} />
+            </button>
+          )}
+        </div>
       </div>
       <button
         className="max-w-max cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"

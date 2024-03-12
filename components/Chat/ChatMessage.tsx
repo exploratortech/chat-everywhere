@@ -373,12 +373,11 @@ export const ChatMessage: FC<Props> = memo(
                       !message.pluginId) &&
                       !messageIsStreaming && (
                         <>
-                          {!isStudentAccount && (
-                            <LineShareButton
-                              messageContent={message.content}
-                              className="ml-2"
-                            />
-                          )}
+                          <LineShareButton
+                            messageContent={message.content}
+                            className="ml-2"
+                          />
+
                           {isStudentAccount && (
                             <StudentShareMessageButton
                               messageContent={message.content}

@@ -259,20 +259,22 @@ export default function MjImageComponentV2({
         >
           <IconHelp size={isMobileLayout ? 16 : undefined} />
         </button>
-        {!isStudentAccount && (
-          <button className={`absolute bottom-0 right-0 p-1 z-10`}>
+
+        <div className={`absolute bottom-0 right-0 p-1 z-10 gap-2 flex`}>
+          <button>
             <LineShareButton
               imageFileUrl={src}
               size={20}
               displayInProgressToast={true}
             />
           </button>
-        )}
-        {isStudentAccount && (
-          <button className={`absolute bottom-0 right-0 p-1 z-10`}>
-            <StudentShareMessageButton imageFileUrl={src} size={20} />
-          </button>
-        )}
+
+          {isStudentAccount && (
+            <button>
+              <StudentShareMessageButton imageFileUrl={src} size={20} />
+            </button>
+          )}
+        </div>
 
         {isImageGrid && (
           <div className="grid grid-cols-2 grid-rows-2 absolute top-0 right-0 w-full h-full">
