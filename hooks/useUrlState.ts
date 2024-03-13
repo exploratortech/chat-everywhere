@@ -14,7 +14,6 @@ const useUrlState = <T extends string>(paramName: string, defaultValue: T) => {
 
   // Sync state with URL parameters
   useEffect(() => {
-    console.log('url useEffect:', router.query[paramName], state);
     const urlParam = router.query[paramName];
     const paramValue = Array.isArray(urlParam) ? urlParam[0] : urlParam;
     if (paramValue !== state) {
@@ -25,19 +24,17 @@ const useUrlState = <T extends string>(paramName: string, defaultValue: T) => {
 
   // Sync URL parameters with state
   useEffect(() => {
-    console.log('state useEffect:', router.query[paramName], state);
     const currentParamValue = router.query[paramName];
     const shouldUpdateUrl =
       currentParamValue !== state && (state || defaultValue);
 
     if (shouldUpdateUrl) {
       const newQuery = { ...router.query, [paramName]: state };
-      // Explicitly add a hash at the end of the URL
       router.replace(
         {
           pathname: router.pathname,
           query: newQuery,
-          hash: '#', // Adding a hash here
+          hash: '#',
         },
         undefined,
         { shallow: true },
@@ -45,17 +42,6 @@ const useUrlState = <T extends string>(paramName: string, defaultValue: T) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
-
-  //   useEffect(() => {
-  //     console.log('state useEffect:', router.query[paramName], state);
-  //     if (router.query[paramName] !== state) {
-  //       router.push({
-  //         pathname: router.pathname,
-  //         query: { ...router.query, [paramName]: state },
-  //       });
-  //     }
-  //     // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   }, [state]);
 
   return [state, setState] as const;
 };
