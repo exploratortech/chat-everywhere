@@ -12,6 +12,7 @@ import { event } from 'nextjs-google-analytics';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 import useTeacherPromptForStudent from '@/hooks/useTeacherPromptForStudent';
+import useTeacherSettingsForStudent from '@/hooks/useTeacherSettingsForStudent';
 import useUserProfile from '@/hooks/useUserProfile';
 
 import { fetchShareableConversation } from '@/utils/app/api';
@@ -271,8 +272,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   const getNewConversation = (folderId: string | null = null) => {
     const lastConversation = conversations[conversations.length - 1];
 
-    let filteredConversations: Conversation[] = getNonDeletedCollection(conversations)
-      .filter((c) => c.folderId === folderId);
+    let filteredConversations: Conversation[] = getNonDeletedCollection(
+      conversations,
+    ).filter((c) => c.folderId === folderId);
 
     const newConversation: Conversation = {
       id: uuidv4(),
@@ -295,8 +297,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   // PROMPTS ---------------------------------------------
   const handleCreatePrompt = (folderId: string | null = null) => {
-    const filteredPrompts: Prompt[] = getNonDeletedCollection(prompts)
-      .filter((p) => p.folderId === folderId);
+    const filteredPrompts: Prompt[] = getNonDeletedCollection(prompts).filter(
+      (p) => p.folderId === folderId,
+    );
 
     if (defaultModelId) {
       const newPrompt: Prompt = {
@@ -449,6 +452,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     userId: session?.user.id,
   });
   const { refetch: fetchTeacherPrompts } = useTeacherPromptForStudent();
+  const { refetch: fetchTeacherSettings } = useTeacherSettingsForStudent();
 
   // USER AUTH ------------------------------------------
   useEffect(() => {
@@ -469,6 +473,14 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
                 dispatch({
                   field: 'teacherPrompts',
                   value: res.data.prompts,
+                });
+              }
+            });
+            fetchTeacherSettings().then((res) => {
+              if (res.data) {
+                dispatch({
+                  field: 'teacherSettings',
+                  value: res.data.settings,
                 });
               }
             });
@@ -605,7 +617,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     const conversationHistory = localStorage.getItem('conversationHistory');
     cleanedConversationHistory = [];
     if (conversationHistory) {
-      const parsedConversationHistory = sortByRankAndFolder(JSON.parse(conversationHistory));
+      const parsedConversationHistory = sortByRankAndFolder(
+        JSON.parse(conversationHistory),
+      );
       cleanedConversationHistory = cleanConversationHistory(
         parsedConversationHistory,
       );
