@@ -25,7 +25,6 @@ const AiPainter: React.FC<AiPainterProps> = ({ src, alt }) => {
     alt.split(' ').slice(0, 10).join('_') +
     `-${dayjs().valueOf()}` +
     '.png';
-  console.log(filename);
   return (
     <div className="flex flex-col gap-4 ">
       <div className="relative">
