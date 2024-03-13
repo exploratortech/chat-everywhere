@@ -13,6 +13,7 @@ import SharedMessages from '@/components/TeacherPortal/SharedMessages';
 import Sidebar from '@/components/TeacherPortal/Sidebar';
 import Tags from '@/components/TeacherPortal/Tags';
 import TeacherPrompt from '@/components/TeacherPortal/TeacherPrompt';
+import TeacherSettings from '@/components/TeacherPortal/TeacherSettings';
 import {
   ShowingChangeAction,
   TeacherPortalContext,
@@ -23,9 +24,10 @@ import DefaultLayout from '@/components/layout/default';
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
 const TeacherPortal = () => {
-  const [showing, setShowing] = useUrlState<
-    'one-time-code' | 'shared-message' | 'tags' | 'teacher-prompt' | 'settings'
-  >('showing', portalState.showing);
+  const [showing, setShowing] = useUrlState<typeof portalState.showing>(
+    'showing',
+    portalState.showing,
+  );
 
   // State to track if the component has mounted (i.e., we're on the client side)
   const [hasMounted, setHasMounted] = useState(false);
@@ -68,6 +70,7 @@ const TeacherPortal = () => {
                   )}
                   {showing === 'tags' && <Tags tags={tags} />}
                   {showing === 'teacher-prompt' && <TeacherPrompt />}
+                  {showing === 'settings' && <TeacherSettings />}
                 </div>
               )}
             </div>

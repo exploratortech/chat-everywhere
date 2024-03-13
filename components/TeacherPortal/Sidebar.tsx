@@ -5,6 +5,7 @@ import {
   IconMessages,
   IconPrompt,
   IconRating12Plus,
+  IconSettings,
   IconTags,
 } from '@tabler/icons-react';
 import React, { cloneElement, useContext } from 'react';
@@ -86,6 +87,17 @@ export default function Sidebar({ className = '' }: Props) {
         dispatch({
           field: 'showing',
           value: 'teacher-prompt',
+        });
+      },
+    },
+    {
+      icon: <IconSettings />,
+      name: t('Settings'),
+      value: 'settings',
+      callback: () => {
+        dispatch({
+          field: 'showing',
+          value: 'settings',
         });
       },
     },
