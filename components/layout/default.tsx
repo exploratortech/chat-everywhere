@@ -271,8 +271,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   const getNewConversation = (folderId: string | null = null) => {
     const lastConversation = conversations[conversations.length - 1];
 
-    let filteredConversations: Conversation[] = getNonDeletedCollection(conversations)
-      .filter((c) => c.folderId === folderId);
+    let filteredConversations: Conversation[] = getNonDeletedCollection(
+      conversations,
+    ).filter((c) => c.folderId === folderId);
 
     const newConversation: Conversation = {
       id: uuidv4(),
@@ -295,8 +296,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   // PROMPTS ---------------------------------------------
   const handleCreatePrompt = (folderId: string | null = null) => {
-    const filteredPrompts: Prompt[] = getNonDeletedCollection(prompts)
-      .filter((p) => p.folderId === folderId);
+    const filteredPrompts: Prompt[] = getNonDeletedCollection(prompts).filter(
+      (p) => p.folderId === folderId,
+    );
 
     if (defaultModelId) {
       const newPrompt: Prompt = {
@@ -358,6 +360,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   // CLOUD SYNC ------------------------------------------
 
+  const currentSyncId = useRef(0);
   useEffect(() => {
     if (messageIsStreaming) return;
     if (!user) return;
@@ -371,6 +374,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       try {
         dispatch({ field: 'syncingConversation', value: true });
 
+        const syncId = ++currentSyncId.current;
         const syncResult: LatestExportFormat | null = await syncData(
           supabase,
           user,
@@ -378,6 +382,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
         );
 
         if (syncResult !== null) {
+          // To prevent race condition
+          if (syncId !== currentSyncId.current) return;
+
           const { history, folders, prompts } = syncResult;
           dispatch({ field: 'conversations', value: history });
           dispatch({ field: 'folders', value: folders });
@@ -605,7 +612,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     const conversationHistory = localStorage.getItem('conversationHistory');
     cleanedConversationHistory = [];
     if (conversationHistory) {
-      const parsedConversationHistory = sortByRankAndFolder(JSON.parse(conversationHistory));
+      const parsedConversationHistory = sortByRankAndFolder(
+        JSON.parse(conversationHistory),
+      );
       cleanedConversationHistory = cleanConversationHistory(
         parsedConversationHistory,
       );
