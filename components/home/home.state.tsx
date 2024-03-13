@@ -4,6 +4,7 @@ import { ErrorMessage } from '@/types/error';
 import { FolderInterface } from '@/types/folder';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 import { Prompt, TeacherPrompt } from '@/types/prompt';
+import { TeacherSettings } from '@/types/teacher-settings';
 import { CreditUsage, User } from '@/types/user';
 
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -74,6 +75,7 @@ export interface HomeInitialState {
 
   // Teacher Portal
   teacherPrompts: TeacherPrompt[];
+  teacherSettings: TeacherSettings;
 }
 
 export const initialState: HomeInitialState = {
@@ -142,4 +144,7 @@ export const initialState: HomeInitialState = {
 
   // Teacher Portal
   teacherPrompts: [],
+  teacherSettings: {
+    allow_student_use_line: false,
+  },
 };
