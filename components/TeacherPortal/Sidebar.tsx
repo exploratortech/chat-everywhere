@@ -23,7 +23,6 @@ import { TeacherPortalContext } from './teacher-portal.context';
 
 type Props = {
   className?: string;
-  disableFooterItems?: boolean;
 };
 
 type sideBarItemType = {
@@ -31,6 +30,7 @@ type sideBarItemType = {
   name: string;
   value: string;
   callback: () => void;
+  overrideClassName?: string;
 };
 
 export default function Sidebar({ className = '' }: Props) {
@@ -40,8 +40,7 @@ export default function Sidebar({ className = '' }: Props) {
   } = useContext(TeacherPortalContext);
   const { t } = useTranslation('model');
   const router = useRouter();
-  const handleBackClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleBackClick = () => {
     router.push('/');
   };
   const iconClass = 'h-[18px] tablet:h-[22px] tablet:w-[36px]';
@@ -90,6 +89,8 @@ export default function Sidebar({ className = '' }: Props) {
         });
       },
     },
+  ];
+  const footerItems: sideBarItemType[] = [
     {
       icon: <IconSettings />,
       name: t('Settings'),
@@ -101,6 +102,32 @@ export default function Sidebar({ className = '' }: Props) {
         });
       },
     },
+    {
+      icon: <IconInfoSquareRounded />,
+      name: t('Instructions'),
+      value: 'instructions',
+      callback: () => {
+        window.location.href =
+          'https://explorator.notion.site/a68dbc8f3df241a49b62add843a8d364';
+      },
+    },
+    {
+      icon: <IconMessages />,
+      name: t('Join research group'),
+      value: 'join-research-group',
+      callback: () => {
+        joinLINEGroupOnClick();
+      },
+    },
+    {
+      icon: <IconArrowBack />,
+      name: t('Back'),
+      value: 'back',
+      overrideClassName: 'py-5',
+      callback: () => {
+        handleBackClick();
+      },
+    },
   ];
 
   const getRenderItems = (itemsArray: sideBarItemType[]) =>
@@ -110,6 +137,7 @@ export default function Sidebar({ className = '' }: Props) {
         href="#"
         className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 tablet:px-2 tablet:py-4 
           ${showing === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
+          ${item.overrideClassName ? item.overrideClassName : ''}
           `}
         onClick={item.callback}
       >
@@ -122,8 +150,7 @@ export default function Sidebar({ className = '' }: Props) {
       </a>
     ));
 
-  const joinLINEGroupOnClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const joinLINEGroupOnClick = () => {
     trackEvent('Join LINE group button clicked');
     toast(
       (tInstance) => (
@@ -169,34 +196,7 @@ export default function Sidebar({ className = '' }: Props) {
         <div className="py-6 flex flex-col">{getRenderItems(items)}</div>
       </div>
 
-      <div className="flex flex-col">
-        <a
-          className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2`}
-          target="_blank"
-          href="https://explorator.notion.site/a68dbc8f3df241a49b62add843a8d364"
-        >
-          <IconInfoSquareRounded className={iconClass} />
-          <div className="tablet:hidden">{t('Instructions')}</div>
-        </a>
-        <a
-          href="#"
-          className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2`}
-          onClick={joinLINEGroupOnClick}
-        >
-          <IconMessages className={iconClass} />
-          <div className="tablet:hidden">{t('Join research group')}</div>
-        </a>
-
-        <a
-          href="#"
-          className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"
-          onClick={handleBackClick}
-        >
-          <IconArrowBack className={iconClass} />
-
-          <div className="tablet:hidden">{t('Back')}</div>
-        </a>
-      </div>
+      <div className="flex flex-col">{getRenderItems(footerItems)}</div>
     </div>
   );
 }
