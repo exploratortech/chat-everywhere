@@ -1,5 +1,6 @@
 import { getHomeUrl } from '@/utils/app/api';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+import { allowAccountToUseLine, isStudentAccount } from '@/utils/server/auth';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
 export const config = {
@@ -36,6 +37,36 @@ const handler = async (req: Request): Promise<Response> => {
       'error',
     );
   }
+  const supabase = getAdminSupabaseClient();
+  const user = await supabase.auth.getUser(supabaseAccessToken);
+
+  if (!user) {
+    console.error('No user found with this access token');
+    return redirectHomeWithNotice(
+      'Unable to connect with LINE, please try again later',
+      'error',
+    );
+  }
+
+  // Check if account is student account, if so, should check if the teacher allow student to use line
+  const userId = user.data.user?.id;
+  if (!userId) {
+    console.error('No user id found');
+    return redirectHomeWithNotice(
+      'Unable to connect with LINE, please try again later',
+      'error',
+    );
+  }
+
+  if (await isStudentAccount(userId)) {
+    if (!(await allowAccountToUseLine(userId))) {
+      console.error('Teacher does not allow student to use LINE');
+      return redirectHomeWithNotice(
+        'Teacher does not allow student to use LINE',
+        'error',
+      );
+    }
+  }
 
   // Retrieved the code, now exchange it for an access token
   const response = await fetch('https://notify-bot.line.me/oauth/token', {
@@ -65,23 +96,11 @@ const handler = async (req: Request): Promise<Response> => {
   const data = await response.json();
   const accessToken = data.access_token;
 
-  const supabase = getAdminSupabaseClient();
-
-  const user = await supabase.auth.getUser(supabaseAccessToken);
-
-  if (!user) {
-    console.error('No user found with this access token');
-    return redirectHomeWithNotice(
-      'Unable to connect with LINE, please try again later',
-      'error',
-    );
-  }
-
   // Store the accessToken in the line_access_token column in the profiles table in Supabase
   const { error } = await supabase
     .from('profiles')
     .update({ line_access_token: accessToken })
-    .match({ id: user.data.user?.id });
+    .match({ id: userId });
 
   if (error) {
     console.error('Failed to store access token:', error);

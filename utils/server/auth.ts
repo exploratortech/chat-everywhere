@@ -5,6 +5,8 @@ import {
 
 import { UserProfile } from '@/types/user';
 
+import { getTeacherSettingsForStudent } from './supabase/teacher-settings';
+
 const supabase = getAdminSupabaseClient();
 
 export async function fetchUserProfileWithAccessToken(
@@ -26,3 +28,13 @@ export async function fetchUserProfileWithAccessToken(
 export const unauthorizedResponse = new Response('Unauthorized', {
   status: 401,
 });
+
+export async function isStudentAccount(userId: string): Promise<boolean> {
+  const user = await getUserProfile(userId);
+  return user?.isTempUser || false;
+}
+
+export async function allowAccountToUseLine(userId: string): Promise<boolean> {
+  const teacherSettings = await getTeacherSettingsForStudent(userId);
+  return teacherSettings?.allow_student_use_line || false;
+}
