@@ -28,7 +28,7 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
 }) => {
   const { t } = useTranslation('feature');
   const {
-    state: { user, isConnectedWithLine },
+    state: { user, isConnectedWithLine, isTempUser, teacherSettings },
   } = useContext(HomeContext);
   const [loading, setLoading] = useState(false);
   const supabase = useSupabaseClient();
@@ -108,7 +108,12 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
       setLoading(false);
     }
   };
+  const isStudentAccount = isTempUser;
+  const lineButtonDisplayCondition =
+    !isStudentAccount ||
+    (isStudentAccount && teacherSettings.allow_student_use_line);
 
+  if (!lineButtonDisplayCondition) return null;
   return (
     <>
       <button

@@ -12,6 +12,7 @@ import { event } from 'nextjs-google-analytics';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 import useTeacherPromptForStudent from '@/hooks/useTeacherPromptForStudent';
+import useTeacherSettingsForStudent from '@/hooks/useTeacherSettingsForStudent';
 import useUserProfile from '@/hooks/useUserProfile';
 
 import { fetchShareableConversation } from '@/utils/app/api';
@@ -456,6 +457,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     userId: session?.user.id,
   });
   const { refetch: fetchTeacherPrompts } = useTeacherPromptForStudent();
+  const { refetch: fetchTeacherSettings } = useTeacherSettingsForStudent();
 
   // USER AUTH ------------------------------------------
   useEffect(() => {
@@ -476,6 +478,14 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
                 dispatch({
                   field: 'teacherPrompts',
                   value: res.data.prompts,
+                });
+              }
+            });
+            fetchTeacherSettings().then((res) => {
+              if (res.data) {
+                dispatch({
+                  field: 'teacherSettings',
+                  value: res.data.settings,
                 });
               }
             });

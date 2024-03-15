@@ -90,6 +90,7 @@
   "Referral Date": "推广日期",
   "Is in Trial": "是否在试用期",
   "User has paid": "用户已付费",
+  "Settings": "设置",
   "Account": "帐户",
   "App": "功能设定",
   "Data": "资料管理",
@@ -188,6 +189,7 @@
   "Prompt removed successfully": "指导提示词已移除",
   "Error removing prompt": "移除指导提示词时出错，请稍后再试",
   "View full message": "查看完整讯息",
-  "AI Painter": "AI绘画"
+  "AI Painter": "AI绘画",
+  "Allow Student to use LINE": "允许学生使用LINE"
 }
 

@@ -1,11 +1,13 @@
 import { Dispatch, createContext } from 'react';
 
-import { ActionType } from '@/hooks/useCreateReducer';
-
 import { portalState } from './teacher-portal.state';
 
+export interface ShowingChangeAction {
+  field: 'showing';
+  value: typeof portalState.showing;
+}
 interface PortalState {
   state: typeof portalState;
-  dispatch: Dispatch<ActionType<typeof portalState>>;
+  dispatch: Dispatch<ShowingChangeAction>;
 }
 export const TeacherPortalContext = createContext<PortalState>(undefined!);
