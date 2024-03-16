@@ -472,7 +472,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           dispatch({ field: 'showOneTimeCodeLoginModel', value: false });
           dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
           dispatch({ field: 'isTempUser', value: userProfile.isTempUser });
-          if (userProfile.isTempUser) {
+          if (userProfile.isTempUser || userProfile.isTeacherAccount) {
             fetchTeacherPrompts().then((res) => {
               if (res.data) {
                 dispatch({
@@ -481,6 +481,8 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
                 });
               }
             });
+          }
+          if (userProfile.isTempUser) {
             fetchTeacherSettings().then((res) => {
               if (res.data) {
                 dispatch({
