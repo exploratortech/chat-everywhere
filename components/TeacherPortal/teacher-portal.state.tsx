@@ -3,5 +3,6 @@ export const portalState = {
     | 'one-time-code'
     | 'shared-message'
     | 'tags'
-    | 'teacher-prompt',
+    | 'teacher-prompt'
+    | 'settings',
 };

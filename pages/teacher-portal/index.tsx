@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
 
-import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useTeacherTags from '@/hooks/useTeacherTags';
+import useUrlState from '@/hooks/useUrlState';
 
 import { withCommonServerSideProps } from '@/utils/withCommonServerSideProps';
 
@@ -13,19 +13,21 @@ import SharedMessages from '@/components/TeacherPortal/SharedMessages';
 import Sidebar from '@/components/TeacherPortal/Sidebar';
 import Tags from '@/components/TeacherPortal/Tags';
 import TeacherPrompt from '@/components/TeacherPortal/TeacherPrompt';
-import { TeacherPortalContext } from '@/components/TeacherPortal/teacher-portal.context';
+import TeacherSettings from '@/components/TeacherPortal/TeacherSettings';
+import {
+  ShowingChangeAction,
+  TeacherPortalContext,
+} from '@/components/TeacherPortal/teacher-portal.context';
 import { portalState } from '@/components/TeacherPortal/teacher-portal.state';
 import DefaultLayout from '@/components/layout/default';
 
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
 const TeacherPortal = () => {
-  const PortalState = useCreateReducer({
-    initialState: portalState,
-  });
-  const {
-    state: { showing },
-  } = PortalState;
+  const [showing, setShowing] = useUrlState<typeof portalState.showing>(
+    'showing',
+    portalState.showing,
+  );
 
   // State to track if the component has mounted (i.e., we're on the client side)
   const [hasMounted, setHasMounted] = useState(false);
@@ -38,9 +40,16 @@ const TeacherPortal = () => {
     setHasMounted(true);
   }, []);
 
+  const dispatch: Dispatch<ShowingChangeAction> = (action) => {
+    if (action.field === 'showing') {
+      setShowing(action.value);
+    } else {
+      setShowing(portalState.showing);
+    }
+  };
   return (
     <DefaultLayout>
-      <TeacherPortalContext.Provider value={{ ...PortalState }}>
+      <TeacherPortalContext.Provider value={{ state: { showing }, dispatch }}>
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center text-center mobile:block">
             <div className="w-full tablet:max-w-[90vw] transform overflow-hidden text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex h-[100dvh] tablet:max-h-[unset] !max-w-[unset] !rounded-none">
@@ -61,6 +70,7 @@ const TeacherPortal = () => {
                   )}
                   {showing === 'tags' && <Tags tags={tags} />}
                   {showing === 'teacher-prompt' && <TeacherPrompt />}
+                  {showing === 'settings' && <TeacherSettings />}
                 </div>
               )}
             </div>

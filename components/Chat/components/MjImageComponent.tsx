@@ -308,29 +308,26 @@ export default function MjImageComponent({
         >
           <IconHelp size={isMobileLayout ? 16 : undefined} />
         </button>
-        {!isStudentAccount && (
-          <button
-            className={`${
-              showButtons ? 'block' : 'hidden'
-            } absolute bottom-0 right-0 p-1`}
-          >
+
+        <div
+          className={`${
+            showButtons ? 'block' : 'hidden'
+          }  absolute bottom-0 right-0 p-1 flex gap-2`}
+        >
+          <button>
             <LineShareButton
               imageFileUrl={src}
               size={20}
               displayInProgressToast={true}
             />
           </button>
-        )}
 
-        {isStudentAccount && (
-          <button
-            className={`${
-              showButtons ? 'block' : 'hidden'
-            } absolute bottom-0 right-0 p-1`}
-          >
-            <StudentShareMessageButton imageFileUrl={src} size={20} />
-          </button>
-        )}
+          {isStudentAccount && (
+            <button>
+              <StudentShareMessageButton imageFileUrl={src} size={20} />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

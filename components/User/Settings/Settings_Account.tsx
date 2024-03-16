@@ -21,7 +21,7 @@ export default function Settings_Account() {
   const [displayReferralCodeEnterer, setDisplayReferralCodeEnterer] =
     useState(false);
   const {
-    state: { user, isPaidUser },
+    state: { user, isTempUser, isPaidUser, teacherSettings },
     dispatch,
   } = useContext(HomeContext);
 
@@ -54,6 +54,11 @@ export default function Settings_Account() {
     process.env.NEXT_PUBLIC_ENV === 'production'
       ? 'https://billing.stripe.com/p/login/5kAbMj0wt5VF6AwaEE'
       : 'https://billing.stripe.com/p/login/test_28o4jFe6GaqK1UY5kk';
+
+  const isStudentAccount = isTempUser;
+  const lineButtonDisplayCondition =
+    !isStudentAccount ||
+    (isStudentAccount && teacherSettings.allow_student_use_line);
 
   return (
     <div>
@@ -185,7 +190,7 @@ export default function Settings_Account() {
             {t('Integrations (pro plan)')}
           </span>
         </div>
-        <LineConnectionButton />
+        {lineButtonDisplayCondition && <LineConnectionButton />}
       </div>
     </div>
   );
