@@ -13,5 +13,7 @@
   "Custom Instruction": "設定為角色扮演",
   "Mode": "對話模式",
   "Show to students": "向學生展示",
-  "Remove": "刪除"
+  "Remove": "刪除",
+  "First message to GPT": "首次對話內容",
+  "The prompt will be used through out the conversation": "提示詞將在整個對話中使用"
 }
