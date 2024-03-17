@@ -111,7 +111,7 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
       </div>
       <textarea
         className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
-        style={{ resize: 'none' }}
+        style={{ resize: 'vertical' }}
         placeholder={
           t('The message will be used to start the conversation with AI') || ''
         }
@@ -125,7 +125,7 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
       </div>
       <textarea
         className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
-        style={{ resize: 'none' }}
+        style={{ resize: 'vertical' }}
         placeholder={
           t('The prompt will be used through out the conversation') || ''
         }

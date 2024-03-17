@@ -35,7 +35,7 @@ export const TeacherPromptComponent = ({ prompt }: Props) => {
           </CardContent>
         </Card>
       </DialogTrigger>
-      <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[100dvh]">
+      <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[100dvh] max-h-[100dvh] overflow-y-scroll">
         <TeacherPromptModal prompt={prompt} onUpdatePrompt={handleUpdate} />
       </DialogContent>
     </Dialog>
