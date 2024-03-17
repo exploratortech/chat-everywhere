@@ -1,4 +1,5 @@
 import { TeacherPromptForTeacherPortal } from '@/types/prompt';
+import { Database } from '@/types/supabase';
 
 import { getAdminSupabaseClient } from '../supabase';
 
@@ -97,12 +98,11 @@ export async function removeTeacherPrompt(
 }
 
 export async function createTeacherPrompt(
-  teacher_profile_id: string,
-  prompt: TeacherPromptForTeacherPortal,
+  prompt: Database['public']['Tables']['teacher_prompts']['Insert'],
 ) {
   const { data, error } = await supabase
     .from('teacher_prompts')
-    .insert({ ...prompt, teacher_profile_id })
+    .insert({ ...prompt })
     .select();
 
   if (error) {
