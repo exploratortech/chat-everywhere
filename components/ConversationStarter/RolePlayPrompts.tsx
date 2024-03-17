@@ -3,7 +3,7 @@ import { FC, useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Prompt, TeacherCustomInstructionPrompt } from '@/types/prompt';
+import { Prompt, TeacherPrompt } from '@/types/prompt';
 
 import PromptIcon from '../Promptbar/components/PromptIcon';
 
@@ -62,7 +62,7 @@ export const RolePlayPrompts: FC<Props> = ({
             customInstructionOnClick({
               ...prompt,
               is_teacher_prompt: true,
-            } as TeacherCustomInstructionPrompt);
+            } as TeacherPrompt);
           }}
         >
           <div className="px-2">

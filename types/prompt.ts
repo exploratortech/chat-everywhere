@@ -1,10 +1,7 @@
 import { OpenAIModel } from './openai';
 import { PluginID } from './plugin';
 
-export type Prompt =
-  | RegularPrompt
-  | CustomInstructionPrompt
-  | TeacherCustomInstructionPrompt;
+export type Prompt = RegularPrompt | CustomInstructionPrompt | TeacherPrompt;
 export interface RegularPrompt {
   id: string;
   name: string;
@@ -21,8 +18,7 @@ export interface CustomInstructionPrompt
   extends Omit<RegularPrompt, 'isCustomInstruction'> {
   isCustomInstruction: true;
 }
-export interface TeacherCustomInstructionPrompt
-  extends CustomInstructionPrompt {
+export interface TeacherPrompt extends CustomInstructionPrompt {
   is_teacher_prompt: true;
   first_user_message: string;
   default_mode:
@@ -47,7 +43,7 @@ export function isCustomInstructionPrompt(
 
 export function isTeacherCustomInstructionPrompt(
   prompt: Prompt,
-): prompt is TeacherCustomInstructionPrompt {
+): prompt is TeacherPrompt {
   return !!(
     'isCustomInstruction' in prompt &&
     prompt.isCustomInstruction &&
@@ -56,7 +52,7 @@ export function isTeacherCustomInstructionPrompt(
 }
 
 export type TeacherPromptForTeacherPortal = Omit<
-  TeacherCustomInstructionPrompt,
+  TeacherPrompt,
   'folderId' | 'lastUpdateAtUTC' | 'rank' | 'isCustomInstruction' | 'deleted'
 > & {
   is_enable: boolean;
