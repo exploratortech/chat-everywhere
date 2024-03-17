@@ -19,7 +19,6 @@ const handler = async (req: Request): Promise<Response> => {
   ) {
     return unauthorizedResponse;
   }
-  console.log(userProfile);
 
   try {
     if (userProfile.isTempUser) {
