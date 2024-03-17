@@ -45,7 +45,7 @@ interface Props {
 
 export const Chat = memo(({ stopConversationRef }: Props) => {
   const { t } = useTranslation('chat');
-  const { t: promptT } = useTranslation('prompt');
+  const { t: promptT } = useTranslation('prompts');
   const { t: commonT } = useTranslation('common');
 
   const {
