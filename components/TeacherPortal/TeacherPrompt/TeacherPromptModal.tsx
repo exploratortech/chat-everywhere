@@ -17,9 +17,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+import { z } from 'zod';
+
 interface Props {
   prompt: TeacherPromptForTeacherPortal;
   onUpdatePrompt: (prompt: TeacherPromptForTeacherPortal) => void;
+  onClose: () => void;
 }
 interface ModelSelectProps {
   mode: TeacherPromptForTeacherPortal['default_mode'];
@@ -37,6 +40,7 @@ const ModeSelector = ({ mode, setMode }: ModelSelectProps) => {
       label: t('AI Painter'),
     },
   ];
+
   return (
     <Select
       onValueChange={(value) => {
@@ -62,8 +66,13 @@ const ModeSelector = ({ mode, setMode }: ModelSelectProps) => {
   );
 };
 
-export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
+export const TeacherPromptModal: FC<Props> = ({
+  prompt,
+  onUpdatePrompt,
+  onClose,
+}) => {
   const { t } = useTranslation('promptbar');
+  const { t: formT } = useTranslation('form');
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
   const [firstMessageToGPT, setFirstMessageToGPT] = useState(
@@ -75,12 +84,62 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
   const { removeMutation } = useTeacherPrompt();
   const { mutate: removePrompt } = removeMutation;
 
+  const schema = z.object({
+    name: z.string().min(
+      1,
+      formT('isRequired', {
+        field: t('Name'),
+      }) as string,
+    ),
+    description: z.string().optional(),
+    content: z.string().min(
+      1,
+      formT('isRequired', {
+        field: t('Prompt'),
+      }) as string,
+    ),
+    first_message_to_gpt: z.string().min(
+      1,
+      formT('isRequired', {
+        field: t('First message to GPT'),
+      }) as string,
+    ),
+    default_mode: z.string(),
+    is_enable: z.boolean(),
+  });
+
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     nameInputRef.current?.focus();
   }, []);
 
+  const handleSubmit = () => {
+    const result = schema.safeParse({
+      name,
+      description,
+      content: content.trim(),
+      is_enable: isEnable,
+      default_mode: mode,
+      first_message_to_gpt: firstMessageToGPT,
+    });
+    if (!result.success) {
+      alert(result.error.issues.map((issue) => issue.message).join('\n'));
+      return;
+    }
+    const updatedPrompt = {
+      ...prompt,
+      name,
+      description,
+      content: content.trim(),
+      is_enable: isEnable,
+      default_mode: mode,
+      first_message_to_gpt: firstMessageToGPT,
+    };
+
+    onUpdatePrompt(updatedPrompt);
+    onClose();
+  };
   return (
     <div>
       <div className="text-sm font-bold text-black dark:text-neutral-200">
@@ -91,6 +150,7 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
         className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
         placeholder={t('A name for your prompt.') || ''}
         value={name}
+        required
         onChange={(e) => setName(e.target.value)}
       />
 
@@ -156,25 +216,13 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
         </label>
       </div>
-      <DialogFooter>
-        <DialogClose className="w-full">
+      <div>
+        <div className="w-full">
           <div className="flex flex-col gap-6">
             <Button
               type="button"
               className="w-full px-4 py-2 mt-6 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
-              onClick={() => {
-                const updatedPrompt = {
-                  ...prompt,
-                  name,
-                  description,
-                  content: content.trim(),
-                  is_enable: isEnable,
-                  default_mode: mode,
-                  first_message_to_gpt: firstMessageToGPT,
-                };
-
-                onUpdatePrompt(updatedPrompt);
-              }}
+              onClick={handleSubmit}
             >
               {t('Save')}
             </Button>
@@ -187,8 +235,8 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
               {t('Remove')}
             </Button>
           </div>
-        </DialogClose>
-      </DialogFooter>
+        </div>
+      </div>
     </div>
   );
 };

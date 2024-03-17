@@ -1,5 +1,5 @@
 import { IconPlus } from '@tabler/icons-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DEFAULT_FIRST_MESSAGE_TO_GPT } from '@/utils/app/const';
@@ -20,20 +20,23 @@ const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
   const { t } = useTranslation('model');
   const { t: promptT } = useTranslation('prompts');
 
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog>
-      <DialogTrigger asChild>
+    <Dialog open={open} onOpenChange={() => setOpen(false)}>
+      <div>
         <Button
           variant={'ghost'}
           size={'default'}
           className=" text-neutral-500"
+          onClick={() => setOpen(true)}
         >
           <div className="flex items-center gap-1">
             <IconPlus size={18} />
             {t('Add new teacher prompt')}
           </div>
         </Button>
-      </DialogTrigger>
+      </div>
+
       <DialogContent className="sm:max-w-md text-white">
         <TeacherPromptModal
           prompt={{
@@ -48,6 +51,9 @@ const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
             first_message_to_gpt: promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
           }}
           onUpdatePrompt={onCreatePrompt}
+          onClose={() => {
+            setOpen(false);
+          }}
         />
       </DialogContent>
     </Dialog>

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import useTeacherPrompt from '@/hooks/useTeacherPrompt';
 
 import { TeacherPromptForTeacherPortal } from '@/types/prompt';
@@ -19,9 +21,10 @@ export const TeacherPromptComponent = ({ prompt }: Props) => {
     updatePrompt(prompt);
   };
 
+  const [open, setOpen] = useState(false);
   return (
-    <Dialog>
-      <DialogTrigger className="w-full">
+    <Dialog open={open} onOpenChange={() => setOpen(false)}>
+      <div className="w-full" onClick={() => setOpen(true)}>
         <Card
           className={cn('bg-transparent', { 'opacity-40': !prompt.is_enable })}
         >
@@ -34,9 +37,15 @@ export const TeacherPromptComponent = ({ prompt }: Props) => {
             </div>
           </CardContent>
         </Card>
-      </DialogTrigger>
+      </div>
       <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[100dvh] max-h-[100dvh] overflow-y-scroll">
-        <TeacherPromptModal prompt={prompt} onUpdatePrompt={handleUpdate} />
+        <TeacherPromptModal
+          prompt={prompt}
+          onUpdatePrompt={handleUpdate}
+          onClose={() => {
+            setOpen(false);
+          }}
+        />
       </DialogContent>
     </Dialog>
   );
