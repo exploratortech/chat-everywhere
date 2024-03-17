@@ -22,7 +22,7 @@ export interface TeacherPrompt extends CustomInstructionPrompt {
   is_teacher_prompt: true;
   first_message_to_gpt: string;
   default_mode:
-    | 'default'
+    | PluginID.default
     | PluginID.LANGCHAIN_CHAT
     | PluginID.GPT4
     | PluginID.IMAGE_GEN;

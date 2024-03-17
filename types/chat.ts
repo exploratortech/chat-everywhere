@@ -14,7 +14,7 @@ export interface Message {
     | PluginID.mqtt
     | PluginID.aiPainter
     | null
-    | 'default';
+    | PluginID.default;
   largeContextResponse?: boolean; // Use to indicate if the response is from a gpt3.5 16k model
   showHintForLargeContextResponse?: boolean; // Use to indicate if the response can be improved by using a gpt3.5 16k model
 }

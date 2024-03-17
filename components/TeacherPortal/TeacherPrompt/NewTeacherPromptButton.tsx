@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { DEFAULT_FIRST_MESSAGE_TO_GPT } from '@/utils/app/const';
 
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
+import { PluginID } from '@/types/plugin';
 import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,7 @@ const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
             is_enable: true,
             id: '',
             model: OpenAIModels[OpenAIModelID.GPT_4],
-            default_mode: 'default',
+            default_mode: PluginID.default,
             is_teacher_prompt: true,
             first_message_to_gpt: promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
           }}

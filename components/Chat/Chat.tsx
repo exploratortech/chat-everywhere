@@ -89,7 +89,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       const plugin =
         isCreatingConversationWithCustomInstruction &&
         isTeacherPrompt(customInstructionPrompt)
-          ? Plugins[customInstructionPrompt.default_mode as Partial<PluginID>]
+          ? Plugins[customInstructionPrompt.default_mode]
           : (message.pluginId && Plugins[message.pluginId]) || null;
 
       const {
@@ -309,8 +309,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                               role: 'user',
                               content:
                                 customInstructionPrompt.first_message_to_gpt,
-                              pluginId:
-                                customInstructionPrompt.default_mode as Partial<PluginID>,
+                              pluginId: customInstructionPrompt.default_mode,
                             }
                           : {
                               role: 'user',
