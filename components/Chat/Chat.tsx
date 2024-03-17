@@ -17,6 +17,7 @@ import { event } from 'nextjs-google-analytics/dist/interactions';
 import useCustomInstructionDefaultMode from '@/hooks/useCustomInstructionDefaultMode';
 
 import chat from '@/utils/app/chat';
+import { DEFAULT_FIRST_MESSAGE_TO_GPT } from '@/utils/app/const';
 import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 import { throttle } from '@/utils/data/throttle';
 
@@ -44,6 +45,7 @@ interface Props {
 
 export const Chat = memo(({ stopConversationRef }: Props) => {
   const { t } = useTranslation('chat');
+  const { t: promptT } = useTranslation('prompt');
   const { t: commonT } = useTranslation('common');
 
   const {
@@ -312,8 +314,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                             }
                           : {
                               role: 'user',
-                              content:
-                                'Provide a very short welcome message based on your prompt, the role your are playing is based on the prompt.',
+                              content: promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
                               pluginId: null,
                             };
                         console.log({ message });

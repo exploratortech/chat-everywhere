@@ -69,3 +69,6 @@ export const ERROR_MESSAGES = {
     httpCode: 405,
   },
 };
+
+export const DEFAULT_FIRST_MESSAGE_TO_GPT =
+  'Provide a very short welcome message based on your prompt, the role your are playing is based on the prompt';
