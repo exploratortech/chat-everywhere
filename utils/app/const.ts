@@ -71,4 +71,4 @@ export const ERROR_MESSAGES = {
 };
 
 export const DEFAULT_FIRST_MESSAGE_TO_GPT =
-  'Provide a very short welcome message based on your prompt, the role your are playing is based on the prompt';
+  'Provide a short welcome message based on your prompt, the role you are playing is based on the prompt';
