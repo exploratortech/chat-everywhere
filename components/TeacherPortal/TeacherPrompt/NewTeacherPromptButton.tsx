@@ -17,7 +17,7 @@ interface Props {
 }
 const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
   const { t } = useTranslation('model');
-  const { t: promptT } = useTranslation('prompt');
+  const { t: promptT } = useTranslation('prompts');
 
   return (
     <Dialog>
