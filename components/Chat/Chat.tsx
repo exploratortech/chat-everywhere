@@ -299,18 +299,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       customInstructionOnClick={(
                         customInstructionPrompt: Prompt,
                       ) => {
-                        const isTeacherPromptTyp = isTeacherPrompt(
+                        const isTeacherPromptType = isTeacherPrompt(
                           customInstructionPrompt,
                         );
-                        // TODO: Update the message here
-                        const message: Message = {
-                          role: 'user',
-                          content:
-                            'Provide a very short welcome message based on your prompt, the role your are playing is based on the prompt.',
-                          pluginId: isTeacherPromptTyp
-                            ? (customInstructionPrompt.default_mode as Partial<PluginID>)
-                            : null,
-                        };
+                        const message: Message = isTeacherPromptType
+                          ? {
+                              role: 'user',
+                              content:
+                                customInstructionPrompt.first_message_to_gpt,
+                              pluginId:
+                                customInstructionPrompt.default_mode as Partial<PluginID>,
+                            }
+                          : {
+                              role: 'user',
+                              content:
+                                'Provide a very short welcome message based on your prompt, the role your are playing is based on the prompt.',
+                              pluginId: null,
+                            };
                         console.log({ message });
 
                         setCurrentMessage(message);
