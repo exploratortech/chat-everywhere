@@ -16,6 +16,7 @@ const CustomInstructionInUseIndicator = () => {
     state: { selectedConversation, currentMessage },
   } = useContext(HomeContext);
   const isInChatMode =
+    currentMessage?.pluginId === 'default' ||
     currentMessage?.pluginId === null ||
     currentMessage?.pluginId === PluginID.LANGCHAIN_CHAT ||
     currentMessage?.pluginId === PluginID.GPT4 ||
