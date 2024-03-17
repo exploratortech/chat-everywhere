@@ -1,6 +1,6 @@
 import { ChatBody, Conversation, Message } from '@/types/chat';
 import { Plugin, PluginID } from '@/types/plugin';
-import { Prompt } from '@/types/prompt';
+import { Prompt, isTeacherPrompt } from '@/types/prompt';
 import { User } from '@/types/user';
 
 import { getOrGenerateUserId } from '../data/taggingHelper';
@@ -80,6 +80,16 @@ function createChatBody(
       selectedConversation.imageQuality || DEFAULT_IMAGE_GENERATION_QUALITY;
     chatBody.imageStyle =
       selectedConversation.imageStyle || DEFAULT_IMAGE_GENERATION_STYLE;
+  }
+
+  const isTeacherPromptType =
+    selectedConversation.customInstructionPrompt &&
+    isTeacherPrompt(selectedConversation.customInstructionPrompt);
+  const isAiPainter = plugin?.id === PluginID.aiPainter;
+
+  // Currently, only the teacher prompt has a custom prompt setting for AI painter mode.
+  if (isAiPainter && !isTeacherPromptType) {
+    chatBody.prompt = '';
   }
 
   return chatBody;
