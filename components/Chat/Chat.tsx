@@ -22,7 +22,11 @@ import { throttle } from '@/utils/data/throttle';
 
 import { Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
-import { Prompt } from '@/types/prompt';
+import {
+  Prompt,
+  isCustomInstructionPrompt,
+  isTeacherCustomInstructionPrompt,
+} from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -80,7 +84,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         !!customInstructionPrompt;
 
       if (!message) return;
-      const plugin = (message.pluginId && Plugins[message.pluginId]) || null;
+      const plugin =
+        isCreatingConversationWithCustomInstruction &&
+        customInstructionPrompt.default_mode
+          ? Plugins[customInstructionPrompt.default_mode as Partial<PluginID>]
+          : (message.pluginId && Plugins[message.pluginId]) || null;
 
       const {
         addCustomInstructions,
@@ -291,12 +299,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       customInstructionOnClick={(
                         customInstructionPrompt: Prompt,
                       ) => {
+                        const isTeacherPrompt =
+                          isTeacherCustomInstructionPrompt(
+                            customInstructionPrompt,
+                          );
+                        const isCustomInstruction = isCustomInstructionPrompt(
+                          customInstructionPrompt,
+                        );
+                        // TODO: Update the message here
                         const message: Message = {
                           role: 'user',
                           content:
                             'Provide a very short welcome message based on your prompt, the role your are playing is based on the prompt.',
-                          pluginId: null,
+                          pluginId: isTeacherPrompt
+                            ? (customInstructionPrompt.default_mode as Partial<PluginID>)
+                            : null,
                         };
+                        console.log({ message });
 
                         setCurrentMessage(message);
                         handleSend(0, message, customInstructionPrompt);
