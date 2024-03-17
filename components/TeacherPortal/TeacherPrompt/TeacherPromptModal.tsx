@@ -22,8 +22,8 @@ interface Props {
   onUpdatePrompt: (prompt: TeacherPromptForTeacherPortal) => void;
 }
 interface ModelSelectProps {
-  mode: Prompt['default_mode'];
-  setMode: (mode: Prompt['default_mode']) => void;
+  mode: TeacherPromptForTeacherPortal['default_mode'];
+  setMode: (mode: TeacherPromptForTeacherPortal['default_mode']) => void;
 }
 
 const ModeSelector = ({ mode, setMode }: ModelSelectProps) => {
@@ -40,7 +40,7 @@ const ModeSelector = ({ mode, setMode }: ModelSelectProps) => {
   return (
     <Select
       onValueChange={(value) => {
-        setMode(value as Prompt['default_mode']);
+        setMode(value as TeacherPromptForTeacherPortal['default_mode']);
       }}
       defaultValue={mode || 'default'}
     >

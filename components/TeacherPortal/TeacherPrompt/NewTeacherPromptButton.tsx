@@ -2,6 +2,8 @@ import { IconPlus } from '@tabler/icons-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { DEFAULT_FIRST_MESSAGE_TO_GPT } from '@/utils/app/const';
+
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
@@ -15,6 +17,7 @@ interface Props {
 }
 const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
   const { t } = useTranslation('model');
+  const { t: promptT } = useTranslation('prompt');
 
   return (
     <Dialog>
@@ -39,6 +42,9 @@ const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
             is_enable: true,
             id: '',
             model: OpenAIModels[OpenAIModelID.GPT_4],
+            default_mode: 'default',
+            is_teacher_prompt: true,
+            first_message_to_gpt: promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
           }}
           onUpdatePrompt={onCreatePrompt}
         />

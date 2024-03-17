@@ -2,7 +2,7 @@ import { FC, useEffect, useRef } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Prompt } from '@/types/prompt';
+import { Prompt, isTeacherPrompt } from '@/types/prompt';
 
 interface CustomInstructionInUseDisplayProps {
   prompt: Prompt;
@@ -16,7 +16,7 @@ const CustomInstructionInUseDisplayModel: FC<
   const { t: chatT } = useTranslation('chat');
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const isTeacherCustomInstructionPrompt = prompt.is_teacher_prompt;
+  const isTeacherCustomInstructionPrompt = isTeacherPrompt(prompt);
   const title = chatT(
     isTeacherCustomInstructionPrompt
       ? 'Teacher Custom Instruction ({{customInstructionPromptName}}) is in use'

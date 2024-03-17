@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PluginID } from '@/types/plugin';
+import { isTeacherPrompt } from '@/types/prompt';
 
 import CustomInstructionInUseDisplayModel from '../Promptbar/components/CustomInstructionInUseDisplayModel';
 
@@ -22,8 +23,9 @@ const CustomInstructionInUseIndicator = () => {
 
   const [showModal, setShowModal] = useState(false);
   if (selectedConversation?.customInstructionPrompt && isInChatMode) {
-    const isTeacherCustomInstructionPrompt =
-      selectedConversation.customInstructionPrompt.is_teacher_prompt;
+    const isTeacherCustomInstructionPrompt = isTeacherPrompt(
+      selectedConversation.customInstructionPrompt,
+    );
     const customInstructionPromptName =
       selectedConversation.customInstructionPrompt.name.trim().length > 10
         ? selectedConversation.customInstructionPrompt.name
