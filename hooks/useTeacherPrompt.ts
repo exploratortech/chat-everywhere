@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-import { TeacherPrompt } from '@/types/prompt';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 const useTeacherPrompt = () => {
   const supabase = useSupabaseClient();
@@ -22,10 +22,10 @@ const useTeacherPrompt = () => {
       },
     });
     const data = await response.json();
-    return data.prompts as TeacherPrompt[];
+    return data.prompts as TeacherPromptForTeacherPortal[];
   };
 
-  const createPrompt = async (prompt: TeacherPrompt) => {
+  const createPrompt = async (prompt: TeacherPromptForTeacherPortal) => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token;
     if (!accessToken) {
@@ -45,7 +45,7 @@ const useTeacherPrompt = () => {
     return await response.json();
   };
 
-  const updatePrompt = async (prompt: TeacherPrompt) => {
+  const updatePrompt = async (prompt: TeacherPromptForTeacherPortal) => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token;
     if (!accessToken) {

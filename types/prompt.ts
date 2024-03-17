@@ -55,7 +55,7 @@ export function isTeacherCustomInstructionPrompt(
   );
 }
 
-export type TeacherPrompt = Omit<
+export type TeacherPromptForTeacherPortal = Omit<
   TeacherCustomInstructionPrompt,
   'folderId' | 'lastUpdateAtUTC' | 'rank' | 'isCustomInstruction' | 'deleted'
 > & {

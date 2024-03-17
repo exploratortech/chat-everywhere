@@ -1,4 +1,4 @@
-import { TeacherPrompt } from '@/types/prompt';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { getAdminSupabaseClient } from '../supabase';
 
@@ -47,7 +47,7 @@ export async function getTeacherPromptForStudent(student_profile_id: string) {
 }
 export async function getTeacherPrompt(
   teacher_profile_id: string,
-): Promise<TeacherPrompt[]> {
+): Promise<TeacherPromptForTeacherPortal[]> {
   const res = await supabase
     .from('teacher_prompts')
     .select('*')
@@ -63,7 +63,7 @@ export async function getTeacherPrompt(
 
 export async function updateTeacherPrompt(
   teacher_profile_id: string,
-  prompt: Partial<TeacherPrompt>,
+  prompt: Partial<TeacherPromptForTeacherPortal>,
 ): Promise<boolean> {
   const { error } = await supabase
     .from('teacher_prompts')
@@ -99,7 +99,7 @@ export async function removeTeacherPrompt(
 
 export async function createTeacherPrompt(
   teacher_profile_id: string,
-  prompt: TeacherPrompt,
+  prompt: TeacherPromptForTeacherPortal,
 ) {
   const { data, error } = await supabase
     .from('teacher_prompts')

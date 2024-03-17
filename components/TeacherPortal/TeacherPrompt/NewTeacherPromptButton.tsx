@@ -3,7 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
-import { TeacherPrompt } from '@/types/prompt';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { TeacherPromptModal } from './TeacherPromptModal';
 
 interface Props {
-  onCreatePrompt: (prompt: TeacherPrompt) => void;
+  onCreatePrompt: (prompt: TeacherPromptForTeacherPortal) => void;
 }
 const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
   const { t } = useTranslation('model');

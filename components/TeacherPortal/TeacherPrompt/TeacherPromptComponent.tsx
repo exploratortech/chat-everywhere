@@ -1,6 +1,6 @@
 import useTeacherPrompt from '@/hooks/useTeacherPrompt';
 
-import { TeacherPrompt } from '@/types/prompt';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { TeacherPromptModal } from '@/components/TeacherPortal/TeacherPrompt/TeacherPromptModal';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,13 +9,13 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 interface Props {
-  prompt: TeacherPrompt;
+  prompt: TeacherPromptForTeacherPortal;
 }
 
 export const TeacherPromptComponent = ({ prompt }: Props) => {
   const { updateMutation } = useTeacherPrompt();
   const { mutate: updatePrompt } = updateMutation;
-  const handleUpdate = (prompt: TeacherPrompt) => {
+  const handleUpdate = (prompt: TeacherPromptForTeacherPortal) => {
     updatePrompt(prompt);
   };
 

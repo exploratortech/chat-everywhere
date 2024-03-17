@@ -5,7 +5,7 @@ import { useTranslation } from 'next-i18next';
 import useTeacherPrompt from '@/hooks/useTeacherPrompt';
 
 import { PluginID } from '@/types/plugin';
-import { Prompt, TeacherPrompt } from '@/types/prompt';
+import { Prompt, TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
@@ -18,8 +18,8 @@ import {
 } from '@/components/ui/select';
 
 interface Props {
-  prompt: TeacherPrompt;
-  onUpdatePrompt: (prompt: TeacherPrompt) => void;
+  prompt: TeacherPromptForTeacherPortal;
+  onUpdatePrompt: (prompt: TeacherPromptForTeacherPortal) => void;
 }
 interface ModelSelectProps {
   mode: Prompt['default_mode'];

@@ -59,7 +59,6 @@ export const RolePlayPrompts: FC<Props> = ({
           key={prompt.id}
           className="mb-2 cursor-pointer rounded-md border border-neutral-200 bg-transparent p-1 pr-2 text-neutral-400 dark:border-neutral-600 dark:text-white flex justify-center items-center"
           onClick={() => {
-            console.log(prompt);
             customInstructionOnClick({
               ...prompt,
               is_teacher_prompt: true,
