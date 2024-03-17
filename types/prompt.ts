@@ -20,7 +20,7 @@ export interface CustomInstructionPrompt
 }
 export interface TeacherPrompt extends CustomInstructionPrompt {
   is_teacher_prompt: true;
-  first_user_message: string;
+  first_message_to_gpt: string;
   default_mode:
     | 'default'
     | PluginID.LANGCHAIN_CHAT
@@ -41,9 +41,7 @@ export function isCustomInstructionPrompt(
   );
 }
 
-export function isTeacherCustomInstructionPrompt(
-  prompt: Prompt,
-): prompt is TeacherPrompt {
+export function isTeacherPrompt(prompt: Prompt): prompt is TeacherPrompt {
   return !!(
     'isCustomInstruction' in prompt &&
     prompt.isCustomInstruction &&

@@ -25,7 +25,7 @@ import { PluginID, Plugins } from '@/types/plugin';
 import {
   Prompt,
   isCustomInstructionPrompt,
-  isTeacherCustomInstructionPrompt,
+  isTeacherPrompt,
 } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
@@ -86,7 +86,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       if (!message) return;
       const plugin =
         isCreatingConversationWithCustomInstruction &&
-        customInstructionPrompt.default_mode
+        isTeacherPrompt(customInstructionPrompt)
           ? Plugins[customInstructionPrompt.default_mode as Partial<PluginID>]
           : (message.pluginId && Plugins[message.pluginId]) || null;
 
@@ -299,11 +299,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       customInstructionOnClick={(
                         customInstructionPrompt: Prompt,
                       ) => {
-                        const isTeacherPrompt =
-                          isTeacherCustomInstructionPrompt(
-                            customInstructionPrompt,
-                          );
-                        const isCustomInstruction = isCustomInstructionPrompt(
+                        const isTeacherPromptTyp = isTeacherPrompt(
                           customInstructionPrompt,
                         );
                         // TODO: Update the message here
@@ -311,7 +307,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                           role: 'user',
                           content:
                             'Provide a very short welcome message based on your prompt, the role your are playing is based on the prompt.',
-                          pluginId: isTeacherPrompt
+                          pluginId: isTeacherPromptTyp
                             ? (customInstructionPrompt.default_mode as Partial<PluginID>)
                             : null,
                         };
