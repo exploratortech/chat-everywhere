@@ -66,6 +66,9 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
   const { t } = useTranslation('promptbar');
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
+  const [firstMessageToGPT, setFirstMessageToGPT] = useState(
+    prompt.first_message_to_gpt,
+  );
   const [content, setContent] = useState(prompt.content);
   const [mode, setMode] = useState(prompt.default_mode);
   const [isEnable, setIsEnable] = useState(prompt.is_enable);
@@ -104,12 +107,28 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
       />
 
       <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
+        {t('First message to GPT')}
+      </div>
+      <textarea
+        className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
+        style={{ resize: 'none' }}
+        placeholder={
+          t('The message will be used to start the conversation with AI') || ''
+        }
+        value={firstMessageToGPT}
+        onChange={(e) => setFirstMessageToGPT(e.target.value)}
+        rows={3}
+      />
+
+      <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
         {t('Prompt')}
       </div>
       <textarea
         className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
         style={{ resize: 'none' }}
-        placeholder={t('') || ''}
+        placeholder={
+          t('The prompt will be used through out the conversation') || ''
+        }
         value={content}
         onChange={(e) => setContent(e.target.value)}
         rows={7}
@@ -151,6 +170,7 @@ export const TeacherPromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
                   content: content.trim(),
                   is_enable: isEnable,
                   default_mode: mode,
+                  first_message_to_gpt: firstMessageToGPT,
                 };
 
                 onUpdatePrompt(updatedPrompt);
