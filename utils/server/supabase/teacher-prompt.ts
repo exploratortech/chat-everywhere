@@ -11,7 +11,6 @@ export async function getTeacherPromptForTeacher(teacher_profile_id: string) {
     .eq('teacher_profile_id', teacher_profile_id)
     .eq('is_enable', true);
 
-  console.log(promptsRes);
   if (promptsRes.error) {
     console.log(promptsRes.error);
     throw promptsRes.error;
