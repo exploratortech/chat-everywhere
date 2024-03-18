@@ -8,6 +8,7 @@
   "Description": "描述",
   "A description for your prompt.": "提示词描述",
   "Prompt": "提示词",
+  "Instruction prompt": "角色扮演的描述",
   "Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}": "提示内容。使用 {{}} 表示一个变量。例如：{{name}} 是一个 {{adjective}} {{noun}}",
   "Save": "保存",
   "Custom Instruction": "设定为角色扮演",
@@ -15,6 +16,6 @@
   "Show to students": "向学生展示",
   "Remove": "删除",
   "First message to GPT": "首次对话内容",
-  "The prompt will be used through out the conversation.": "提示词将在整个对话中使用",
-  "The message will be used to start the conversation with AI": "該訊息将用于开始与AI对话"
+  "The prompt will be used through out the conversation.": "关于这个角色扮演的规则，比如：必须使用繁体中文来回答(zh-hant)，不要使用在对话中没有提到的资讯。",
+  "The first message to start the conversation, such that the student does not need to type anything to start": "首条讯息, 比如：你好，我想知道怎样可以提升我的写作能力。"
 }

@@ -8,7 +8,7 @@ import { PluginID } from '@/types/plugin';
 import { Prompt, TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
-import { DialogClose, DialogFooter } from '@/components/ui/dialog';
+
 import {
   Select,
   SelectContent,
@@ -75,9 +75,7 @@ export const TeacherPromptModal: FC<Props> = ({
   const { t: formT } = useTranslation('form');
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
-  const [firstMessageToGPT, setFirstMessageToGPT] = useState(
-    prompt.first_message_to_gpt,
-  );
+  const [firstMessageToGPT, setFirstMessageToGPT] = useState("");
   const [content, setContent] = useState(prompt.content);
   const [mode, setMode] = useState(prompt.default_mode);
   const [isEnable, setIsEnable] = useState(prompt.is_enable);
@@ -95,7 +93,7 @@ export const TeacherPromptModal: FC<Props> = ({
     content: z.string().min(
       1,
       formT('isRequired', {
-        field: t('Prompt'),
+        field: t('Instruction prompt'),
       }) as string,
     ),
     first_message_to_gpt: z.string().min(
@@ -167,21 +165,7 @@ export const TeacherPromptModal: FC<Props> = ({
       />
 
       <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
-        {t('First message to GPT')}
-      </div>
-      <textarea
-        className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
-        style={{ resize: 'vertical' }}
-        placeholder={
-          t('The message will be used to start the conversation with AI') || ''
-        }
-        value={firstMessageToGPT}
-        onChange={(e) => setFirstMessageToGPT(e.target.value)}
-        rows={3}
-      />
-
-      <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
-        {t('Prompt')}
+        {t('Instruction prompt')}
       </div>
       <textarea
         className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
@@ -193,6 +177,21 @@ export const TeacherPromptModal: FC<Props> = ({
         onChange={(e) => setContent(e.target.value)}
         rows={7}
       />
+
+      <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
+        {t('First message to GPT')}
+      </div>
+      <textarea
+        className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
+        style={{ resize: 'vertical' }}
+        placeholder={
+          t('The first message to start the conversation, such that the student does not need to type anything to start') || ''
+        }
+        value={firstMessageToGPT}
+        onChange={(e) => setFirstMessageToGPT(e.target.value)}
+        rows={3}
+      />
+
       <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
         {t('Mode')}
       </div>

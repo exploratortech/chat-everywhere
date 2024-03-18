@@ -24,7 +24,7 @@ export const TeacherPromptComponent = ({ prompt }: Props) => {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={() => setOpen(false)}>
-      <div className="w-full" onClick={() => setOpen(true)}>
+      <div className="w-full cursor-pointer" onClick={() => setOpen(true)}>
         <Card
           className={cn('bg-transparent', { 'opacity-40': !prompt.is_enable })}
         >
