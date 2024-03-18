@@ -37,7 +37,7 @@ const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
         </Button>
       </div>
 
-      <DialogContent className="sm:max-w-md text-white">
+      <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[90dvh] max-h-[90dvh] overflow-y-scroll">
         <TeacherPromptModal
           prompt={{
             name: '',
