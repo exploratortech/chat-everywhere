@@ -92,7 +92,7 @@ function createChatBody(
     chatBody.prompt = '';
   }
 
-  return chatBody;
+  return structuredClone(chatBody);
 }
 
 async function sendRequest(

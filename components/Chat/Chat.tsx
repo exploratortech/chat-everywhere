@@ -119,12 +119,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         );
         homeDispatch({
           field: 'selectedConversation',
-          value: isCreatingConversationWithCustomInstruction
-            ? {
-                ...updatedConversation,
-                messages: [...updatedConversation.messages.slice(1)],
-              }
-            : updatedConversation,
+          value: updatedConversation,
         });
         homeDispatch({ field: 'loading', value: true });
         homeDispatch({ field: 'messageIsStreaming', value: true });
@@ -134,6 +129,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           plugin,
           selectedConversation,
         );
+
+        const isTeacherPromptConversation =
+          updatedConversation.customInstructionPrompt &&
+          isTeacherPrompt(updatedConversation.customInstructionPrompt);
+        if (
+          isCreatingConversationWithCustomInstruction &&
+          !isTeacherPromptConversation
+        ) {
+          selectedConversation.messages.shift();
+          updatedConversation.messages.shift();
+        }
         const response = await sendRequest(
           chatBody,
           plugin,
@@ -142,10 +148,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           user,
         );
 
-        if (isCreatingConversationWithCustomInstruction) {
-          selectedConversation.messages.shift();
-          updatedConversation.messages.shift();
-        }
         if (!response.ok) {
           handleErrorResponse(
             response,
@@ -316,7 +318,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                               content: promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
                               pluginId: null,
                             };
-                        console.log({ message });
 
                         setCurrentMessage(message);
                         handleSend(0, message, customInstructionPrompt);
