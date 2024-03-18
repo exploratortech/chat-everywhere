@@ -3,7 +3,7 @@ import { DragData } from '@/types/drag';
 import { ErrorMessage } from '@/types/error';
 import { FolderInterface } from '@/types/folder';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
-import { Prompt, TeacherPrompt } from '@/types/prompt';
+import { Prompt, TeacherPromptForTeacherPortal } from '@/types/prompt';
 import { TeacherSettings } from '@/types/teacher-settings';
 import { CreditUsage, User } from '@/types/user';
 
@@ -74,7 +74,7 @@ export interface HomeInitialState {
   speechRecognitionLanguage: string;
 
   // Teacher Portal
-  teacherPrompts: TeacherPrompt[];
+  teacherPrompts: TeacherPromptForTeacherPortal[];
   teacherSettings: TeacherSettings;
 }
 

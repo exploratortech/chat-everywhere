@@ -4,7 +4,7 @@ import {
 } from '@/utils/server/auth';
 import { updateTeacherPrompt } from '@/utils/server/supabase/teacher-prompt';
 
-import { TeacherPrompt } from '@/types/prompt';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 export const config = {
   runtime: 'edge',
@@ -20,7 +20,7 @@ const handler = async (req: Request): Promise<Response> => {
     return unauthorizedResponse;
 
   const requestBody = (await req.json()) as {
-    prompt: TeacherPrompt;
+    prompt: TeacherPromptForTeacherPortal;
   };
   const prompt = requestBody?.prompt;
   if (!prompt) {

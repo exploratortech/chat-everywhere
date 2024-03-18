@@ -1,9 +1,24 @@
-import { TeacherPrompt } from '@/types/prompt';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
+import { Database } from '@/types/supabase';
 
 import { getAdminSupabaseClient } from '../supabase';
 
 const supabase = getAdminSupabaseClient();
 
+export async function getTeacherPromptForTeacher(teacher_profile_id: string) {
+  const promptsRes = await supabase
+    .from('teacher_prompts')
+    .select('*')
+    .eq('teacher_profile_id', teacher_profile_id)
+    .eq('is_enable', true);
+
+  if (promptsRes.error) {
+    console.log(promptsRes.error);
+    throw promptsRes.error;
+  }
+
+  return promptsRes.data;
+}
 export async function getTeacherPromptForStudent(student_profile_id: string) {
   // Step 1: Locate teacher profile id by getting the temp profile by student profile id
   // with join on one time code table to get the teacher profile id
@@ -28,22 +43,11 @@ export async function getTeacherPromptForStudent(student_profile_id: string) {
     .teacher_profile_id;
 
   // Step 2: Get the teacher prompt by teacher profile id and filter out only the is_enable = true
-  const promptsRes = await supabase
-    .from('teacher_prompts')
-    .select('*')
-    .eq('teacher_profile_id', teacher_profile_id)
-    .eq('is_enable', true);
-
-  if (promptsRes.error) {
-    console.log(promptsRes.error);
-    throw promptsRes.error;
-  }
-
-  return promptsRes.data;
+  return await getTeacherPromptForTeacher(teacher_profile_id);
 }
 export async function getTeacherPrompt(
   teacher_profile_id: string,
-): Promise<TeacherPrompt[]> {
+): Promise<TeacherPromptForTeacherPortal[]> {
   const res = await supabase
     .from('teacher_prompts')
     .select('*')
@@ -59,7 +63,7 @@ export async function getTeacherPrompt(
 
 export async function updateTeacherPrompt(
   teacher_profile_id: string,
-  prompt: Partial<TeacherPrompt>,
+  prompt: Partial<TeacherPromptForTeacherPortal>,
 ): Promise<boolean> {
   const { error } = await supabase
     .from('teacher_prompts')
@@ -94,12 +98,11 @@ export async function removeTeacherPrompt(
 }
 
 export async function createTeacherPrompt(
-  teacher_profile_id: string,
-  prompt: TeacherPrompt,
+  prompt: Database['public']['Tables']['teacher_prompts']['Insert'],
 ) {
   const { data, error } = await supabase
     .from('teacher_prompts')
-    .insert({ ...prompt, teacher_profile_id })
+    .insert({ ...prompt })
     .select();
 
   if (error) {

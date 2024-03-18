@@ -2,7 +2,7 @@ import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Prompt } from '@/types/prompt';
+import { CustomInstructionPrompt, Prompt, RegularPrompt } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
@@ -89,8 +89,8 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
             onChange={(e) =>
               onUpdatePrompt({
                 ...prompt,
-                isCustomInstruction: e.target.checked,
-              })
+                isCustomInstruction: !!e.target.checked,
+              } as RegularPrompt | CustomInstructionPrompt)
             }
           />
           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>

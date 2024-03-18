@@ -4,7 +4,7 @@ import {
 } from '@/utils/server/auth';
 import { createTeacherPrompt } from '@/utils/server/supabase/teacher-prompt';
 
-import { TeacherPrompt } from '@/types/prompt';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 export const config = {
   runtime: 'edge',
@@ -20,20 +20,30 @@ const handler = async (req: Request): Promise<Response> => {
     return unauthorizedResponse;
 
   const requestBody = (await req.json()) as {
-    prompt: TeacherPrompt;
+    prompt: TeacherPromptForTeacherPortal;
   };
-  const prompt = requestBody?.prompt;
+  const { prompt } = requestBody;
+
   if (!prompt) {
     return new Response('No prompt provided', { status: 400 });
   }
+  const formattedPrompt = {
+    name: prompt.name,
+    description: prompt.description,
+    content: prompt.content,
+    is_enable: prompt.is_enable,
+    model: prompt.model.id,
+    default_mode: prompt.default_mode,
+    first_message_to_gpt: prompt.first_message_to_gpt,
+    teacher_profile_id: userProfile.id,
+  };
 
   try {
     return new Response(
       JSON.stringify({
-        is_updated: await createTeacherPrompt(
-          userProfile.id,
-          requestBody.prompt,
-        ),
+        is_updated: await createTeacherPrompt({
+          ...formattedPrompt,
+        }),
       }),
       { status: 200 },
     );

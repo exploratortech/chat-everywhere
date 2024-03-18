@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef } from 'react';
 
 import { Conversation } from '@/types/chat';
+import { isTeacherPrompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -16,7 +17,8 @@ const useCustomInstructionDefaultMode = (
 
   useEffect(() => {
     if (
-      selectedConversation?.customInstructionPrompt?.default_mode &&
+      selectedConversation?.customInstructionPrompt &&
+      isTeacherPrompt(selectedConversation.customInstructionPrompt) &&
       prevConversationId.current !== selectedConversation.id
     ) {
       homeDispatch({

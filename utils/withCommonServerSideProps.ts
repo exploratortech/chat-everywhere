@@ -33,6 +33,7 @@ export const withCommonServerSideProps =
         'auth',
         'mjImage',
         'imageToPrompt',
+        'form',
       ])),
     };
 
