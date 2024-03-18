@@ -38,7 +38,7 @@ export const TeacherPromptComponent = ({ prompt }: Props) => {
           </CardContent>
         </Card>
       </div>
-      <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[100dvh] max-h-[100dvh] overflow-y-scroll">
+      <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[90dvh] max-h-[90dvh] overflow-y-scroll">
         <TeacherPromptModal
           prompt={prompt}
           onUpdatePrompt={handleUpdate}
