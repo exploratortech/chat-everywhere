@@ -48,7 +48,7 @@ const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
             model: OpenAIModels[OpenAIModelID.GPT_4],
             default_mode: PluginID.default,
             is_teacher_prompt: true,
-            first_message_to_gpt: promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
+            first_message_to_gpt: '',
           }}
           onUpdatePrompt={onCreatePrompt}
           onClose={() => {
