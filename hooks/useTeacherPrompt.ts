@@ -1,9 +1,9 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-import { TeacherPrompt } from '@/types/prompt';
-import { useTranslation } from 'react-i18next';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 const useTeacherPrompt = () => {
   const supabase = useSupabaseClient();
@@ -22,10 +22,10 @@ const useTeacherPrompt = () => {
       },
     });
     const data = await response.json();
-    return data.prompts as TeacherPrompt[];
+    return data.prompts as TeacherPromptForTeacherPortal[];
   };
 
-  const createPrompt = async (prompt: TeacherPrompt) => {
+  const createPrompt = async (prompt: TeacherPromptForTeacherPortal) => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token;
     if (!accessToken) {
@@ -45,7 +45,7 @@ const useTeacherPrompt = () => {
     return await response.json();
   };
 
-  const updatePrompt = async (prompt: TeacherPrompt) => {
+  const updatePrompt = async (prompt: TeacherPromptForTeacherPortal) => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token;
     if (!accessToken) {
@@ -92,6 +92,7 @@ const useTeacherPrompt = () => {
     createMutation: useMutation(createPrompt, {
       onSuccess: () => {
         queryClient.invalidateQueries('teacher-prompts');
+        queryClient.refetchQueries('teacher-prompts');
         toast.success(t('Prompt created successfully'));
       },
       onError: (error) => {
@@ -102,6 +103,7 @@ const useTeacherPrompt = () => {
     updateMutation: useMutation(updatePrompt, {
       onSuccess: () => {
         queryClient.invalidateQueries('teacher-prompts');
+        queryClient.refetchQueries('teacher-prompts');
         toast.success(t('Prompt updated successfully'));
       },
       onError: (error) => {
@@ -112,6 +114,7 @@ const useTeacherPrompt = () => {
     removeMutation: useMutation(removePrompt, {
       onSuccess: () => {
         queryClient.invalidateQueries('teacher-prompts');
+        queryClient.refetchQueries('teacher-prompts');
         toast.success(t('Prompt removed successfully'));
       },
       onError: (error) => {

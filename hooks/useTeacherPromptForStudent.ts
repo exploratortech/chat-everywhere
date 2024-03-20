@@ -1,7 +1,7 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useQuery } from 'react-query';
 
-import { TeacherPrompt } from '@/types/prompt';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 const useTeacherPromptForStudent = () => {
   const supabase = useSupabaseClient();
@@ -26,7 +26,7 @@ const useTeacherPromptForStudent = () => {
       }
       const data = await res.json();
       return data as {
-        prompts: TeacherPrompt[];
+        prompts: TeacherPromptForTeacherPortal[];
       };
     },
     {

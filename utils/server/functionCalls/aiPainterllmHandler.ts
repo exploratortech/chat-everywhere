@@ -12,6 +12,7 @@ type handlerType = {
   user: UserProfile;
   messages: Message[];
   countryCode: string;
+  prompt: string;
   onUpdate: (payload: string) => void;
   onProgressUpdate: (payload: string) => void;
   onErrorUpdate: (payload: string) => void;
@@ -34,6 +35,7 @@ export const aiPainterLlmHandler = async ({
   user,
   messages,
   countryCode,
+  prompt,
   onUpdate,
   onProgressUpdate,
   onErrorUpdate,
@@ -61,7 +63,7 @@ export const aiPainterLlmHandler = async ({
     while (isFunctionCallRequired) {
       const requestedFunctionCalls = await AIStream({
         countryCode: countryCode,
-        systemPrompt: llmHandlerPrompt,
+        systemPrompt: llmHandlerPrompt + prompt,
         messages: innerWorkingMessages,
         onUpdateToken: (token: string) => {
           onUpdate(token);

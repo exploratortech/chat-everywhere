@@ -47,7 +47,10 @@ export const addUsageEntry = async (
 // Get user credits
 export const getUserCredits = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
 ) => {
   const supabase = getAdminSupabaseClient();
   const { data, error } = await supabase
@@ -84,7 +87,10 @@ export const getUserCredits = async (
 // Update user credits
 export const updateUserCredits = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
   newBalance: number,
 ): Promise<void> => {
   const supabase = getAdminSupabaseClient();
@@ -107,7 +113,10 @@ export const updateUserCredits = async (
 // Subtract one credit from user's balance
 export const subtractCredit = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
   const newBalance = userCredits.balance - 1;
@@ -116,7 +125,10 @@ export const subtractCredit = async (
 
 export const addCredit = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
   credit: number,
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
@@ -127,7 +139,10 @@ export const addCredit = async (
 // Add user credits entry
 export const addUserCreditsEntry = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
 ): Promise<void> => {
   const initialBalance = DefaultMonthlyCredits[apiType];
   const supabase = getAdminSupabaseClient();
@@ -143,7 +158,10 @@ export const addUserCreditsEntry = async (
 // Reset user credits
 export const resetUserCredits = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
 ): Promise<void> => {
   updateUserCredits(userId, apiType, DefaultMonthlyCredits[apiType]);
 };
@@ -151,7 +169,10 @@ export const resetUserCredits = async (
 // Check if user has run out of credits
 export const hasUserRunOutOfCredits = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
 ): Promise<boolean> => {
   const userCredits = await getUserCredits(userId, apiType);
   return userCredits.balance <= 0;

@@ -17,12 +17,17 @@ import { event } from 'nextjs-google-analytics/dist/interactions';
 import useCustomInstructionDefaultMode from '@/hooks/useCustomInstructionDefaultMode';
 
 import chat from '@/utils/app/chat';
+import { DEFAULT_FIRST_MESSAGE_TO_GPT } from '@/utils/app/const';
 import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 import { throttle } from '@/utils/data/throttle';
 
 import { Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
-import { Prompt } from '@/types/prompt';
+import {
+  Prompt,
+  isCustomInstructionPrompt,
+  isTeacherPrompt,
+} from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -40,6 +45,7 @@ interface Props {
 
 export const Chat = memo(({ stopConversationRef }: Props) => {
   const { t } = useTranslation('chat');
+  const { t: promptT } = useTranslation('prompts');
   const { t: commonT } = useTranslation('common');
 
   const {
@@ -80,7 +86,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         !!customInstructionPrompt;
 
       if (!message) return;
-      const plugin = (message.pluginId && Plugins[message.pluginId]) || null;
+      const plugin =
+        isCreatingConversationWithCustomInstruction &&
+        isTeacherPrompt(customInstructionPrompt)
+          ? Plugins[customInstructionPrompt.default_mode]
+          : (message.pluginId && Plugins[message.pluginId]) || null;
 
       const {
         addCustomInstructions,
@@ -109,12 +119,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         );
         homeDispatch({
           field: 'selectedConversation',
-          value: isCreatingConversationWithCustomInstruction
-            ? {
-                ...updatedConversation,
-                messages: [...updatedConversation.messages.slice(1)],
-              }
-            : updatedConversation,
+          value: updatedConversation,
         });
         homeDispatch({ field: 'loading', value: true });
         homeDispatch({ field: 'messageIsStreaming', value: true });
@@ -124,6 +129,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           plugin,
           selectedConversation,
         );
+
+        const isTeacherPromptConversation =
+          updatedConversation.customInstructionPrompt &&
+          isTeacherPrompt(updatedConversation.customInstructionPrompt);
+        if (
+          isCreatingConversationWithCustomInstruction &&
+          !isTeacherPromptConversation
+        ) {
+          selectedConversation.messages.shift();
+          updatedConversation.messages.shift();
+        }
         const response = await sendRequest(
           chatBody,
           plugin,
@@ -132,10 +148,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           user,
         );
 
-        if (isCreatingConversationWithCustomInstruction) {
-          selectedConversation.messages.shift();
-          updatedConversation.messages.shift();
-        }
         if (!response.ok) {
           handleErrorResponse(
             response,
@@ -291,12 +303,21 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       customInstructionOnClick={(
                         customInstructionPrompt: Prompt,
                       ) => {
-                        const message: Message = {
-                          role: 'user',
-                          content:
-                            'Provide a very short welcome message based on your prompt, the role your are playing is based on the prompt.',
-                          pluginId: null,
-                        };
+                        const isTeacherPromptType = isTeacherPrompt(
+                          customInstructionPrompt,
+                        );
+                        const message: Message = isTeacherPromptType
+                          ? {
+                              role: 'user',
+                              content:
+                                customInstructionPrompt.first_message_to_gpt,
+                              pluginId: customInstructionPrompt.default_mode,
+                            }
+                          : {
+                              role: 'user',
+                              content: promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
+                              pluginId: null,
+                            };
 
                         setCurrentMessage(message);
                         handleSend(0, message, customInstructionPrompt);

@@ -33,7 +33,8 @@ const handler = async (req: Request): Promise<Response> => {
   const user = await getUserProfile(data.user.id);
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
-  const { messages } = (await req.json()) as ChatBody;
+  const chatbody = (await req.json()) as ChatBody;
+  const { messages, prompt } = chatbody;
 
   const sendToUser = (message: string) => {
     buffer.push(encoder.encode(message));
@@ -85,9 +86,11 @@ const handler = async (req: Request): Promise<Response> => {
 
       sendToUser('[PLACEHOLDER]');
 
+      const promptToSend = prompt || '';
       aiPainterLlmHandler({
         user,
         messages,
+        prompt: promptToSend,
         onUpdate: (payload) => {
           sendToUser(payload);
         },

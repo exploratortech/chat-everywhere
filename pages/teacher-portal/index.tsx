@@ -57,7 +57,7 @@ const TeacherPortal = () => {
                 <Sidebar className="bg-neutral-800 flex-shrink-0 flex-grow-0" />
               )}
               {isLoading ? (
-                <div className="flex mt-[50%]">
+                <div className="bg-neutral-900 flex-grow relative flex mt-[50%]">
                   <Spinner size="16px" className="mx-auto" />
                 </div>
               ) : (
