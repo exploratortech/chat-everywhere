@@ -32,7 +32,9 @@ export async function getTeacherSettingsForStudent(
   // Step 2: Get the teacher settings by teacher profile id and filter out
   const { data, error } = await supabase
     .from('teacher_settings')
-    .select('allow_student_use_line')
+    .select(
+      'allow_student_use_line, hidden_chateverywhere_default_character_prompt',
+    )
     .eq('teacher_profile_id', teacher_profile_id);
 
   if (error) {
@@ -51,14 +53,24 @@ export async function getTeacherSettings(
 ): Promise<TeacherSettings> {
   let { data, error } = await supabase
     .from('teacher_settings')
-    .select('allow_student_use_line')
+    .select(
+      'allow_student_use_line, hidden_chateverywhere_default_character_prompt',
+    )
     .eq('teacher_profile_id', teacher_profile_id);
 
   if (!data?.length) {
     const { data: newData, error: insertError } = await supabase
       .from('teacher_settings')
-      .insert([{ teacher_profile_id, allow_student_use_line: false }])
-      .select('allow_student_use_line');
+      .insert([
+        {
+          teacher_profile_id,
+          allow_student_use_line: false,
+          hidden_chateverywhere_default_character_prompt: false,
+        },
+      ])
+      .select(
+        'allow_student_use_line, hidden_chateverywhere_default_character_prompt',
+      );
 
     if (insertError) {
       throw insertError;
@@ -74,6 +86,8 @@ export async function getTeacherSettings(
   }
   return {
     allow_student_use_line: data[0].allow_student_use_line,
+    hidden_chateverywhere_default_character_prompt:
+      data[0].hidden_chateverywhere_default_character_prompt,
   };
 }
 
