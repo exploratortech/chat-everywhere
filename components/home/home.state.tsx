@@ -146,5 +146,6 @@ export const initialState: HomeInitialState = {
   teacherPrompts: [],
   teacherSettings: {
     allow_student_use_line: false,
+    hidden_chateverywhere_default_character_prompt: false,
   },
 };
