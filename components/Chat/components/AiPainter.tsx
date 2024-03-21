@@ -14,6 +14,7 @@ interface AiPainterProps {
   alt: string;
 }
 
+// This component is used to display the AI painter result (Backward compatibility, no longer used)
 const AiPainter: React.FC<AiPainterProps> = ({ src, alt }) => {
   const { t: mjImageT } = useTranslation('mjImage');
   const {
