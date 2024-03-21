@@ -95,7 +95,11 @@ const handler = async (req: Request): Promise<Response> => {
           sendToUser(payload);
         },
         onProgressUpdate: (payload) => {
-          sendLoadingMessage(payload);
+          if (payload.type === 'result') {
+            sendToUser(payload.content);
+          } else {
+            sendLoadingMessage(payload.content);
+          }
         },
         onErrorUpdate: (payload) => {
           sendErrorMessage(payload);

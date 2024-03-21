@@ -14,7 +14,7 @@ type handlerType = {
   countryCode: string;
   prompt: string;
   onUpdate: (payload: string) => void;
-  onProgressUpdate: (payload: string) => void;
+  onProgressUpdate: (payload: { content: string; type: string }) => void;
   onErrorUpdate: (payload: string) => void;
   onEnd: () => void;
 };
@@ -29,6 +29,8 @@ const llmHandlerPrompt =
 
   If failed to generate image, there is no need to show the prompt to user, only tell the user why it failed.
   If you never called the generate-image function, please give a reason why you didn't call it.
+
+  If the function call 'generate-html-for-ai-painter-images' is called, there is no need to show the image and prompt again since the result is shown already.
   `;
 
 export const aiPainterLlmHandler = async ({
@@ -45,6 +47,32 @@ export const aiPainterLlmHandler = async ({
   let isFunctionCallRequired = true;
   let innerWorkingMessages = messages;
 
+  functionCallsToSend.push({
+    name: 'generate-html-for-ai-painter-images',
+    description: 'To show the result of the image generation',
+    parameters: {
+      type: 'object',
+      properties: {
+        imageResults: {
+          type: 'array',
+          description: 'The result of the image generation',
+          items: {
+            type: 'object',
+            properties: {
+              url: {
+                type: 'string',
+                description: 'The url of the image',
+              },
+              prompt: {
+                type: 'string',
+                description: 'The prompt of the image',
+              },
+            },
+          },
+        },
+      },
+    },
+  });
   functionCallsToSend.push({
     name: 'generate-image',
     description: 'Generate an image from a prompt',
@@ -82,14 +110,25 @@ export const aiPainterLlmHandler = async ({
         let executionResult: string;
 
         // Execute helper function
-        onProgressUpdate('Creating artwork...🎨');
+
+        if (functionCall.name === 'generate-image') {
+          onProgressUpdate({
+            content: 'Creating artwork...🎨',
+            type: 'progress',
+          });
+        }
         const helperFunctionResult = await triggerHelperFunction(
           functionCall.name,
           functionCall.arguments,
           user.id,
           onProgressUpdate,
         );
-        onProgressUpdate(`Ready to show you...💌`);
+        if (functionCall.name === 'generate-image') {
+          onProgressUpdate({
+            content: 'Ready to show you...💌',
+            type: 'progress',
+          });
+        }
         executionResult = helperFunctionResult;
 
         innerWorkingMessages.push({

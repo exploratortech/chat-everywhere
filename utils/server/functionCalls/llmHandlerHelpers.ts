@@ -20,6 +20,7 @@ const helperFunctionNames = {
   weather: 'get-weather',
   line: 'send-message-to-line',
   aiPainter: 'generate-image',
+  generateHtmlForAiPainterImages: 'generate-html-for-ai-painter-images',
 };
 
 export const getHelperFunctionCalls = (
@@ -67,7 +68,7 @@ export const triggerHelperFunction = async (
   helperFunctionName: string,
   argumentsString: string,
   userId: string,
-  onProgressUpdate?: (payload: string) => void,
+  onProgressUpdate?: (payload: { content: string; type: string }) => void,
 ): Promise<string> => {
   console.log('Trying to trigger helperFunction: ', helperFunctionName);
 
@@ -200,9 +201,10 @@ export const triggerHelperFunction = async (
         if (!imagePublicUrlData) throw new Error('Image generation failed');
 
         if (onProgressUpdate) {
-          onProgressUpdate(
-            'Artwork is done, now adding the final touches...✨',
-          );
+          onProgressUpdate({
+            content: 'Artwork is done, now adding the final touches...✨',
+            type: 'progress',
+          });
         }
         return imagePublicUrlData.publicUrl;
       };
@@ -251,10 +253,26 @@ export const triggerHelperFunction = async (
          Prompt_2: ${imageGenerationResponse2.data[0].revised_prompt}.
          URL_2: ${imagePublicUrl2}
 
-        Display both images to user by using the URL in Markdown format.
+        Pass those URLs and Prompts to function generate-html-for-ai-painter-images for display the result.
       `;
 
       return functionResponse;
+    case helperFunctionNames.generateHtmlForAiPainterImages:
+      let imageResults: AiPainterImageGenerationResult[];
+      try {
+        console.log('argumentsString: ', argumentsString);
+        imageResults = JSON.parse(argumentsString).imageResults;
+        console.log('imageResults: ', imageResults);
+      } catch (e) {
+        return 'Unable to parse JSON that you provided, please output a valid JSON string. For example: {"imageResults": [{"prompt": "A cat", "url": "https://example.com/cat.png"}, {"prompt": "A dog", "url": "https://example.com/dog.png"}]}';
+      }
+      if (onProgressUpdate) {
+        onProgressUpdate({
+          content: generateHtmlForAiPainterImages(imageResults),
+          type: 'result',
+        });
+      }
+      return `You can safely end the conversation here, the result is shown already. PLEASE DO NOT SHOW THE IMAGE AND PROMPT AGAIN SINCE THE RESULT IS SHOWN.`;
     default:
       return "I don't know how to do that yet, please try again later.";
   }
@@ -415,3 +433,18 @@ export const retrieveMqttConnectionPayload = async (
     }
   }
 };
+
+function generateHtmlForAiPainterImages(
+  imageResults: AiPainterImageGenerationResult[],
+): string {
+  const imagesHtml = imageResults
+    .map((result) => `<img src="${result.url}" alt="${result.prompt}" />`)
+    .join('');
+
+  return `<div id="ai-painter-generated-image">${imagesHtml}</div>`;
+}
+
+interface AiPainterImageGenerationResult {
+  prompt: string;
+  url: string;
+}
