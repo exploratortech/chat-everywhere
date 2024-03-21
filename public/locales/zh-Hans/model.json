@@ -190,5 +190,6 @@
   "Error removing prompt": "移除指导提示词时出错，请稍后再试",
   "View full message": "查看完整讯息",
   "AI Painter": "AI绘画",
-  "Allow Student to use LINE": "允许学生使用LINE"
+  "Allow Student to use LINE": "允许学生使用LINE",
+  "Hidden ChatEverywhere Default Character Prompt": "隐藏ChatEverywhere默认角色提示词"
 }
