@@ -134,6 +134,7 @@ export const triggerHelperFunction = async (
       } catch (e) {
         return 'Unable to send notification to LINE';
       }
+
     case helperFunctionNames.aiPainter:
       let prompt: string;
       try {
@@ -147,16 +148,33 @@ export const triggerHelperFunction = async (
       });
       serverSideTrackEvent('N/A', 'DallE image generation');
 
-      const imageGenerationResponse = await generateImage(prompt);
+      const [imageGenerationResponse1, imageGenerationResponse2] =
+        await Promise.all([
+          await generateImage(prompt),
+          await generateImage(prompt),
+        ]);
 
-      if (!imageGenerationResponse.data) {
-        console.error('imageGenerationResponse: ', imageGenerationResponse);
-        return `Failed to generate image, below is the error message: ${imageGenerationResponse.errorMessage}`;
+      if (!imageGenerationResponse1.data || !imageGenerationResponse2.data) {
+        console.error('imageGenerationResponse1: ', imageGenerationResponse1);
+        console.error('imageGenerationResponse2: ', imageGenerationResponse2);
+        let errorMessage = '';
+        if (!imageGenerationResponse1.data)
+          errorMessage =
+            errorMessage +
+            `Failed to generate image, below is the error message: ${imageGenerationResponse1.errorMessage}`;
+        if (!imageGenerationResponse2.data)
+          errorMessage =
+            errorMessage +
+            `Failed to generate image, below is the error message: ${imageGenerationResponse2.errorMessage}`;
+        return errorMessage;
       }
 
-      const generatedImageInBase64 = imageGenerationResponse.data[0].b64_json;
+      const generatedImageInBase64_1 =
+        imageGenerationResponse1.data[0].b64_json;
+      const generatedImageInBase64_2 =
+        imageGenerationResponse2.data[0].b64_json;
 
-      if (!generatedImageInBase64) {
+      if (!generatedImageInBase64_1 || !generatedImageInBase64_2) {
         return 'Failed to generate image';
       }
 
@@ -189,6 +207,10 @@ export const triggerHelperFunction = async (
         return imagePublicUrlData.publicUrl;
       };
 
+      // Run storeImage and substractUserCredit in parallel
+      let imagePublicUrlPromise1 = storeImage(generatedImageInBase64_1);
+      let imagePublicUrlPromise2 = storeImage(generatedImageInBase64_2);
+
       const subtractUserCredit = async () => {
         console.log('Subtracting credit from user');
         try {
@@ -198,34 +220,38 @@ export const triggerHelperFunction = async (
           throw 'Not enough credit';
         }
       };
-
-      // Run storeImage and substractUserCredit in parallel
-      let imagePublicUrlPromise = storeImage(generatedImageInBase64);
       // TODO: Enable Temp disable subtract credit
       // let subtractUserCreditPromise = subtractUserCredit();
 
-      let imagePublicUrl: string;
+      let imagePublicUrl1: string;
+      let imagePublicUrl2: string;
       try {
-        const [storeImageRes] = await Promise.all([
-          imagePublicUrlPromise,
+        const [storeRes1, storeRes2] = await Promise.all([
+          imagePublicUrlPromise1,
+          imagePublicUrlPromise2,
           // TODO: Enable Temp disable subtract credit
           // subtractUserCreditPromise,
         ]);
-        imagePublicUrl = storeImageRes;
+        imagePublicUrl1 = storeRes1;
+        imagePublicUrl2 = storeRes2;
       } catch (error) {
         console.error('Error in parallel execution: ', error);
         return 'Failed to process image or subtract user credit';
       }
 
-      if (!imagePublicUrl) {
+      if (!imagePublicUrl1 || !imagePublicUrl2) {
         return 'Failed to store image';
       }
 
       const functionResponse = `
-        Image generated! Below is the detail: 
-        Generation prompt (insert this prompt as the 'alt' attribute of the image for later reference): ${imageGenerationResponse.data[0].revised_prompt}. 
-        URL: ${imagePublicUrl}
-        Display the image to user by using the URL in Markdown format.
+        2 Images generated! Below is the detail:
+        Generation prompt (insert the prompts as the 'alt' attribute of the image for later reference):
+         Prompt_1: ${imageGenerationResponse1.data[0].revised_prompt}.
+         URL_1: ${imagePublicUrl1}
+         Prompt_2: ${imageGenerationResponse2.data[0].revised_prompt}.
+         URL_2: ${imagePublicUrl2}
+
+        Display both images to user by using the URL in Markdown format.
       `;
 
       return functionResponse;
