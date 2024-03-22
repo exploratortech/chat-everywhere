@@ -141,7 +141,6 @@ const AssistantRespondMessage = memo(
         components={{
           div: ({ node, children, ...props }) => {
             if (node?.properties?.id === 'ai-painter-generated-image') {
-              console.log(node);
               const imageTags = node?.children;
               if (!imageTags) return <>{children}</>;
               const result = imageTags
