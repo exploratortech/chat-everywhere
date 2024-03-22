@@ -150,10 +150,7 @@ export const triggerHelperFunction = async (
       serverSideTrackEvent('N/A', 'DallE image generation');
 
       const [imageGenerationResponse1, imageGenerationResponse2] =
-        await Promise.all([
-          await generateImage(prompt),
-          await generateImage(prompt),
-        ]);
+        await Promise.all([generateImage(prompt), generateImage(prompt)]);
 
       if (!imageGenerationResponse1.data || !imageGenerationResponse2.data) {
         console.error('imageGenerationResponse1: ', imageGenerationResponse1);
