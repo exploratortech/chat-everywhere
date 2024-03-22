@@ -67,12 +67,10 @@ const handler = async (req: Request): Promise<Response> => {
       let stop = false;
       let error: any = null;
 
-      // Set an interval to send a placeholder message every 10 seconds
+      // The placeholder is used to keep the stream alive while the image is being generated
       const placeholderInterval = setInterval(() => {
         if (!stop) {
-          // Only send if the stop flag hasn't been set
           sendToUser('[PLACEHOLDER]');
-          console.log('========== placeholder interval sent');
         }
       }, 10000); // 10 seconds
 
@@ -91,7 +89,6 @@ const handler = async (req: Request): Promise<Response> => {
           }
           clearInterval(interval);
           clearInterval(placeholderInterval);
-          console.log('========== cleared interval for ai-painter');
         }
       }, 10);
 
