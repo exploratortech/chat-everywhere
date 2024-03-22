@@ -1,4 +1,7 @@
-import { TeacherSettings } from '@/types/teacher-settings';
+import {
+  TeacherSettings,
+  TeacherSettingsInPortal,
+} from '@/types/teacher-settings';
 
 import { getAdminSupabaseClient } from '../supabase';
 
@@ -50,11 +53,11 @@ export async function getTeacherSettingsForStudent(
 }
 export async function getTeacherSettings(
   teacher_profile_id: string,
-): Promise<TeacherSettings> {
+): Promise<TeacherSettingsInPortal> {
   let { data, error } = await supabase
     .from('teacher_settings')
     .select(
-      'allow_student_use_line, hidden_chateverywhere_default_character_prompt',
+      'allow_student_use_line, hidden_chateverywhere_default_character_prompt, should_clear_conversations_on_logout',
     )
     .eq('teacher_profile_id', teacher_profile_id);
 
@@ -66,10 +69,11 @@ export async function getTeacherSettings(
           teacher_profile_id,
           allow_student_use_line: false,
           hidden_chateverywhere_default_character_prompt: false,
+          should_clear_conversations_on_logout: false,
         },
       ])
       .select(
-        'allow_student_use_line, hidden_chateverywhere_default_character_prompt',
+        'allow_student_use_line, hidden_chateverywhere_default_character_prompt, should_clear_conversations_on_logout',
       );
 
     if (insertError) {
@@ -88,13 +92,15 @@ export async function getTeacherSettings(
     allow_student_use_line: data[0].allow_student_use_line,
     hidden_chateverywhere_default_character_prompt:
       data[0].hidden_chateverywhere_default_character_prompt,
+    should_clear_conversations_on_logout:
+      data[0].should_clear_conversations_on_logout,
   };
 }
 
 export async function updateTeacherSettings(
   teacher_profile_id: string,
-  settings: TeacherSettings,
-): Promise<TeacherSettings> {
+  settings: TeacherSettingsInPortal,
+): Promise<TeacherSettingsInPortal> {
   const { data, error } = await supabase
     .from('teacher_settings')
     .update(settings)

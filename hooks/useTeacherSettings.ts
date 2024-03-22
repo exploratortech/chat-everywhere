@@ -2,7 +2,7 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-import { TeacherSettings } from '@/types/teacher-settings';
+import { TeacherSettingsInPortal } from '@/types/teacher-settings';
 
 const useTeacherSettings = () => {
   const supabase = useSupabaseClient();
@@ -23,10 +23,10 @@ const useTeacherSettings = () => {
       throw new Error('Failed to fetch teacher settings');
     }
     const data = await response.json();
-    return data.settings as TeacherSettings;
+    return data.settings as TeacherSettingsInPortal;
   };
 
-  const updateTeacherSettings = async (settings: TeacherSettings) => {
+  const updateTeacherSettings = async (settings: TeacherSettingsInPortal) => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token;
     if (!accessToken) {
@@ -58,13 +58,16 @@ const useTeacherSettings = () => {
       onMutate: async (newSettings) => {
         await queryClient.cancelQueries('teacher-settings');
         const previousSettings =
-          queryClient.getQueryData<TeacherSettings>('teacher-settings');
-        queryClient.setQueryData<TeacherSettings>('teacher-settings', (old) => {
-          return {
-            ...old,
-            ...newSettings,
-          };
-        });
+          queryClient.getQueryData<TeacherSettingsInPortal>('teacher-settings');
+        queryClient.setQueryData<TeacherSettingsInPortal>(
+          'teacher-settings',
+          (old) => {
+            return {
+              ...old,
+              ...newSettings,
+            };
+          },
+        );
         return { previousSettings };
       },
       onError: (error, _newSettings, context) => {
