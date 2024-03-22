@@ -67,6 +67,15 @@ const handler = async (req: Request): Promise<Response> => {
       let stop = false;
       let error: any = null;
 
+      // Set an interval to send a placeholder message every 10 seconds
+      const placeholderInterval = setInterval(() => {
+        if (!stop) {
+          // Only send if the stop flag hasn't been set
+          sendToUser('[PLACEHOLDER]');
+          console.log('========== placeholder interval sent');
+        }
+      }, 10000); // 10 seconds
+
       const interval = setInterval(() => {
         if (buffer.length > 0) {
           const data = buffer.shift();
@@ -81,6 +90,8 @@ const handler = async (req: Request): Promise<Response> => {
             controller.close();
           }
           clearInterval(interval);
+          clearInterval(placeholderInterval);
+          console.log('========== cleared interval for ai-painter');
         }
       }, 10);
 
