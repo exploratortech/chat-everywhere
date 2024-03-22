@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import Image from 'next/image';
 
 import useTeacherSettings from '@/hooks/useTeacherSettings';
-import { TeacherSettings } from '@/types/teacher-settings';
+
+import { TeacherSettingsInPortal } from '@/types/teacher-settings';
 
 const TeacherSettings = () => {
   const { t } = useTranslation('model');
@@ -12,9 +13,10 @@ const TeacherSettings = () => {
   const { fetchSettingsQuery, updateSettingsMutation } = useTeacherSettings();
   const { data: settings } = fetchSettingsQuery;
 
-  const [formState, setFormState] = useState<TeacherSettings>({
+  const [formState, setFormState] = useState<TeacherSettingsInPortal>({
     allow_student_use_line: false,
     hidden_chateverywhere_default_character_prompt: false,
+    should_clear_conversations_on_logout: false,
   });
 
   useEffect(() => {
@@ -24,12 +26,11 @@ const TeacherSettings = () => {
   }, [settings]);
   const { mutate: updateSettings } = updateSettingsMutation;
 
-
   return (
     <div>
       <h1 className="font-bold mb-4">{t('Settings')}</h1>
       <div className="flex flex-col gap-4 mb-8 content-start">
-        <div className="mt-6 flex items-center justify-between">
+        <div className="mt-6 min-h-[50px] flex items-center justify-between">
           <div className="text-sm font-bold text-black dark:text-neutral-200">
             {t('Allow Student to use LINE')}{' '}
             <Image
@@ -49,23 +50,21 @@ const TeacherSettings = () => {
               id="toggleAllowStudentToUseLine"
               className="sr-only peer"
               checked={formState.allow_student_use_line}
-              onChange={(e) =>
-                  {
-                      setFormState({
-                        ...formState,
-                        allow_student_use_line: e.target.checked,
-                      })
-                      updateSettings({
-                    ...formState,
-                        allow_student_use_line: e.target.checked,
-                      });
-                          }
-                }
-
+              onChange={(e) => {
+                setFormState({
+                  ...formState,
+                  allow_student_use_line: e.target.checked,
+                });
+                updateSettings({
+                  ...formState,
+                  allow_student_use_line: e.target.checked,
+                });
+              }}
             />
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
           </label>
-        </div><div className="flex items-center justify-between">
+        </div>
+        <div className="min-h-[50px] flex items-center justify-between">
           <div className="text-sm font-bold text-black dark:text-neutral-200">
             {t('Hidden ChatEverywhere Default Character Prompt')}{' '}
           </div>
@@ -78,19 +77,45 @@ const TeacherSettings = () => {
               id="toggleHiddenChatEverywhereDefaultCharacterPrompt"
               className="sr-only peer"
               checked={formState.hidden_chateverywhere_default_character_prompt}
-              onChange={(e) =>
-                  {
-                      setFormState({
-                        ...formState,
-                        hidden_chateverywhere_default_character_prompt: e.target.checked,
-                      })
-                      updateSettings({
-                    ...formState,
-                        hidden_chateverywhere_default_character_prompt: e.target.checked,
-                      });
-                          }
-                }
-
+              onChange={(e) => {
+                setFormState({
+                  ...formState,
+                  hidden_chateverywhere_default_character_prompt:
+                    e.target.checked,
+                });
+                updateSettings({
+                  ...formState,
+                  hidden_chateverywhere_default_character_prompt:
+                    e.target.checked,
+                });
+              }}
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+          </label>
+        </div>
+        <div className="min-h-[50px] flex items-center justify-between">
+          <div className="text-sm font-bold text-black dark:text-neutral-200">
+            {t('Automatic clear Conversations on student logout')}
+          </div>
+          <label
+            htmlFor="toggleShouldClearConversationsOnStudentLogout"
+            className="inline-flex relative items-center cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              id="toggleShouldClearConversationsOnStudentLogout"
+              className="sr-only peer"
+              checked={formState.should_clear_conversations_on_logout}
+              onChange={(e) => {
+                setFormState({
+                  ...formState,
+                  should_clear_conversations_on_logout: e.target.checked,
+                });
+                updateSettings({
+                  ...formState,
+                  should_clear_conversations_on_logout: e.target.checked,
+                });
+              }}
             />
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
           </label>
