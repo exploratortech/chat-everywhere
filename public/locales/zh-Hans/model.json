@@ -191,5 +191,6 @@
   "View full message": "查看完整讯息",
   "AI Painter": "AI绘画",
   "Allow Student to use LINE": "允许学生使用LINE",
-  "Hidden ChatEverywhere Default Character Prompt": "隐藏ChatEverywhere默认角色提示词"
+  "Hidden ChatEverywhere Default Character Prompt": "隐藏ChatEverywhere默认角色提示词",
+  "Automatic clear Conversations on student logout": "学生帐户登出时自动清除对话"
 }
