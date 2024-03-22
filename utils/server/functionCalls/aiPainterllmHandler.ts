@@ -117,12 +117,20 @@ export const aiPainterLlmHandler = async ({
             type: 'progress',
           });
         }
+        const timeStartInSec = Math.floor(Date.now() / 1000);
         const helperFunctionResult = await triggerHelperFunction(
           functionCall.name,
           functionCall.arguments,
           user.id,
           onProgressUpdate,
         );
+        const timeEndInSec = Math.floor(Date.now() / 1000);
+        console.log(
+          `Time taken for ${functionCall.name}: ${
+            timeEndInSec - timeStartInSec
+          } seconds`,
+        );
+
         if (functionCall.name === 'generate-image') {
           onProgressUpdate({
             content: 'Ready to show you...💌',
