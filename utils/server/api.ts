@@ -8,11 +8,12 @@ import { Message } from '@/types/chat';
 // @ts-expect-error
 import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
 import {
+  AZURE_DALL_E_3_ENDPOINTS,
+  AZURE_DALL_E_API_KEYS,
   AZURE_OPENAI_ENDPOINTS,
   AZURE_OPENAI_GPT_4_ENDPOINTS,
   AZURE_OPENAI_GPT_4_KEYS,
   AZURE_OPENAI_KEYS,
-  OPENAI_API_HOST,
 } from '../app/const';
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
@@ -155,6 +156,20 @@ export const getEndpointsAndKeys = (
   const filteredKeys = shuffled.keys.filter((key) => key !== undefined);
 
   return [filteredEndpoints, filteredKeys];
+};
+
+export const getDalle3EndpointAndKeys = (): {
+  endpoint: string | undefined;
+  key: string | undefined;
+} => {
+  const endpoint =
+    AZURE_DALL_E_3_ENDPOINTS[
+      Math.floor(Math.random() * AZURE_DALL_E_3_ENDPOINTS.length)
+    ];
+  const keyIndex = AZURE_DALL_E_3_ENDPOINTS.indexOf(endpoint);
+  const key = AZURE_DALL_E_API_KEYS[keyIndex];
+
+  return { endpoint, key };
 };
 
 const shuffleEndpointsAndKeys = (
