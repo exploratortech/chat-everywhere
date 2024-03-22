@@ -153,7 +153,7 @@ const AssistantRespondMessage = memo(
 
               return <AiPainterResult results={result} />;
             }
-            return <>{children}</>;
+            return <div {...props}>{children}</div>;
           },
           a({ node, children, href, ...props }) {
             return (
