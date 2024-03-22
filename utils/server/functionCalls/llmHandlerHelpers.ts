@@ -149,53 +149,63 @@ export const triggerHelperFunction = async (
       });
       serverSideTrackEvent('N/A', 'DallE image generation');
 
-      const [imageGenerationResponse1, imageGenerationResponse2] =
-        await Promise.all([generateImage(prompt), generateImage(prompt)]);
+      const generateAndStoreImage = async () => {
+        const storeImage = async (imageBase64: string) => {
+          console.log(
+            'Image generated successfully, storing to Supabase storage ...',
+          );
+          const supabase = getAdminSupabaseClient();
+          const imageFileName = `${v4()}.png`;
+          const { error: fileUploadError } = await supabase.storage
+            .from('ai-images')
+            .upload(imageFileName, decode(imageBase64), {
+              cacheControl: '3600',
+              upsert: false,
+              contentType: 'image/png',
+            });
+          if (fileUploadError) throw fileUploadError;
 
-      if (!imageGenerationResponse1.data || !imageGenerationResponse2.data) {
-        console.error('imageGenerationResponse1: ', imageGenerationResponse1);
-        console.error('imageGenerationResponse2: ', imageGenerationResponse2);
-        let errorMessage = '';
-        if (!imageGenerationResponse1.data)
-          errorMessage =
-            errorMessage +
-            `Failed to generate image, below is the error message: ${imageGenerationResponse1.errorMessage}`;
-        if (!imageGenerationResponse2.data)
-          errorMessage =
-            errorMessage +
-            `Failed to generate image, below is the error message: ${imageGenerationResponse2.errorMessage}`;
-        return errorMessage;
-      }
+          const { data: imagePublicUrlData } = await supabase.storage
+            .from('ai-images')
+            .getPublicUrl(imageFileName);
 
-      const generatedImageInBase64_1 =
-        imageGenerationResponse1.data[0].b64_json;
-      const generatedImageInBase64_2 =
-        imageGenerationResponse2.data[0].b64_json;
+          if (!imagePublicUrlData) throw new Error('Image generation failed');
 
-      if (!generatedImageInBase64_1 || !generatedImageInBase64_2) {
-        return 'Failed to generate image';
-      }
+          return imagePublicUrlData.publicUrl;
+        };
+        try {
+          const imageGenerationResponse = await generateImage(prompt);
 
-      const storeImage = async (imageBase64: string) => {
-        console.log(
-          'Image generated successfully, storing to Supabase storage ...',
-        );
-        const supabase = getAdminSupabaseClient();
-        const imageFileName = `${v4()}.png`;
-        const { error: fileUploadError } = await supabase.storage
-          .from('ai-images')
-          .upload(imageFileName, decode(imageBase64), {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: 'image/png',
-          });
-        if (fileUploadError) throw fileUploadError;
+          if (!imageGenerationResponse.data) {
+            console.error('imageGenerationResponse: ', imageGenerationResponse);
+            if (!imageGenerationResponse.data)
+              throw new Error(
+                `Failed to generate image, below is the error message: ${imageGenerationResponse.errorMessage}`,
+              );
+          }
+          const generatedImageInBase64 =
+            imageGenerationResponse.data[0].b64_json;
+          if (!generatedImageInBase64) {
+            throw new Error('Failed to generate image');
+          }
+          // Run storeImage and substractUserCredit in parallel
+          const imagePublicUrl = await storeImage(generatedImageInBase64);
 
-        const { data: imagePublicUrlData } = await supabase.storage
-          .from('ai-images')
-          .getPublicUrl(imageFileName);
+          if (!imagePublicUrl) {
+            throw new Error('Failed to store image');
+          }
+          return {
+            revised_prompt: imageGenerationResponse.data[0].revised_prompt,
+            imagePublicUrl,
+          };
+        } catch (e) {
+          throw e;
+        }
+      };
 
-        if (!imagePublicUrlData) throw new Error('Image generation failed');
+      try {
+        const [imageGenerationResponse1, imageGenerationResponse2] =
+          await Promise.all([generateAndStoreImage(), generateAndStoreImage()]);
 
         if (onProgressUpdate) {
           onProgressUpdate({
@@ -203,64 +213,40 @@ export const triggerHelperFunction = async (
             type: 'progress',
           });
         }
-        return imagePublicUrlData.publicUrl;
-      };
 
-      // Run storeImage and substractUserCredit in parallel
-      let imagePublicUrlPromise1 = storeImage(generatedImageInBase64_1);
-      let imagePublicUrlPromise2 = storeImage(generatedImageInBase64_2);
+        const subtractUserCredit = async () => {
+          console.log('Subtracting credit from user');
+          try {
+            await addUsageEntry(PluginID.IMAGE_GEN, userId);
+            await subtractCredit(userId, PluginID.IMAGE_GEN);
+          } catch (e) {
+            throw 'Not enough credit';
+          }
+        };
+        // TODO: Enable Temp disable subtract credit
+        // await subtractUserCredit();
 
-      const subtractUserCredit = async () => {
-        console.log('Subtracting credit from user');
-        try {
-          await addUsageEntry(PluginID.IMAGE_GEN, userId);
-          await subtractCredit(userId, PluginID.IMAGE_GEN);
-        } catch (e) {
-          throw 'Not enough credit';
-        }
-      };
-      // TODO: Enable Temp disable subtract credit
-      // let subtractUserCreditPromise = subtractUserCredit();
+        const functionResponse = `
+        2 Images generated! Below is the detail:
+        Generation prompt (insert the prompts as the 'alt' attribute of the image for later reference):
+         Prompt_1: ${imageGenerationResponse1.revised_prompt}.
+         URL_1: ${imageGenerationResponse1.imagePublicUrl}
+         Prompt_2: ${imageGenerationResponse2.revised_prompt}.
+         URL_2: ${imageGenerationResponse2.imagePublicUrl}
 
-      let imagePublicUrl1: string;
-      let imagePublicUrl2: string;
-      try {
-        const [storeRes1, storeRes2] = await Promise.all([
-          imagePublicUrlPromise1,
-          imagePublicUrlPromise2,
-          // TODO: Enable Temp disable subtract credit
-          // subtractUserCreditPromise,
-        ]);
-        imagePublicUrl1 = storeRes1;
-        imagePublicUrl2 = storeRes2;
+        Pass those URLs and Prompts to function generate-html-for-ai-painter-images for display the result.
+      `;
+
+        return functionResponse;
       } catch (error) {
         console.error('Error in parallel execution: ', error);
         return 'Failed to process image or subtract user credit';
       }
 
-      if (!imagePublicUrl1 || !imagePublicUrl2) {
-        return 'Failed to store image';
-      }
-
-      const functionResponse = `
-        2 Images generated! Below is the detail:
-        Generation prompt (insert the prompts as the 'alt' attribute of the image for later reference):
-         Prompt_1: ${imageGenerationResponse1.data[0].revised_prompt}.
-         URL_1: ${imagePublicUrl1}
-         Prompt_2: ${imageGenerationResponse2.data[0].revised_prompt}.
-         URL_2: ${imagePublicUrl2}
-
-        Pass those URLs and Prompts to function generate-html-for-ai-painter-images for display the result.
-      `;
-      console.log(functionResponse);
-
-      return functionResponse;
     case helperFunctionNames.generateHtmlForAiPainterImages:
       let imageResults: AiPainterImageGenerationResult[];
       try {
-        console.log('argumentsString: ', argumentsString);
         imageResults = JSON.parse(argumentsString).imageResults;
-        console.log('imageResults: ', imageResults);
       } catch (e) {
         return 'Unable to parse JSON that you provided, please output a valid JSON string. For example: {"imageResults": [{"prompt": "A cat", "url": "https://example.com/cat.png"}, {"prompt": "A dog", "url": "https://example.com/dog.png"}]}';
       }
