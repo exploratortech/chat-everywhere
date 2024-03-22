@@ -255,6 +255,7 @@ export const triggerHelperFunction = async (
 
         Pass those URLs and Prompts to function generate-html-for-ai-painter-images for display the result.
       `;
+      console.log(functionResponse);
 
       return functionResponse;
     case helperFunctionNames.generateHtmlForAiPainterImages:

@@ -149,7 +149,6 @@ export const generateImage = async (
 
     // If status is 429 (Too Many Requests), wait for the delay then double it for the next iteration
     await new Promise((resolve) => {
-      console.log('waiting for: ', delay);
       setTimeout(resolve, delay);
     });
     delay *= 2;
@@ -355,5 +354,6 @@ const authorizedAzureRequest = async (options: RequestInit = {}) => {
     'Content-Type': 'application/json',
     ...options.headers,
   };
+  console.log('hitting endpoint: ', endpoint);
   return fetch(endpoint, { ...options, headers });
 };
