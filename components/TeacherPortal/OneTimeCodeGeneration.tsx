@@ -1,12 +1,10 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconRefresh } from '@tabler/icons-react';
-import React, { memo, useContext, useState } from 'react';
+import React, { memo, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
-
-import useTeacherOneTimeCodeTagsManagement from '@/hooks/useTeacherOneTimeCodeTagsManagement';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
@@ -20,12 +18,14 @@ import Spinner from '../Spinner/Spinner';
 import HelpTagTooltip from './HelpTagTooltip';
 import AddTagsToOneTimeCodeDropdown from './Tags/AddTagsToOneTimeCodeDropdown';
 import TemporaryAccountProfileList from './TemporaryAccountProfileList';
+import { TeacherPortalContext } from './teacher-portal.context';
 
 const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
   const { t } = useTranslation('model');
   const {
     state: { user },
   } = useContext(HomeContext);
+  const { startLoading, completeLoading } = useContext(TeacherPortalContext);
 
   const [invalidateCode, setInvalidateCode] = useState(false);
 
@@ -35,6 +35,13 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
     user?.id,
     selectedTags,
   );
+  useEffect(() => {
+    if (oneTimeCodeQuery.isLoading) {
+      startLoading();
+    } else {
+      completeLoading();
+    }
+  }, [completeLoading, oneTimeCodeQuery.isLoading, startLoading]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(oneTimeCodeQuery.data?.code || '');
@@ -44,6 +51,7 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
   // Trigger code invalidation and refetch
   const regenerateCode = () => {
     setInvalidateCode(true);
+    startLoading();
     oneTimeCodeQuery
       .refetch()
       .then(() => {
@@ -55,53 +63,66 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
       .finally(() => {
         setInvalidateCode(false);
         trackEvent('Teacher portal generate code');
+        completeLoading();
       });
   };
 
   return (
     <div>
       <h1 className="font-bold mb-4">{t('One-time code')}</h1>
-      {oneTimeCodeQuery.isLoading && (
+      {oneTimeCodeQuery.isLoading ? (
         <div className="flex mt-[50%]">
           <Spinner size="16px" className="mx-auto" />
         </div>
-      )}
-      {!oneTimeCodeQuery.isLoading && oneTimeCodeQuery.data?.code && (
-        <div className="flex select-none justify-between items-center flex-wrap gap-2">
-          <div onClick={handleCopy} className="cursor-pointer flex-shrink-0">
-            {`${t('Your one-time code is')}: `}
-            <span className="inline bg-sky-100 font-bold text-sm text-neutral-900 font-mono rounded dark:bg-neutral-600 dark:text-neutral-200 text-primary-500 p-1">
-              {oneTimeCodeQuery.data?.code}
-            </span>
-          </div>
-          <div className="flex gap-2 items-center">
-            <AddTagsToOneTimeCodeDropdown
-              selectedTags={selectedTags}
-              setSelectedTags={setSelectedTags}
-              tags={tags}
-              oneTimeCodeId={oneTimeCodeQuery.data?.code_id}
-            />
-            <HelpTagTooltip />
-            {oneTimeCodeQuery.data?.expiresAt && (
-              <CodeTimeLeft endOfDay={oneTimeCodeQuery.data.expiresAt} />
+      ) : (
+        <>
+          {oneTimeCodeQuery.data?.code && (
+            <div className="flex select-none justify-between items-center flex-wrap gap-2">
+              <div
+                onClick={handleCopy}
+                className="cursor-pointer flex-shrink-0"
+              >
+                {`${t('Your one-time code is')}: `}
+                <span className="inline bg-sky-100 font-bold text-sm text-neutral-900 font-mono rounded dark:bg-neutral-600 dark:text-neutral-200 text-primary-500 p-1">
+                  {oneTimeCodeQuery.data?.code}
+                </span>
+              </div>
+              <div className="flex gap-2 items-center">
+                <AddTagsToOneTimeCodeDropdown
+                  selectedTags={selectedTags}
+                  setSelectedTags={setSelectedTags}
+                  tags={tags}
+                  oneTimeCodeId={oneTimeCodeQuery.data?.code_id}
+                />
+                <HelpTagTooltip />
+                {oneTimeCodeQuery.data?.expiresAt && (
+                  <CodeTimeLeft endOfDay={oneTimeCodeQuery.data.expiresAt} />
+                )}
+              </div>
+            </div>
+          )}
+          <button
+            className="mx-auto my-3 flex w-fit items-center gap-3 rounded border text-sm py-2 px-4 hover:opacity-50 border-neutral-600 text-white md:mb-0 md:mt-2"
+            onClick={regenerateCode}
+            disabled={oneTimeCodeQuery.isLoading}
+          >
+            {oneTimeCodeQuery.isLoading ? (
+              <Spinner size="16px" />
+            ) : (
+              <IconRefresh />
             )}
-          </div>
-        </div>
-      )}
-      <button
-        className="mx-auto my-3 flex w-fit items-center gap-3 rounded border text-sm py-2 px-4 hover:opacity-50 border-neutral-600 text-white md:mb-0 md:mt-2"
-        onClick={regenerateCode}
-        disabled={oneTimeCodeQuery.isLoading}
-      >
-        {oneTimeCodeQuery.isLoading ? <Spinner size="16px" /> : <IconRefresh />}
-        <div>{t('Regenerate code')}</div>
-      </button>
-      {!oneTimeCodeQuery.isLoading && oneTimeCodeQuery.data?.code && (
-        <TemporaryAccountProfileList
-          tempAccountProfiles={oneTimeCodeQuery.data.tempAccountProfiles}
-          maxQuota={oneTimeCodeQuery.data.maxQuota}
-          totalActiveTempAccount={oneTimeCodeQuery.data.totalActiveTempAccount}
-        />
+            <div>{t('Regenerate code')}</div>
+          </button>
+          {oneTimeCodeQuery.data?.code && (
+            <TemporaryAccountProfileList
+              tempAccountProfiles={oneTimeCodeQuery.data.tempAccountProfiles}
+              maxQuota={oneTimeCodeQuery.data.maxQuota}
+              totalActiveTempAccount={
+                oneTimeCodeQuery.data.totalActiveTempAccount
+              }
+            />
+          )}
+        </>
       )}
     </div>
   );
