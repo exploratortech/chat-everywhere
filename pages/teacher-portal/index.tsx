@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useRef, useState } from 'react';
+import { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
 
 import useTeacherTags from '@/hooks/useTeacherTags';
@@ -33,16 +33,23 @@ const TeacherPortal = () => {
   // State to track if the component has mounted (i.e., we're on the client side)
   const [hasMounted, setHasMounted] = useState(false);
   const loadingRef = useRef<LoadingBarRef>(null);
-  const startLoading = () => {
+  const startLoading = useCallback(() => {
     loadingRef.current?.continuousStart();
-  };
-  const completeLoading = () => {
+  }, []);
+  const completeLoading = useCallback(() => {
     loadingRef.current?.complete();
-  };
+  }, []);
 
   const { fetchQuery } = useTeacherTags();
   const { data, isLoading } = fetchQuery;
   const tags: Tag[] = data || [];
+  useEffect(() => {
+    if (isLoading) {
+      startLoading();
+    } else {
+      completeLoading();
+    }
+  }, [completeLoading, isLoading, startLoading]);
 
   useEffect(() => {
     setHasMounted(true);

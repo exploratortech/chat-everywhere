@@ -24,12 +24,14 @@ import FloatMenu from './FloatMenu';
 import Pagination from './Pagination';
 import Filter from './ShareMessages/Filter';
 import SharedMessageItem from './SharedMessageItem';
+import { TeacherPortalContext } from './teacher-portal.context';
 
 const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
   const { t } = useTranslation('model');
   const {
     state: { user },
   } = useContext(HomeContext);
+  const { startLoading, completeLoading } = useContext(TeacherPortalContext);
   const [pagination, setPagination] = useState<PaginationType>({
     current_page: 1,
     total_pages: 0,
@@ -49,6 +51,13 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
       setSharedMessages,
       setPagination,
     );
+  useEffect(() => {
+    if (isLoading) {
+      startLoading();
+    } else {
+      completeLoading();
+    }
+  }, [completeLoading, isLoading, startLoading]);
 
   useEffect(() => {
     if (user) {
