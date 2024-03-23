@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import Image from 'next/image';
 
-import useTeacherSettings from '@/hooks/useTeacherSettings';
+import useTeacherSettings from '@/hooks/teacherPortal/useTeacherSettings';
 
 import { TeacherSettingsInPortal } from '@/types/teacher-settings';
 

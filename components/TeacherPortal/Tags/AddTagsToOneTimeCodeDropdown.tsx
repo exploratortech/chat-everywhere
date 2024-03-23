@@ -1,7 +1,7 @@
 import { IconTag } from '@tabler/icons-react';
 import { Dispatch, SetStateAction, memo, useEffect, useState } from 'react';
 
-import useTeacherOneTimeCodeTagsManagement from '@/hooks/useTeacherOneTimeCodeTagsManagement';
+import useTeacherOneTimeCodeTagsManagement from '@/hooks/teacherPortal/useTeacherOneTimeCodeTagsManagement';
 
 import { Tag } from '@/types/tags';
 

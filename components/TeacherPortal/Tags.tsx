@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import useTeacherTags from '@/hooks/useTeacherTags';
+import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 
 import { Tag as TagType } from '@/types/tags';
 

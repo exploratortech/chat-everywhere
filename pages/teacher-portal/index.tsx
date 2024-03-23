@@ -1,7 +1,7 @@
 import { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
 
-import useTeacherTags from '@/hooks/useTeacherTags';
+import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 import useUrlState from '@/hooks/useUrlState';
 
 import { withCommonServerSideProps } from '@/utils/withCommonServerSideProps';

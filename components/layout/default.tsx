@@ -9,10 +9,10 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { event } from 'nextjs-google-analytics';
 
+import useTeacherPromptForStudent from '@/hooks/teacherPortal/useTeacherPromptForStudent';
+import useTeacherSettingsForStudent from '@/hooks/teacherPortal/useTeacherSettingsForStudent';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
-import useTeacherPromptForStudent from '@/hooks/useTeacherPromptForStudent';
-import useTeacherSettingsForStudent from '@/hooks/useTeacherSettingsForStudent';
 import useUserProfile from '@/hooks/useUserProfile';
 
 import { fetchShareableConversation } from '@/utils/app/api';

@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import useTeacherPrompt from '@/hooks/useTeacherPrompt';
+import useTeacherPrompt from '@/hooks/teacherPortal/useTeacherPrompt';
 
 import NewTeacherPromptButton from './TeacherPrompt/NewTeacherPromptButton';
 import { TeacherPromptComponent } from './TeacherPrompt/TeacherPromptComponent';
