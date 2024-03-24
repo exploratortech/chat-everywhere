@@ -1,8 +1,8 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useQuery } from '@tanstack/react-query';
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from 'react-query';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 import { userProfileQuery } from '@/utils/server/supabase';
@@ -31,7 +31,7 @@ export const ReferralCodeEnter = () => {
     error: queryError,
     refetch: queryReferralCodeRefetch,
   } = useQuery<{ profile: UserProfile }, Error>(
-    'redeemReferralCode',
+    ['redeemReferralCode'],
     async () => {
       if (user === null) throw new Error('User is not logged in');
 
