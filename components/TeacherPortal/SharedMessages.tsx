@@ -11,6 +11,8 @@ import { useQuery, useQueryClient } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
+import useTeacherPortalLoading from '@/hooks/teacherPortal/useTeacherPortalLoading';
+
 import { Pagination as PaginationType } from '@/types/pagination';
 import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
 import { Tag } from '@/types/tags';
@@ -24,14 +26,12 @@ import FloatMenu from './FloatMenu';
 import Pagination from './Pagination';
 import Filter from './ShareMessages/Filter';
 import SharedMessageItem from './SharedMessageItem';
-import { TeacherPortalContext } from './teacher-portal.context';
 
 const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
   const { t } = useTranslation('model');
   const {
     state: { user },
   } = useContext(HomeContext);
-  const { startLoading, completeLoading } = useContext(TeacherPortalContext);
   const [pagination, setPagination] = useState<PaginationType>({
     current_page: 1,
     total_pages: 0,
@@ -51,13 +51,6 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
       setSharedMessages,
       setPagination,
     );
-  useEffect(() => {
-    if (isLoading) {
-      startLoading();
-    } else {
-      completeLoading();
-    }
-  }, [completeLoading, isLoading, startLoading]);
 
   useEffect(() => {
     if (user) {
@@ -139,34 +132,36 @@ export const useFetchSharedMessages = (
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
   const { selectedTags } = useShareMessageFilterStore();
+  const { withLoading } = useTeacherPortalLoading();
 
   return useQuery(
     ['shared-messages-with-teacher'],
-    async () => {
-      const payload = {
-        accessToken: (await supabase.auth.getSession()).data.session
-          ?.access_token,
-        page,
-        filter: {
-          tag_ids: selectedTags.map((tag) => tag.id),
-        },
-      };
-      const response = await fetch(
-        '/api/teacher-portal/get-shared-messages-with-teacher',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+    () =>
+      withLoading(async () => {
+        const payload = {
+          accessToken: (await supabase.auth.getSession()).data.session
+            ?.access_token,
+          page,
+          filter: {
+            tag_ids: selectedTags.map((tag) => tag.id),
           },
-          body: JSON.stringify(payload),
-        },
-      );
-      if (response.status !== 200 || !response.ok) {
-        throw new Error('Failed to fetch shared messages');
-      }
-      const data = await response.json();
-      return data;
-    },
+        };
+        const response = await fetch(
+          '/api/teacher-portal/get-shared-messages-with-teacher',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          },
+        );
+        if (response.status !== 200 || !response.ok) {
+          throw new Error('Failed to fetch shared messages');
+        }
+        const data = await response.json();
+        return data;
+      }),
     {
       keepPreviousData: true,
       refetchInterval: 3000, // 3 seconds
