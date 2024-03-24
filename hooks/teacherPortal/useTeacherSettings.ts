@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { TeacherSettingsInPortal } from '@/types/teacher-settings';
 
+import useTeacherPortalLoading from './useTeacherPortalLoading';
+
 const useTeacherSettings = () => {
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
@@ -49,44 +51,53 @@ const useTeacherSettings = () => {
     return await response.json();
   };
 
+  const { withLoading } = useTeacherPortalLoading();
   return {
-    fetchSettingsQuery: useQuery(['teacher-settings'], fetchTeacherSettings, {
-      staleTime: 600000,
-      refetchOnWindowFocus: true,
-    }),
-    updateSettingsMutation: useMutation(updateTeacherSettings, {
-      onMutate: async (newSettings) => {
-        await queryClient.cancelQueries(['teacher-settings']);
-        const previousSettings =
-          queryClient.getQueryData<TeacherSettingsInPortal>([
-            'teacher-settings',
-          ]);
-        queryClient.setQueryData<TeacherSettingsInPortal>(
-          ['teacher-settings'],
-          (old) => {
-            return {
-              ...old,
-              ...newSettings,
-            };
-          },
-        );
-        return { previousSettings };
+    fetchSettingsQuery: useQuery(
+      ['teacher-settings'],
+      () => withLoading(fetchTeacherSettings),
+      {
+        staleTime: 600000,
+        refetchOnWindowFocus: true,
       },
-      onError: (error, _newSettings, context) => {
-        console.error(error);
-        if (context?.previousSettings) {
-          queryClient.setQueryData(
+    ),
+    updateSettingsMutation: useMutation(
+      (settings: TeacherSettingsInPortal) =>
+        withLoading(() => updateTeacherSettings(settings)),
+      {
+        onMutate: async (newSettings) => {
+          await queryClient.cancelQueries(['teacher-settings']);
+          const previousSettings =
+            queryClient.getQueryData<TeacherSettingsInPortal>([
+              'teacher-settings',
+            ]);
+          queryClient.setQueryData<TeacherSettingsInPortal>(
             ['teacher-settings'],
-            context.previousSettings,
+            (old) => {
+              return {
+                ...old,
+                ...newSettings,
+              };
+            },
           );
-        }
+          return { previousSettings };
+        },
+        onError: (error, _newSettings, context) => {
+          console.error(error);
+          if (context?.previousSettings) {
+            queryClient.setQueryData(
+              ['teacher-settings'],
+              context.previousSettings,
+            );
+          }
+        },
+        onSettled: () => {
+          queryClient.invalidateQueries({
+            queryKey: ['teacher-settings'],
+          });
+        },
       },
-      onSettled: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['teacher-settings'],
-        });
-      },
-    }),
+    ),
   };
 };
 export default useTeacherSettings;
