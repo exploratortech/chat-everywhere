@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
@@ -8,23 +8,14 @@ import { Tag as TagType } from '@/types/tags';
 import { Button } from '../ui/button';
 import NewTagButton from './Tags/NewTagButton';
 import Tag from './Tags/Tag';
-import { TeacherPortalContext } from './teacher-portal.context';
 
 const Tags = ({ tags }: { tags: TagType[] }) => {
   const { t } = useTranslation('model');
   const { removeTeacherTags, addTeacherTag } = useTeacherTags();
-  const { startLoading, completeLoading } = useContext(TeacherPortalContext);
   const { mutateAsync: removeTags } = removeTeacherTags;
-  const { mutate: addTag, isLoading } = addTeacherTag;
+  const { mutate: addTag } = addTeacherTag;
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
-  useEffect(() => {
-    if (isLoading) {
-      startLoading();
-    } else {
-      completeLoading();
-    }
-  }, [completeLoading, isLoading, startLoading]);
   const handleRemoveTag = () => {
     const selectedTagDetails = tags.filter((tag) =>
       selectedTags.includes(tag.id),
@@ -41,16 +32,11 @@ const Tags = ({ tags }: { tags: TagType[] }) => {
       );
 
     if (proceedWithRemoval) {
-      startLoading();
-      removeTags(selectedTags)
-        .then((res) => {
-          if (res.isRemoved) {
-            setSelectedTags([]);
-          }
-        })
-        .finally(() => {
-          completeLoading();
-        });
+      removeTags(selectedTags).then((res) => {
+        if (res.isRemoved) {
+          setSelectedTags([]);
+        }
+      });
     }
   };
   return (
@@ -76,7 +62,6 @@ const Tags = ({ tags }: { tags: TagType[] }) => {
       <div className="flex items-center">
         <NewTagButton
           onAddTag={(tag_name) => {
-            startLoading();
             addTag(tag_name);
           }}
         />
