@@ -1,3 +1,4 @@
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +10,6 @@ import HomeContext from '@/components/home/home.context';
 import DropZone from './Dropzone';
 import ImagePreviewModel from './ImagePreviewModel';
 
-import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { v4 } from 'uuid';
 
 const ImageToPromptUpload = () => {
@@ -26,7 +26,7 @@ const ImageToPromptUpload = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [filename, setFilename] = useState<string>('');
   const [showImagePreview, setShowImagePreview] = useState<boolean>(false);
-  const supabaseClient = useMemo(() => createBrowserSupabaseClient(), []);
+  const supabaseClient = useSupabaseClient();
 
   const fileInputOnChange = (file: File) => {
     if (!user) {
