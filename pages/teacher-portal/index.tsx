@@ -30,29 +30,12 @@ const TeacherPortal = () => {
     portalState.showing,
   );
 
-  // State to track if the component has mounted (i.e., we're on the client side)
-  const [hasMounted, setHasMounted] = useState(false);
   const loadingRef = useRef<LoadingBarRef>(null);
   const startLoading = useCallback(() => {
     loadingRef.current?.continuousStart();
   }, []);
   const completeLoading = useCallback(() => {
     loadingRef.current?.complete();
-  }, []);
-
-  const { fetchQuery } = useTeacherTags();
-  const { data, isLoading } = fetchQuery;
-  const tags: Tag[] = data || [];
-  useEffect(() => {
-    if (isLoading) {
-      startLoading();
-    } else {
-      completeLoading();
-    }
-  }, [completeLoading, isLoading, startLoading]);
-
-  useEffect(() => {
-    setHasMounted(true);
   }, []);
 
   const dispatch: Dispatch<ShowingChangeAction> = (action) => {
@@ -68,38 +51,56 @@ const TeacherPortal = () => {
         value={{ state: { showing }, dispatch, startLoading, completeLoading }}
       >
         <LoadingBar color={'white'} ref={loadingRef} />;
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center text-center mobile:block">
-            <div className="bg-neutral-900 w-full tablet:max-w-[90vw] transform overflow-hidden text-left align-middle shadow-xl transition-all text-neutral-200 flex h-[100dvh] tablet:max-h-[unset] !max-w-[unset] !rounded-none">
-              {hasMounted && (
-                <Sidebar className="bg-neutral-800 flex-shrink-0 flex-grow-0" />
-              )}
-              {isLoading ? (
-                <div className="flex-grow relative flex items-center justify-center">
-                  <Spinner size="16px" />
-                </div>
-              ) : (
-                <div className="p-6 flex-grow relative overflow-y-auto">
-                  {showing === 'one-time-code' && (
-                    <OneTimeCodeGeneration tags={tags} />
-                  )}
-                  {showing === 'shared-message' && (
-                    <SharedMessages tags={tags} />
-                  )}
-                  {showing === 'tags' && <Tags tags={tags} />}
-                  {showing === 'teacher-prompt' && <TeacherPrompt />}
-                  {showing === 'settings' && <TeacherSettings />}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <TeacherPortalContent showing={showing} />
       </TeacherPortalContext.Provider>
     </DefaultLayout>
   );
 };
 
 export default TeacherPortal;
+
+interface TeacherPortalContentProps {
+  showing: string;
+}
+
+const TeacherPortalContent: React.FC<TeacherPortalContentProps> = ({
+  showing,
+}) => {
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+  const { fetchQuery } = useTeacherTags();
+  const { data, isLoading } = fetchQuery;
+  const tags: Tag[] = data || [];
+
+  return (
+    <div className="fixed inset-0 overflow-y-auto">
+      <div className="flex min-h-full items-center justify-center text-center mobile:block">
+        <div className="bg-neutral-900 w-full tablet:max-w-[90vw] transform overflow-hidden text-left align-middle shadow-xl transition-all text-neutral-200 flex h-[100dvh] tablet:max-h-[unset] !max-w-[unset] !rounded-none">
+          {hasMounted && (
+            <Sidebar className="bg-neutral-800 flex-shrink-0 flex-grow-0" />
+          )}
+          {isLoading ? (
+            <div className="flex-grow relative flex items-center justify-center">
+              <Spinner size="16px" />
+            </div>
+          ) : (
+            <div className="p-6 flex-grow relative overflow-y-auto">
+              {showing === 'one-time-code' && (
+                <OneTimeCodeGeneration tags={tags} />
+              )}
+              {showing === 'shared-message' && <SharedMessages tags={tags} />}
+              {showing === 'tags' && <Tags tags={tags} />}
+              {showing === 'teacher-prompt' && <TeacherPrompt />}
+              {showing === 'settings' && <TeacherSettings />}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const getServerSideProps = withCommonServerSideProps(async (context) => {
   const supabase = createServerSupabaseClient(context);
