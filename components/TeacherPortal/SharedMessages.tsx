@@ -12,10 +12,12 @@ import React, {
 import { useTranslation } from 'next-i18next';
 
 import useTeacherPortalLoading from '@/hooks/teacherPortal/useTeacherPortalLoading';
+import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 
 import { Pagination as PaginationType } from '@/types/pagination';
 import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
 import { Tag } from '@/types/tags';
+import { Tag as TagType } from '@/types/tags';
 
 import useShareMessageFilterStore from '@/components/TeacherPortal/share-message-filter.store';
 import HomeContext from '@/components/home/home.context';
@@ -27,11 +29,13 @@ import Pagination from './Pagination';
 import Filter from './ShareMessages/Filter';
 import SharedMessageItem from './SharedMessageItem';
 
-const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
+const SharedMessages = () => {
   const { t } = useTranslation('model');
   const {
     state: { user },
   } = useContext(HomeContext);
+  const { fetchQuery } = useTeacherTags();
+  const tags: TagType[] = fetchQuery.data || [];
   const [pagination, setPagination] = useState<PaginationType>({
     current_page: 1,
     total_pages: 0,
@@ -116,7 +120,7 @@ const SharedMessages = memo(({ tags }: { tags: Tag[] }) => {
       </div>
     </div>
   );
-});
+};
 
 SharedMessages.displayName = 'SharedMessages';
 

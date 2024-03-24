@@ -34,26 +34,20 @@ type sideBarItemType = {
 };
 
 export default function Sidebar({ className = '' }: Props) {
-  const {
-    state: { showing },
-    dispatch,
-  } = useContext(TeacherPortalContext);
   const { t } = useTranslation('model');
   const router = useRouter();
   const handleBackClick = () => {
     router.push('/');
   };
   const iconClass = 'h-[18px] tablet:h-[22px] tablet:w-[36px]';
+  const { slug } = router.query;
   const items: sideBarItemType[] = [
     {
       icon: <IconRating12Plus />,
       name: t('One-time code'),
       value: 'one-time-code',
       callback: () => {
-        dispatch({
-          field: 'showing',
-          value: 'one-time-code',
-        });
+        router.push('/teacher-portal/one-time-code');
       },
     },
     {
@@ -61,10 +55,7 @@ export default function Sidebar({ className = '' }: Props) {
       name: t('Shared messages'),
       value: 'shared-message',
       callback: () => {
-        dispatch({
-          field: 'showing',
-          value: 'shared-message',
-        });
+        router.push('/teacher-portal/shared-message');
       },
     },
     {
@@ -72,10 +63,7 @@ export default function Sidebar({ className = '' }: Props) {
       name: t('Tags'),
       value: 'tags',
       callback: () => {
-        dispatch({
-          field: 'showing',
-          value: 'tags',
-        });
+        router.push('/teacher-portal/tags');
       },
     },
     {
@@ -83,10 +71,7 @@ export default function Sidebar({ className = '' }: Props) {
       name: t('Teacher Prompt'),
       value: 'teacher-prompt',
       callback: () => {
-        dispatch({
-          field: 'showing',
-          value: 'teacher-prompt',
-        });
+        router.push('/teacher-portal/teacher-prompt');
       },
     },
   ];
@@ -96,10 +81,7 @@ export default function Sidebar({ className = '' }: Props) {
       name: t('Settings'),
       value: 'settings',
       callback: () => {
-        dispatch({
-          field: 'showing',
-          value: 'settings',
-        });
+        router.push('/teacher-portal/settings');
       },
     },
     {
@@ -135,8 +117,8 @@ export default function Sidebar({ className = '' }: Props) {
       <a
         key={`${i} ${item.name}`}
         href="#"
-        className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 tablet:px-2 tablet:py-4 
-          ${showing === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
+        className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+          ${slug === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
           ${item.overrideClassName ? item.overrideClassName : ''}
           `}
         onClick={item.callback}

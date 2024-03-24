@@ -71,9 +71,7 @@ const useTeacherTags = () => {
   };
 
   return {
-    fetchQuery: useQuery(['teacher-tags'], () => withLoading(fetchTags), {
-      staleTime: 600000,
-    }),
+    fetchQuery: useQuery(['teacher-tags'], () => withLoading(fetchTags), {}),
     addTeacherTag: useMutation(
       (tagName: string) => withLoading(() => addTag(tagName)),
       {

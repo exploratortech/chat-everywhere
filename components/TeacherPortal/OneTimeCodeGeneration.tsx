@@ -7,11 +7,13 @@ import { toast } from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 
 import useTeacherPortalLoading from '@/hooks/teacherPortal/useTeacherPortalLoading';
+import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { OneTimeCodeInfoPayload } from '@/types/one-time-code';
 import { Tag } from '@/types/tags';
+import { Tag as TagType } from '@/types/tags';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -20,13 +22,14 @@ import Spinner from '../Spinner/Spinner';
 import HelpTagTooltip from './HelpTagTooltip';
 import AddTagsToOneTimeCodeDropdown from './Tags/AddTagsToOneTimeCodeDropdown';
 import TemporaryAccountProfileList from './TemporaryAccountProfileList';
-import { TeacherPortalContext } from './teacher-portal.context';
 
-const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
+const OneTimeCodeGeneration = () => {
   const { t } = useTranslation('model');
   const {
     state: { user },
   } = useContext(HomeContext);
+  const { fetchQuery } = useTeacherTags();
+  const tags: TagType[] = fetchQuery.data || [];
 
   const [invalidateCode, setInvalidateCode] = useState(false);
 
@@ -118,7 +121,7 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
       )}
     </div>
   );
-});
+};
 
 OneTimeCodeGeneration.displayName = 'OneTimeCodeGeneration';
 
