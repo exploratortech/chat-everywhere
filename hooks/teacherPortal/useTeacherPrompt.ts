@@ -1,7 +1,7 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
@@ -89,13 +89,13 @@ const useTeacherPrompt = () => {
   };
 
   return {
-    fetchQuery: useQuery('teacher-prompts', () => withLoading(fetchPrompts), {
+    fetchQuery: useQuery(['teacher-prompts'], () => withLoading(fetchPrompts), {
       staleTime: 600000,
     }),
     createMutation: useMutation(createPrompt, {
       onSuccess: () => {
-        queryClient.invalidateQueries('teacher-prompts');
-        queryClient.refetchQueries('teacher-prompts');
+        queryClient.invalidateQueries(['teacher-prompts']);
+        queryClient.refetchQueries(['teacher-prompts']);
         toast.success(t('Prompt created successfully'));
       },
       onError: (error) => {
@@ -108,8 +108,8 @@ const useTeacherPrompt = () => {
         withLoading(() => updatePrompt(prompt)),
       {
         onSuccess: () => {
-          queryClient.invalidateQueries('teacher-prompts');
-          queryClient.refetchQueries('teacher-prompts');
+          queryClient.invalidateQueries(['teacher-prompts']);
+          queryClient.refetchQueries(['teacher-prompts']);
           toast.success(t('Prompt updated successfully'));
         },
         onError: (error) => {
@@ -122,8 +122,8 @@ const useTeacherPrompt = () => {
       (promptId: string) => withLoading(() => removePrompt(promptId)),
       {
         onSuccess: () => {
-          queryClient.invalidateQueries('teacher-prompts');
-          queryClient.refetchQueries('teacher-prompts');
+          queryClient.invalidateQueries(['teacher-prompts']);
+          queryClient.refetchQueries(['teacher-prompts']);
           toast.success(t('Prompt removed successfully'));
         },
         onError: (error) => {

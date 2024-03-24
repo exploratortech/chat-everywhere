@@ -1,6 +1,6 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { TeacherSettingsInPortal } from '@/types/teacher-settings';
 
@@ -50,17 +50,19 @@ const useTeacherSettings = () => {
   };
 
   return {
-    fetchSettingsQuery: useQuery('teacher-settings', fetchTeacherSettings, {
+    fetchSettingsQuery: useQuery(['teacher-settings'], fetchTeacherSettings, {
       staleTime: 600000,
       refetchOnWindowFocus: true,
     }),
     updateSettingsMutation: useMutation(updateTeacherSettings, {
       onMutate: async (newSettings) => {
-        await queryClient.cancelQueries('teacher-settings');
+        await queryClient.cancelQueries(['teacher-settings']);
         const previousSettings =
-          queryClient.getQueryData<TeacherSettingsInPortal>('teacher-settings');
+          queryClient.getQueryData<TeacherSettingsInPortal>([
+            'teacher-settings',
+          ]);
         queryClient.setQueryData<TeacherSettingsInPortal>(
-          'teacher-settings',
+          ['teacher-settings'],
           (old) => {
             return {
               ...old,
