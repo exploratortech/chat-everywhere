@@ -12,7 +12,6 @@ import Tag from './Tags/Tag';
 const Tags = () => {
   const { fetchQuery } = useTeacherTags();
   const tags: TagType[] = fetchQuery.data || [];
-  console.log('inter::::', fetchQuery.data?.length);
   const { t } = useTranslation('model');
   const { removeTeacherTags, addTeacherTag } = useTeacherTags();
   const { mutateAsync: removeTags } = removeTeacherTags;
