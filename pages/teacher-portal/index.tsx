@@ -2,7 +2,6 @@ import { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
 
 import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
-import useUrlState from '@/hooks/useUrlState';
 
 import { withCommonServerSideProps } from '@/utils/withCommonServerSideProps';
 
@@ -25,10 +24,7 @@ import DefaultLayout from '@/components/layout/default';
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
 const TeacherPortal = () => {
-  const [showing, setShowing] = useUrlState<typeof portalState.showing>(
-    'showing',
-    portalState.showing,
-  );
+  const [showing, setShowing] = useState(portalState.showing);
 
   const loadingRef = useRef<LoadingBarRef>(null);
   const startLoading = useCallback(() => {
@@ -45,14 +41,25 @@ const TeacherPortal = () => {
       setShowing(portalState.showing);
     }
   };
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
   return (
     <DefaultLayout>
-      <TeacherPortalContext.Provider
-        value={{ state: { showing }, dispatch, startLoading, completeLoading }}
-      >
-        <LoadingBar color={'white'} ref={loadingRef} />;
-        <TeacherPortalContent showing={showing} />
-      </TeacherPortalContext.Provider>
+      {hasMounted && (
+        <TeacherPortalContext.Provider
+          value={{
+            state: { showing },
+            dispatch,
+            startLoading,
+            completeLoading,
+          }}
+        >
+          <LoadingBar color={'white'} ref={loadingRef} />;
+          <TeacherPortalContent showing={showing} />
+        </TeacherPortalContext.Provider>
+      )}
     </DefaultLayout>
   );
 };
@@ -66,10 +73,6 @@ interface TeacherPortalContentProps {
 const TeacherPortalContent: React.FC<TeacherPortalContentProps> = ({
   showing,
 }) => {
-  const [hasMounted, setHasMounted] = useState(false);
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
   const { fetchQuery } = useTeacherTags();
   const { data, isLoading } = fetchQuery;
   const tags: Tag[] = data || [];
@@ -78,9 +81,8 @@ const TeacherPortalContent: React.FC<TeacherPortalContentProps> = ({
     <div className="fixed inset-0 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center text-center mobile:block">
         <div className="bg-neutral-900 w-full tablet:max-w-[90vw] transform overflow-hidden text-left align-middle shadow-xl transition-all text-neutral-200 flex h-[100dvh] tablet:max-h-[unset] !max-w-[unset] !rounded-none">
-          {hasMounted && (
-            <Sidebar className="bg-neutral-800 flex-shrink-0 flex-grow-0" />
-          )}
+          <Sidebar className="bg-neutral-800 flex-shrink-0 flex-grow-0" />
+
           {isLoading ? (
             <div className="flex-grow relative flex items-center justify-center">
               <Spinner size="16px" />
