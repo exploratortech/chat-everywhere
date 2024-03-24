@@ -45,7 +45,6 @@ function App({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
           <Component {...pageProps} />
           <GoogleAnalytics trackPageViews strategy="lazyOnload" />
         </div>
-        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </SessionContextProvider>
   );
