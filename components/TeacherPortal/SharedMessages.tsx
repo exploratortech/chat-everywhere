@@ -1,4 +1,5 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React, {
   Dispatch,
   SetStateAction,
@@ -7,7 +8,6 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { useQuery, useQueryClient } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
@@ -174,7 +174,7 @@ export const useFetchSharedMessages = (
           next_page: data.pagination.next_page,
           prev_page: data.pagination.prev_page,
         });
-        queryClient.invalidateQueries('teacher-tags');
+        queryClient.invalidateQueries(['teacher-tags']);
       },
       onError: (error) => {
         console.error(

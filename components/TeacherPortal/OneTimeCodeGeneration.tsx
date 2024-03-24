@@ -1,8 +1,8 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconRefresh } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
 import React, { memo, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
