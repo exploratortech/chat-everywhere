@@ -1,8 +1,9 @@
 import { Session, SessionContextProvider } from '@supabase/auth-helpers-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ReactNode, useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import 'react-notion-x/src/styles.css';
-import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { appWithTranslation } from 'next-i18next';
 import type { AppProps } from 'next/app';
@@ -37,13 +38,15 @@ function App({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
       supabaseClient={supabase}
       initialSession={pageProps.initialSession}
     >
-      <div className={inter.className}>
-        <Toaster />
-        <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <div className={inter.className}>
+          <Toaster />
+
           <Component {...pageProps} />
           <GoogleAnalytics trackPageViews strategy="lazyOnload" />
-        </QueryClientProvider>
-      </div>
+        </div>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </SessionContextProvider>
   );
 }
