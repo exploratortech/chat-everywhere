@@ -6,6 +6,8 @@ import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
+import useTeacherPortalLoading from '@/hooks/teacherPortal/useTeacherPortalLoading';
+
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { OneTimeCodeInfoPayload } from '@/types/one-time-code';
@@ -25,7 +27,6 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
   const {
     state: { user },
   } = useContext(HomeContext);
-  const { startLoading, completeLoading } = useContext(TeacherPortalContext);
 
   const [invalidateCode, setInvalidateCode] = useState(false);
 
@@ -35,13 +36,6 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
     user?.id,
     selectedTags,
   );
-  useEffect(() => {
-    if (oneTimeCodeQuery.isLoading) {
-      startLoading();
-    } else {
-      completeLoading();
-    }
-  }, [completeLoading, oneTimeCodeQuery.isLoading, startLoading]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(oneTimeCodeQuery.data?.code || '');
@@ -51,7 +45,6 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
   // Trigger code invalidation and refetch
   const regenerateCode = () => {
     setInvalidateCode(true);
-    startLoading();
     oneTimeCodeQuery
       .refetch()
       .then(() => {
@@ -63,7 +56,6 @@ const OneTimeCodeGeneration = memo(({ tags }: { tags: Tag[] }) => {
       .finally(() => {
         setInvalidateCode(false);
         trackEvent('Teacher portal generate code');
-        completeLoading();
       });
   };
 
@@ -138,30 +130,32 @@ export const useGetOneTimeCode = (
   selectedTags: Tag[] = [],
 ) => {
   const supabase = useSupabaseClient();
+  const { withLoading } = useTeacherPortalLoading();
   return useQuery(
     ['getOneTimeCode', { invalidate }],
-    async () => {
-      const accessToken = (await supabase.auth.getSession()).data.session
-        ?.access_token;
-      if (!accessToken) {
-        return;
-      }
-      const response = await fetch(`/api/teacher-portal/get-code`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'access-token': accessToken,
-          invalidate: invalidate ? 'true' : 'false',
-          tag_ids_for_invalidate: selectedTags.map((tag) => tag.id).join(','),
-        },
-      });
+    () =>
+      withLoading(async () => {
+        const accessToken = (await supabase.auth.getSession()).data.session
+          ?.access_token;
+        if (!accessToken) {
+          return;
+        }
+        const response = await fetch(`/api/teacher-portal/get-code`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'access-token': accessToken,
+            invalidate: invalidate ? 'true' : 'false',
+            tag_ids_for_invalidate: selectedTags.map((tag) => tag.id).join(','),
+          },
+        });
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
 
-      return (await response.json()) as OneTimeCodeInfoPayload;
-    },
+        return (await response.json()) as OneTimeCodeInfoPayload;
+      }),
     {
       enabled: !!userId,
       refetchInterval: 3000, // 3 seconds
