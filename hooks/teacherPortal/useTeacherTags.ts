@@ -1,6 +1,6 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { Tag } from '@/types/tags';
 
@@ -71,7 +71,7 @@ const useTeacherTags = () => {
   };
 
   return {
-    fetchQuery: useQuery('teacher-tags', () => withLoading(fetchTags), {
+    fetchQuery: useQuery(['teacher-tags'], () => withLoading(fetchTags), {
       staleTime: 600000,
     }),
     addTeacherTag: useMutation(
@@ -79,7 +79,7 @@ const useTeacherTags = () => {
       {
         onSuccess: (res) => {
           if (res.isAdded) {
-            queryClient.invalidateQueries('teacher-tags');
+            queryClient.invalidateQueries(['teacher-tags']);
           } else {
             toast.error('Failed to add tag');
           }
@@ -91,7 +91,7 @@ const useTeacherTags = () => {
       {
         onSuccess: (res) => {
           if (res.isRemoved) {
-            queryClient.invalidateQueries('teacher-tags');
+            queryClient.invalidateQueries(['teacher-tags']);
           } else {
             toast.error('Failed to remove tags');
           }
