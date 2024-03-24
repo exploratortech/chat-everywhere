@@ -5,10 +5,13 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
+import useTeacherPortalLoading from './useTeacherPortalLoading';
+
 const useTeacherPrompt = () => {
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
   const { t } = useTranslation('model');
+  const { withLoading } = useTeacherPortalLoading();
 
   const fetchPrompts = async () => {
     const accessToken = (await supabase.auth.getSession()).data.session
@@ -86,7 +89,7 @@ const useTeacherPrompt = () => {
   };
 
   return {
-    fetchQuery: useQuery('teacher-prompts', fetchPrompts, {
+    fetchQuery: useQuery('teacher-prompts', () => withLoading(fetchPrompts), {
       staleTime: 600000,
     }),
     createMutation: useMutation(createPrompt, {
@@ -100,28 +103,35 @@ const useTeacherPrompt = () => {
         console.error(error);
       },
     }),
-    updateMutation: useMutation(updatePrompt, {
-      onSuccess: () => {
-        queryClient.invalidateQueries('teacher-prompts');
-        queryClient.refetchQueries('teacher-prompts');
-        toast.success(t('Prompt updated successfully'));
+    updateMutation: useMutation(
+      (prompt: TeacherPromptForTeacherPortal) =>
+        withLoading(() => updatePrompt(prompt)),
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries('teacher-prompts');
+          queryClient.refetchQueries('teacher-prompts');
+          toast.success(t('Prompt updated successfully'));
+        },
+        onError: (error) => {
+          toast.error(t('Error updating prompt'));
+          console.error(error);
+        },
       },
-      onError: (error) => {
-        toast.error(t('Error updating prompt'));
-        console.error(error);
+    ),
+    removeMutation: useMutation(
+      (promptId: string) => withLoading(() => removePrompt(promptId)),
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries('teacher-prompts');
+          queryClient.refetchQueries('teacher-prompts');
+          toast.success(t('Prompt removed successfully'));
+        },
+        onError: (error) => {
+          toast.error(t('Error removing prompt'));
+          console.error(error);
+        },
       },
-    }),
-    removeMutation: useMutation(removePrompt, {
-      onSuccess: () => {
-        queryClient.invalidateQueries('teacher-prompts');
-        queryClient.refetchQueries('teacher-prompts');
-        toast.success(t('Prompt removed successfully'));
-      },
-      onError: (error) => {
-        toast.error(t('Error removing prompt'));
-        console.error(error);
-      },
-    }),
+    ),
   };
 };
 export default useTeacherPrompt;
