@@ -22,6 +22,8 @@ const helperFunctionNames = {
   aiPainter: 'generate-image',
 };
 
+const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production';
+
 export const getHelperFunctionCalls = (
   lineAccessToken?: string,
 ): FunctionCall[] => {
@@ -220,7 +222,7 @@ export const triggerHelperFunction = async (
           // TODO: Enable Temp disable subtract credit
           // subtractUserCreditPromise,
         ]);
-        imagePublicUrl = storeImageRes.compressedUrl || storeImageRes.originalUrl;
+        imagePublicUrl = isInProductionEnv && storeImageRes.compressedUrl || storeImageRes.originalUrl;
       } catch (error) {
         console.error('Error in parallel execution: ', error);
         return 'Failed to process image or subtract user credit';
