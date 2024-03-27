@@ -221,10 +221,11 @@ export const triggerHelperFunction = async (
         return 'Failed to store image';
       }
 
+      // Resize image to reduce bandwidth
       const functionResponse = `
         Image generated! Below is the detail: 
         Generation prompt (insert this prompt as the 'alt' attribute of the image for later reference): ${imageGenerationResponse.data[0].revised_prompt}. 
-        URL: ${imagePublicUrl}
+        URL: ${imagePublicUrl}?width=500&height=500
         Display the image to user by using the URL in Markdown format.
       `;
 
