@@ -186,7 +186,16 @@ export const triggerHelperFunction = async (
             'Artwork is done, now adding the final touches...✨',
           );
         }
-        return imagePublicUrlData.publicUrl;
+
+        const compressedImageUrl = supabase.storage
+          .from('ai-images')
+          .getPublicUrl(imageFileName, {
+            transform: {
+              width: 500,
+              height: 500,
+            },
+          });
+        return { compressedUrl: compressedImageUrl.data.publicUrl, originalUrl: imagePublicUrlData.publicUrl };
       };
 
       const subtractUserCredit = async () => {
@@ -211,7 +220,7 @@ export const triggerHelperFunction = async (
           // TODO: Enable Temp disable subtract credit
           // subtractUserCreditPromise,
         ]);
-        imagePublicUrl = storeImageRes;
+        imagePublicUrl = storeImageRes.compressedUrl || storeImageRes.originalUrl;
       } catch (error) {
         console.error('Error in parallel execution: ', error);
         return 'Failed to process image or subtract user credit';
@@ -225,7 +234,7 @@ export const triggerHelperFunction = async (
       const functionResponse = `
         Image generated! Below is the detail: 
         Generation prompt (insert this prompt as the 'alt' attribute of the image for later reference): ${imageGenerationResponse.data[0].revised_prompt}. 
-        URL: ${imagePublicUrl}?width=500&height=500
+        URL: ${imagePublicUrl}
         Display the image to user by using the URL in Markdown format.
       `;
 
