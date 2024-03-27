@@ -79,7 +79,7 @@ export const OpenAIStream = async (
         attempt + 1
       }: Using endpoint ${openAIEndpoint}\n`;
 
-      let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2023-12-01-preview`;
+      let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2024-02-01`;
       if (openAIEndpoint.includes('openai.com')) {
         url = `${openAIEndpoint}/v1/chat/completions`;
       }

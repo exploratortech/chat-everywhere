@@ -20,6 +20,7 @@ type AIStreamProps = {
   messages: Message[];
   onUpdateToken: (token: string) => void;
   functionCalls: FunctionCall[];
+  useOpenAI?: boolean;
 };
 
 type AIStreamResponseType = {
@@ -33,6 +34,7 @@ export const AIStream = async ({
   messages,
   onUpdateToken,
   functionCalls,
+  useOpenAI = false,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
   const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true, countryCode);
 
@@ -45,9 +47,7 @@ export const AIStream = async ({
   const openAIKey = openAIKeys[attempt] || '';
   const model = OpenAIModels[OpenAIModelID.GPT_4];
 
-  let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2023-12-01-preview`;
-
-  console.log('Sending request to: ' + url);
+  let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2024-02-01`;
 
   const messagesToSend = await shortenMessagesBaseOnTokenLimit(
     '',
@@ -83,11 +83,29 @@ export const AIStream = async ({
 
   requestHeaders['api-key'] = openAIKey;
 
-  const res = await fetch(url, {
-    headers: requestHeaders,
-    method: 'POST',
-    body: JSON.stringify(bodyToSend),
-  });
+  let res;
+  if (useOpenAI) {
+    bodyToSend.model = 'gpt-4-0125-preview';
+    console.log(
+      'Sending request to: https://api.openai.com/v1/chat/completions',
+    );
+    
+    res = await fetch('https://api.openai.com/v1/chat/completions', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      method: 'POST',
+      body: JSON.stringify(bodyToSend),
+    });
+  } else {
+    console.log('Sending request to: ' + url);
+    res = await fetch(url, {
+      headers: requestHeaders,
+      method: 'POST',
+      body: JSON.stringify(bodyToSend),
+    });
+  }
 
   const decoder = new TextDecoder();
 
@@ -120,7 +138,7 @@ export const AIStream = async ({
           }
         }
 
-        const text = json.choices[0].delta.content;
+        const text = json.choices[0].delta.content || "";
         onUpdateToken(text);
       }
     }

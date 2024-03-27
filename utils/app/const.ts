@@ -63,6 +63,18 @@ export const AZURE_OPENAI_GPT_4_KEYS = [
   process.env.AZURE_OPENAI_GPT_4_KEY_2,
 ];
 
+export const AZURE_DALL_E_3_ENDPOINTS = [
+  process.env.AZURE_DALL_E_3_ENDPOINT_0,
+  // process.env.AZURE_DALL_E_3_ENDPOINT_1, // RESOURCE NOT FOUND
+  process.env.AZURE_DALL_E_3_ENDPOINT_2,
+];
+
+export const AZURE_DALL_E_API_KEYS = [
+  process.env.AZURE_DALL_E_API_KEY_0,
+  // process.env.AZURE_DALL_E_API_KEY_1, // RESOURCE NOT FOUND
+  process.env.AZURE_DALL_E_API_KEY_2,
+];
+
 export const ERROR_MESSAGES = {
   content_filter_triggered: {
     message: 'Content filter triggered',
