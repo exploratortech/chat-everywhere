@@ -1,4 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
+import {
+  SupabaseClient,
+  useSupabaseClient,
+} from '@supabase/auth-helpers-react';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +16,7 @@ import dayjs from 'dayjs';
 interface Result {
   url: string;
   prompt: string;
+  filename: string;
 }
 
 interface AiPainterResultProps {
@@ -25,7 +30,8 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
   } = useContext(HomeContext);
   const isStudentAccount = isTempUser;
 
-  const getCompressedImageUrl = (url: string) => `${url}?width=300&height=300`
+  const getCompressedImageUrl = (url: string) => `${url}?width=300&height=300`;
+  const supabase = useSupabaseClient();
 
   return (
     <div
@@ -61,7 +67,11 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
             <button
               className="max-w-max cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
               onClick={() => {
-                downloadFile(result.url, generateFilename(result.prompt));
+                downloadFile(
+                  supabase,
+                  result.filename,
+                  generateFilename(result.prompt),
+                );
               }}
             >
               {mjImageT('Download Image')}
@@ -75,8 +85,20 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
 
 export default AiPainterResult;
 
-const downloadFile = async (url: string, filename: string) => {
-  const response = await fetch(url);
+const downloadFile = async (
+  supabaseClient: SupabaseClient,
+  originalFilename: string,
+  filename: string,
+) => {
+  const data = await supabaseClient.storage
+    .from('ai-images')
+    .getPublicUrl(originalFilename);
+
+  if (!data) {
+    return;
+  }
+
+  const response = await fetch(data.data.publicUrl);
   const blob = await response.blob();
 
   const href = URL.createObjectURL(blob);

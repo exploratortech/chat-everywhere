@@ -147,6 +147,7 @@ const AssistantRespondMessage = memo(
                 .map((imageTag: any) => ({
                   url: imageTag.properties?.src,
                   prompt: imageTag.properties?.alt,
+                  filename: imageTag.properties?.dataFilename,
                 }))
                 .filter((image: any) => image.url && image.prompt);
 
