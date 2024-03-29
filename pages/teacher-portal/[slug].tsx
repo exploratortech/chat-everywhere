@@ -109,38 +109,38 @@ const TeacherPortalContent: React.FC<TeacherPortalContentProps> = ({
   );
 };
 
-export const getServerSideProps = withCommonServerSideProps(async (context) => {
-  const supabase = createServerSupabaseClient(context);
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+// export const getServerSideProps = withCommonServerSideProps(async (context) => {
+//   const supabase = createServerSupabaseClient(context);
+//   const {
+//     data: { user },
+//     error,
+//   } = await supabase.auth.getUser();
 
-  if (error || !user) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
+//   if (error || !user) {
+//     return {
+//       redirect: {
+//         destination: '/',
+//         permanent: false,
+//       },
+//     };
+//   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user?.id)
-    .single();
+//   const { data: profile, error: profileError } = await supabase
+//     .from('profiles')
+//     .select('*')
+//     .eq('id', user?.id)
+//     .single();
 
-  if (profileError || !profile || !profile.is_teacher_account) {
-    return {
-      redirect: {
-        destination: '/',
-        permanent: false,
-      },
-    };
-  }
+//   if (profileError || !profile || !profile.is_teacher_account) {
+//     return {
+//       redirect: {
+//         destination: '/',
+//         permanent: false,
+//       },
+//     };
+//   }
 
-  return {
-    props: {},
-  };
-});
+//   return {
+//     props: {},
+//   };
+// });

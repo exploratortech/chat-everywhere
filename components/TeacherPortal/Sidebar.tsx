@@ -20,8 +20,6 @@ import { trackEvent } from '@/utils/app/eventTracking';
 
 import { Button } from '@/components/ui/button';
 
-import { TeacherPortalContext } from './teacher-portal.context';
-
 type Props = {
   className?: string;
 };
@@ -135,20 +133,8 @@ export default function Sidebar({ className = '' }: Props) {
         <b className="pt-6 px-6 block select-none tablet:hidden">
           {t('Teacher Portal')} (Beta)
         </b>
-        <button
-          onClick={() => {
-            router.prefetch('/teacher-portal/shared-message');
-            router.prefetch('/teacher-portal/one-time-code');
-            router.prefetch('/teacher-portal/tags');
-            router.prefetch('/teacher-portal/teacher-prompt');
-            router.prefetch('/teacher-portal/settings');
-          }}
-        >
-          Prefetch test
-        </button>
         <div className="py-6 flex flex-col">
           <Link
-            prefetch
             href={'/teacher-portal/one-time-code'}
             className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
           ${slug === 'one-time-code' ? 'bg-neutral-900 text-neutral-100' : ''}
@@ -160,7 +146,6 @@ export default function Sidebar({ className = '' }: Props) {
             </div>
           </Link>
           <Link
-            prefetch
             href={'/teacher-portal/shared-message'}
             className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
                 ${
@@ -199,7 +184,6 @@ export default function Sidebar({ className = '' }: Props) {
               <div className="tablet:hidden">{t('Teacher Prompt')}</div>
             </div>
           </Link>
-          bu
         </div>
       </div>
 
