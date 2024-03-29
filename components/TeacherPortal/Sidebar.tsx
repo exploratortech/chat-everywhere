@@ -137,6 +137,7 @@ export default function Sidebar({ className = '' }: Props) {
         </b>
         <div className="py-6 flex flex-col">
           <Link
+            prefetch
             href={'/teacher-portal/one-time-code'}
             className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
           ${slug === 'one-time-code' ? 'bg-neutral-900 text-neutral-100' : ''}
@@ -148,6 +149,7 @@ export default function Sidebar({ className = '' }: Props) {
             </div>
           </Link>
           <Link
+            prefetch
             href={'/teacher-portal/shared-message'}
             className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
                 ${
