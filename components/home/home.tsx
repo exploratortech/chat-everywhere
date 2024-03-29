@@ -18,7 +18,7 @@ import SettingsModel from '@/components/User/Settings/SettingsModel';
 import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
-import DefaultLayout from '@/components/layout/default';
+import EventsModel from '@/components/Events/EventsModel';
 
 import HomeContext from './home.context';
 import ClearConversationsModal from '../Chatbar/components/ClearConversationsModal';
@@ -42,6 +42,7 @@ const Home = () => {
       showSurveyModel,
       showNewsModel,
       showFeaturesModel,
+      showEventModel,
     },
     handleNewConversation,
     stopConversationRef,
@@ -150,6 +151,10 @@ const Home = () => {
         <FeaturesModel
           open={showFeaturesModel}
           onClose={() => dispatch({ field: 'showFeaturesModel', value: false })}
+        />
+        <EventsModel
+          open={showEventModel}
+          onClose={() => dispatch({ field: 'showEventModel', value: false })}
         />
         <Promptbar />
       </div>

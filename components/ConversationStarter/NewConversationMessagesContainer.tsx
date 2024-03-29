@@ -14,9 +14,31 @@ import { FootNoteMessage } from './FootNoteMessage';
 import { RolePlayPrompts } from './RolePlayPrompts';
 import { SamplePrompts } from './SamplePrompts';
 
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+
+// Use the plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 type Props = {
   promptOnClick: (prompt: string) => void;
   customInstructionOnClick: (customInstructionPrompt: Prompt) => void;
+};
+
+const getEventHourCountDown = () => {
+  const eventTimezone = 'Asia/Taipei';
+  const eventDate1 = dayjs.tz('2024-03-29T21:30:00', eventTimezone);
+  const eventDate2 = dayjs.tz('2024-03-31T09:00:00', eventTimezone);
+  const currentDate = dayjs();
+
+  const eventDate = eventDate1.isBefore(eventDate2) ? eventDate1 : eventDate2;
+
+  const timeDifference = eventDate.diff(currentDate, 'hour');
+  const hoursUntilEvent = Math.floor(timeDifference);
+
+  return hoursUntilEvent;
 };
 
 export const NewConversationMessagesContainer: FC<Props> = ({
@@ -55,15 +77,6 @@ export const NewConversationMessagesContainer: FC<Props> = ({
     trackEvent('Promotional banner clicked');
   };
 
-  const surveyOnClick = () => {
-    dispatch({ field: 'showSurveyModel', value: true });
-
-    event('Survey banner clicked', {
-      category: 'Engagement',
-      label: 'survey_banner',
-    });
-  };
-
   const featureOnClick = () => {
     dispatch({ field: 'showFeaturesModel', value: true });
     dispatch({ field: 'showFeaturePageOnLoad', value: null });
@@ -72,6 +85,11 @@ export const NewConversationMessagesContainer: FC<Props> = ({
       label: 'feature_introduction_banner',
     });
     trackEvent('Feature introduction opened');
+  };
+
+  const eventBannerOnClick = () => {
+    dispatch({ field: 'showEventModel', value: true });
+    trackEvent('Event promotional banner on click');
   };
 
   return (
@@ -117,6 +135,15 @@ export const NewConversationMessagesContainer: FC<Props> = ({
           </div>
         </div>
       )}
+      <div
+        className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:bg-none cursor-pointer"
+        onClick={eventBannerOnClick}
+      >
+        <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
+          {t('Join our event in {{hours}} hours!', { hours: getEventHourCountDown() })} 🎉
+        </span>
+      </div>
+
       <div
         className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none cursor-pointer"
         onClick={featureOnClick}

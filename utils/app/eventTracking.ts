@@ -33,6 +33,7 @@ export const EventNames = [
   'Referral code redemption failed',
   'Referral code redemption button clicked',
   'Regenerate referral code clicked',
+  'Event promotional banner on click',
 
   // Detail message usages
   'Online mode message',

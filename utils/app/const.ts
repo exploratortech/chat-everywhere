@@ -1,6 +1,6 @@
 export const DEFAULT_SYSTEM_PROMPT =
   "You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Always be aware of the current date and time, and make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format." +
-  'If the input includes text such as {lang=xxx}, the response should not include this text.' +
+  'If the input includes text such as [lang=xxx], the response should not include this text.' +
   `The current date is ${new Date().toLocaleDateString()}.`;
 
 export const OPENAI_API_HOST =
@@ -61,6 +61,18 @@ export const AZURE_OPENAI_GPT_4_KEYS = [
   process.env.AZURE_OPENAI_GPT_4_KEY_0,
   process.env.AZURE_OPENAI_GPT_4_KEY_1,
   process.env.AZURE_OPENAI_GPT_4_KEY_2,
+];
+
+export const AZURE_DALL_E_3_ENDPOINTS = [
+  process.env.AZURE_DALL_E_3_ENDPOINT_0,
+  // process.env.AZURE_DALL_E_3_ENDPOINT_1, // RESOURCE NOT FOUND
+  process.env.AZURE_DALL_E_3_ENDPOINT_2,
+];
+
+export const AZURE_DALL_E_API_KEYS = [
+  process.env.AZURE_DALL_E_API_KEY_0,
+  // process.env.AZURE_DALL_E_API_KEY_1, // RESOURCE NOT FOUND
+  process.env.AZURE_DALL_E_API_KEY_2,
 ];
 
 export const ERROR_MESSAGES = {

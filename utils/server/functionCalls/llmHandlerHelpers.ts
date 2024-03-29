@@ -22,6 +22,8 @@ const helperFunctionNames = {
   aiPainter: 'generate-image',
 };
 
+const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production';
+
 export const getHelperFunctionCalls = (
   lineAccessToken?: string,
 ): FunctionCall[] => {
@@ -186,7 +188,16 @@ export const triggerHelperFunction = async (
             'Artwork is done, now adding the final touches...✨',
           );
         }
-        return imagePublicUrlData.publicUrl;
+
+        const compressedImageUrl = supabase.storage
+          .from('ai-images')
+          .getPublicUrl(imageFileName, {
+            transform: {
+              width: 500,
+              height: 500,
+            },
+          });
+        return { compressedUrl: compressedImageUrl.data.publicUrl, originalUrl: imagePublicUrlData.publicUrl };
       };
 
       const subtractUserCredit = async () => {
@@ -211,7 +222,7 @@ export const triggerHelperFunction = async (
           // TODO: Enable Temp disable subtract credit
           // subtractUserCreditPromise,
         ]);
-        imagePublicUrl = storeImageRes;
+        imagePublicUrl = isInProductionEnv && storeImageRes.compressedUrl || storeImageRes.originalUrl;
       } catch (error) {
         console.error('Error in parallel execution: ', error);
         return 'Failed to process image or subtract user credit';
@@ -221,6 +232,7 @@ export const triggerHelperFunction = async (
         return 'Failed to store image';
       }
 
+      // Resize image to reduce bandwidth
       const functionResponse = `
         Image generated! Below is the detail: 
         Generation prompt (insert this prompt as the 'alt' attribute of the image for later reference): ${imageGenerationResponse.data[0].revised_prompt}. 

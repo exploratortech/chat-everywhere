@@ -60,5 +60,6 @@
   "AI image generation is temporarily unavailable. We are working to get it back online as soon as possible.": "AI圖像生成暫時無法使用。我們正在努力盡快恢復線上服務。",
   "Custom Instruction ({{customInstructionPromptName}}) is in use": "提示詞模版 ({{customInstructionPromptName}}) 正在使用",
   "Custom Instruction only available in Chat mode": "提示詞模版僅在聊天模式下可用",
-  "Teacher Custom Instruction ({{customInstructionPromptName}}) is in use": "教師提示詞模版 ({{customInstructionPromptName}}) 正在使用"
+  "Teacher Custom Instruction ({{customInstructionPromptName}}) is in use": "教師提示詞模版 ({{customInstructionPromptName}}) 正在使用",
+  "Join our event in {{hours}} hours!": "不要錯過我們這次精彩的官方活動喔！倒計時 {{hours}} 小時！"
 }
