@@ -176,9 +176,6 @@ export const useFetchSharedMessages = (
   return useQuery(
     ['shared-messages-with-teacher', page],
     () => {
-      console.log({
-        isPeriodic,
-      });
       if (isPeriodic) {
         return fetchSharedMessages();
       }
