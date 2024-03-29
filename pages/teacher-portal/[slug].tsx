@@ -1,4 +1,11 @@
-import { Dispatch, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
 
 import { useRouter } from 'next/router';
@@ -18,6 +25,7 @@ import Tags from '@/components/TeacherPortal/Tags';
 import TeacherPrompt from '@/components/TeacherPortal/TeacherPrompt';
 import TeacherSettings from '@/components/TeacherPortal/TeacherSettings';
 import { TeacherPortalContext } from '@/components/TeacherPortal/teacher-portal.context';
+import HomeContext from '@/components/home/home.context';
 import DefaultLayout from '@/components/layout/default';
 
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
@@ -82,7 +90,27 @@ const TeacherPortalContent: React.FC<TeacherPortalContentProps> = ({
   showing,
 }) => {
   const { fetchQuery } = useTeacherTags();
-  const { isLoading } = fetchQuery;
+  const { isLoading: isFetchingTeacherTags } = fetchQuery;
+  const {
+    state: { isTeacherAccount },
+  } = useContext(HomeContext);
+  const isLoading = useMemo(
+    () => isFetchingTeacherTags || !isTeacherAccount,
+    [isFetchingTeacherTags, isTeacherAccount],
+  );
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      // If the user is not a teacher account, redirect them to the home page
+      console.log({
+        isTeacherAccount,
+      });
+      if (!isTeacherAccount) {
+        window.location.href = '/';
+      }
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [isTeacherAccount]);
 
   return (
     <div className="fixed inset-0 overflow-y-auto">
