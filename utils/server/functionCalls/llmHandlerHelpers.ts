@@ -244,8 +244,10 @@ export const triggerHelperFunction = async (
         Generation prompt (insert the prompts as the 'alt' attribute of the image for later reference):
          Prompt_1: ${imageGenerationResponse1.revised_prompt}.
          URL_1: ${imageGenerationResponse1.imagePublicUrl}
+         File Name_1: ${imageGenerationResponse1.fileName}
          Prompt_2: ${imageGenerationResponse2.revised_prompt}.
          URL_2: ${imageGenerationResponse2.imagePublicUrl}
+         File Name_2: ${imageGenerationResponse2.fileName}
 
         Pass those URLs and Prompts to function generate-html-for-ai-painter-images for display the result.
       `;
@@ -261,7 +263,7 @@ export const triggerHelperFunction = async (
       try {
         imageResults = JSON.parse(argumentsString).imageResults;
       } catch (e) {
-        return 'Unable to parse JSON that you provided, please output a valid JSON string. For example: {"imageResults": [{"prompt": "A cat", "url": "https://example.com/cat.png"}, {"prompt": "A dog", "url": "https://example.com/dog.png"}]}';
+        return 'Unable to parse JSON that you provided, please output a valid JSON string. For example: {"imageResults": [{"prompt": "A cat", "url": "https://example.com/cat.png", "filename": "cat.png"}, {"prompt": "A dog", "url": "https://example.com/dog.png", "filename": "dog.png"}]}';
       }
       if (onProgressUpdate) {
         onProgressUpdate({
@@ -435,7 +437,10 @@ function generateHtmlForAiPainterImages(
   imageResults: AiPainterImageGenerationResult[],
 ): string {
   const imagesHtml = imageResults
-    .map((result) => `<img src="${result.url}" alt="${result.prompt}" />`)
+    .map(
+      (result) =>
+        `<img src="${result.url}" alt="${result.prompt}" data-filename="${result.filename}" />`,
+    )
     .join('');
 
   return `<div id="ai-painter-generated-image">${imagesHtml}</div>`;
@@ -444,4 +449,5 @@ function generateHtmlForAiPainterImages(
 interface AiPainterImageGenerationResult {
   prompt: string;
   url: string;
+  filename: string;
 }

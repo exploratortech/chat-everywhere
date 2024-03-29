@@ -67,6 +67,10 @@ export const aiPainterLlmHandler = async ({
                 type: 'string',
                 description: 'The prompt of the image',
               },
+              filename: {
+                type: 'string',
+                description: 'The file name of the image',
+              },
             },
           },
         },
