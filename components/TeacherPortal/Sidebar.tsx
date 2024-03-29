@@ -135,6 +135,17 @@ export default function Sidebar({ className = '' }: Props) {
         <b className="pt-6 px-6 block select-none tablet:hidden">
           {t('Teacher Portal')} (Beta)
         </b>
+        <button
+          onClick={() => {
+            router.prefetch('/teacher-portal/shared-message');
+            router.prefetch('/teacher-portal/one-time-code');
+            router.prefetch('/teacher-portal/tags');
+            router.prefetch('/teacher-portal/teacher-prompt');
+            router.prefetch('/teacher-portal/settings');
+          }}
+        >
+          Prefetch test
+        </button>
         <div className="py-6 flex flex-col">
           <Link
             prefetch
@@ -188,6 +199,7 @@ export default function Sidebar({ className = '' }: Props) {
               <div className="tablet:hidden">{t('Teacher Prompt')}</div>
             </div>
           </Link>
+          bu
         </div>
       </div>
 
