@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React, {
@@ -6,6 +7,7 @@ import React, {
   memo,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -16,7 +18,6 @@ import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 
 import { Pagination as PaginationType } from '@/types/pagination';
 import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
-import { Tag } from '@/types/tags';
 import { Tag as TagType } from '@/types/tags';
 
 import useShareMessageFilterStore from '@/components/TeacherPortal/share-message-filter.store';
@@ -34,7 +35,8 @@ const SharedMessages = () => {
   const {
     state: { user },
   } = useContext(HomeContext);
-  const { fetchQuery } = useTeacherTags();
+  const isPeriodicFetchFlag = useRef(false);
+  const { fetchQuery } = useTeacherTags(isPeriodicFetchFlag.current);
   const tags: TagType[] = fetchQuery.data || [];
   const [pagination, setPagination] = useState<PaginationType>({
     current_page: 1,
@@ -49,22 +51,29 @@ const SharedMessages = () => {
 
   const [selectedMessageIds, setSelectedMessageIds] = useState<number[]>([]);
 
+  const queryClient = useQueryClient();
   const { refetch: fetchSharedMessages, isFetching: isLoading } =
     useFetchSharedMessages(
       pagination.current_page,
       setSharedMessages,
       setPagination,
+      isPeriodicFetchFlag.current,
+      () => {
+        isPeriodicFetchFlag.current = true;
+      },
     );
 
   useEffect(() => {
     if (user) {
       fetchSharedMessages();
+      isPeriodicFetchFlag.current = true;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [fetchSharedMessages, user]);
 
-  const handlePageChange = (page: number) => {
-    setPagination((prev) => ({ ...prev, current_page: page }));
+  const handlePageChange = (newPage: number) => {
+    queryClient.cancelQueries(['shared-messages-with-teacher']);
+    isPeriodicFetchFlag.current = false;
+    setPagination((prev) => ({ ...prev, current_page: newPage }));
   };
 
   const handleSelectMessage = (id: number) => {
@@ -77,7 +86,7 @@ const SharedMessages = () => {
   };
 
   return (
-    <div>
+    <div className="flex flex-col gap-1 h-full">
       <h1 className="font-bold mb-4">{t('Shared messages')}</h1>
       <div className="flex flex-col gap-2 my-4">
         <Filter tags={tags} />
@@ -132,45 +141,55 @@ export const useFetchSharedMessages = (
     SetStateAction<ShareMessagesByTeacherProfilePayload['submissions'] | null>
   >,
   setPagination: Dispatch<SetStateAction<PaginationType>>,
+  isPeriodic: boolean = true,
+  onSuccess: () => void,
 ) => {
   const supabase = useSupabaseClient();
-  const queryClient = useQueryClient();
   const { selectedTags } = useShareMessageFilterStore();
-  const { withLoading } = useTeacherPortalLoading();
 
+  const { withLoading } = useTeacherPortalLoading();
+  const fetchSharedMessages = async () => {
+    const payload = {
+      accessToken: (await supabase.auth.getSession()).data.session
+        ?.access_token,
+      page,
+      filter: {
+        tag_ids: selectedTags.map((tag) => tag.id),
+      },
+    };
+    const response = await fetch(
+      '/api/teacher-portal/get-shared-messages-with-teacher',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+    if (response.status !== 200 || !response.ok) {
+      throw new Error('Failed to fetch shared messages');
+    }
+    const data = await response.json();
+    return data;
+  };
   return useQuery(
-    ['shared-messages-with-teacher'],
-    () =>
-      withLoading(async () => {
-        const payload = {
-          accessToken: (await supabase.auth.getSession()).data.session
-            ?.access_token,
-          page,
-          filter: {
-            tag_ids: selectedTags.map((tag) => tag.id),
-          },
-        };
-        const response = await fetch(
-          '/api/teacher-portal/get-shared-messages-with-teacher',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-          },
-        );
-        if (response.status !== 200 || !response.ok) {
-          throw new Error('Failed to fetch shared messages');
-        }
-        const data = await response.json();
-        return data;
-      }),
+    ['shared-messages-with-teacher', page],
+    () => {
+      console.log({
+        isPeriodic,
+      });
+      if (isPeriodic) {
+        return fetchSharedMessages();
+      }
+      return withLoading(fetchSharedMessages);
+    },
     {
       keepPreviousData: true,
       refetchInterval: 3000, // 3 seconds
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
       onSuccess: (data) => {
+        onSuccess();
         setSharedMessages(data.submissions || null);
         setPagination({
           current_page: data.pagination.current_page,
@@ -178,7 +197,6 @@ export const useFetchSharedMessages = (
           next_page: data.pagination.next_page,
           prev_page: data.pagination.prev_page,
         });
-        queryClient.invalidateQueries(['teacher-tags']);
       },
       onError: (error) => {
         console.error(
