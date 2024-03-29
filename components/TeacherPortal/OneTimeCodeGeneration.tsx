@@ -162,9 +162,6 @@ export const useGetOneTimeCode = (
   return useQuery(
     ['getOneTimeCode', { invalidate, userId, selectedTags }],
     () => {
-      console.log({
-        isPeriodic,
-      });
       if (isPeriodic) {
         return fetchOneTimeCode();
       }
