@@ -1,7 +1,7 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconRefresh } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import React, { memo, useContext, useEffect, useState } from 'react';
+import React, { memo, useContext, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
@@ -28,7 +28,8 @@ const OneTimeCodeGeneration = () => {
   const {
     state: { user },
   } = useContext(HomeContext);
-  const { fetchQuery } = useTeacherTags();
+  const isPeriodicFlag = useRef(false);
+  const { fetchQuery } = useTeacherTags(isPeriodicFlag.current);
   const tags: TagType[] = fetchQuery.data || [];
 
   const [invalidateCode, setInvalidateCode] = useState(false);
@@ -58,6 +59,7 @@ const OneTimeCodeGeneration = () => {
       })
       .finally(() => {
         setInvalidateCode(false);
+        isPeriodicFlag.current = true;
         trackEvent('Teacher portal generate code');
       });
   };
@@ -131,34 +133,43 @@ export const useGetOneTimeCode = (
   invalidate: boolean,
   userId: string | undefined,
   selectedTags: Tag[] = [],
+  isPeriodic: boolean = true,
 ) => {
   const supabase = useSupabaseClient();
   const { withLoading } = useTeacherPortalLoading();
+  const fetchOneTimeCode = async () => {
+    const accessToken = (await supabase.auth.getSession()).data.session
+      ?.access_token;
+    if (!accessToken) {
+      return;
+    }
+    const response = await fetch(`/api/teacher-portal/get-code`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'access-token': accessToken,
+        invalidate: invalidate ? 'true' : 'false',
+        tag_ids_for_invalidate: selectedTags.map((tag) => tag.id).join(','),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    return (await response.json()) as OneTimeCodeInfoPayload;
+  };
   return useQuery(
-    ['getOneTimeCode', { invalidate }],
-    () =>
-      withLoading(async () => {
-        const accessToken = (await supabase.auth.getSession()).data.session
-          ?.access_token;
-        if (!accessToken) {
-          return;
-        }
-        const response = await fetch(`/api/teacher-portal/get-code`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'access-token': accessToken,
-            invalidate: invalidate ? 'true' : 'false',
-            tag_ids_for_invalidate: selectedTags.map((tag) => tag.id).join(','),
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        return (await response.json()) as OneTimeCodeInfoPayload;
-      }),
+    ['getOneTimeCode', { invalidate, userId, selectedTags }],
+    () => {
+      console.log({
+        isPeriodic,
+      });
+      if (isPeriodic) {
+        return fetchOneTimeCode();
+      }
+      return withLoading(fetchOneTimeCode);
+    },
     {
       enabled: !!userId,
       refetchInterval: 3000, // 3 seconds
