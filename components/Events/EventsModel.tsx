@@ -3,10 +3,6 @@ import { IconX } from '@tabler/icons-react';
 import React, {
   Fragment,
   memo,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
 } from 'react';
 
 import { useTranslation } from 'next-i18next';
@@ -62,40 +58,6 @@ const EventsModel = memo(({ className = '', open, onClose }: Props) => {
                 </div>
                 <div className="flex flex-col justify-between items-center overflow-y-auto">
                   <div className="flex flex-col justify-between items-center">
-                    <Image
-                      src="/assets/posters/20240326.png"
-                      alt="20240326 event"
-                      className="inline-block mb-4"
-                      width="500"
-                      height="500"
-                    />
-                    <div className="flex flex-row gap-2">
-                      <button
-                        className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent`}
-                        onClick={() => {
-                          window.open(
-                            'https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=XzZrcWpnaDI1ODRvMzRiOWo4cDFqZWI5azZkMzNpYmEyNm9wamNiYTU4NHM0NmQyNTcxMzQ2ZDIzOGsgamFja0BleHBsb3JhdG9ybGFicy5jb20&tmsrc=jack%40exploratorlabs.com',
-                            '_blank',
-                          );
-                        }}
-                      >
-                        {t('Add to your calendar')}
-                      </button>
-
-                      <button
-                        className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent`}
-                        onClick={() => {
-                          window.open(
-                            'https://meet.google.com/kjd-axqs-ggu',
-                            '_blank',
-                          );
-                        }}
-                      >
-                        {t('Join event!')}
-                      </button>
-                    </div>
-
-                    <hr className="my-4" />
                     <Image
                       src="/assets/posters/20240331.jpg"
                       alt="20240331 event"

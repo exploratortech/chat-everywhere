@@ -29,11 +29,8 @@ type Props = {
 
 const getEventHourCountDown = () => {
   const eventTimezone = 'Asia/Taipei';
-  const eventDate1 = dayjs.tz('2024-03-29T21:30:00', eventTimezone);
-  const eventDate2 = dayjs.tz('2024-03-31T09:00:00', eventTimezone);
+  const eventDate = dayjs.tz('2024-03-31T09:00:00', eventTimezone);
   const currentDate = dayjs();
-
-  const eventDate = eventDate1.isBefore(eventDate2) ? eventDate1 : eventDate2;
 
   const timeDifference = eventDate.diff(currentDate, 'hour');
   const hoursUntilEvent = Math.floor(timeDifference);
@@ -135,14 +132,20 @@ export const NewConversationMessagesContainer: FC<Props> = ({
           </div>
         </div>
       )}
-      <div
-        className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:bg-none cursor-pointer"
-        onClick={eventBannerOnClick}
-      >
-        <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
-          {t('Join our event in {{hours}} hours!', { hours: getEventHourCountDown() })} 🎉
-        </span>
-      </div>
+
+      {getEventHourCountDown() > 0 && (
+        <div
+          className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:bg-none cursor-pointer"
+          onClick={eventBannerOnClick}
+        >
+          <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
+            {t('Join our event in {{hours}} hours!', {
+              hours: getEventHourCountDown(),
+            })}{' '}
+            🎉
+          </span>
+        </div>
+      )}
 
       <div
         className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none cursor-pointer"
