@@ -2,17 +2,8 @@ import { useContext, useEffect } from 'react';
 
 import { TeacherPortalContext } from '@/components/TeacherPortal/teacher-portal.context';
 
-const useTeacherPortalLoading = (isLoading?: boolean) => {
+const useTeacherPortalLoading = () => {
   const { startLoading, completeLoading } = useContext(TeacherPortalContext);
-  useEffect(() => {
-    if (isLoading === undefined) return;
-    if (isLoading) {
-      startLoading();
-    } else {
-      completeLoading();
-    }
-  }, [completeLoading, isLoading, startLoading]);
-
   const withLoading = async <T, A extends any[]>(
     asyncFunction: (...args: A) => Promise<T>,
     ...args: A

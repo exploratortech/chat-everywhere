@@ -6,7 +6,7 @@ import { Tag } from '@/types/tags';
 
 import useTeacherPortalLoading from './useTeacherPortalLoading';
 
-const useTeacherTags = () => {
+const useTeacherTags = (isPeriodic: boolean = true) => {
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
   const { withLoading } = useTeacherPortalLoading();
@@ -71,7 +71,16 @@ const useTeacherTags = () => {
   };
 
   return {
-    fetchQuery: useQuery(['teacher-tags'], () => withLoading(fetchTags), {}),
+    fetchQuery: useQuery(
+      ['teacher-tags'],
+      () => {
+        if (isPeriodic) {
+          return fetchTags();
+        }
+        return withLoading(fetchTags);
+      },
+      {},
+    ),
     addTeacherTag: useMutation(
       (tagName: string) => withLoading(() => addTag(tagName)),
       {
