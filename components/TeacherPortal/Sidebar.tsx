@@ -8,12 +8,11 @@ import {
   IconSettings,
   IconTags,
 } from '@tabler/icons-react';
-import React, { cloneElement, useContext } from 'react';
+import React, { cloneElement, useContext, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import { trackEvent } from '@/utils/app/eventTracking';
@@ -30,11 +29,9 @@ type sideBarItemType = {
   icon: JSX.Element;
   name: string;
   value: string;
+  callback: () => void;
   overrideClassName?: string;
-} & (
-  | { callback: () => void; link?: never }
-  | { link: string; callback?: never }
-);
+};
 
 export default function Sidebar({ className = '' }: Props) {
   const { t } = useTranslation('model');
@@ -115,46 +112,37 @@ export default function Sidebar({ className = '' }: Props) {
     },
   ];
 
+  const prefetchRoutes = () => {
+    router.prefetch('/teacher-portal/one-time-code');
+    router.prefetch('/teacher-portal/shared-message');
+    router.prefetch('/teacher-portal/tags');
+    router.prefetch('/teacher-portal/teacher-prompt');
+    router.prefetch('/teacher-portal/settings');
+  };
+  useEffect(() => {
+    prefetchRoutes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const getRenderItems = (itemsArray: sideBarItemType[]) =>
-    itemsArray.map((item, i) =>
-      item.callback ? (
-        <a
-          key={`${i} ${item.name}`}
-          href="#"
-          className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+    itemsArray.map((item, i) => (
+      <a
+        key={`${i} ${item.name}`}
+        href="#"
+        className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
           ${slug === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
           ${item.overrideClassName ? item.overrideClassName : ''}
           `}
-          onClick={(e) => {
-            e.preventDefault();
-            item.callback();
-          }}
-        >
-          <div className="flex gap-2 items-center">
-            {cloneElement(item.icon, {
-              className: iconClass,
-            })}
-            <div className="tablet:hidden">{item.name}</div>
-          </div>
-        </a>
-      ) : (
-        <Link
-          key={`${i} ${item.name}`}
-          href={item.link}
-          className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
-          ${slug === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
-          ${item.overrideClassName ? item.overrideClassName : ''}
-          `}
-        >
-          <div className="flex gap-2 items-center">
-            {cloneElement(item.icon, {
-              className: iconClass,
-            })}
-            <div className="tablet:hidden">{item.name}</div>
-          </div>
-        </Link>
-      ),
-    );
+        onClick={item.callback}
+      >
+        <div className="flex gap-2 items-center ">
+          {cloneElement(item.icon, {
+            className: iconClass,
+          })}
+          <div className="tablet:hidden"> {item.name}</div>
+        </div>
+      </a>
+    ));
 
   const joinLINEGroupOnClick = () => {
     trackEvent('Join LINE group button clicked');
