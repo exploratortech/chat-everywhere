@@ -23,6 +23,8 @@ const helperFunctionNames = {
   generateHtmlForAiPainterImages: 'generate-html-for-ai-painter-images',
 };
 
+const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production';
+
 export const getHelperFunctionCalls = (
   lineAccessToken?: string,
 ): FunctionCall[] => {
@@ -167,11 +169,19 @@ export const triggerHelperFunction = async (
 
           const { data: imagePublicUrlData } = await supabase.storage
             .from('ai-images')
-            .getPublicUrl(imageFileName);
+            .getPublicUrl(imageFileName, {
+              transform: {
+                width: 500,
+                height: 500,
+              },
+            });
 
           if (!imagePublicUrlData) throw new Error('Image generation failed');
 
-          return imagePublicUrlData.publicUrl;
+          return {
+            imagePublicUrl: imagePublicUrlData.publicUrl,
+            fileName: imageFileName,
+          };
         };
         try {
           const imageGenerationResponse = await generateImage(prompt);
@@ -189,7 +199,9 @@ export const triggerHelperFunction = async (
             throw new Error('Failed to generate image');
           }
           // Run storeImage and substractUserCredit in parallel
-          const imagePublicUrl = await storeImage(generatedImageInBase64);
+          const { imagePublicUrl, fileName } = await storeImage(
+            generatedImageInBase64,
+          );
 
           if (!imagePublicUrl) {
             throw new Error('Failed to store image');
@@ -197,6 +209,7 @@ export const triggerHelperFunction = async (
           return {
             revised_prompt: imageGenerationResponse.data[0].revised_prompt,
             imagePublicUrl,
+            fileName,
           };
         } catch (e) {
           throw e;

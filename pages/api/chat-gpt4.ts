@@ -50,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const selectedOutputLanguage = req.headers.get('Output-Language')
-      ? `{lang=${req.headers.get('Output-Language')}}`
+      ? `[lang=${req.headers.get('Output-Language')}]`
       : '';
 
     const { messages, prompt, temperature } = (await req.json()) as ChatBody;

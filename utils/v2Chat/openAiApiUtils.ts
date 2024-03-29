@@ -132,7 +132,7 @@ export const generateImage = async (
 
   while (retries < maxRetries) {
     if (retries < 4) {
-      response = await authorizedAzureRequest({
+      response = await authorizedDalle3AzureRequest({
         method: 'POST',
         body: JSON.stringify(payload),
       });
@@ -342,8 +342,7 @@ const authorizedOpenAiRequest = async (
 };
 
 // Move this function from utils/server/index.ts to here for serverless function compatibility reason
-
-const authorizedAzureRequest = async (options: RequestInit = {}) => {
+const authorizedDalle3AzureRequest = async (options: RequestInit = {}) => {
   const { endpoint, key } = getDalle3EndpointAndKeys();
   if (!endpoint || !key) {
     throw new Error('Failed to get Azure DALL-E 3 endpoint and key');
