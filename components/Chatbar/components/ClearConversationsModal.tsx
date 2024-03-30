@@ -21,11 +21,7 @@ import { event } from 'nextjs-google-analytics';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 
-import {
-  DEFAULT_SYSTEM_PROMPT,
-  DEFAULT_TEMPERATURE,
-  newDefaultConversation,
-} from '@/utils/app/const';
+import { newDefaultConversation } from '@/utils/app/const';
 import {
   getNonDeletedCollection,
   saveConversations,
@@ -36,7 +32,6 @@ import { saveFolders } from '@/utils/app/folders';
 
 import { Conversation } from '@/types/chat';
 import { FolderInterface } from '@/types/folder';
-import { OpenAIModels } from '@/types/openai';
 
 import HomeContext from '@/components/home/home.context';
 import { Button } from '@/components/v2Chat/ui/button';
@@ -44,8 +39,6 @@ import { Button } from '@/components/v2Chat/ui/button';
 import ClearConversationsModalContext, {
   ClearConversationsModalState,
 } from './ClearConversationsModal.context';
-
-import { v4 as uuidv4 } from 'uuid';
 
 export default function ClearConversationsModal() {
   const {
@@ -193,7 +186,7 @@ export default function ClearConversationsModal() {
     localStorage.removeItem('selectedConversation');
 
     if (deletingFolders) {
-      const updatedFolders = filteredFolders.filter(
+      const updatedFolders = folders.filter(
         (folder) => !selectedFolders.has(folder.id),
       );
       homeDispatch({ field: 'folders', value: updatedFolders });
