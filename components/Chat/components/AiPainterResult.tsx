@@ -3,7 +3,7 @@ import {
   SupabaseClient,
   useSupabaseClient,
 } from '@supabase/auth-helpers-react';
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import HomeContext from '@/components/home/home.context';
@@ -31,6 +31,10 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
   const isStudentAccount = isTempUser;
 
   const getCompressedImageUrl = (url: string) => `${url}?width=300&height=300`;
+  const compressedImageUrls = useMemo(
+    () => results.map((result) => getCompressedImageUrl(result.url)),
+    [results],
+  );
   const supabase = useSupabaseClient();
 
   return (
@@ -38,18 +42,21 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
       id="ai-painter-result"
       className="grid grid-cols-2 gap-4 bg-white rounded-md p-4 mobile:p-2 my-4"
     >
-      {results.map((result) => (
+      {results.map((result, index) => (
         <div className="relative group/ai-painter-result" key={result.url}>
           <img
             src={result.url}
             alt={result.prompt}
-            className={`w-full m-0 transition-all duration-500 `}
+            loading="lazy"
+            className={`w-full m-0 transition-all duration-500`}
+            width={300}
+            height={300}
           />
 
           <div className="group-hover/ai-painter-result:flex hidden absolute bottom-0 right-0 p-1 z-10 gap-2">
             <button>
               <LineShareButton
-                imageFileUrl={getCompressedImageUrl(result.url)}
+                imageFileUrl={compressedImageUrls[index]}
                 size={20}
                 displayInProgressToast={true}
               />
@@ -83,7 +90,7 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
   );
 };
 
-export default AiPainterResult;
+export default React.memo(AiPainterResult);
 
 const downloadFile = async (
   supabaseClient: SupabaseClient,
