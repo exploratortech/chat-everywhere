@@ -2,7 +2,7 @@ import { Conversation, Message } from '@/types/chat';
 import { DragData } from '@/types/drag';
 import { ErrorMessage } from '@/types/error';
 import { FolderInterface } from '@/types/folder';
-import { OpenAIModel, OpenAIModelID } from '@/types/openai';
+import { OpenAIModelID } from '@/types/openai';
 import { Prompt, TeacherPromptForTeacherPortal } from '@/types/prompt';
 import { TeacherSettings } from '@/types/teacher-settings';
 import { CreditUsage, User } from '@/types/user';
@@ -49,6 +49,7 @@ export interface HomeInitialState {
   showFeaturesModel: boolean;
   showEventModel: boolean;
   showClearConversationsModal: boolean;
+  showClearPromptsModal: boolean;
   showFeaturePageOnLoad: string | null;
   user: User | null;
   isPaidUser: boolean;
@@ -119,6 +120,7 @@ export const initialState: HomeInitialState = {
   showFeaturesModel: false,
   showEventModel: false,
   showClearConversationsModal: false,
+  showClearPromptsModal: false,
   showFeaturePageOnLoad: null,
   user: null,
   isPaidUser: false,
