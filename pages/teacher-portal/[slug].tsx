@@ -137,38 +137,4 @@ const TeacherPortalContent: React.FC<TeacherPortalContentProps> = ({
   );
 };
 
-// export const getServerSideProps = withCommonServerSideProps(async (context) => {
-//   const supabase = createServerSupabaseClient(context);
-//   const {
-//     data: { user },
-//     error,
-//   } = await supabase.auth.getUser();
-
-//   if (error || !user) {
-//     return {
-//       redirect: {
-//         destination: '/',
-//         permanent: false,
-//       },
-//     };
-//   }
-
-//   const { data: profile, error: profileError } = await supabase
-//     .from('profiles')
-//     .select('*')
-//     .eq('id', user?.id)
-//     .single();
-
-//   if (profileError || !profile || !profile.is_teacher_account) {
-//     return {
-//       redirect: {
-//         destination: '/',
-//         permanent: false,
-//       },
-//     };
-//   }
-
-//   return {
-//     props: {},
-//   };
-// });
+export const getServerSideProps = withCommonServerSideProps();
