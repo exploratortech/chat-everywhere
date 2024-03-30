@@ -21,7 +21,11 @@ import {
   cleanFolders,
   cleanPrompts,
 } from '@/utils/app/clean';
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_TEMPERATURE,
+  newDefaultConversation,
+} from '@/utils/app/const';
 import {
   getNonDeletedCollection,
   saveConversation,
@@ -639,16 +643,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       cleanedPrompts,
     );
 
-    const newConversation = {
-      id: uuidv4(),
-      name: 'New conversation',
-      messages: [],
-      model: OpenAIModels[defaultModelId],
-      prompt: DEFAULT_SYSTEM_PROMPT,
-      temperature: DEFAULT_TEMPERATURE,
-      folderId: null,
-    };
-
     // Load shareable conversations
     const { shareable_conversation_id: accessibleConversationId } =
       router.query;
@@ -675,7 +669,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           toast.error(t('Sorry, we could not find this shared conversation.'));
           dispatch({
             field: 'selectedConversation',
-            value: newConversation,
+            value: newDefaultConversation,
           });
         })
         .finally(() => {
@@ -685,7 +679,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     } else {
       dispatch({
         field: 'selectedConversation',
-        value: newConversation,
+        value: newDefaultConversation,
       });
     }
   }, []);
