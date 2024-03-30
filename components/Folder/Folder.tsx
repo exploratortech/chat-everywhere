@@ -173,7 +173,6 @@ const Folder = ({
             </div>
           </div>
         )}
-
         <div
           className="absolute right-1 z-10 flex text-gray-300"
           onDragOver={allowDrop}
@@ -217,16 +216,19 @@ const Folder = ({
                 handleClick={(e) => {
                   e.stopPropagation();
                   switch (currentFolder.type) {
-                    case 'chat': handleNewConversation(currentFolder.id);
-                    case 'prompt': handleCreatePrompt(currentFolder.id);
+                    case 'chat':
+                      handleNewConversation(currentFolder.id);
+                    case 'prompt':
+                      handleCreatePrompt(currentFolder.id);
                   }
                   setIsOpen(true);
                 }}
               >
-                {currentFolder.type === 'chat'
-                  ? <IconMessagePlus size={18} />
-                  : <IconPlus size={18} />
-                }
+                {currentFolder.type === 'chat' ? (
+                  <IconMessagePlus size={18} />
+                ) : (
+                  <IconPlus size={18} />
+                )}
               </SidebarActionButton>
               <SidebarActionButton
                 handleClick={(e) => {
