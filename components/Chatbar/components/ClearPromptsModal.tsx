@@ -204,6 +204,13 @@ export default function ClearPromptsModal() {
 
     handleClose();
   };
+  const handleSwitchToClearConversations = () => {
+    homeDispatch({
+      field: 'showClearPromptsModal',
+      value: false,
+    });
+    homeDispatch({ field: 'showClearConversationsModal', value: true });
+  };
 
   return (
     <Transition appear show={showClearPromptsModal} as={Fragment}>
@@ -241,9 +248,20 @@ export default function ClearPromptsModal() {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="flex flex-col w-full max-w-[70vw] xl:max-w-3xl tablet:max-w-[90vw] h-[calc(80vh-100px)] transform overflow-hidden rounded-2xl text-left align-middle shadow-xl transition-all text-neutral-200 mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none bg-neutral-900">
-                  <h1 className="font-bold mb-4 px-6 pt-6">
-                    {t('Clear Prompts')}
-                  </h1>
+                  <div className="flex gap-2 items-baseline">
+                    <h1 className="font-bold mb-4 px-6 pt-6 pr-2">
+                      {t('Clear Prompts')}
+                    </h1>
+                    <Button
+                      variant={'link'}
+                      size={'sm'}
+                      className="mobile:hidden p-0 text-gray-400 underline"
+                      onClick={handleSwitchToClearConversations}
+                    >
+                      {t('Switch to Clear Conversations')}
+                    </Button>
+                  </div>
+
                   <Button
                     className="p-1 absolute top-5 right-5"
                     onClick={handleClose}
