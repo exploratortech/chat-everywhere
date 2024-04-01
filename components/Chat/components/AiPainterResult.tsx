@@ -30,13 +30,12 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
   } = useContext(HomeContext);
   const isStudentAccount = isTempUser;
 
-  const getCompressedImageUrl = (url: string) => `${url}?width=300&height=300`;
-  const compressedImageUrls = useMemo(
-    () => results.map((result) => getCompressedImageUrl(result.url)),
+  const imageUrls = useMemo(
+    () => results.map((result) => result.url),
     [results],
   );
   const supabase = useSupabaseClient();
-
+  
   return (
     <div
       id="ai-painter-result"
@@ -56,7 +55,7 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
           <div className="group-hover/ai-painter-result:flex hidden absolute bottom-0 right-0 p-1 z-10 gap-2">
             <button>
               <LineShareButton
-                imageFileUrl={compressedImageUrls[index]}
+                imageFileUrl={imageUrls[index]}
                 size={20}
                 displayInProgressToast={true}
               />
