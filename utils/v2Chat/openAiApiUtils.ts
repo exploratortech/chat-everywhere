@@ -129,7 +129,7 @@ export const generateImage = async (
   let delay = 500; // Initial delay of 500ms
   let retries = 0; // Initial retry count
   const maxRetries = 10;
-  
+
   while (retries < maxRetries) {
     if (retries < 4) {
       response = await authorizedDalle3AzureRequest({
@@ -148,7 +148,9 @@ export const generateImage = async (
     }
 
     // If status is 429 (Too Many Requests), wait for the delay then double it for the next iteration
-    await new Promise((resolve) => setTimeout(resolve, delay));
+    await new Promise((resolve) => {
+      setTimeout(resolve, delay);
+    });
     delay *= 2;
     retries += 1;
   }

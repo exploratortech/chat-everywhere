@@ -67,6 +67,13 @@ const handler = async (req: Request): Promise<Response> => {
       let stop = false;
       let error: any = null;
 
+      // The placeholder is used to keep the stream alive while the image is being generated
+      const placeholderInterval = setInterval(() => {
+        if (!stop) {
+          sendToUser('[PLACEHOLDER]');
+        }
+      }, 10000); // 10 seconds
+
       const interval = setInterval(() => {
         if (buffer.length > 0) {
           const data = buffer.shift();
@@ -81,6 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
             controller.close();
           }
           clearInterval(interval);
+          clearInterval(placeholderInterval);
         }
       }, 10);
 
@@ -95,7 +103,11 @@ const handler = async (req: Request): Promise<Response> => {
           sendToUser(payload);
         },
         onProgressUpdate: (payload) => {
-          sendLoadingMessage(payload);
+          if (payload.type === 'result') {
+            sendToUser(payload.content);
+          } else {
+            sendLoadingMessage(payload.content);
+          }
         },
         onErrorUpdate: (payload) => {
           sendErrorMessage(payload);

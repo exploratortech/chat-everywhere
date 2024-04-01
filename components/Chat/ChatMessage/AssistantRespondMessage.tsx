@@ -4,6 +4,7 @@ import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
 import AiPainter from '../components/AiPainter';
+import AiPainterResult from '../components/AiPainterResult';
 import { ImageGenerationComponent } from '../components/ImageGenerationComponent';
 import MjImageComponentV2 from '../components/MjImageComponentV2';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
@@ -63,7 +64,7 @@ const AssistantRespondMessage = memo(
           );
         }
 
-        // AI PAINTER IMAGE (DALL-E)
+        // AI PAINTER IMAGE (DALL-E) [Backward compatibility]
         if (messagePluginId === PluginID.aiPainter) {
           const imageAlt = node?.properties?.alt;
 
@@ -138,6 +139,22 @@ const AssistantRespondMessage = memo(
         remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
         rehypePlugins={[rehypeMathjax, rehypeRaw]}
         components={{
+          div: ({ node, children, ...props }) => {
+            if (node?.properties?.id === 'ai-painter-generated-image') {
+              const imageTags = node?.children;
+              if (!imageTags) return <>{children}</>;
+              const result = imageTags
+                .map((imageTag: any) => ({
+                  url: imageTag.properties?.src,
+                  prompt: imageTag.properties?.alt,
+                  filename: imageTag.properties?.dataFilename,
+                }))
+                .filter((image: any) => image.url && image.prompt);
+
+              return <AiPainterResult results={result} />;
+            }
+            return <div {...props}>{children}</div>;
+          },
           a({ node, children, href, ...props }) {
             return (
               <a
