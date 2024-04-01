@@ -1,15 +1,13 @@
-import { useMemo } from 'react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useState } from 'react';
 
 import { PluginID } from '@/types/plugin';
 import { CreditUsage } from '@/types/user';
 
-import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
-
 export const useFetchCreditUsage = () => {
   const [creditUsage, setCreditUsage] = useState<CreditUsage | null>(null);
 
-  const supabaseClient = useMemo(() => createBrowserSupabaseClient(), []);
+  const supabaseClient = useSupabaseClient();
 
   const fetchAndUpdateCreditUsage = async (
     userId: string,

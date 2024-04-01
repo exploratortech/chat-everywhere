@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import useTeacherTags from '@/hooks/useTeacherTags';
+import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 
 import { Tag as TagType } from '@/types/tags';
 
@@ -9,13 +9,19 @@ import { Button } from '../ui/button';
 import NewTagButton from './Tags/NewTagButton';
 import Tag from './Tags/Tag';
 
-const Tags = ({ tags }: { tags: TagType[] }) => {
+const Tags = () => {
+  const isPeriodicFlag = useRef(false);
+  const { fetchQuery } = useTeacherTags(isPeriodicFlag.current);
+  const tags: TagType[] = fetchQuery.data || [];
   const { t } = useTranslation('model');
   const { removeTeacherTags, addTeacherTag } = useTeacherTags();
   const { mutateAsync: removeTags } = removeTeacherTags;
   const { mutate: addTag } = addTeacherTag;
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
+  useEffect(() => {
+    isPeriodicFlag.current = true;
+  }, []);
   const handleRemoveTag = () => {
     const selectedTagDetails = tags.filter((tag) =>
       selectedTags.includes(tag.id),

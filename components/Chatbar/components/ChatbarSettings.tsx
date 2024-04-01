@@ -12,6 +12,7 @@ import { useContext, useMemo } from 'react';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 
+import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import CloudSyncStatusComponent from '../../Sidebar/components/CloudSyncComponent';
@@ -20,7 +21,6 @@ import HomeContext from '@/components/home/home.context';
 
 import { SidebarButton } from '../../Sidebar/SidebarButton';
 import { ClearConversations } from './ClearConversations';
-import { getNonDeletedCollection } from '@/utils/app/conversation';
 
 export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
@@ -33,14 +33,16 @@ export const ChatbarSettings = () => {
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
 
-  const filteredConversations = useMemo(() =>
-    getNonDeletedCollection(conversations),
+  const filteredConversations = useMemo(
+    () => getNonDeletedCollection(conversations),
     [conversations],
   );
 
-  const filteredFolders = useMemo(() =>
-    getNonDeletedCollection(folders)
-      .filter((folder) => folder.type === 'chat'),
+  const filteredFolders = useMemo(
+    () =>
+      getNonDeletedCollection(folders).filter(
+        (folder) => folder.type === 'chat',
+      ),
     [folders],
   );
 
@@ -65,7 +67,7 @@ export const ChatbarSettings = () => {
   const teacherPortalBtnOnClick = () => {
     if (isTeacherAccount) {
       trackEvent('Teacher portal clicked');
-      router.push('/teacher-portal');
+      router.push('/teacher-portal/one-time-code');
     }
   };
 
@@ -73,7 +75,9 @@ export const ChatbarSettings = () => {
     <div className="min-h-min">
       <CloudSyncStatusComponent />
       <div className="flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm overflow-auto">
-        {filteredConversations.length > 0 || filteredFolders.length > 0 ? <ClearConversations /> : null}
+        {filteredConversations.length > 0 || filteredFolders.length > 0 ? (
+          <ClearConversations />
+        ) : null}
 
         <SidebarButton
           text={t('Settings')}

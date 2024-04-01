@@ -1,12 +1,15 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { Tag } from '@/types/tags';
 
-const useTeacherTags = () => {
+import useTeacherPortalLoading from './useTeacherPortalLoading';
+
+const useTeacherTags = (isPeriodic: boolean = true) => {
   const supabase = useSupabaseClient();
   const queryClient = useQueryClient();
+  const { withLoading } = useTeacherPortalLoading();
 
   const fetchTags = async () => {
     const accessToken = (await supabase.auth.getSession()).data.session
@@ -68,25 +71,40 @@ const useTeacherTags = () => {
   };
 
   return {
-    fetchQuery: useQuery('teacher-tags', fetchTags, { staleTime: 600000 }),
-    addTeacherTag: useMutation(addTag, {
-      onSuccess: (res) => {
-        if (res.isAdded) {
-          queryClient.invalidateQueries('teacher-tags');
-        } else {
-          toast.error('Failed to add tag');
+    fetchQuery: useQuery(
+      ['teacher-tags'],
+      () => {
+        if (isPeriodic) {
+          return fetchTags();
         }
+        return withLoading(fetchTags);
       },
-    }),
-    removeTeacherTags: useMutation(removeTags, {
-      onSuccess: (res) => {
-        if (res.isRemoved) {
-          queryClient.invalidateQueries('teacher-tags');
-        } else {
-          toast.error('Failed to remove tags');
-        }
+      {},
+    ),
+    addTeacherTag: useMutation(
+      (tagName: string) => withLoading(() => addTag(tagName)),
+      {
+        onSuccess: (res) => {
+          if (res.isAdded) {
+            queryClient.invalidateQueries(['teacher-tags']);
+          } else {
+            toast.error('Failed to add tag');
+          }
+        },
       },
-    }),
+    ),
+    removeTeacherTags: useMutation(
+      (tagIds: number[]) => withLoading(() => removeTags(tagIds)),
+      {
+        onSuccess: (res) => {
+          if (res.isRemoved) {
+            queryClient.invalidateQueries(['teacher-tags']);
+          } else {
+            toast.error('Failed to remove tags');
+          }
+        },
+      },
+    ),
   };
 };
 export default useTeacherTags;

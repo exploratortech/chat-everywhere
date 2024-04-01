@@ -1,5 +1,5 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 const useTeacherOneTimeCodeTagsManagement = (code_id: string) => {
   const supabase = useSupabaseClient();

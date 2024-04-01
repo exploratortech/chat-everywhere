@@ -1,4 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { FC, Fragment, useContext, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -8,8 +9,6 @@ import { markSurveyIsFilledInLocalStorage } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 
 import HomeContext from '@/components/home/home.context';
-
-import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
 type Props = {
   onClose: () => void;
@@ -26,7 +25,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
     state: { user },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
-  const supabaseClient = useMemo(() => createBrowserSupabaseClient(), []);
+  const supabaseClient = useSupabaseClient();
 
   const occupationOptions = [
     { value: 'student', label: 'Student' },

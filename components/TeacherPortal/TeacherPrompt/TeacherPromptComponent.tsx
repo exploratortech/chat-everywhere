@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import useTeacherPrompt from '@/hooks/useTeacherPrompt';
+import useTeacherPrompt from '@/hooks/teacherPortal/useTeacherPrompt';
 
 import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
