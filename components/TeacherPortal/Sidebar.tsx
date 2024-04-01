@@ -131,7 +131,7 @@ export default function Sidebar({ className = '' }: Props) {
     <div className={`${className} flex justify-between flex-col`}>
       <div>
         <b className="pt-6 px-6 block select-none tablet:hidden">
-          {t('Teacher Portal')} (Beta)
+          {t('Teacher Portal')}
         </b>
         <div className="py-6 flex flex-col">
           <Link
