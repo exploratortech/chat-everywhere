@@ -6,7 +6,11 @@ import { event } from 'nextjs-google-analytics';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_TEMPERATURE,
+  newDefaultConversation,
+} from '@/utils/app/const';
 import {
   getNonDeletedCollection,
   saveConversation,
@@ -95,15 +99,7 @@ export const Chatbar = () => {
       defaultModelId &&
         homeDispatch({
           field: 'selectedConversation',
-          value: {
-            id: uuidv4(),
-            name: 'New conversation',
-            messages: [],
-            model: OpenAIModels[defaultModelId],
-            prompt: DEFAULT_SYSTEM_PROMPT,
-            temperature: DEFAULT_TEMPERATURE,
-            folderId: null,
-          },
+          value: newDefaultConversation,
         });
 
       localStorage.removeItem('selectedConversation');

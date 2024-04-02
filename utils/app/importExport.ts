@@ -15,7 +15,7 @@ import {
 import { HomeInitialState } from '@/components/home/home.state';
 
 import { cleanConversationHistory, cleanFolders, cleanPrompts } from './clean';
-import { RANK_INTERVAL } from './const';
+import { RANK_INTERVAL, newDefaultConversation } from './const';
 import { trackEvent } from './eventTracking';
 
 import dayjs from 'dayjs';
@@ -151,9 +151,16 @@ export const importData = (
 
   const conversations = history;
   localStorage.setItem('conversationHistory', JSON.stringify(conversations));
+  const lastConversation =
+    conversations.length > 0
+      ? conversations[conversations.length - 1]
+      : new Set<string>();
+  console.log({
+    lastConversation: JSON.stringify(lastConversation),
+  });
   localStorage.setItem(
     'selectedConversation',
-    JSON.stringify(conversations[conversations.length - 1]),
+    JSON.stringify(lastConversation),
   );
 
   localStorage.setItem('folders', JSON.stringify(folders));
@@ -174,6 +181,7 @@ export const handleImportConversations = (
     const { history, folders, prompts }: LatestExportFormat = importData(data);
     homeDispatch({ field: 'conversations', value: history });
     // skip if selected conversation is already in history
+
     if (
       selectedConversation &&
       !history.some(
@@ -182,7 +190,7 @@ export const handleImportConversations = (
     ) {
       homeDispatch({
         field: 'selectedConversation',
-        value: history[history.length - 1],
+        value: history[history.length - 1] || newDefaultConversation,
       });
     }
     homeDispatch({ field: 'folders', value: folders });

@@ -21,12 +21,13 @@ import HomeContext from '@/components/home/home.context';
 
 import { SidebarButton } from '../../Sidebar/SidebarButton';
 import { ClearConversations } from './ClearConversations';
+import { ClearPrompts } from './ClearPrompts';
 
 export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
 
   const {
-    state: { conversations, folders, user, isTeacherAccount },
+    state: { conversations, folders, prompts, user, isTeacherAccount },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -44,6 +45,18 @@ export const ChatbarSettings = () => {
         (folder) => folder.type === 'chat',
       ),
     [folders],
+  );
+
+  const filteredPromptFolders = useMemo(
+    () =>
+      getNonDeletedCollection(folders).filter(
+        (folder) => folder.type === 'prompt',
+      ),
+    [folders],
+  );
+  const filteredPrompts = useMemo(
+    () => getNonDeletedCollection(prompts),
+    [prompts],
   );
 
   const signInOnClick = () => {
@@ -77,6 +90,9 @@ export const ChatbarSettings = () => {
       <div className="flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm overflow-auto">
         {filteredConversations.length > 0 || filteredFolders.length > 0 ? (
           <ClearConversations />
+        ) : null}
+        {filteredPrompts.length > 0 || filteredPromptFolders.length > 0 ? (
+          <ClearPrompts />
         ) : null}
 
         <SidebarButton

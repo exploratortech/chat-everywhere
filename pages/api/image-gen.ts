@@ -357,7 +357,7 @@ const handler = async (req: Request): Promise<Response> => {
               content: `${
                 generationProgress === 0
                   ? 'Waiting to be processed'
-                  : `${generationProgress}% complete`
+                  : `${generationProgress || 0}% complete`
               } ... ${getTotalGenerationTime()}s \n`,
               removeLastLine: true,
               previewImageUrl:
