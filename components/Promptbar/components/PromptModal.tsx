@@ -1,10 +1,11 @@
+import { IconFileImport } from '@tabler/icons-react';
 import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { Tooltip } from 'react-tooltip';
 
 import { useTranslation } from 'next-i18next';
 
 import { CustomInstructionPrompt, Prompt, RegularPrompt } from '@/types/prompt';
 
-import { Button } from '@/components/ui/button';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 
 interface Props {
@@ -31,6 +32,18 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
   useEffect(() => {
     nameInputRef.current?.focus();
   }, []);
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'text/plain') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result;
+        setContent(text?.toString().trim() || '');
+      };
+      reader.readAsText(file);
+    }
+  };
 
   return (
     <div onKeyDown={handleEnter}>
@@ -72,6 +85,31 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
         onChange={(e) => setContent(e.target.value)}
         rows={7}
       />
+      <div className="flex w-full justify-end">
+        <input
+          type="file"
+          accept=".txt"
+          style={{ display: 'none' }}
+          onChange={handleFileImport}
+          id="fileInput"
+        />
+        <div
+          data-tooltip-id="import-tooltip"
+          data-tooltip-place="left"
+          data-tooltip-variant="light"
+        >
+          <IconFileImport
+            size={16}
+            onClick={() => document.getElementById('fileInput')?.click()}
+            className="cursor-pointer text-neutral-400 hover:text-neutral-100"
+          />
+        </div>
+        <Tooltip
+          id="import-tooltip"
+          content={t('Import from text file') || ''}
+          place="bottom"
+        />
+      </div>
 
       <div className="mt-6 flex items-center justify-between">
         <div className="text-sm font-bold text-black dark:text-neutral-200">
