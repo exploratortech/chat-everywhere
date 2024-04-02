@@ -21,7 +21,6 @@ import HomeContext from '@/components/home/home.context';
 
 import { SidebarButton } from '../../Sidebar/SidebarButton';
 import { ClearConversations } from './ClearConversations';
-import { ClearPrompts } from './ClearPrompts';
 
 export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
@@ -88,11 +87,11 @@ export const ChatbarSettings = () => {
     <div className="min-h-min">
       <CloudSyncStatusComponent />
       <div className="flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm overflow-auto">
-        {filteredConversations.length > 0 || filteredFolders.length > 0 ? (
+        {filteredConversations.length > 0 ||
+        filteredFolders.length > 0 ||
+        filteredPromptFolders.length > 0 ||
+        filteredPrompts.length > 0 ? (
           <ClearConversations />
-        ) : null}
-        {filteredPrompts.length > 0 || filteredPromptFolders.length > 0 ? (
-          <ClearPrompts />
         ) : null}
 
         <SidebarButton

@@ -166,6 +166,7 @@
   "to join our focus group to share your feedback.": "加入我们的焦点小组来分享您的反馈。",
   "Close": "关闭",
   "Clear Conversations": "清除对话",
+  "Clear Prompts": "清除提示词模板",
   "Select all": "全选",
   "Clear folders": "移除资料夹和内容",
   "Are you sure?": "确定吗？",
@@ -196,5 +197,7 @@
   "Upcoming events": "近期活动",
   "Add to your calendar": "加入到行事历",
   "Join event!": "加入活动!",
-  "Sign up": "报名活动"
+  "Sign up": "报名活动",
+  "Switch to Clear Prompts": "切换至清空提示词模板",
+  "Switch to Clear Conversations": "切换至清空对话"
 }
