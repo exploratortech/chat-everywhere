@@ -4,7 +4,6 @@ import { useTranslation } from 'next-i18next';
 
 import { CustomInstructionPrompt, Prompt, RegularPrompt } from '@/types/prompt';
 
-import { Button } from '@/components/ui/button';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 
 interface Props {
@@ -19,7 +18,6 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
   const [description, setDescription] = useState(prompt.description);
   const [content, setContent] = useState(prompt.content);
 
-  const modalRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const handleEnter = (e: KeyboardEvent<HTMLDivElement>) => {

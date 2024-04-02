@@ -5,10 +5,9 @@ import { useTranslation } from 'next-i18next';
 import useTeacherPrompt from '@/hooks/useTeacherPrompt';
 
 import { PluginID } from '@/types/plugin';
-import { Prompt, TeacherPromptForTeacherPortal } from '@/types/prompt';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
-
 import {
   Select,
   SelectContent,
@@ -75,7 +74,9 @@ export const TeacherPromptModal: FC<Props> = ({
   const { t: formT } = useTranslation('form');
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
-  const [firstMessageToGPT, setFirstMessageToGPT] = useState(prompt.first_message_to_gpt);
+  const [firstMessageToGPT, setFirstMessageToGPT] = useState(
+    prompt.first_message_to_gpt,
+  );
   const [content, setContent] = useState(prompt.content);
   const [mode, setMode] = useState(prompt.default_mode);
   const [isEnable, setIsEnable] = useState(prompt.is_enable);
@@ -185,7 +186,9 @@ export const TeacherPromptModal: FC<Props> = ({
         className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
         style={{ resize: 'vertical' }}
         placeholder={
-          t('The first message to start the conversation, such that the student does not need to type anything to start') || ''
+          t(
+            'The first message to start the conversation, such that the student does not need to type anything to start',
+          ) || ''
         }
         value={firstMessageToGPT}
         onChange={(e) => setFirstMessageToGPT(e.target.value)}
