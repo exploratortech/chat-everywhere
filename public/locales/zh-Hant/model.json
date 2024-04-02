@@ -192,6 +192,8 @@
   "View full message": "查看完整訊息",
   "AI Painter": "AI繪畫",
   "Allow Student to use LINE": "允許學生使用LINE",
+  "Hidden ChatEverywhere Default Character Prompt": "隱藏ChatEverywhere預設角色提示詞",
+  "Automatic clear Conversations on student logout": "學生帳號登出時自動清除對話",
   "Upcoming events": "近期活動 (臺灣限定)",
   "Add to your calendar": "加入到行事曆",
   "Join event!": "加入活動!",

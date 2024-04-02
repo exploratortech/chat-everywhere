@@ -1,20 +1,20 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import { TeacherSettings } from '@/types/teacher-settings';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
-const useTeacherSettingsForStudent = () => {
+const useTeacherPromptForStudent = () => {
   const supabase = useSupabaseClient();
 
   return useQuery(
-    ['teacherSettingsForStudent'],
+    ['teacherPromptForStudent'],
     async () => {
       const accessToken = (await supabase.auth.getSession()).data.session
         ?.access_token;
       if (!accessToken) {
         throw new Error('No access token');
       }
-      const res = await fetch('/api/teacher-settings-for-student', {
+      const res = await fetch('/api/teacher-prompt-for-student', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -22,11 +22,11 @@ const useTeacherSettingsForStudent = () => {
         },
       });
       if (!res.ok) {
-        throw new Error('Failed to fetch teacher Settings');
+        throw new Error('Failed to fetch teacher prompt');
       }
       const data = await res.json();
       return data as {
-        settings: TeacherSettings;
+        prompts: TeacherPromptForTeacherPortal[];
       };
     },
     {
@@ -35,4 +35,4 @@ const useTeacherSettingsForStudent = () => {
   );
 };
 
-export default useTeacherSettingsForStudent;
+export default useTeacherPromptForStudent;

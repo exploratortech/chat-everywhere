@@ -20,9 +20,10 @@ const helperFunctionNames = {
   weather: 'get-weather',
   line: 'send-message-to-line',
   aiPainter: 'generate-image',
+  generateHtmlForAiPainterImages: 'generate-html-for-ai-painter-images',
 };
 
-const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production';
+const isInProductionOrLocalEnv = process.env.NEXT_PUBLIC_ENV === 'production' || process.env.NEXT_PUBLIC_ENV === 'local';
 
 export const getHelperFunctionCalls = (
   lineAccessToken?: string,
@@ -69,7 +70,7 @@ export const triggerHelperFunction = async (
   helperFunctionName: string,
   argumentsString: string,
   userId: string,
-  onProgressUpdate?: (payload: string) => void,
+  onProgressUpdate?: (payload: { content: string; type: string }) => void,
 ): Promise<string> => {
   console.log('Trying to trigger helperFunction: ', helperFunctionName);
 
@@ -136,6 +137,7 @@ export const triggerHelperFunction = async (
       } catch (e) {
         return 'Unable to send notification to LINE';
       }
+
     case helperFunctionNames.aiPainter:
       let prompt: string;
       try {
@@ -149,98 +151,134 @@ export const triggerHelperFunction = async (
       });
       serverSideTrackEvent('N/A', 'DallE image generation');
 
-      const imageGenerationResponse = await generateImage(prompt);
+      const generateAndStoreImage = async () => {
+        const storeImage = async (imageBase64: string) => {
+          console.log(
+            'Image generated successfully, storing to Supabase storage ...',
+          );
+          const supabase = getAdminSupabaseClient();
+          const imageFileName = `${v4()}.png`;
+          const { error: fileUploadError } = await supabase.storage
+            .from('ai-images')
+            .upload(imageFileName, decode(imageBase64), {
+              cacheControl: '3600',
+              upsert: false,
+              contentType: 'image/png',
+            });
+          if (fileUploadError) throw fileUploadError;
 
-      if (!imageGenerationResponse.data) {
-        console.error('imageGenerationResponse: ', imageGenerationResponse);
-        return `Failed to generate image, below is the error message: ${imageGenerationResponse.errorMessage}`;
-      }
+          const { data: imagePublicUrlData } = await supabase.storage
+            .from('ai-images')
+            .getPublicUrl(imageFileName);
+  
 
-      const generatedImageInBase64 = imageGenerationResponse.data[0].b64_json;
+          const compressedImageUrl = supabase.storage
+            .from('ai-images')
+            .getPublicUrl(imageFileName, {
+              transform: {
+                width: 500,
+                height: 500,
+              },
+            });
 
-      if (!generatedImageInBase64) {
-        return 'Failed to generate image';
-      }
+          if (!imagePublicUrlData) throw new Error('Image generation failed');
 
-      const storeImage = async (imageBase64: string) => {
-        console.log(
-          'Image generated successfully, storing to Supabase storage ...',
-        );
-        const supabase = getAdminSupabaseClient();
-        const imageFileName = `${v4()}.png`;
-        const { error: fileUploadError } = await supabase.storage
-          .from('ai-images')
-          .upload(imageFileName, decode(imageBase64), {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: 'image/png',
-          });
-        if (fileUploadError) throw fileUploadError;
+          return {
+            compressedUrl: compressedImageUrl.data.publicUrl,
+            imagePublicUrl: imagePublicUrlData.publicUrl,
+            fileName: imageFileName,
+          };
+        };
 
-        const { data: imagePublicUrlData } = await supabase.storage
-          .from('ai-images')
-          .getPublicUrl(imageFileName);
+        try {
+          const imageGenerationResponse = await generateImage(prompt);
 
-        if (!imagePublicUrlData) throw new Error('Image generation failed');
+          if (!imageGenerationResponse.data) {
+            console.error('imageGenerationResponse: ', imageGenerationResponse);
+            if (!imageGenerationResponse.data)
+              throw new Error(
+                `Failed to generate image, below is the error message: ${imageGenerationResponse.errorMessage}`,
+              );
+          }
+          const generatedImageInBase64 =
+            imageGenerationResponse.data[0].b64_json;
+          if (!generatedImageInBase64) {
+            throw new Error('Failed to generate image');
+          }
+          // Run storeImage and substractUserCredit in parallel
+          const { imagePublicUrl, fileName, compressedUrl } = await storeImage(
+            generatedImageInBase64,
+          );
+
+          if (!imagePublicUrl) {
+            throw new Error('Failed to store image');
+          }
+          return {
+            revised_prompt: imageGenerationResponse.data[0].revised_prompt,
+            imagePublicUrl: isInProductionOrLocalEnv ? compressedUrl : imagePublicUrl,
+            fileName,
+          };
+        } catch (e) {
+          throw e;
+        }
+      };
+
+      try {
+        const [imageGenerationResponse1, imageGenerationResponse2] =
+          await Promise.all([generateAndStoreImage(), generateAndStoreImage()]);
 
         if (onProgressUpdate) {
-          onProgressUpdate(
-            'Artwork is done, now adding the final touches...✨',
-          );
-        }
-
-        const compressedImageUrl = supabase.storage
-          .from('ai-images')
-          .getPublicUrl(imageFileName, {
-            transform: {
-              width: 500,
-              height: 500,
-            },
+          onProgressUpdate({
+            content: 'Artwork is done, now adding the final touches...✨',
+            type: 'progress',
           });
-        return { compressedUrl: compressedImageUrl.data.publicUrl, originalUrl: imagePublicUrlData.publicUrl };
-      };
-
-      const subtractUserCredit = async () => {
-        console.log('Subtracting credit from user');
-        try {
-          await addUsageEntry(PluginID.IMAGE_GEN, userId);
-          await subtractCredit(userId, PluginID.IMAGE_GEN);
-        } catch (e) {
-          throw 'Not enough credit';
         }
-      };
 
-      // Run storeImage and substractUserCredit in parallel
-      let imagePublicUrlPromise = storeImage(generatedImageInBase64);
-      // TODO: Enable Temp disable subtract credit
-      // let subtractUserCreditPromise = subtractUserCredit();
+        const subtractUserCredit = async () => {
+          console.log('Subtracting credit from user');
+          try {
+            await addUsageEntry(PluginID.IMAGE_GEN, userId);
+            await subtractCredit(userId, PluginID.IMAGE_GEN);
+          } catch (e) {
+            throw 'Not enough credit';
+          }
+        };
+        // TODO: Enable Temp disable subtract credit
+        // await subtractUserCredit();
 
-      let imagePublicUrl: string;
-      try {
-        const [storeImageRes] = await Promise.all([
-          imagePublicUrlPromise,
-          // TODO: Enable Temp disable subtract credit
-          // subtractUserCreditPromise,
-        ]);
-        imagePublicUrl = isInProductionEnv && storeImageRes.compressedUrl || storeImageRes.originalUrl;
+        const functionResponse = `
+        2 Images generated! Below is the detail:
+        Generation prompt (insert the prompts as the 'alt' attribute of the image for later reference):
+         Prompt_1: ${imageGenerationResponse1.revised_prompt}.
+         URL_1: ${imageGenerationResponse1.imagePublicUrl}
+         File Name_1: ${imageGenerationResponse1.fileName}
+         Prompt_2: ${imageGenerationResponse2.revised_prompt}.
+         URL_2: ${imageGenerationResponse2.imagePublicUrl}
+         File Name_2: ${imageGenerationResponse2.fileName}
+
+        Pass those URLs and Prompts to function generate-html-for-ai-painter-images for display the result.
+      `;
+
+        return functionResponse;
       } catch (error) {
         console.error('Error in parallel execution: ', error);
         return 'Failed to process image or subtract user credit';
       }
 
-      if (!imagePublicUrl) {
-        return 'Failed to store image';
+    case helperFunctionNames.generateHtmlForAiPainterImages:
+      let imageResults: AiPainterImageGenerationResult[];
+      try {
+        imageResults = JSON.parse(argumentsString).imageResults;
+      } catch (e) {
+        return 'Unable to parse JSON that you provided, please output a valid JSON string. For example: {"imageResults": [{"prompt": "A cat", "url": "https://example.com/cat.png", "filename": "cat.png"}, {"prompt": "A dog", "url": "https://example.com/dog.png", "filename": "dog.png"}]}';
       }
-
-      // Resize image to reduce bandwidth
-      const functionResponse = `
-        Image generated! Below is the detail: 
-        Generation prompt (insert this prompt as the 'alt' attribute of the image for later reference): ${imageGenerationResponse.data[0].revised_prompt}. 
-        URL: ${imagePublicUrl}
-        Display the image to user by using the URL in Markdown format.
-      `;
-
-      return functionResponse;
+      if (onProgressUpdate) {
+        onProgressUpdate({
+          content: generateHtmlForAiPainterImages(imageResults),
+          type: 'result',
+        });
+      }
+      return `You can safely end the conversation here, the result is shown already. PLEASE DO NOT SHOW THE IMAGE AND PROMPT AGAIN SINCE THE RESULT IS SHOWN.`;
     default:
       return "I don't know how to do that yet, please try again later.";
   }
@@ -401,3 +439,22 @@ export const retrieveMqttConnectionPayload = async (
     }
   }
 };
+
+function generateHtmlForAiPainterImages(
+  imageResults: AiPainterImageGenerationResult[],
+): string {
+  const imagesHtml = imageResults
+    .map(
+      (result) =>
+        `<img src="${result.url}" alt="${result.prompt}" data-filename="${result.filename}" />`,
+    )
+    .join('');
+
+  return `<div id="ai-painter-generated-image">${imagesHtml}</div>`;
+}
+
+interface AiPainterImageGenerationResult {
+  prompt: string;
+  url: string;
+  filename: string;
+}

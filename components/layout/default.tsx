@@ -9,10 +9,10 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { event } from 'nextjs-google-analytics';
 
+import useTeacherPromptForStudent from '@/hooks/teacherPortal/useTeacherPromptForStudent';
+import useTeacherSettingsForStudent from '@/hooks/teacherPortal/useTeacherSettingsForStudent';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
-import useTeacherPromptForStudent from '@/hooks/useTeacherPromptForStudent';
-import useTeacherSettingsForStudent from '@/hooks/useTeacherSettingsForStudent';
 import useUserProfile from '@/hooks/useUserProfile';
 
 import { fetchShareableConversation } from '@/utils/app/api';
@@ -87,6 +87,41 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   const contextValue = useCreateReducer<HomeInitialState>({ initialState });
 
+  const resetStateOnLogout = ({
+    clearConversationHistory = false,
+  }: {
+    clearConversationHistory?: boolean;
+  }) => {
+    const newState = {
+      ...initialState,
+      // Preserve the values of the specified properties
+      loading: contextValue.state.loading,
+      lightMode: contextValue.state.lightMode,
+      messageIsStreaming: contextValue.state.messageIsStreaming,
+      modelError: contextValue.state.modelError,
+      folders: contextValue.state.folders,
+      conversations: contextValue.state.conversations,
+      selectedConversation: contextValue.state.selectedConversation,
+      currentMessage: contextValue.state.currentMessage,
+      prompts: contextValue.state.prompts,
+      temperature: contextValue.state.temperature,
+      showChatbar: contextValue.state.showChatbar,
+      showPromptbar: contextValue.state.showPromptbar,
+      currentFolder: contextValue.state.currentFolder,
+      messageError: contextValue.state.messageError,
+      searchTerm: contextValue.state.searchTerm,
+      defaultModelId: contextValue.state.defaultModelId,
+      outputLanguage: contextValue.state.outputLanguage,
+      currentDrag: contextValue.state.currentDrag,
+    };
+    if (clearConversationHistory) {
+      newState.conversations = [];
+      newState.prompts = [];
+      newState.folders = [];
+    }
+
+    dispatch({ type: 'partialReset', payload: newState });
+  };
   const { fetchAndUpdateCreditUsage, creditUsage } = useFetchCreditUsage();
 
   const {
@@ -105,6 +140,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       replaceRemoteData,
       messageIsStreaming,
       speechRecognitionLanguage,
+      isTempUser,
     },
     dispatch,
   } = contextValue;
@@ -563,9 +599,40 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   }, [user, isPaidUser, conversations]);
 
   const handleUserLogout = async () => {
+    const accessToken = (await supabase.auth.getSession()).data.session
+      ?.access_token;
+
+    let shouldClearConversationsOnLogout = false;
+    if (isTempUser) {
+      shouldClearConversationsOnLogout = (
+        await fetchShouldClearConversationsOnLogout(accessToken)
+      ).should_clear_conversations_on_logout;
+    }
     await supabase.auth.signOut();
-    dispatch({ field: 'user', value: null });
-    dispatch({ field: 'showSettingsModel', value: false });
+
+    if (shouldClearConversationsOnLogout) {
+      resetStateOnLogout({
+        clearConversationHistory: true,
+      });
+      saveConversations([]);
+      defaultModelId &&
+        dispatch({
+          field: 'selectedConversation',
+          value: {
+            id: uuidv4(),
+            name: 'New conversation',
+            messages: [],
+            model: OpenAIModels[defaultModelId],
+            prompt: DEFAULT_SYSTEM_PROMPT,
+            temperature: DEFAULT_TEMPERATURE,
+            folderId: null,
+          },
+        });
+      localStorage.removeItem('selectedConversation');
+    } else {
+      resetStateOnLogout({});
+    }
+
     toast.success(t('You have been logged out'));
     clearUserInfo();
   };
@@ -746,3 +813,32 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 export default DefaultLayout;
+
+const fetchShouldClearConversationsOnLogout = async (
+  accessToken: string | undefined,
+) => {
+  try {
+    if (!accessToken) {
+      throw new Error('No access token');
+    }
+    const res = await fetch('/api/teacher-settings-for-student-logout', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'access-token': accessToken,
+      },
+    });
+    if (!res.ok) {
+      throw new Error('Failed to fetch teacher Settings');
+    }
+    const data = await res.json();
+    return data as {
+      should_clear_conversations_on_logout: boolean;
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      should_clear_conversations_on_logout: false,
+    };
+  }
+};

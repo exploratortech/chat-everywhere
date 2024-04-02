@@ -80,7 +80,7 @@ export const ChatbarSettings = () => {
   const teacherPortalBtnOnClick = () => {
     if (isTeacherAccount) {
       trackEvent('Teacher portal clicked');
-      router.push('/teacher-portal');
+      router.push('/teacher-portal/one-time-code');
     }
   };
 

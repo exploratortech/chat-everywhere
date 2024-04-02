@@ -8,18 +8,17 @@ import {
   IconSettings,
   IconTags,
 } from '@tabler/icons-react';
-import React, { cloneElement, useContext } from 'react';
+import React, { cloneElement, useContext, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { Button } from '@/components/ui/button';
-
-import { TeacherPortalContext } from './teacher-portal.context';
 
 type Props = {
   className?: string;
@@ -34,74 +33,15 @@ type sideBarItemType = {
 };
 
 export default function Sidebar({ className = '' }: Props) {
-  const {
-    state: { showing },
-    dispatch,
-  } = useContext(TeacherPortalContext);
   const { t } = useTranslation('model');
   const router = useRouter();
   const handleBackClick = () => {
     router.push('/');
   };
   const iconClass = 'h-[18px] tablet:h-[22px] tablet:w-[36px]';
-  const items: sideBarItemType[] = [
-    {
-      icon: <IconRating12Plus />,
-      name: t('One-time code'),
-      value: 'one-time-code',
-      callback: () => {
-        dispatch({
-          field: 'showing',
-          value: 'one-time-code',
-        });
-      },
-    },
-    {
-      icon: <IconBuildingBroadcastTower />,
-      name: t('Shared messages'),
-      value: 'shared-message',
-      callback: () => {
-        dispatch({
-          field: 'showing',
-          value: 'shared-message',
-        });
-      },
-    },
-    {
-      icon: <IconTags />,
-      name: t('Tags'),
-      value: 'tags',
-      callback: () => {
-        dispatch({
-          field: 'showing',
-          value: 'tags',
-        });
-      },
-    },
-    {
-      icon: <IconPrompt />,
-      name: t('Teacher Prompt'),
-      value: 'teacher-prompt',
-      callback: () => {
-        dispatch({
-          field: 'showing',
-          value: 'teacher-prompt',
-        });
-      },
-    },
-  ];
+  const { slug } = router.query;
+
   const footerItems: sideBarItemType[] = [
-    {
-      icon: <IconSettings />,
-      name: t('Settings'),
-      value: 'settings',
-      callback: () => {
-        dispatch({
-          field: 'showing',
-          value: 'settings',
-        });
-      },
-    },
     {
       icon: <IconInfoSquareRounded />,
       name: t('Instructions'),
@@ -135,8 +75,8 @@ export default function Sidebar({ className = '' }: Props) {
       <a
         key={`${i} ${item.name}`}
         href="#"
-        className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 tablet:px-2 tablet:py-4 
-          ${showing === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
+        className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+          ${slug === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
           ${item.overrideClassName ? item.overrideClassName : ''}
           `}
         onClick={item.callback}
@@ -191,12 +131,76 @@ export default function Sidebar({ className = '' }: Props) {
     <div className={`${className} flex justify-between flex-col`}>
       <div>
         <b className="pt-6 px-6 block select-none tablet:hidden">
-          {t('Teacher Portal')} (Beta)
+          {t('Teacher Portal')}
         </b>
-        <div className="py-6 flex flex-col">{getRenderItems(items)}</div>
+        <div className="py-6 flex flex-col">
+          <Link
+            href={'/teacher-portal/one-time-code'}
+            className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+          ${slug === 'one-time-code' ? 'bg-neutral-900 text-neutral-100' : ''}
+          `}
+          >
+            <div className="flex gap-2 items-center">
+              <IconRating12Plus className={iconClass} />
+              <div className="tablet:hidden">{t('One-time code')}</div>
+            </div>
+          </Link>
+          <Link
+            href={'/teacher-portal/shared-message'}
+            className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+                ${
+                  slug === 'shared-message'
+                    ? 'bg-neutral-900 text-neutral-100'
+                    : ''
+                }
+                `}
+          >
+            <div className="flex gap-2 items-center">
+              <IconBuildingBroadcastTower className={iconClass} />
+              <div className="tablet:hidden">{t('Shared messages')}</div>
+            </div>
+          </Link>
+          <Link
+            href={'/teacher-portal/tags'}
+            className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+            ${slug === 'tags' ? 'bg-neutral-900 text-neutral-100' : ''}
+            `}
+          >
+            <div className="flex gap-2 items-center">
+              <IconTags className={iconClass} />
+              <div className="tablet:hidden">{t('Tags')}</div>
+            </div>
+          </Link>
+          <Link
+            href={'/teacher-portal/teacher-prompt'}
+            className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+            ${
+              slug === 'teacher-prompt' ? 'bg-neutral-900 text-neutral-100' : ''
+            }
+            `}
+          >
+            <div className="flex gap-2 items-center">
+              <IconPrompt className={iconClass} />
+              <div className="tablet:hidden">{t('Teacher Prompt')}</div>
+            </div>
+          </Link>
+        </div>
       </div>
 
-      <div className="flex flex-col">{getRenderItems(footerItems)}</div>
+      <div className="flex flex-col">
+        <Link
+          href={'/teacher-portal/settings'}
+          className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+          ${slug === 'settings' ? 'bg-neutral-900 text-neutral-100' : ''}
+          `}
+        >
+          <div className="flex gap-2 items-center">
+            <IconSettings className={iconClass} />
+            <div className="tablet:hidden">{t('Settings')}</div>
+          </div>
+        </Link>
+        {getRenderItems(footerItems)}
+      </div>
     </div>
   );
 }

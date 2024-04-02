@@ -14,7 +14,6 @@ import {
   AZURE_OPENAI_GPT_4_ENDPOINTS,
   AZURE_OPENAI_GPT_4_KEYS,
   AZURE_OPENAI_KEYS,
-  OPENAI_API_HOST,
 } from '../app/const';
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';

@@ -2,7 +2,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import useTeacherPrompt from '@/hooks/useTeacherPrompt';
+import useTeacherPrompt from '@/hooks/teacherPortal/useTeacherPrompt';
 
 import { PluginID } from '@/types/plugin';
 import { TeacherPromptForTeacherPortal } from '@/types/prompt';
