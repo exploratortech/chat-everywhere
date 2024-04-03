@@ -86,7 +86,7 @@ export default function Settings_Account() {
     <div>
       <h1 className="font-bold mb-4">{t("Account")}</h1>
 
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-3xl">
         <div className="rounded-2xl flex flex-col">
           {!isPaidUser && (
             <span className="text-sm mb-2">
@@ -150,6 +150,81 @@ export default function Settings_Account() {
                             )}`}{' '}
                 </div>
               )}
+            </div>
+            {/* Discounted 3 months pro plan */}
+            <div className='flex flex-col mt-4 md:mt-0 md:ml-2 md:w-1/2'>
+              <div className="flex flex-col  border rounded-lg p-4">
+                <span className="text-2xl font-bold">Pro (3-months)</span>
+                <span className="text-sm mb-2">{t('USD$26.97 / 3 months')}</span>
+                <div className="text-xs leading-5">
+                  <FeatureItem featureName={t('Everything in pro plan')} />
+                </div>
+                {(!user || !isPaidUser) && (
+                  <div className="flex flex-col">
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => upgradeLinkOnClick()}
+                      className="px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] position: relative"
+                    >
+                      {t('Upgrade')}
+                      <span className='text-[9px] ml-1 position: absolute top-0 right-1'>{t('[Recurring]')}</span>
+                    </a>
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => upgradeForOneMonthLinkOnClick()}
+                      className="px-4 py-2 text-xs border rounded-lg bg-neutral-300 shadow border-none text-neutral-700 hover:bg-white focus:outline-none mt-2 text-center cursor-pointer"
+                    >
+                      {t('Upgrade for 3 month only')}
+                    </a>
+                  </div>
+                )}
+                {user?.plan === 'pro' && user.proPlanExpirationDate && (
+                  <div className="text-left text-neutral-500 p-2 text-xs">
+                    {`${t('Expires on')}: 
+                              ${dayjs(user.proPlanExpirationDate).format(
+                                'll',
+                              )}`}{' '}
+                  </div>
+                )}
+              </div>
+              {/* Discounted 6 months pro plan */}
+              <div className="flex flex-col  border rounded-lg p-4 mt-2">
+                <span className="text-2xl font-bold">Pro (6-months)</span>
+                <span className="text-sm mb-2">{t('USD$50.94 / 6 month')}</span>
+                <div className="text-xs leading-5">
+                  <FeatureItem featureName={t('Everything in pro plan')} />
+                </div>
+                {(!user || !isPaidUser) && (
+                  <div className="flex flex-col">
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => upgradeLinkOnClick()}
+                      className="px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
+                    >
+                      {t('Upgrade')}
+                    </a>
+                    <a
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={() => upgradeForOneMonthLinkOnClick()}
+                      className="px-4 py-2 text-xs border rounded-lg bg-neutral-300 shadow border-none text-neutral-700 hover:bg-white focus:outline-none mt-2 text-center cursor-pointer"
+                    >
+                      {t('Upgrade for 6 month only')}
+                    </a>
+                  </div>
+                )}
+                {user?.plan === 'pro' && user.proPlanExpirationDate && (
+                  <div className="text-left text-neutral-500 p-2 text-xs">
+                    {`${t('Expires on')}: 
+                              ${dayjs(user.proPlanExpirationDate).format(
+                                'll',
+                              )}`}{' '}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           {displayReferralCodeEnterer && <ReferralCodeEnter />}
