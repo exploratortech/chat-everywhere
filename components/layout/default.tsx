@@ -673,7 +673,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     const prompts = localStorage.getItem('prompts');
     if (prompts) {
       const parsedPrompts = sortByRankAndFolder(JSON.parse(prompts));
-      cleanedPrompts = cleanPrompts(parsedPrompts);
+      cleanedPrompts = cleanPrompts(parsedPrompts, cleanedFolders);
       dispatch({ field: 'prompts', value: cleanedPrompts });
     }
 
