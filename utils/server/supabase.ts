@@ -552,7 +552,7 @@ export const updateProAccountsPlan = async (): Promise<void> => {
   const { error: updateError } = await supabase
     .from('profiles')
     .update({ plan: 'free' })
-    .eq('plan', 'pro')
+    .in('plan', ['ultra', 'pro'])
     .lte('pro_plan_expiration_date', nowMinusOneDay);
 
   if (updateError) {
@@ -568,7 +568,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
   const { data: users, error: fetchError } = await supabase
     .from('profiles')
     .select('id')
-    .eq('plan', 'pro')
+    .in('plan', ['ultra', 'pro'])
     .lte('pro_plan_expiration_date', nowMinusOneDay);
 
   if (fetchError) {
@@ -580,24 +580,5 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
     return [];
   }
 
-  const trialUserIds: string[] = [];
-
-  for (const userId of userIds) {
-    // Check if user has any referral record in the past 7 days
-    const { data: referralRows, error: referralError } = await supabase
-      .from('referral')
-      .select('referee_id')
-      .eq('referee_id', userId)
-      .gte('referral_date', endReferralDay);
-
-    if (referralError) {
-      throw referralError;
-    }
-
-    if (referralRows?.length > 0) {
-      trialUserIds.push(userId);
-    }
-  }
-
-  return trialUserIds;
+  return userIds;
 };
