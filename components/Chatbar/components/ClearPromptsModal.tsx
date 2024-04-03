@@ -1,11 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
-import {
-  IconCaretDown,
-  IconCaretRight,
-  IconFolder,
-  IconMessage,
-  IconX,
-} from '@tabler/icons-react';
+import { IconFolder, IconMessage, IconX } from '@tabler/icons-react';
 import React, {
   Fragment,
   PropsWithChildren,
@@ -19,41 +13,57 @@ import { useTranslation } from 'react-i18next';
 
 import { event } from 'nextjs-google-analytics';
 
-import { useCreateReducer } from '@/hooks/useCreateReducer';
+import { ActionType, useCreateReducer } from '@/hooks/useCreateReducer';
 
-import { newDefaultConversation } from '@/utils/app/const';
-import {
-  getNonDeletedCollection,
-  saveConversations,
-  updateConversationLastUpdatedAtTimeStamp,
-} from '@/utils/app/conversation';
+import { getNonDeletedCollection, savePrompts } from '@/utils/app/conversation';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { saveFolders } from '@/utils/app/folders';
 
-import { Conversation } from '@/types/chat';
 import { FolderInterface } from '@/types/folder';
+import { Prompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 import { Button } from '@/components/v2Chat/ui/button';
 
-import ClearConversationsModalContext, {
-  ClearConversationsModalState,
-} from './ClearConversationsModal.context';
+interface ClearPromptsModalState {
+  selectedPrompts: Set<string>;
+  selectedFolders: Set<string>;
+  deletingFolders: boolean;
+  selectingAll: boolean;
+  confirmingDeletion: boolean;
+}
 
-export default function ClearConversationsModal() {
+const ClearPromptsModalContext = React.createContext<{
+  state: ClearPromptsModalState;
+  dispatch: React.Dispatch<ActionType<ClearPromptsModalState>>;
+  addPrompts: (...ids: string[]) => void;
+  removePrompts: (...ids: string[]) => void;
+  addFolders: (...ids: string[]) => void;
+  removeFolders: (...ids: string[]) => void;
+}>({
+  state: {
+    selectedPrompts: new Set(),
+    selectedFolders: new Set(),
+    deletingFolders: true,
+    selectingAll: false,
+    confirmingDeletion: false,
+  },
+  dispatch: () => {},
+  addPrompts: () => {},
+  removePrompts: () => {},
+  addFolders: () => {},
+  removeFolders: () => {},
+});
+
+export default function ClearPromptsModal() {
   const {
-    state: {
-      defaultModelId,
-      folders,
-      conversations,
-      showClearConversationsModal,
-    },
+    state: { folders, prompts, showClearPromptsModal },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const context = useCreateReducer<ClearConversationsModalState>({
+  const context = useCreateReducer<ClearPromptsModalState>({
     initialState: {
-      selectedConversations: new Set<string>(),
+      selectedPrompts: new Set<string>(),
       selectedFolders: new Set<string>(),
       deletingFolders: true,
       selectingAll: false,
@@ -63,7 +73,7 @@ export default function ClearConversationsModal() {
 
   const {
     state: {
-      selectedConversations,
+      selectedPrompts,
       selectedFolders,
       deletingFolders,
       selectingAll,
@@ -77,40 +87,40 @@ export default function ClearConversationsModal() {
   const filteredFolders = useMemo(
     () =>
       getNonDeletedCollection(folders).filter(
-        (folder) => folder.type === 'chat',
+        (folder) => folder.type === 'prompt',
       ),
     [folders],
   );
 
-  const filteredConversations = useMemo(
-    () => getNonDeletedCollection(conversations),
-    [conversations],
+  const filteredPrompts = useMemo(
+    () => getNonDeletedCollection(prompts),
+    [prompts],
   );
 
   const itemCount = useMemo(
     () =>
       deletingFolders
-        ? selectedConversations.size + selectedFolders.size
-        : selectedConversations.size,
-    [deletingFolders, selectedConversations, selectedFolders],
+        ? selectedPrompts.size + selectedFolders.size
+        : selectedPrompts.size,
+    [deletingFolders, selectedPrompts, selectedFolders],
   );
 
-  const addConversations = useCallback(
+  const addPrompts = useCallback(
     (...ids: string[]) => {
-      const updatedSet = new Set<string>(selectedConversations);
+      const updatedSet = new Set<string>(selectedPrompts);
       ids.forEach((id) => updatedSet.add(id));
-      dispatch({ field: 'selectedConversations', value: updatedSet });
+      dispatch({ field: 'selectedPrompts', value: updatedSet });
     },
-    [selectedConversations, dispatch],
+    [selectedPrompts, dispatch],
   );
 
-  const removeConversations = useCallback(
+  const removePrompts = useCallback(
     (...ids: string[]) => {
-      const updatedSet = new Set<string>(selectedConversations);
+      const updatedSet = new Set<string>(selectedPrompts);
       ids.forEach((id) => updatedSet.delete(id));
-      dispatch({ field: 'selectedConversations', value: updatedSet });
+      dispatch({ field: 'selectedPrompts', value: updatedSet });
     },
-    [selectedConversations, dispatch],
+    [selectedPrompts, dispatch],
   );
 
   const addFolders = useCallback(
@@ -133,25 +143,23 @@ export default function ClearConversationsModal() {
 
   const handleSelectAll = useCallback(
     (checked: boolean) => {
-      const conversationIds = filteredConversations.map(
-        (conversation) => conversation.id,
-      );
+      const promptIds = filteredPrompts.map((prompt) => prompt.id);
       const folderIds = filteredFolders.map((folder) => folder.id);
       if (checked) {
-        addConversations(...conversationIds);
+        addPrompts(...promptIds);
         addFolders(...folderIds);
       } else {
-        removeConversations(...conversationIds);
+        removePrompts(...promptIds);
         removeFolders(...folderIds);
       }
       dispatch({ field: 'selectingAll', value: checked });
       dispatch({ field: 'confirmingDeletion', value: false });
     },
     [
-      filteredConversations,
+      filteredPrompts,
       filteredFolders,
-      addConversations,
-      removeConversations,
+      addPrompts,
+      removePrompts,
       addFolders,
       removeFolders,
       dispatch,
@@ -159,11 +167,11 @@ export default function ClearConversationsModal() {
   );
 
   const handleClose = useCallback(() => {
-    homeDispatch({ field: 'showClearConversationsModal', value: false });
+    homeDispatch({ field: 'showClearPromptsModal', value: false });
 
     // Reset state
     setTimeout(() => {
-      dispatch({ field: 'selectedConversations', value: new Set() });
+      dispatch({ field: 'selectedPrompts', value: new Set() });
       dispatch({ field: 'selectedFolders', value: new Set() });
       dispatch({ field: 'deletingFolders', value: true });
       dispatch({ field: 'selectingAll', value: false });
@@ -171,19 +179,12 @@ export default function ClearConversationsModal() {
     }, 300);
   }, [homeDispatch, dispatch]);
 
-  const clearConversations = () => {
-    defaultModelId &&
-      homeDispatch({
-        field: 'selectedConversation',
-        value: newDefaultConversation,
-      });
-
-    const updatedConversations = filteredConversations.filter(
-      (conversation) => !selectedConversations.has(conversation.id),
+  const clearPrompts = () => {
+    const updatedPrompts = filteredPrompts.filter(
+      (prompt) => !selectedPrompts.has(prompt.id),
     );
-    homeDispatch({ field: 'conversations', value: updatedConversations });
-    saveConversations(updatedConversations);
-    localStorage.removeItem('selectedConversation');
+    homeDispatch({ field: 'prompts', value: updatedPrompts });
+    savePrompts(updatedPrompts);
 
     if (deletingFolders) {
       const updatedFolders = folders.filter(
@@ -193,27 +194,26 @@ export default function ClearConversationsModal() {
       saveFolders(updatedFolders);
     }
 
-    updateConversationLastUpdatedAtTimeStamp();
-
     homeDispatch({ field: 'forceSyncConversation', value: true });
     homeDispatch({ field: 'replaceRemoteData', value: true });
-
     event('interaction', {
-      category: 'Conversation',
-      label: 'Clear conversations',
+      category: 'Prompt',
+      label: 'Clear prompts',
     });
-
-    trackEvent('Clear conversation clicked');
+    trackEvent('Clear prompts clicked');
 
     handleClose();
   };
-
-  const handleSwitchToClearPrompts = () => {
-    homeDispatch({ field: 'showClearConversationsModal', value: false });
-    homeDispatch({ field: 'showClearPromptsModal', value: true });
+  const handleSwitchToClearConversations = () => {
+    homeDispatch({
+      field: 'showClearPromptsModal',
+      value: false,
+    });
+    homeDispatch({ field: 'showClearConversationsModal', value: true });
   };
+
   return (
-    <Transition appear show={showClearConversationsModal} as={Fragment}>
+    <Transition appear show={showClearPromptsModal} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={handleClose}>
         <Transition.Child
           as={Fragment}
@@ -227,11 +227,11 @@ export default function ClearConversationsModal() {
           <div className="fixed inset-0 bg-gray-500/50" />
         </Transition.Child>
 
-        <ClearConversationsModalContext.Provider
+        <ClearPromptsModalContext.Provider
           value={{
             ...context,
-            addConversations,
-            removeConversations,
+            addPrompts,
+            removePrompts,
             addFolders,
             removeFolders,
           }}
@@ -250,15 +250,15 @@ export default function ClearConversationsModal() {
                 <Dialog.Panel className="flex flex-col w-full max-w-[70vw] xl:max-w-3xl tablet:max-w-[90vw] h-[calc(80vh-100px)] transform overflow-hidden rounded-2xl text-left align-middle shadow-xl transition-all text-neutral-200 mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none bg-neutral-900">
                   <div className="flex gap-2 items-baseline">
                     <h1 className="font-bold mb-4 px-6 pt-6 pr-2">
-                      {t('Clear Conversations')}
+                      {t('Clear Prompts')}
                     </h1>
                     <Button
                       variant={'link'}
                       size={'sm'}
                       className="mobile:hidden p-0 text-gray-400 underline"
-                      onClick={handleSwitchToClearPrompts}
+                      onClick={handleSwitchToClearConversations}
                     >
-                      {t('Switch to Clear Prompts')}
+                      {t('Switch to Clear Conversations')}
                     </Button>
                   </div>
 
@@ -275,7 +275,7 @@ export default function ClearConversationsModal() {
                       <div className="flex items-center">
                         <label
                           className="select-none"
-                          htmlFor="clear-conversation-all-input"
+                          htmlFor="clear-prompt-all-input"
                         >
                           {t('Select all')}
                         </label>
@@ -285,7 +285,7 @@ export default function ClearConversationsModal() {
                             handleSelectAll(event.currentTarget.checked)
                           }
                           checked={selectingAll}
-                          id="clear-conversation-all-input"
+                          id="clear-prompt-all-input"
                           type="checkbox"
                         />
                       </div>
@@ -294,21 +294,15 @@ export default function ClearConversationsModal() {
                       <FolderItem
                         key={folder.id}
                         folder={folder}
-                        conversations={filteredConversations.filter(
-                          (conversation: Conversation) =>
-                            conversation.folderId === folder.id,
+                        prompts={filteredPrompts.filter(
+                          (prompt: Prompt) => prompt.folderId === folder.id,
                         )}
                       />
                     ))}
-                    {filteredConversations
-                      .filter(
-                        (conversation: Conversation) => !conversation.folderId,
-                      )
-                      .map((conversation) => (
-                        <ConversationItem
-                          key={conversation.id}
-                          conversation={conversation}
-                        />
+                    {filteredPrompts
+                      .filter((prompt: Prompt) => !prompt.folderId)
+                      .map((prompt) => (
+                        <PromptItem key={prompt.id} prompt={prompt} />
                       ))}
                   </div>
                   <div className="flex flex-col items-stretch xs:flex-row justify-between p-6 gap-x-2 gap-y-4 bg-neutral-900">
@@ -345,7 +339,7 @@ export default function ClearConversationsModal() {
                       {confirmingDeletion ? (
                         <Button
                           className="flex-1 xs:flex-auto h-10"
-                          onClick={clearConversations}
+                          onClick={clearPrompts}
                           variant="default"
                           type="button"
                         >
@@ -379,7 +373,7 @@ export default function ClearConversationsModal() {
               </Transition.Child>
             </div>
           </div>
-        </ClearConversationsModalContext.Provider>
+        </ClearPromptsModalContext.Provider>
       </Dialog>
     </Transition>
   );
@@ -387,25 +381,25 @@ export default function ClearConversationsModal() {
 
 type FolderItemProp = {
   folder: FolderInterface;
-  conversations: Conversation[];
+  prompts: Prompt[];
 };
 
-function FolderItem({ folder, conversations }: FolderItemProp) {
+function FolderItem({ folder, prompts }: FolderItemProp) {
   const {
     state: { selectedFolders },
     dispatch,
-    addConversations,
-    removeConversations,
+    addPrompts,
+    removePrompts,
     addFolders,
     removeFolders,
-  } = useContext(ClearConversationsModalContext);
+  } = useContext(ClearPromptsModalContext);
 
   const [isOpen, setIsOpen] = useState(false);
   const [checked, setChecked] = useState(false);
 
-  const conversationIds = useMemo(
-    () => conversations.map((conversation) => conversation.id),
-    [conversations],
+  const promptIds = useMemo(
+    () => prompts.map((prompt) => prompt.id),
+    [prompts],
   );
 
   useEffect(() => {
@@ -418,10 +412,10 @@ function FolderItem({ folder, conversations }: FolderItemProp) {
         checked={checked}
         onCheck={(checked: boolean) => {
           if (checked) {
-            addConversations(...conversationIds);
+            addPrompts(...promptIds);
             addFolders(folder.id);
           } else {
-            removeConversations(...conversationIds);
+            removePrompts(...promptIds);
             removeFolders(folder.id);
           }
           dispatch({ field: 'selectingAll', value: false });
@@ -436,37 +430,32 @@ function FolderItem({ folder, conversations }: FolderItemProp) {
           <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 pr-12 select-none">
             {folder.name}
           </div>
-          {isOpen ? <IconCaretDown size={18} /> : <IconCaretRight size={18} />}
         </div>
       </CheckboxItem>
       {isOpen &&
-        conversations.map((conversation) => (
-          <ConversationItem key={conversation.id} conversation={conversation} />
-        ))}
+        prompts.map((prompt) => <PromptItem key={prompt.id} prompt={prompt} />)}
     </>
   );
 }
 
-type ConversationItemProp = {
-  conversation: Conversation;
+type PromptItemProp = {
+  prompt: Prompt;
 };
 
-function ConversationItem({ conversation }: ConversationItemProp) {
+function PromptItem({ prompt }: PromptItemProp) {
   const {
-    state: { selectedConversations },
+    state: { selectedPrompts },
     dispatch,
-    addConversations,
-    removeConversations,
-  } = useContext(ClearConversationsModalContext);
+    addPrompts,
+    removePrompts,
+  } = useContext(ClearPromptsModalContext);
 
   return (
     <CheckboxItem
-      padded={!!conversation.folderId}
-      checked={selectedConversations.has(conversation.id)}
+      padded={!!prompt.folderId}
+      checked={selectedPrompts.has(prompt.id)}
       onCheck={(checked: boolean) => {
-        checked
-          ? addConversations(conversation.id)
-          : removeConversations(conversation.id);
+        checked ? addPrompts(prompt.id) : removePrompts(prompt.id);
         dispatch({ field: 'selectingAll', value: false });
         dispatch({ field: 'confirmingDeletion', value: false });
       }}
@@ -476,7 +465,7 @@ function ConversationItem({ conversation }: ConversationItemProp) {
       >
         <IconMessage size={18} />
         <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 pr-12">
-          {conversation.name}
+          {prompt.name}
         </div>
       </div>
     </CheckboxItem>

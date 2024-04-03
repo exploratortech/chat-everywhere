@@ -164,6 +164,7 @@
   "to join our focus group to share your feedback.": "來加入我們的教師群組來分享您的意見吧。",
   "Close": "關閉",
   "Clear Conversations": "清除對話",
+  "Clear Prompts": "清除提示詞模版",
   "Select all": "全選",
   "Clear folders": "移除資料夾和內容",
   "Are you sure?": "確定嗎？",
@@ -197,5 +198,7 @@
   "Upcoming events": "近期活動 (臺灣限定)",
   "Add to your calendar": "加入到行事曆",
   "Join event!": "加入活動!",
-  "Sign up": "報名活動"
+  "Sign up": "報名活動",
+  "Switch to Clear Prompts": "切換至清空提示詞模版",
+  "Switch to Clear Conversations": "切換至清空對話"
 }
