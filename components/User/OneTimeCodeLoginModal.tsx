@@ -7,6 +7,7 @@ import { useTranslation } from 'next-i18next';
 
 import Spinner from '../Spinner/Spinner';
 
+import { cn } from '@/lib/utils';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -104,61 +105,71 @@ const OneTimeCodeLoginModal = memo(
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="w-full max-w-3xl tablet:max-w-max h-max transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
-                  {isLoading && (
-                    <div className="flex mt-[50%]">
-                      <Spinner size="16px" className="mx-auto" />
+                  <div
+                    className={cn(
+                      'invisible',
+                      isLoading &&
+                        'visible absolute h-full flex justify-center items-center w-full',
+                    )}
+                  >
+                    <Spinner size="16px" className="mx-auto" />
+                  </div>
+                  <form
+                    className={cn(
+                      'space-y-6 invisible',
+                      !isLoading && 'visible',
+                    )}
+                    onSubmit={handleLogin}
+                  >
+                    <div>
+                      <label
+                        htmlFor="one-time-code"
+                        className="block text-sm font-medium text-neutral-200"
+                      >
+                        {authT('Your one-time code')}
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          id="one-time-code"
+                          name="one-time-code"
+                          type="text"
+                          required
+                          value={code}
+                          onChange={(e) =>
+                            setCode(e.target.value.replace(/[^0-9]/g, ''))
+                          }
+                          className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
+                        />
+                      </div>
                     </div>
-                  )}
-                  {!isLoading && (
-                    <form className="space-y-6" onSubmit={handleLogin}>
-                      <div>
-                        <label
-                          htmlFor="one-time-code"
-                          className="block text-sm font-medium text-neutral-200"
-                        >
-                          {authT('Your one-time code')}
-                        </label>
-                        <div className="mt-1">
-                          <input
-                            id="one-time-code"
-                            name="one-time-code"
-                            type="text"
-                            required
-                            value={code}
-                            onChange={(e) => setCode(e.target.value.replace(/[^0-9]/g, ''))}
-                            className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
-                          />
-                        </div>
+                    <div>
+                      <label
+                        htmlFor="unique-id"
+                        className="block text-sm font-medium text-neutral-200"
+                      >
+                        {t('Name')}
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          id="unique-id"
+                          name="unique-id"
+                          type="text"
+                          required
+                          value={uniqueId}
+                          onChange={(e) => setUniqueId(e.target.value)}
+                          className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
+                        />
                       </div>
-                      <div>
-                        <label
-                          htmlFor="unique-id"
-                          className="block text-sm font-medium text-neutral-200"
-                        >
-                          {t('Name')}
-                        </label>
-                        <div className="mt-1">
-                          <input
-                            id="unique-id"
-                            name="unique-id"
-                            type="text"
-                            required
-                            value={uniqueId}
-                            onChange={(e) => setUniqueId(e.target.value)}
-                            className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <button
-                          type="submit"
-                          className="w-full px-4 py-2 mt-2 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
-                        >
-                          {authT('Sign in')}
-                        </button>
-                      </div>
-                    </form>
-                  )}
+                    </div>
+                    <div>
+                      <button
+                        type="submit"
+                        className="w-full px-4 py-2 mt-2 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
+                      >
+                        {authT('Sign in')}
+                      </button>
+                    </div>
+                  </form>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
