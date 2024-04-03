@@ -4,12 +4,14 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React, {
   Dispatch,
   SetStateAction,
+  forwardRef,
   memo,
   useContext,
   useEffect,
   useRef,
   useState,
 } from 'react';
+import { Virtuoso } from 'react-virtuoso';
 
 import { useTranslation } from 'next-i18next';
 
@@ -29,6 +31,8 @@ import FloatMenu from './FloatMenu';
 import Pagination from './Pagination';
 import Filter from './ShareMessages/Filter';
 import SharedMessageItem from './SharedMessageItem';
+
+import { cn } from '@/lib/utils';
 
 const SharedMessages = () => {
   const { t } = useTranslation('model');
@@ -101,15 +105,46 @@ const SharedMessages = () => {
         <div>{t('No Submissions found')}</div>
       )}
 
-      <div className="flex flex-wrap gap-4">
-        {sharedMessages?.map((submission) => (
-          <SharedMessageItem
-            key={submission.id}
-            submission={submission}
-            onSelectMessage={handleSelectMessage}
-            isSelected={selectedMessageIds.includes(submission.id)}
+      <div className="flex-grow w-full">
+        {sharedMessages && sharedMessages.length > 0 && (
+          <Virtuoso
+            data={sharedMessages}
+            atTopThreshold={1000}
+            atBottomThreshold={1000}
+            overscan={1200}
+            components={{
+              Item: forwardRef<
+                HTMLDivElement,
+                React.HTMLAttributes<HTMLDivElement>
+              >((props, ref) => (
+                <div
+                  ref={ref}
+                  {...props}
+                  className={`mobile:w-full ${props.className || ''}`}
+                />
+              )),
+              List: forwardRef((props, ref) => (
+                <div
+                  ref={ref}
+                  {...props}
+                  className="w-full flex flex-wrap gap-4"
+                />
+              )),
+            }}
+            itemContent={(index, submission) => (
+              <div className="">
+                <SharedMessageItem
+                  key={submission.id}
+                  submission={submission}
+                  onSelectMessage={handleSelectMessage}
+                  isSelected={selectedMessageIds.includes(submission.id)}
+                />
+                {index}
+              </div>
+            )}
+            style={{ height: '100%', width: '100%' }}
           />
-        ))}
+        )}
       </div>
 
       {sharedMessages && sharedMessages.length > 0 && (
@@ -121,7 +156,12 @@ const SharedMessages = () => {
         </div>
       )}
 
-      <div className="sticky flex justify-center bottom-8 w-full pointer-events-none">
+      <div
+        className={cn(
+          'sticky flex justify-center bottom-8 w-full pointer-events-none',
+          selectedMessageIds.length > 0 ? 'visible' : 'invisible',
+        )}
+      >
         <FloatMenu
           selectedMessageIds={selectedMessageIds}
           setSelectedMessageIds={setSelectedMessageIds}

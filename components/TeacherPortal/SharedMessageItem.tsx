@@ -65,11 +65,11 @@ const SharedMessageItem = ({
 
   const [open, setOpen] = useState(false);
   return (
-    <>
+    <div className="">
       <div
         onClick={() => onSelectMessage(submission.id)}
         className={cn(
-          'group bg-neutral-800 relative cursor-pointer max-w-[300px] max-h-[250px] w-[300px] h-[250px] overflow-hidden text-neutral-200 p-4 rounded-lg shadow-md transition-all duration-100',
+          'group bg-neutral-800 relative cursor-pointer w-[300px] mobile:w-full max-w-[300px] max-h-[250px] h-[250px] overflow-hidden text-neutral-200 p-4 rounded-lg shadow-md transition-all duration-100',
           className,
           isSelected ? 'border-4 border-white' : '',
         )}
@@ -94,7 +94,7 @@ const SharedMessageItem = ({
           <SubmissionContent overflow />
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 
