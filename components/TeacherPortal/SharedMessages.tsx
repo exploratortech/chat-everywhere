@@ -27,8 +27,8 @@ import Spinner from '../Spinner/Spinner';
 import { Separator } from '../v2Chat/ui/separator';
 import FloatMenu from './FloatMenu';
 import Pagination from './Pagination';
+import SharedMessageList from './ShareMessageList';
 import Filter from './ShareMessages/Filter';
-import SharedMessageItem from './SharedMessageItem';
 
 const SharedMessages = () => {
   const { t } = useTranslation('model');
@@ -101,16 +101,11 @@ const SharedMessages = () => {
         <div>{t('No Submissions found')}</div>
       )}
 
-      <div className="flex flex-wrap gap-4">
-        {sharedMessages?.map((submission) => (
-          <SharedMessageItem
-            key={submission.id}
-            submission={submission}
-            onSelectMessage={handleSelectMessage}
-            isSelected={selectedMessageIds.includes(submission.id)}
-          />
-        ))}
-      </div>
+      <SharedMessageList
+        sharedMessages={sharedMessages}
+        handleSelectMessage={handleSelectMessage}
+        selectedMessageIds={selectedMessageIds}
+      />
 
       {sharedMessages && sharedMessages.length > 0 && (
         <div className="my-4">
