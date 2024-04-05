@@ -1,16 +1,17 @@
-import * as React from 'react';
+import { memo } from 'react';
 
 import { Tag } from '@/types/tags';
 
 import { Button } from '@/components/ui/button';
 
 import useShareMessageFilterStore from '../share-message-filter.store';
+import SortBy from './SortBy';
 import TagFilter from './TagFilter';
 
-const Filter = React.memo(({ tags }: { tags: Tag[] }) => {
+const Filter = memo(({ tags }: { tags: Tag[] }) => {
   const { selectedTags, resetTags } = useShareMessageFilterStore();
   return (
-    <div className="flex items-baseline gap-2 ">
+    <div className="flex justify-between gap-2 items-center">
       <TagFilter tags={tags} />
       {selectedTags.length > 0 && (
         <Button
@@ -21,6 +22,7 @@ const Filter = React.memo(({ tags }: { tags: Tag[] }) => {
           {`Clear ${selectedTags.length} selected tags`}
         </Button>
       )}
+      <SortBy />
     </div>
   );
 });
