@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getAvailableLocales } from '@/utils/app/i18n';
@@ -8,12 +8,24 @@ import HomeContext from '@/components/home/home.context';
 
 function ChangeOutputLanguageButton() {
   const { t } = useTranslation('model');
+  // Get the selected language
+  const { i18n } = useTranslation('model');
+  const currentLanguage = i18n.language;
 
   const {
     state: { outputLanguage },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
+  // Set the default language based on the i18n locale if outputLanguage is not already set  
+  useEffect(() => {
+    if (!outputLanguage) {
+      homeDispatch({ field: 'outputLanguage', value: currentLanguage });
+      saveOutputLanguage(currentLanguage);
+    }
+  }, []);
+
+  
   const availableLocales = getAvailableLocales();
 
   const locales = [
