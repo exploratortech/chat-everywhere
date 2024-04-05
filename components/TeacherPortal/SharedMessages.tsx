@@ -144,7 +144,7 @@ export const useFetchSharedMessages = (
   onSuccess: () => void,
 ) => {
   const supabase = useSupabaseClient();
-  const { selectedTags, sortBy } = useShareMessageFilterStore();
+  const { selectedTags, sortBy, itemPerPage } = useShareMessageFilterStore();
 
   const { withLoading } = useTeacherPortalLoading();
   const fetchSharedMessages = async () => {
@@ -156,6 +156,7 @@ export const useFetchSharedMessages = (
         tag_ids: selectedTags.map((tag) => tag.id),
         sort_by: sortBy,
       },
+      itemPerPage,
     };
     const response = await fetch(
       '/api/teacher-portal/get-shared-messages-with-teacher',

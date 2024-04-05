@@ -16,6 +16,15 @@ const requestSchema = z.object({
       sortOrder: z.enum(['asc', 'desc']),
     }),
   }),
+  itemPerPage: z
+    .string()
+    .refine(
+      (val) =>
+        ['10', '20', '30', '40', '50', '60', '70', '80', '90', '100'].includes(
+          val,
+        ),
+      'Item per page must be one of the following values: 10, 20, 30, 40, 50, 60, 70, 80, 90, 100',
+    ),
 });
 
 const handler = async (req: Request) => {
@@ -29,7 +38,7 @@ const handler = async (req: Request) => {
     return new Response('Invalid request format', { status: 400 });
   }
 
-  const { accessToken, page, filter } = parsed.data;
+  const { accessToken, page, filter, itemPerPage } = parsed.data;
 
   const supabase = getAdminSupabaseClient();
 
@@ -52,7 +61,7 @@ const handler = async (req: Request) => {
 
   const teacherProfileId = userId;
 
-  const pageSize = 20;
+  const pageSize = parseInt(itemPerPage);
   let query = supabase
     .from('student_message_submissions')
     .select(

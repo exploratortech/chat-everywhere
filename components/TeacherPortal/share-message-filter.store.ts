@@ -13,6 +13,8 @@ interface ShareMessageFilterState {
   setSortBy: (sortBy: SortBy) => void;
   resetSortBy: () => void;
   isNotSortByDefault: () => boolean;
+  itemPerPage: string;
+  setItemPerPage: (itemPerPage: string) => void;
 }
 
 const useShareMessageFilterStore = create<ShareMessageFilterState>(
@@ -37,6 +39,8 @@ const useShareMessageFilterStore = create<ShareMessageFilterState>(
       const { sortBy } = get();
       return sortBy.sortKey !== 'created_at' || sortBy.sortOrder !== 'desc';
     },
+    itemPerPage: '20',
+    setItemPerPage: (itemPerPage: string) => set({ itemPerPage }),
   }),
 );
 
