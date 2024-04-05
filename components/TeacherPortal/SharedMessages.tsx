@@ -11,7 +11,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Virtuoso } from 'react-virtuoso';
 
 import { useTranslation } from 'next-i18next';
 
@@ -29,8 +28,8 @@ import Spinner from '../Spinner/Spinner';
 import { Separator } from '../v2Chat/ui/separator';
 import FloatMenu from './FloatMenu';
 import Pagination from './Pagination';
+import SharedMessageList from './ShareMessageList';
 import Filter from './ShareMessages/Filter';
-import SharedMessageItem from './SharedMessageItem';
 
 import { cn } from '@/lib/utils';
 
@@ -105,47 +104,11 @@ const SharedMessages = () => {
         <div>{t('No Submissions found')}</div>
       )}
 
-      <div className="flex-grow w-full">
-        {sharedMessages && sharedMessages.length > 0 && (
-          <Virtuoso
-            data={sharedMessages}
-            atTopThreshold={1000}
-            atBottomThreshold={1000}
-            overscan={1200}
-            components={{
-              Item: forwardRef<
-                HTMLDivElement,
-                React.HTMLAttributes<HTMLDivElement>
-              >((props, ref) => (
-                <div
-                  ref={ref}
-                  {...props}
-                  className={`mobile:w-full ${props.className || ''}`}
-                />
-              )),
-              List: forwardRef((props, ref) => (
-                <div
-                  ref={ref}
-                  {...props}
-                  className="w-full flex flex-wrap gap-4"
-                />
-              )),
-            }}
-            itemContent={(index, submission) => (
-              <div className="">
-                <SharedMessageItem
-                  key={submission.id}
-                  submission={submission}
-                  onSelectMessage={handleSelectMessage}
-                  isSelected={selectedMessageIds.includes(submission.id)}
-                />
-                {index}
-              </div>
-            )}
-            style={{ height: '100%', width: '100%' }}
-          />
-        )}
-      </div>
+      <SharedMessageList
+        sharedMessages={sharedMessages}
+        handleSelectMessage={handleSelectMessage}
+        selectedMessageIds={selectedMessageIds}
+      />
 
       {sharedMessages && sharedMessages.length > 0 && (
         <div className="my-4">
