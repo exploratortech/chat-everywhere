@@ -144,7 +144,7 @@ export const useFetchSharedMessages = (
   onSuccess: () => void,
 ) => {
   const supabase = useSupabaseClient();
-  const { selectedTags } = useShareMessageFilterStore();
+  const { selectedTags, sortBy } = useShareMessageFilterStore();
 
   const { withLoading } = useTeacherPortalLoading();
   const fetchSharedMessages = async () => {
@@ -154,6 +154,7 @@ export const useFetchSharedMessages = (
       page,
       filter: {
         tag_ids: selectedTags.map((tag) => tag.id),
+        sort_by: sortBy,
       },
     };
     const response = await fetch(
