@@ -1,5 +1,5 @@
 import { IconTag } from '@tabler/icons-react';
-import * as React from 'react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Tag } from '@/types/tags';
@@ -15,15 +15,15 @@ import {
 
 import { cn } from '@/lib/utils';
 
-const TagFilter = React.memo(({ tags }: { tags: Tag[] }) => {
+const TagFilter = memo(({ tags }: { tags: Tag[] }) => {
   const { t } = useTranslation('model');
   const { selectedTags, addTag, removeTag } = useShareMessageFilterStore();
 
   const handleTagSelectionChange = (tag: Tag, checked: boolean) => {
     if (checked) {
-      addTag(tag); // Add tag
+      addTag(tag);
     } else {
-      removeTag(tag.id); // Remove tag
+      removeTag(tag.id);
     }
   };
 

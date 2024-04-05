@@ -46,12 +46,12 @@ const SortBy = () => {
               }}
               defaultValue={sortBy.sortKey}
             >
-              <SelectTrigger className="">
+              <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-[#40414F]">
+              <SelectContent>
                 {['created_at', 'name'].map((option) => (
-                  <SelectItem key={option} value={option} className="">
+                  <SelectItem key={option} value={option}>
                     {option}
                   </SelectItem>
                 ))}
@@ -66,12 +66,12 @@ const SortBy = () => {
               }}
               defaultValue={sortBy.sortOrder}
             >
-              <SelectTrigger className="">
+              <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-[#40414F]">
+              <SelectContent>
                 {['asc', 'desc'].map((option) => (
-                  <SelectItem key={option} value={option} className="">
+                  <SelectItem key={option} value={option}>
                     {option}
                   </SelectItem>
                 ))}
