@@ -160,7 +160,7 @@ export const useFetchSharedMessages = (
     const response = await fetch(
       '/api/teacher-portal/get-shared-messages-with-teacher',
       {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
