@@ -19,7 +19,7 @@ import useShareMessageFilterStore from '../share-message-filter.store';
 
 
 const SortBy = () => {
-  const { sortBy, setSortBy } = useShareMessageFilterStore();
+  const { sortBy, setSortBy, isNotSortByDefault, resetSortBy } = useShareMessageFilterStore();
   return (
     <Popover>
       <PopoverTrigger>
@@ -29,7 +29,18 @@ const SortBy = () => {
       </PopoverTrigger>
       <PopoverContent>
         <div className="flex flex-col gap-2">
-          <h1>Sort by</h1>
+          <div className="flex items-center justify-between">
+            <h1>Sort by</h1>
+            {
+              isNotSortByDefault() && (
+                <Button
+                  variant={"link"}
+                  className="text-neutral-500 hover:text-neutral-400"
+                  onClick={() => resetSortBy()}>Reset
+                </Button>
+              )
+            }
+          </div>
           <Separator />
           <div className="grid grid-cols-2 gap-2 grid-flow-row">
             <Select
