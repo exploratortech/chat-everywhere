@@ -1,4 +1,7 @@
 import { IconSortAscending } from '@tabler/icons-react';
+import React, { memo } from 'react';
+
+import { SortBy as SortByType } from '@/types/filter_sortby';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -14,12 +17,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { SortBy } from '@/types/filter_sortby';
+
 import useShareMessageFilterStore from '../share-message-filter.store';
 
+import { cn } from '@/lib/utils';
 
-const SortBy = () => {
-  const { sortBy, setSortBy, isNotSortByDefault, resetSortBy } = useShareMessageFilterStore();
+const SortBy = memo(() => {
+  const { sortBy, setSortBy, isNotSortByDefault, resetSortBy } =
+    useShareMessageFilterStore();
   return (
     <Popover>
       <PopoverTrigger>
@@ -29,17 +34,25 @@ const SortBy = () => {
       </PopoverTrigger>
       <PopoverContent>
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-baseline justify-between h-">
             <h1>Sort by</h1>
-            {
-              isNotSortByDefault() && (
-                <Button
-                  variant={"link"}
-                  className="text-neutral-500 hover:text-neutral-400"
-                  onClick={() => resetSortBy()}>Reset
-                </Button>
-              )
-            }
+
+            <Button
+              variant={'link'}
+              className={cn(
+                'text-neutral-500 hover:text-neutral-400',
+                isNotSortByDefault() ? 'visible' : 'invisible',
+              )}
+              onClick={() => {
+                resetSortBy();
+                setSortBy({
+                  sortKey: 'created_at',
+                  sortOrder: 'desc',
+                });
+              }}
+            >
+              Reset
+            </Button>
           </div>
           <Separator />
           <div className="grid grid-cols-2 gap-2 grid-flow-row">
@@ -47,7 +60,7 @@ const SortBy = () => {
               onValueChange={(value) => {
                 setSortBy({
                   ...sortBy,
-                  sortKey: value as SortBy['sortKey'],
+                  sortKey: value as SortByType['sortKey'],
                 });
               }}
               defaultValue={sortBy.sortKey}
@@ -67,7 +80,7 @@ const SortBy = () => {
               onValueChange={(value) => {
                 setSortBy({
                   ...sortBy,
-                  sortOrder: value as SortBy['sortOrder'],
+                  sortOrder: value as SortByType['sortOrder'],
                 });
               }}
               defaultValue={sortBy.sortOrder}
@@ -88,6 +101,7 @@ const SortBy = () => {
       </PopoverContent>
     </Popover>
   );
-};
+});
 
+SortBy.displayName = 'SortByFilterComponent';
 export default SortBy;
