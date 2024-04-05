@@ -125,6 +125,9 @@ const SharedMessages = () => {
         <FloatMenu
           selectedMessageIds={selectedMessageIds}
           setSelectedMessageIds={setSelectedMessageIds}
+          submissions={sharedMessages?.filter((message) =>
+            selectedMessageIds.includes(message.id)
+          )}
         />
       </div>
     </div>
