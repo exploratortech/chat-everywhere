@@ -65,7 +65,7 @@ const SharedMessageItem = ({
 
   const [open, setOpen] = useState(false);
   return (
-    <div className="">
+    <div className="w-full">
       <div
         onClick={() => onSelectMessage(submission.id)}
         className={cn(
@@ -90,7 +90,7 @@ const SharedMessageItem = ({
         </div>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="border-0 w-full max-w-3xl tablet:max-w-max h-max transform rounded-2xl text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] max-h-[95dvh] mobile:!max-w-[unset] mobile:!rounded-none">
+        <DialogContent className="border-0 w-full max-w-3xl tablet:min-w-max h-max transform rounded-2xl text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] max-h-[95dvh] mobile:!max-w-[unset] mobile:!rounded-none">
           <SubmissionContent overflow />
         </DialogContent>
       </Dialog>

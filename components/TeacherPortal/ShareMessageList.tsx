@@ -20,7 +20,6 @@ const SharedMessageList: React.FC<SharedMessageListProps> = ({
 }) => {
   return (
     <VirtuosoGrid
-      className="h-[78dvh]"
       totalCount={sharedMessages ? sharedMessages.length : 0}
       components={gridComponents}
       itemContent={(index) => {
@@ -29,6 +28,7 @@ const SharedMessageList: React.FC<SharedMessageListProps> = ({
 
         return (
           <SharedMessageItem
+            className="w-full"
             key={submission.id}
             submission={submission}
             onSelectMessage={handleSelectMessage}
