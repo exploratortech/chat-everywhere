@@ -49,7 +49,7 @@ const gridComponents = {
       <div
         ref={ref}
         {...props}
-        className={cn(className, 'flex flex-wrap')}
+        className={cn(className, 'flex flex-wrap gap-4')}
         style={style}
       >
         {children}
@@ -62,7 +62,7 @@ const gridComponents = {
   }: React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>) => (
     <div
       {...props}
-      className="p-2 w-[300px] flex flex-none content-stretch box-border"
+      className="mobile:w-full w-[300px] flex flex-none content-stretch box-border"
     >
       {children}
     </div>

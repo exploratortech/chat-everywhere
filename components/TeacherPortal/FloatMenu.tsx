@@ -28,9 +28,11 @@ const FloatMenu = ({
   return (
     <div
       className={cn(
-        'transition transform pointer-events-auto px-4 py-2 bg-neutral-900/90 rounded-lg shadow-md border',
+        'transition ease-in-out transform pointer-events-auto px-4 py-2 bg-neutral-900/90 rounded-lg h-min shadow-md border',
         selectedMessageIds.length > 0 ? 'opacity-100' : 'opacity-0',
-        selectedMessageIds.length > 0 ? 'translate-y-[-100%]' : 'translate-y-0',
+        selectedMessageIds.length > 0
+          ? 'translate-y-[-50%]'
+          : 'translate-y-[1.5rem]',
       )}
     >
       <div className={cn('flex gap-4')}>

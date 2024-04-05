@@ -4,8 +4,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React, {
   Dispatch,
   SetStateAction,
-  forwardRef,
-  memo,
   useContext,
   useEffect,
   useRef,
@@ -89,7 +87,7 @@ const SharedMessages = () => {
   };
 
   return (
-    <div className="flex flex-col gap-1 h-full">
+    <div className="flex flex-col gap-1 h-full relative">
       <h1 className="font-bold mb-4">{t('Shared messages')}</h1>
       <div className="flex flex-col gap-2 my-4">
         <Filter tags={tags} />
@@ -118,11 +116,9 @@ const SharedMessages = () => {
           />
         </div>
       )}
-
       <div
         className={cn(
-          'sticky flex justify-center bottom-8 w-full pointer-events-none',
-          selectedMessageIds.length > 0 ? 'visible' : 'invisible',
+          'absolute flex justify-center top-0 h-full items-end w-full pointer-events-none',
         )}
       >
         <FloatMenu
