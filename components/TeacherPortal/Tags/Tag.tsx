@@ -14,7 +14,7 @@ const Tag = ({
   return (
     <div
       className={cn(
-        'hover:bg-neutral-700 border inline-flex items-center h-max bg-neutral-800 text-white text-sm font-semibold px-2.5 py-0.5 rounded-lg',
+        'hover:bg-neutral-700 border inline-flex items-center bg-neutral-800 text-white text-sm font-semibold px-2.5 py-0.5 rounded-lg h-[30px]',
         selected ? 'bg-neutral-700' : 'border-neutral-600',
         onSelect ? 'cursor-pointer' : 'cursor-default',
       )}
