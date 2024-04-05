@@ -15,6 +15,10 @@ const handler = async (req: Request) => {
     page: number;
     filter: {
       tag_ids: number[];
+      sort_by: {
+        sortKey: 'created_at' | 'student_name';
+        sortOrder: 'asc' | 'desc';
+      };
     };
   };
 
@@ -53,8 +57,7 @@ const handler = async (req: Request) => {
     `,
       { count: 'exact' },
     )
-    .eq('teacher_profile_id', teacherProfileId)
-    .order('created_at', { ascending: false });
+    .eq('teacher_profile_id', teacherProfileId);
 
   // Apply tag_ids filter if provided
   if (filter.tag_ids?.length) {
@@ -64,6 +67,11 @@ const handler = async (req: Request) => {
       `(${filter.tag_ids.join(',')})`,
     );
   }
+
+  // Apply sorting based on sortKey and sortOrder
+  query = query.order(filter.sort_by.sortKey, {
+    ascending: filter.sort_by.sortOrder === 'asc',
+  });
 
   const {
     data: messagesData,
