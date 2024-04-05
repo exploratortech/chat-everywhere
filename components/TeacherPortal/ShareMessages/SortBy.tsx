@@ -36,7 +36,7 @@ const SortBy = () => {
               onValueChange={(value) => {
                 setSortBy({
                   ...sortBy,
-                  sortKey: value as 'created_at' | 'name',
+                  sortKey: value as SortBy['sortKey'],
                 });
               }}
               defaultValue={sortBy.sortKey}
@@ -45,7 +45,7 @@ const SortBy = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {['created_at', 'name'].map((option) => (
+                {['created_at', 'student_name'].map((option) => (
                   <SelectItem key={option} value={option}>
                     {option}
                   </SelectItem>
@@ -56,7 +56,7 @@ const SortBy = () => {
               onValueChange={(value) => {
                 setSortBy({
                   ...sortBy,
-                  sortOrder: value as 'asc' | 'desc',
+                  sortOrder: value as SortBy['sortOrder'],
                 });
               }}
               defaultValue={sortBy.sortOrder}
