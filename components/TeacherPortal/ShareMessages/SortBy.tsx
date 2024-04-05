@@ -1,5 +1,6 @@
 import { IconSortAscending } from '@tabler/icons-react';
 import React, { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { SortBy as SortByType } from '@/types/filter_sortby';
 
@@ -22,13 +23,24 @@ import useShareMessageFilterStore from '../share-message-filter.store';
 
 import { cn } from '@/lib/utils';
 
+const SORT_BY_OPTIONS = [
+  {
+    label: 'Submitted at',
+    value: 'created_at',
+  },
+  {
+    label: 'Student name',
+    value: 'student_name',
+  },
+];
 const SortBy = memo(() => {
   const { sortBy, setSortBy, isNotSortByDefault, resetSortBy } =
     useShareMessageFilterStore();
+  const { t } = useTranslation('model');
   return (
     <Popover>
       <PopoverTrigger>
-        <Button variant="outline">
+        <Button variant="outline" className="h-[30px]">
           <IconSortAscending />
         </Button>
       </PopoverTrigger>
@@ -69,9 +81,9 @@ const SortBy = memo(() => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {['created_at', 'student_name'].map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
+                {SORT_BY_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {t(option.label)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -91,7 +103,7 @@ const SortBy = memo(() => {
               <SelectContent>
                 {['asc', 'desc'].map((option) => (
                   <SelectItem key={option} value={option}>
-                    {option}
+                    {option.toUpperCase()}
                   </SelectItem>
                 ))}
               </SelectContent>
