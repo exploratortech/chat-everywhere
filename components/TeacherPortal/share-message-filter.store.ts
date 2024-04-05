@@ -1,3 +1,4 @@
+import { SortBy } from '@/types/filter_sortby';
 import { Tag } from '@/types/tags';
 
 import { create } from 'zustand';
@@ -7,6 +8,8 @@ interface ShareMessageFilterState {
   addTag: (tag: Tag) => void;
   removeTag: (tagId: number) => void;
   resetTags: () => void;
+  sortBy: SortBy;
+  setSortBy: (sortBy: SortBy) => void;
 }
 
 const useShareMessageFilterStore = create<ShareMessageFilterState>((set) => ({
@@ -18,6 +21,11 @@ const useShareMessageFilterStore = create<ShareMessageFilterState>((set) => ({
       selectedTags: state.selectedTags.filter((tag) => tag.id !== tagId),
     })),
   resetTags: () => set({ selectedTags: [] }),
+  sortBy: {
+    sortKey: 'created_at',
+    sortOrder: 'desc',
+  },
+  setSortBy: (sortBy: SortBy) => set({ sortBy }),
 }));
 
 export default useShareMessageFilterStore;

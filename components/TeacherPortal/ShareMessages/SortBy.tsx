@@ -1,5 +1,4 @@
 import { IconSortAscending } from '@tabler/icons-react';
-import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -15,16 +14,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { SortBy } from '@/types/filter_sortby';
+import useShareMessageFilterStore from '../share-message-filter.store';
 
-interface SortBy {
-  sortKey: 'created_at' | 'name';
-  sortOrder: 'asc' | 'desc';
-}
+
 const SortBy = () => {
-  const [sortBy, setSortBy] = useState<SortBy>({
-    sortKey: 'created_at',
-    sortOrder: 'desc',
-  });
+  const { sortBy, setSortBy } = useShareMessageFilterStore();
   return (
     <Popover>
       <PopoverTrigger>
@@ -39,10 +34,10 @@ const SortBy = () => {
           <div className="grid grid-cols-2 gap-2 grid-flow-row">
             <Select
               onValueChange={(value) => {
-                setSortBy((prevSortBy) => ({
-                  ...prevSortBy,
+                setSortBy({
+                  ...sortBy,
                   sortKey: value as 'created_at' | 'name',
-                }));
+                });
               }}
               defaultValue={sortBy.sortKey}
             >
@@ -59,10 +54,10 @@ const SortBy = () => {
             </Select>
             <Select
               onValueChange={(value) => {
-                setSortBy((prevSortBy) => ({
-                  ...prevSortBy,
+                setSortBy({
+                  ...sortBy,
                   sortOrder: value as 'asc' | 'desc',
-                }));
+                });
               }}
               defaultValue={sortBy.sortOrder}
             >
