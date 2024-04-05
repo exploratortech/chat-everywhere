@@ -8,6 +8,7 @@ interface ShareMessageFilterState {
   addTag: (tag: Tag) => void;
   removeTag: (tagId: number) => void;
   resetTags: () => void;
+  isNoTagsSelected: () => boolean;
   sortBy: SortBy;
   setSortBy: (sortBy: SortBy) => void;
   resetSortBy: () => void;
@@ -24,6 +25,7 @@ const useShareMessageFilterStore = create<ShareMessageFilterState>(
         selectedTags: state.selectedTags.filter((tag) => tag.id !== tagId),
       })),
     resetTags: () => set({ selectedTags: [] }),
+    isNoTagsSelected: () => get().selectedTags.length === 0,
     sortBy: {
       sortKey: 'created_at',
       sortOrder: 'desc',
