@@ -1,26 +1,35 @@
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
+import { z } from 'zod';
+
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
 };
+const requestSchema = z.object({
+  accessToken: z.string(),
+  page: z.number(),
+  filter: z.object({
+    tag_ids: z.array(z.number()),
+    sort_by: z.object({
+      sortKey: z.enum(['created_at', 'student_name']),
+      sortOrder: z.enum(['asc', 'desc']),
+    }),
+  }),
+});
 
 const handler = async (req: Request) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  const { accessToken, page, filter } = (await req.json()) as {
-    accessToken: string;
-    page: number;
-    filter: {
-      tag_ids: number[];
-      sort_by: {
-        sortKey: 'created_at' | 'student_name';
-        sortOrder: 'asc' | 'desc';
-      };
-    };
-  };
+  const parsed = requestSchema.safeParse(await req.json());
+
+  if (!parsed.success) {
+    return new Response('Invalid request format', { status: 400 });
+  }
+
+  const { accessToken, page, filter } = parsed.data;
 
   const supabase = getAdminSupabaseClient();
 
