@@ -64,7 +64,7 @@ const NameEdit: React.FC<NameEditProps> = ({ name, id }) => {
             onChange={(e) => setCurrentName(e.target.value)}
             onBlur={() => setIsEditing(false)}
             autoFocus
-            className="w-max"
+            className="!w-full"
           />
         </form>
       ) : (
