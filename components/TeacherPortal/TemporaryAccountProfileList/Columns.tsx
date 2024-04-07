@@ -1,16 +1,20 @@
 import { CaretSortIcon } from '@radix-ui/react-icons';
 import { ColumnDef } from '@tanstack/react-table';
+
 import { TempAccountProfiles } from '@/types/one-time-code';
 
 import CodeTimeLeft from '@/components/Referral/CodeTimeLeft';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 
-import { TFunction } from 'i18next';
+import NameEdit from './NameEdit';
 
 import dayjs from 'dayjs';
+import { TFunction } from 'i18next';
 
-export function getColumns(t: TFunction<'model', undefined>): ColumnDef<TempAccountProfiles>[] {
+export function getColumns(
+  t: TFunction<'model', undefined>,
+): ColumnDef<TempAccountProfiles>[] {
   return [
     {
       id: 'select',
@@ -21,14 +25,14 @@ export function getColumns(t: TFunction<'model', undefined>): ColumnDef<TempAcco
             (table.getIsSomePageRowsSelected() && 'indeterminate')
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label={t("Select all") || "Select all"}
+          aria-label={t('Select all') || 'Select all'}
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label={t("Select row") || "Select row"}
+          aria-label={t('Select row') || 'Select row'}
         />
       ),
       enableSorting: false,
@@ -42,18 +46,20 @@ export function getColumns(t: TFunction<'model', undefined>): ColumnDef<TempAcco
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            {t("Name")}
+            {t('Name')}
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
         );
       },
-      cell: ({ row }) => (
-        <div className="lowercase pl-5">{row.getValue('uniqueId')}</div>
-      ),
+      cell: ({ row }) => {
+        return (
+          <NameEdit name={row.getValue('uniqueId')} id={row.original.id} />
+        );
+      },
     },
     {
       accessorKey: 'code',
-      header: t("Code") || "Code",
+      header: t('Code') || 'Code',
     },
     {
       accessorKey: 'created_at',
@@ -63,7 +69,7 @@ export function getColumns(t: TFunction<'model', undefined>): ColumnDef<TempAcco
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            {t("Registered At")}
+            {t('Registered At')}
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
         );
@@ -82,14 +88,14 @@ export function getColumns(t: TFunction<'model', undefined>): ColumnDef<TempAcco
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
-            {t("Expired At")}
+            {t('Expired At')}
             <CaretSortIcon className="ml-2 h-4 w-4" />
           </Button>
         );
       },
       cell: ({ row }) => (
         <div className="lowercase pl-4">
-          <CodeTimeLeft endOfDay={row.getValue('expired_at')} timeOnly={true}/>
+          <CodeTimeLeft endOfDay={row.getValue('expired_at')} timeOnly={true} />
         </div>
       ),
     },
