@@ -58,6 +58,8 @@ export const ChatInput = ({
       currentMessage,
       speechContent,
       isSpeechRecognitionActive,
+      isConversationModeActive,
+      isSpeechRecognizing,
       showSettingsModel,
       user,
     },
@@ -110,8 +112,8 @@ export const ChatInput = ({
     updateFileListVisibility(value);
   };
 
-  const handleSend = () => {
-    if (messageIsStreaming || isSpeechRecognitionActive) {
+  const handleSend = useCallback(() => {
+    if (messageIsStreaming) {
       return;
     }
 
@@ -146,7 +148,14 @@ export const ChatInput = ({
     } else {
       alert('currentMessage is null');
     }
-  };
+  }, [
+    messageIsStreaming,
+    textareaRef,
+    isOverTokenLimit,
+    currentMessage,
+    onSend,
+    t,
+  ]);
 
   const handleStopConversation = () => {
     stopConversationRef.current = true;
@@ -361,6 +370,27 @@ export const ChatInput = ({
   useEffect(() => {
     setContent(speechContent);
   }, [speechContent]);
+
+  // In conversation mode, automatically send the input's content once
+  // speech is finished being recognized.
+  useEffect(() => {
+    if (
+      isSpeechRecognitionActive &&
+      isConversationModeActive &&
+      !isSpeechRecognizing &&
+      content
+    ) {
+      handleSend();
+      homeDispatch({ field: 'speechContent', value: '' });
+    }
+  }, [
+    isSpeechRecognitionActive,
+    isConversationModeActive,
+    isSpeechRecognizing,
+    content,
+    handleSend,
+    homeDispatch,
+  ]);
 
   const isAiImagePluginSelected = useMemo(
     () => currentMessage?.pluginId === PluginID.IMAGE_GEN,
