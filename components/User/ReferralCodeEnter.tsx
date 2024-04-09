@@ -26,7 +26,7 @@ export const ReferralCodeEnter = () => {
   const { closeModel } = useContext(SettingsModelContext);
 
   const {
-    isLoading,
+    isFetching: isLoading,
     isError,
     error: queryError,
     refetch: queryReferralCodeRefetch,
