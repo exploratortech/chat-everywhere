@@ -1,18 +1,23 @@
-import React, { Dispatch, SetStateAction, useCallback } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import useSharedMessagesWithTeacher from '@/hooks/useSharedMessagesWithTeacher';
-
 import { Button } from '../ui/button';
+import { Tag } from '@/types/tags';
+import TagEditorPopup from './Tags/TagEditorPopUp';
+import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
 
 import { cn } from '@/lib/utils';
 
 const FloatMenu = ({
   selectedMessageIds,
   setSelectedMessageIds,
+  submissions,
+  tags,
 }: {
   selectedMessageIds: number[];
   setSelectedMessageIds: Dispatch<SetStateAction<number[]>>;
+  submissions?: StudentMessageSubmission[];
+  tags: Tag[];
 }) => {
   const { t } = useTranslation('model');
   const { removeMutation } = useSharedMessagesWithTeacher();
@@ -25,6 +30,12 @@ const FloatMenu = ({
     });
   }, [removeMutation, selectedMessageIds, setSelectedMessageIds]);
 
+  // State to manage tag editing popup visibility
+  const [isTagEditorVisible, setIsTagEditorVisible] = useState(false);
+  const toggleTagEditor = () => {
+    setIsTagEditorVisible(!isTagEditorVisible);
+  };
+  
   return (
     <div
       className={cn(
@@ -35,21 +46,42 @@ const FloatMenu = ({
           : 'translate-y-[1.5rem]',
       )}
     >
-      <div className={cn('flex gap-4')}>
-        <Button
-          variant={'ghost'}
-          className="hover:bg-neutral-700"
-          size={'lg'}
-          onClick={handleRemove}
-        >
-          {`${t('Remove')} (${selectedMessageIds.length})`}
-        </Button>
+      <div className={cn('flex gap-4 items-center')}>
+        {isTagEditorVisible ? (
+          <TagEditorPopup
+            selectedMessageIds={selectedMessageIds}
+            submissions={submissions}
+            allTags={tags}
+          />
+        ) : (
+          <>
+            <Button
+              variant={'ghost'}
+              className="hover:bg-neutral-700"
+              size={'lg'}
+              onClick={handleRemove}
+            >
+              {`${t('Remove')} (${selectedMessageIds.length})`}
+            </Button>
+            <Button
+              variant={'ghost'}
+              className="hover:bg-neutral-700"
+              size={'lg'}
+              onClick={toggleTagEditor}
+            >
+              {`${t('Edit Tags')}`}
+            </Button>
+          </>
+        )}
         <Button
           variant={'link'}
           size={'lg'}
-          onClick={() => setSelectedMessageIds([])}
+          onClick={() => {
+            setSelectedMessageIds([]);
+            setIsTagEditorVisible(false);
+          }}
         >
-          <div className="flex gap-2">{t('Clear')}</div>
+          {t('Clear')}
         </Button>
       </div>
     </div>
