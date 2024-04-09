@@ -57,7 +57,7 @@ const FloatMenu = ({
           <>
             <Button
               variant={'ghost'}
-              className="hover:bg-neutral-700"
+              className="hover:bg-destructive"
               size={'lg'}
               onClick={handleRemove}
             >
