@@ -110,7 +110,9 @@ const handler = async (req: Request) => {
   const { data: messagesData, error: messagesError } = messagesResult;
 
   console.log(
-    `Time taken to fetch messages: ${new Date().getTime() - startTime}ms`,
+    `Time taken to fetch shared messages: ${
+      new Date().getTime() - startTime
+    }ms`,
   );
 
   if (messagesError) {
@@ -135,7 +137,6 @@ const handler = async (req: Request) => {
         .filter(Boolean),
     }),
   );
-  console.log(formattedMessagesData);
 
   // Filter out messages with no tags, if tag_ids filter is provided
   if (filter.tag_ids?.length) {
