@@ -1,7 +1,21 @@
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
+import { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
+interface FetchMessagesParams {
+  supabase: SupabaseClient;
+  teacherProfileId: string;
+  filter: {
+    tag_ids?: number[];
+    sort_by: {
+      sortKey: string;
+      sortOrder: 'asc' | 'desc';
+    };
+  };
+  page: number;
+  pageSize: number;
+}
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
@@ -62,40 +76,28 @@ const handler = async (req: Request) => {
   const teacherProfileId = userId;
 
   const pageSize = parseInt(itemPerPage);
-  let query = supabase
-    .from('student_message_submissions')
-    .select(
-      `
-      id,
-      message_content,
-      image_file_url,
-      created_at,
-      student_name,
-      message_tags!left(tag_id, tags(name))
-    `,
-      { count: 'exact' },
-    )
-    .eq('teacher_profile_id', teacherProfileId);
+  const startTime = new Date().getTime();
 
-  // Apply tag_ids filter if provided
-  if (filter.tag_ids?.length) {
-    query = query.filter(
-      'message_tags.tag_id',
-      'in',
-      `(${filter.tag_ids.join(',')})`,
-    );
-  }
+  const [count, messagesResult] = await Promise.all([
+    fetchShareMessageCount({
+      supabase,
+      teacherProfileId,
+      filter,
+    }),
+    fetchMessages({
+      supabase,
+      teacherProfileId,
+      filter,
+      page,
+      pageSize,
+    }),
+  ]);
 
-  // Apply sorting based on sortKey and sortOrder
-  query = query.order(filter.sort_by.sortKey, {
-    ascending: filter.sort_by.sortOrder === 'asc',
-  });
+  const { data: messagesData, error: messagesError } = messagesResult;
 
-  const {
-    data: messagesData,
-    error: messagesError,
-    count,
-  } = await query.range((page - 1) * pageSize, page * pageSize - 1);
+  console.log(
+    `Time taken to fetch messages: ${new Date().getTime() - startTime}ms`,
+  );
 
   if (messagesError) {
     console.error('Error fetching messages:', messagesError);
@@ -141,3 +143,56 @@ const handler = async (req: Request) => {
 };
 
 export default handler;
+
+function fetchMessages({
+  supabase,
+  teacherProfileId,
+  filter,
+  page,
+  pageSize,
+}: FetchMessagesParams) {
+  let query = supabase
+    .from('student_message_submissions')
+    .select(
+      `
+        id,
+        message_content,
+        image_file_url,
+        created_at,
+        student_name,
+        message_tags!left(tag_id, tags(name))
+      `,
+    )
+    .eq('teacher_profile_id', teacherProfileId);
+
+  // Apply tag_ids filter if provided
+  if (filter.tag_ids?.length) {
+    query = query.filter(
+      'message_tags.tag_id',
+      'in',
+      `(${filter.tag_ids.join(',')})`,
+    );
+  }
+
+  // Apply sorting based on sortKey and sortOrder
+  query = query.order(filter.sort_by.sortKey, {
+    ascending: filter.sort_by.sortOrder === 'asc',
+  });
+
+  return query.range((page - 1) * pageSize, page * pageSize - 1);
+}
+
+async function fetchShareMessageCount({
+  supabase,
+  teacherProfileId,
+  filter,
+}: Omit<FetchMessagesParams, 'page' | 'pageSize'>) {
+  const { data: count, error } = await supabase.rpc('shared_message_counter', {
+    teacher_id: teacherProfileId,
+    input_tag_ids: filter.tag_ids || [],
+  });
+  if (error) {
+    throw error;
+  }
+  return count as number;
+}
