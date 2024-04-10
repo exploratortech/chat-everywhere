@@ -175,7 +175,13 @@ export const useFetchSharedMessages = (
     return data;
   };
   return useQuery(
-    ['shared-messages-with-teacher', page],
+    [
+      'shared-messages-with-teacher',
+      page,
+      selectedTags,
+      sortBy.sortKey,
+      sortBy.sortOrder,
+    ],
     () => {
       if (isPeriodic) {
         return fetchSharedMessages();
