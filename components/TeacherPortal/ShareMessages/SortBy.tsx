@@ -56,11 +56,11 @@ const SortBy = memo(() => {
                 isNotSortByDefault() ? 'visible' : 'invisible',
               )}
               onClick={() => {
-                resetSortBy();
                 setSortBy({
                   sortKey: 'created_at',
                   sortOrder: 'desc',
                 });
+                resetSortBy();
               }}
             >
               Reset
@@ -69,6 +69,7 @@ const SortBy = memo(() => {
           <Separator />
           <div className="grid grid-cols-2 gap-2 grid-flow-row">
             <Select
+              value={sortBy.sortKey}
               onValueChange={(value) => {
                 setSortBy({
                   ...sortBy,
@@ -89,6 +90,7 @@ const SortBy = memo(() => {
               </SelectContent>
             </Select>
             <Select
+              value={sortBy.sortOrder}
               onValueChange={(value) => {
                 setSortBy({
                   ...sortBy,
