@@ -74,12 +74,12 @@ export function cleanData(data: SupportedExportFormats): LatestExportFormat {
   }
 
   if (isExportFormatV4(data)) {
-    const cleanedFolders = cleanFolders(data.folders);
+    const cleanedFolder = cleanFolders(data.folders);
     return {
       ...data,
       history: cleanConversationHistory(data.history),
-      folders: cleanedFolders,
-      prompts: cleanPrompts(data.prompts, cleanedFolders),
+      folders: cleanedFolder,
+      prompts: cleanPrompts(data.prompts, cleanedFolder),
     };
   }
 
