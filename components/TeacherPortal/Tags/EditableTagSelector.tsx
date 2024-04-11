@@ -19,7 +19,7 @@ const EditableTagSelector: React.FC<EditableTagSelectorProps> = ({
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <>
       {allTags.map(tag => (
         <TagComponent.default
           key={tag.id}
@@ -28,7 +28,7 @@ const EditableTagSelector: React.FC<EditableTagSelectorProps> = ({
           onSelect={() => handleTagClick(tag)}
         />
       ))}
-    </div>
+    </>
   );
 };
 

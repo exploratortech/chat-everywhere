@@ -46,7 +46,7 @@ const FloatMenu = ({
           : 'translate-y-[1.5rem]',
       )}
     >
-      <div className={cn('flex gap-4 items-center')}>
+      <div className={cn('flex items-center')}>
         {isTagEditorVisible ? (
           <TagEditorPopup
             selectedMessageIds={selectedMessageIds}
