@@ -93,12 +93,14 @@ const TagEditorPopup = ({
   };
 
   return (
-    <div className="flex flex-wrap gap-2 items-center">
-      <EditableTagSelector
-        allTags={allTags}
-        selectedTags={selectedTags}
-        onTagSelectionChange={handleTagSelectionChange}
-      />
+    <div className="flex items-center">
+      <div className="flex flex-wrap gap-2 items-center">
+        <EditableTagSelector
+          allTags={allTags}
+          selectedTags={selectedTags}
+          onTagSelectionChange={handleTagSelectionChange}
+        />
+      </div>
       <Button
         variant={'ghost'}
         className="hover:bg-green-700"
