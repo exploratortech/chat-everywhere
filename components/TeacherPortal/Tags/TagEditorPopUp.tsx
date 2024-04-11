@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
 import { Tag as TagType } from '@/types/tags';
 import EditableTagSelector from './EditableTagSelector';
@@ -11,10 +11,12 @@ const TagEditorPopup = ({
   selectedMessageIds,
   submissions,
   allTags,
+  setIsTagEditorVisible
 }: {
   selectedMessageIds: number[];
   submissions?: StudentMessageSubmission[];
   allTags: TagType[];
+  setIsTagEditorVisible: Dispatch<SetStateAction<boolean>>;
 }) => {
   const { t } = useTranslation('model');
   const [selectedTags, setSelectedTags] = useState<TagType[]>([]);
@@ -81,6 +83,7 @@ const TagEditorPopup = ({
         return;
       }
       toast.success('Tags updated successfully');
+      setIsTagEditorVisible(false);
     } catch (error) {
         toast.error('Failed to update tags');
     }

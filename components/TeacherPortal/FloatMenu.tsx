@@ -53,6 +53,7 @@ const FloatMenu = ({
             selectedMessageIds={selectedMessageIds}
             submissions={submissions}
             allTags={tags}
+            setIsTagEditorVisible={setIsTagEditorVisible}
           />
           <Button
             variant={'link'}
