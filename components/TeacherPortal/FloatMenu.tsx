@@ -84,7 +84,7 @@ const FloatMenu = ({
               size={'lg'}
               onClick={toggleTagEditor}
             >
-              {`${t('Edit Tags')}`}
+              {`${t('Edit tags')} (${selectedMessageIds.length})`}
             </Button>
             <Button
             variant={'link'}
@@ -93,7 +93,7 @@ const FloatMenu = ({
               setSelectedMessageIds([]);
             }}
           >
-            {t('Clear')}
+            {t('Clear selection')}
           </Button>
           </>
         )}
