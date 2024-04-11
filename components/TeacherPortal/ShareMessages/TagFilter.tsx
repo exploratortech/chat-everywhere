@@ -34,7 +34,7 @@ const TagFilter = memo(({ tags }: { tags: Tag[] }) => {
           isNoTagsSelected() && 'invisible',
         )}
       >
-        {`Clear ${selectedTags.length} selected tags`}
+        {t('Clear {{count}} selected tags', { count: selectedTags.length })}
       </Button>
       {tags.map((tag) => (
         <TagComponent.default

@@ -16,7 +16,7 @@ const ItemPerPage = () => {
   const { t } = useTranslation('model');
   return (
     <div className="flex items-center gap-2">
-      <span>{t('Show')}</span>
+      <span className="flex-shrink-0">{t('Show')}</span>
       <Select
         onValueChange={(value) => {
           setItemPerPage(value);
