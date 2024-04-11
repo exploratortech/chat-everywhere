@@ -13,11 +13,13 @@ const FloatMenu = ({
   setSelectedMessageIds,
   submissions,
   tags,
+  refetchTags,
 }: {
   selectedMessageIds: number[];
   setSelectedMessageIds: Dispatch<SetStateAction<number[]>>;
   submissions?: StudentMessageSubmission[];
   tags: Tag[];
+  refetchTags: () => void;
 }) => {
   const { t } = useTranslation('model');
   const { removeMutation } = useSharedMessagesWithTeacher();
@@ -54,6 +56,7 @@ const FloatMenu = ({
             submissions={submissions}
             allTags={tags}
             setIsTagEditorVisible={setIsTagEditorVisible}
+            refetchTags={refetchTags}
           />
           <Button
             variant={'link'}

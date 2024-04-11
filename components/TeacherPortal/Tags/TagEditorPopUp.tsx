@@ -11,12 +11,14 @@ const TagEditorPopup = ({
   selectedMessageIds,
   submissions,
   allTags,
-  setIsTagEditorVisible
+  setIsTagEditorVisible,
+  refetchTags
 }: {
   selectedMessageIds: number[];
   submissions?: StudentMessageSubmission[];
   allTags: TagType[];
   setIsTagEditorVisible: Dispatch<SetStateAction<boolean>>;
+  refetchTags: () => void;
 }) => {
   const { t } = useTranslation('model');
   const [selectedTags, setSelectedTags] = useState<TagType[]>([]);
@@ -83,6 +85,7 @@ const TagEditorPopup = ({
         return;
       }
       toast.success('Tags updated successfully');
+      refetchTags();
       setIsTagEditorVisible(false);
     } catch (error) {
         toast.error('Failed to update tags');
