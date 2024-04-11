@@ -204,5 +204,6 @@
   "Submitted at": "提交時間",
   "Student name": "學生姓名",
   "Show": "顯示",
-  "Clear {{count}} selected tags": "清除 {{count}} 個選擇的標籤"
+  "Clear {{count}} selected tags": "清除 {{count}} 個選擇的標籤",
+  "Student name updated successfully": "學生姓名已成功更新"
 }
