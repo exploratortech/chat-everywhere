@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
 import { Tag as TagType } from '@/types/tags';
 import EditableTagSelector from './EditableTagSelector';
+import toast from 'react-hot-toast';
+import { Button } from '../../ui/button';
+import { useTranslation } from 'react-i18next';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 
 const TagEditorPopup = ({
   selectedMessageIds,
@@ -12,8 +16,10 @@ const TagEditorPopup = ({
   submissions?: StudentMessageSubmission[];
   allTags: TagType[];
 }) => {
+  const { t } = useTranslation('model');
   const [selectedTags, setSelectedTags] = useState<TagType[]>([]);
   const [isInitialSelectionDone, setIsInitialSelectionDone] = useState(false);
+  const supabase = useSupabaseClient();
   
   // Reset initial selection when selectedMessageIds change
   useEffect(() => {
@@ -50,13 +56,51 @@ const TagEditorPopup = ({
     });
   };
 
+  const handleSaveTags = async () => {
+    const accessToken = (await supabase.auth.getSession()).data.session
+      ?.access_token;
+    if (!accessToken) {
+      throw new Error('No access token');
+    }
+    const data = {
+      messageSubmissionIds: selectedMessageIds,
+      tagIds: selectedTags.map(tag => tag.id),
+    };
+    try {
+      const response = await fetch('/api/teacher-portal/bulk-edit-tags-for-selected-submissions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'access-token': accessToken,
+        },
+        body: JSON.stringify(data),
+      });
+      const responseBody = await response.json();
+      if (!response.ok || !responseBody.success) {
+        toast.error('Failed to update tags');
+        return;
+      }
+      toast.success('Tags updated successfully');
+    } catch (error) {
+        toast.error('Failed to update tags');
+    }
+  };
+
   return (
-    <div>
+    <div className="flex flex-wrap gap-2 items-center">
       <EditableTagSelector
         allTags={allTags}
         selectedTags={selectedTags}
         onTagSelectionChange={handleTagSelectionChange}
       />
+      <Button
+        variant={'ghost'}
+        className="hover:bg-green-700"
+        size={'lg'}
+        onClick={handleSaveTags}
+      >
+        {t('Save')}
+      </Button>
     </div>
   );
 };
