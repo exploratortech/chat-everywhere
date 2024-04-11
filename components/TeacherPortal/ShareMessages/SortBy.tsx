@@ -44,7 +44,7 @@ const SortBy = memo(() => {
           <IconSortAscending />
         </Button>
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent className="border-neutral-800">
         <div className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between h-">
             <h1>Sort by</h1>
@@ -81,7 +81,7 @@ const SortBy = memo(() => {
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="border-neutral-800">
                 {SORT_BY_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {t(option.label)}
@@ -102,7 +102,7 @@ const SortBy = memo(() => {
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="border-neutral-800">
                 {['asc', 'desc'].map((option) => (
                   <SelectItem key={option} value={option}>
                     {option.toUpperCase()}

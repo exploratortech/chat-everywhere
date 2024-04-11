@@ -26,7 +26,7 @@ const ItemPerPage = () => {
         <SelectTrigger className="max-h-[30px]">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="border-neutral-800">
           {Array.from({ length: 10 }, (_, i) => (i + 1) * 10).map((option) => (
             <SelectItem
               key={option}
