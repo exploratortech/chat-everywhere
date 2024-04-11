@@ -113,3 +113,19 @@ export async function setTagsToOneTimeCode(
 
   return true;
 }
+
+export async function bulkEditTagsForSelectedSubmissions(
+  messageSubmissionIds: number[],
+  tagIds: number[]
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc('bulk_edit_tags_for_selected_submissions', {
+    message_submission_ids: messageSubmissionIds,
+    tag_ids: tagIds,
+  });
+  console.log(data);
+  if (error) {
+    console.log(error);
+    return false;
+  }
+  return true;
+}
