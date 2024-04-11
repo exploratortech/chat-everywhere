@@ -48,11 +48,22 @@ const FloatMenu = ({
     >
       <div className={cn('flex items-center')}>
         {isTagEditorVisible ? (
+          <>
           <TagEditorPopup
             selectedMessageIds={selectedMessageIds}
             submissions={submissions}
             allTags={tags}
           />
+          <Button
+            variant={'link'}
+            size={'lg'}
+            onClick={() => {
+              setIsTagEditorVisible(false);
+            }}
+          >
+            {t('Go back')}
+          </Button>
+          </>
         ) : (
           <>
             <Button
@@ -71,18 +82,17 @@ const FloatMenu = ({
             >
               {`${t('Edit Tags')}`}
             </Button>
+            <Button
+            variant={'link'}
+            size={'lg'}
+            onClick={() => {
+              setSelectedMessageIds([]);
+            }}
+          >
+            {t('Clear')}
+          </Button>
           </>
         )}
-        <Button
-          variant={'link'}
-          size={'lg'}
-          onClick={() => {
-            setSelectedMessageIds([]);
-            setIsTagEditorVisible(false);
-          }}
-        >
-          {t('Clear')}
-        </Button>
       </div>
     </div>
   );
