@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import React, {
   Dispatch,
   SetStateAction,
-  memo,
   useContext,
   useEffect,
   useRef,
@@ -27,8 +26,10 @@ import Spinner from '../Spinner/Spinner';
 import { Separator } from '../v2Chat/ui/separator';
 import FloatMenu from './FloatMenu';
 import Pagination from './Pagination';
+import SharedMessageList from './ShareMessageList';
 import Filter from './ShareMessages/Filter';
-import SharedMessageItem from './SharedMessageItem';
+
+import { cn } from '@/lib/utils';
 
 const SharedMessages = () => {
   const { t } = useTranslation('model');
@@ -86,7 +87,7 @@ const SharedMessages = () => {
   };
 
   return (
-    <div className="flex flex-col gap-1 h-full">
+    <div className="flex flex-col gap-1 h-full relative">
       <h1 className="font-bold mb-4">{t('Shared messages')}</h1>
       <div className="flex flex-col gap-2 my-4">
         <Filter tags={tags} />
@@ -101,16 +102,11 @@ const SharedMessages = () => {
         <div>{t('No Submissions found')}</div>
       )}
 
-      <div className="flex flex-wrap gap-4">
-        {sharedMessages?.map((submission) => (
-          <SharedMessageItem
-            key={submission.id}
-            submission={submission}
-            onSelectMessage={handleSelectMessage}
-            isSelected={selectedMessageIds.includes(submission.id)}
-          />
-        ))}
-      </div>
+      <SharedMessageList
+        sharedMessages={sharedMessages}
+        handleSelectMessage={handleSelectMessage}
+        selectedMessageIds={selectedMessageIds}
+      />
 
       {sharedMessages && sharedMessages.length > 0 && (
         <div className="my-4">
@@ -120,8 +116,11 @@ const SharedMessages = () => {
           />
         </div>
       )}
-
-      <div className="sticky flex justify-center bottom-8 w-full pointer-events-none">
+      <div
+        className={cn(
+          'absolute flex justify-center top-0 h-full items-end w-full pointer-events-none',
+        )}
+      >
         <FloatMenu
           selectedMessageIds={selectedMessageIds}
           setSelectedMessageIds={setSelectedMessageIds}
@@ -145,7 +144,7 @@ export const useFetchSharedMessages = (
   onSuccess: () => void,
 ) => {
   const supabase = useSupabaseClient();
-  const { selectedTags } = useShareMessageFilterStore();
+  const { selectedTags, sortBy, itemPerPage } = useShareMessageFilterStore();
 
   const { withLoading } = useTeacherPortalLoading();
   const fetchSharedMessages = async () => {
@@ -155,7 +154,9 @@ export const useFetchSharedMessages = (
       page,
       filter: {
         tag_ids: selectedTags.map((tag) => tag.id),
+        sort_by: sortBy,
       },
+      itemPerPage,
     };
     const response = await fetch(
       '/api/teacher-portal/get-shared-messages-with-teacher',
@@ -174,7 +175,13 @@ export const useFetchSharedMessages = (
     return data;
   };
   return useQuery(
-    ['shared-messages-with-teacher', page],
+    [
+      'shared-messages-with-teacher',
+      page,
+      selectedTags,
+      sortBy.sortKey,
+      sortBy.sortOrder,
+    ],
     () => {
       if (isPeriodic) {
         return fetchSharedMessages();
