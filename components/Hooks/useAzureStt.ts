@@ -36,6 +36,7 @@ export const useAzureStt = () => {
   const speechRecognizer = useRef<SpeechRecognizer>();
   const speechRecognizingTimeout = useRef<NodeJS.Timeout>();
 
+  // Mute/unmute microphone in conversation mode.
   useEffect(() => {
     if (!isConversationModeActive) return;
     console.log('MIC MUTED?', isMicrophoneMuted);
