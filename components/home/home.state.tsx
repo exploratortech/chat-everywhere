@@ -77,6 +77,7 @@ export interface HomeInitialState {
   speechRecognitionLanguage: string;
   isConversationModeActive: boolean;
   isSpeechRecognizing: boolean; // Keeps track of the recognition state (conversation mode only).
+  isMicrophoneMuted: boolean;
 
   // Teacher Portal
   teacherPrompts: TeacherPromptForTeacherPortal[];
@@ -156,6 +157,7 @@ export const initialState: HomeInitialState = {
   speechRecognitionLanguage: 'en-US',
   isConversationModeActive: false,
   isSpeechRecognizing: false,
+  isMicrophoneMuted: false,
 
   // Teacher Portal
   teacherPrompts: [],

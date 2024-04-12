@@ -24,13 +24,7 @@ const VoiceInputButton = () => {
   const { t } = useTranslation('common');
 
   const {
-    state: {
-      user,
-      lightMode,
-      isSpeechRecognitionActive,
-      isConversationModeActive,
-      isSpeechRecognizing,
-    },
+    state: { user, lightMode, isSpeechRecognitionActive },
   } = useContext(HomeContext);
 
   const {
@@ -91,14 +85,6 @@ const VoiceInputButton = () => {
         cancelAnimationFrame(animationFrameId.current);
     };
   }, [audioStream, draw, isLoading]);
-
-  // // Mute/unmute the user's microphone depending on the speech recognition state.
-  // useEffect(() => {
-  //   if (!isConversationModeActive) return;
-  //   audioStream
-  //     ?.getAudioTracks()
-  //     .forEach((audioTrack) => (audioTrack.enabled = isSpeechRecognizing));
-  // }, [audioStream, isSpeechRecognizing, isConversationModeActive]);
 
   const renderStatusIndicator = useMemo(() => {
     if ((!isLoading && !isSpeechRecognitionActive) || isMicrophoneDisabled) {

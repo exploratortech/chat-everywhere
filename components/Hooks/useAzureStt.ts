@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
@@ -18,7 +18,11 @@ export const useAzureStt = () => {
   const { t } = useTranslation('common');
 
   const {
-    state: { speechRecognitionLanguage },
+    state: {
+      speechRecognitionLanguage,
+      isConversationModeActive,
+      isMicrophoneMuted,
+    },
     dispatch,
   } = useContext(HomeContext);
 
@@ -31,6 +35,14 @@ export const useAzureStt = () => {
   const region = useRef<string>('');
   const speechRecognizer = useRef<SpeechRecognizer>();
   const speechRecognizingTimeout = useRef<NodeJS.Timeout>();
+
+  useEffect(() => {
+    if (!isConversationModeActive) return;
+    console.log('MIC MUTED?', isMicrophoneMuted);
+    audioStream
+      ?.getAudioTracks()
+      .forEach((track) => (track.enabled = !isMicrophoneMuted));
+  }, [isConversationModeActive, isMicrophoneMuted, audioStream]);
 
   const fetchTokenAndRegion = async (userToken: string): Promise<any> => {
     const response = await fetch('/api/getSpeechToken', {
@@ -92,7 +104,14 @@ export const useAzureStt = () => {
     // generated. The result can be accessed in the "recognized" event of the Recognizer.
     speechConfig.setProperty(
       PropertyId.Speech_SegmentationSilenceTimeoutMs,
-      '2000',
+      '750',
+    );
+
+    // A duration (ms) of detected silence in speech, after which the "speechEndDetected" event will
+    // be signaled. Should be larger than the duration for "Speech_SegmentationSilenceTimeoutMs".
+    speechConfig.setProperty(
+      PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,
+      '1750',
     );
 
     const audioConfig = AudioConfig.fromStreamInput(stream);
@@ -100,7 +119,6 @@ export const useAzureStt = () => {
     // Perform speech recognition from the microphone
     speechRecognizer.current = new SpeechRecognizer(speechConfig, audioConfig);
 
-    let speechContent = '';
     let speechBuffer = '';
 
     speechRecognizer.current.sessionStarted = (sender, event) => {
@@ -108,6 +126,7 @@ export const useAzureStt = () => {
       dispatch({ field: 'isSpeechRecognitionActive', value: true });
       dispatch({ field: 'speechContent', value: '' });
       dispatch({ field: 'isSpeechRecognizing', value: true });
+      dispatch({ field: 'isMicrophoneMuted', value: false });
     };
 
     speechRecognizer.current.recognizing = (sender, event) => {
@@ -119,7 +138,7 @@ export const useAzureStt = () => {
         speechBuffer = event.result.text;
         dispatch({
           field: 'speechContent',
-          value: `${speechContent} ${speechBuffer} ...`.trim(),
+          value: `${speechBuffer} ...`.trim(),
         });
         dispatch({ field: 'isSpeechRecognizing', value: true });
         clearTimeout(speechRecognizingTimeout.current);
@@ -129,30 +148,18 @@ export const useAzureStt = () => {
     speechRecognizer.current.recognized = (sender, event) => {
       if (event.result.reason === ResultReason.RecognizedSpeech) {
         speechBuffer = event.result.text;
-        speechContent = `${speechContent} ${speechBuffer}`;
+        dispatch({ field: 'speechContent', value: speechBuffer.trim() });
       }
-      dispatch({ field: 'speechContent', value: speechContent.trim() });
+    };
 
-      // Clear speech content, otherwise, it'll show up in subsequent dialogue
-      // during conversation mode.
-      speechContent = '';
-
-      // This ensures that the ChatInput's content get's updated before the message
-      // is sent to the model during conversation mode. Without it, the content will contain
-      // the 'speechBuffer' (the unprocessed speech). There's likely a better way of doing this.
-      speechRecognizingTimeout.current = setTimeout(() => {
-        dispatch({ field: 'isSpeechRecognizing', value: false });
-      }, 500);
+    speechRecognizer.current.speechEndDetected = (sender, event) => {
+      if (options.isConversationModeActive) return;
+      dispatch({ field: 'isSpeechRecognizing', value: false });
+      dispatch({ field: 'isMicrophoneMuted', value: true });
     };
 
     speechRecognizer.current.canceled = (sender, event) => {
       stopSpeechRecognition();
-      setIsLoading(false);
-      dispatch({ field: 'isSpeechRecognitionActive', value: false });
-      stream?.getTracks().forEach((mediaTrack) => mediaTrack.stop());
-      setAudioStream(null);
-      speechRecognizer.current?.close();
-
       if (event.reason == CancellationReason.Error) {
         toast.error(
           t(
@@ -164,8 +171,7 @@ export const useAzureStt = () => {
     };
 
     speechRecognizer.current.sessionStopped = (sender, event) => {
-      clearTimeout(speechRecognizingTimeout.current);
-      dispatch({ field: 'isSpeechRecognizing', value: false });
+      stopSpeechRecognition();
     };
 
     speechRecognizer.current.startContinuousRecognitionAsync(
@@ -187,7 +193,14 @@ export const useAzureStt = () => {
   const stopSpeechRecognition = async (): Promise<void> => {
     if (!speechRecognizer.current) return;
     speechRecognizer.current.stopContinuousRecognitionAsync(
-      () => {},
+      () => {
+        audioStream?.getTracks().forEach((mediaTrack) => mediaTrack.stop());
+        setAudioStream(null);
+        setIsLoading(false);
+        clearTimeout(speechRecognizingTimeout.current);
+        dispatch({ field: 'isSpeechRecognitionActive', value: false });
+        dispatch({ field: 'isSpeechRecognizing', value: false });
+      },
       (error) => {
         toast.error(
           t(
