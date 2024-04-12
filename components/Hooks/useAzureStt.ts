@@ -7,6 +7,7 @@ import HomeContext from '@/components/home/home.context';
 
 import {
   AudioConfig,
+  CancellationReason,
   PropertyId,
   ResultReason,
   SpeechConfig,
@@ -148,14 +149,21 @@ export const useAzureStt = () => {
       stopSpeechRecognition();
       setIsLoading(false);
       dispatch({ field: 'isSpeechRecognitionActive', value: false });
-    };
-
-    speechRecognizer.current.sessionStopped = (sender, event) => {
-      dispatch({ field: 'isSpeechRecognitionActive', value: false });
       stream?.getTracks().forEach((mediaTrack) => mediaTrack.stop());
       setAudioStream(null);
       speechRecognizer.current?.close();
 
+      if (event.reason == CancellationReason.Error) {
+        toast.error(
+          t(
+            'The speech service is unavailable at the moment, please try again later',
+          ),
+        );
+        console.log(event.errorDetails);
+      }
+    };
+
+    speechRecognizer.current.sessionStopped = (sender, event) => {
       clearTimeout(speechRecognizingTimeout.current);
       dispatch({ field: 'isSpeechRecognizing', value: false });
     };
