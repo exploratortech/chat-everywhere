@@ -171,6 +171,7 @@ export const useGetOneTimeCode = (
       enabled: !!userId,
       refetchInterval: 3000, // 3 seconds
       refetchOnWindowFocus: true,
+      keepPreviousData: true,
     },
   );
 };
