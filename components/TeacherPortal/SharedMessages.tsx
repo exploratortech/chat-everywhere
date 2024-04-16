@@ -63,6 +63,11 @@ const SharedMessages = () => {
         isPeriodicFetchFlag.current = true;
       },
     );
+    // Refresh shared messages and tag filter count after bulk tag edit
+    const refetchTags = () => {
+      queryClient.invalidateQueries(['shared-messages-with-teacher']);
+      queryClient.invalidateQueries(['teacher-tags']);
+    };
 
   useEffect(() => {
     if (user) {
@@ -124,6 +129,11 @@ const SharedMessages = () => {
         <FloatMenu
           selectedMessageIds={selectedMessageIds}
           setSelectedMessageIds={setSelectedMessageIds}
+          submissions={sharedMessages?.filter((message) =>
+            selectedMessageIds.includes(message.id)
+          )}
+          tags={tags}
+          refetchTags={refetchTags}
         />
       </div>
     </div>
