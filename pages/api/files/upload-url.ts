@@ -1,31 +1,38 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 
+import {
+  fetchUserProfileWithAccessTokenServerless,
+  unauthorizedResponse,
+} from '@/utils/server/auth';
 import { getBucket } from '@/utils/server/gcpBucket';
-
-import { SignedPostPolicyV4Output } from '@google-cloud/storage';
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<SignedPostPolicyV4Output | string>,
+  res: NextApiResponse,
 ) {
   const { body, method } = req;
   if (method !== 'POST') {
-    res.status(405).json('Method not allowed');
-    return;
+    return res.status(405).json('Method not allowed');
+  }
+  const fileName = body.fileName;
+
+  if (!fileName) {
+    return res.status(400).json('File name is required');
   }
 
-  const bucket = await getBucket();
-
-  const folderPath = 'myFolder';
-  const fileName = body.file as string;
+  const userProfile = await fetchUserProfileWithAccessTokenServerless(req);
+  if (!userProfile || !userProfile.isTeacherAccount)
+    return unauthorizedResponse;
+  const folderPath = userProfile.id;
   const fileWithPath = `${folderPath}/${fileName}`;
 
+  const bucket = await getBucket();
   const file = bucket.file(fileWithPath);
 
   const options = {
     expires: Date.now() + 5 * 60 * 1000,
-    fields: { 'x-goog-meta-user-id': 'test-value' },
+    fields: { 'x-goog-meta-user-id': userProfile.id },
   };
   const [response] = await file.generateSignedPostPolicyV4(options);
-  res.status(200).json(response);
+  return res.status(200).json(response);
 }

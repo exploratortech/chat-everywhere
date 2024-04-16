@@ -1,29 +1,34 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 
+import {
+  fetchUserProfileWithAccessTokenServerless,
+  unauthorizedResponse,
+} from '@/utils/server/auth';
 import { getBucket } from '@/utils/server/gcpBucket';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const folderPath = 'user-id';
   if (req.method === 'GET') {
-    const folderPath = 'myFolder';
+    const userProfile = await fetchUserProfileWithAccessTokenServerless(req);
+    if (!userProfile || !userProfile.isTeacherAccount)
+      return unauthorizedResponse;
+    const folderPath = userProfile.id;
 
     try {
       const bucket = await getBucket();
       const bucketRes = await bucket.getFiles({ prefix: folderPath });
       console.log(bucketRes);
       const [files] = bucketRes;
-      res.status(200).json({ files });
+      return res.status(200).json({ files });
     } catch (err) {
       if (err instanceof Error) {
-        return res.status(500).send(err.message);
+        return res.status(500).json(err.message);
       }
-      res.status(500).send('Internal server error');
+      return res.status(500).json('Internal server error');
     }
   } else {
-    res.setHeader('Allow', ['GET']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    return res.status(405).json(`Method ${req.method} Not Allowed`);
   }
 }
