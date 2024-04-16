@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconX } from '@tabler/icons-react';
-import React, { Fragment, useContext, useState } from 'react';
+import React, { Fragment, useContext, useRef, useState } from 'react';
 
 import { useFileUpload } from '@/hooks/useFileUpload';
 
@@ -77,7 +77,7 @@ export default function FilePortalModel({ onClose }: Props) {
 
 const UploadFileComponent = () => {
   const uploadFile = useFileUpload();
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Added a ref to the input
 
   const handleFileSelect = async (file: File | null) => {
     if (!file) {
@@ -89,6 +89,7 @@ const UploadFileComponent = () => {
     if (uploadOk) {
       console.log('Upload successful');
       // show success
+      if (fileInputRef.current) fileInputRef.current.value = ''; // Clear the input field
     } else {
       console.error('Upload failed');
       // show error
@@ -98,13 +99,11 @@ const UploadFileComponent = () => {
   return (
     <div>
       <input
+        ref={fileInputRef} // Attach the ref to the input
         type="file"
         onChange={(e) => {
           if (e.target.files && e.target.files[0]) {
             handleFileSelect(e.target.files[0]);
-            setSelectedFile(e.target.files[0].name);
-          } else {
-            setSelectedFile(null);
           }
         }}
       />
