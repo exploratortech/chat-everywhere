@@ -204,5 +204,9 @@
   "Student name": "学生姓名",
   "Show": "显示",
   "Clear {{count}} selected tags": "清除 {{count}} 个选择的标签",
-  "Student name updated successfully": "学生姓名已成功更新"
+  "Student name updated successfully": "学生姓名已成功更新",
+  "Edit tags": "编辑标签",
+  "Save": "保存",
+  "Go back": "返回",
+  "Clear selection": "取消"
 }
