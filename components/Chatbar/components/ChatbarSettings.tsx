@@ -2,6 +2,7 @@ import {
   IconBrandFacebook,
   IconBrandGoogle,
   IconCurrencyDollar,
+  IconFolder,
   IconHighlight,
   IconLogin,
   IconNews,
@@ -32,6 +33,7 @@ export const ChatbarSettings = () => {
 
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
+  const isUltraUser = user && user.plan === 'ultra';
 
   const filteredConversations = useMemo(
     () => getNonDeletedCollection(conversations),
@@ -94,6 +96,18 @@ export const ChatbarSettings = () => {
           <ClearConversations />
         ) : null}
 
+        {isUltraUser && (
+          <SidebarButton
+            text={`${t('File Portal')}`}
+            icon={<IconFolder size={18} />}
+            onClick={() => {
+              homeDispatch({
+                field: 'showFilePortalModel',
+                value: true,
+              });
+            }}
+          />
+        )}
         <SidebarButton
           text={t('Settings')}
           icon={<IconSettings size={18} />}
@@ -124,6 +138,7 @@ export const ChatbarSettings = () => {
             onClick={() => teacherPortalBtnOnClick()}
           />
         )}
+
         {isEduUser && (
           <SidebarButton
             text={t('Referral Program')}
