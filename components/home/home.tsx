@@ -22,6 +22,7 @@ import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
 
+import FilePortalModel from '../User/File/FilePortalModel';
 import HomeContext from './home.context';
 
 const Home = () => {
@@ -36,6 +37,7 @@ const Home = () => {
     state: {
       selectedConversation,
       showSettingsModel,
+      showFilePortalModel,
       showLoginSignUpModel,
       showOneTimeCodeLoginModel,
       showReferralModel,
@@ -95,6 +97,13 @@ const Home = () => {
         <div className="flex flex-1">
           <Chat stopConversationRef={stopConversationRef} />
         </div>
+        {showFilePortalModel && (
+          <FilePortalModel
+            onClose={() =>
+              dispatch({ field: 'showFilePortalModel', value: false })
+            }
+          />
+        )}
         {showSettingsModel && (
           <SettingsModel
             onClose={() =>
