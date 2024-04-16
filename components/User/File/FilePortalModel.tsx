@@ -1,6 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconX } from '@tabler/icons-react';
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useState } from 'react';
+
+import { useFileUpload } from '@/hooks/useFileUpload';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -54,6 +56,10 @@ export default function FilePortalModel({ onClose }: Props) {
                       <div className="text-neutral-200 font-bold">
                         File Portal
                       </div>
+                      <div className="border p-4 rounded-md">
+                        <UploadFileComponent />
+                      </div>
+
                       <div className="p-4">
                         <FileList />
                       </div>
@@ -68,3 +74,40 @@ export default function FilePortalModel({ onClose }: Props) {
     </Transition>
   );
 }
+
+const UploadFileComponent = () => {
+  const uploadFile = useFileUpload();
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+
+  const handleFileSelect = async (file: File | null) => {
+    if (!file) {
+      console.error('No file selected.');
+      return;
+    }
+    const uploadOk = await uploadFile(file.name, file);
+
+    if (uploadOk) {
+      console.log('Upload successful');
+      // show success
+    } else {
+      console.error('Upload failed');
+      // show error
+    }
+  };
+
+  return (
+    <div>
+      <input
+        type="file"
+        onChange={(e) => {
+          if (e.target.files && e.target.files[0]) {
+            handleFileSelect(e.target.files[0]);
+            setSelectedFile(e.target.files[0].name);
+          } else {
+            setSelectedFile(null);
+          }
+        }}
+      />
+    </div>
+  );
+};
