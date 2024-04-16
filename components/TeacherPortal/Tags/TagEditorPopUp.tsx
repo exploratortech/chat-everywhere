@@ -81,10 +81,10 @@ const TagEditorPopup = ({
       });
       const responseBody = await response.json();
       if (!response.ok || !responseBody.success) {
-        toast.error('Failed to update tags');
+        toast.error(t('Failed to update tags'));
         return;
       }
-      toast.success('Tags updated successfully');
+      toast.success(t('Tags updated successfully'));
       refetchTags();
       setIsTagEditorVisible(false);
     } catch (error) {

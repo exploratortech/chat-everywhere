@@ -208,5 +208,7 @@
   "Edit tags": "编辑标签",
   "Save": "保存",
   "Go back": "返回",
-  "Clear selection": "取消"
+  "Clear selection": "取消",
+  "Tags updated successfully": "标签已成功更新",
+  "Failed to update tags": "更新标签时出错"
 }
