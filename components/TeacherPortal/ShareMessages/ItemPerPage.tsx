@@ -16,7 +16,7 @@ const ItemPerPage = () => {
   const { t } = useTranslation('model');
   return (
     <div className="flex items-center gap-2">
-      <span>{t('Show')}</span>
+      <span className="flex-shrink-0">{t('Show')}</span>
       <Select
         onValueChange={(value) => {
           setItemPerPage(value);
@@ -26,7 +26,7 @@ const ItemPerPage = () => {
         <SelectTrigger className="max-h-[30px]">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="border-neutral-800">
           {Array.from({ length: 10 }, (_, i) => (i + 1) * 10).map((option) => (
             <SelectItem
               key={option}

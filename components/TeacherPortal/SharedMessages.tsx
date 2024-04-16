@@ -157,7 +157,15 @@ export const useFetchSharedMessages = (
   const { selectedTags, sortBy, itemPerPage } = useShareMessageFilterStore();
 
   const { withLoading } = useTeacherPortalLoading();
+  const previousItemPerPage = useRef(itemPerPage);
+
   const fetchSharedMessages = async () => {
+    // Reset page to 1 if itemPerPage has changed
+    if (previousItemPerPage.current !== itemPerPage) {
+      page = 1;
+      previousItemPerPage.current = itemPerPage;
+    }
+
     const payload = {
       accessToken: (await supabase.auth.getSession()).data.session
         ?.access_token,
@@ -185,7 +193,14 @@ export const useFetchSharedMessages = (
     return data;
   };
   return useQuery(
-    ['shared-messages-with-teacher', page],
+    [
+      'shared-messages-with-teacher',
+      page,
+      selectedTags,
+      sortBy.sortKey,
+      sortBy.sortOrder,
+      itemPerPage,
+    ],
     () => {
       if (isPeriodic) {
         return fetchSharedMessages();

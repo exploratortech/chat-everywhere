@@ -202,5 +202,7 @@
   "Switch to Clear Conversations": "切换至清空对话",
   "Submitted at": "提交时间",
   "Student name": "学生姓名",
-  "Show": "显示"
+  "Show": "显示",
+  "Clear {{count}} selected tags": "清除 {{count}} 个选择的标签",
+  "Student name updated successfully": "学生姓名已成功更新"
 }

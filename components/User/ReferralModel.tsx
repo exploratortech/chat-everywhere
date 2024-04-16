@@ -65,7 +65,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
   };
 
   const {
-    isLoading: isRegenerating,
+    isFetching: isRegenerating,
     isError,
     error: queryError,
     refetch: queryReferralCodeRefetch,

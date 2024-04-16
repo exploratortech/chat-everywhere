@@ -10,8 +10,10 @@ const Filter = memo(({ tags }: { tags: Tag[] }) => {
   return (
     <div className="flex justify-between gap-4 items-start">
       <TagFilter tags={tags} />
-      <ItemPerPage />
-      <SortBy />
+      <div className="flex gap-4 items-center">
+        <ItemPerPage />
+        <SortBy />
+      </div>
     </div>
   );
 });

@@ -105,7 +105,6 @@ export async function setTagsToOneTimeCode(
     tag_ids_param: tag_ids,
   });
 
-  console.log(data);
   if (error) {
     console.error(error);
     return false;
