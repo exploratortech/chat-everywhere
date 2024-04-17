@@ -21,102 +21,107 @@ export const config = {
   preferredRegion: 'icn1',
 };
 
+const bucket_name = 'chat-everywhere-staging';
+const bucket_file_path = 'user-id/sample-pdf.pdf';
+
 const handler = async (req: Request): Promise<Response> => {
-  const userToken = req.headers.get('user-token');
+  // const userToken = req.headers.get('user-token');
 
-  const { data, error } = await supabase.auth.getUser(userToken || '');
-  if (!data || error) return unauthorizedResponse;
+  // const { data, error } = await supabase.auth.getUser(userToken || '');
+  // if (!data || error) return unauthorizedResponse;
 
-  const user = await getUserProfile(data.user.id);
-  if (!user || user.plan === 'free') return unauthorizedResponse;
+  // const user = await getUserProfile(data.user.id);
+  // if (!user || user.plan === 'free') return unauthorizedResponse;
 
-  const isUserInUltraPlan = user.plan === 'ultra';
+  // const isUserInUltraPlan = user.plan === 'ultra';
 
-  if (!isUserInUltraPlan) {
-    return new Response('Error', {
-      status: 402,
-      statusText: 'Not in Ultra plan',
-    });
-  }
+  // if (!isUserInUltraPlan) {
+  //   return new Response('Error', {
+  //     status: 402,
+  //     statusText: 'Not in Ultra plan',
+  //   });
+  // }
 
-  let promptToSend = '';
-  let messageToSend: Message[] = [];
+  // let promptToSend = '';
+  // let messageToSend: Message[] = [];
 
   try {
-    const selectedOutputLanguage = req.headers.get('Output-Language')
-      ? `[lang=${req.headers.get('Output-Language')}]`
-      : '';
+    // const selectedOutputLanguage = req.headers.get('Output-Language')
+    // ? `[lang=${req.headers.get('Output-Language')}]`
+    // : '';
 
-    const { messages, prompt, temperature } = (await req.json()) as ChatBody;
+    // const { messages, prompt, temperature } = (await req.json()) as ChatBody;
 
-    promptToSend = prompt;
-    if (!promptToSend) {
-      promptToSend = DEFAULT_SYSTEM_PROMPT;
-    }
-    let temperatureToUse = temperature;
-    if (temperatureToUse == null) {
-      temperatureToUse = DEFAULT_TEMPERATURE;
-    }
+    // promptToSend = prompt;
+    // if (!promptToSend) {
+    //   promptToSend = DEFAULT_SYSTEM_PROMPT;
+    // }
+    // let temperatureToUse = temperature;
+    // if (temperatureToUse == null) {
+    //   temperatureToUse = DEFAULT_TEMPERATURE;
+    // }
 
-    messageToSend = messages;
+    // messageToSend = messages;
 
-    if (selectedOutputLanguage) {
-      messageToSend[
-        messageToSend.length - 1
-      ].content = `${selectedOutputLanguage} ${
-        messageToSend[messageToSend.length - 1].content
-      }`;
-    }
+    // if (selectedOutputLanguage) {
+    //   messageToSend[
+    //     messageToSend.length - 1
+    //   ].content = `${selectedOutputLanguage} ${
+    //     messageToSend[messageToSend.length - 1].content
+    //   }`;
+    // }
 
     // GEMINI API STARTS HERE
-    const generationConfig: GenerationConfig = {
-      temperature: temperatureToUse,
-      topP: 0.95,
-    };
-    const lastMessage = messages.pop();
+    // const generationConfig: GenerationConfig = {
+    //   temperature: temperatureToUse,
+    //   topP: 0.95,
+    // };
+    // const lastMessage = messages.pop();
     // TODO: update back to the original format
-    const lastMessageFormatted: Content = {
-      role: lastMessage
-        ? lastMessage.role === 'user'
-          ? 'user'
-          : 'model'
-        : 'user',
-      parts: lastMessage
-        ? [
-            // {
-            //   fileData: {
-            //     mimeType: 'application/pdf',
-            //     fileUri:
-            //       'gs://chat-everywhere-staging/98ba69f3-5648-4951-8308-128a90a6f770%2Fsupabase_tlzqgrjdkmblgtbmalki_Top%20SQL%20Statements%20by%20Total%20Time.pdf',
-            //   },
-            // },
-            {
-              text: 'Tell me what is this file about',
-            },
-          ]
-        : [],
-    };
-    const contents: Content[] = messages.map((message) => ({
-      role: message.role === 'user' ? 'user' : 'model',
-      parts: [{ text: message.content }],
-    }));
-    const systemInstruction = {
-      role: 'model',
-      parts: [
-        {
-          text: promptToSend,
-        },
-      ],
-    };
+    const filePath = `gs://${bucket_name}/${bucket_file_path}`;
+    console.log({
+      filePath,
+    });
+    // const lastMessageFormatted: Content = {
+    //   role: lastMessage
+    //     ? lastMessage.role === 'user'
+    //       ? 'user'
+    //       : 'model'
+    //     : 'user',
+    //   parts: lastMessage
+    //     ? [
+    //         {
+    //           fileData: {
+    //             mimeType: 'application/pdf',
+    //             fileUri: filePath,
+    //           },
+    //         },
+    //         {
+    //           text: 'Tell me what is this file about',
+    //         },
+    //       ]
+    //     : [],
+    // };
+    // const contents: Content[] = messages.map((message) => ({
+    //   role: message.role === 'user' ? 'user' : 'model',
+    //   parts: [{ text: message.content }],
+    // }));
+    // const systemInstruction = {
+    //   role: 'model',
+    //   parts: [
+    //     {
+    //       text: promptToSend,
+    //     },
+    //   ],
+    // };
     // TODO: add support to convert to Gemini format
     // TODO: add support for files parts
 
     return new Response(
-      await callGeminiAPI(
-        [...contents, lastMessageFormatted],
-        generationConfig,
-        systemInstruction,
-      ),
+      await callGeminiAPI(),
+      // [...contents, lastMessageFormatted],
+      // generationConfig,
+      // systemInstruction,
     );
   } catch (error) {
     console.error(error);
@@ -126,24 +131,40 @@ const handler = async (req: Request): Promise<Response> => {
 
 export default handler;
 
-async function callGeminiAPI(
-  contents: Content[],
-  generationConfig: GenerationConfig,
-  systemInstruction: Content,
-) {
+async function callGeminiAPI() {
+  // contents: Content[],
+  // generationConfig: GenerationConfig,
+  // systemInstruction: Content,
   const requestPayload = {
-    contents,
-    generationConfig,
-    systemInstruction,
+    contents: [
+      {
+        role: 'user',
+        parts: [
+          {
+            fileData: {
+              mimeType: 'application/pdf',
+              fileUri: 'gs://chat-everywhere-staging/user-id/sample-pdf.pdf',
+            },
+          },
+          {
+            text: 'Give me a summary about this pdf in zh-hant, in no less than 500 words.',
+          },
+        ],
+      },
+    ],
+    // generationConfig,
+    // systemInstruction,
   };
 
   const API_ENDPOINT = 'us-east1-aiplatform.googleapis.com';
-  const PROJECT_ID = 'chat-everywhere-api-staging';
+  const PROJECT_ID = 'chat-everywhere-383315';
   const LOCATION_ID = 'us-east1';
   const MODEL_ID = 'gemini-1.5-pro-preview-0409';
   const url = `https://${API_ENDPOINT}/v1/projects/${PROJECT_ID}/locations/${LOCATION_ID}/publishers/google/models/${MODEL_ID}:streamGenerateContent`;
+  // https://us-east1-aiplatform.googleapis.com/v1/projects/chat-everywhere-383315/locations/us-east1/publishers/google/models/gemini-1.5-pro-preview-0409:generateContent
 
   try {
+    console.log({ contents: requestPayload.contents });
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -162,6 +183,7 @@ async function callGeminiAPI(
     if (!response.body) {
       throw new Error('Response body is null');
     }
+
     const reader = response.body.getReader();
     let completeChunk = '';
     const stream = new ReadableStream({
@@ -213,5 +235,5 @@ async function callGeminiAPI(
 
 // TODO: update the access token method
 async function getAccessToken() {
-  return 'XXXX';
+  return 'ya29.a0Ad52N3-_wof6krw4S5otH4tqeu7rsoK_9Q63jImj20snWPeIeJ-CfkgYxdD_zTdzaF0ogv3Aai-k62KOGLvtk6Bk6bqZTQkKpSaOtw6PoC2nrh1-YXDczvug1aciuTd5Ut2WLDVhFNskA3DbfDi3cGOvh4MHTrFNDp3RdCNQUH0aCgYKAdoSARESFQHGX2MiuRN0dp_g2MLBLPRpaano9w0178';
 }
