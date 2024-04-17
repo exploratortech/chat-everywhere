@@ -357,6 +357,7 @@ export const ChatMessage: FC<Props> = memo(
                           <div className="ml-2 flex items-center">
                             <StudentShareMessageButton
                               messageContent={selectedText !== '' ? selectedText : message.content}
+                              isSelectedText = { selectedText !== '' ? true : false}
                             />
                           </div>
                         )}
@@ -411,6 +412,7 @@ export const ChatMessage: FC<Props> = memo(
                           {isStudentAccount && (
                             <StudentShareMessageButton
                               messageContent={selectedText !== '' ? selectedText : message.content}
+                              isSelectedText = { selectedText !== '' ? true : false}
                               className="ml-2"
                             />
                           )}
