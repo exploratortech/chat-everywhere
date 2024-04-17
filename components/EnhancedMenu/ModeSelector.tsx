@@ -11,7 +11,7 @@ const ModeSelector = () => {
   const { t } = useTranslation('model');
 
   const {
-    state: { currentMessage, isPaidUser, hasMqttConnection },
+    state: { currentMessage, isPaidUser, hasMqttConnection, isUltraUser },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -98,6 +98,14 @@ const ModeSelector = () => {
                 {t('AI Painter')}
               </option>
             </>
+          )}
+          {isUltraUser && (
+            <option
+              value={PluginID.GEMINI}
+              className="dark:bg-[#343541] dark:text-white text-yellow-600"
+            >
+              {t('Gemini')}
+            </option>
           )}
         </select>
       </div>

@@ -29,6 +29,9 @@ export const getEndpoint = (plugin: Plugin | null) => {
   if (plugin.id === PluginID.aiPainter) {
     return 'api/ai-painter';
   }
+  if (plugin.id === PluginID.GEMINI) {
+    return 'api/gemini';
+  }
 
   return 'api/chat';
 };

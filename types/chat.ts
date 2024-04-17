@@ -13,6 +13,7 @@ export interface Message {
     | PluginID.IMAGE_TO_PROMPT
     | PluginID.mqtt
     | PluginID.aiPainter
+    | PluginID.GEMINI
     | null
     | PluginID.default;
   largeContextResponse?: boolean; // Use to indicate if the response is from a gpt3.5 16k model
