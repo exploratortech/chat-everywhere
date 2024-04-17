@@ -124,6 +124,28 @@ export const ChatMessage: FC<Props> = memo(
       homeDispatch({ field: 'conversations', value: all });
     };
 
+    // Add a new state for the selected text
+    const [selectedText, setSelectedText] = useState('');
+
+    // Method to handle text selection
+    const handleTextSelection = () => {
+      const text = window.getSelection()?.toString();
+      setSelectedText(text || '');
+    };
+
+    useEffect(() => {
+      const clearSelection = (event: MouseEvent) => {
+        const target = event.target as Element;
+        if (!target.closest('.message-content')){
+          setSelectedText('')
+        }
+      }
+      document.addEventListener('click', clearSelection)
+      return () => {
+        document.removeEventListener('click', clearSelection);
+      };
+    }, []);
+
     const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       setIsTyping(e.nativeEvent.isComposing);
       if (e.key === 'Enter' && !isTyping && !e.shiftKey) {
@@ -306,7 +328,10 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <>
-                    <div className="prose whitespace-pre-wrap dark:prose-invert">
+                    <div 
+                    className="prose whitespace-pre-wrap dark:prose-invert message-content"
+                    onMouseUp={handleTextSelection}
+                    >
                       {message.content}
                     </div>
                     {!isEditing && (
@@ -327,11 +352,11 @@ export const ChatMessage: FC<Props> = memo(
                         >
                           <IconTrash size={18} />
                         </button>
-                        <LineShareButton messageContent={message.content} />
+                        <LineShareButton messageContent={selectedText !== '' ? selectedText : message.content} />
                         {isStudentAccount && (
                           <div className="ml-2 flex items-center">
                             <StudentShareMessageButton
-                              messageContent={message.content}
+                              messageContent={selectedText !== '' ? selectedText : message.content}
                             />
                           </div>
                         )}
@@ -342,12 +367,17 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
-                <div className="flex flex-row justify-between">
-                  <AssistantRespondMessage
-                    formattedMessage={formattedMessage}
-                    messageIndex={messageIndex}
-                    messagePluginId={message.pluginId}
-                  />
+                <div 
+                className="flex flex-row justify-between"
+                onMouseUp={handleTextSelection}
+                >
+                  <div className='message-content'>
+                    <AssistantRespondMessage
+                      formattedMessage={formattedMessage}
+                      messageIndex={messageIndex}
+                      messagePluginId={message.pluginId}
+                    />
+                  </div>
                   <div className="flex m-1 tablet:hidden">
                     <CopyButton />
                   </div>
@@ -374,13 +404,13 @@ export const ChatMessage: FC<Props> = memo(
                       !messageIsStreaming && (
                         <>
                           <LineShareButton
-                            messageContent={message.content}
+                            messageContent={selectedText !== '' ? selectedText : message.content}
                             className="ml-2"
                           />
 
                           {isStudentAccount && (
                             <StudentShareMessageButton
-                              messageContent={message.content}
+                              messageContent={selectedText !== '' ? selectedText : message.content}
                               className="ml-2"
                             />
                           )}
