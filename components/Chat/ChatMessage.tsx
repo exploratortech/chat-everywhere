@@ -370,6 +370,7 @@ export const ChatMessage: FC<Props> = memo(
                     )}
                     {(message.pluginId === PluginID.aiPainter ||
                       message.pluginId === PluginID.GPT4 ||
+                      message.pluginId === PluginID.default ||
                       !message.pluginId) &&
                       !messageIsStreaming && (
                         <>
@@ -377,7 +378,6 @@ export const ChatMessage: FC<Props> = memo(
                             messageContent={message.content}
                             className="ml-2"
                           />
-
                           {isStudentAccount && (
                             <StudentShareMessageButton
                               messageContent={message.content}
