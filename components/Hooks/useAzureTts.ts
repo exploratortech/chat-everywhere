@@ -25,17 +25,7 @@ export const useAzureTts = () => {
   const [currentSpeechId, setCurrentSpeechId] = useState<string | null>(null);
   const token = useRef();
   const region = useRef();
-  const player = useRef(new SpeakerAudioDestination());
-
-  player.current.onAudioStart = () => {
-    setIsPlaying(true);
-    setIsLoading(false);
-  };
-
-  player.current.onAudioEnd = () => {
-    setIsPlaying(false);
-    setIsLoading(false);
-  };
+  const player = useRef<SpeakerAudioDestination>();
 
   const getSpeechConfig = (): SpeechConfigType => {
     const storedSpeechConfig = localStorage.getItem('speechConfig');
@@ -97,9 +87,7 @@ export const useAzureTts = () => {
   };
 
   const stopPlaying = () => {
-    player.current.pause();
-    player.current.close();
-    player.current = new SpeakerAudioDestination();
+    player.current?.pause();
     setIsPlaying(false);
   };
 
@@ -130,14 +118,24 @@ export const useAzureTts = () => {
         return;
       }
 
-      const audioConfig = AudioConfig.fromSpeakerOutput(player.current);
       const speechConfig = SpeechConfig.fromAuthorizationToken(
         toUseToken,
         toUseRegion,
       );
-
       // Default to use Mandarin voice, since it can also handle English fairly well
       speechConfig.speechSynthesisVoiceName = voiceMap[language];
+
+      player.current = new SpeakerAudioDestination();
+      player.current.onAudioStart = () => {
+        setIsPlaying(true);
+        setIsLoading(false);
+      };
+      player.current.onAudioEnd = () => {
+        setIsPlaying(false);
+        setIsLoading(false);
+      };
+      const audioConfig = AudioConfig.fromSpeakerOutput(player.current);
+
       const synthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
 
       let ssml = `
@@ -153,9 +151,7 @@ export const useAzureTts = () => {
       synthesizer.speakSsmlAsync(
         ssml,
         (result) => {
-          if (result) {
-            synthesizer.close();
-          }
+          synthesizer.close();
         },
         (error) => {
           setIsLoading(false);
