@@ -26,18 +26,19 @@ BEGIN
         sms.teacher_profile_id = $2
         AND (ARRAY_LENGTH($1, 1) IS NULL OR ARRAY_LENGTH($1, 1) = 0 OR mt.tag_id = ANY($1))
     GROUP BY sms.id
-    ORDER BY ' || 
+    ORDER BY ' ||
     CASE WHEN input_sort_by_key = 'created_at' THEN 'sms.created_at'
          WHEN input_sort_by_key = 'student_name' THEN 'sms.student_name'
-         ELSE 'sms.created_at' END || 
-    ' ' || 
+         ELSE 'sms.created_at' END ||
+    ' ' ||
     CASE WHEN input_sort_by_order = 'asc' THEN 'ASC'
          WHEN input_sort_by_order = 'desc' THEN 'DESC'
-         ELSE 'ASC' END || 
+         ELSE 'ASC' END ||
     ' LIMIT ' || input_page_size || ' OFFSET ' || offset_calc
     USING input_tag_ids, input_teacher_profile_id;
 END;
 $function$
 ;
+
 
 

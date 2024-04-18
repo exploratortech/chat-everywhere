@@ -46,7 +46,7 @@ const SharedMessageItem = ({
       <div
         className="mt-4"
         style={
-          overflow ? { height: 'calc(95dvh - 7rem)', overflow: 'auto' } : {}
+          overflow ? { height: 'calc(95dvh - 10rem)', overflow: 'auto' } : {}
         }
       >
         {submission.message_content ? (

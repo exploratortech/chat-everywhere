@@ -12,7 +12,7 @@ const OrientationBlock: React.FC<OrientationBlockProps> = ({ children }) => {
   const isLandscape = useOrientation();
   const deviceInfo = useDeviceDetect();
   const isMobileOrIOSAndNotTabletAndLandscape =
-    deviceInfo.isMobile && !deviceInfo.isTablet && isLandscape;
+    deviceInfo.isMobile && !deviceInfo.isTablet && !deviceInfo.isDesktop && isLandscape;
 
   const showBlocker = isMobileOrIOSAndNotTabletAndLandscape
     ? 'block'
