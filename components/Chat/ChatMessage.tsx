@@ -386,7 +386,6 @@ export const ChatMessage: FC<Props> = memo(
                           )}
                         </>
                       )}
-                    123
                   </div>
                   {displayFooterButtons && (
                     <CreditCounter pluginId={message.pluginId} />
