@@ -1,45 +1,82 @@
-import { OpenAIModelID } from '@/types/openai';
+import { FunctionCall } from '@/types/chat';
 
-import { OPENAI_API_HOST } from '../app/const';
+import { getEndpointsAndKeys } from './api';
 
 export const translateAndEnhancePrompt = async (prompt: string) => {
-  let url = `${OPENAI_API_HOST}/v1/chat/completions`;
+  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true);
+  const openAIEndpoint = openAIEndpoints[0] || '';
+  const openAIKey = openAIKeys[0] || '';
 
-  const isInProductionEnv = process.env.NEXT_PUBLIC_ENV === 'production';
+  let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2024-02-01`;
+
   const translateSystemPrompt = `
-    If the prompt is not in English:
-      1. Translate the prompt to English, keeping in mind the context for simplicity
-      2. Embellish the translated prompt with additional details for enhanced visual appeal
-      3. Make sure your response is solely in English 
-      4. Provide only your final response, with no accompanying explanation or process 
+    Act as an AI image generation expert and a professional translator, follow user's instruction as strictly as possible.
+    First determine the prompt's language:
+      If the prompt is not in English:
+        1. Translate the prompt to English, keeping in mind the context for simplicity
+        2. Embellish the translated prompt with additional details for enhanced visual appeal
+        3. Make sure your response is solely in English
 
-    If the prompt is in English:
-      1. Simply echo the original prompt verbatim
-      2. Refrain from making any alterations to the original prompt
-      3. Deliver only your final response, devoid of any description or explanation
+      if the prompt is in english:
+        1. Simply echo the original prompt verbatim
+        2. Refrain from making any alterations to the original prompt
 
-    Prompt: ${prompt}
+    Afterward, called the available function based on the following condition:
+      if the prompt is ready to be processed:
+        - call the 'generate-image' function with the prompt.
+      if there are anything wrong or the prompt is not ready for processing:
+        - call the 'error-message' function indicating the errorMessage
+
+    Important to note: you should always called the function with the name 'generate-image' or 'error-message' and there is no need to response without calling the function.
     `;
+  const functionCallsToSend: FunctionCall[] = [
+    {
+      name: 'error-message',
+      description: 'error message',
+      parameters: {
+        type: 'object',
+        properties: {
+          errorMessage: {
+            type: 'string',
+            description: 'error message',
+          },
+        },
+      },
+    },
+    {
+      name: 'generate-image',
+      description: 'generate an image from a prompt',
+      parameters: {
+        type: 'object',
+        properties: {
+          prompt: {
+            type: 'string',
+            description: 'prompt to generate the image. must be in english.',
+          },
+        },
+      },
+    },
+  ];
 
   const completionResponse = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${isInProductionEnv ? process.env.OPENAI_API_GPT_4_KEY : process.env.OPENAI_API_KEY}`,
+      'api-key': openAIKey,
     },
     method: 'POST',
     body: JSON.stringify({
-      model: isInProductionEnv ? OpenAIModelID.GPT_4 : OpenAIModelID.GPT_3_5,
+      model: 'gpt-35-turbo',
       temperature: 0.1,
       stream: false,
+      functions: functionCallsToSend,
       messages: [
         {
           role: 'system',
-          content:
-            "Act as an AI image generation expert, follow user's instruction as strictly as possible.",
+          content: translateSystemPrompt,
         },
         {
           role: 'user',
-          content: translateSystemPrompt,
+          content: `Prompt: ${prompt}`,
         },
       ],
     }),
@@ -47,15 +84,44 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
 
   const completionResponseJson = await completionResponse.json();
 
+  console.log('completionResponseJson', JSON.stringify(completionResponseJson));
+  if (
+    completionResponseJson.error &&
+    completionResponseJson.error.code === 'content_filter'
+  ) {
+    throw new Error('Translate and enhance prompt error', {
+      cause: {
+        translateAndEnhancePromptErrorMessage:
+          'Your input appears to contain elements that could be related to sexual content, hate speech, self-harm, or violence. These topics are against our guidelines. We kindly ask you to revise your content and try again. We appreciate your understanding and cooperation in maintaining a safe and respectful environment',
+      },
+    });
+  }
+  console.log({
+    message: completionResponseJson.choices[0].message,
+  });
   if (completionResponse.status !== 200) {
     console.log('Image generation failed', completionResponseJson);
     throw new Error('Image generation failed');
   }
 
-  let resultPrompt = completionResponseJson.choices[0].message.content || prompt;
+  let functionCallResponse =
+    completionResponseJson.choices[0].message.function_call;
+  if (functionCallResponse) {
+    const functionName = functionCallResponse.name;
+    const functionParameters = JSON.parse(functionCallResponse.arguments);
 
-  // remove white space, period symbol at the end of the string
-  resultPrompt = resultPrompt.trim().replace(/\.$/, "");
-
-  return resultPrompt;
+    if (functionName === 'error-message') {
+      throw new Error('Translate and enhance prompt error', {
+        cause: {
+          translateAndEnhancePromptErrorMessage:
+            functionParameters.errorMessage,
+        },
+      });
+    } else if (functionName === 'generate-image') {
+      console.log('resultPrompt', functionParameters.prompt);
+      return functionParameters.prompt;
+    }
+  } else {
+    throw new Error('Translate and enhance prompt error');
+  }
 };

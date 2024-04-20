@@ -101,9 +101,6 @@ const TeacherPortalContent: React.FC<TeacherPortalContentProps> = ({
   useEffect(() => {
     const timeout = setTimeout(() => {
       // If the user is not a teacher account, redirect them to the home page
-      console.log({
-        isTeacherAccount,
-      });
       if (!isTeacherAccount) {
         window.location.href = '/';
       }

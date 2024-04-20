@@ -357,7 +357,7 @@ const handler = async (req: Request): Promise<Response> => {
               content: `${
                 generationProgress === 0
                   ? 'Waiting to be processed'
-                  : `${generationProgress}% complete`
+                  : `${generationProgress || 0}% complete`
               } ... ${getTotalGenerationTime()}s \n`,
               removeLastLine: true,
               previewImageUrl:
@@ -381,13 +381,26 @@ const handler = async (req: Request): Promise<Response> => {
       return;
     } catch (error) {
       jobTerminated = true;
-
       console.log(error);
-      await progressHandler.updateProgress({
-        content:
-          'Error occurred while generating image, please try again later.',
-        state: 'error',
-      });
+      if (
+        error instanceof Error &&
+        error.cause &&
+        typeof error.cause === 'object' &&
+        'translateAndEnhancePromptErrorMessage' in error.cause
+      ) {
+        const translateAndEnhancePromptErrorMessage =
+          error.cause.translateAndEnhancePromptErrorMessage;
+        await progressHandler.updateProgress({
+          content: `Error: ${translateAndEnhancePromptErrorMessage} \n`,
+          state: 'error',
+        });
+      } else {
+        await progressHandler.updateProgress({
+          content:
+            'Error occurred while generating image, please try again later.',
+          state: 'error',
+        });
+      }
 
       await writeToStream('[DONE]');
       writer.close();

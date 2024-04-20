@@ -5,7 +5,7 @@ import { useTranslation } from 'next-i18next';
 import useTeacherPrompt from '@/hooks/teacherPortal/useTeacherPrompt';
 
 import { PluginID } from '@/types/plugin';
-import { Prompt, TeacherPromptForTeacherPortal } from '@/types/prompt';
+import { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
 import {

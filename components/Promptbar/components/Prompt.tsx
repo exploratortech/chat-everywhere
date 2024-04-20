@@ -143,7 +143,7 @@ export const PromptComponent = ({ prompt }: Props) => {
             )}
           </div>
         </DialogTrigger>
-        <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[100dvh]">
+        <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[90dvh] max-h-[90dvh] overflow-y-scroll">
           <PromptModal
             prompt={prompt}
             onClose={() => setShowModal(false)}

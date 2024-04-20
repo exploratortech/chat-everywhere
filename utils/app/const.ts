@@ -1,3 +1,8 @@
+import { OpenAIModels, fallbackModelID } from '@/types/openai';
+
+import dayjs from 'dayjs';
+import { v4 as uuidv4 } from 'uuid';
+
 export const DEFAULT_SYSTEM_PROMPT =
   "You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Always be aware of the current date and time, and make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format." +
   'If the input includes text such as [lang=xxx], the response should not include this text.' +
@@ -84,3 +89,14 @@ export const ERROR_MESSAGES = {
 
 export const DEFAULT_FIRST_MESSAGE_TO_GPT =
   'Provide a short welcome message based on your prompt, the role you are playing is based on the prompt';
+
+export const newDefaultConversation = {
+  id: uuidv4(),
+  name: 'New conversation',
+  messages: [],
+  model: OpenAIModels[fallbackModelID],
+  prompt: DEFAULT_SYSTEM_PROMPT,
+  temperature: DEFAULT_TEMPERATURE,
+  folderId: null,
+  lastUpdateAtUTC: dayjs().valueOf(),
+};
