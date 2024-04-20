@@ -8,6 +8,8 @@ import { CustomInstructionPrompt, Prompt, RegularPrompt } from '@/types/prompt';
 
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 
+import TokenCounter from '@/components/Chat/components/TokenCounter';
+
 interface Props {
   prompt: Prompt;
   onClose: () => void;
@@ -19,6 +21,8 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
   const [content, setContent] = useState(prompt.content);
+  const [isOverTokenLimit, setIsOverTokenLimit] = useState(false);
+  const [isCloseToTokenLimit, setIsCloseToTokenLimit] = useState(false);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,7 +42,8 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result;
-        setContent(text?.toString().trim() || '');
+        const newContent = `${content} \n --- ${file.name} --- \n ${text}`;
+        setContent(newContent.trim() || '');
       };
       reader.readAsText(file);
     }
@@ -84,7 +89,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
         onChange={(e) => setContent(e.target.value)}
         rows={7}
       />
-      <div className="flex w-full justify-end">
+      <div className="flex w-full justify-end items-center">
         <input
           type="file"
           accept=".txt"
@@ -107,6 +112,20 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
           id="import-tooltip"
           content={t('Import from text file') || ''}
           place="bottom"
+        />
+        <TokenCounter
+          className={`
+              ${isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''}
+              ${
+                isCloseToTokenLimit || isOverTokenLimit
+                  ? 'visible'
+                  : 'hidden'
+              }
+              text-sm text-neutral-500 dark:text-neutral-400
+            `}
+          value={content}
+          setIsOverLimit={setIsOverTokenLimit}
+          setIsCloseToLimit={setIsCloseToTokenLimit}
         />
       </div>
 
@@ -137,7 +156,8 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
         <DialogClose asChild>
           <button
             type="button"
-            className="w-full px-4 py-2 mt-6 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
+            className="w-full px-4 py-2 mt-6 border rounded-lg shadow cursor-pointer border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300 disabled:dark:bg-slate-400 disabled:cursor-not-allowed"
+            disabled={isOverTokenLimit}
             onClick={() => {
               const updatedPrompt = {
                 ...prompt,
