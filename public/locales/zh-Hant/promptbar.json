@@ -18,5 +18,5 @@
   "First message to GPT": "起始信息",
   "The prompt will be used through out the conversation": "關於這個角色扮演的規則，比如：必須使用繁體中文來回答(zh-hant)，不要使用在對話中沒有提到的資訊。",
   "The first message to start the conversation, such that the student does not need to type anything to start": "首條訊息, 比如：你好，我想知道怎樣可以提升我的寫作能力。",
-  "Import from text file": "從文字案匯入"
+  "Import from .txt file": "匯入 .txt 檔"
 }

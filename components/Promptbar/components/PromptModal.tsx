@@ -110,7 +110,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
         </div>
         <Tooltip
           id="import-tooltip"
-          content={t('Import from text file') || ''}
+          content={t('Import from .txt file') || ''}
           place="bottom"
         />
         <TokenCounter
