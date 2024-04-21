@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { getHomeUrl } from '@/utils/app/api';
 import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
@@ -194,6 +195,7 @@ const handler = async (req: Request): Promise<Response> => {
           headers: requestHeader,
           body: JSON.stringify({
             prompt: generationPrompt,
+            webhookOverride: `${getHomeUrl()}/api/webhooks/mj-health-check`
           }),
         },
       );
