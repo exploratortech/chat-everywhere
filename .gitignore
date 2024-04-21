@@ -58,3 +58,4 @@ public/workbox-*.js
 public/workbox-*.js.map
 
 .env.*
+!.env.local.example
