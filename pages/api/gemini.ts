@@ -12,7 +12,14 @@ import {
   Content,
   GenerateContentResponse,
   GenerationConfig,
+  GenerativeModel,
+  GenerativeModelPreview,
 } from '@google-cloud/vertexai';
+import {
+  ParsedEvent,
+  ReconnectInterval,
+  createParser,
+} from 'eventsource-parser';
 
 const supabase = getAdminSupabaseClient();
 
@@ -147,9 +154,7 @@ async function callGeminiAPI(
     systemInstruction,
   };
 
-  console.log(requestPayload);
-
-  const url = `https://${API_ENDPOINT}/v1/projects/${PROJECT_ID}/locations/${LOCATION_ID}/publishers/google/models/${MODEL_ID}:streamGenerateContent`;
+  const url = `https://${API_ENDPOINT}/v1/projects/${PROJECT_ID}/locations/${LOCATION_ID}/publishers/google/models/${MODEL_ID}:streamGenerateContent?alt=sse`;
 
   try {
     const response = await fetch(url, {
@@ -171,47 +176,57 @@ async function callGeminiAPI(
       throw new Error('Response body is null');
     }
 
+    const contentType = response.headers.get('Content-Type');
+    console.log({ contentType });
+    // Check if the response is a streaming response
+
     const encoder = new TextEncoder();
-    const reader = response.body.getReader();
-    let partialChunk = '';
+    const decoder = new TextDecoder();
+    let stop = false;
 
     const stream = new ReadableStream({
       async start(controller) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          partialChunk += new TextDecoder('utf-8').decode(value);
-          try {
-            const json = JSON.parse(partialChunk) as GenerateContentResponse[];
-            json.forEach((item) => {
-              if (item.candidates) {
-                item.candidates.forEach((candidate) => {
-                  if (candidate.content) {
-                    const content = candidate.content;
-                    if (content.role === 'model') {
-                      const text = content.parts
-                        .map((part) => part.text)
-                        .join('');
-                      controller.enqueue(encoder.encode(text));
-                    } else {
-                      console.log(
-                        'Unhandled role:',
-                        content.role,
-                        'content:',
-                        content,
-                      );
-                    }
-                  }
-                });
+        const onParse = async (event: ParsedEvent | ReconnectInterval) => {
+          console.log({ event });
+          if (event.type === 'event') {
+            const data = event.data;
+
+            try {
+              if (data === '[DONE]') {
+                controller.close();
+                return;
               }
-            });
-            partialChunk = ''; // Reset the partialChunk after successful parsing
-          } catch (e) {
-            console.log('JSON parsing error, waiting for more data:', e);
+
+              const json = JSON.parse(data) as GenerateContentResponse;
+              json?.candidates?.forEach((item) => {
+                const content = item.content;
+                if (content.role === 'model') {
+                  const text = content.parts.map((part) => part.text).join('');
+                  controller.enqueue(encoder.encode(text));
+                } else {
+                  console.log(
+                    'Unhandled role:',
+                    content.role,
+                    'content:',
+                    content,
+                  );
+                }
+                if (item.finishReason && item.finishReason === 'STOP') {
+                  controller.close();
+                }
+              });
+            } catch (e) {
+              console.error(e);
+              controller.error(e);
+            }
           }
+        };
+
+        const parser = createParser(onParse);
+
+        for await (const chunk of response.body as any) {
+          parser.feed(decoder.decode(chunk));
         }
-        controller.close();
-        reader.releaseLock();
       },
     });
 
@@ -224,5 +239,5 @@ async function callGeminiAPI(
 
 // TODO: update the access token method
 async function getAccessToken() {
-  return 'ya29.a0Ad52N3-_wof6krw4S5otH4tqeu7rsoK_9Q63jImj20snWPeIeJ-CfkgYxdD_zTdzaF0ogv3Aai-k62KOGLvtk6Bk6bqZTQkKpSaOtw6PoC2nrh1-YXDczvug1aciuTd5Ut2WLDVhFNskA3DbfDi3cGOvh4MHTrFNDp3RdCNQUH0aCgYKAdoSARESFQHGX2MiuRN0dp_g2MLBLPRpaano9w0178';
+  return 'ya29.a0Ad52N38j-wCBpZQyYFCuf93X1Qas4FLHaZWPP1LgNhmwt0akT5tC8h4t6PppcqjfTmIYiyjfHg-Jk294GTSgVDnlYZdfocmtSoR7C_ZhsbEwVAIicKEs4PEEbQXkcP38NugboU2MOyo6Dz5ghj_V2oeoqs8MXw7DpdK7nHq3_z0aCgYKAQYSARESFQHGX2Mi8KwyPerct07orwf5FCn0aw0178';
 }
