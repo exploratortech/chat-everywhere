@@ -323,7 +323,7 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <>
-                    <div className="prose whitespace-pre-wrap dark:prose-invert message-content">
+                    <div className="prose whitespace-pre-wrap dark:prose-invert">
                       {message.content}
                     </div>
                     {!isEditing && (
@@ -364,13 +364,11 @@ export const ChatMessage: FC<Props> = memo(
             ) : (
               <div className="flex w-full flex-col md:justify-between">
                 <div className="flex flex-row justify-between">
-                  <div className='message-content'>
                     <AssistantRespondMessage
                       formattedMessage={formattedMessage}
                       messageIndex={messageIndex}
                       messagePluginId={message.pluginId}
                     />
-                  </div>
                   <div className="flex m-1 tablet:hidden">
                     <CopyButton />
                   </div>
