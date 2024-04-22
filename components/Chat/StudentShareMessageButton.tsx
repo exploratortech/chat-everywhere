@@ -36,6 +36,15 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
   const { dispatch: homeDispatch } = useContext(HomeContext);
   let imageFileInBase64: String | null = null;
 
+  const truncateMiddleWords = (text: string, limit: number) => {
+    const words = text.split(' ');
+    if (words.length <= limit) return text;
+  
+    const startWords = words.slice(0, limit / 2).join(' ');
+    const endWords = words.slice(-limit / 2).join(' ');
+    return `${startWords} ... ${endWords}`;
+  };
+
   const shareOnClick = async () => {
     setLoading(true);
     if (imageFileUrl) {
@@ -79,7 +88,7 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
     <>
       <button
         data-tooltip-id="share-line-tooltip"
-        data-tooltip-content={t(`Share to Teacher: ${isSelectedText? messageContent : 'Full Content'}`)}
+        data-tooltip-content={t(`Share to Teacher: ${isSelectedText? truncateMiddleWords(messageContent, 15) : 'Full Content'}`)}
         data-tooltip-place="bottom"
         className={`translate-x-[9999px] text-[#4c75c7] hover:text-[#89adf4] focus:translate-x-0 group-hover:translate-x-0 h-fit ${className} ${
           loading ? '!translate-x-0' : ''
