@@ -128,21 +128,16 @@ export const ChatMessage: FC<Props> = memo(
     const [selectedText, setSelectedText] = useState('');
 
     // Method to handle text selection
-    const handleTextSelection = () => {
-      const text = window.getSelection()?.toString();
-      setSelectedText(text || '');
-    };
-
     useEffect(() => {
-      const clearSelection = (event: MouseEvent) => {
-        const target = event.target as Element;
-        if (!target.closest('.message-content')){
-          setSelectedText('')
-        }
-      }
-      document.addEventListener('click', clearSelection)
+      const logSelection = () => {
+        const text = window.getSelection()?.toString();
+        setSelectedText(text || '');
+      };
+    
+      document.addEventListener('selectionchange', logSelection);
+    
       return () => {
-        document.removeEventListener('click', clearSelection);
+        document.removeEventListener('selectionchange', logSelection);
       };
     }, []);
 
@@ -328,10 +323,7 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <>
-                    <div 
-                    className="prose whitespace-pre-wrap dark:prose-invert message-content"
-                    onMouseUp={handleTextSelection}
-                    >
+                    <div className="prose whitespace-pre-wrap dark:prose-invert message-content">
                       {message.content}
                     </div>
                     {!isEditing && (
@@ -368,10 +360,7 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
-                <div 
-                className="flex flex-row justify-between"
-                onMouseUp={handleTextSelection}
-                >
+                <div className="flex flex-row justify-between">
                   <div className='message-content'>
                     <AssistantRespondMessage
                       formattedMessage={formattedMessage}
