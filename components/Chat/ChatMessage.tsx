@@ -344,7 +344,10 @@ export const ChatMessage: FC<Props> = memo(
                         >
                           <IconTrash size={18} />
                         </button>
-                        <LineShareButton messageContent={selectedText !== '' ? selectedText : message.content} />
+                        <LineShareButton 
+                        messageContent={selectedText !== '' ? selectedText : message.content} 
+                        isSelectedText = { selectedText !== '' ? true : false}
+                        />
                         {isStudentAccount && (
                           <div className="ml-2 flex items-center">
                             <StudentShareMessageButton
@@ -395,6 +398,7 @@ export const ChatMessage: FC<Props> = memo(
                         <>
                           <LineShareButton
                             messageContent={selectedText !== '' ? selectedText : message.content}
+                            isSelectedText = { selectedText !== '' ? true : false }
                             className="ml-2"
                           />
 
