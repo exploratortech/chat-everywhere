@@ -1,5 +1,6 @@
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { unauthorizedResponse } from '@/utils/server/auth';
+import { getAccessToken } from '@/utils/server/google/auth';
 import {
   getAdminSupabaseClient,
   getUserProfile,
@@ -12,8 +13,6 @@ import {
   Content,
   GenerateContentResponse,
   GenerationConfig,
-  GenerativeModel,
-  GenerativeModelPreview,
 } from '@google-cloud/vertexai';
 import {
   ParsedEvent,
@@ -29,7 +28,7 @@ export const config = {
 };
 
 const BUCKET_NAME = process.env.GCP_CHAT_WITH_DOCUMENTS_BUCKET_NAME as string;
-const PROJECT_ID = process.env.GCP_BUCKET_PROJECT_ID as string;
+const PROJECT_ID = process.env.GCP_PROJECT_ID as string;
 const API_ENDPOINT = 'us-east1-aiplatform.googleapis.com';
 const LOCATION_ID = 'us-east1';
 const MODEL_ID = 'gemini-1.5-pro-preview-0409';
@@ -154,13 +153,14 @@ async function callGeminiAPI(
     systemInstruction,
   };
 
+  const access_token = await getAccessToken();
   const url = `https://${API_ENDPOINT}/v1/projects/${PROJECT_ID}/locations/${LOCATION_ID}/publishers/google/models/${MODEL_ID}:streamGenerateContent?alt=sse`;
 
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${await getAccessToken()}`,
+        Authorization: `Bearer ${access_token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(requestPayload),
@@ -182,7 +182,6 @@ async function callGeminiAPI(
 
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
-    let stop = false;
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -235,9 +234,4 @@ async function callGeminiAPI(
     console.error('Failed to call Gemini API:', error);
     return null;
   }
-}
-
-// TODO: update the access token method
-async function getAccessToken() {
-  return 'ya29.a0Ad52N38j-wCBpZQyYFCuf93X1Qas4FLHaZWPP1LgNhmwt0akT5tC8h4t6PppcqjfTmIYiyjfHg-Jk294GTSgVDnlYZdfocmtSoR7C_ZhsbEwVAIicKEs4PEEbQXkcP38NugboU2MOyo6Dz5ghj_V2oeoqs8MXw7DpdK7nHq3_z0aCgYKAQYSARESFQHGX2Mi8KwyPerct07orwf5FCn0aw0178';
 }
