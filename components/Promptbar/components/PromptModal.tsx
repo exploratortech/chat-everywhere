@@ -1,5 +1,6 @@
 import { IconFileImport } from '@tabler/icons-react';
 import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import { useTranslation } from 'next-i18next';
@@ -50,9 +51,14 @@ export const PromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
 
       const reader = new FileReader();
       reader.onload = (e) => {
-        const text = e.target?.result;
-        const newContent = `${content} \n --- ${file.name} --- \n ${text}`;
-        setContent(newContent.trim() || '');
+        try {
+          const text = e.target?.result;
+          const newContent = `${content} \n --- ${file.name} --- \n ${text}`;
+          setContent(newContent.trim() || '');
+        } catch (error) {
+          console.error('Error reading file:', error);
+          toast.error(t('Failed to read the file'));
+        }
       };
       reader.readAsText(file);
     }
