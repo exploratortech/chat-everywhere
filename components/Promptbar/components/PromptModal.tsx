@@ -11,6 +11,7 @@ import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 
 interface Props {
   prompt: Prompt;
+  onClose: () => void;
   onUpdatePrompt: (prompt: Prompt) => void;
 }
 
