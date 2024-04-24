@@ -6,23 +6,23 @@ import { useTranslation } from 'next-i18next';
 
 import { CustomInstructionPrompt, Prompt, RegularPrompt } from '@/types/prompt';
 
-import { DialogClose, DialogFooter } from '@/components/ui/dialog';
-
 import TokenCounter from '@/components/Chat/components/TokenCounter';
+import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 
 interface Props {
   prompt: Prompt;
-  onClose: () => void;
   onUpdatePrompt: (prompt: Prompt) => void;
 }
 
-export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
+export const PromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
   const { t } = useTranslation('promptbar');
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
   const [content, setContent] = useState(prompt.content);
   const [isOverTokenLimit, setIsOverTokenLimit] = useState(false);
   const [isCloseToTokenLimit, setIsCloseToTokenLimit] = useState(false);
+  const [displayFileImportMessage, setDisplayFileImportMessage] =
+    useState(false);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -36,9 +36,17 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
     nameInputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    if (isCloseToTokenLimit || isOverTokenLimit) {
+      setDisplayFileImportMessage(true);
+    }
+  }, [isCloseToTokenLimit, isOverTokenLimit]);
+
   const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === 'text/plain') {
+      setDisplayFileImportMessage(true);
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result;
@@ -116,11 +124,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
         <TokenCounter
           className={`
               ${isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''}
-              ${
-                isCloseToTokenLimit || isOverTokenLimit
-                  ? 'visible'
-                  : 'hidden'
-              }
+              ${isCloseToTokenLimit || isOverTokenLimit ? 'visible' : 'hidden'}
               text-sm text-neutral-500 dark:text-neutral-400
             `}
           value={content}
@@ -128,6 +132,14 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
           setIsCloseToLimit={setIsCloseToTokenLimit}
         />
       </div>
+
+      {displayFileImportMessage && (
+        <div className="mt-2 text-sm text-yellow-300 font-italic">
+          {t(
+            "Please be aware that for long files, it's best to use this prompt in default mode as a Pro member because it can handle much longer context.",
+          )}
+        </div>
+      )}
 
       <div className="mt-6 flex items-center justify-between">
         <div className="text-sm font-bold text-black dark:text-neutral-200">
