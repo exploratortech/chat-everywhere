@@ -55,6 +55,7 @@
     "html-to-md": "^0.8.3",
     "i18next": "^22.4.13",
     "isomorphic-dompurify": "^1.7.0",
+    "jose": "^5.2.4",
     "langchain": "^0.0.206",
     "lodash": "^4.17.21",
     "markdown-to-txt": "^2.0.1",
