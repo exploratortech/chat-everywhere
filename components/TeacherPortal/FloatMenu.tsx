@@ -4,6 +4,7 @@ import useSharedMessagesWithTeacher from '@/hooks/useSharedMessagesWithTeacher';
 import { Button } from '../ui/button';
 import { Tag } from '@/types/tags';
 import TagEditorPopup from './Tags/TagEditorPopUp';
+import TitleEditorPopup from './Tags/TitleEditorPopUp';
 import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
 
 import { cn } from '@/lib/utils';
@@ -36,6 +37,12 @@ const FloatMenu = ({
   const [isTagEditorVisible, setIsTagEditorVisible] = useState(false);
   const toggleTagEditor = () => {
     setIsTagEditorVisible(!isTagEditorVisible);
+  };
+
+  // State to manage title editing popup visibility
+  const [isTitleEditorVisible, setIsTitleEditorVisible] = useState(false);
+  const toggleTitleEditor = () => {
+    setIsTitleEditorVisible(!isTitleEditorVisible);
   };
   
   return (
@@ -70,6 +77,23 @@ const FloatMenu = ({
             {t('Go back')}
           </Button>
           </>
+        ) : isTitleEditorVisible ? (
+          <>
+            <TitleEditorPopup
+              selectedMessageIds={selectedMessageIds}
+              setIsTitleEditorVisible={setIsTitleEditorVisible}
+              refetchTags={refetchTags}
+            />
+            <Button
+            variant={'link'}
+            size={'lg'}
+            onClick={() => {
+              setIsTitleEditorVisible(false);
+            }}
+            >
+              {t('Go back')}
+            </Button>
+          </>
         ) : (
           <>
             <Button
@@ -87,6 +111,14 @@ const FloatMenu = ({
               onClick={toggleTagEditor}
             >
               {`${t('Edit tags')} (${selectedMessageIds.length})`}
+            </Button>
+            <Button
+              variant={'ghost'}
+              className="hover:bg-neutral-700"
+              size={'lg'}
+              onClick={toggleTitleEditor}
+            >
+              {`${t('Edit titles')} (${selectedMessageIds.length})`}
             </Button>
             <Button
             variant={'link'}
