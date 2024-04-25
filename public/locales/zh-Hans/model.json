@@ -210,5 +210,9 @@
   "Go back": "返回",
   "Clear selection": "取消",
   "Tags updated successfully": "标签已成功更新",
-  "Failed to update tags": "更新标签时出错"
+  "Failed to update tags": "更新标签时出错",
+  "Edit titles": "编辑标题",
+  "Enter new title": "输入新的标题",
+  "Titles updated successfully": "标题已成功更新",
+  "Failed to update titles": "更新标题时出错"
 }

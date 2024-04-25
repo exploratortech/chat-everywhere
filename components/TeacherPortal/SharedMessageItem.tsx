@@ -108,7 +108,8 @@ function propsAreEqual(
   const equal =
     prevProps.submission.id === nextProps.submission.id &&
     prevProps.isSelected === nextProps.isSelected &&
-    prevProps.submission.message_tags === nextProps.submission.message_tags;
+    prevProps.submission.message_tags === nextProps.submission.message_tags &&
+    prevProps.submission.student_name === nextProps.submission.student_name;
 
   return equal;
 }

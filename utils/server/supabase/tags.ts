@@ -141,3 +141,24 @@ export async function bulkEditTagsForSelectedSubmissions(
     return false;
   }
 }
+
+export async function bulkEditTitlesForSelectedSubmissions(
+  messageSubmissionIds: number[],
+  newTitle: string
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('student_message_submissions')
+      .update({ student_name: newTitle })
+      .in('id', messageSubmissionIds);
+
+    if (error) {
+      throw error;
+    }
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
