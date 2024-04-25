@@ -11,11 +11,14 @@ import HomeContext from '@/components/home/home.context';
 
 import { encode } from 'base64-arraybuffer';
 
+import { truncateText } from '@/utils/data/truncateText';
+
 interface StudentShareMessageBtnProps {
   className?: string;
   messageContent?: string;
   imageFileUrl?: string;
   size?: number;
+  isSelectedText? : boolean
 }
 
 const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
@@ -23,6 +26,7 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
   messageContent = '',
   imageFileUrl = '',
   size = 18,
+  isSelectedText = false,
 }) => {
   const { t } = useTranslation('feature');
   const {
@@ -77,7 +81,7 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
     <>
       <button
         data-tooltip-id="share-line-tooltip"
-        data-tooltip-content={t('Share to Teacher') || ''}
+        data-tooltip-content={`${t(`Share to Teacher`)}${isSelectedText? ': ' + truncateText(messageContent, 15) : ''}`}
         data-tooltip-place="bottom"
         className={`translate-x-[9999px] text-[#4c75c7] hover:text-[#89adf4] focus:translate-x-0 group-hover:translate-x-0 h-fit ${className} ${
           loading ? '!translate-x-0' : ''
@@ -90,7 +94,7 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
           <IconBallpen size={size} />
         )}
       </button>
-      <Tooltip id="share-line-tooltip" />
+      <Tooltip id="share-line-tooltip" className="max-w-md break-words" />
     </>
   );
 };
