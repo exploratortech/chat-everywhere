@@ -63,6 +63,11 @@ const SharedMessages = () => {
         isPeriodicFetchFlag.current = true;
       },
     );
+    // Refresh shared messages and tag filter count after bulk tag edit
+    const refetchTags = () => {
+      queryClient.invalidateQueries(['shared-messages-with-teacher']);
+      queryClient.invalidateQueries(['teacher-tags']);
+    };
 
   useEffect(() => {
     if (user) {
@@ -124,6 +129,11 @@ const SharedMessages = () => {
         <FloatMenu
           selectedMessageIds={selectedMessageIds}
           setSelectedMessageIds={setSelectedMessageIds}
+          submissions={sharedMessages?.filter((message) =>
+            selectedMessageIds.includes(message.id)
+          )}
+          tags={tags}
+          refetchTags={refetchTags}
         />
       </div>
     </div>
@@ -147,7 +157,15 @@ export const useFetchSharedMessages = (
   const { selectedTags, sortBy, itemPerPage } = useShareMessageFilterStore();
 
   const { withLoading } = useTeacherPortalLoading();
+  const previousItemPerPage = useRef(itemPerPage);
+
   const fetchSharedMessages = async () => {
+    // Reset page to 1 if itemPerPage has changed
+    if (previousItemPerPage.current !== itemPerPage) {
+      page = 1;
+      previousItemPerPage.current = itemPerPage;
+    }
+
     const payload = {
       accessToken: (await supabase.auth.getSession()).data.session
         ?.access_token,
@@ -181,6 +199,7 @@ export const useFetchSharedMessages = (
       selectedTags,
       sortBy.sortKey,
       sortBy.sortOrder,
+      itemPerPage,
     ],
     () => {
       if (isPeriodic) {

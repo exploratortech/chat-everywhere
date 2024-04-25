@@ -391,6 +391,7 @@ export const ChatMessage: FC<Props> = memo(
                     )}
                     {(message.pluginId === PluginID.aiPainter ||
                       message.pluginId === PluginID.GPT4 ||
+                      message.pluginId === PluginID.default ||
                       !message.pluginId) &&
                       !messageIsStreaming && (
                         <>
@@ -399,7 +400,6 @@ export const ChatMessage: FC<Props> = memo(
                             isSelectedText = { selectedText !== '' ? true : false }
                             className="ml-2"
                           />
-
                           {isStudentAccount && (
                             <StudentShareMessageButton
                               messageContent={selectedText !== '' ? selectedText : message.content}

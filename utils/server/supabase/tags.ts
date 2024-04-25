@@ -112,3 +112,32 @@ export async function setTagsToOneTimeCode(
 
   return true;
 }
+
+export async function bulkEditTagsForSelectedSubmissions(
+  messageSubmissionIds: number[],
+  tagIds: number[]
+): Promise<boolean> {
+  try {
+    await supabase
+      .from('message_tags')
+      .delete()
+      .in('message_submission_id', messageSubmissionIds);
+
+    for (const submissionId of messageSubmissionIds) {
+      for (const tagId of tagIds) {
+        const { error } = await supabase
+          .from('message_tags')
+          .insert({ message_submission_id: submissionId, tag_id: tagId });
+
+        if (error) {
+          throw error;
+        }
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}

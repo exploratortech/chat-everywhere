@@ -241,9 +241,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       return;
     }
 
+    const overrideMessage =
+      selectedConversation?.messages[selectedConversation?.messages.length - 2];
+
     handleSend(
       2,
-      selectedConversation?.messages[selectedConversation?.messages.length - 2],
+      overrideMessage
+        ? {
+            ...overrideMessage,
+            pluginId: currentMessage
+              ? currentMessage.pluginId
+              : overrideMessage.pluginId,
+          }
+        : undefined,
     );
   };
 
