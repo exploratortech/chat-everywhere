@@ -85,34 +85,34 @@ const handler = async (req: Request): Promise<Response> => {
       temperature: temperatureToUse,
       topP: 0.95,
     };
-    const lastMessage = messages.pop();
 
     // TODO: update back to the original format
     const bucket_file_path = `${user.id}/supabase_tlzqgrjdkmblgtbmalki_Top SQL Statements by Total Time.pdf`;
     const filePath = `gs://${BUCKET_NAME}/${bucket_file_path}`;
 
-    const lastMessageFormatted: Content = {
-      role: lastMessage
-        ? lastMessage.role === 'user'
-          ? 'user'
-          : 'model'
-        : 'user',
-      parts: lastMessage
-        ? [
-            {
-              fileData: {
-                mimeType: 'application/pdf',
-                fileUri: filePath,
-              },
-            },
-            {
-              text: 'Tell me what is this file about',
-            },
-          ]
-        : [],
-    };
+    // const lastMessageFormatted: Content = {
+    //   role: lastMessage
+    //     ? lastMessage.role === 'user'
+    //       ? 'user'
+    //       : 'model'
+    //     : 'user',
+    //   parts: lastMessage
+    //     ? [
+    //         {
+    //           fileData: {
+    //             mimeType: 'application/pdf',
+    //             fileUri: filePath,
+    //           },
+    //         },
+    //         {
+    //           text: 'Tell me what is this file about',
+    //         },
+    //       ]
+    //     : [],
+    // };
     const contents: Content[] = messages.map((message) => ({
       role: message.role === 'user' ? 'user' : 'model',
+      // TODO: add support for files parts
       parts: [{ text: message.content }],
     }));
     const systemInstruction = {
@@ -123,15 +123,9 @@ const handler = async (req: Request): Promise<Response> => {
         },
       ],
     };
-    // TODO: add support to convert to Gemini format
-    // TODO: add support for files parts
 
     return new Response(
-      await callGeminiAPI(
-        [...contents, lastMessageFormatted],
-        generationConfig,
-        systemInstruction,
-      ),
+      await callGeminiAPI(contents, generationConfig, systemInstruction),
     );
   } catch (error) {
     console.error(error);
