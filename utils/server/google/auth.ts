@@ -1,7 +1,6 @@
 import { SignJWT, importPKCS8 } from 'jose';
 import fetch from 'node-fetch';
 
-// TODO: update the variable name
 const CLIENT_EMAIL = process.env.GCP_CLIENT_EMAIL as string;
 const PRIVATE_KEY = process.env.GCP_PRIVATE_KEY as string;
 const PRIVATE_KEY_ID = process.env.GCP_PRIVATE_KEY_ID as string;
