@@ -30,7 +30,7 @@ const bucket = storage.bucket(BUCKET_NAME);
 async function getBucketMetadata() {
   const [metadata] = await bucket.getMetadata();
 
-  console.log(JSON.stringify(metadata, null, 2));
+  // console.log(JSON.stringify(metadata, null, 2));
 }
 async function configureBucketCors() {
   await bucket.setCorsConfiguration([
@@ -41,14 +41,9 @@ async function configureBucketCors() {
       responseHeader: [responseHeader],
     },
   ]);
-
-  console.log(`Bucket ${BUCKET_NAME} was updated with a CORS config
-      to allow ${method} requests from ${origin} sharing
-      ${responseHeader} responses across origins`);
 }
 
 export async function getBucket() {
   await configureBucketCors();
-  await getBucketMetadata();
   return bucket;
 }
