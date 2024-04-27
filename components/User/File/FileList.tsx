@@ -1,10 +1,10 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useQuery } from '@tanstack/react-query';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
+
+import { StorageObject } from '@/types/google-storage';
 
 import HomeContext from '@/components/home/home.context';
-
-import { File } from '@google-cloud/storage';
 
 const FileList = () => {
   const { data: userFiles, isFetching } = useFetchFileList();
@@ -36,7 +36,7 @@ const useFetchFileList = () => {
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
-    return data.files as File[];
+    return data.files as StorageObject[];
   };
 
   return useQuery(['files', user?.id], fetchFileList, {
