@@ -13,6 +13,9 @@ const SCOPE_LIST = [
   'https://www.googleapis.com/auth/devstorage.full_control',
   'https://www.googleapis.com/auth/devstorage.read_only',
   'https://www.googleapis.com/auth/devstorage.read_write',
+  // IAM
+  'https://www.googleapis.com/auth/cloud-platform',
+  'https://www.googleapis.com/auth/iam',
 ];
 async function createSignedJwt() {
   const privateKey = await importPKCS8(PRIVATE_KEY, 'RS256');
