@@ -5,16 +5,21 @@ const CLIENT_EMAIL = process.env.GCP_CLIENT_EMAIL as string;
 const PRIVATE_KEY = process.env.GCP_PRIVATE_KEY as string;
 const PRIVATE_KEY_ID = process.env.GCP_PRIVATE_KEY_ID as string;
 
-// TODO: replace this with argument
-const API_ENDPOINT = 'https://us-east1-aiplatform.googleapis.com'; // Example API endpoint
-
+const SCOPE_LIST = [
+  // GEMINI API
+  'https://www.googleapis.com/auth/cloud-platform',
+  'https://www.googleapis.com/auth/cloud-platform.read-only',
+  // BUCKET STORAGE
+  'https://www.googleapis.com/auth/devstorage.full_control',
+  'https://www.googleapis.com/auth/devstorage.read_only',
+  'https://www.googleapis.com/auth/devstorage.read_write',
+];
 async function createSignedJwt() {
   const privateKey = await importPKCS8(PRIVATE_KEY, 'RS256');
 
   const payload = {
     iss: CLIENT_EMAIL,
-    scope:
-      'https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloud-platform.read-only',
+    scope: SCOPE_LIST.join(' '),
     aud: 'https://oauth2.googleapis.com/token',
     exp: Math.floor(Date.now() / 1000) + 60,
     iat: Math.floor(Date.now() / 1000),
