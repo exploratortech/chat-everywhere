@@ -1,11 +1,7 @@
-import { useContext } from 'react';
-
-import HomeContext from '@/components/home/home.context';
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 
 const VoiceInputActiveOverlay = () => {
-  const {
-    state: { isSpeechRecognitionActive },
-  } = useContext(HomeContext);
+  const { isSpeechRecognitionActive } = useCognitiveService();
 
   if (!isSpeechRecognitionActive) return null;
 

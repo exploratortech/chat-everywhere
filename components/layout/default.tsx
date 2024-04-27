@@ -67,6 +67,7 @@ import { useAzureTts } from '@/components/Hooks/useAzureTts';
 import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
 import OrientationBlock from '@/components/Mobile/OrientationBlock';
 
+import { CognitiveServiceProvider } from '../CognitiveService/CognitiveServiceProvider';
 import HomeContext from '../home/home.context';
 import { HomeInitialState, initialState } from '../home/home.state';
 
@@ -85,8 +86,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   }, []);
   const defaultModelId = fallbackModelID;
   const { t } = useTranslation('chat');
-  const { isLoading, isPlaying, currentSpeechId, speak, stopPlaying } =
-    useAzureTts();
   const router = useRouter();
   const session = useSession();
   const supabase = useSupabaseClient();
@@ -145,11 +144,21 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       forceSyncConversation,
       replaceRemoteData,
       messageIsStreaming,
-      speechRecognitionLanguage,
       isTempUser,
     },
     dispatch,
   } = contextValue;
+
+  // const {
+  //   isLoading,
+  //   isPlaying,
+  //   currentSpeechId,
+  //   speak,
+  //   initializeSpeechSynthesizer,
+  //   closeSpeechSynthesizer,
+  //   queueSpeech,
+  //   stopPlaying,
+  // } = useAzureTts(dispatch);
 
   const stopConversationRef = useRef<boolean>(false);
 
@@ -774,18 +783,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   // APPLY HOOKS VALUE TO CONTEXT -------------------------------------
   useEffect(() => {
-    dispatch({ field: 'isPlaying', value: isPlaying });
-  }, [isPlaying]);
-
-  useEffect(() => {
-    dispatch({ field: 'isLoading', value: isLoading });
-  }, [isLoading]);
-
-  useEffect(() => {
-    dispatch({ field: 'currentSpeechId', value: currentSpeechId });
-  }, [currentSpeechId]);
-
-  useEffect(() => {
     dispatch({ field: 'creditUsage', value: creditUsage });
   }, [creditUsage]);
   useEffect(() => {
@@ -805,14 +802,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           handleUpdateConversation,
           handleCreatePrompt,
           handleUserLogout,
-          playMessage: (text, speechId) =>
-            speak(
-              convertMarkdownToText(text),
-              speechId,
-              user?.token || '',
-              speechRecognitionLanguage,
-            ),
-          stopPlaying,
           toggleChatbar,
           togglePromptbar,
           setDragData,
@@ -831,7 +820,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           />
         </Head>
         <LoadingBar color={'white'} ref={loadingRef} />
-        <>{children}</>
+        <CognitiveServiceProvider>
+          <>{children}</>
+        </CognitiveServiceProvider>
       </HomeContext.Provider>
     </OrientationBlock>
   );

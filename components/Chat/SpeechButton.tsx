@@ -10,6 +10,8 @@ import { trackEvent } from '@/utils/app/eventTracking';
 import { useLogger } from '@/components/Hooks/useLogger';
 import HomeContext from '@/components/home/home.context';
 
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
+
 import { v4 } from 'uuid';
 
 type Props = {
@@ -23,17 +25,17 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   const { logGeneralEvent } = useLogger();
 
   const {
-    state: {
-      currentSpeechId,
-      isLoading,
-      isPlaying,
-      user,
-      messageIsStreaming,
-      isPaidUser,
-    },
-    playMessage,
-    stopPlaying,
+    state: { messageIsStreaming, isPaidUser },
   } = useContext(HomeContext);
+
+  const {
+    closeSpeechSynthesizer,
+    closePlayer,
+    playMessage,
+    playingSpeech,
+    currentSpeechId,
+    loadingTts,
+  } = useCognitiveService();
 
   useEffect(() => {
     setComponentSpeechId(v4());
@@ -44,8 +46,10 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
   }, [componentSpeechId, currentSpeechId]);
 
   const playStopOnClick = async () => {
-    if (isPlaying && isComponentCurrentlyBeingPlayed) {
-      stopPlaying();
+    if (loadingTts) return;
+    if (playingSpeech && isComponentCurrentlyBeingPlayed) {
+      closePlayer();
+      closeSpeechSynthesizer();
     } else {
       await playMessage(inputText, componentSpeechId);
       logGeneralEvent('speech');
@@ -55,9 +59,9 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
 
   const getPlayerIcon = () => {
     if (isComponentCurrentlyBeingPlayed) {
-      if (isLoading) {
+      if (loadingTts) {
         return <IconLoader fill="none" size={18} className="animate-spin" />;
-      } else if (isPlaying) {
+      } else if (playingSpeech) {
         return (
           <IconPlayerStop onClick={playStopOnClick} fill="none" size={18} />
         );

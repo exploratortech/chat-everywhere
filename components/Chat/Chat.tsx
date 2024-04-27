@@ -33,6 +33,7 @@ import {
 import HomeContext from '@/components/home/home.context';
 
 import { NewConversationMessagesContainer } from '../ConversationStarter/NewConversationMessagesContainer';
+import { useConversation } from '../Hooks/useConversation';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
@@ -64,6 +65,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     handleUpdateConversation,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
+
+  useConversation();
 
   const setCurrentMessage = useCallback(
     (message: Message) => {

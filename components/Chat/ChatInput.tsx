@@ -28,6 +28,7 @@ import { Prompt } from '@/types/prompt';
 import TokenCounter from './components/TokenCounter';
 import HomeContext from '@/components/home/home.context';
 
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../Voice/VoiceInputButton';
 import { FileList } from './FileList';
@@ -56,8 +57,6 @@ export const ChatInput = ({
       messageIsStreaming,
       prompts: originalPrompts,
       currentMessage,
-      speechContent,
-      isSpeechRecognitionActive,
       isConversationModeActive,
       isSpeechRecognizing,
       showSettingsModel,
@@ -81,6 +80,8 @@ export const ChatInput = ({
     filteredFiles,
     updateFileListVisibility,
   } = useFileList();
+
+  const { speechContent, isSpeechRecognitionActive } = useCognitiveService();
 
   const [content, setContent] = useState<string>();
   const [isTyping, setIsTyping] = useState<boolean>(false);

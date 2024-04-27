@@ -23,6 +23,7 @@ import {
 import { reorderItem } from './rank';
 import { removeSecondLastLine } from './ui';
 
+import '@formatjs/intl-segmenter/polyfill';
 import dayjs from 'dayjs';
 
 function addCustomInstructions(

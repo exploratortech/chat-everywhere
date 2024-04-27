@@ -8,7 +8,7 @@ import { trackEvent } from '@/utils/app/eventTracking';
 
 import HomeContext from '@/components/home/home.context';
 
-import { useAzureStt } from '../Hooks/useAzureStt';
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 
 const getLargestValue = (bytes: Uint8Array): number => {
   let largest = 0;
@@ -24,16 +24,17 @@ const VoiceInputButton = () => {
   const { t } = useTranslation('common');
 
   const {
-    state: { user, lightMode, isSpeechRecognitionActive },
+    state: { user, lightMode },
   } = useContext(HomeContext);
 
   const {
-    audioStream,
-    isLoading,
-    isMicrophoneDisabled,
     startSpeechRecognition,
     stopSpeechRecognition,
-  } = useAzureStt();
+    audioStream,
+    isSpeechRecognitionActive,
+    loadingStt,
+    isMicrophoneDisabled,
+  } = useCognitiveService();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameId = useRef<number>();
@@ -67,7 +68,7 @@ const VoiceInputButton = () => {
   );
 
   useEffect(() => {
-    if (audioStream && !isLoading) {
+    if (audioStream && !loadingStt) {
       const audioContext = new window.AudioContext();
       const analyserNode = audioContext.createAnalyser();
       analyserNode.fftSize = 32;
@@ -84,10 +85,10 @@ const VoiceInputButton = () => {
       if (animationFrameId.current)
         cancelAnimationFrame(animationFrameId.current);
     };
-  }, [audioStream, draw, isLoading]);
+  }, [audioStream, draw, loadingStt]);
 
   const renderStatusIndicator = useMemo(() => {
-    if ((!isLoading && !isSpeechRecognitionActive) || isMicrophoneDisabled) {
+    if ((!loadingStt && !isSpeechRecognitionActive) || isMicrophoneDisabled) {
       return null;
     }
 
@@ -96,10 +97,10 @@ const VoiceInputButton = () => {
         className={`absolute w-1.5 h-1.5 m-1.5 top-0 right-0 bg-green-500 rounded-full`}
       />
     );
-  }, [isLoading, isSpeechRecognitionActive, isMicrophoneDisabled]);
+  }, [loadingStt, isSpeechRecognitionActive, isMicrophoneDisabled]);
 
   const handleClick = async (e: any): Promise<void> => {
-    if (isLoading) return;
+    if (loadingStt) return;
     if (isSpeechRecognitionActive) {
       stopSpeechRecognition();
 
@@ -113,7 +114,7 @@ const VoiceInputButton = () => {
       }
     } else {
       if (user && user.token) {
-        await startSpeechRecognition(user.token);
+        await startSpeechRecognition();
       } else {
         toast.error(t('Please register and sign in to enable voice input'));
       }
@@ -122,11 +123,13 @@ const VoiceInputButton = () => {
     trackEvent('Voice input button clicked');
   };
 
+  useEffect(() => {}, []);
+
   return (
     <div
       className={`
         w-9 h-9 bg-white dark:bg-[#40414F] rounded-full
-        ${isLoading || isSpeechRecognitionActive ? 'z-[1100]' : ''}
+        ${loadingStt || isSpeechRecognitionActive ? 'z-[1100]' : ''}
       `}
     >
       <div className="relative">
@@ -136,7 +139,7 @@ const VoiceInputButton = () => {
           height="36"
           ref={canvasRef}
         />
-        {isLoading ? (
+        {loadingStt ? (
           <div className="absolute top-[0.7rem] left-3 h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
         ) : (
           <>

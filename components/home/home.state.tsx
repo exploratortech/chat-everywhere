@@ -64,20 +64,8 @@ export interface HomeInitialState {
   hasMqttConnection: boolean;
   isConnectedWithLine: boolean;
 
-  // Text to Speech
-  currentSpeechId: null | string;
-  speechToken: null | string;
-  speechRegion: null | string;
-  isPlaying: boolean;
-  isLoading: boolean;
-
-  // Speech to Text
-  speechContent: string;
-  isSpeechRecognitionActive: boolean;
+  // Speech
   speechRecognitionLanguage: string;
-  isConversationModeActive: boolean;
-  isSpeechRecognizing: boolean; // Keeps track of the recognition state (conversation mode only).
-  isMicrophoneMuted: boolean;
 
   // Teacher Portal
   teacherPrompts: TeacherPromptForTeacherPortal[];
@@ -144,20 +132,8 @@ export const initialState: HomeInitialState = {
   hasMqttConnection: false,
   isConnectedWithLine: false,
 
-  // Text to Speech
-  currentSpeechId: null,
-  speechToken: null,
-  speechRegion: null,
-  isPlaying: false,
-  isLoading: false,
-
-  // Speech to Text
-  speechContent: '',
-  isSpeechRecognitionActive: false,
+  // Speech
   speechRecognitionLanguage: 'en-US',
-  isConversationModeActive: false,
-  isSpeechRecognizing: false,
-  isMicrophoneMuted: false,
 
   // Teacher Portal
   teacherPrompts: [],
