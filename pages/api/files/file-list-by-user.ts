@@ -1,34 +1,54 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-
 import {
-  fetchUserProfileWithAccessTokenServerless,
+  fetchUserProfileWithAccessToken,
   unauthorizedResponse,
 } from '@/utils/server/auth';
-import { getBucket } from '@/utils/server/gcpBucket';
+import { getAccessToken } from '@/utils/server/google/auth';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
+import { StorageObject } from '@/types/google-storage';
+
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req: Request) {
   if (req.method === 'GET') {
-    const userProfile = await fetchUserProfileWithAccessTokenServerless(req);
+    const userProfile = await fetchUserProfileWithAccessToken(req);
     if (!userProfile || !userProfile.isTeacherAccount)
       return unauthorizedResponse;
     const folderPath = userProfile.id;
+    const BUCKET_NAME = process.env
+      .GCP_CHAT_WITH_DOCUMENTS_BUCKET_NAME as string;
 
     try {
-      const bucket = await getBucket();
-      const bucketRes = await bucket.getFiles({ prefix: folderPath });
-      console.log(bucketRes);
-      const [files] = bucketRes;
-      return res.status(200).json({ files });
+      const apiUrl = `https://storage.googleapis.com/storage/v1/b/${BUCKET_NAME}/o?prefix=${folderPath}`;
+      const accessToken = await getAccessToken();
+      const response = await fetch(apiUrl, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error.message);
+      }
+      const files = data.items as StorageObject[];
+      return new Response(JSON.stringify({ files }), {
+        status: 200,
+      });
     } catch (err) {
       if (err instanceof Error) {
-        return res.status(500).json(err.message);
+        return new Response(JSON.stringify(err.message), {
+          status: 500,
+        });
       }
-      return res.status(500).json('Internal server error');
+      return new Response(JSON.stringify('Internal server error'), {
+        status: 500,
+      });
     }
   } else {
-    return res.status(405).json(`Method ${req.method} Not Allowed`);
+    return new Response(JSON.stringify(`Method ${req.method} Not Allowed`), {
+      status: 405,
+    });
   }
 }
