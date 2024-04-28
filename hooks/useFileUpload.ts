@@ -5,7 +5,8 @@ export function useFileUpload() {
   return async (filename: string, file: File) => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token!;
-    const result = await fetch(`/api/files/upload-url`, {
+    // DOING: WIP
+    const result = await fetch(`/api/files/upload-url-edge`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,7 +20,8 @@ export function useFileUpload() {
       formData.append(key, value as string | Blob);
     });
     const upload = await fetch(url, {
-      method: 'POST',
+      // DOING: WIP
+      method: 'PUT',
       body: formData,
     });
     return upload.ok;
