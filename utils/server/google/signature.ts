@@ -10,22 +10,26 @@ export async function createSignature(payload: string): Promise<string> {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
   };
-  const body = JSON.stringify({
-    payload: Buffer.from(payload).toString('base64'),
-  });
 
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: headers,
-      body: body,
+      body: JSON.stringify({
+        payload: Buffer.from(payload).toString('base64'),
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(
+        `HTTP error! status: ${
+          response.status
+        }, response: ${await response.text()}`,
+      );
     }
 
     const data = await response.json();
+
     return data.signedBlob;
   } catch (error) {
     console.error('Error creating signature:', error);
