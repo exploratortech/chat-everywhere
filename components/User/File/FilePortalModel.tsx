@@ -84,6 +84,10 @@ const UploadFileComponent = () => {
       console.error('No file selected.');
       return;
     }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     const uploadOk = await uploadFile(file.name, file);
 
     if (uploadOk) {
