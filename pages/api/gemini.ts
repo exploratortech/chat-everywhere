@@ -86,35 +86,22 @@ const handler = async (req: Request): Promise<Response> => {
       topP: 0.95,
     };
 
-    // TODO: update back to the original format
-    const bucket_file_path = `${user.id}/supabase_tlzqgrjdkmblgtbmalki_Top SQL Statements by Total Time.pdf`;
-    const filePath = `gs://${BUCKET_NAME}/${bucket_file_path}`;
-
-    // const lastMessageFormatted: Content = {
-    //   role: lastMessage
-    //     ? lastMessage.role === 'user'
-    //       ? 'user'
-    //       : 'model'
-    //     : 'user',
-    //   parts: lastMessage
-    //     ? [
-    //         {
-    //           fileData: {
-    //             mimeType: 'application/pdf',
-    //             fileUri: filePath,
-    //           },
-    //         },
-    //         {
-    //           text: 'Tell me what is this file about',
-    //         },
-    //       ]
-    //     : [],
-    // };
-    const contents: Content[] = messages.map((message) => ({
-      role: message.role === 'user' ? 'user' : 'model',
-      // TODO: add support for files parts
-      parts: [{ text: message.content }],
-    }));
+    const contents: Content[] = messages.map((message) => {
+      const role = message.role === 'user' ? 'user' : 'model';
+      const textParts = [{ text: message.content }];
+      const fileDataList = message.fileList
+        ? message.fileList.map((file) => ({
+            fileData: {
+              mimeType: file.filetype,
+              fileUri: `gs://${BUCKET_NAME}/${file.objectPath}`,
+            },
+          }))
+        : [];
+      return {
+        role,
+        parts: [...fileDataList, ...textParts],
+      };
+    });
     const systemInstruction = {
       role: 'model',
       parts: [
@@ -142,8 +129,7 @@ async function callGeminiAPI(
 ) {
   const requestPayload = {
     contents,
-    // TODO: possible bug in generationConfig, fix this later, checkout the document
-    // generationConfig,
+    generationConfig,
     systemInstruction,
   };
 
@@ -171,7 +157,6 @@ async function callGeminiAPI(
     }
 
     const contentType = response.headers.get('Content-Type');
-    console.log({ contentType });
     // Check if the response is a streaming response
 
     const encoder = new TextEncoder();
@@ -180,7 +165,6 @@ async function callGeminiAPI(
     const stream = new ReadableStream({
       async start(controller) {
         const onParse = async (event: ParsedEvent | ReconnectInterval) => {
-          console.log({ event });
           if (event.type === 'event') {
             const data = event.data;
 
