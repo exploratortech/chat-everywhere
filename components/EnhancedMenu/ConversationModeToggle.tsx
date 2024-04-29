@@ -1,18 +1,20 @@
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import HomeContext from '@/components/home/home.context';
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 
 const ConversationModeToggle = () => {
   const { t } = useTranslation(['common', 'model']);
 
-  const {
-    state: { isConversationModeActive },
-    dispatch,
-  } = useContext(HomeContext);
+  const { isConversationModeActive, setIsConversationModeActive } =
+    useCognitiveService();
 
-  const handleChange = (checked: boolean) => {
-    dispatch({ field: 'isConversationModeActive', value: checked });
+  const handleChange = () => {
+    if (isConversationModeActive) {
+      setIsConversationModeActive(false);
+    } else {
+      setIsConversationModeActive(true);
+    }
   };
 
   return (
@@ -29,7 +31,7 @@ const ConversationModeToggle = () => {
           id="toggleHiddenChatEverywhereDefaultCharacterPrompt"
           className="sr-only peer"
           checked={isConversationModeActive}
-          onChange={(event) => handleChange(event.currentTarget.checked)}
+          onChange={handleChange}
         />
         <div className="w-11 h-6 bg-gray-200 outline-none peer-focus:outline-none peer-focus:ring-4 peer-focus:transparent rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-400"></div>
       </label>

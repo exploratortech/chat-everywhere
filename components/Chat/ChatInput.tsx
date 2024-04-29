@@ -57,8 +57,6 @@ export const ChatInput = ({
       messageIsStreaming,
       prompts: originalPrompts,
       currentMessage,
-      isConversationModeActive,
-      isSpeechRecognizing,
       showSettingsModel,
       user,
     },
@@ -81,7 +79,8 @@ export const ChatInput = ({
     updateFileListVisibility,
   } = useFileList();
 
-  const { speechContent, isSpeechRecognitionActive } = useCognitiveService();
+  const { setSendMessage, speechContent, isSpeechRecognitionActive } =
+    useCognitiveService();
 
   const [content, setContent] = useState<string>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -113,29 +112,30 @@ export const ChatInput = ({
     updateFileListVisibility(value);
   };
 
-  const handleSend = useCallback(() => {
-    if (messageIsStreaming) {
-      return;
-    }
+  const handleSend = useCallback(
+    (ignoreEmpty: boolean = false) => {
+      if (messageIsStreaming) {
+        return;
+      }
 
-    const content = textareaRef.current?.value;
-    if (!content) {
-      alert(t('Please enter a message'));
-      return;
-    }
+      const content = textareaRef.current?.value;
+      if (!content) {
+        if (!ignoreEmpty) alert(t('Please enter a message'));
+        return;
+      }
 
-    if (isOverTokenLimit) {
-      return;
-    }
+      if (isOverTokenLimit) {
+        return;
+      }
 
-    if (currentMessage) {
-      onSend({
-        ...currentMessage,
-        content,
-        role: 'user',
-      });
-      setContent('');
-      homeDispatch({
+      if (currentMessage) {
+        onSend({
+          ...currentMessage,
+          content,
+          role: 'user',
+        });
+        setContent('');
+        homeDispatch({
         field: 'currentMessage',
         value: {
           ...currentMessage,
@@ -144,19 +144,22 @@ export const ChatInput = ({
         },
       });
       if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
-        textareaRef.current.blur();
+          textareaRef.current.blur();
+        }
+      } else {
+        alert('currentMessage is null');
       }
-    } else {
-      alert('currentMessage is null');
-    }
-  }, [
-    messageIsStreaming,
-    textareaRef,
-    isOverTokenLimit,
-    currentMessage,
-    onSend,
-    t,
-  ]);
+    },
+    [
+      homeDispatch,
+      messageIsStreaming,
+      textareaRef,
+      isOverTokenLimit,
+      currentMessage,
+      onSend,
+      t,
+    ],
+  );
 
   const handleStopConversation = () => {
     stopConversationRef.current = true;
@@ -372,26 +375,10 @@ export const ChatInput = ({
     setContent(speechContent);
   }, [speechContent]);
 
-  // In conversation mode, automatically send the input's content once
-  // speech is finished being recognized.
+  // Needed for conversation mode
   useEffect(() => {
-    if (
-      isSpeechRecognitionActive &&
-      isConversationModeActive &&
-      !isSpeechRecognizing &&
-      content
-    ) {
-      handleSend();
-      homeDispatch({ field: 'speechContent', value: '' });
-    }
-  }, [
-    isSpeechRecognitionActive,
-    isConversationModeActive,
-    isSpeechRecognizing,
-    content,
-    handleSend,
-    homeDispatch,
-  ]);
+    setSendMessage(handleSend);
+  }, [setSendMessage, handleSend]);
 
   const isAiImagePluginSelected = useMemo(
     () => currentMessage?.pluginId === PluginID.IMAGE_GEN,
@@ -549,7 +536,7 @@ export const ChatInput = ({
 
           <button
             className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
-            onClick={handleSend}
+            onClick={() => handleSend()}
           >
             {messageIsStreaming ? (
               <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>

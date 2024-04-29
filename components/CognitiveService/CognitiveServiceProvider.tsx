@@ -2,6 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -25,9 +26,15 @@ import {
 } from 'microsoft-cognitiveservices-speech-sdk';
 
 type CognitiveServiceContextType = {
+  isConversationModeActive: boolean;
+  setIsConversationModeActive: (value: boolean) => void;
+  currentSpeaker: Speaker | null;
+  setSendMessage: (func: Function) => void;
+  toggleConversation: () => void;
+
   // Tts
   playMessage: (message: string, speechId: string) => Promise<void>;
-  queueMessage: () => Promise<void>;
+  queueMessage: (message: string) => void;
   initSpeechSynthesizer: () => Promise<void>;
   closeSpeechSynthesizer: () => void;
   closePlayer: () => void;
@@ -51,6 +58,8 @@ type SpeechConfigType = {
   speechSpeed: SpeechSpeedType;
 };
 
+type Speaker = 'model' | 'user';
+
 const CognitiveServiceContext =
   createContext<CognitiveServiceContextType | null>(null);
 
@@ -61,12 +70,19 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
 
   const {
     state: { user, speechRecognitionLanguage },
-    dispatch,
   } = useContext(HomeContext);
 
   const speechRegion = useRef<string>();
   const speechToken = useRef<string>();
   const speechTokenExpiresAt = useRef<Dayjs>(dayjs());
+
+  // Conversation mode
+  const [isConversationModeActive, setIsConversationModeActive] =
+    useState<boolean>(false);
+  const [isConversing, setIsConversing] = useState<boolean>(false);
+  const [currentSpeaker, setCurrentSpeaker] = useState<Speaker | null>(null);
+  const speechSynthesizerTimeout = useRef<NodeJS.Timeout>();
+  const sendMessage = useRef<Function>();
 
   // Text-to-speech
   const speechSynthesizer = useRef<SpeechSynthesizer>();
@@ -138,51 +154,77 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
       speechToken.current = responseJson.token;
       speechRegion.current = responseJson.region;
     } catch (error) {
-      displayErrorToast();
-      console.error('Error fetching token:', error);
+      console.error('Error fetching token');
+      return Promise.reject(error);
     }
 
     // Speech token expires in 10 minutes
     speechTokenExpiresAt.current = now.add(9, 'minutes');
-  }, [user, displayErrorToast]);
+    return Promise.resolve();
+  }, [user]);
+
+  const setSendMessage = useCallback((func: Function) => {
+    sendMessage.current = func;
+  }, []);
 
   const initSpeechSynthesizer = useCallback(async () => {
-    setLoadingTts(true);
+    try {
+      if (loadingTts) return;
 
-    await fetchSpeechToken();
+      setLoadingTts(true);
 
-    if (!speechToken.current || !speechRegion.current) {
-      setLoadingTts(false);
-      return;
+      await fetchSpeechToken();
+
+      if (!speechToken.current || !speechRegion.current) {
+        setLoadingTts(false);
+        return;
+      }
+
+      const speechConfig = SpeechConfig.fromAuthorizationToken(
+        speechToken.current,
+        speechRegion.current,
+      );
+
+      // Default to use Mandarin voice, since it can also handle English fairly well
+      speechConfig.speechSynthesisVoiceName =
+        voiceMap[speechRecognitionLanguage];
+
+      player.current = new SpeakerAudioDestination();
+
+      player.current.onAudioStart = () => {
+        setLoadingTts(false);
+        setPlayingSpeech(true);
+      };
+
+      player.current.onAudioEnd = () => {
+        setLoadingTts(false);
+        setPlayingSpeech(false);
+
+        if (isConversationModeActive) {
+          setCurrentSpeaker('user');
+        }
+      };
+
+      const audioConfig = AudioConfig.fromSpeakerOutput(player.current);
+
+      speechSynthesizer.current = new SpeechSynthesizer(
+        speechConfig,
+        audioConfig,
+      );
+
+      return Promise.resolve();
+    } catch (error) {
+      displayErrorToast();
+      console.error(error);
+      return Promise.reject(error);
     }
-
-    const speechConfig = SpeechConfig.fromAuthorizationToken(
-      speechToken.current,
-      speechRegion.current,
-    );
-
-    // Default to use Mandarin voice, since it can also handle English fairly well
-    speechConfig.speechSynthesisVoiceName = voiceMap[speechRecognitionLanguage];
-
-    player.current = new SpeakerAudioDestination();
-
-    player.current.onAudioStart = () => {
-      setLoadingTts(false);
-      setPlayingSpeech(true);
-    };
-
-    player.current.onAudioEnd = () => {
-      setLoadingTts(false);
-      setPlayingSpeech(false);
-    };
-
-    const audioConfig = AudioConfig.fromSpeakerOutput(player.current);
-
-    speechSynthesizer.current = new SpeechSynthesizer(
-      speechConfig,
-      audioConfig,
-    );
-  }, [fetchSpeechToken, speechRecognitionLanguage]);
+  }, [
+    loadingTts,
+    fetchSpeechToken,
+    speechRecognitionLanguage,
+    isConversationModeActive,
+    displayErrorToast,
+  ]);
 
   const closeSpeechSynthesizer = useCallback(() => {
     speechSynthesizer.current?.close();
@@ -225,8 +267,8 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
             closeSpeechSynthesizer();
           },
           (error) => {
-            setLoadingTts(false);
             closeSpeechSynthesizer();
+            setLoadingTts(false);
             console.error(error);
           },
         );
@@ -246,136 +288,240 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
   );
 
   // Used in conversation mode. Call initSpeechSynthesizer() before calling queueMessage.
-  const queueMessage = useCallback(async () => {}, []);
+  const queueMessage = useCallback(
+    (message: string) => {
+      if (!speechSynthesizer.current) {
+        return;
+      }
+
+      if (!message) return;
+
+      const ssml = `
+      <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+        <voice name="${voiceMap[speechRecognitionLanguage]}">
+          <prosody rate="${getSpeechSpeedInSsml()}">
+          ${message}
+          </prosody>
+        </voice>
+      </speak>
+    `;
+
+      speechSynthesizer.current?.speakSsmlAsync(
+        ssml,
+        () => {
+          // Delay closing the speech synthesizer, otherwise, it will close before we get
+          // the chance to queue another message.
+          // Note: synthesizer needs to be closed in order for the player.onAudioEnd event
+          // to occur.
+          clearTimeout(speechSynthesizerTimeout.current);
+          speechSynthesizerTimeout.current = setTimeout(
+            closeSpeechSynthesizer,
+            2500,
+          );
+        },
+        (error) => {
+          closeSpeechSynthesizer();
+          setLoadingTts(false);
+          console.error(error);
+        },
+      );
+    },
+    [speechRecognitionLanguage, getSpeechSpeedInSsml, closeSpeechSynthesizer],
+  );
 
   const getMicrophone = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      setAudioStream(stream);
-      setIsMicrophoneDisabled(false);
-      return stream;
-    } catch (error) {
-      setIsMicrophoneDisabled(true);
-      toast.error(t('Unable to access microphone'));
-      return null;
-    }
-  }, [t]);
+    return await navigator.mediaDevices.getUserMedia({ audio: true });
+  }, []);
 
   const stopSpeechRecognition = useCallback(async (): Promise<void> => {
     speechRecognizer.current?.stopContinuousRecognitionAsync(
       () => {
-        audioStream?.getTracks().forEach((track) => track.stop());
-        setAudioStream(undefined);
+        setAudioStream((audioStream) => {
+          audioStream?.getTracks().forEach((track) => track.stop());
+          return undefined;
+        });
         setLoadingStt(false);
         setIsSpeechRecognitionActive(false);
+        speechRecognizer.current?.close();
+        speechRecognizer.current = undefined;
       },
       (error) => {
         displayErrorToast();
         console.error(error);
       },
     );
-  }, [audioStream, displayErrorToast]);
+  }, [displayErrorToast]);
 
   const startSpeechRecognition = useCallback(async () => {
-    setLoadingStt(true);
+    try {
+      if (loadingStt) return;
 
-    await fetchSpeechToken();
-    const audioStream = await getMicrophone();
+      setLoadingStt(true);
 
-    if (!speechToken.current || !speechRegion.current || !audioStream) {
-      setLoadingStt(false);
-      return;
-    }
+      await fetchSpeechToken();
 
-    const speechConfig = SpeechConfig.fromAuthorizationToken(
-      speechToken.current,
-      speechRegion.current,
-    );
-
-    speechConfig.speechRecognitionLanguage =
-      speechRecognitionLanguage || 'en-US';
-
-    // A duration (ms) of detected silence in speech, after which a final recognized result will be
-    // generated. The result can be accessed in the "recognized" event of the Recognizer.
-    speechConfig.setProperty(
-      PropertyId.Speech_SegmentationSilenceTimeoutMs,
-      '750',
-    );
-
-    // A duration (ms) of detected silence in speech, after which the "speechEndDetected" event will
-    // be signaled. Should be larger than the duration for "Speech_SegmentationSilenceTimeoutMs".
-    speechConfig.setProperty(
-      PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,
-      '1750',
-    );
-
-    const audioConfig = AudioConfig.fromStreamInput(audioStream);
-
-    speechRecognizer.current = new SpeechRecognizer(speechConfig, audioConfig);
-
-    // For keeping track of previously recognized speech. Prevents speechContent from
-    // being cleared when the user stops speaking and starts again.
-    let lastSpeechContent = '';
-
-    speechRecognizer.current.sessionStarted = () => {
-      setLoadingStt(false);
-      setIsSpeechRecognitionActive(true);
-      dispatch({ field: 'isMicrophoneMuted', value: false });
-    };
-
-    speechRecognizer.current.recognizing = (_, event) => {
-      const { reason, text } = event.result;
-      if (
-        reason === ResultReason.RecognizedSpeech ||
-        reason === ResultReason.RecognizingSpeech
-      ) {
-        setSpeechContent(`${lastSpeechContent} ${text} ...`.trim());
-      }
-    };
-
-    speechRecognizer.current.recognized = (_, event) => {
-      const { reason, text } = event.result;
-      if (reason === ResultReason.RecognizedSpeech) {
-        lastSpeechContent = `${lastSpeechContent} ${text}`;
-        setSpeechContent(lastSpeechContent);
-      }
-    };
-
-    speechRecognizer.current.speechEndDetected = () => {};
-
-    speechRecognizer.current.canceled = (_, event) => {
-      stopSpeechRecognition();
-      if (event.reason == CancellationReason.Error) {
-        displayErrorToast();
-        console.error(event.errorDetails);
-      }
-    };
-
-    speechRecognizer.current.sessionStopped = () => {
-      stopSpeechRecognition();
-    };
-
-    speechRecognizer.current.startContinuousRecognitionAsync(
-      () => {},
-      (error) => {
-        setLoadingStt(false);
-        setIsSpeechRecognitionActive(false);
-        displayErrorToast();
+      let audioStream: MediaStream | null;
+      try {
+        audioStream = await getMicrophone();
+        setAudioStream(audioStream);
+        setIsMicrophoneDisabled(false);
+      } catch (error) {
+        setIsMicrophoneDisabled(true);
+        toast.error(t('Unable to access microphone'));
         console.error(error);
-      },
-    );
+        return;
+      }
+
+      if (!speechToken.current || !speechRegion.current || !audioStream) {
+        setLoadingStt(false);
+        return;
+      }
+
+      const speechConfig = SpeechConfig.fromAuthorizationToken(
+        speechToken.current,
+        speechRegion.current,
+      );
+
+      speechConfig.speechRecognitionLanguage =
+        speechRecognitionLanguage || 'en-US';
+
+      // A duration (ms) of detected silence in speech, after which a final recognized result will be
+      // generated. The result can be accessed in the "recognized" event of the Recognizer.
+      speechConfig.setProperty(
+        PropertyId.Speech_SegmentationSilenceTimeoutMs,
+        '750',
+      );
+
+      // A duration (ms) of detected silence in speech, after which the "speechEndDetected" event will
+      // be signaled. Should be larger than the duration for "Speech_SegmentationSilenceTimeoutMs".
+      speechConfig.setProperty(
+        PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,
+        '1750',
+      );
+
+      const audioConfig = AudioConfig.fromStreamInput(audioStream);
+
+      speechRecognizer.current = new SpeechRecognizer(
+        speechConfig,
+        audioConfig,
+      );
+
+      // For keeping track of previously recognized speech. Prevents speechContent from
+      // being cleared when the user stops speaking and starts again.
+      let lastSpeechContent = '';
+
+      speechRecognizer.current.sessionStarted = () => {
+        setLoadingStt(false);
+        setIsSpeechRecognitionActive(true);
+      };
+
+      speechRecognizer.current.recognizing = (_, event) => {
+        const { reason, text } = event.result;
+        if (
+          reason === ResultReason.RecognizedSpeech ||
+          reason === ResultReason.RecognizingSpeech
+        ) {
+          setSpeechContent(`${lastSpeechContent} ${text} ...`.trim());
+        }
+      };
+
+      speechRecognizer.current.recognized = (_, event) => {
+        const { reason, text } = event.result;
+        if (reason === ResultReason.RecognizedSpeech) {
+          lastSpeechContent = `${lastSpeechContent} ${text}`;
+          setSpeechContent(lastSpeechContent);
+        }
+      };
+
+      speechRecognizer.current.speechEndDetected = () => {
+        if (!isConversationModeActive) return;
+        if (!sendMessage.current) return;
+        sendMessage.current(true);
+        setCurrentSpeaker('model');
+        stopSpeechRecognition();
+      };
+
+      speechRecognizer.current.canceled = (_, event) => {
+        stopSpeechRecognition();
+        if (event.reason == CancellationReason.Error) {
+          displayErrorToast();
+          console.error(event.errorDetails);
+        }
+      };
+
+      speechRecognizer.current.sessionStopped = () => {
+        stopSpeechRecognition();
+      };
+
+      speechRecognizer.current.startContinuousRecognitionAsync(
+        () => {},
+        (error) => {
+          setLoadingStt(false);
+          setIsSpeechRecognitionActive(false);
+          displayErrorToast();
+          console.error(error);
+        },
+      );
+    } catch (error) {
+      displayErrorToast();
+      console.error(error);
+    }
   }, [
+    loadingStt,
+    isConversationModeActive,
     fetchSpeechToken,
     getMicrophone,
     speechRecognitionLanguage,
     stopSpeechRecognition,
-    dispatch,
     displayErrorToast,
+    t,
+  ]);
+
+  // Starts/stops conversation
+  const toggleConversation = useCallback(async () => {
+    if (isConversing) {
+      setCurrentSpeaker(null);
+      await Promise.all([
+        stopSpeechRecognition(),
+        closePlayer(),
+        closeSpeechSynthesizer(),
+      ]);
+    } else {
+      // Will execute a useEffect callback that invokes startSpeechRecognition().
+      setCurrentSpeaker('user');
+    }
+
+    setIsConversing(!isConversing);
+  }, [
+    isConversing,
+    stopSpeechRecognition,
+    closePlayer,
+    closeSpeechSynthesizer,
+  ]);
+
+  useEffect(() => {
+    if (!isConversing) return;
+    if (currentSpeaker === 'model' && !speechSynthesizer.current) {
+      initSpeechSynthesizer();
+    } else if (currentSpeaker === 'user' && !speechRecognizer.current) {
+      startSpeechRecognition();
+    }
+  }, [
+    isConversing,
+    currentSpeaker,
+    initSpeechSynthesizer,
+    startSpeechRecognition,
   ]);
 
   return (
     <CognitiveServiceContext.Provider
       value={{
+        isConversationModeActive,
+        setIsConversationModeActive,
+        currentSpeaker,
+        setSendMessage,
+        toggleConversation,
+
         // Tts
         playMessage,
         queueMessage,

@@ -28,6 +28,8 @@ const VoiceInputButton = () => {
   } = useContext(HomeContext);
 
   const {
+    isConversationModeActive,
+    toggleConversation,
     startSpeechRecognition,
     stopSpeechRecognition,
     audioStream,
@@ -101,6 +103,12 @@ const VoiceInputButton = () => {
 
   const handleClick = async (e: any): Promise<void> => {
     if (loadingStt) return;
+
+    if (isConversationModeActive) {
+      toggleConversation();
+      return;
+    }
+
     if (isSpeechRecognitionActive) {
       stopSpeechRecognition();
 

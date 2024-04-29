@@ -1,16 +1,15 @@
 import { useContext, useEffect, useRef } from 'react';
 
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 import HomeContext from '../home/home.context';
 
 export const useConversation = () => {
   const {
-    state: {
-      selectedConversation,
-      outputLanguage,
-      messageIsStreaming,
-      isConversationModeActive,
-    },
+    state: { selectedConversation, outputLanguage, messageIsStreaming },
   } = useContext(HomeContext);
+
+  const { isConversationModeActive, currentSpeaker, queueMessage } =
+    useCognitiveService();
 
   const pointer = useRef<number>(0);
   const segmenter = useRef<Intl.Segmenter>();
@@ -22,6 +21,10 @@ export const useConversation = () => {
   }, [outputLanguage]);
 
   useEffect(() => {
+    if (currentSpeaker === 'model') pointer.current = 0;
+  }, [currentSpeaker]);
+
+  useEffect(() => {
     if (!isConversationModeActive) return;
     if (!selectedConversation || !selectedConversation.messages.length) return;
     if (!segmenter.current) return;
@@ -31,28 +34,33 @@ export const useConversation = () => {
       selectedConversation.messages[selectedConversation.messages.length - 1];
     const subContent = content.substring(pointer.current);
 
-    if (!messageIsStreaming) {
-      // Message is done streaming. Queue the remaining content and reset pointer.
-      if (pointer.current > 0) {
-        // queueSpeech(subContent, 'conversation');
-        pointer.current = 0;
-      }
-      return;
-    }
+    // This line prevents queuing the remaining content more than once.
+    if (pointer.current >= content.length) return;
 
     // Ensure that we have at least 1 complete sentence to process.
     const sentences = Array.from(segmenter.current.segment(subContent));
 
-    if (sentences.length >= 2) {
-      let text = '';
+    if (!messageIsStreaming) {
+      // Message is done streaming. Queue the remaining content and reset pointer.
+      pointer.current += subContent.length;
+      queueMessage(subContent);
+    } else {
+      if (sentences.length >= 2) {
+        let message = '';
 
-      for (let i = 0; i < sentences.length - 1; i++) {
-        const { segment } = sentences[i];
-        text += segment;
+        for (let i = 0; i < sentences.length - 1; i++) {
+          const { segment } = sentences[i];
+          message += segment;
+        }
+
+        pointer.current += message.length;
+        queueMessage(message);
       }
-
-      pointer.current += text.length;
-      // queueSpeech(text, 'conversation');
     }
-  }, [messageIsStreaming, isConversationModeActive, selectedConversation]);
+  }, [
+    messageIsStreaming,
+    selectedConversation,
+    isConversationModeActive,
+    queueMessage,
+  ]);
 };
