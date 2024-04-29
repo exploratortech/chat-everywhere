@@ -6,6 +6,8 @@ import {
 } from '@/utils/server/auth';
 import { getBucket } from '@/utils/server/gcpBucket';
 
+import { v4 as uuidv4 } from 'uuid';
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -24,14 +26,18 @@ export default async function handler(
   if (!userProfile || !userProfile.isTeacherAccount)
     return unauthorizedResponse;
   const folderPath = userProfile.id;
-  const fileWithPath = `${folderPath}/${fileName}`;
+  const randomUUID = uuidv4();
+  const fileWithPath = `${folderPath}/${fileName}_${randomUUID}`;
 
   const bucket = await getBucket();
   const file = bucket.file(fileWithPath);
 
   const options = {
     expires: Date.now() + 5 * 60 * 1000,
-    fields: { 'x-goog-meta-user-id': userProfile.id },
+    fields: {
+      'x-goog-meta-user-id': userProfile.id,
+      'x-goog-meta-file-name': fileName,
+    },
   };
   const [response] = await file.generateSignedPostPolicyV4(options);
   return res.status(200).json(response);

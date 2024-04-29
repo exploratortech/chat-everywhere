@@ -4,6 +4,7 @@ import {
 } from '@/utils/server/auth';
 import { getAccessToken } from '@/utils/server/google/auth';
 
+import { UserFile } from '@/types/file';
 import { StorageObject } from '@/types/google-storage';
 
 export const config = {
@@ -32,8 +33,14 @@ export default async function handler(req: Request) {
       if (!response.ok) {
         throw new Error(data.error.message);
       }
-      const files = data.items as StorageObject[];
-      return new Response(JSON.stringify({ files }), {
+      const files = (data.items || []) as StorageObject[];
+      const userFiles: UserFile[] = files.map((file) => ({
+        id: file.id,
+        filename: file.metadata['file-name'],
+        filetype: file.contentType,
+        timeCreated: file.timeCreated,
+      }));
+      return new Response(JSON.stringify({ files: userFiles }), {
         status: 200,
       });
     } catch (err) {

@@ -1,5 +1,6 @@
 interface Metadata {
   'user-id': string;
+  'file-name': string;
 }
 
 export interface StorageObject {

@@ -1,20 +1,16 @@
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useQuery } from '@tanstack/react-query';
-import React, { useContext } from 'react';
+import React from 'react';
 
 import { useFetchFileList } from '@/hooks/useFetchFileList';
 
-import { StorageObject } from '@/types/google-storage';
-
-import HomeContext from '@/components/home/home.context';
-
 const FileList = () => {
-  const { data: userFiles, isFetching } = useFetchFileList();
+  const { data: userFiles } = useFetchFileList();
   return (
     <div>
       FileList
       {userFiles &&
-        userFiles.map((file) => <div key={file.name}>{file.name}</div>)}
+        userFiles.map((file, index) => (
+          <div key={`${file.id}-${index}`}>{file.filename}</div>
+        ))}
     </div>
   );
 };

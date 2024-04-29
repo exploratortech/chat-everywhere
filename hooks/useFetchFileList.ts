@@ -2,7 +2,7 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useQuery } from '@tanstack/react-query';
 import { useContext } from 'react';
 
-import { StorageObject } from '@/types/google-storage';
+import { UserFile } from '@/types/file';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -23,11 +23,12 @@ export const useFetchFileList = () => {
       throw new Error('Network response was not ok');
     }
     const data = await response.json();
-    return data.files as StorageObject[];
+    return data.files as UserFile[];
   };
 
   return useQuery(['gcp-files', user?.id], fetchFileList, {
     keepPreviousData: true,
+    staleTime: 1000 * 60 * 5, // 5 minutes
     onError: (error) => {
       console.error('There was a problem with your fetch operation:', error);
     },
