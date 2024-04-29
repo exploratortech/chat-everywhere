@@ -12,6 +12,7 @@ import {
 
 import { useTranslation } from 'next-i18next';
 
+import { useFileList } from '@/hooks/chatInput/useFileList';
 import { usePromptList } from '@/hooks/chatInput/usePromptList';
 import useDisplayAttribute from '@/hooks/useDisplayAttribute';
 import useFocusHandler from '@/hooks/useFocusInputHandler';
@@ -19,6 +20,7 @@ import useFocusHandler from '@/hooks/useFocusInputHandler';
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
 
+import { UserFile } from '@/types/UserFile';
 import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
@@ -28,6 +30,7 @@ import HomeContext from '@/components/home/home.context';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../Voice/VoiceInputButton';
+import { FileList } from './FileList';
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
@@ -67,6 +70,14 @@ export const ChatInput = ({
     filteredPrompts,
     updatePromptListVisibility,
   } = usePromptList({ originalPrompts });
+  const {
+    showFileList,
+    setShowFileList,
+    activeFileIndex,
+    setActiveFileIndex,
+    filteredFiles,
+    updateFileListVisibility,
+  } = useFileList();
 
   const [content, setContent] = useState<string>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -74,6 +85,7 @@ export const ChatInput = ({
   const [variables, setVariables] = useState<string[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const promptListRef = useRef<HTMLUListElement | null>(null);
+  const fileListRef = useRef<HTMLUListElement | null>(null);
 
   const { isFocused, setIsFocused, menuRef } = useFocusHandler(textareaRef);
   const [isOverTokenLimit, setIsOverTokenLimit] = useState(false);
@@ -94,6 +106,7 @@ export const ChatInput = ({
 
     setContent(value);
     updatePromptListVisibility(value);
+    updateFileListVisibility(value);
   };
 
   const handleSend = () => {
@@ -183,6 +196,31 @@ export const ChatInput = ({
       } else {
         setActivePromptIndex(0);
       }
+    } else if (showFileList) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveFileIndex((prevIndex) =>
+          prevIndex < filteredFiles.length - 1 ? prevIndex + 1 : prevIndex,
+        );
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveFileIndex((prevIndex) =>
+          prevIndex > 0 ? prevIndex - 1 : prevIndex,
+        );
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        setActiveFileIndex((prevIndex) =>
+          prevIndex < filteredFiles.length - 1 ? prevIndex + 1 : 0,
+        );
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        handleFileSelect(filteredFiles[activeFileIndex]);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowFileList(false);
+      } else {
+        setActiveFileIndex(0);
+      }
     } else if (e.key === 'Enter' && !isTyping && !isMobile() && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -203,6 +241,23 @@ export const ChatInput = ({
     return foundVariables;
   };
 
+  const handleFileSelect = (file: UserFile) => {
+    const existingFiles = currentMessage?.fileList || [];
+    const isFileAlreadyIncluded = existingFiles.some(
+      (existingFile) => existingFile.id === file.id,
+    );
+
+    if (!isFileAlreadyIncluded) {
+      homeDispatch({
+        field: 'currentMessage',
+        value: {
+          ...currentMessage,
+          fileList: [...existingFiles, file],
+        },
+      });
+    }
+    setShowFileList(false);
+  };
   const handlePromptSelect = (prompt: Prompt) => {
     const parsedVariables = parseVariables(prompt.content);
     setVariables(parsedVariables);
@@ -433,6 +488,17 @@ export const ChatInput = ({
                 onSelect={handleInitModal}
                 onMouseOver={setActivePromptIndex}
                 promptListRef={promptListRef}
+              />
+            </div>
+          )}
+          {showFileList && filteredFiles.length > 0 && (
+            <div className="absolute bottom-12 w-full z-20">
+              <FileList
+                fileListRef={fileListRef}
+                activeFileIndex={activeFileIndex}
+                files={filteredFiles}
+                onSelect={handleFileSelect}
+                onMouseOver={setActiveFileIndex}
               />
             </div>
           )}
