@@ -35,6 +35,7 @@ import { FeedbackContainer } from './FeedbackContainer';
 import { LineShareButton } from './LineShareButton';
 import { SpeechButton } from './SpeechButton';
 import StudentShareMessageButton from './StudentShareMessageButton';
+import UserFileItem from './UserFileItem';
 
 interface Props {
   message: Message;
@@ -306,6 +307,12 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <>
+                    <div className="flex flex-row gap-2">
+                      {message.fileList &&
+                        message.fileList.map((file) => {
+                          return <UserFileItem key={file.id} file={file} />;
+                        })}
+                    </div>
                     <div className="prose whitespace-pre-wrap dark:prose-invert">
                       {message.content}
                     </div>
