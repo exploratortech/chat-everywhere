@@ -4,7 +4,7 @@ import {
 } from '@/utils/server/auth';
 import { getAccessToken } from '@/utils/server/google/auth';
 
-import { UserFile } from '@/types/file';
+import { UserFile } from '@/types/UserFile';
 import { StorageObject } from '@/types/google-storage';
 
 export const config = {
@@ -39,6 +39,7 @@ export default async function handler(req: Request) {
         filename: file.metadata['file-name'],
         filetype: file.contentType,
         timeCreated: file.timeCreated,
+        objectPath: file.name,
       }));
       return new Response(JSON.stringify({ files: userFiles }), {
         status: 200,
