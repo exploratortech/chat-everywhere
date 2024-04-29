@@ -76,7 +76,8 @@ export default function FilePortalModel({ onClose }: Props) {
 }
 
 const UploadFileComponent = () => {
-  const uploadFile = useFileUpload();
+  const uploadFileMutation = useFileUpload();
+  const { mutateAsync: uploadFile } = uploadFileMutation;
   const fileInputRef = useRef<HTMLInputElement>(null); // Added a ref to the input
 
   const handleFileSelect = async (file: File | null) => {
@@ -88,7 +89,7 @@ const UploadFileComponent = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    const uploadOk = await uploadFile(file.name, file);
+    const uploadOk = await uploadFile({ filename: file.name, file });
 
     if (uploadOk) {
       console.log('Upload successful');
