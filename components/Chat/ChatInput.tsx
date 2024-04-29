@@ -2,7 +2,6 @@ import { IconPlayerStop, IconRepeat, IconSend } from '@tabler/icons-react';
 import {
   KeyboardEvent,
   MutableRefObject,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -13,6 +12,7 @@ import {
 
 import { useTranslation } from 'next-i18next';
 
+import { usePromptList } from '@/hooks/chatInput/usePromptList';
 import useDisplayAttribute from '@/hooks/useDisplayAttribute';
 import useFocusHandler from '@/hooks/useFocusInputHandler';
 
@@ -59,12 +59,18 @@ export const ChatInput = ({
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
+  const {
+    showPromptList,
+    setShowPromptList,
+    activePromptIndex,
+    setActivePromptIndex,
+    filteredPrompts,
+    updatePromptListVisibility,
+  } = usePromptList({ originalPrompts });
 
   const [content, setContent] = useState<string>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const [showPromptList, setShowPromptList] = useState(false);
-  const [activePromptIndex, setActivePromptIndex] = useState(0);
-  const [promptInputValue, setPromptInputValue] = useState('');
+
   const [variables, setVariables] = useState<string[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const promptListRef = useRef<HTMLUListElement | null>(null);
@@ -76,10 +82,6 @@ export const ChatInput = ({
   const prompts = useMemo(() => {
     return getNonDeletedCollection(originalPrompts);
   }, [originalPrompts]);
-
-  const filteredPrompts = prompts.filter((prompt) =>
-    prompt.name.toLowerCase().includes(promptInputValue.toLowerCase()),
-  );
 
   const enhancedMenuDisplayValue = useDisplayAttribute(menuRef);
 
@@ -200,18 +202,6 @@ export const ChatInput = ({
 
     return foundVariables;
   };
-
-  const updatePromptListVisibility = useCallback((text: string) => {
-    const match = text.match(/\/\w*$/);
-
-    if (match) {
-      setShowPromptList(true);
-      setPromptInputValue(match[0].slice(1));
-    } else {
-      setShowPromptList(false);
-      setPromptInputValue('');
-    }
-  }, []);
 
   const handlePromptSelect = (prompt: Prompt) => {
     const parsedVariables = parseVariables(prompt.content);
@@ -344,10 +334,10 @@ export const ChatInput = ({
           )}
 
         <div
-          className={`relative mx-2 flex w-full flex-grow flex-col rounded-md 
-            border bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] 
-            dark:bg-[#40414F] dark:text-white 
-            dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4 
+          className={`relative mx-2 flex w-full flex-grow flex-col rounded-md
+            border bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)]
+            dark:bg-[#40414F] dark:text-white
+            dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4
             ${
               isOverTokenLimit && !isSpeechRecognitionActive
                 ? '!border-red-500 dark:!border-red-600'
