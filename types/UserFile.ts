@@ -3,4 +3,5 @@ export interface UserFile {
   filename: string;
   filetype: string;
   timeCreated: string;
+  objectPath: string;
 }
