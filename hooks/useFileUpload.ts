@@ -1,12 +1,18 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useContext } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
+
+import HomeContext from '@/components/home/home.context';
 
 export function useFileUpload() {
   const supabase = useSupabaseClient();
   const { t: commonT } = useTranslation('common');
   const queryClient = useQueryClient();
+  const {
+    state: { user },
+  } = useContext(HomeContext);
 
   const uploadFileMutation = useMutation(
     async ({ filename, file }: { filename: string; file: File }) => {
@@ -39,7 +45,7 @@ export function useFileUpload() {
         toast.error(commonT('File upload failed'));
       },
       onSettled: () => {
-        // queryClient.invalidateQueries([queryKey]);
+        queryClient.invalidateQueries(['gcp-files', user?.id]);
       },
     },
   );
