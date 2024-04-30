@@ -4,9 +4,8 @@ import React, { Fragment, useContext, useRef, useState } from 'react';
 
 import { useFileUpload } from '@/hooks/useFileUpload';
 
+import { FileListGridView } from '@/components/FileListGridView';
 import HomeContext from '@/components/home/home.context';
-
-import FileList from './FileList';
 
 type Props = {
   onClose: () => void;
@@ -60,8 +59,8 @@ export default function FilePortalModel({ onClose }: Props) {
                         <UploadFileComponent />
                       </div>
 
-                      <div className="p-4">
-                        <FileList />
+                      <div className="py-4">
+                        <FileListGridView />
                       </div>
                     </div>
                   </div>
