@@ -17,7 +17,6 @@ const origin = (() => {
 
 const responseHeader = 'Content-Type';
 const maxAgeSeconds = 36000;
-const method = 'GET';
 
 const storage = new Storage({
   projectId: PROJECT_ID,
@@ -29,14 +28,14 @@ const storage = new Storage({
 const bucket = storage.bucket(BUCKET_NAME);
 async function getBucketMetadata() {
   const [metadata] = await bucket.getMetadata();
-
-  // console.log(JSON.stringify(metadata, null, 2));
+  // FOR DEBUG
+  console.log(JSON.stringify(metadata, null, 2));
 }
 async function configureBucketCors() {
   await bucket.setCorsConfiguration([
     {
       maxAgeSeconds,
-      method: [method, 'POST'],
+      method: ['GET', 'POST'],
       origin: [origin],
       responseHeader: [responseHeader],
     },
