@@ -43,32 +43,31 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
     isMicrophoneDisabled,
   } = useCognitiveService();
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameId = useRef<number>();
   const byteArray = useRef<Uint8Array>(new Uint8Array());
 
   const draw = useCallback(
     (node: AnalyserNode): void => {
-      if (!canvasRef.current) return;
-      const ctx = canvasRef.current.getContext(
-        '2d',
-      ) as CanvasRenderingContext2D;
-      const largestValue = getLargestValue(byteArray.current);
+      const ctx = canvasRef.current?.getContext('2d');
+      if (ctx) {
+        const largestValue = getLargestValue(byteArray.current);
 
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.strokeStyle = lightMode === 'dark' ? '#ffffff' : '#71717a';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(
-        ctx.canvas.width / 2,
-        ctx.canvas.height / 2,
-        ((ctx.canvas.width - 2) / 2) * (largestValue / 255),
-        0,
-        2 * Math.PI,
-      );
-      ctx.stroke();
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.strokeStyle = lightMode === 'dark' ? '#ffffff' : '#71717a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(
+          ctx.canvas.width / 2,
+          ctx.canvas.height / 2,
+          ((ctx.canvas.width - 2) / 2) * (largestValue / 255),
+          0,
+          2 * Math.PI,
+        );
+        ctx.stroke();
 
-      node.getByteFrequencyData(byteArray.current);
+        node.getByteFrequencyData(byteArray.current);
+      }
       animationFrameId.current = requestAnimationFrame(() => draw(node));
     },
     [lightMode],
@@ -88,9 +87,15 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
       );
     }
 
+    const ctx = canvasRef.current?.getContext('2d');
+
     return () => {
-      if (animationFrameId.current)
+      if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
+      }
+      if (ctx) {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      }
     };
   }, [audioStream, draw, loadingStt]);
 
