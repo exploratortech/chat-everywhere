@@ -1,7 +1,7 @@
 import { IconDownload, IconMessagePlus, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
-import { useFetchFileList } from '@/hooks/useFetchFileList';
+import { useFetchFileList } from '@/hooks/file/useFetchFileList';
 
 import { Button } from '@/components/ui/button';
 
