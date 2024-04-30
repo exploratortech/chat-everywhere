@@ -8,8 +8,6 @@ import { useFileUpload } from '@/hooks/useFileUpload';
 import { FileListGridView } from '@/components/FileListGridView';
 import { Button } from '@/components/ui/button';
 
-import HomeContext from '@/components/home/home.context';
-
 type Props = {
   onClose: () => void;
 };
