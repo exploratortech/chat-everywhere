@@ -3,7 +3,7 @@ import { IconX } from '@tabler/icons-react';
 import { IconUpload } from '@tabler/icons-react';
 import React, { Fragment, useRef } from 'react';
 
-import { useFileUpload } from '@/hooks/useFileUpload';
+import { useFileUpload } from '@/hooks/file/useFileUpload';
 
 import { FileListGridView } from '@/components/FileListGridView';
 import { Button } from '@/components/ui/button';

@@ -1,6 +1,7 @@
 import { IconDownload, IconMessagePlus, IconTrash } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 
+import { useDeleteObject } from '@/hooks/file/useDeleteObject';
 import { useFetchFileList } from '@/hooks/file/useFetchFileList';
 
 import { Button } from '@/components/ui/button';
@@ -45,10 +46,7 @@ export function FileListGridView() {
                       <AddToChatIcon />
                       <span className="sr-only">AddToChat</span>
                     </Button>
-                    <Button size="icon" variant="ghost">
-                      <TrashIcon />
-                      <span className="sr-only">Delete</span>
-                    </Button>
+                    <TrashButton objectPath={file.objectPath} />
                   </div>
                 </div>
               </div>
@@ -82,8 +80,14 @@ function AddToChatIcon() {
   return <IconMessagePlus />;
 }
 
-function TrashIcon() {
-  return <IconTrash />;
+function TrashButton({ objectPath }: { objectPath: string }) {
+  const { mutateAsync: deleteFile } = useDeleteObject();
+  return (
+    <Button size="icon" variant="ghost" onClick={() => deleteFile(objectPath)}>
+      <IconTrash />
+      <span className="sr-only">Delete</span>
+    </Button>
+  );
 }
 
 const formatFileSize = (sizeInBytes: string) => {
