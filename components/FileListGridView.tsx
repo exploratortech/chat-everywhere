@@ -1,9 +1,5 @@
-import {
-  IconDownload,
-  IconFile,
-  IconMessagePlus,
-  IconTrash,
-} from '@tabler/icons-react';
+import { IconDownload, IconMessagePlus, IconTrash } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 
 import { useFetchFileList } from '@/hooks/useFetchFileList';
 
@@ -12,6 +8,9 @@ import { Button } from '@/components/ui/button';
 import UserFileItemIcon from './Chat/UserFileItemIcon';
 
 import dayjs from 'dayjs';
+import 'dayjs/locale/en';
+import 'dayjs/locale/zh-cn';
+import 'dayjs/locale/zh-tw';
 
 export function FileListGridView() {
   const { data: userFiles } = useFetchFileList();
@@ -34,7 +33,7 @@ export function FileListGridView() {
                     {file.filename}
                   </div>
                   <div className="text-neutral-400 text-sm text-center">
-                    {dayjs(file.timeCreated).format('YYYY-MM-DD')} -{' '}
+                    <RelativeTimeComponent time={file.timeCreated} /> -{' '}
                     {formatFileSize(file.size)}
                   </div>
                   <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity mt-4">
@@ -60,12 +59,23 @@ export function FileListGridView() {
   );
 }
 
+const RelativeTimeComponent = ({ time }: { time: string }) => {
+  const { i18n } = useTranslation();
+
+  switch (i18n.language) {
+    case 'zh-Hant':
+    case 'zh':
+      return <span>{dayjs(time).locale('zh-tw').fromNow()}</span>;
+    case 'zh-Hans':
+    case 'cn':
+      return <span>{dayjs(time).locale('zh-cn').fromNow()}</span>;
+    default:
+      return <span>{dayjs(time).locale('en').fromNow()}</span>;
+  }
+};
+
 function DownloadIcon() {
   return <IconDownload />;
-}
-
-function FileIcon() {
-  return <IconFile />;
 }
 
 function AddToChatIcon() {
