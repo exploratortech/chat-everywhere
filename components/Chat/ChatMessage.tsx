@@ -23,6 +23,7 @@ import { updateConversation } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
 import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 
+import { UserFile } from '@/types/UserFile';
 import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
@@ -97,6 +98,53 @@ export const ChatMessage: FC<Props> = memo(
       });
     };
 
+    const removeFileFromMessages = (
+      messages: Message[],
+      fileToRemove: UserFile,
+    ): Message[] | null => {
+      const messageIndex = messages.findIndex((m) => m === message);
+      if (messageIndex === -1) return null;
+
+      const updatedFiles =
+        messages[messageIndex].fileList?.filter(
+          (f) => f.id !== fileToRemove.id,
+        ) || [];
+      if (messages[messageIndex].fileList?.length === updatedFiles.length)
+        return null;
+
+      const updatedMessage = {
+        ...messages[messageIndex],
+        fileList: updatedFiles,
+      };
+
+      return [
+        ...messages.slice(0, messageIndex),
+        updatedMessage,
+        ...messages.slice(messageIndex + 1),
+      ];
+    };
+
+    const handleFileRemove = (file: UserFile) => {
+      if (!selectedConversation) return;
+
+      const updatedMessages = removeFileFromMessages(
+        selectedConversation.messages,
+        file,
+      );
+      if (!updatedMessages) return; // If no update is needed, exit early
+
+      const updatedConversation = {
+        ...selectedConversation,
+        messages: updatedMessages,
+      };
+
+      const { single, all } = updateConversation(
+        updatedConversation,
+        conversations,
+      );
+      homeDispatch({ field: 'selectedConversation', value: single });
+      homeDispatch({ field: 'conversations', value: all });
+    };
     const handleDeleteMessage = () => {
       if (!selectedConversation) return;
 
@@ -307,14 +355,20 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <>
+                    <div className="prose whitespace-pre-wrap dark:prose-invert">
+                      {message.content}
+                    </div>
                     <div className="flex flex-row gap-2">
                       {message.fileList &&
                         message.fileList.map((file) => {
-                          return <UserFileItem key={file.id} file={file} />;
+                          return (
+                            <UserFileItem
+                              key={file.id}
+                              file={file}
+                              onRemove={() => handleFileRemove(file)}
+                            />
+                          );
                         })}
-                    </div>
-                    <div className="prose whitespace-pre-wrap dark:prose-invert">
-                      {message.content}
                     </div>
                     {!isEditing && (
                       <div className="flex flex-row items-center mt-3 w-full">
