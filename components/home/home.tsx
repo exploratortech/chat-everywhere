@@ -169,7 +169,7 @@ const Home = () => {
         />
         <Promptbar />
       </div>
-      <VoiceInputActiveOverlay />
+      <VoiceInputActiveOverlay interactable />
     </main>
   );
 };

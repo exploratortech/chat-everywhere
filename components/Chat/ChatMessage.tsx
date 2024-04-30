@@ -30,6 +30,7 @@ import { PluginID } from '@/types/plugin';
 import TokenCounter from './components/TokenCounter';
 import HomeContext from '@/components/home/home.context';
 
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 import AssistantRespondMessage from './ChatMessage/AssistantRespondMessage';
 import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';
@@ -50,6 +51,8 @@ export const ChatMessage: FC<Props> = memo(
     const { t } = useTranslation('chat');
     const { i18n } = useTranslation();
 
+    const { isConversing } = useCognitiveService();
+
     const {
       state: { isTempUser, selectedConversation, conversations },
       dispatch: homeDispatch,
@@ -63,6 +66,14 @@ export const ChatMessage: FC<Props> = memo(
         !messageIsStreaming
       );
     }, [messageIndex, messageIsStreaming, selectedConversation]);
+
+    const highlight = useMemo(
+      () =>
+        selectedConversation &&
+        selectedConversation.messages.length - 1 === messageIndex &&
+        isConversing,
+      [selectedConversation, messageIndex, isConversing],
+    );
 
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -182,9 +193,9 @@ export const ChatMessage: FC<Props> = memo(
         const text = window.getSelection()?.toString();
         setSelectedText(text || '');
       };
-    
+
       document.addEventListener('selectionchange', logSelection);
-    
+
       return () => {
         document.removeEventListener('selectionchange', logSelection);
       };
@@ -405,15 +416,23 @@ export const ChatMessage: FC<Props> = memo(
                         >
                           <IconTrash size={18} />
                         </button>
-                        <LineShareButton 
-                        messageContent={selectedText !== '' ? selectedText : message.content} 
-                        isSelectedText = { selectedText !== '' ? true : false}
+                        <LineShareButton
+                          messageContent={
+                            selectedText !== '' ? selectedText : message.content
+                          }
+                          isSelectedText={selectedText !== '' ? true : false}
                         />
                         {isStudentAccount && (
                           <div className="ml-2 flex items-center">
                             <StudentShareMessageButton
-                              messageContent={selectedText !== '' ? selectedText : message.content}
-                              isSelectedText = { selectedText !== '' ? true : false}
+                              messageContent={
+                                selectedText !== ''
+                                  ? selectedText
+                                  : message.content
+                              }
+                              isSelectedText={
+                                selectedText !== '' ? true : false
+                              }
                             />
                           </div>
                         )}
@@ -424,12 +443,21 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
-                <div className="flex flex-row justify-between">
-                    <AssistantRespondMessage
-                      formattedMessage={formattedMessage}
-                      messageIndex={messageIndex}
-                      messagePluginId={message.pluginId}
-                    />
+                <div className="relative flex flex-row justify-between">
+                  <AssistantRespondMessage
+                    formattedMessage={formattedMessage}
+                    messageIndex={messageIndex}
+                    messagePluginId={message.pluginId}
+                  />
+                  {highlight && (
+                    <div className="absolute z-[1100] -left-2 -top-2 -right-2 -bottom-2 p-2 dark:bg-[#444654] rounded-lg">
+                      <AssistantRespondMessage
+                        formattedMessage={formattedMessage}
+                        messageIndex={messageIndex}
+                        messagePluginId={message.pluginId}
+                      />
+                    </div>
+                  )}
                   <div className="flex m-1 tablet:hidden">
                     <CopyButton />
                   </div>
@@ -457,14 +485,24 @@ export const ChatMessage: FC<Props> = memo(
                       !messageIsStreaming && (
                         <>
                           <LineShareButton
-                            messageContent={selectedText !== '' ? selectedText : message.content}
-                            isSelectedText = { selectedText !== '' ? true : false }
+                            messageContent={
+                              selectedText !== ''
+                                ? selectedText
+                                : message.content
+                            }
+                            isSelectedText={selectedText !== '' ? true : false}
                             className="ml-2"
                           />
                           {isStudentAccount && (
                             <StudentShareMessageButton
-                              messageContent={selectedText !== '' ? selectedText : message.content}
-                              isSelectedText = { selectedText !== '' ? true : false}
+                              messageContent={
+                                selectedText !== ''
+                                  ? selectedText
+                                  : message.content
+                              }
+                              isSelectedText={
+                                selectedText !== '' ? true : false
+                              }
                               className="ml-2"
                             />
                           )}

@@ -27,6 +27,7 @@ import {
 
 type CognitiveServiceContextType = {
   isConversationModeActive: boolean;
+  isConversing: boolean;
   setIsConversationModeActive: (value: boolean) => void;
   currentSpeaker: Speaker | null;
   setSendMessage: (func: Function) => void;
@@ -517,6 +518,7 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
     <CognitiveServiceContext.Provider
       value={{
         isConversationModeActive,
+        isConversing,
         setIsConversationModeActive,
         currentSpeaker,
         setSendMessage,

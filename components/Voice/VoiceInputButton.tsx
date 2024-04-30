@@ -20,7 +20,11 @@ const getLargestValue = (bytes: Uint8Array): number => {
   return largest;
 };
 
-const VoiceInputButton = () => {
+type VoiceInputButtonProps = {
+  onClick?: () => void;
+};
+
+const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
   const { t } = useTranslation('common');
 
   const {
@@ -29,6 +33,7 @@ const VoiceInputButton = () => {
 
   const {
     isConversationModeActive,
+    isConversing,
     toggleConversation,
     startSpeechRecognition,
     stopSpeechRecognition,
@@ -102,6 +107,7 @@ const VoiceInputButton = () => {
   }, [loadingStt, isSpeechRecognitionActive, isMicrophoneDisabled]);
 
   const handleClick = async (e: any): Promise<void> => {
+    if (onClick) onClick();
     if (loadingStt) return;
 
     if (isConversationModeActive) {
@@ -127,17 +133,20 @@ const VoiceInputButton = () => {
         toast.error(t('Please register and sign in to enable voice input'));
       }
     }
+
     e.stopPropagation();
     trackEvent('Voice input button clicked');
   };
-
-  useEffect(() => {}, []);
 
   return (
     <div
       className={`
         w-9 h-9 bg-white dark:bg-[#40414F] rounded-full
-        ${loadingStt || isSpeechRecognitionActive ? 'z-[1100]' : ''}
+        ${
+          loadingStt || isConversing || isSpeechRecognitionActive
+            ? 'z-[1100]'
+            : ''
+        }
       `}
     >
       <div className="relative">

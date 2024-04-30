@@ -27,7 +27,7 @@ type EnhancedMenuProps = {
 const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
   ({ isFocused }, ref) => {
     const {
-      state: { messageIsStreaming, currentMessage, isSpeechRecognitionActive },
+      state: { messageIsStreaming, currentMessage },
     } = useContext(HomeContext);
 
     const shouldShow = useMemo(() => {

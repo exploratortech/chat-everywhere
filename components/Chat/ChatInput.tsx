@@ -36,6 +36,8 @@ import { PromptList } from './PromptList';
 import UserFileItem from './UserFileItem';
 import { VariableModal } from './VariableModal';
 
+import { cn } from '@/lib/utils';
+
 interface Props {
   onSend: (currentMessage: Message) => void;
   onRegenerate: () => void;
@@ -79,8 +81,12 @@ export const ChatInput = ({
     updateFileListVisibility,
   } = useFileList();
 
-  const { setSendMessage, speechContent, isSpeechRecognitionActive } =
-    useCognitiveService();
+  const {
+    isConversing,
+    setSendMessage,
+    speechContent,
+    isSpeechRecognitionActive,
+  } = useCognitiveService();
 
   const [content, setContent] = useState<string>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -386,7 +392,12 @@ export const ChatInput = ({
   );
 
   return (
-    <div className="absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#343541] dark:to-[#343541] md:pt-2">
+    <div
+      className={cn(
+        'absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#343541] dark:to-[#343541] md:pt-2',
+        isConversing && 'z-[1200]',
+      )}
+    >
       <div
         className={` ${
           enhancedMenuDisplayValue === 'none'
@@ -410,6 +421,7 @@ export const ChatInput = ({
           )}
 
         {!messageIsStreaming &&
+          !isConversing &&
           selectedConversation &&
           selectedConversation.messages.length > 0 && (
             <button
@@ -443,12 +455,13 @@ export const ChatInput = ({
 
           <div className="flex items-start">
             <div className="flex items-center pt-1 pl-1">
-              <VoiceInputButton />
+              <VoiceInputButton onClick={() => setIsFocused(false)} />
               <button className="rounded-sm p-1 text-zinc-500 dark:text-zinc-400 cursor-default">
                 {getPluginIcon(currentMessage?.pluginId)}
               </button>
             </div>
 
+<<<<<<< HEAD
             <div className="flex flex-col w-full">
               <textarea
                 onFocus={() => setIsFocused(true)}
@@ -516,6 +529,44 @@ export const ChatInput = ({
                   </div>
                 )}
             </div>
+=======
+            <textarea
+              onFocus={() => setIsFocused(true)}
+              ref={textareaRef}
+              className={`
+                m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md
+                ${
+                  isSpeechRecognitionActive || isConversing
+                    ? 'pointer-events-none'
+                    : ''
+                }
+                ${
+                  isOverTokenLimit && isSpeechRecognitionActive
+                    ? 'border !border-red-500 dark:!border-red-600'
+                    : 'border-0'
+                }
+              `}
+              style={{
+                paddingBottom: `${
+                  isCloseToTokenLimit || isOverTokenLimit ? '2.2' : '0.75'
+                }rem `,
+                resize: 'none',
+                bottom: `${textareaRef?.current?.scrollHeight}px`,
+                maxHeight: '400px',
+                overflow: `${
+                  textareaRef.current && textareaRef.current.scrollHeight > 400
+                    ? 'auto'
+                    : 'hidden'
+                }`,
+              }}
+              placeholder={t('Type a message ...') || ''}
+              value={content}
+              rows={1}
+              onKeyUp={(e) => setIsTyping(e.nativeEvent.isComposing)}
+              onChange={handleChange}
+              onKeyDown={handleKeyDown}
+            />
+>>>>>>> a2289073 (Highlight generated message; fix voice input overlay)
           </div>
 
           <TokenCounter
@@ -526,7 +577,7 @@ export const ChatInput = ({
                   ? 'visible'
                   : 'invisible'
               }
-              ${isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : ''}
+              ${isSpeechRecognitionActive ? 'pointer-events-none' : ''}
               absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400
             `}
             value={content}
@@ -534,16 +585,18 @@ export const ChatInput = ({
             setIsCloseToLimit={setIsCloseToTokenLimit}
           />
 
-          <button
-            className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
-            onClick={() => handleSend()}
-          >
-            {messageIsStreaming ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
-            ) : (
-              <IconSend size={18} />
-            )}
-          </button>
+          {!isConversing && (
+            <button
+              className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+              onClick={() => handleSend()}
+            >
+              {messageIsStreaming ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
+              ) : (
+                <IconSend size={18} />
+              )}
+            </button>
+          )}
 
           {showPromptList && filteredPrompts.length > 0 && (
             <div className="absolute bottom-12 w-full z-20">
