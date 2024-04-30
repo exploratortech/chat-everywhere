@@ -45,9 +45,18 @@ export default async function handler(req: Request) {
         objectPath: file.name,
         size: file.size,
       }));
-      return new Response(JSON.stringify({ files: userFiles }), {
-        status: 200,
-      });
+      return new Response(
+        JSON.stringify({
+          files: userFiles.sort(
+            (a, b) =>
+              new Date(b.timeCreated).getTime() -
+              new Date(a.timeCreated).getTime(),
+          ),
+        }),
+        {
+          status: 200,
+        },
+      );
     } catch (err) {
       if (err instanceof Error) {
         return new Response(JSON.stringify(err.message), {
