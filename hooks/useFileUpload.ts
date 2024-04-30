@@ -1,6 +1,6 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -13,6 +13,7 @@ export function useFileUpload() {
   const {
     state: { user },
   } = useContext(HomeContext);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   const uploadFileMutation = useMutation(
     async ({ filename, file }: { filename: string; file: File }) => {
@@ -27,15 +28,39 @@ export function useFileUpload() {
         body: JSON.stringify({ fileName: filename }),
       });
       const { url, fields } = await result.json();
-      const formData = new FormData();
-      Object.entries({ ...fields, file }).forEach(([key, value]) => {
-        formData.append(key, value as string | Blob);
+
+      return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        Object.entries({ ...fields, file }).forEach(([key, value]) => {
+          formData.append(key, value as string | Blob);
+        });
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url);
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(true);
+          } else {
+            reject(xhr.statusText);
+          }
+        };
+        xhr.onerror = () => reject(xhr.statusText);
+
+        // Progress listener
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentage = (event.loaded / event.total) * 100;
+            setUploadProgress(Math.round(percentage));
+          }
+        };
+
+        xhr.onloadend = () => {
+          setUploadProgress(null);
+        };
+
+        xhr.send(formData);
       });
-      const upload = await fetch(url, {
-        method: 'POST',
-        body: formData,
-      });
-      return upload.ok;
     },
     {
       onSuccess: () => {
@@ -50,5 +75,5 @@ export function useFileUpload() {
     },
   );
 
-  return uploadFileMutation;
+  return { uploadFileMutation, uploadProgress };
 }

@@ -8,6 +8,8 @@ import { useFileUpload } from '@/hooks/useFileUpload';
 import { FileListGridView } from '@/components/FileListGridView';
 import { Button } from '@/components/ui/button';
 
+import { UploadProgress } from './UploadProgress';
+
 type Props = {
   onClose: () => void;
 };
@@ -73,7 +75,10 @@ export default function FilePortalModel({ onClose }: Props) {
 
 const UploadFileComponent = () => {
   const uploadFileMutation = useFileUpload();
-  const { mutateAsync: uploadFile } = uploadFileMutation;
+  const {
+    uploadFileMutation: { mutateAsync: uploadFile },
+    uploadProgress,
+  } = uploadFileMutation;
   const fileInputRef = useRef<HTMLInputElement>(null); // Added a ref to the input
 
   const handleFileSelect = async (file: File | null) => {
@@ -103,13 +108,18 @@ const UploadFileComponent = () => {
 
   return (
     <div>
-      <Button
-        className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 bg-neutral-50 text-neutral-900 hover:bg-neutral-50/90 focus:ring-neutral-300"
-        onClick={triggerFileInput}
-      >
-        <IconUpload className="mr-2 h-4 w-4" />
-        Upload
-      </Button>
+      <div className="flex gap-4">
+        <Button
+          className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 bg-neutral-50 text-neutral-900 hover:bg-neutral-50/90 focus:ring-neutral-300"
+          onClick={triggerFileInput}
+        >
+          <IconUpload className="mr-2 h-4 w-4" />
+          Upload
+        </Button>
+        <div className="flex-1">
+          {uploadProgress && <UploadProgress progressNumber={uploadProgress} />}
+        </div>
+      </div>
       <input
         ref={fileInputRef}
         type="file"
