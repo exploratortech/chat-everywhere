@@ -1,10 +1,13 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconX } from '@tabler/icons-react';
-import React, { Fragment, useContext, useRef, useState } from 'react';
+import { IconUpload } from '@tabler/icons-react';
+import React, { Fragment, useRef } from 'react';
 
 import { useFileUpload } from '@/hooks/useFileUpload';
 
 import { FileListGridView } from '@/components/FileListGridView';
+import { Button } from '@/components/ui/button';
+
 import HomeContext from '@/components/home/home.context';
 
 type Props = {
@@ -12,10 +15,6 @@ type Props = {
 };
 
 export default function FilePortalModel({ onClose }: Props) {
-  const {
-    state: { user, isPaidUser },
-  } = useContext(HomeContext);
-
   return (
     <Transition appear show={true} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose} open>
@@ -55,7 +54,7 @@ export default function FilePortalModel({ onClose }: Props) {
                       <div className="text-neutral-200 font-bold">
                         File Portal
                       </div>
-                      <div className="border p-4 rounded-md">
+                      <div className="p-4 ">
                         <UploadFileComponent />
                       </div>
 
@@ -100,11 +99,23 @@ const UploadFileComponent = () => {
     }
   };
 
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div>
+      <Button
+        className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 bg-neutral-50 text-neutral-900 hover:bg-neutral-50/90 focus:ring-neutral-300"
+        onClick={triggerFileInput}
+      >
+        <IconUpload className="mr-2 h-4 w-4" />
+        Upload
+      </Button>
       <input
-        ref={fileInputRef} // Attach the ref to the input
+        ref={fileInputRef}
         type="file"
+        className="hidden"
         onChange={(e) => {
           if (e.target.files && e.target.files[0]) {
             handleFileSelect(e.target.files[0]);

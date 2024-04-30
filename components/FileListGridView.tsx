@@ -26,14 +26,14 @@ export function FileListGridView() {
                 className="border rounded-lg shadow-sm overflow-hidden"
                 title={file.filename}
               >
-                <div className="group h-full hover:bg-neutral-50 dark:hover:bg-neutral-800 p-4 flex flex-col items-center justify-center">
-                  <div className="flex items-center justify-center w-12 h-12 bg-neutral-100 dark:bg-neutral-800 rounded-full mb-4">
+                <div className="group h-full hover:bg-neutral-800 p-4 flex flex-col items-center justify-center">
+                  <div className="flex items-center justify-center w-12 h-12 bg-neutral-800 rounded-full mb-4">
                     <UserFileItemIcon fileType={file.filetype} />
                   </div>
                   <div className="font-medium text-center mb-2 h-[3rem]">
                     {file.filename}
                   </div>
-                  <div className="text-neutral-500 dark:text-neutral-400 text-sm text-center">
+                  <div className="text-neutral-400 text-sm text-center">
                     {dayjs(file.timeCreated).format('YYYY-MM-DD')} -{' '}
                     {formatFileSize(file.size)}
                   </div>
