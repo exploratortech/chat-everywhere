@@ -6,4 +6,4 @@ export const DefaultMonthlyCredits = {
   [PluginID.GPT4]: 50,
   [PluginID.IMAGE_GEN]: 50,
   [PluginID.mqtt]: 0,
-}
+};
