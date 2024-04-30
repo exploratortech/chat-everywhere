@@ -136,80 +136,74 @@ async function callGeminiAPI(
   const access_token = await getAccessToken();
   const url = `https://${API_ENDPOINT}/v1/projects/${PROJECT_ID}/locations/${LOCATION_ID}/publishers/google/models/${MODEL_ID}:streamGenerateContent?alt=sse`;
 
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestPayload),
-    });
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
 
-    if (!response.ok) {
-      const result = await response.json();
-      console.log({ result });
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+  const stream = new ReadableStream({
+    start(controller) {
+      const placeHolder = '[PLACEHOLDER]';
+      controller.enqueue(encoder.encode(placeHolder));
 
-    if (!response.body) {
-      throw new Error('Response body is null');
-    }
+      const intervalId = setInterval(() => {
+        controller.enqueue(encoder.encode(placeHolder));
+      }, 10000);
 
-    const contentType = response.headers.get('Content-Type');
-    // Check if the response is a streaming response
-
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
-
-    const stream = new ReadableStream({
-      async start(controller) {
-        const onParse = async (event: ParsedEvent | ReconnectInterval) => {
-          if (event.type === 'event') {
-            const data = event.data;
-
-            try {
-              if (data === '[DONE]') {
-                controller.close();
-                return;
-              }
-
-              const json = JSON.parse(data) as GenerateContentResponse;
-              json?.candidates?.forEach((item) => {
-                const content = item.content;
-                if (content.role === 'model') {
-                  const text = content.parts.map((part) => part.text).join('');
-                  controller.enqueue(encoder.encode(text));
-                } else {
-                  console.log(
-                    'Unhandled role:',
-                    content.role,
-                    'content:',
-                    content,
-                  );
-                }
-                if (item.finishReason && item.finishReason === 'STOP') {
-                  controller.close();
-                }
-              });
-            } catch (e) {
-              console.error(e);
-              controller.error(e);
-            }
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestPayload),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
-        };
+          return response.body;
+        })
+        .then(async (body) => {
+          const parser = createParser(
+            async (event: ParsedEvent | ReconnectInterval) => {
+              if (event.type === 'event') {
+                const data = event.data;
+                try {
+                  if (data === '[DONE]') {
+                    controller.close();
+                    return;
+                  }
+                  const json = JSON.parse(data) as GenerateContentResponse;
+                  json?.candidates?.forEach((item) => {
+                    const content = item.content;
+                    if (content.role === 'model') {
+                      const text = content.parts
+                        .map((part) => part.text)
+                        .join('');
+                      controller.enqueue(encoder.encode(text));
+                    }
+                    if (item.finishReason && item.finishReason === 'STOP') {
+                      controller.close();
+                      clearInterval(intervalId);
+                    }
+                  });
+                } catch (e) {
+                  console.error(e);
+                  controller.error(e);
+                }
+              }
+            },
+          );
 
-        const parser = createParser(onParse);
+          for await (const chunk of body as any) {
+            parser.feed(decoder.decode(chunk));
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to call Gemini API:', error);
+          controller.error(error);
+        });
+    },
+  });
 
-        for await (const chunk of response.body as any) {
-          parser.feed(decoder.decode(chunk));
-        }
-      },
-    });
-
-    return stream;
-  } catch (error) {
-    console.error('Failed to call Gemini API:', error);
-    return null;
-  }
+  return stream;
 }
