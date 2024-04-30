@@ -5,7 +5,7 @@ const PROJECT_ID = process.env.GCP_PROJECT_ID as string;
 const CLIENT_EMAIL = process.env.GCP_CLIENT_EMAIL as string;
 const PRIVATE_KEY = process.env.GCP_PRIVATE_KEY as string;
 
-const origin = (() => {
+const origin = () => {
   if (process.env.VERCEL_ENV === 'production') {
     return 'https://chateverywhere.app';
   }
@@ -13,7 +13,7 @@ const origin = (() => {
     return 'http://localhost:3000';
   }
   return process.env.VERCEL_URL || 'http://localhost:3000';
-})();
+};
 
 const responseHeader = 'Content-Type';
 const maxAgeSeconds = 36000;
@@ -32,11 +32,14 @@ async function getBucketMetadata() {
   console.log(JSON.stringify(metadata, null, 2));
 }
 async function configureBucketCors() {
+  console.log({
+    settingOrigin: origin(),
+  });
   await bucket.setCorsConfiguration([
     {
       maxAgeSeconds,
       method: ['GET', 'POST'],
-      origin: [origin],
+      origin: [origin()],
       responseHeader: [responseHeader],
     },
   ]);
