@@ -36,10 +36,14 @@ export default async function handler(req: Request) {
       const files = (data.items || []) as StorageObject[];
       const userFiles: UserFile[] = files.map((file) => ({
         id: file.id,
-        filename: file.metadata['file-name'],
+        filename:
+          file.metadata && file.metadata['file-name']
+            ? file.metadata['file-name']
+            : file.name.replace(new RegExp(`^${userProfile.id}/`), ''),
         filetype: file.contentType,
         timeCreated: file.timeCreated,
         objectPath: file.name,
+        size: file.size,
       }));
       return new Response(JSON.stringify({ files: userFiles }), {
         status: 200,
