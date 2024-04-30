@@ -1,19 +1,28 @@
 import { IconDownload, IconMessagePlus, IconTrash } from '@tabler/icons-react';
+import { useContext } from 'react';
+import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { useDeleteObject } from '@/hooks/file/useDeleteObject';
 import { useFetchFileList } from '@/hooks/file/useFetchFileList';
 
+import { UserFile } from '@/types/UserFile';
+
 import { Button } from '@/components/ui/button';
 
 import UserFileItemIcon from './Chat/UserFileItemIcon';
+import HomeContext from './home/home.context';
 
 import dayjs from 'dayjs';
 import 'dayjs/locale/en';
 import 'dayjs/locale/zh-cn';
 import 'dayjs/locale/zh-tw';
 
-export function FileListGridView() {
+export function FileListGridView({
+  closeDialogCallback,
+}: {
+  closeDialogCallback: () => void;
+}) {
   const { data: userFiles } = useFetchFileList();
   return (
     <div className="flex flex-col">
@@ -38,14 +47,13 @@ export function FileListGridView() {
                     {formatFileSize(file.size)}
                   </div>
                   <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity mt-4">
-                    <Button size="icon" variant="ghost">
-                      <DownloadIcon />
-                      <span className="sr-only">Download</span>
-                    </Button>
-                    <Button size="icon" variant="ghost">
-                      <AddToChatIcon />
-                      <span className="sr-only">AddToChat</span>
-                    </Button>
+                    {/* TODO: download button To be done  */}
+                    {/* <DownloadButton /> */}
+                    <AddToChatButton
+                      file={file}
+                      closeDialogCallback={closeDialogCallback}
+                    />
+
                     <TrashButton objectPath={file.objectPath} />
                   </div>
                 </div>
@@ -72,12 +80,52 @@ const RelativeTimeComponent = ({ time }: { time: string }) => {
   }
 };
 
-function DownloadIcon() {
-  return <IconDownload />;
+function DownloadButton() {
+  return (
+    <Button size="icon" variant="ghost">
+      <IconDownload />
+      <span className="sr-only">Download</span>
+    </Button>
+  );
 }
 
-function AddToChatIcon() {
-  return <IconMessagePlus />;
+function AddToChatButton({
+  file,
+  closeDialogCallback,
+}: {
+  file: UserFile;
+  closeDialogCallback: () => void;
+}) {
+  const {
+    state: { currentMessage },
+    dispatch: homeDispatch,
+  } = useContext(HomeContext);
+  const handleAddToChat = () => {
+    const existingFiles = currentMessage?.fileList || [];
+    const isFileAlreadyIncluded = existingFiles.some(
+      (existingFile) => existingFile.id === file.id,
+    );
+
+    if (!isFileAlreadyIncluded) {
+      homeDispatch({
+        field: 'currentMessage',
+        value: {
+          ...currentMessage,
+          fileList: [...existingFiles, file],
+        },
+      });
+      toast.success('File added to current chat');
+      closeDialogCallback();
+    } else {
+      toast.error('File already in current chat');
+    }
+  };
+  return (
+    <Button size="icon" variant="ghost" onClick={handleAddToChat}>
+      <IconMessagePlus />
+      <span className="sr-only">Add to current chat</span>
+    </Button>
+  );
 }
 
 function TrashButton({ objectPath }: { objectPath: string }) {

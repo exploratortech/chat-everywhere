@@ -59,7 +59,7 @@ export default function FilePortalModel({ onClose }: Props) {
                       </div>
 
                       <div className="py-4">
-                        <FileListGridView />
+                        <FileListGridView closeDialogCallback={onClose} />
                       </div>
                     </div>
                   </div>
