@@ -358,7 +358,7 @@ export const ChatMessage: FC<Props> = memo(
                     <div className="prose whitespace-pre-wrap dark:prose-invert">
                       {message.content}
                     </div>
-                    <div className="flex flex-row gap-2">
+                    <div className="flex flex-row gap-2 p-2">
                       {message.fileList &&
                         message.fileList.map((file) => {
                           return (
