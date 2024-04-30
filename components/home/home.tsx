@@ -23,6 +23,7 @@ import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
 
 import FilePortalModel from '../User/File/FilePortalModel';
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 import HomeContext from './home.context';
 
 const Home = () => {
@@ -51,6 +52,8 @@ const Home = () => {
     stopConversationRef,
     dispatch,
   } = useContext(HomeContext);
+
+  const { isConversing } = useCognitiveService();
 
   // ON LOAD --------------------------------------------
 
@@ -169,7 +172,7 @@ const Home = () => {
         />
         <Promptbar />
       </div>
-      <VoiceInputActiveOverlay interactable />
+      <VoiceInputActiveOverlay interactable={isConversing} />
     </main>
   );
 };

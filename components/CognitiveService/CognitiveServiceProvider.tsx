@@ -429,17 +429,15 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
       speechRecognizer.current.recognized = (_, event) => {
         const { reason, text } = event.result;
         if (reason === ResultReason.RecognizedSpeech) {
-          lastSpeechContent = `${lastSpeechContent} ${text}`;
+          lastSpeechContent = `${lastSpeechContent} ${text}`.trim();
           setSpeechContent(lastSpeechContent);
         }
       };
 
       speechRecognizer.current.speechEndDetected = () => {
-        if (!isConversationModeActive) return;
-        if (!sendMessage.current) return;
-        sendMessage.current(true);
-        setCurrentSpeaker('model');
-        stopSpeechRecognition();
+        if (isConversationModeActive) {
+          stopSpeechRecognition();
+        }
       };
 
       speechRecognizer.current.canceled = (_, event) => {
@@ -451,6 +449,12 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
       };
 
       speechRecognizer.current.sessionStopped = () => {
+        // This event doesn't get called when stopContinueRecognitionAsync() is called.
+        // Get's called when the user is no longer speaking.
+        if (isConversationModeActive) {
+          sendMessage.current && sendMessage.current(true);
+          setCurrentSpeaker('model');
+        }
         stopSpeechRecognition();
       };
 
@@ -489,6 +493,7 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
       ]);
     } else {
       // Will execute a useEffect callback that invokes startSpeechRecognition().
+      setSpeechContent('');
       setCurrentSpeaker('user');
     }
 

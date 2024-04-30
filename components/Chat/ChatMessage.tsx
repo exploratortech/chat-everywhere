@@ -454,7 +454,7 @@ export const ChatMessage: FC<Props> = memo(
                     messagePluginId={message.pluginId}
                   />
                   {highlight && (
-                    <div className="absolute z-[1100] -left-2 -top-2 -right-2 -bottom-2 p-2 dark:bg-[#444654] rounded-lg pointer-events-auto">
+                    <div className="absolute z-[1100] -left-2 -top-2 -right-2 -bottom-2 p-2 dark:bg-[#444654] rounded-lg">
                       <AssistantRespondMessage
                         formattedMessage={formattedMessage}
                         messageIndex={messageIndex}
