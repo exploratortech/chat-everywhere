@@ -242,6 +242,8 @@ export const ChatInput = ({
   };
 
   const handleFileSelect = (file: UserFile) => {
+    const selectedFile = filteredFiles[activeFileIndex];
+    console.log({ selectedFile });
     const existingFiles = currentMessage?.fileList || [];
     const isFileAlreadyIncluded = existingFiles.some(
       (existingFile) => existingFile.id === file.id,
@@ -256,6 +258,10 @@ export const ChatInput = ({
         },
       });
     }
+    setContent((prevContent) => {
+      const newContent = prevContent?.replace(/\@\w*$/, '');
+      return newContent;
+    });
     setShowFileList(false);
   };
   const handlePromptSelect = (prompt: Prompt) => {
