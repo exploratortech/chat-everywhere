@@ -39,6 +39,8 @@ import { SpeechButton } from './SpeechButton';
 import StudentShareMessageButton from './StudentShareMessageButton';
 import UserFileItem from './UserFileItem';
 
+import { cn } from '@/lib/utils';
+
 interface Props {
   message: Message;
   messageIndex: number;
@@ -277,11 +279,13 @@ export const ChatMessage: FC<Props> = memo(
 
     return (
       <div
-        className={`group px-4 ${
+        className={cn(
+          'group px-4',
           message.role === 'assistant'
             ? 'border-b border-black/10 bg-gray-50 text-gray-800 dark:border-gray-900/50 dark:bg-[#444654] dark:text-gray-100'
-            : 'border-b border-black/10 bg-white text-gray-800 dark:border-gray-900/50 dark:bg-[#343541] dark:text-gray-100'
-        }`}
+            : 'border-b border-black/10 bg-white text-gray-800 dark:border-gray-900/50 dark:bg-[#343541] dark:text-gray-100',
+          isConversing && 'pointer-events-none',
+        )}
         style={{
           overflowWrap: 'anywhere',
         }}
@@ -450,7 +454,7 @@ export const ChatMessage: FC<Props> = memo(
                     messagePluginId={message.pluginId}
                   />
                   {highlight && (
-                    <div className="absolute z-[1100] -left-2 -top-2 -right-2 -bottom-2 p-2 dark:bg-[#444654] rounded-lg">
+                    <div className="absolute z-[1100] -left-2 -top-2 -right-2 -bottom-2 p-2 dark:bg-[#444654] rounded-lg pointer-events-auto">
                       <AssistantRespondMessage
                         formattedMessage={formattedMessage}
                         messageIndex={messageIndex}
