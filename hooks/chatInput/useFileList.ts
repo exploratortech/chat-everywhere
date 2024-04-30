@@ -14,16 +14,24 @@ export const useFileList = () => {
     );
   }, [files, fileInputValue]);
 
-  const updateFileListVisibility = useCallback((text: string) => {
-    const match = text.match(/@\w*$/);
-    if (match) {
-      setShowFileList(true);
-      setFileInputValue(match[0].slice(1));
-    } else {
-      setShowFileList(false);
-      setFileInputValue('');
-    }
-  }, []);
+  const updateFileListVisibility = useCallback(
+    (text: string) => {
+      const match = text.match(/@\w*$/);
+      if (match) {
+        const searchText = match[0].slice(1).toLowerCase();
+        const isFilePresent =
+          files?.some((file) =>
+            file.filename.toLowerCase().includes(searchText),
+          ) ?? false;
+        setShowFileList(isFilePresent);
+        setFileInputValue(searchText);
+      } else {
+        setShowFileList(false);
+        setFileInputValue('');
+      }
+    },
+    [files],
+  );
 
   return {
     showFileList,
