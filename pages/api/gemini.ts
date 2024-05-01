@@ -29,8 +29,10 @@ export const config = {
 
 const BUCKET_NAME = process.env.GCP_CHAT_WITH_DOCUMENTS_BUCKET_NAME as string;
 const PROJECT_ID = process.env.GCP_PROJECT_ID as string;
-const API_ENDPOINT = 'us-east1-aiplatform.googleapis.com';
-const LOCATION_ID = 'us-east1';
+// const API_ENDPOINT = 'us-east1-aiplatform.googleapis.com';
+// const LOCATION_ID = 'us-east1';
+const API_ENDPOINT = 'asia-east1-aiplatform.googleapis.com';
+const LOCATION_ID = 'asia-east1';
 const MODEL_ID = 'gemini-1.5-pro-preview-0409';
 
 const handler = async (req: Request): Promise<Response> => {
@@ -167,6 +169,10 @@ async function callGeminiAPI(
             async (event: ParsedEvent | ReconnectInterval) => {
               if (event.type === 'event') {
                 const data = event.data;
+                console.log('--------GEMINI data START------------');
+                console.log(data);
+                console.log('--------GEMINI data END------------');
+
                 try {
                   if (data === '[DONE]') {
                     controller.close();
