@@ -101,7 +101,15 @@ const UploadFileComponent = () => {
 
   const handleFileSelect = async (file: File | null) => {
     if (!file) {
-      console.error('No file selected.');
+      alert('No file selected.');
+      return;
+    }
+
+    const maxFileSize = 52428800; // 50 MB in bytes
+
+    // Check file Size
+    if (file.size > maxFileSize) {
+      alert('File size exceeds the maximum limit of 50 MB.');
       return;
     }
 
