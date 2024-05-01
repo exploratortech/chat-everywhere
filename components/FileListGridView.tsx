@@ -7,6 +7,7 @@ import { useDeleteObject } from '@/hooks/file/useDeleteObject';
 import { useFetchFileList } from '@/hooks/file/useFetchFileList';
 
 import { UserFile } from '@/types/UserFile';
+import { PluginID } from '@/types/plugin';
 
 import { Button } from '@/components/ui/button';
 
@@ -39,7 +40,7 @@ export function FileListGridView({
                   <div className="flex items-center justify-center w-12 h-12 bg-neutral-800 rounded-full mb-4">
                     <UserFileItemIcon fileType={file.filetype} />
                   </div>
-                  <div className="font-medium text-center mb-2 h-[3rem]">
+                  <div className="font-medium text-center mb-2 h-[3rem] overflow-hidden">
                     {file.filename}
                   </div>
                   <div className="text-neutral-400 text-sm text-center">
@@ -112,6 +113,7 @@ function AddToChatButton({
         value: {
           ...currentMessage,
           fileList: [...existingFiles, file],
+          pluginId: PluginID.GEMINI,
         },
       });
       toast.success('File added to current chat');
