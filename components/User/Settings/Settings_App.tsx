@@ -2,7 +2,10 @@ import { IconMoon, IconSun } from '@tabler/icons-react';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SpeechSpeedType, useAzureTts } from '@/components/Hooks/useAzureTts';
+import {
+  SpeechSpeedType,
+  useCognitiveService,
+} from '@/components/CognitiveService/CognitiveServiceProvider';
 import { SidebarButton } from '@/components/Sidebar/SidebarButton';
 import HomeContext from '@/components/home/home.context';
 
@@ -15,16 +18,17 @@ export default function Settings_App() {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  // const { getSpeechSpeed, setSpeechSpeed } = useAzureTts();
+  const { getSpeechConfig, setSpeechSpeed } = useCognitiveService();
 
-  // const speechSpeedOnChange = (value: string) => {
-  //   setSpeechSpeedConfig(value as SpeechSpeedType);
-  //   setSpeechSpeed(value as SpeechSpeedType);
-  // };
+  const speechSpeedOnChange = (value: string) => {
+    setSpeechSpeedConfig(value as SpeechSpeedType);
+    setSpeechSpeed(value as SpeechSpeedType);
+  };
 
-  // useEffect(() => {
-  //   setSpeechSpeedConfig(getSpeechSpeed());
-  // }, []);
+  useEffect(() => {
+    const { speechSpeed } = getSpeechConfig();
+    setSpeechSpeedConfig(speechSpeed);
+  }, [getSpeechConfig]);
 
   return (
     <div>
@@ -63,7 +67,7 @@ export default function Settings_App() {
                 id="speechSpeed"
                 name="speechSpeed"
                 value={speechSpeedConfig}
-                // onChange={(e) => speechSpeedOnChange(e.target.value)}
+                onChange={(e) => speechSpeedOnChange(e.target.value)}
                 className="mt-1 block w-full pl-3 pr-10 py-2 focus:outline-none text-sm rounded-md bg-[#171717] text-end"
               >
                 <option value={'slow'}>{t('Slow')}</option>

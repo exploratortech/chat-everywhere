@@ -33,6 +33,9 @@ type CognitiveServiceContextType = {
   setSendMessage: (func: Function) => void;
   toggleConversation: () => void;
 
+  getSpeechConfig: () => SpeechConfigType;
+  setSpeechSpeed: (speechSpeed: SpeechSpeedType) => void;
+
   // Tts
   playMessage: (message: string, speechId: string) => Promise<void>;
   queueMessage: (message: string) => void;
@@ -113,6 +116,13 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
     } catch {
       return defaultSpeechConfig;
     }
+  }, []);
+
+  const setSpeechSpeed = useCallback((speechSpeed: SpeechSpeedType) => {
+    localStorage.setItem(
+      'speechConfig',
+      JSON.stringify({ speechSpeed: speechSpeed }),
+    );
   }, []);
 
   const getSpeechSpeedInSsml = useCallback((): string => {
@@ -528,6 +538,9 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
         currentSpeaker,
         setSendMessage,
         toggleConversation,
+
+        getSpeechConfig,
+        setSpeechSpeed,
 
         // Tts
         playMessage,

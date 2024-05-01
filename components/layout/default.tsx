@@ -63,7 +63,6 @@ import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 
-import { useAzureTts } from '@/components/Hooks/useAzureTts';
 import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
 import OrientationBlock from '@/components/Mobile/OrientationBlock';
 
@@ -148,17 +147,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     },
     dispatch,
   } = contextValue;
-
-  // const {
-  //   isLoading,
-  //   isPlaying,
-  //   currentSpeechId,
-  //   speak,
-  //   initializeSpeechSynthesizer,
-  //   closeSpeechSynthesizer,
-  //   queueSpeech,
-  //   stopPlaying,
-  // } = useAzureTts(dispatch);
 
   const stopConversationRef = useRef<boolean>(false);
 
