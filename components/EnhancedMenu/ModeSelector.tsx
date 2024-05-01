@@ -57,13 +57,15 @@ const ModeSelector = () => {
       (message) => message.fileList && message.fileList.length > 0,
     );
     if (hasFiles && currentSelectedPluginId !== PluginID.GEMINI) {
-      homeDispatch({
-        field: 'currentMessage',
-        value: {
-          ...currentMessage,
-          pluginId: PluginID.GEMINI,
-        },
-      });
+      if (isUltraUser) {
+        homeDispatch({
+          field: 'currentMessage',
+          value: {
+            ...currentMessage,
+            pluginId: PluginID.GEMINI,
+          },
+        });
+      }
     }
   }, [
     selectedConversation,
@@ -71,6 +73,7 @@ const ModeSelector = () => {
     t,
     homeDispatch,
     currentMessage,
+    isUltraUser,
   ]);
 
   return (
