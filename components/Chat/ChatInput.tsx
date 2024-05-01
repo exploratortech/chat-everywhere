@@ -251,7 +251,6 @@ export const ChatInput = ({
   };
 
   const handleFileSelect = (file: UserFile) => {
-    const selectedFile = filteredFiles[activeFileIndex];
     const existingFiles = currentMessage?.fileList || [];
     const isFileAlreadyIncluded = existingFiles.some(
       (existingFile) => existingFile.id === file.id,
@@ -263,6 +262,7 @@ export const ChatInput = ({
         value: {
           ...currentMessage,
           fileList: [...existingFiles, file],
+          pluginId: PluginID.GEMINI,
         },
       });
     }
