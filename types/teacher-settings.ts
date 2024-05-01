@@ -5,4 +5,6 @@ export interface TeacherSettings {
 export interface TeacherSettingsInPortal extends TeacherSettings {
   should_clear_conversations_on_logout?: boolean;
   items_per_page?: number;
+  sort_key?: string;
+  sort_order?: string;
 }
