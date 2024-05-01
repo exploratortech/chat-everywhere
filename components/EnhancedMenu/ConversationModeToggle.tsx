@@ -1,10 +1,16 @@
 import React, { useContext } from 'react';
+import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
+import HomeContext from '../home/home.context';
 
 const ConversationModeToggle = () => {
-  const { t } = useTranslation(['common', 'model']);
+  const { t } = useTranslation(['common', 'feature', 'model']);
+
+  const {
+    state: { user },
+  } = useContext(HomeContext);
 
   const { isConversationModeActive, setIsConversationModeActive } =
     useCognitiveService();
@@ -13,7 +19,16 @@ const ConversationModeToggle = () => {
     if (isConversationModeActive) {
       setIsConversationModeActive(false);
     } else {
-      setIsConversationModeActive(true);
+      if (!user || user.plan === 'free') {
+        toast.error(
+          t(
+            "This is a Pro only feature. Please sign-up to use it if you don't have an account.",
+            { ns: 'feature' },
+          ),
+        );
+      } else {
+        setIsConversationModeActive(true);
+      }
     }
   };
 
