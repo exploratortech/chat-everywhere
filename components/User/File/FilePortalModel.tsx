@@ -120,6 +120,7 @@ const UploadFileComponent = () => {
       <input
         ref={fileInputRef}
         type="file"
+        accept="application/pdf, text/plain"
         className="hidden"
         onChange={(e) => {
           if (e.target.files && e.target.files[0]) {
