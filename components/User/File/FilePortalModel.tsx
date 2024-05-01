@@ -93,12 +93,9 @@ const UploadFileComponent = () => {
     const uploadOk = await uploadFile({ filename: file.name, file });
 
     if (uploadOk) {
-      console.log('Upload successful');
-      // show success
-      if (fileInputRef.current) fileInputRef.current.value = ''; // Clear the input field
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } else {
       console.error('Upload failed');
-      // show error
     }
   };
 
