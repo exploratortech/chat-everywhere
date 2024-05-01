@@ -29,6 +29,7 @@ export async function createSignature(payload: string): Promise<string> {
     }
 
     const data = await response.json();
+    console.log({ data });
 
     return data.signedBlob;
   } catch (error) {

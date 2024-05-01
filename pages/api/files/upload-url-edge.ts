@@ -1,3 +1,5 @@
+import { origins } from '@/utils/server/google/auth';
+import { getAccessToken } from '@/utils/server/google/auth';
 import { createSignature } from '@/utils/server/google/signature';
 
 import dayjs from 'dayjs';
@@ -26,6 +28,7 @@ export default async function handler(req: Request) {
       status: 400,
     });
   }
+  await updateBucketCORS();
 
   const userProfile = { id: '98ba69f3-5648-4951-8308-128a90a6f770' };
   const folderPath = userProfile.id;
@@ -51,15 +54,14 @@ export default async function handler(req: Request) {
     .map((key) => key.toLowerCase())
     .sort()
     .join(';');
-  const canonicalHeaders =
-    Object.keys(headers)
-      .map(
-        (key) =>
-          `${key.toLowerCase()}:${headers[
-            key as keyof typeof headers
-          ].toLowerCase()}`,
-      )
-      .join('\n') + '\n';
+  const canonicalHeaders = Object.keys(headers)
+    .map(
+      (key) =>
+        `${key.toLowerCase()}:${headers[
+          key as keyof typeof headers
+        ].toLowerCase()}\n`,
+    )
+    .join('');
   const queryParams = {
     'response-content-disposition': 'attachment; filename=' + fileName,
     'X-Goog-Algorithm': 'GOOG4-RSA-SHA256',
@@ -85,6 +87,7 @@ export default async function handler(req: Request) {
     signedHeaders,
     'UNSIGNED-PAYLOAD',
   ].join('\n');
+
   async function hashCanonicalRequest(input: string): Promise<string> {
     const encoder = new TextEncoder();
     const encoded = encoder.encode(input);
@@ -104,6 +107,7 @@ export default async function handler(req: Request) {
     credentialScope,
     canonicalRequestHash,
   ].join('\n');
+
   const signature = await createSignature(stringToSign);
 
   const schemeAndHost = `https://${host}`;
@@ -122,4 +126,43 @@ export default async function handler(req: Request) {
       status: 200,
     },
   );
+}
+async function updateBucketCORS() {
+  const accessToken = await getAccessToken(); // Assuming getAccessToken() is available from the imported utils
+
+  const url = `https://storage.googleapis.com/storage/v1/b/${BUCKET_NAME}?fields=cors`;
+
+  const corsConfig = {
+    cors: [
+      {
+        origin: origins(),
+        method: ['GET', 'POST', 'PUT'],
+        responseHeader: ['Content-Type'],
+        maxAgeSeconds: 3600,
+      },
+    ],
+  };
+
+  const headers = {
+    Authorization: `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: headers,
+      body: JSON.stringify(corsConfig),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error updating CORS configuration:', error);
+    throw error;
+  }
 }

@@ -53,3 +53,15 @@ export async function getAccessToken() {
 
   return accessToken;
 }
+
+export const origins = () => {
+  if (process.env.NODE_ENV === 'development') {
+    return ['http://localhost:3000'];
+  }
+  return [
+    `https://${process.env.VERCEL_URL}`,
+    `https://${process.env.VERCEL_BRANCH_URL}`,
+    `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`,
+    'https://chateverywhere.app',
+  ];
+};
