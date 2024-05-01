@@ -1,3 +1,4 @@
+import { UserFile } from '@/types/UserFile';
 import { ChatBody, Conversation, Message } from '@/types/chat';
 import { Plugin, PluginID } from '@/types/plugin';
 import { Prompt, isTeacherPrompt } from '@/types/prompt';
@@ -67,6 +68,7 @@ function createChatBody(
   updatedConversation: Conversation,
   plugin: Plugin | null,
   selectedConversation: Conversation,
+  allExistedUserFiles: UserFile[] | undefined = [],
 ): ChatBody {
   const chatBody: ChatBody = {
     model: updatedConversation.model,
@@ -92,7 +94,31 @@ function createChatBody(
     chatBody.prompt = '';
   }
 
+  // Filter out the non-existed files
+  chatBody.messages = nonExistedFileFilter(
+    chatBody.messages,
+    allExistedUserFiles,
+  );
+
   return structuredClone(chatBody);
+}
+
+function nonExistedFileFilter(
+  messages: Message[],
+  allExistedUserFiles: UserFile[],
+) {
+  const existingFileIds = new Set(allExistedUserFiles.map((file) => file.id));
+
+  const filteredMessages = messages.map((message) => {
+    if (message.fileList && message.fileList.length > 0) {
+      message.fileList = message.fileList.filter((messageFile) =>
+        existingFileIds.has(messageFile.id),
+      );
+    }
+    return message;
+  });
+
+  return filteredMessages;
 }
 
 async function sendRequest(
