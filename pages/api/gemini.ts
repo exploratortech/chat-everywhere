@@ -88,7 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
       topP: 0.95,
     };
 
-    const contents: Content[] = messages.map((message) => {
+    const contents: Content[] = messages.map((message, index) => {
       const role = message.role === 'user' ? 'user' : 'model';
       const textParts = [{ text: message.content }];
       const fileDataList = message.fileList
@@ -104,6 +104,19 @@ const handler = async (req: Request): Promise<Response> => {
         parts: [...fileDataList, ...textParts],
       };
     });
+
+    if (contents.length > 0 && contents?.[0]?.role !== 'user') {
+      // This is custom prompt, we need to add user role to avoid 'multiturn requests error'
+      contents.unshift({
+        role: 'user',
+        parts: [
+          {
+            text: 'Hey',
+          },
+        ],
+      });
+    }
+
     const systemInstruction = {
       role: 'model',
       parts: [
@@ -134,6 +147,9 @@ async function callGeminiAPI(
     generationConfig,
     systemInstruction,
   };
+  console.log({
+    requestPayload,
+  });
 
   const access_token = await getAccessToken();
   const url = `https://${API_ENDPOINT}/v1/projects/${PROJECT_ID}/locations/${LOCATION_ID}/publishers/google/models/${MODEL_ID}:streamGenerateContent?alt=sse`;
@@ -158,8 +174,10 @@ async function callGeminiAPI(
         },
         body: JSON.stringify(requestPayload),
       })
-        .then((response) => {
+        .then(async (response) => {
           if (!response.ok) {
+            const res = await response.json();
+            console.error(res);
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           return response.body;
@@ -169,9 +187,6 @@ async function callGeminiAPI(
             async (event: ParsedEvent | ReconnectInterval) => {
               if (event.type === 'event') {
                 const data = event.data;
-                console.log('--------GEMINI data START------------');
-                console.log(data);
-                console.log('--------GEMINI data END------------');
 
                 try {
                   if (data === '[DONE]') {
