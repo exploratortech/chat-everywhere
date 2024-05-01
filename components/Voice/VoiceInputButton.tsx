@@ -1,4 +1,8 @@
-import { IconMicrophone, IconMicrophoneOff } from '@tabler/icons-react';
+import {
+  IconMicrophone,
+  IconMicrophoneOff,
+  IconPlayerStop,
+} from '@tabler/icons-react';
 import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -99,7 +103,7 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
     };
   }, [audioStream, draw, loadingStt]);
 
-  const renderStatusIndicator = useMemo(() => {
+  const statusIndicator = useMemo(() => {
     if ((!loadingStt && !isSpeechRecognitionActive) || isMicrophoneDisabled) {
       return null;
     }
@@ -110,6 +114,31 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
       />
     );
   }, [loadingStt, isSpeechRecognitionActive, isMicrophoneDisabled]);
+
+  const icon = useMemo(() => {
+    if (isMicrophoneDisabled) {
+      return (
+        <IconMicrophoneOff
+          className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full opacity-50"
+          size={18}
+        />
+      );
+    }
+    if (isConversing) {
+      return (
+        <IconPlayerStop
+          className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full"
+          size={18}
+        />
+      );
+    }
+    return (
+      <IconMicrophone
+        className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full"
+        size={18}
+      />
+    );
+  }, [isMicrophoneDisabled, isConversing]);
 
   const handleClick = async (e: any): Promise<void> => {
     if (onClick) onClick();
@@ -173,19 +202,9 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
                 e.stopPropagation();
               }}
             >
-              {isMicrophoneDisabled ? (
-                <IconMicrophoneOff
-                  className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full opacity-50"
-                  size={18}
-                />
-              ) : (
-                <IconMicrophone
-                  className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full"
-                  size={18}
-                />
-              )}
+              {icon}
             </button>
-            {renderStatusIndicator}
+            {statusIndicator}
           </>
         )}
       </div>
