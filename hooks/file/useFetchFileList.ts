@@ -6,8 +6,11 @@ import { UserFile } from '@/types/UserFile';
 
 import HomeContext from '@/components/home/home.context';
 
+import useHomeLoadingBar from '../useHomeLoadingBar';
+
 export const useFetchFileList = () => {
   const supabase = useSupabaseClient();
+  const { withLoading } = useHomeLoadingBar();
   const {
     state: { user },
   } = useContext(HomeContext);
@@ -26,7 +29,7 @@ export const useFetchFileList = () => {
     return data.files as UserFile[];
   };
 
-  return useQuery(['gcp-files', user?.id], fetchFileList, {
+  return useQuery(['gcp-files', user?.id], () => withLoading(fetchFileList), {
     keepPreviousData: true,
     staleTime: 1000 * 60 * 5, // 5 minutes
     onError: (error) => {
