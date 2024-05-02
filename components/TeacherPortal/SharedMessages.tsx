@@ -95,7 +95,11 @@ const SharedMessages = () => {
     <div className="flex flex-col gap-1 h-full relative">
       <h1 className="font-bold mb-4">{t('Shared messages')}</h1>
       <div className="flex flex-col gap-2 my-4">
-        <Filter tags={tags} />
+        <Filter
+        tags={tags} 
+        allSharedMessages={sharedMessages}
+        selectedMessageIds={selectedMessageIds}
+        />
         <Separator />
       </div>
       {isLoading && !sharedMessages && (
