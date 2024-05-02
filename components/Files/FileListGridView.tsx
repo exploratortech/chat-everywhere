@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { useDeleteObject } from '@/hooks/file/useDeleteObject';
-import { useDownloadObject } from '@/hooks/file/useDownloadObject';
+import { useDownloadObjectUrl } from '@/hooks/file/useDownloadObjectUrl';
 import { useFetchFileList } from '@/hooks/file/useFetchFileList';
 
 import { UserFile } from '@/types/UserFile';
@@ -54,7 +54,10 @@ export function FileListGridView({
                       {formatFileSize(file.size)}
                     </div>
                     <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity mt-4">
-                      <DownloadButton objectPath={file.objectPath} />
+                      <DownloadButton
+                        objectPath={file.objectPath}
+                        fileName={file.filename}
+                      />
                       <AddToChatButton
                         file={file}
                         closeDialogCallback={closeDialogCallback}
@@ -87,16 +90,43 @@ const RelativeTimeComponent = ({ time }: { time: string }) => {
   }
 };
 
-function DownloadButton({ objectPath }: { objectPath: string }) {
+function DownloadButton({
+  objectPath,
+  fileName,
+}: {
+  objectPath: string;
+  fileName: string;
+}) {
   const { t } = useTranslation('model');
-  const { mutateAsync: downloadFile } = useDownloadObject();
+  const { mutateAsync: downloadFile } = useDownloadObjectUrl();
+
+  const handleDownload = async () => {
+    try {
+      const result = await downloadFile(objectPath);
+      const url = result.url;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const blob = await response.blob();
+      const downloadLink = document.createElement('a');
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      downloadLink.href = blobUrl;
+      downloadLink.download = fileName;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(blobUrl);
+      document.body.removeChild(downloadLink);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
 
   return (
-    <Button
-      size="icon"
-      variant="ghost"
-      onClick={() => downloadFile(objectPath)}
-    >
+    <Button size="icon" variant="ghost" onClick={handleDownload}>
       <IconDownload />
       <span className="sr-only">{t('Download')}</span>
     </Button>
