@@ -4,6 +4,8 @@ import { useContext } from 'react';
 
 import HomeContext from '@/components/home/home.context';
 
+import useHomeLoadingBar from '../useHomeLoadingBar';
+
 export const useDeleteObject = () => {
   const {
     state: { user },
@@ -33,16 +35,20 @@ export const useDeleteObject = () => {
     return response.json();
   };
 
-  return useMutation(deleteFile, {
-    onError: (error: Error) => {
-      console.error('Error deleting file:', error.message);
-    },
+  const { withLoading } = useHomeLoadingBar();
+  return useMutation(
+    async (objectPath: string) => withLoading(() => deleteFile(objectPath)),
+    {
+      onError: (error: Error) => {
+        console.error('Error deleting file:', error.message);
+      },
 
-    onSettled: () => {
-      queryClient.invalidateQueries(['gcp-files', user?.id]);
+      onSettled: () => {
+        queryClient.invalidateQueries(['gcp-files', user?.id]);
+      },
+      onSuccess: () => {
+        console.log('File deleted successfully');
+      },
     },
-    onSuccess: () => {
-      console.log('File deleted successfully');
-    },
-  });
+  );
 };
