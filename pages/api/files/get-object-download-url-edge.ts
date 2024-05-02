@@ -113,7 +113,7 @@ export default async function handler(req: Request) {
 
   const schemeAndHost = `https://${host}`;
 
-  const signedUrl = `${schemeAndHost}${canonicalUri}?${canonicalQueryString}&x-goog-signature=${signature}`;
+  const signedUrl = `${schemeAndHost}${canonicalUri}?${canonicalQueryString}&X-Goog-Signature=${signature}`;
 
   console.log({
     stringToSign,
