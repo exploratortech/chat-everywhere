@@ -6,8 +6,8 @@ import React, { Fragment, useRef } from 'react';
 import { useFileUpload } from '@/hooks/file/useFileUpload';
 
 import { FileListGridView } from '@/components/FileListGridView';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { UploadProgress } from './UploadProgress';
 
@@ -59,21 +59,19 @@ export default function FilePortalModel({ onClose }: Props) {
                         <UploadFileComponent />
                       </div>
                       <div className="p-4">
-                        <Card className="w-full bg-yellow-100 text-black ">
-                          <CardHeader className="flex flex-row justify-center items-center gap-3 px-4 py-3">
-                            <IconAlertCircle className="h-5 w-5 text-yellow-500" />
-                            <CardTitle className="text-base font-medium !mt-0">
-                              Warning
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="text-sm px-4 py-2">
+                        <Alert className="bg-yellow-100 text-black">
+                          <IconAlertCircle className="h-4 w-4 !text-yellow-500 " />
+                          <AlertTitle className="text-base font-medium">
+                            Warning
+                          </AlertTitle>
+                          <AlertDescription>
                             <p>Currently we only support PDF and TXT files.</p>
                             <ul>
                               <li>File Size Limitation: 50 MB</li>
                               <li>PDF Page Limitation: 300 Pages</li>
                             </ul>
-                          </CardContent>
-                        </Card>
+                          </AlertDescription>
+                        </Alert>
                       </div>
 
                       <div className="py-4">
