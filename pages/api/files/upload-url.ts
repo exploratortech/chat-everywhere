@@ -140,8 +140,6 @@ export default async function handler(req: Request) {
     JSON.stringify({
       url: signedUrl,
       headers,
-      stringToSign,
-      canonicalRequest,
     }),
     {
       status: 200,
