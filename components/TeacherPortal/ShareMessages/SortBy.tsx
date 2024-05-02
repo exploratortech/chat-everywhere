@@ -1,5 +1,5 @@
 import { IconSortAscending } from '@tabler/icons-react';
-import React, { memo } from 'react';
+import React, { useEffect, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SortBy as SortByType } from '@/types/filter_sortby';
@@ -23,6 +23,8 @@ import useShareMessageFilterStore from '../share-message-filter.store';
 
 import { cn } from '@/lib/utils';
 
+import useTeacherSettings from '@/hooks/teacherPortal/useTeacherSettings';
+
 const SORT_BY_OPTIONS = [
   {
     label: 'Submitted at',
@@ -36,7 +38,37 @@ const SORT_BY_OPTIONS = [
 const SortBy = memo(() => {
   const { sortBy, setSortBy, isNotSortByDefault, resetSortBy } =
     useShareMessageFilterStore();
+  const { updateSettingsMutation } = useTeacherSettings();
+  const { mutate: updateSettings } = updateSettingsMutation;
+  const { fetchSettingsQuery } = useTeacherSettings();
+  const { data: settings } = fetchSettingsQuery;
   const { t } = useTranslation('model');
+
+  const handleValueChange = (sortKey?: SortByType['sortKey'], sortOrder?: SortByType['sortOrder']) => {
+    // Get the current sortBy state to fill in the missing value if only one is provided
+    const currentSortBy = sortBy;
+    // If a new sortKey or sortOrder is provided, use it; otherwise, fall back to the current state
+    const newSortKey = sortKey ?? currentSortBy.sortKey;
+    const newSortOrder = sortOrder ?? currentSortBy.sortOrder;
+    // Update the local state
+    setSortBy({ sortKey: newSortKey, sortOrder: newSortOrder });
+    // Update the settings in the database. Only include the fields that are provided
+    const updatePayload = {
+      ...(sortKey !== undefined && { sort_key: newSortKey }),
+      ...(sortOrder !== undefined && { sort_order: newSortOrder }),
+    };
+    updateSettings(updatePayload);
+  };
+
+  useEffect(() => {
+    if (settings?.sort_key && settings?.sort_order) {
+      setSortBy({
+        sortKey: settings.sort_key as SortByType['sortKey'],
+        sortOrder: settings.sort_order as SortByType['sortOrder'],
+      });
+    }
+  }, [settings, setSortBy]);
+
   return (
     <Popover>
       <PopoverTrigger>
@@ -56,10 +88,7 @@ const SortBy = memo(() => {
                 isNotSortByDefault() ? 'visible' : 'invisible',
               )}
               onClick={() => {
-                setSortBy({
-                  sortKey: 'created_at',
-                  sortOrder: 'desc',
-                });
+                handleValueChange('created_at', 'desc')
                 resetSortBy();
               }}
             >
@@ -71,10 +100,7 @@ const SortBy = memo(() => {
             <Select
               value={sortBy.sortKey}
               onValueChange={(value) => {
-                setSortBy({
-                  ...sortBy,
-                  sortKey: value as SortByType['sortKey'],
-                });
+                handleValueChange(value as SortByType['sortKey'], undefined)
               }}
               defaultValue={sortBy.sortKey}
             >
@@ -92,10 +118,7 @@ const SortBy = memo(() => {
             <Select
               value={sortBy.sortOrder}
               onValueChange={(value) => {
-                setSortBy({
-                  ...sortBy,
-                  sortOrder: value as SortByType['sortOrder'],
-                });
+                handleValueChange(undefined, value as SortByType['sortOrder'])
               }}
               defaultValue={sortBy.sortOrder}
             >
