@@ -23,24 +23,30 @@ export function useFileUpload() {
       withLoading(async () => {
         const accessToken = (await supabase.auth.getSession()).data.session
           ?.access_token!;
-        const result = await fetch(`/api/files/upload-url`, {
+        const result = await fetch(`/api/files/upload-url-edge`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'access-token': accessToken,
           },
-          body: JSON.stringify({ fileName: filename }),
+          body: JSON.stringify({
+            fileName: filename,
+            fileMimeType: file.type,
+          }),
         });
-        const { url, fields } = await result.json();
+        const { url, headers } = await result.json();
 
         return new Promise((resolve, reject) => {
           const formData = new FormData();
-          Object.entries({ ...fields, file }).forEach(([key, value]) => {
-            formData.append(key, value as string | Blob);
-          });
+
+          formData.append('file', file);
 
           const xhr = new XMLHttpRequest();
-          xhr.open('POST', url);
+          xhr.open('PUT', url);
+          for (const [key, value] of Object.entries(headers)) {
+            if (key === 'host') continue;
+            xhr.setRequestHeader(`${key}`, value as string);
+          }
 
           xhr.onload = () => {
             if (xhr.status >= 200 && xhr.status < 300) {

@@ -1,10 +1,13 @@
-// TODO: its not working just yet, need to fix the signature not correct
-import { origins } from '@/utils/server/google/auth';
-import { getAccessToken } from '@/utils/server/google/auth';
+import {
+  fetchUserProfileWithAccessToken,
+  unauthorizedResponse,
+} from '@/utils/server/auth';
 import { createSignature } from '@/utils/server/google/signature';
+import { updateBucketCORS } from '@/utils/server/google/updateBucketCORS';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { v4 as uuidv4 } from 'uuid';
 
 dayjs.extend(utc);
 
@@ -22,18 +25,34 @@ export default async function handler(req: Request) {
     });
   }
   const requestData = await req.json();
-  const fileName = requestData.fileName;
+  const originalFileName = requestData.fileName;
+  const fileMimeType = requestData.fileMimeType;
 
-  if (!fileName) {
-    return new Response('File name is required', {
+  if (!originalFileName) {
+    return new Response('fileName is required', {
       status: 400,
     });
   }
-  await updateBucketCORS();
+  if (!fileMimeType) {
+    return new Response('fileMimeType is required', {
+      status: 400,
+    });
+  }
+  const [userProfile] = await Promise.all([
+    fetchUserProfileWithAccessToken(req),
+    updateBucketCORS(),
+  ]);
+  if (!userProfile || !userProfile.isTeacherAccount)
+    return unauthorizedResponse;
 
-  const userProfile = { id: '98ba69f3-5648-4951-8308-128a90a6f770' };
   const folderPath = userProfile.id;
-  const objectPath = `${folderPath}/${fileName}`;
+  const randomUUID = uuidv4();
+  const filteredFileName = `${originalFileName.replace(
+    /[^a-zA-Z0-9]/g,
+    '_',
+  )}_${randomUUID}`;
+  console.log({ filteredFileName });
+  const objectPath = `${folderPath}/${filteredFileName}`;
   const expiration = 3600;
 
   const escapedObjectName = encodeURIComponent(objectPath);
@@ -50,21 +69,22 @@ export default async function handler(req: Request) {
   const host = `${BUCKET_NAME}.storage.googleapis.com`;
   const headers = {
     host: host,
+    'Content-Type': fileMimeType,
+    'x-goog-meta-user-id': userProfile.id,
+    'x-goog-meta-file-name': originalFileName,
   };
   const signedHeaders = Object.keys(headers)
-    .map((key) => key.toLowerCase())
     .sort()
+    .map((key) => key.toLowerCase())
     .join(';');
   const canonicalHeaders = Object.keys(headers)
+    .sort()
     .map(
-      (key) =>
-        `${key.toLowerCase()}:${headers[
-          key as keyof typeof headers
-        ].toLowerCase()}\n`,
+      (key) => `${key.toLowerCase()}:${headers[key as keyof typeof headers]}\n`,
     )
     .join('');
   const queryParams = {
-    'response-content-disposition': 'attachment; filename=' + fileName,
+    'response-content-disposition': 'attachment; filename=' + filteredFileName,
     'X-Goog-Algorithm': 'GOOG4-RSA-SHA256',
     'X-Goog-Credential': credential,
     'X-Goog-Date': requestTimestamp,
@@ -80,6 +100,7 @@ export default async function handler(req: Request) {
         )}`,
     )
     .join('&');
+
   const canonicalRequest = [
     'PUT',
     canonicalUri,
@@ -118,52 +139,12 @@ export default async function handler(req: Request) {
   return new Response(
     JSON.stringify({
       url: signedUrl,
+      headers,
       stringToSign,
       canonicalRequest,
-      signature,
     }),
     {
-      headers: headers,
       status: 200,
     },
   );
-}
-async function updateBucketCORS() {
-  const accessToken = await getAccessToken(); // Assuming getAccessToken() is available from the imported utils
-
-  const url = `https://storage.googleapis.com/storage/v1/b/${BUCKET_NAME}?fields=cors`;
-
-  const corsConfig = {
-    cors: [
-      {
-        origin: origins(),
-        method: ['GET', 'POST', 'PUT'],
-        responseHeader: ['Content-Type'],
-        maxAgeSeconds: 3600,
-      },
-    ],
-  };
-
-  const headers = {
-    Authorization: `Bearer ${accessToken}`,
-    'Content-Type': 'application/json',
-  };
-
-  try {
-    const response = await fetch(url, {
-      method: 'PATCH',
-      headers: headers,
-      body: JSON.stringify(corsConfig),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error updating CORS configuration:', error);
-    throw error;
-  }
 }
