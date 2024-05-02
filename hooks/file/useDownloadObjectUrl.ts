@@ -6,7 +6,7 @@ import HomeContext from '@/components/home/home.context';
 
 import useHomeLoadingBar from '../useHomeLoadingBar';
 
-export const useDownloadObject = () => {
+export const useDownloadObjectUrl = () => {
   const {
     state: { user },
   } = useContext(HomeContext);
@@ -18,7 +18,7 @@ export const useDownloadObject = () => {
   const downloadFile = async (objectPath: string) => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token!;
-    const response = await fetch('/api/files/get-object-download-url', {
+    const response = await fetch('/api/files/get-object-download-url-edge', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -45,9 +45,6 @@ export const useDownloadObject = () => {
 
       onSettled: () => {
         queryClient.invalidateQueries(['gcp-files', user?.id]);
-      },
-      onSuccess: (data) => {
-        console.log('Download URL obtained successfully:', data.url);
       },
     },
   );
