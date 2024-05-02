@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { useDeleteObject } from '@/hooks/file/useDeleteObject';
+import { useDownloadObject } from '@/hooks/file/useDownloadObject';
 import { useFetchFileList } from '@/hooks/file/useFetchFileList';
 
 import { UserFile } from '@/types/UserFile';
@@ -53,7 +54,7 @@ export function FileListGridView({
                       {formatFileSize(file.size)}
                     </div>
                     <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity mt-4">
-                      <DownloadButton />
+                      <DownloadButton objectPath={file.objectPath} />
                       <AddToChatButton
                         file={file}
                         closeDialogCallback={closeDialogCallback}
@@ -86,10 +87,16 @@ const RelativeTimeComponent = ({ time }: { time: string }) => {
   }
 };
 
-function DownloadButton() {
+function DownloadButton({ objectPath }: { objectPath: string }) {
   const { t } = useTranslation('model');
+  const { mutateAsync: downloadFile } = useDownloadObject();
+
   return (
-    <Button size="icon" variant="ghost">
+    <Button
+      size="icon"
+      variant="ghost"
+      onClick={() => downloadFile(objectPath)}
+    >
       <IconDownload />
       <span className="sr-only">{t('Download')}</span>
     </Button>
