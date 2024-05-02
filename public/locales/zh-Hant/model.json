@@ -222,5 +222,6 @@
   "{{pages}} Pages": "{{pages}} 頁",
   "No file selected.": "未選擇檔案",
   "File size exceeds the maximum limit of {{mb}} MB.": "檔案大小超過最大限制 {{mb}} MB",
-  "Add to current chat": "加入到當前對話"
+  "Add to current chat": "加入到當前對話",
+  "Download": "下載"
 }

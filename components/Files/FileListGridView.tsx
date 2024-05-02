@@ -26,6 +26,7 @@ export function FileListGridView({
 }) {
   const { data: userFiles } = useFetchFileList();
   const { t } = useTranslation('model');
+
   return (
     <div className="flex flex-col">
       <div className="flex-1 overflow-auto p-6">
@@ -52,8 +53,7 @@ export function FileListGridView({
                       {formatFileSize(file.size)}
                     </div>
                     <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity mt-4">
-                      {/* TODO: download button To be done  */}
-                      {/* <DownloadButton /> */}
+                      <DownloadButton />
                       <AddToChatButton
                         file={file}
                         closeDialogCallback={closeDialogCallback}
@@ -87,10 +87,11 @@ const RelativeTimeComponent = ({ time }: { time: string }) => {
 };
 
 function DownloadButton() {
+  const { t } = useTranslation('model');
   return (
     <Button size="icon" variant="ghost">
       <IconDownload />
-      <span className="sr-only">Download</span>
+      <span className="sr-only">{t('Download')}</span>
     </Button>
   );
 }
