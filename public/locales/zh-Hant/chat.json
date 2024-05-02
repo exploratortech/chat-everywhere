@@ -61,5 +61,7 @@
   "Custom Instruction ({{customInstructionPromptName}}) is in use": "提示詞模版 ({{customInstructionPromptName}}) 正在使用",
   "Custom Instruction only available in Chat mode": "提示詞模版僅在聊天模式下可用",
   "Teacher Custom Instruction ({{customInstructionPromptName}}) is in use": "教師提示詞模版 ({{customInstructionPromptName}}) 正在使用",
-  "Join our event in {{hours}} hours!": "不要錯過我們這次精彩的官方活動喔！倒計時 {{hours}} 小時！"
+  "Join our event in {{hours}} hours!": "不要錯過我們這次精彩的官方活動喔! 倒計時 {{hours}} 小時!",
+  "Join our event in {{minutes}} minutes!": "不要錯過我們這次精彩的官方活動喔! 倒計時 {{minutes}} 分鐘!",
+  "Event is now live!": "活動正式開始, 快加入我們吧!"
 }
