@@ -8,8 +8,7 @@ export const useConversation = () => {
     state: { selectedConversation, outputLanguage, messageIsStreaming },
   } = useContext(HomeContext);
 
-  const { isConversing, currentSpeaker, queueMessage, loadingTts } =
-    useCognitiveService();
+  const { isConversing, currentSpeaker, queueMessage } = useCognitiveService();
 
   const pointer = useRef<number>(0);
   const segmenter = useRef<Intl.Segmenter>();
@@ -60,11 +59,5 @@ export const useConversation = () => {
         queueMessage(message);
       }
     }
-  }, [
-    messageIsStreaming,
-    selectedConversation,
-    isConversing,
-    queueMessage,
-    loadingTts,
-  ]);
+  }, [messageIsStreaming, selectedConversation, isConversing, queueMessage]);
 };
