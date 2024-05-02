@@ -185,6 +185,9 @@ const V2Chat = () => {
     }
 
     const data = (await response.json()) as RetrieveMessageResponseType;
+
+    console.log(data.messages);
+    
     const messages: MessageType[] = data.messages.map((messageItem) => ({
       id: messageItem.id,
       role: messageItem.role,
