@@ -13,6 +13,7 @@ import { useFileUpload } from '@/hooks/file/useFileUpload';
 import { FileListGridView } from '@/components/Files/FileListGridView';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import PreviewVersionFlag from '@/components/ui/preview-version-flag';
 
 import { UploadProgress } from './UploadProgress';
 
@@ -58,8 +59,9 @@ export default function FilePortalModel({ onClose }: Props) {
                   </button>
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
-                      <div className="text-neutral-200 font-bold">
+                      <div className="flex items-center gap-2 text-neutral-200 font-bold">
                         File Portal
+                        <PreviewVersionFlag />
                       </div>
                       <div className="p-4">
                         <UploadFileComponent />
