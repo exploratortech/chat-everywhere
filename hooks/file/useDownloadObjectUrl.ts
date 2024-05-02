@@ -18,7 +18,7 @@ export const useDownloadObjectUrl = () => {
   const downloadFile = async (objectPath: string) => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token!;
-    const response = await fetch('/api/files/get-object-download-url-edge', {
+    const response = await fetch('/api/files/get-object-download-url', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
