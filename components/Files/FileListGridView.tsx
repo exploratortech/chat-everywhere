@@ -11,8 +11,8 @@ import { PluginID } from '@/types/plugin';
 
 import { Button } from '@/components/ui/button';
 
-import UserFileItemIcon from './Chat/UserFileItemIcon';
-import HomeContext from './home/home.context';
+import UserFileItemIcon from '../Chat/UserFileItemIcon';
+import HomeContext from '../home/home.context';
 
 import dayjs from 'dayjs';
 import 'dayjs/locale/en';

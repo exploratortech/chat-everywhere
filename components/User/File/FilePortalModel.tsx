@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useFileUpload } from '@/hooks/file/useFileUpload';
 
-import { FileListGridView } from '@/components/FileListGridView';
+import { FileListGridView } from '@/components/Files/FileListGridView';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
