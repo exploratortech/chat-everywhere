@@ -29,9 +29,13 @@ export async function createSignature(payload: string): Promise<string> {
     }
 
     const data = await response.json();
-    console.log({ data });
 
-    return data.signedBlob;
+    // CRITICAL: Convert base64 to hexadecimal
+    const signedBlobBase64 = data.signedBlob;
+    const buffer = Buffer.from(signedBlobBase64, 'base64');
+    const hexString = buffer.toString('hex');
+
+    return hexString;
   } catch (error) {
     console.error('Error creating signature:', error);
     throw error;
