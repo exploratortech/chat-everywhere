@@ -12,7 +12,7 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     outputFileTracingIncludes: {
-      '/api/**/*': ['./node_modules/**/*.wasm'],
+      '/api/**/*': ['../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm'],
     },
   },
 
