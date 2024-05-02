@@ -1,6 +1,7 @@
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
 
 import { GetServerSideProps } from 'next';
 import { useTranslation } from 'next-i18next';
@@ -77,6 +78,13 @@ import { v4 as uuidv4 } from 'uuid';
 const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const loadingRef = useRef<LoadingBarRef>(null);
+  const startLoadingBar = useCallback(() => {
+    loadingRef.current?.continuousStart();
+  }, []);
+  const completeLoadingBar = useCallback(() => {
+    loadingRef.current?.complete();
+  }, []);
   const defaultModelId = fallbackModelID;
   const { t } = useTranslation('chat');
   const { isLoading, isPlaying, currentSpeechId, speak, stopPlaying } =
@@ -797,6 +805,8 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           setDragData,
           removeDragData,
           stopConversationRef,
+          startLoadingBar,
+          completeLoadingBar,
         }}
       >
         <Head>
@@ -807,6 +817,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
             content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1"
           />
         </Head>
+        <LoadingBar color={'white'} ref={loadingRef} />
         <>{children}</>
       </HomeContext.Provider>
     </OrientationBlock>
