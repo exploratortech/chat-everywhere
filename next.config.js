@@ -12,7 +12,7 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     outputFileTracingIncludes: {
-      '/api/v2/thread-handler': ['./node_modules/@dqbd/tiktoken/lite/*'],
+      '/api/**/*': ['./node_modules/**/*.wasm'],
     },
   },
 
