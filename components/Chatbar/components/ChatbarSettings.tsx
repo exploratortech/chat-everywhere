@@ -19,6 +19,7 @@ import { trackEvent } from '@/utils/app/eventTracking';
 import CloudSyncStatusComponent from '../../Sidebar/components/CloudSyncComponent';
 import UserAccountBadge from '@/components/User/UserAccountBadge';
 import HomeContext from '@/components/home/home.context';
+import PreviewVersionFlag from '@/components/ui/preview-version-flag';
 
 import { SidebarButton } from '../../Sidebar/SidebarButton';
 import { ClearConversations } from './ClearConversations';
@@ -106,6 +107,7 @@ export const ChatbarSettings = () => {
                 value: true,
               });
             }}
+            suffixIcon={<PreviewVersionFlag />}
           />
         )}
         <SidebarButton
