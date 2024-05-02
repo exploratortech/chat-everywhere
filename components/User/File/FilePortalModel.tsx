@@ -82,7 +82,7 @@ export default function FilePortalModel({ onClose }: Props) {
                               <li>{t('File Size Limitation')}: 50 MB</li>
                               <li>
                                 {t('PDF Page Limitation')}:{' '}
-                                {t('{{pages}}} Pages', { pages: 300 })}
+                                {t('{{pages}} Pages', { pages: 300 })}
                               </li>
                             </ul>
                           </AlertDescription>
