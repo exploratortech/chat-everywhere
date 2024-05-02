@@ -23,7 +23,7 @@ export function useFileUpload() {
       withLoading(async () => {
         const accessToken = (await supabase.auth.getSession()).data.session
           ?.access_token!;
-        const result = await fetch(`/api/files/upload-url-edge`, {
+        const result = await fetch(`/api/files/upload-url`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
