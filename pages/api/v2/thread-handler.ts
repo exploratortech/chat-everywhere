@@ -30,6 +30,8 @@ export default async function handler(
     res.status(405).end('Method Not Allowed');
   }
 
+  console.log("Can you see me??");
+
   const authToken = req.headers['auth-token'];
 
   if (authToken !== process.env.THREAD_RUNNER_AUTH_TOKEN) {
