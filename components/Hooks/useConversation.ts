@@ -8,7 +8,7 @@ export const useConversation = () => {
     state: { selectedConversation, outputLanguage, messageIsStreaming },
   } = useContext(HomeContext);
 
-  const { isConversationModeActive, currentSpeaker, queueMessage } =
+  const { isConversing, currentSpeaker, queueMessage, loadingTts } =
     useCognitiveService();
 
   const pointer = useRef<number>(0);
@@ -25,13 +25,16 @@ export const useConversation = () => {
   }, [currentSpeaker]);
 
   useEffect(() => {
-    if (!isConversationModeActive) return;
+    if (!isConversing) return;
     if (!selectedConversation || !selectedConversation.messages.length) return;
     if (!segmenter.current) return;
 
-    // Retrieve the portion of the content that hasn't been processed.
-    const { content } =
+    const message =
       selectedConversation.messages[selectedConversation.messages.length - 1];
+    if (message.role !== 'assistant') return;
+
+    // Retrieve the portion of the content that hasn't been processed.
+    const { content } = message;
     const subContent = content.substring(pointer.current);
 
     // This line prevents queuing the remaining content more than once.
@@ -41,7 +44,7 @@ export const useConversation = () => {
     const sentences = Array.from(segmenter.current.segment(subContent));
 
     if (!messageIsStreaming) {
-      // Message is done streaming. Queue the remaining content and reset pointer.
+      // Message is done streaming; queue the remaining content.
       pointer.current += subContent.length;
       queueMessage(subContent);
     } else {
@@ -60,7 +63,8 @@ export const useConversation = () => {
   }, [
     messageIsStreaming,
     selectedConversation,
-    isConversationModeActive,
+    isConversing,
     queueMessage,
+    loadingTts,
   ]);
 };

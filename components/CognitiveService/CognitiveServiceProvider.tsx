@@ -179,7 +179,6 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
   }, []);
 
   const initSpeechSynthesizer = useCallback(async () => {
-    console.log('initSpeechSynthesizer()');
     try {
       if (loadingTts) return;
 
