@@ -179,6 +179,7 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
   }, []);
 
   const initSpeechSynthesizer = useCallback(async () => {
+    console.log('initSpeechSynthesizer()');
     try {
       if (loadingTts) return;
 
@@ -237,36 +238,52 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
     displayErrorToast,
   ]);
 
-  const closeSpeechSynthesizer = useCallback(() => {
-    speechSynthesizer.current?.close();
-    speechSynthesizer.current = undefined;
+  const closeSpeechSynthesizer = useCallback((): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+      if (!speechSynthesizer.current) {
+        resolve();
+        return;
+      }
+      speechSynthesizer.current.close(
+        () => resolve(),
+        (error) => reject(error),
+      );
+      speechSynthesizer.current = undefined;
+    });
   }, []);
 
-  const closePlayer = useCallback(() => {
-    if (!player.current) return;
-    const { internalAudio } = player.current;
-    // https://html.spec.whatwg.org/multipage/media.html#best-practices-for-authors-using-media-elements
-    internalAudio.removeAttribute('src');
-    internalAudio.load();
-    player.current.close();
-    setPlayingSpeech(false);
+  const closePlayer = useCallback((): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+      if (!player.current) {
+        resolve();
+        return;
+      }
+
+      const { internalAudio } = player.current;
+      // https://html.spec.whatwg.org/multipage/media.html#best-practices-for-authors-using-media-elements
+      internalAudio.removeAttribute('src');
+      internalAudio.load();
+      player.current.close(
+        () => resolve(),
+        (error) => reject(error),
+      );
+      setPlayingSpeech(false);
+    });
   }, []);
 
   // Play a one-off message.
   const playMessage = useCallback(
     async (message: string, speechId: string) => {
       try {
-        closePlayer();
-        closeSpeechSynthesizer();
-        setCurrentSpeechId(speechId);
-
+        await Promise.all([closePlayer(), closeSpeechSynthesizer()]);
         await initSpeechSynthesizer();
+        setCurrentSpeechId(speechId);
 
         const ssml = `
           <speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
             <voice name="${voiceMap[speechRecognitionLanguage]}">
               <prosody rate="${getSpeechSpeedInSsml()}">
-              ${message}
+                ${message}
               </prosody>
             </voice>
           </speak>
