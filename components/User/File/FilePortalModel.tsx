@@ -1,7 +1,12 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { IconAlertCircle, IconX } from '@tabler/icons-react';
+import {
+  IconAlertCircle,
+  IconRotateClockwise,
+  IconX,
+} from '@tabler/icons-react';
 import { IconUpload } from '@tabler/icons-react';
 import React, { Fragment, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useFileUpload } from '@/hooks/file/useFileUpload';
 
@@ -92,7 +97,7 @@ export default function FilePortalModel({ onClose }: Props) {
 const UploadFileComponent = () => {
   const uploadFileMutation = useFileUpload();
   const {
-    uploadFileMutation: { mutateAsync: uploadFile },
+    uploadFileMutation: { mutateAsync: uploadFile, isLoading },
     uploadProgress,
   } = uploadFileMutation;
   const fileInputRef = useRef<HTMLInputElement>(null); // Added a ref to the input
@@ -127,18 +132,30 @@ const UploadFileComponent = () => {
     fileInputRef.current?.click();
   };
 
+  const { t } = useTranslation('model');
+
   return (
     <div>
       <div className="flex gap-4">
         <Button
-          className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 bg-neutral-50 text-neutral-900 hover:bg-neutral-50/90 focus:ring-neutral-300"
+          className="min-w-[7.5rem] inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 bg-neutral-50 text-neutral-900 hover:bg-neutral-50/90 focus:ring-neutral-300"
           onClick={triggerFileInput}
+          disabled={isLoading}
         >
-          <IconUpload className="mr-2 h-4 w-4" />
-          Upload
+          {isLoading ? (
+            <>
+              <IconRotateClockwise className="mr-2 h-4 w-4 animate-spin" />
+              {t('Loading...')}
+            </>
+          ) : (
+            <>
+              <IconUpload className="mr-2 h-4 w-4" />
+              {t('Upload')}
+            </>
+          )}
         </Button>
         <div className="flex-1">
-          {uploadProgress && <UploadProgress progressNumber={uploadProgress} />}
+          {isLoading && <UploadProgress progressNumber={uploadProgress || 0} />}
         </div>
       </div>
       <input
