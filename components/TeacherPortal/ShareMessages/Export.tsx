@@ -48,7 +48,41 @@ const Export = ({
     // Convert submissions to HTML
     const exportDate = new Date().toLocaleString();
     const exportSelection = selectedMessageIds.length > 0 ? `Selected Messages (${selectedMessageIds.length})` : selectedTags.length > 0 ? `All in Tags (${selectedTags.map(tag => tag.name).join(', ')})` : 'All Messages';
+    // Styles for exported HTML
+      const styles = `
+      <style>
+        body {
+          font-family: 'Arial', sans-serif;
+        }
+        header {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        h1 {
+          font-size: 24px;
+        }
+        h2 {
+          font-size: 20px;
+          color: #333;
+        }
+        p {
+          font-size: 16px;
+          color: #666;
+        }
+        img {
+          max-width: 100%;
+          height: auto;
+        }
+        .submission {
+          border-bottom: 1px solid #eee;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
+        }
+        /* Add more styles as needed */
+      </style>
+    `;
     const htmlContent = `
+      ${styles}
       <header>
         <h1>Export from Chat Everywhere (Teacher's portal)</h1>
         <p>Export Date: ${exportDate}</p>
