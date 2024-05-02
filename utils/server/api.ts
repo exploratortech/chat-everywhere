@@ -199,7 +199,7 @@ export const authorizedOpenAiRequest = async (
 ) => {
   const headers = {
     Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    'OpenAI-Beta': 'assistants=v1',
+    'OpenAI-Beta': 'assistants=v2',
     'Content-Type': 'application/json',
     ...options.headers,
   };

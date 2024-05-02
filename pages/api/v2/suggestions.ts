@@ -62,7 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
         body: JSON.stringify({
           messages: messagesPayload,
           max_tokens: 500,
-          model: 'gpt-3.5-turbo-1106',
+          model: 'gpt-3.5-turbo',
           temperature: 0.0,
           stream: false,
           response_format: { type: 'json_object' },
