@@ -21,6 +21,7 @@ type Props = {
 };
 
 export default function FilePortalModel({ onClose }: Props) {
+  const { t } = useTranslation('model');
   return (
     <Transition appear show={true} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose} open>
@@ -67,13 +68,20 @@ export default function FilePortalModel({ onClose }: Props) {
                         <Alert className="bg-yellow-100 text-black">
                           <IconAlertCircle className="h-4 w-4 !text-yellow-500 " />
                           <AlertTitle className="text-base font-medium">
-                            Warning
+                            {t('Warning')}
                           </AlertTitle>
                           <AlertDescription>
-                            <p>Currently we only support PDF and TXT files.</p>
+                            <p>
+                              {t(
+                                'Currently we only support PDF and TXT files.',
+                              )}
+                            </p>
                             <ul>
-                              <li>File Size Limitation: 50 MB</li>
-                              <li>PDF Page Limitation: 300 Pages</li>
+                              <li>{t('File Size Limitation')}: 50 MB</li>
+                              <li>
+                                {t('PDF Page Limitation')}:{' '}
+                                {t('{{pages}}} Pages', { pages: 300 })}
+                              </li>
                             </ul>
                           </AlertDescription>
                         </Alert>
@@ -104,7 +112,7 @@ const UploadFileComponent = () => {
 
   const handleFileSelect = async (file: File | null) => {
     if (!file) {
-      alert('No file selected.');
+      alert(t('No file selected.'));
       return;
     }
 
@@ -112,7 +120,7 @@ const UploadFileComponent = () => {
 
     // Check file Size
     if (file.size > maxFileSize) {
-      alert('File size exceeds the maximum limit of 50 MB.');
+      alert(t('File size exceeds the maximum limit of {{mb}} MB.', { mb: 50 }));
       return;
     }
 

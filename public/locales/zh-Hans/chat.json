@@ -60,5 +60,7 @@
   "Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.": "抱歉，我们的安全系统在您的消息中发现了不适当的内容。请尝试更换主题并再次尝试。",
   "AI image generation is temporarily unavailable. We are working to get it back online as soon as possible.": "AI图像生成暂时无法使用。我们正在努力尽快恢复在线状态。",
   "Custom Instruction ({{customInstructionPromptName}}) is in use": "提示词模版 ({{customInstructionPromptName}}) 正在使用中",
-  "Custom Instruction only available in Chat mode": "提示词模版仅在聊天模式下可用"
+  "Custom Instruction only available in Chat mode": "提示词模版仅在聊天模式下可用",
+  "You are not an Ultra user, please upgrade to Ultra to use this Gemini Chat": "您不是 Ultra 用户，请升级为 Ultra 以使用 Gemini Chat",
+  "This file does not exist, it will be deleted from the chat": "此档案不存在，将从对话中删除"
 }

@@ -1,5 +1,6 @@
 import { IconAlertCircleFilled, IconX } from '@tabler/icons-react';
 import React, { useContext, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useFetchFileList } from '@/hooks/file/useFetchFileList';
 
@@ -23,6 +24,7 @@ interface UserFileItemProps {
 }
 
 const UserFileItem: React.FC<UserFileItemProps> = ({ file, onRemove }) => {
+  const { t } = useTranslation('chat');
   const { data: files } = useFetchFileList();
   const {
     state: { isUltraUser },
@@ -34,13 +36,15 @@ const UserFileItem: React.FC<UserFileItemProps> = ({ file, onRemove }) => {
   );
   const errorTooltipMessage = useMemo(() => {
     if (!isUltraUser) {
-      return 'You are not an Ultra user, please upgrade to Ultra to use this Gemini Chat';
+      return t(
+        'You are not an Ultra user, please upgrade to Ultra to use this Gemini Chat',
+      );
     }
     if (!fileExists) {
-      return 'This file does not exist, it will be deleted from the chat';
+      return t('This file does not exist, it will be deleted from the chat');
     }
     return '';
-  }, [isUltraUser, fileExists]);
+  }, [isUltraUser, fileExists, t]);
 
   if (errorTooltipMessage) {
     return (

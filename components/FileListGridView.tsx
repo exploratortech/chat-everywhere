@@ -25,42 +25,47 @@ export function FileListGridView({
   closeDialogCallback: () => void;
 }) {
   const { data: userFiles } = useFetchFileList();
+  const { t } = useTranslation('model');
   return (
     <div className="flex flex-col">
       <div className="flex-1 overflow-auto p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {userFiles &&
-            userFiles.map((file, index) => (
-              <div
-                key={`${file.id}-${index}`}
-                className="border rounded-lg shadow-sm overflow-hidden"
-                title={file.filename}
-              >
-                <div className="group h-full hover:bg-neutral-800 p-4 flex flex-col items-center justify-center">
-                  <div className="flex items-center justify-center w-12 h-12 bg-neutral-800 rounded-full mb-4">
-                    <UserFileItemIcon fileType={file.filetype} />
-                  </div>
-                  <div className="font-medium text-center mb-2 h-[3rem] overflow-hidden">
-                    {file.filename}
-                  </div>
-                  <div className="text-neutral-400 text-sm text-center">
-                    <RelativeTimeComponent time={file.timeCreated} /> -{' '}
-                    {formatFileSize(file.size)}
-                  </div>
-                  <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity mt-4">
-                    {/* TODO: download button To be done  */}
-                    {/* <DownloadButton /> */}
-                    <AddToChatButton
-                      file={file}
-                      closeDialogCallback={closeDialogCallback}
-                    />
+        {userFiles && userFiles.length === 0 ? (
+          <div className="text-center">{t('No files uploaded')}</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {userFiles &&
+              userFiles.map((file, index) => (
+                <div
+                  key={`${file.id}-${index}`}
+                  className="border rounded-lg shadow-sm overflow-hidden"
+                  title={file.filename}
+                >
+                  <div className="group h-full hover:bg-neutral-800 p-4 flex flex-col items-center justify-center">
+                    <div className="flex items-center justify-center w-12 h-12 bg-neutral-800 rounded-full mb-4">
+                      <UserFileItemIcon fileType={file.filetype} />
+                    </div>
+                    <div className="font-medium text-center mb-2 h-[3rem] overflow-hidden">
+                      {file.filename}
+                    </div>
+                    <div className="text-neutral-400 text-sm text-center">
+                      <RelativeTimeComponent time={file.timeCreated} /> -{' '}
+                      {formatFileSize(file.size)}
+                    </div>
+                    <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity mt-4">
+                      {/* TODO: download button To be done  */}
+                      {/* <DownloadButton /> */}
+                      <AddToChatButton
+                        file={file}
+                        closeDialogCallback={closeDialogCallback}
+                      />
 
-                    <TrashButton objectPath={file.objectPath} />
+                      <TrashButton objectPath={file.objectPath} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-        </div>
+              ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -122,20 +127,22 @@ function AddToChatButton({
       toast.error('File already in current chat');
     }
   };
+  const { t } = useTranslation('model');
   return (
     <Button size="icon" variant="ghost" onClick={handleAddToChat}>
       <IconMessagePlus />
-      <span className="sr-only">Add to current chat</span>
+      <span className="sr-only">{t('Add to current chat')}</span>
     </Button>
   );
 }
 
 function TrashButton({ objectPath }: { objectPath: string }) {
   const { mutateAsync: deleteFile } = useDeleteObject();
+  const { t } = useTranslation('model');
   return (
     <Button size="icon" variant="ghost" onClick={() => deleteFile(objectPath)}>
       <IconTrash />
-      <span className="sr-only">Delete</span>
+      <span className="sr-only">{t('Delete')}</span>
     </Button>
   );
 }

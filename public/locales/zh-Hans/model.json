@@ -211,5 +211,15 @@
   "Clear selection": "取消",
   "Tags updated successfully": "标签已成功更新",
   "Failed to update tags": "更新标签时出错",
-  "Upload": "上传"
+  "Upload": "上传",
+  "No files uploaded": "尚未上传任何檔案",
+  "Sorry, only the Gemini mode supports files, please clear all files to use other mode.": "抱歉，只有Gemini模式支持档案，请清除所有档案以使用其他模式",
+  "Warning": "警告",
+  "Currently we only support PDF and TXT files.": "目前我们仅支持PDF和TXT文件。",
+  "File Size Limitation": "文件大小限制",
+  "PDF Page Limitation": "PDF页面限制",
+  "{{pages}} Pages": "{{pages}} 页",
+  "No file selected.": "未选择文件",
+  "File size exceeds the maximum limit of {{mb}} MB.": "文件大小超过最大限制 {{mb}} MB",
+  "Add to current chat": "加入到当前对话"
 }
