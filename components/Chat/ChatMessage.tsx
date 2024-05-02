@@ -173,6 +173,23 @@ export const ChatMessage: FC<Props> = memo(
       homeDispatch({ field: 'conversations', value: all });
     };
 
+    // Add a new state for the selected text
+    const [selectedText, setSelectedText] = useState('');
+
+    // Method to handle text selection
+    useEffect(() => {
+      const logSelection = () => {
+        const text = window.getSelection()?.toString();
+        setSelectedText(text || '');
+      };
+    
+      document.addEventListener('selectionchange', logSelection);
+    
+      return () => {
+        document.removeEventListener('selectionchange', logSelection);
+      };
+    }, []);
+
     const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       setIsTyping(e.nativeEvent.isComposing);
       if (e.key === 'Enter' && !isTyping && !e.shiftKey) {
@@ -388,11 +405,15 @@ export const ChatMessage: FC<Props> = memo(
                         >
                           <IconTrash size={18} />
                         </button>
-                        <LineShareButton messageContent={message.content} />
+                        <LineShareButton 
+                        messageContent={selectedText !== '' ? selectedText : message.content} 
+                        isSelectedText = { selectedText !== '' ? true : false}
+                        />
                         {isStudentAccount && (
                           <div className="ml-2 flex items-center">
                             <StudentShareMessageButton
-                              messageContent={message.content}
+                              messageContent={selectedText !== '' ? selectedText : message.content}
+                              isSelectedText = { selectedText !== '' ? true : false}
                             />
                           </div>
                         )}
@@ -404,11 +425,11 @@ export const ChatMessage: FC<Props> = memo(
             ) : (
               <div className="flex w-full flex-col md:justify-between">
                 <div className="flex flex-row justify-between">
-                  <AssistantRespondMessage
-                    formattedMessage={formattedMessage}
-                    messageIndex={messageIndex}
-                    messagePluginId={message.pluginId}
-                  />
+                    <AssistantRespondMessage
+                      formattedMessage={formattedMessage}
+                      messageIndex={messageIndex}
+                      messagePluginId={message.pluginId}
+                    />
                   <div className="flex m-1 tablet:hidden">
                     <CopyButton />
                   </div>
@@ -436,12 +457,14 @@ export const ChatMessage: FC<Props> = memo(
                       !messageIsStreaming && (
                         <>
                           <LineShareButton
-                            messageContent={message.content}
+                            messageContent={selectedText !== '' ? selectedText : message.content}
+                            isSelectedText = { selectedText !== '' ? true : false }
                             className="ml-2"
                           />
                           {isStudentAccount && (
                             <StudentShareMessageButton
-                              messageContent={message.content}
+                              messageContent={selectedText !== '' ? selectedText : message.content}
+                              isSelectedText = { selectedText !== '' ? true : false}
                               className="ml-2"
                             />
                           )}

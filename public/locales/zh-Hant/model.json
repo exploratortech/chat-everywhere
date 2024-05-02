@@ -223,5 +223,9 @@
   "No file selected.": "未選擇檔案",
   "File size exceeds the maximum limit of {{mb}} MB.": "檔案大小超過最大限制 {{mb}} MB",
   "Add to current chat": "加入到當前對話",
-  "Download": "下載"
+  "Download": "下載",
+  "Edit titles": "編輯標題",
+  "Enter new title": "輸入新的標題",
+  "Titles updated successfully": "標題已成功更新",
+  "Failed to update titles": "更新標題時出錯"
 }
