@@ -172,7 +172,7 @@ const UploadFileComponent = () => {
       <input
         ref={fileInputRef}
         type="file"
-        accept="application/pdf, text/plain"
+        accept="application/pdf, text/plain, audio/aac, audio/flac, audio/mp3, audio/m4a, audio/mpeg, audio/mpga, audio/mp4, audio/opus, audio/pcm, audio/wav, audio/webm, image/png, image/jpeg"
         className="hidden"
         onChange={(e) => {
           if (e.target.files && e.target.files[0]) {
