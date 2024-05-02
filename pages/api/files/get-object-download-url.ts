@@ -2,9 +2,8 @@ import {
   fetchUserProfileWithAccessToken,
   unauthorizedResponse,
 } from '@/utils/server/auth';
-import { origins } from '@/utils/server/google/auth';
-import { getAccessToken } from '@/utils/server/google/auth';
 import { createSignature } from '@/utils/server/google/signature';
+import { updateBucketCORS } from '@/utils/server/google/updateBucketCORS';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -31,14 +30,16 @@ export default async function handler(req: Request) {
       status: 400,
     });
   }
-  const userProfile = await fetchUserProfileWithAccessToken(req);
+  const [userProfile] = await Promise.all([
+    fetchUserProfileWithAccessToken(req),
+    updateBucketCORS(),
+  ]);
   if (!userProfile || !userProfile.isTeacherAccount)
     return unauthorizedResponse;
 
   if (!objectPath.includes(userProfile.id)) {
     return unauthorizedResponse;
   }
-  await updateBucketCORS();
 
   const expiration = 3600;
 
@@ -133,43 +134,4 @@ export default async function handler(req: Request) {
       status: 200,
     },
   );
-}
-async function updateBucketCORS() {
-  const accessToken = await getAccessToken();
-
-  const url = `https://storage.googleapis.com/storage/v1/b/${BUCKET_NAME}?fields=cors`;
-
-  const corsConfig = {
-    cors: [
-      {
-        origin: origins(),
-        method: ['GET', 'POST', 'PUT'],
-        responseHeader: ['Content-Type'],
-        maxAgeSeconds: 3600,
-      },
-    ],
-  };
-
-  const headers = {
-    Authorization: `Bearer ${accessToken}`,
-    'Content-Type': 'application/json',
-  };
-
-  try {
-    const response = await fetch(url, {
-      method: 'PATCH',
-      headers: headers,
-      body: JSON.stringify(corsConfig),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error updating CORS configuration:', error);
-    throw error;
-  }
 }
