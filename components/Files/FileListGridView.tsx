@@ -42,7 +42,7 @@ export function FileListGridView({
                   className="border rounded-lg shadow-sm overflow-hidden"
                   title={file.filename}
                 >
-                  <div className="group h-full hover:bg-neutral-800 p-4 flex flex-col items-center justify-center">
+                  <div className="group h-full hover:bg-neutral-800 p-4 flex flex-col items-center justify-start">
                     <div className="flex items-center content-start justify-center w-12 h-12 bg-neutral-800 rounded-full my-4">
                       <UserFileItemIcon fileType={file.filetype} />
                     </div>
