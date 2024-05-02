@@ -10,6 +10,9 @@ const withPWA = require('next-pwa')({
 const nextConfig = {
   i18n,
   reactStrictMode: true,
+  outputFileTracingIncludes: {
+    '/api/v2/thread-handler': ['.next/server/static/wasm/*.wasm'],
+  },
 
   webpack(config, { isServer, dev }) {
     config.experiments = {

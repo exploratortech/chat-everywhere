@@ -30,7 +30,7 @@ export default async function handler(
     res.status(405).end('Method Not Allowed');
   }
 
-  console.log("Can you see me??");
+  console.log("Thread-handler in progress");
 
   const authToken = req.headers['auth-token'];
 

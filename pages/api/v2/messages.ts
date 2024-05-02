@@ -40,18 +40,14 @@ const handler = async (req: Request): Promise<Response> => {
     const userProfile = await getUserProfile(user.user.id);
     if (!user || userProfile.plan === 'free') return unauthorizedResponse;
 
-    const {
-      conversationId,
-      latestMessageId,
-      requestType,
-      messageContent,
-    } = (await req.json()) as {
-      requestType: RequestType;
-      conversationId: string;
-      beforeMessageId?: string;
-      latestMessageId?: string;
-      messageContent?: string;
-    };
+    const { conversationId, latestMessageId, requestType, messageContent } =
+      (await req.json()) as {
+        requestType: RequestType;
+        conversationId: string;
+        beforeMessageId?: string;
+        latestMessageId?: string;
+        messageContent?: string;
+      };
 
     if (!requestType)
       return new Response('Invalid request type', { status: 400 });
@@ -62,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
         return await retrieveMessages(
           user.user.id,
           conversationId,
-          latestMessageId
+          latestMessageId,
         );
       case 'send message':
         serverSideTrackEvent(userProfile.id, 'v2 Send message');
@@ -215,6 +211,12 @@ const sendMessage = async (
   }
 
   await setConversationRunInProgress(conversationId, true);
+
+  console.log(
+    `${
+      process.env.SERVER_HOST || `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+    }/api/v2/thread-handler`,
+  );
 
   fetch(
     `${
