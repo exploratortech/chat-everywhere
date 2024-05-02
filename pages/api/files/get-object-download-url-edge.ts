@@ -1,4 +1,7 @@
-// TODO: its not working just yet, need to fix the signature not correct`
+import {
+  fetchUserProfileWithAccessToken,
+  unauthorizedResponse,
+} from '@/utils/server/auth';
 import { origins } from '@/utils/server/google/auth';
 import { getAccessToken } from '@/utils/server/google/auth';
 import { createSignature } from '@/utils/server/google/signature';
@@ -22,18 +25,21 @@ export default async function handler(req: Request) {
     });
   }
   const requestData = await req.json();
-  const fileName = requestData.fileName;
-
-  if (!fileName) {
+  const objectPath = requestData.objectPath;
+  if (!objectPath) {
     return new Response('File name is required', {
       status: 400,
     });
   }
+  const userProfile = await fetchUserProfileWithAccessToken(req);
+  if (!userProfile || !userProfile.isTeacherAccount)
+    return unauthorizedResponse;
+
+  if (!objectPath.includes(userProfile.id)) {
+    return unauthorizedResponse;
+  }
   await updateBucketCORS();
 
-  const userProfile = { id: '98ba69f3-5648-4951-8308-128a90a6f770' };
-  const folderPath = userProfile.id;
-  const objectPath = `${folderPath}/${fileName}`;
   const expiration = 3600;
 
   const escapedObjectName = encodeURIComponent(objectPath);
@@ -64,7 +70,7 @@ export default async function handler(req: Request) {
     )
     .join('');
   const queryParams = {
-    'response-content-disposition': 'attachment; filename=' + fileName,
+    'response-content-disposition': 'attachment; filename=' + objectPath,
     'X-Goog-Algorithm': 'GOOG4-RSA-SHA256',
     'X-Goog-Credential': credential,
     'X-Goog-Date': requestTimestamp,
@@ -115,10 +121,6 @@ export default async function handler(req: Request) {
 
   const signedUrl = `${schemeAndHost}${canonicalUri}?${canonicalQueryString}&X-Goog-Signature=${signature}`;
 
-  console.log({
-    stringToSign,
-    canonicalRequest,
-  });
   return new Response(
     JSON.stringify({
       url: signedUrl,
@@ -133,7 +135,7 @@ export default async function handler(req: Request) {
   );
 }
 async function updateBucketCORS() {
-  const accessToken = await getAccessToken(); // Assuming getAccessToken() is available from the imported utils
+  const accessToken = await getAccessToken();
 
   const url = `https://storage.googleapis.com/storage/v1/b/${BUCKET_NAME}?fields=cors`;
 
