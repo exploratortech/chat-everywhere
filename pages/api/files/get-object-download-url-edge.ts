@@ -1,4 +1,4 @@
-// TODO: its not working just yet, need to fix the signature not correct
+// TODO: its not working just yet, need to fix the signature not correct`
 import { origins } from '@/utils/server/google/auth';
 import { getAccessToken } from '@/utils/server/google/auth';
 import { createSignature } from '@/utils/server/google/signature';
@@ -81,7 +81,7 @@ export default async function handler(req: Request) {
     )
     .join('&');
   const canonicalRequest = [
-    'PUT',
+    'GET',
     canonicalUri,
     canonicalQueryString,
     canonicalHeaders,
@@ -115,6 +115,10 @@ export default async function handler(req: Request) {
 
   const signedUrl = `${schemeAndHost}${canonicalUri}?${canonicalQueryString}&x-goog-signature=${signature}`;
 
+  console.log({
+    stringToSign,
+    canonicalRequest,
+  });
   return new Response(
     JSON.stringify({
       url: signedUrl,
