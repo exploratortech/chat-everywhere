@@ -23,6 +23,7 @@ type Props = {
 
 export default function FilePortalModel({ onClose }: Props) {
   const { t } = useTranslation('model');
+  const { t: sidebarT } = useTranslation('sidebar');
   return (
     <Transition appear show={true} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose} open>
@@ -60,7 +61,7 @@ export default function FilePortalModel({ onClose }: Props) {
                   <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center gap-2 text-neutral-200 font-bold">
-                        File Portal
+                        {sidebarT('File Portal')}
                         <PreviewVersionFlag />
                       </div>
                       <div className="p-4">
