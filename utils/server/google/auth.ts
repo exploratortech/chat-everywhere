@@ -14,7 +14,6 @@ const SCOPE_LIST = [
   'https://www.googleapis.com/auth/devstorage.read_only',
   'https://www.googleapis.com/auth/devstorage.read_write',
   // IAM
-  'https://www.googleapis.com/auth/cloud-platform',
   'https://www.googleapis.com/auth/iam',
 ];
 async function createSignedJwt() {
