@@ -79,9 +79,12 @@ export default async function handler(req: Request) {
     .join(';');
   const canonicalHeaders = Object.keys(headers)
     .sort()
-    .map(
-      (key) => `${key.toLowerCase()}:${headers[key as keyof typeof headers]}\n`,
-    )
+    .map((key) => {
+      const value = key.startsWith('x-goog-meta')
+        ? encodeURIComponent(headers[key as keyof typeof headers])
+        : headers[key as keyof typeof headers];
+      return `${key.toLowerCase()}:${value}\n`;
+    })
     .join('');
   const queryParams = {
     'response-content-disposition': 'attachment; filename=' + filteredFileName,
@@ -136,10 +139,16 @@ export default async function handler(req: Request) {
 
   const signedUrl = `${schemeAndHost}${canonicalUri}?${canonicalQueryString}&x-goog-signature=${signature}`;
 
+  const encodedHeaders = Object.fromEntries(
+    Object.entries(headers).map(([key, value]) => [
+      key,
+      key.startsWith('x-goog-meta') ? encodeURIComponent(value) : value,
+    ]),
+  );
   return new Response(
     JSON.stringify({
       url: signedUrl,
-      headers,
+      headers: encodedHeaders,
     }),
     {
       status: 200,

@@ -15,6 +15,9 @@ export const useFetchFileList = () => {
     state: { user },
   } = useContext(HomeContext);
   const fetchFileList = async () => {
+    if (!user) {
+      return [];
+    }
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token!;
     const response = await fetch('/api/files/file-list-by-user', {

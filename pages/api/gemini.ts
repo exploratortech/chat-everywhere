@@ -216,7 +216,8 @@ async function callGeminiAPI(
           );
 
           for await (const chunk of body as any) {
-            parser.feed(decoder.decode(chunk));
+            const decoded = decoder.decode(chunk, { stream: true });
+            parser.feed(decoded);
           }
         })
         .catch((error) => {
