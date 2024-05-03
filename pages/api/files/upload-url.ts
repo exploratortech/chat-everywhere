@@ -79,12 +79,12 @@ export default async function handler(req: Request) {
     .join(';');
   const canonicalHeaders = Object.keys(headers)
     .sort()
-    .map(
-      (key) =>
-        `${key.toLowerCase()}:${encodeURIComponent(
-          headers[key as keyof typeof headers],
-        )}\n`,
-    )
+    .map((key) => {
+      const value = key.startsWith('x-goog-meta')
+        ? encodeURIComponent(headers[key as keyof typeof headers])
+        : headers[key as keyof typeof headers];
+      return `${key.toLowerCase()}:${value}\n`;
+    })
     .join('');
   const queryParams = {
     'response-content-disposition': 'attachment; filename=' + filteredFileName,
