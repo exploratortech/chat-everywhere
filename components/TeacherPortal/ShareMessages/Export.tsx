@@ -74,28 +74,29 @@ const Export = ({
           height: auto;
         }
         .submission {
-          border-bottom: 1px solid #eee;
-          padding-bottom: 20px;
-          margin-bottom: 20px;
+          border: 1px solid #c8c8c8;
+          background-color: #f9f9f9;
+          border-radius: 10px;
+          padding: 10px;
+          margin: 10px;
         }
-        /* Add more styles as needed */
       </style>
     `;
     const htmlContent = `
       ${styles}
       <header>
         <h1>Export from Chat Everywhere (Teacher's portal)</h1>
-        <p>Export Date: ${exportDate}</p>
+        <p>Export Date: ${new Date(exportDate).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}, ${new Date(exportDate).toLocaleTimeString('en-US')}</p>
         <p>Selection: ${exportSelection}</p>
       </header>
-      <hr>
+
       ${filteredSubmissions?.map(submission => `
-        <div>
+        <div class='submission'>
           <h2>${submission.student_name}</h2>
           <p>Tags: ${submission.message_tags.map(tag => tag.name).join(', ')}</p>
+          <p>Submitted at: ${new Date(submission.created_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
           <p>${submission.message_content}</p>
           ${submission.image_file_url ? `<img src="${submission.image_file_url}" alt="Student work">` : ''}
-          <hr>
         </div>
       `).join('')}
     `;
