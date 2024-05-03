@@ -121,7 +121,7 @@ async function createTempUser(code: string, codeId: string, uniqueId: string) {
   const createUserRes = await supabase.auth.admin.createUser({
     email: randomEmail,
     password: randomPassword,
-    email_confirm: true,
+    email_confirm: true, // even though we disabled "Confirm Email", it's still required
   });
   if (createUserRes.error) {
     throw createUserRes.error;
