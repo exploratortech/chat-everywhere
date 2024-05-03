@@ -200,6 +200,7 @@ async function callGeminiAPI(
                       const text = content.parts
                         .map((part) => part.text)
                         .join('');
+                      console.log({ text });
                       controller.enqueue(encoder.encode(text));
                     }
                     if (item.finishReason && item.finishReason === 'STOP') {
@@ -216,7 +217,9 @@ async function callGeminiAPI(
           );
 
           for await (const chunk of body as any) {
-            parser.feed(decoder.decode(chunk, { stream: true }));
+            const decoded = decoder.decode(chunk, { stream: true });
+            console.log({ decoded });
+            parser.feed(decoded);
           }
         })
         .catch((error) => {
