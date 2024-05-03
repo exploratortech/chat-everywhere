@@ -257,7 +257,7 @@ export const OpenAIStream = async (
 
           (async function () {
             for await (const chunk of res.body as any) {
-              parser.feed(decoder.decode(chunk));
+              parser.feed(decoder.decode(chunk, { stream: true }));
             }
 
             await logEvent({
