@@ -71,7 +71,9 @@ const Export = ({
         }
         img {
           max-width: 100%;
+          max-height: 700px;
           height: auto;
+          object-fit: contain;
         }
         .submission {
           border: 1px solid #c8c8c8;
