@@ -142,7 +142,7 @@ export default async function handler(req: Request) {
   const encodedHeaders = Object.fromEntries(
     Object.entries(headers).map(([key, value]) => [
       key,
-      encodeURIComponent(value),
+      key.startsWith('x-goog-meta') ? encodeURIComponent(value) : value,
     ]),
   );
   return new Response(
