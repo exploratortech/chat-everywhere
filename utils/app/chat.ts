@@ -239,7 +239,7 @@ async function handleDataResponse(
     }
     const { value, done: doneReading } = await reader.read();
     done = doneReading;
-    const chunkValue = decoder.decode(value);
+    const chunkValue = decoder.decode(value, { stream: true });
     text += chunkValue;
 
     if (text.includes('[DONE]')) {
