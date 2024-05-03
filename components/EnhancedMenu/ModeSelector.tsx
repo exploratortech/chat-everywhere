@@ -5,7 +5,7 @@ import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 
 import { PluginID } from '@/types/plugin';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 const ModeSelector = () => {
   const { t } = useTranslation('model');
@@ -91,6 +91,12 @@ const ModeSelector = () => {
                   {t('MQTT')}
                 </option>
               )}
+              <option
+                value={PluginID.aiPainter}
+                className="dark:bg-[#343541] dark:text-white text-yellow-600"
+              >
+                {t('AI Painter')}
+              </option>
             </>
           )}
         </select>

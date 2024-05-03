@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useTransition,
 } from 'react';
 
 import { useTranslation } from 'next-i18next';
@@ -18,12 +19,12 @@ import useFocusHandler from '@/hooks/useFocusInputHandler';
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
 
+import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import TokenCounter from './components/TokenCounter';
+import HomeContext from '@/components/home/home.context';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../Voice/VoiceInputButton';
@@ -31,7 +32,7 @@ import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';
 
 interface Props {
-  onSend: () => void;
+  onSend: (currentMessage: Message) => void;
   onRegenerate: () => void;
   stopConversationRef: MutableRefObject<boolean>;
   textareaRef: MutableRefObject<HTMLTextAreaElement | null>;
@@ -98,6 +99,7 @@ export const ChatInput = ({
       return;
     }
 
+    const content = textareaRef.current?.value;
     if (!content) {
       alert(t('Please enter a message'));
       return;
@@ -107,11 +109,18 @@ export const ChatInput = ({
       return;
     }
 
-    onSend();
-    setContent('');
-
-    if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
-      textareaRef.current.blur();
+    if (currentMessage) {
+      onSend({
+        ...currentMessage,
+        content,
+        role: 'user',
+      });
+      setContent('');
+      if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
+        textareaRef.current.blur();
+      }
+    } else {
+      alert('currentMessage is null');
     }
   };
 
@@ -246,15 +255,7 @@ export const ChatInput = ({
         textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'
       }`;
     }
-
-    homeDispatch({
-      field: 'currentMessage',
-      value: {
-        ...currentMessage,
-        role: 'user',
-        content,
-      },
-    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
 
   useEffect(() => {
@@ -270,9 +271,11 @@ export const ChatInput = ({
     return () => {
       window.removeEventListener('keydown', handleGlobalKeyDown);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isFocused, showSettingsModel]);
 
   useEffect(() => {
+    // Create currentMessage
     homeDispatch({
       field: 'currentMessage',
       value: {
@@ -357,11 +360,7 @@ export const ChatInput = ({
             }
           `}
         >
-          <EnhancedMenu
-            ref={menuRef}
-            isFocused={isFocused}
-            setIsFocused={setIsFocused}
-          />
+          <EnhancedMenu ref={menuRef} isFocused={isFocused} />
 
           <div className="flex items-start">
             <div className="flex items-center pt-1 pl-1">

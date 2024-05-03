@@ -1,4 +1,5 @@
 import { Dialog, Transition } from '@headlessui/react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { FC, Fragment, useContext, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
@@ -7,9 +8,7 @@ import { useTranslation } from 'next-i18next';
 import { markSurveyIsFilledInLocalStorage } from '@/utils/app/ui';
 import { getOrGenerateUserId } from '@/utils/data/taggingHelper';
 
-import HomeContext from '@/pages/api/home/home.context';
-
-import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
+import HomeContext from '@/components/home/home.context';
 
 type Props = {
   onClose: () => void;
@@ -26,7 +25,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
     state: { user },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
-  const supabaseClient = useMemo(() => createBrowserSupabaseClient(), []);
+  const supabaseClient = useSupabaseClient();
 
   const occupationOptions = [
     { value: 'student', label: 'Student' },
@@ -264,9 +263,15 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                             setSelectedOccupation(event.target.value)
                           }
                         >
-                          <option value="" className="bg-[#343541] text-white">{t('Select an occupation')}</option>
+                          <option value="" className="bg-[#343541] text-white">
+                            {t('Select an occupation')}
+                          </option>
                           {occupationOptions.map((option) => (
-                            <option key={option.value} value={option.value} className="bg-[#343541] text-white">
+                            <option
+                              key={option.value}
+                              value={option.value}
+                              className="bg-[#343541] text-white"
+                            >
                               <OptionLabels
                                 key={option.value}
                                 option={option.label}

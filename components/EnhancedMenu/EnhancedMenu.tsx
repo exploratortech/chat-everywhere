@@ -1,5 +1,6 @@
 import React, {
   forwardRef,
+  memo,
   useContext,
   useEffect,
   useMemo,
@@ -8,7 +9,7 @@ import React, {
 
 import { PluginID } from '@/types/plugin';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import ImageToPromptUpload from '../ImageToPromptUpload/ImageUpload';
 import ChangeOutputLanguageButton from './ChangeOutputLanguageButton';
@@ -21,11 +22,10 @@ import PropTypes from 'prop-types';
 
 type EnhancedMenuProps = {
   isFocused: boolean;
-  setIsFocused: (isFocused: boolean) => void;
 };
 
 const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
-  ({ isFocused, setIsFocused }, ref) => {
+  ({ isFocused }, ref) => {
     const {
       state: { messageIsStreaming, currentMessage, isSpeechRecognitionActive },
     } = useContext(HomeContext);
@@ -94,9 +94,8 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
 
 EnhancedMenu.propTypes = {
   isFocused: PropTypes.bool.isRequired,
-  setIsFocused: PropTypes.func.isRequired,
 };
 
 EnhancedMenu.displayName = 'EnhancedMenu';
 
-export default EnhancedMenu;
+export default memo(EnhancedMenu);

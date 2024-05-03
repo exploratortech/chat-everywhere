@@ -1,6 +1,11 @@
+import { OpenAIModels, fallbackModelID } from '@/types/openai';
+
+import dayjs from 'dayjs';
+import { v4 as uuidv4 } from 'uuid';
+
 export const DEFAULT_SYSTEM_PROMPT =
   "You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Always be aware of the current date and time, and make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format." +
-  'If the input includes text such as {lang=xxx}, the response should not include this text.' +
+  'If the input includes text such as [lang=xxx], the response should not include this text.' +
   `The current date is ${new Date().toLocaleDateString()}.`;
 
 export const OPENAI_API_HOST =
@@ -30,12 +35,14 @@ export const DEFAULT_REGION = 'icn1';
 export const IMAGE_TO_PROMPT_MAX_TIMEOUT = 30;
 
 export const AZURE_OPENAI_ENDPOINTS = [
+  process.env.AZURE_OPENAI_ENDPOINT_0,
   process.env.AZURE_OPENAI_ENDPOINT_1,
   process.env.AZURE_OPENAI_ENDPOINT_2,
   process.env.AZURE_OPENAI_ENDPOINT_3,
 ];
 
 export const AZURE_OPENAI_KEYS = [
+  process.env.AZURE_OPENAI_KEY_0,
   process.env.AZURE_OPENAI_KEY_1,
   process.env.AZURE_OPENAI_KEY_2,
   process.env.AZURE_OPENAI_KEY_3,
@@ -50,13 +57,27 @@ export const ENDPOINT_TRAFFIC_DISTRIBUTION = [
 ];
 
 export const AZURE_OPENAI_GPT_4_ENDPOINTS = [
+  process.env.AZURE_OPENAI_GPT_4_ENDPOINT_0,
   process.env.AZURE_OPENAI_GPT_4_ENDPOINT_1,
   process.env.AZURE_OPENAI_GPT_4_ENDPOINT_2,
 ];
 
 export const AZURE_OPENAI_GPT_4_KEYS = [
+  process.env.AZURE_OPENAI_GPT_4_KEY_0,
   process.env.AZURE_OPENAI_GPT_4_KEY_1,
   process.env.AZURE_OPENAI_GPT_4_KEY_2,
+];
+
+export const AZURE_DALL_E_3_ENDPOINTS = [
+  process.env.AZURE_DALL_E_3_ENDPOINT_0,
+  // process.env.AZURE_DALL_E_3_ENDPOINT_1, // RESOURCE NOT FOUND
+  process.env.AZURE_DALL_E_3_ENDPOINT_2,
+];
+
+export const AZURE_DALL_E_API_KEYS = [
+  process.env.AZURE_DALL_E_API_KEY_0,
+  // process.env.AZURE_DALL_E_API_KEY_1, // RESOURCE NOT FOUND
+  process.env.AZURE_DALL_E_API_KEY_2,
 ];
 
 export const ERROR_MESSAGES = {
@@ -64,4 +85,18 @@ export const ERROR_MESSAGES = {
     message: 'Content filter triggered',
     httpCode: 405,
   },
+};
+
+export const DEFAULT_FIRST_MESSAGE_TO_GPT =
+  'Provide a short welcome message based on your prompt, the role you are playing is based on the prompt';
+
+export const newDefaultConversation = {
+  id: uuidv4(),
+  name: 'New conversation',
+  messages: [],
+  model: OpenAIModels[fallbackModelID],
+  prompt: DEFAULT_SYSTEM_PROMPT,
+  temperature: DEFAULT_TEMPERATURE,
+  folderId: null,
+  lastUpdateAtUTC: dayjs().valueOf(),
 };

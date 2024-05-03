@@ -1,15 +1,15 @@
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import DropZone from './Dropzone';
 import ImagePreviewModel from './ImagePreviewModel';
 
-import { createBrowserSupabaseClient } from '@supabase/auth-helpers-nextjs';
 import { v4 } from 'uuid';
 
 const ImageToPromptUpload = () => {
@@ -26,7 +26,7 @@ const ImageToPromptUpload = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [filename, setFilename] = useState<string>('');
   const [showImagePreview, setShowImagePreview] = useState<boolean>(false);
-  const supabaseClient = useMemo(() => createBrowserSupabaseClient(), []);
+  const supabaseClient = useSupabaseClient();
 
   const fileInputOnChange = (file: File) => {
     if (!user) {
@@ -96,13 +96,19 @@ const ImageToPromptUpload = () => {
         user,
       });
     } catch (e) {
-      const isErrorMessage =  e && typeof e === 'object' && 'message' in e && typeof e.message === 'string'
-      const isMaxSizeError = isErrorMessage && (e.message as string).includes('maximum allowed size')
+      const isErrorMessage =
+        e &&
+        typeof e === 'object' &&
+        'message' in e &&
+        typeof e.message === 'string';
+      const isMaxSizeError =
+        isErrorMessage &&
+        (e.message as string).includes('maximum allowed size');
       if (isMaxSizeError) {
         toast.error(imageToPromptT('The Max Image Size is 20MB'));
       } else if (isErrorMessage) {
         toast.error(e.message as string);
-      } 
+      }
       console.log(e);
     }
 

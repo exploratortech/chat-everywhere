@@ -4,13 +4,13 @@ import React, { Dispatch, Fragment, createContext, useContext } from 'react';
 
 import { ActionType, useCreateReducer } from '@/hooks/useCreateReducer';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import Settings_Account from './Settings_Account';
 import Settings_App from './Settings_App';
 import Settings_Data from './Settings_Data';
-import Sidebar from './Sidebar';
 import Settings_MQTT from './Settings_MQTT';
+import Sidebar from './Sidebar';
 
 type Props = {
   onClose: () => void;

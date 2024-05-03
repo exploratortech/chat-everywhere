@@ -1,14 +1,15 @@
 import { FC, Fragment, useContext } from 'react';
 
+import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
+import { savePrompts } from '@/utils/app/prompts';
+import { generateRank, reorderItem } from '@/utils/app/rank';
+
 import { Prompt } from '@/types/prompt';
 
-import { generateRank, reorderItem } from '@/utils/app/rank';
-import { savePrompts } from '@/utils/app/prompts';
-import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
+import DropArea from '@/components/DropArea/DropArea';
+import HomeContext from '@/components/home/home.context';
 
 import { PromptComponent } from './Prompt';
-import DropArea from '@/components/DropArea/DropArea';
-import HomeContext from '@/pages/api/home/home.context';
 
 interface Props {
   prompts: Prompt[];
@@ -16,10 +17,7 @@ interface Props {
 
 export const Prompts: FC<Props> = ({ prompts }) => {
   const {
-    state: {
-      currentDrag,
-      prompts: unfilteredPrompts,
-    },
+    state: { currentDrag, prompts: unfilteredPrompts },
     dispatch,
   } = useContext(HomeContext);
 
@@ -33,7 +31,10 @@ export const Prompts: FC<Props> = ({ prompts }) => {
       const reorderedPrompts = reorderItem(
         unfilteredPrompts,
         prompt.id,
-        generateRank(prompts, index),
+        generateRank(
+          unfilteredPrompts.filter((p) => p.folderId == null),
+          index,
+        ),
         { updates: { folderId: null } },
       );
       dispatch({ field: 'prompts', value: reorderedPrompts });
@@ -52,16 +53,16 @@ export const Prompts: FC<Props> = ({ prompts }) => {
         onDrop={(e) => handleDrop(e, 0)}
       />
       {prompts.map((prompt, index) => (
-          <Fragment key={prompt.id}>
-            <PromptComponent prompt={prompt} />
-            <DropArea
-              allowedDragTypes={['prompt']}
-              canDrop={handleCanDrop}
-              index={index + 1}
-              onDrop={(e) => handleDrop(e, index + 1)}
-            />
-          </Fragment>
-        ))}
+        <Fragment key={prompt.id}>
+          <PromptComponent prompt={prompt} />
+          <DropArea
+            allowedDragTypes={['prompt']}
+            canDrop={handleCanDrop}
+            index={index + 1}
+            onDrop={(e) => handleDrop(e, index + 1)}
+          />
+        </Fragment>
+      ))}
     </div>
   );
 };

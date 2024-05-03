@@ -1,14 +1,29 @@
 import { getHomeUrl } from '@/utils/app/api';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+import { generateImage } from '@/utils/v2Chat/openAiApiUtils';
 
 import { FunctionCall } from '@/types/chat';
 import { mqttConnectionType } from '@/types/data';
+import { PluginID } from '@/types/plugin';
+
+import {
+  addUsageEntry,
+  getAdminSupabaseClient,
+  subtractCredit,
+} from '../supabase';
+
+import { decode } from 'base64-arraybuffer';
+import { v4 } from 'uuid';
 
 // This object is used as enum
 const helperFunctionNames = {
   weather: 'get-weather',
   line: 'send-message-to-line',
+  aiPainter: 'generate-image',
+  generateHtmlForAiPainterImages: 'generate-html-for-ai-painter-images',
 };
+
+const isInProductionOrLocalEnv = process.env.NEXT_PUBLIC_ENV === 'production' || process.env.NEXT_PUBLIC_ENV === 'local';
 
 export const getHelperFunctionCalls = (
   lineAccessToken?: string,
@@ -55,6 +70,7 @@ export const triggerHelperFunction = async (
   helperFunctionName: string,
   argumentsString: string,
   userId: string,
+  onProgressUpdate?: (payload: { content: string; type: string }) => void,
 ): Promise<string> => {
   console.log('Trying to trigger helperFunction: ', helperFunctionName);
 
@@ -121,6 +137,148 @@ export const triggerHelperFunction = async (
       } catch (e) {
         return 'Unable to send notification to LINE';
       }
+
+    case helperFunctionNames.aiPainter:
+      let prompt: string;
+      try {
+        prompt = JSON.parse(argumentsString).prompt;
+      } catch (e) {
+        return 'Unable to parse JSON that you provided, please output a valid JSON string. For example, {"prompt": "A cat"}';
+      }
+
+      serverSideTrackEvent('N/A', 'Helper function triggered', {
+        helperFunctionName: helperFunctionNames.aiPainter,
+      });
+      serverSideTrackEvent('N/A', 'DallE image generation');
+
+      const generateAndStoreImage = async () => {
+        const storeImage = async (imageBase64: string) => {
+          console.log(
+            'Image generated successfully, storing to Supabase storage ...',
+          );
+          const supabase = getAdminSupabaseClient();
+          const imageFileName = `${v4()}.png`;
+          const { error: fileUploadError } = await supabase.storage
+            .from('ai-images')
+            .upload(imageFileName, decode(imageBase64), {
+              cacheControl: '3600',
+              upsert: false,
+              contentType: 'image/png',
+            });
+          if (fileUploadError) throw fileUploadError;
+
+          const { data: imagePublicUrlData } = await supabase.storage
+            .from('ai-images')
+            .getPublicUrl(imageFileName);
+  
+
+          const compressedImageUrl = supabase.storage
+            .from('ai-images')
+            .getPublicUrl(imageFileName, {
+              transform: {
+                width: 500,
+                height: 500,
+              },
+            });
+
+          if (!imagePublicUrlData) throw new Error('Image generation failed');
+
+          return {
+            compressedUrl: compressedImageUrl.data.publicUrl,
+            imagePublicUrl: imagePublicUrlData.publicUrl,
+            fileName: imageFileName,
+          };
+        };
+
+        try {
+          const imageGenerationResponse = await generateImage(prompt);
+
+          if (!imageGenerationResponse.data) {
+            console.error('imageGenerationResponse: ', imageGenerationResponse);
+            if (!imageGenerationResponse.data)
+              throw new Error(
+                `Failed to generate image, below is the error message: ${imageGenerationResponse.errorMessage}`,
+              );
+          }
+          const generatedImageInBase64 =
+            imageGenerationResponse.data[0].b64_json;
+          if (!generatedImageInBase64) {
+            throw new Error('Failed to generate image');
+          }
+          // Run storeImage and substractUserCredit in parallel
+          const { imagePublicUrl, fileName, compressedUrl } = await storeImage(
+            generatedImageInBase64,
+          );
+
+          if (!imagePublicUrl) {
+            throw new Error('Failed to store image');
+          }
+          return {
+            revised_prompt: imageGenerationResponse.data[0].revised_prompt,
+            imagePublicUrl: isInProductionOrLocalEnv ? compressedUrl : imagePublicUrl,
+            fileName,
+          };
+        } catch (e) {
+          throw e;
+        }
+      };
+
+      try {
+        const [imageGenerationResponse1, imageGenerationResponse2] =
+          await Promise.all([generateAndStoreImage(), generateAndStoreImage()]);
+
+        if (onProgressUpdate) {
+          onProgressUpdate({
+            content: 'Artwork is done, now adding the final touches...✨',
+            type: 'progress',
+          });
+        }
+
+        const subtractUserCredit = async () => {
+          console.log('Subtracting credit from user');
+          try {
+            await addUsageEntry(PluginID.IMAGE_GEN, userId);
+            await subtractCredit(userId, PluginID.IMAGE_GEN);
+          } catch (e) {
+            throw 'Not enough credit';
+          }
+        };
+        // TODO: Enable Temp disable subtract credit
+        // await subtractUserCredit();
+
+        const functionResponse = `
+        2 Images generated! Below is the detail:
+        Generation prompt (insert the prompts as the 'alt' attribute of the image for later reference):
+         Prompt_1: ${imageGenerationResponse1.revised_prompt}.
+         URL_1: ${imageGenerationResponse1.imagePublicUrl}
+         File Name_1: ${imageGenerationResponse1.fileName}
+         Prompt_2: ${imageGenerationResponse2.revised_prompt}.
+         URL_2: ${imageGenerationResponse2.imagePublicUrl}
+         File Name_2: ${imageGenerationResponse2.fileName}
+
+        Pass those URLs and Prompts to function generate-html-for-ai-painter-images for display the result.
+      `;
+
+        return functionResponse;
+      } catch (error) {
+        console.error('Error in parallel execution: ', error);
+        return 'Failed to process image or subtract user credit';
+      }
+
+    case helperFunctionNames.generateHtmlForAiPainterImages:
+      let imageResults: AiPainterImageGenerationResult[];
+      try {
+        imageResults = JSON.parse(argumentsString).imageResults;
+      } catch (e) {
+        return 'Unable to parse JSON that you provided, please output a valid JSON string. For example: {"imageResults": [{"prompt": "A cat", "url": "https://example.com/cat.png", "filename": "cat.png"}, {"prompt": "A dog", "url": "https://example.com/dog.png", "filename": "dog.png"}]}';
+      }
+      if (onProgressUpdate) {
+        onProgressUpdate({
+          content: generateHtmlForAiPainterImages(imageResults),
+          type: 'result',
+        });
+      }
+      return `You can safely end the conversation here, the result is shown already. PLEASE DO NOT SHOW THE IMAGE AND PROMPT AGAIN SINCE THE RESULT IS SHOWN.`;
     default:
       return "I don't know how to do that yet, please try again later.";
   }
@@ -281,3 +439,22 @@ export const retrieveMqttConnectionPayload = async (
     }
   }
 };
+
+function generateHtmlForAiPainterImages(
+  imageResults: AiPainterImageGenerationResult[],
+): string {
+  const imagesHtml = imageResults
+    .map(
+      (result) =>
+        `<img src="${result.url}" alt="${result.prompt}" data-filename="${result.filename}" />`,
+    )
+    .join('');
+
+  return `<div id="ai-painter-generated-image">${imagesHtml}</div>`;
+}
+
+interface AiPainterImageGenerationResult {
+  prompt: string;
+  url: string;
+  filename: string;
+}

@@ -13,7 +13,7 @@ import { useTranslation } from 'next-i18next';
 
 import { ChatEverywhereFeatures } from '@/types/notion';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import Spinner from '../Spinner/Spinner';
 import FeaturesPage from './FeaturePage';

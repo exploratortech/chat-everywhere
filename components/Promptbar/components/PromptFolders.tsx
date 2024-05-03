@@ -2,12 +2,12 @@ import { Fragment, useContext, useMemo } from 'react';
 
 import { getNonDeletedCollection, updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { saveFolders } from '@/utils/app/folders';
-import { generateRank, reorderItem } from '@/utils/app/rank';
+import { generateRank, reorderFolder, reorderItem } from '@/utils/app/rank';
 
 import { Prompt } from '@/types/prompt';
 import { FolderInterface } from '@/types/folder';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import Folder from '@/components/Folder';
 import { PromptComponent } from '@/components/Promptbar/components/Prompt';
@@ -43,17 +43,14 @@ export const PromptFolders = () => {
       const prompt = currentDrag.data as Prompt;
 
       // Filter for prompts that are in the folder
-      const filter = (otherPrompt: Prompt) => otherPrompt.folderId === folder.id;
-      const refinedFilteredPrompts = filteredPrompts.filter(filter);
+      const refinedFilteredPrompts = filteredPrompts
+        .filter((p) => p.folderId === folder.id);
 
       const updatedPrompts = reorderItem(
         prompts,
         prompt.id,
         generateRank(refinedFilteredPrompts, index),
-        {
-          filter,
-          updates: { folderId: folder.id },
-        },
+        { updates: { folderId: folder.id } },
       );
 
       dispatch({ field: 'prompts', value: updatedPrompts });
@@ -70,11 +67,10 @@ export const PromptFolders = () => {
     if (currentDrag && currentDrag.type === 'folder') {
       const folder = currentDrag.data as FolderInterface;
       if (folder.type !== 'prompt') return;
-      const reorderedFolders = reorderItem(
+      const reorderedFolders = reorderFolder(
         folders,
         folder.id,
         generateRank(filteredFolders, index),
-        { filter: (folder: FolderInterface) => folder.type === 'prompt' },
       );
       dispatch({ field: 'folders', value: reorderedFolders });
       saveFolders(reorderedFolders);

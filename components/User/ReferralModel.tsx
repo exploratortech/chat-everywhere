@@ -1,17 +1,17 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconRefresh, IconX } from '@tabler/icons-react';
+import { useQuery } from '@tanstack/react-query';
 import React, { Fragment, memo, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useQuery } from 'react-query';
 
 import { useTranslation } from 'next-i18next';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 import { CodeGenerationPayloadType } from '@/utils/server/referralCode';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
-import ReferralCodeTimeLeft from '../Referral/ReferralCodeTimeLeft';
+import CodeTimeLeft from '../Referral/CodeTimeLeft';
 import ReferralProgramData from '../Referral/ReferralProgramData';
 import Spinner from '../Spinner/Spinner';
 
@@ -65,12 +65,12 @@ const ReferralModel = memo(({ onClose }: Props) => {
   };
 
   const {
-    isLoading: isRegenerating,
+    isFetching: isRegenerating,
     isError,
     error: queryError,
     refetch: queryReferralCodeRefetch,
   } = useQuery<{ code: string; expiresAt: string }, Error>(
-    'regenerateReferralCode',
+    ['regenerateReferralCode'],
     async () => {
       const response = await fetch('/api/referral/regenerate-code', {
         method: 'POST',
@@ -159,7 +159,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
                         </span>
                       </div>
                       {user?.referralCodeExpirationDate && (
-                        <ReferralCodeTimeLeft
+                        <CodeTimeLeft
                           endOfDay={user?.referralCodeExpirationDate}
                         />
                       )}

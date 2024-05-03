@@ -17,10 +17,11 @@ import {
 
 import { Conversation } from '@/types/chat';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 import ChatbarContext from '@/components/Chatbar/Chatbar.context';
+import HomeContext from '@/components/home/home.context';
+
+import { cn } from '@/lib/utils';
 
 interface Props {
   conversation: Conversation;
@@ -28,11 +29,7 @@ interface Props {
 
 export const ConversationComponent = ({ conversation }: Props) => {
   const {
-    state: {
-      currentDrag,
-      selectedConversation,
-      messageIsStreaming,
-    },
+    state: { currentDrag, selectedConversation, messageIsStreaming },
     handleSelectConversation,
     handleUpdateConversation,
     setDragData,
@@ -55,11 +52,10 @@ export const ConversationComponent = ({ conversation }: Props) => {
   };
 
   const handleButtonFocusKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (["Space", "Enter"].includes(e.code)) {
-      if (!messageIsStreaming)
-        handleSelectConversation(conversation);
+    if (['Space', 'Enter'].includes(e.code)) {
+      if (!messageIsStreaming) handleSelectConversation(conversation);
     }
-  }
+  };
 
   const handleDrop = (e: any) => {
     e.currentTarget.style.background = 'none';
@@ -67,7 +63,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
   };
 
   const handleDragStart = () => {
-    setDragData({ data: conversation, type: 'conversation'});
+    setDragData({ data: conversation, type: 'conversation' });
   };
 
   const highlightDrop = (e: any) => {
@@ -131,10 +127,16 @@ export const ConversationComponent = ({ conversation }: Props) => {
   }, [isRenaming, isDeleting]);
 
   return (
-    <div className={`
-      relative flex items-center select-none
-      ${ !currentDrag || currentDrag.type === 'conversation' && currentDrag.data.id === conversation.id ? 'pointer-events-auto' : 'pointer-events-none' }
-    `}>
+    <div
+      className={cn(
+        'relative flex items-center',
+        !currentDrag ||
+          (currentDrag.type === 'conversation' &&
+            currentDrag.data.id === conversation.id)
+          ? 'pointer-events-auto'
+          : 'pointer-events-none',
+      )}
+    >
       {isRenaming && selectedConversation?.id === conversation.id ? (
         <div className="flex w-full items-center gap-3 rounded-lg bg-[#343541]/90 p-3">
           <IconMessage size={18} />
@@ -149,14 +151,16 @@ export const ConversationComponent = ({ conversation }: Props) => {
         </div>
       ) : (
         <div
-          className={
-            `flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90 translate-x-0 z-10
-            ${ messageIsStreaming ? 'disabled:cursor-not-allowed' : '' }
-            ${ selectedConversation?.id === conversation.id ? '!bg-[#343541]/90' : '' }
+          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90 translate-x-0 z-10
+            ${messageIsStreaming ? 'disabled:cursor-not-allowed' : ''}
+            ${
+              selectedConversation?.id === conversation.id
+                ? '!bg-[#343541]/90'
+                : ''
+            }
           `}
           onClick={() => {
-            if (!messageIsStreaming)
-              handleSelectConversation(conversation);
+            if (!messageIsStreaming) handleSelectConversation(conversation);
           }}
           draggable="true"
           onDrop={handleDrop}

@@ -21,9 +21,10 @@ import { removeSecondLastLine } from '@/utils/app/ui';
 
 import { Conversation, Message } from '@/types/chat';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { LineShareButton } from '../LineShareButton';
+import StudentShareMessageButton from '../StudentShareMessageButton';
 
 import dayjs from 'dayjs';
 
@@ -41,10 +42,17 @@ export default function MjImageComponent({
   prompt,
 }: MjImageComponentProps) {
   const {
-    state: { user, selectedConversation, conversations, messageIsStreaming },
+    state: {
+      user,
+      isTempUser,
+      selectedConversation,
+      conversations,
+      messageIsStreaming,
+    },
     dispatch: homeDispatch,
     stopConversationRef,
   } = useContext(HomeContext);
+  const isStudentAccount = isTempUser;
   const { t: commonT } = useTranslation('common');
   const { t: mjImageT } = useTranslation('mjImage');
 
@@ -300,17 +308,26 @@ export default function MjImageComponent({
         >
           <IconHelp size={isMobileLayout ? 16 : undefined} />
         </button>
-        <button
+
+        <div
           className={`${
             showButtons ? 'block' : 'hidden'
-          } absolute bottom-0 right-0 p-1`}
+          }  absolute bottom-0 right-0 p-1 flex gap-2`}
         >
-          <LineShareButton
-            imageFileUrl={src}
-            size={20}
-            displayInProgressToast={true}
-          />
-        </button>
+          <button>
+            <LineShareButton
+              imageFileUrl={src}
+              size={20}
+              displayInProgressToast={true}
+            />
+          </button>
+
+          {isStudentAccount && (
+            <button>
+              <StudentShareMessageButton imageFileUrl={src} size={20} />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

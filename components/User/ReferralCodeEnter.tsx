@@ -1,15 +1,15 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useQuery } from '@tanstack/react-query';
 import React, { useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from 'react-query';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 import { userProfileQuery } from '@/utils/server/supabase';
 
 import { UserProfile } from '@/types/user';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { SettingsModelContext } from './Settings/SettingsModel';
 
@@ -26,14 +26,14 @@ export const ReferralCodeEnter = () => {
   const { closeModel } = useContext(SettingsModelContext);
 
   const {
-    isLoading,
+    isFetching: isLoading,
     isError,
     error: queryError,
     refetch: queryReferralCodeRefetch,
   } = useQuery<{ profile: UserProfile }, Error>(
-    'redeemReferralCode',
+    ['redeemReferralCode'],
     async () => {
-      if(user === null) throw new Error('User is not logged in');
+      if (user === null) throw new Error('User is not logged in');
 
       const response = await fetch('/api/referral/redeem-code', {
         method: 'POST',
@@ -104,7 +104,7 @@ export const ReferralCodeEnter = () => {
 
   return (
     <div className="my-2 text-sm">
-      <h2 className="">{t('Referral code')}</h2>
+      <h2>{t('Referral code')}</h2>
       <form
         className="flex items-center gap-2 justify-between"
         onSubmit={handleSubmit}

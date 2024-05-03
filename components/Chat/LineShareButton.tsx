@@ -5,10 +5,13 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 
-import HomeContext from '@/pages/api/home/home.context';
+import { trackEvent } from '@/utils/app/eventTracking';
+
+import HomeContext from '@/components/home/home.context';
 
 import { encode } from 'base64-arraybuffer';
-import { trackEvent } from '@/utils/app/eventTracking';
+
+import { truncateText } from '@/utils/data/truncateText';
 
 interface LineShareButtonProps {
   displayInProgressToast?: boolean;
@@ -16,6 +19,7 @@ interface LineShareButtonProps {
   messageContent?: string;
   imageFileUrl?: string;
   size?: number;
+  isSelectedText? : boolean
 }
 
 export const LineShareButton: FC<LineShareButtonProps> = ({
@@ -24,10 +28,11 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
   messageContent = '',
   imageFileUrl = '',
   size = 18,
+  isSelectedText = false,
 }) => {
   const { t } = useTranslation('feature');
   const {
-    state: { user, isConnectedWithLine },
+    state: { user, isConnectedWithLine, isTempUser, teacherSettings },
   } = useContext(HomeContext);
   const [loading, setLoading] = useState(false);
   const supabase = useSupabaseClient();
@@ -54,7 +59,7 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
     }
 
     setLoading(true);
-    
+
     if (imageFileUrl) {
       const response = await fetch(imageFileUrl);
       const blob = await response.arrayBuffer();
@@ -107,12 +112,17 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
       setLoading(false);
     }
   };
+  const isStudentAccount = isTempUser;
+  const lineButtonDisplayCondition =
+    !isStudentAccount ||
+    (isStudentAccount && teacherSettings.allow_student_use_line);
 
+  if (!lineButtonDisplayCondition) return null;
   return (
     <>
       <button
         data-tooltip-id="share-line-tooltip"
-        data-tooltip-content={t('Share to LINE') || ''}
+        data-tooltip-content={`${t(`Share to LINE`)}${isSelectedText? ': ' + truncateText(messageContent, 15) : ''}`}
         data-tooltip-place="bottom"
         className={`translate-x-[9999px] text-[#4CC764] hover:text-[#17ff44] focus:translate-x-0 group-hover:translate-x-0 h-fit ${className} ${
           loading ? '!translate-x-0' : ''

@@ -9,6 +9,8 @@ import {
   activeRunStatuses,
 } from '@/types/v2Chat/chat';
 
+import { getDalle3EndpointAndKeys } from '../server/api';
+
 export const addOpenAiMessageToThread = async (
   threadId: string,
   message: MessageType,
@@ -113,8 +115,6 @@ export const getOpenAiLatestRunObject = async (
 export const generateImage = async (
   prompt: string,
 ): Promise<OpenAiImageResponseType & { errorMessage?: string }> => {
-  const azureDallE3Url =
-    'https://delle3.openai.azure.com/openai/deployments/dalle3/images/generations?api-version=2023-12-01-preview';
   const openAiUrl = 'https://api.openai.com/v1/images/generations';
 
   const payload = {
@@ -131,14 +131,11 @@ export const generateImage = async (
   const maxRetries = 10;
 
   while (retries < maxRetries) {
-    if (retries === 0) {
-      response = await authorizedAzureRequest(
-        azureDallE3Url, // Use Azure endpoint by default
-        {
-          method: 'POST',
-          body: JSON.stringify(payload),
-        },
-      );
+    if (retries < 4) {
+      response = await authorizedDalle3AzureRequest({
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
     } else {
       response = await authorizedOpenAiRequest(openAiUrl, {
         method: 'POST',
@@ -146,12 +143,14 @@ export const generateImage = async (
       });
     }
 
-    if (response.status !== 429) {
+    if (response.status !== 429 && response.status !== 404) {
       break;
     }
 
     // If status is 429 (Too Many Requests), wait for the delay then double it for the next iteration
-    await new Promise((resolve) => setTimeout(resolve, delay));
+    await new Promise((resolve) => {
+      setTimeout(resolve, delay);
+    });
     delay *= 2;
     retries += 1;
   }
@@ -343,14 +342,17 @@ const authorizedOpenAiRequest = async (
 };
 
 // Move this function from utils/server/index.ts to here for serverless function compatibility reason
-const authorizedAzureRequest = async (
-  url: string,
-  options: RequestInit = {},
-) => {
+const authorizedDalle3AzureRequest = async (options: RequestInit = {}) => {
+  const { endpoint, key } = getDalle3EndpointAndKeys();
+  if (!endpoint || !key) {
+    throw new Error('Failed to get Azure DALL-E 3 endpoint and key');
+  }
+
   const headers = {
-    'api-key': process.env.AZURE_DALL_E_API_KEY || '',
+    'api-key': key || '',
     'Content-Type': 'application/json',
     ...options.headers,
   };
-  return fetch(url, { ...options, headers });
+  console.log('hitting endpoint: ', endpoint);
+  return fetch(endpoint, { ...options, headers });
 };

@@ -23,45 +23,44 @@ import { updateConversation } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
 import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 
-import { Conversation, Message } from '@/types/chat';
+import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
-import HomeContext from '@/pages/api/home/home.context';
-
-import { ImageGenerationComponent } from './components/ImageGenerationComponent';
-import MjImageComponentV2 from './components/MjImageComponentV2';
 import TokenCounter from './components/TokenCounter';
+import HomeContext from '@/components/home/home.context';
 
-import { CodeBlock } from '../Markdown/CodeBlock';
-import { MemoizedReactMarkdown } from '../Markdown/MemoizedReactMarkdown';
+import AssistantRespondMessage from './ChatMessage/AssistantRespondMessage';
 import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';
 import { LineShareButton } from './LineShareButton';
 import { SpeechButton } from './SpeechButton';
-
-import rehypeMathjax from 'rehype-mathjax';
-import rehypeRaw from 'rehype-raw';
-import remarkBreaks from 'remark-breaks';
-import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
+import StudentShareMessageButton from './StudentShareMessageButton';
 
 interface Props {
   message: Message;
   messageIndex: number;
-  displayFooterButtons: boolean;
-  conversation: Conversation;
-  onEdit?: (editedMessage: Message) => void;
+  messageIsStreaming: boolean;
+  onEdit?: (editedMessage: Message, index: number) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, displayFooterButtons, conversation, onEdit, messageIndex }) => {
+  ({ message, onEdit, messageIsStreaming, messageIndex }) => {
     const { t } = useTranslation('chat');
     const { i18n } = useTranslation();
 
     const {
-      state: { selectedConversation, conversations, messageIsStreaming },
+      state: { isTempUser, selectedConversation, conversations },
       dispatch: homeDispatch,
     } = useContext(HomeContext);
+    const isStudentAccount = isTempUser;
+
+    const displayFooterButtons = useMemo(() => {
+      if (!selectedConversation) return false;
+      return (
+        selectedConversation.messages.length - 1 === messageIndex &&
+        !messageIsStreaming
+      );
+    }, [messageIndex, messageIsStreaming, selectedConversation]);
 
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -88,7 +87,7 @@ export const ChatMessage: FC<Props> = memo(
 
     const handleEditMessage = () => {
       if (message.content != messageContent && selectedConversation && onEdit) {
-        onEdit({ ...message, content: messageContent });
+        onEdit({ ...message, content: messageContent }, messageIndex);
       }
       setIsEditing(false);
       event('interaction', {
@@ -124,6 +123,23 @@ export const ChatMessage: FC<Props> = memo(
       homeDispatch({ field: 'selectedConversation', value: single });
       homeDispatch({ field: 'conversations', value: all });
     };
+
+    // Add a new state for the selected text
+    const [selectedText, setSelectedText] = useState('');
+
+    // Method to handle text selection
+    useEffect(() => {
+      const logSelection = () => {
+        const text = window.getSelection()?.toString();
+        setSelectedText(text || '');
+      };
+    
+      document.addEventListener('selectionchange', logSelection);
+    
+      return () => {
+        document.removeEventListener('selectionchange', logSelection);
+      };
+    }, []);
 
     const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       setIsTyping(e.nativeEvent.isComposing);
@@ -194,102 +210,11 @@ export const ChatMessage: FC<Props> = memo(
       }
     };
 
-    const ImgComponent = useMemo(() => {
-      const Component = ({
-        src,
-        title,
-        alt,
-        node,
-      }: React.DetailedHTMLProps<
-        React.ImgHTMLAttributes<HTMLImageElement> & { node?: any },
-        HTMLImageElement
-      >) => {
-        const aiImageButtons =
-          node?.properties?.dataAiImageButtons &&
-          (node?.properties?.dataAiImageButtons).split(',');
-        const aiImagePrompt =
-          node?.properties?.dataAiImagePrompt &&
-          (node?.properties?.dataAiImagePrompt).split(',');
-        const aiImageButtonMessageId =
-          node?.properties?.dataAiImageButtonMessageId;
-
-        const isValidUrl = (url: string) => {
-          try {
-            new URL(url);
-            return true;
-          } catch (e) {
-            return false;
-          }
-        };
-
-        if (!src) return <></>;
-        if (!isValidUrl(src)) return <b>{`{InValid IMAGE URL}`}</b>;
-
-        if (message.pluginId !== PluginID.IMAGE_GEN) {
-          return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              id={node?.properties?.id}
-              src={src}
-              alt=""
-              className="w-full"
-            />
-          );
-        }
-        if (aiImageButtons) {
-          return (
-            <MjImageComponentV2
-              src={src}
-              buttons={aiImageButtons}
-              buttonMessageId={aiImageButtonMessageId}
-              prompt={aiImagePrompt}
-            />
-          );
-        }
-
-        return (
-          <ImageGenerationComponent
-            src={src}
-            title={title}
-            messageIndex={messageIndex}
-            generationPrompt={alt || ''}
-          />
-        );
-      };
-      Component.displayName = 'ImgComponent';
-      return Component;
-    }, [message.pluginId, messageIndex]);
-
-    const CodeComponent = useMemo(() => {
-      const Component: React.FC<any> = ({
-        node,
-        inline,
-        className,
-        children,
-        ...props
-      }) => {
-        const match = /language-(\w+)/.exec(className || '');
-        return !inline ? (
-          <CodeBlock
-            key={messageIndex}
-            language={(match && match[1]) || ''}
-            value={String(children).replace(/\n$/, '')}
-            {...props}
-          />
-        ) : (
-          <code className={className} {...props} key={messageIndex}>
-            {children}
-          </code>
-        );
-      };
-      Component.displayName = 'CodeComponent';
-      return Component;
-    }, [messageIndex]);
-
     const formattedMessage = useMemo(
       () => modifyParagraphs(message.content),
       [message.content],
     );
+
     return (
       <div
         className={`group px-4 ${
@@ -297,7 +222,9 @@ export const ChatMessage: FC<Props> = memo(
             ? 'border-b border-black/10 bg-gray-50 text-gray-800 dark:border-gray-900/50 dark:bg-[#444654] dark:text-gray-100'
             : 'border-b border-black/10 bg-white text-gray-800 dark:border-gray-900/50 dark:bg-[#343541] dark:text-gray-100'
         }`}
-        style={{ overflowWrap: 'anywhere' }}
+        style={{
+          overflowWrap: 'anywhere',
+        }}
       >
         <div className="relative m-auto flex gap-4 py-4 text-base md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
           <div className="min-w-[40px] text-center font-bold flex flex-col justify-start flex-wrap content-center">
@@ -417,7 +344,18 @@ export const ChatMessage: FC<Props> = memo(
                         >
                           <IconTrash size={18} />
                         </button>
-                        <LineShareButton messageContent={message.content} />
+                        <LineShareButton 
+                        messageContent={selectedText !== '' ? selectedText : message.content} 
+                        isSelectedText = { selectedText !== '' ? true : false}
+                        />
+                        {isStudentAccount && (
+                          <div className="ml-2 flex items-center">
+                            <StudentShareMessageButton
+                              messageContent={selectedText !== '' ? selectedText : message.content}
+                              isSelectedText = { selectedText !== '' ? true : false}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                   </>
@@ -426,52 +364,11 @@ export const ChatMessage: FC<Props> = memo(
             ) : (
               <div className="flex w-full flex-col md:justify-between">
                 <div className="flex flex-row justify-between">
-                  <MemoizedReactMarkdown
-                    className="prose dark:prose-invert min-w-full"
-                    remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-                    rehypePlugins={[rehypeMathjax, rehypeRaw]}
-                    components={{
-                      a({ node, children, href, ...props }) {
-                        return (
-                          <a
-                            href={href}
-                            target={
-                              href && href[0] === '#' ? '_self' : '_blank'
-                            }
-                            rel="noreferrer noopener"
-                            {...props}
-                          >
-                            {children}
-                          </a>
-                        );
-                      },
-                      code: CodeComponent,
-                      table({ children }) {
-                        return (
-                          <table className="border-collapse border border-black px-3 py-1 dark:border-white">
-                            {children}
-                          </table>
-                        );
-                      },
-                      th({ children }) {
-                        return (
-                          <th className="break-words border border-black bg-gray-500 px-3 py-1 text-white dark:border-white">
-                            {children}
-                          </th>
-                        );
-                      },
-                      td({ children }) {
-                        return (
-                          <td className="break-words border border-black px-3 py-1 dark:border-white">
-                            {children}
-                          </td>
-                        );
-                      },
-                      img: ImgComponent,
-                    }}
-                  >
-                    {formattedMessage}
-                  </MemoizedReactMarkdown>
+                    <AssistantRespondMessage
+                      formattedMessage={formattedMessage}
+                      messageIndex={messageIndex}
+                      messagePluginId={message.pluginId}
+                    />
                   <div className="flex m-1 tablet:hidden">
                     <CopyButton />
                   </div>
@@ -482,22 +379,34 @@ export const ChatMessage: FC<Props> = memo(
                       !message.pluginId) && (
                       <SpeechButton inputText={message.content} />
                     )}
-                    {displayFooterButtons && (
+                    {displayFooterButtons && selectedConversation && (
                       <>
-                        <FeedbackContainer conversation={conversation} />
+                        <FeedbackContainer
+                          conversation={selectedConversation}
+                        />
                         <div className="m-1 hidden tablet:flex">
                           <CopyButton className="translate-x-[unset] !text-gray-500 hover:!text-gray-300" />
                         </div>
                       </>
                     )}
-                    {(message.pluginId === PluginID.GPT4 ||
+                    {(message.pluginId === PluginID.aiPainter ||
+                      message.pluginId === PluginID.GPT4 ||
+                      message.pluginId === PluginID.default ||
                       !message.pluginId) &&
                       !messageIsStreaming && (
                         <>
                           <LineShareButton
-                            messageContent={message.content}
+                            messageContent={selectedText !== '' ? selectedText : message.content}
+                            isSelectedText = { selectedText !== '' ? true : false }
                             className="ml-2"
                           />
+                          {isStudentAccount && (
+                            <StudentShareMessageButton
+                              messageContent={selectedText !== '' ? selectedText : message.content}
+                              isSelectedText = { selectedText !== '' ? true : false}
+                              className="ml-2"
+                            />
+                          )}
                         </>
                       )}
                   </div>

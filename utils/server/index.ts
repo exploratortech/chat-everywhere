@@ -79,7 +79,7 @@ export const OpenAIStream = async (
         attempt + 1
       }: Using endpoint ${openAIEndpoint}\n`;
 
-      let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2023-12-01-preview`;
+      let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2024-02-01`;
       if (openAIEndpoint.includes('openai.com')) {
         url = `${openAIEndpoint}/v1/chat/completions`;
       }
@@ -257,7 +257,7 @@ export const OpenAIStream = async (
 
           (async function () {
             for await (const chunk of res.body as any) {
-              parser.feed(decoder.decode(chunk));
+              parser.feed(decoder.decode(chunk, { stream: true }));
             }
 
             await logEvent({

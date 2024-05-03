@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import {
   createColumnHelper,
   flexRender,
@@ -7,14 +8,13 @@ import {
 } from '@tanstack/react-table';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from 'react-query';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { RefereeProfile } from '@/types/referral';
 import { SubscriptionPlan } from '@/types/user';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import dayjs from 'dayjs';
 
@@ -26,7 +26,7 @@ export default function ReferralProgramData() {
   const { t } = useTranslation('model');
 
   const { data, isSuccess } = useQuery(
-    'referrals',
+    ['referrals'],
     async () => {
       const response = await fetch('/api/referral/referees', {
         method: 'POST',
@@ -141,7 +141,7 @@ const RefereesTable = ({ referees }: { referees: RefereeProfile[] }) => {
               </tr>
             ))}
           </thead>
-          <tbody className="">
+          <tbody>
             {table.getRowModel().rows.map((row, rIndex) => (
               <tr key={row.id}>
                 {row.getVisibleCells().map((cell, i) => (

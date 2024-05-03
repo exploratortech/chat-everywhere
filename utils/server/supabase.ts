@@ -47,7 +47,10 @@ export const addUsageEntry = async (
 // Get user credits
 export const getUserCredits = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
 ) => {
   const supabase = getAdminSupabaseClient();
   const { data, error } = await supabase
@@ -84,7 +87,10 @@ export const getUserCredits = async (
 // Update user credits
 export const updateUserCredits = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
   newBalance: number,
 ): Promise<void> => {
   const supabase = getAdminSupabaseClient();
@@ -107,7 +113,10 @@ export const updateUserCredits = async (
 // Subtract one credit from user's balance
 export const subtractCredit = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
   const newBalance = userCredits.balance - 1;
@@ -116,7 +125,10 @@ export const subtractCredit = async (
 
 export const addCredit = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
   credit: number,
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
@@ -127,7 +139,10 @@ export const addCredit = async (
 // Add user credits entry
 export const addUserCreditsEntry = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
 ): Promise<void> => {
   const initialBalance = DefaultMonthlyCredits[apiType];
   const supabase = getAdminSupabaseClient();
@@ -143,7 +158,10 @@ export const addUserCreditsEntry = async (
 // Reset user credits
 export const resetUserCredits = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
 ): Promise<void> => {
   updateUserCredits(userId, apiType, DefaultMonthlyCredits[apiType]);
 };
@@ -151,7 +169,10 @@ export const resetUserCredits = async (
 // Check if user has run out of credits
 export const hasUserRunOutOfCredits = async (
   userId: string,
-  apiType: Exclude<PluginID, PluginID.IMAGE_TO_PROMPT>,
+  apiType: Exclude<
+    PluginID,
+    PluginID.IMAGE_TO_PROMPT | PluginID.aiPainter | PluginID.default
+  >,
 ): Promise<boolean> => {
   const userCredits = await getUserCredits(userId, apiType);
   return userCredits.balance <= 0;
@@ -239,6 +260,8 @@ export const batchRefreshReferralCodes = async (): Promise<void> => {
     throw e;
   }
 };
+
+export { getOneTimeCodeInfo } from './supabase/getOneTimeCodeInfo';
 
 export const getReferralCode = async (
   userId: string,
@@ -411,6 +434,7 @@ export const redeemReferralCode = async ({
   }
 };
 
+// USE IN CLIENT SIDE AND SERVER SIDE, TO BE OPTIMIZED
 export const userProfileQuery = async ({
   client,
   userId,
@@ -427,12 +451,14 @@ export const userProfileQuery = async ({
     referral_code: any;
     referral_code_expiration_date: any;
     line_access_token?: string;
+    temporary_account_profiles: any[];
+    is_teacher_account: boolean;
   } | null = null;
   if (userId) {
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(*)',
       )
       .eq('id', userId)
       .single();
@@ -445,7 +471,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(*)',
       )
       .eq('email', email)
       .single();
@@ -510,6 +536,8 @@ export const userProfileQuery = async ({
     isInReferralTrial: isInReferralTrial,
     isConnectedWithLine: !!userProfile.line_access_token,
     hasMqttConnection: hasMqttConnection,
+    isTempUser: userProfile.temporary_account_profiles.length > 0,
+    isTeacherAccount: userProfile.is_teacher_account,
   } as UserProfile;
 };
 
@@ -546,12 +574,12 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
   if (fetchError) {
     throw fetchError;
   }
-  
+
   const userIds = users?.map((user) => user.id);
   if (!userIds) {
     return [];
   }
-  
+
   const trialUserIds: string[] = [];
 
   for (const userId of userIds) {
@@ -565,7 +593,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
     if (referralError) {
       throw referralError;
     }
-    
+
     if (referralRows?.length > 0) {
       trialUserIds.push(userId);
     }

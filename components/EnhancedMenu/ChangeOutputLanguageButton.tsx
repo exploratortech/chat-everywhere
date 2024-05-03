@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { getAvailableLocales } from '@/utils/app/i18n';
 import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 function ChangeOutputLanguageButton() {
   const { t } = useTranslation('model');

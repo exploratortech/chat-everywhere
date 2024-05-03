@@ -7,22 +7,31 @@ export interface Plugin {
 }
 
 export enum PluginID {
+  default = 'default',
   LANGCHAIN_CHAT = 'langchain-chat',
   GPT4 = 'gpt-4',
   IMAGE_GEN = 'image-gen',
   IMAGE_TO_PROMPT = 'image-to-prompt',
   mqtt = 'mqtt',
+  aiPainter = 'ai-painter',
 }
 
 export enum PluginName {
+  default = 'default',
   LANGCHAIN_CHAT = 'Enhance Mode',
   GPT4 = 'GPT-4',
   IMAGE_GEN = 'image-gen',
   IMAGE_TO_PROMPT = 'image-to-prompt',
   mqtt = 'MQTT',
+  aiPainter = 'AI Painter',
 }
 
 export const Plugins: Record<PluginID, Plugin> = {
+  [PluginID.default]: {
+    id: PluginID.default,
+    name: PluginName.default,
+    requiredKeys: [],
+  },
   [PluginID.LANGCHAIN_CHAT]: {
     id: PluginID.LANGCHAIN_CHAT,
     name: PluginName.LANGCHAIN_CHAT,
@@ -46,6 +55,11 @@ export const Plugins: Record<PluginID, Plugin> = {
   [PluginID.mqtt]: {
     id: PluginID.mqtt,
     name: PluginName.mqtt,
+    requiredKeys: [],
+  },
+  [PluginID.aiPainter]: {
+    id: PluginID.aiPainter,
+    name: PluginName.aiPainter,
     requiredKeys: [],
   },
 };

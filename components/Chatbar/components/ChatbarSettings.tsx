@@ -1,40 +1,62 @@
 import {
   IconBrandFacebook,
+  IconBrandGoogle,
   IconCurrencyDollar,
+  IconHighlight,
   IconLogin,
   IconNews,
   IconSettings,
-  IconBrandGoogle
 } from '@tabler/icons-react';
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 
+import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { trackEvent } from '@/utils/app/eventTracking';
-
-import HomeContext from '@/pages/api/home/home.context';
 
 import CloudSyncStatusComponent from '../../Sidebar/components/CloudSyncComponent';
 import UserAccountBadge from '@/components/User/UserAccountBadge';
+import HomeContext from '@/components/home/home.context';
 
 import { SidebarButton } from '../../Sidebar/SidebarButton';
-import ChatbarContext from '../Chatbar.context';
 import { ClearConversations } from './ClearConversations';
 
 export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
 
   const {
-    state: { conversations, user },
+    state: { conversations, folders, prompts, user, isTeacherAccount },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const {
-    handleClearConversations,
-  } = useContext(ChatbarContext);
-
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
+
+  const filteredConversations = useMemo(
+    () => getNonDeletedCollection(conversations),
+    [conversations],
+  );
+
+  const filteredFolders = useMemo(
+    () =>
+      getNonDeletedCollection(folders).filter(
+        (folder) => folder.type === 'chat',
+      ),
+    [folders],
+  );
+
+  const filteredPromptFolders = useMemo(
+    () =>
+      getNonDeletedCollection(folders).filter(
+        (folder) => folder.type === 'prompt',
+      ),
+    [folders],
+  );
+  const filteredPrompts = useMemo(
+    () => getNonDeletedCollection(prompts),
+    [prompts],
+  );
 
   const signInOnClick = () => {
     trackEvent('Sign in button clicked');
@@ -53,12 +75,23 @@ export const ChatbarSettings = () => {
     }
   };
 
+  const router = useRouter();
+  const teacherPortalBtnOnClick = () => {
+    if (isTeacherAccount) {
+      trackEvent('Teacher portal clicked');
+      router.push('/teacher-portal/one-time-code');
+    }
+  };
+
   return (
     <div className="min-h-min">
       <CloudSyncStatusComponent />
       <div className="flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm overflow-auto">
-        {conversations.length > 0 ? (
-          <ClearConversations onClearConversations={handleClearConversations} />
+        {filteredConversations.length > 0 ||
+        filteredFolders.length > 0 ||
+        filteredPromptFolders.length > 0 ||
+        filteredPrompts.length > 0 ? (
+          <ClearConversations />
         ) : null}
 
         <SidebarButton
@@ -77,11 +110,20 @@ export const ChatbarSettings = () => {
           <SidebarButton
             text={t('Sign in')}
             icon={<IconLogin size={18} />}
-            suffixIcon={<IconBrandGoogle size={18} color='#DB4437' stroke={3}/>}
+            suffixIcon={
+              <IconBrandGoogle size={18} color="#DB4437" stroke={3} />
+            }
             onClick={signInOnClick}
           />
         )}
 
+        {isTeacherAccount && (
+          <SidebarButton
+            text={t('Teacher Portal')}
+            icon={<IconHighlight size={18} />}
+            onClick={() => teacherPortalBtnOnClick()}
+          />
+        )}
         {isEduUser && (
           <SidebarButton
             text={t('Referral Program')}
@@ -102,6 +144,20 @@ export const ChatbarSettings = () => {
             }}
           />
         )}
+        {!user && (
+          <SidebarButton
+            className="flex-grow"
+            text={t('One-time code login')}
+            icon={<IconNews size={18} />}
+            onClick={() => {
+              homeDispatch({
+                field: 'showOneTimeCodeLoginModel',
+                value: true,
+              });
+            }}
+          />
+        )}
+
         <div className="flex w-full">
           <SidebarButton
             className="flex-grow"

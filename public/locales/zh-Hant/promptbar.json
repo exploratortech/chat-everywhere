@@ -8,6 +8,17 @@
   "Description": "描述",
   "A description for your prompt.": "提示詞描述",
   "Prompt": "提示詞",
+  "Instruction prompt": "角色扮演的描述",
   "Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}": "提示內容。使用 {{}} 表示一個變量。例如：{{name}} 是一個 {{adjective}} {{noun}}",
-  "Save": "保存"
-  }
+  "Save": "保存",
+  "Custom Instruction": "設定為角色扮演",
+  "Mode": "對話模式",
+  "Show to students": "向學生展示",
+  "Remove": "刪除",
+  "First message to GPT": "起始信息",
+  "The prompt will be used through out the conversation": "關於這個角色扮演的規則，比如：必須使用繁體中文來回答(zh-hant)，不要使用在對話中沒有提到的資訊。",
+  "The first message to start the conversation, such that the student does not need to type anything to start": "首條訊息, 比如：你好，我想知道怎樣可以提升我的寫作能力。",
+  "Import from .txt file": "匯入 .txt 檔",
+  "Please be aware that for long files, it's best to use this prompt in default mode as a Pro member because it can handle much longer context.": "請注意,如果滙入的是長的文檔,請使用Pro會員的預設模式,以避免因對話長度過長而產生錯誤",
+  "Failed to read the file": "讀取檔案失敗"
+}

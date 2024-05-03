@@ -6,18 +6,58 @@ import { event } from 'nextjs-google-analytics';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
-import HomeContext from '@/pages/api/home/home.context';
+import { Prompt } from '@/types/prompt';
+
+import HomeContext from '@/components/home/home.context';
 
 import { FootNoteMessage } from './FootNoteMessage';
 import { RolePlayPrompts } from './RolePlayPrompts';
 import { SamplePrompts } from './SamplePrompts';
 
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+
+// Use the plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 type Props = {
   promptOnClick: (prompt: string) => void;
+  customInstructionOnClick: (customInstructionPrompt: Prompt) => void;
+};
+
+const getEventMinuteCountDown = () => {
+  const eventTimezone = 'Asia/Taipei';
+  const eventDate = dayjs.tz('2024-05-04T13:00:00', eventTimezone);
+  const currentDate = dayjs();
+
+  const timeDifference = eventDate.diff(currentDate, 'minute');
+  const minutesUntilEvent = Math.floor(timeDifference);
+
+  return minutesUntilEvent;
+};
+
+const getEventDisplayMessage = (t: any) => {
+  const minutesUntilEvent = getEventMinuteCountDown();
+  if (minutesUntilEvent > 60) {
+    return t('Join our event in {{hours}} hours!', {
+      hours: Math.floor(minutesUntilEvent / 60),
+    });
+  }
+
+  if (minutesUntilEvent < 0) {
+    return t('Event is now live!');
+  }
+
+  return t('Join our event in {{minutes}} minutes!', {
+    minutes: minutesUntilEvent,
+  });
 };
 
 export const NewConversationMessagesContainer: FC<Props> = ({
   promptOnClick,
+  customInstructionOnClick,
 }) => {
   const { t } = useTranslation('chat');
   const { t: modelTranslate } = useTranslation('model');
@@ -51,15 +91,6 @@ export const NewConversationMessagesContainer: FC<Props> = ({
     trackEvent('Promotional banner clicked');
   };
 
-  const surveyOnClick = () => {
-    dispatch({ field: 'showSurveyModel', value: true });
-
-    event('Survey banner clicked', {
-      category: 'Engagement',
-      label: 'survey_banner',
-    });
-  };
-
   const featureOnClick = () => {
     dispatch({ field: 'showFeaturesModel', value: true });
     dispatch({ field: 'showFeaturePageOnLoad', value: null });
@@ -68,6 +99,11 @@ export const NewConversationMessagesContainer: FC<Props> = ({
       label: 'feature_introduction_banner',
     });
     trackEvent('Feature introduction opened');
+  };
+
+  const eventBannerOnClick = () => {
+    dispatch({ field: 'showEventModel', value: true });
+    trackEvent('Event promotional banner on click');
   };
 
   return (
@@ -113,6 +149,19 @@ export const NewConversationMessagesContainer: FC<Props> = ({
           </div>
         </div>
       )}
+
+      {getEventMinuteCountDown() > -60 && (
+        <div
+          className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:bg-none cursor-pointer"
+          onClick={eventBannerOnClick}
+        >
+          <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
+            {getEventDisplayMessage(t)}{' '}
+            🎉
+          </span>
+        </div>
+      )}
+
       <div
         className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none cursor-pointer"
         onClick={featureOnClick}
@@ -123,7 +172,10 @@ export const NewConversationMessagesContainer: FC<Props> = ({
       </div>
 
       {rolePlayMode ? (
-        <RolePlayPrompts roleOnClick={roleOnClick} />
+        <RolePlayPrompts
+          roleOnClick={roleOnClick}
+          customInstructionOnClick={customInstructionOnClick}
+        />
       ) : (
         <SamplePrompts promptOnClick={promptOnClick} />
       )}

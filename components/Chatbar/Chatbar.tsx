@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
@@ -6,15 +6,16 @@ import { event } from 'nextjs-google-analytics';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_TEMPERATURE,
+  newDefaultConversation,
+} from '@/utils/app/const';
 import {
   getNonDeletedCollection,
   saveConversation,
   saveConversations,
 } from '@/utils/app/conversation';
-import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import { trackEvent } from '@/utils/app/eventTracking';
-import { saveFolders } from '@/utils/app/folders';
 import {
   handleExportData,
   handleImportConversations,
@@ -24,11 +25,10 @@ import { Conversation } from '@/types/chat';
 import { SupportedExportFormats } from '@/types/export';
 import { OpenAIModels } from '@/types/openai';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import { ChatFolders } from './components/ChatFolders';
 import { ChatbarSettings } from './components/ChatbarSettings';
 import { Conversations } from './components/Conversations';
+import HomeContext from '@/components/home/home.context';
 
 import Sidebar from '../Sidebar';
 import ChatbarContext from './Chatbar.context';
@@ -73,43 +73,6 @@ export const Chatbar = () => {
 
   const [isImportingData, setIsImportingData] = useState(false);
 
-  const handleClearConversations = () => {
-    defaultModelId &&
-      homeDispatch({
-        field: 'selectedConversation',
-        value: {
-          id: uuidv4(),
-          name: 'New conversation',
-          messages: [],
-          model: OpenAIModels[defaultModelId],
-          prompt: DEFAULT_SYSTEM_PROMPT,
-          temperature: DEFAULT_TEMPERATURE,
-          folderId: null,
-        },
-      });
-
-    homeDispatch({ field: 'conversations', value: [] });
-
-    localStorage.removeItem('conversationHistory');
-    localStorage.removeItem('selectedConversation');
-
-    const updatedFolders = folders.filter((f) => f.type !== 'chat');
-
-    homeDispatch({ field: 'folders', value: updatedFolders });
-    saveFolders(updatedFolders);
-    updateConversationLastUpdatedAtTimeStamp();
-
-    homeDispatch({ field: 'forceSyncConversation', value: true });
-    homeDispatch({ field: 'replaceRemoteData', value: true });
-
-    event('interaction', {
-      category: 'Conversation',
-      label: 'Clear conversations',
-    });
-
-    trackEvent('Clear conversation clicked');
-  };
-
   const handleDeleteConversation = (conversation: Conversation) => {
     const updatedConversations = conversations.map((c) => {
       if (c.id === conversation.id) {
@@ -136,15 +99,7 @@ export const Chatbar = () => {
       defaultModelId &&
         homeDispatch({
           field: 'selectedConversation',
-          value: {
-            id: uuidv4(),
-            name: 'New conversation',
-            messages: [],
-            model: OpenAIModels[defaultModelId],
-            prompt: DEFAULT_SYSTEM_PROMPT,
-            temperature: DEFAULT_TEMPERATURE,
-            folderId: null,
-          },
+          value: newDefaultConversation,
         });
 
       localStorage.removeItem('selectedConversation');
@@ -192,7 +147,6 @@ export const Chatbar = () => {
       value={{
         ...chatBarContextValue,
         handleDeleteConversation,
-        handleClearConversations,
         handleImportConversations: (data: SupportedExportFormats) => {
           handleImportConversations(
             data,
@@ -201,7 +155,7 @@ export const Chatbar = () => {
             setIsImportingData,
           );
         },
-        handleExportData
+        handleExportData,
       }}
     >
       <Sidebar<Conversation>
@@ -210,9 +164,9 @@ export const Chatbar = () => {
         addItemButtonTitle={t('New chat')}
         itemComponent={
           <Conversations
-            conversations={
-              filteredConversations.filter((conversation) => conversation.folderId == null)
-            }
+            conversations={filteredConversations.filter(
+              (conversation) => conversation.folderId == null,
+            )}
           />
         }
         itemsIsImporting={isImportingData}

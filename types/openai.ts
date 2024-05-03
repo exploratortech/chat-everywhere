@@ -24,7 +24,7 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     name: 'GPT-3.5',
     maxLength: 12000,
     tokenLimit: 4000,
-    completionTokenLimit: 800,
+    completionTokenLimit: 2500,
     deploymentName: 'gpt-35',
   },
   [OpenAIModelID.GPT_3_5_AZ]: {
@@ -32,7 +32,7 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     name: 'GPT-3.5',
     maxLength: 12000,
     tokenLimit: 4000,
-    completionTokenLimit: 800,
+    completionTokenLimit: 2500,
     deploymentName: 'gpt-35',
   },
   [OpenAIModelID.GPT_3_5_16K]: {
@@ -47,7 +47,7 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     id: OpenAIModelID.GPT_4,
     name: 'GPT-4',
     maxLength: 24000,
-    tokenLimit: 8000,
+    tokenLimit: 7000,
     completionTokenLimit: 2000,
     deploymentName: 'gpt-4',
   },

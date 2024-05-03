@@ -8,6 +8,7 @@ import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
   getMessagesTokenCount,
   shortenMessagesBaseOnTokenLimit,
+  getStringTokenCount
 } from '@/utils/server/api';
 import { isPaidUserByAuthToken } from '@/utils/server/supabase';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
@@ -35,7 +36,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const selectedOutputLanguage = req.headers.get('Output-Language')
-      ? `{lang=${req.headers.get('Output-Language')}}`
+      ? `[lang=${req.headers.get('Output-Language')}]`
       : '';
     const { messages, prompt, temperature } = (await req.json()) as ChatBody;
 
@@ -54,8 +55,8 @@ const handler = async (req: Request): Promise<Response> => {
       OpenAIModels[OpenAIModelID.GPT_3_5_16K].tokenLimit;
 
     const requireToUseLargerContextWindowModel =
-      (await getMessagesTokenCount(messages)) + 1000 > defaultTokenLimit; // Add buffer token to take system prompt into account
-
+      (await getMessagesTokenCount(messages) + await getStringTokenCount(promptToSend)) + 1000 > defaultTokenLimit;
+    
     const isPaidUser = await isPaidUserByAuthToken(
       req.headers.get('user-token'),
     );

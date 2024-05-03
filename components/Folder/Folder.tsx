@@ -1,8 +1,11 @@
 import {
+  IconBulbFilled,
   IconCaretDown,
   IconCaretRight,
   IconCheck,
+  IconMessagePlus,
   IconPencil,
+  IconPlus,
   IconTrash,
   IconX,
 } from '@tabler/icons-react';
@@ -17,10 +20,10 @@ import {
 
 import { FolderInterface } from '@/types/folder';
 
-import HomeContext from '@/pages/api/home/home.context';
-
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
-import { getNonDeletedCollection } from '@/utils/app/conversation';
+import HomeContext from '@/components/home/home.context';
+
+import { cn } from '@/lib/utils';
 
 interface Props {
   currentFolder: FolderInterface;
@@ -36,11 +39,13 @@ const Folder = ({
   folderComponent,
 }: Props) => {
   const {
-    state: { currentDrag, folders },
+    state: { currentDrag },
     handleDeleteFolder,
     handleUpdateFolder,
     setDragData,
     removeDragData,
+    handleNewConversation,
+    handleCreatePrompt,
   } = useContext(HomeContext);
 
   const [isDeleting, setIsDeleting] = useState(false);
@@ -65,17 +70,16 @@ const Folder = ({
   };
 
   const handleButtonFocusKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (["Space", "Enter"].includes(e.code)) {
+    if (['Space', 'Enter'].includes(e.code)) {
       setIsOpen(!isOpen);
     }
-  }
+  };
 
   const dropHandler = (e: any) => {
     if (currentDrag && currentDrag.type !== 'folder') {
       setIsOpen(true);
       handleDrop(currentFolder);
-      if (buttonRef.current)
-        buttonRef.current.style.background = 'none';
+      if (buttonRef.current) buttonRef.current.style.background = 'none';
     }
   };
 
@@ -117,10 +121,16 @@ const Folder = ({
 
   return (
     <>
-      <div className={`
-        relative flex items-center select-none
-        ${ !currentDrag || currentDrag.type !== 'folder' || currentDrag.data.id === currentFolder.id ? 'pointer-events-auto' : 'pointer-events-none' }
-      `}>
+      <div
+        className={cn(
+          'relative flex items-center',
+          !currentDrag ||
+            currentDrag.type !== 'folder' ||
+            currentDrag.data.id === currentFolder.id
+            ? 'pointer-events-auto'
+            : 'pointer-events-none',
+        )}
+      >
         {isRenaming ? (
           <div className="flex w-full items-center gap-3 bg-[#343541]/90 p-3">
             {isOpen ? (
@@ -163,7 +173,6 @@ const Folder = ({
             </div>
           </div>
         )}
-
         <div
           className="absolute right-1 z-10 flex text-gray-300"
           onDragOver={allowDrop}
@@ -203,6 +212,24 @@ const Folder = ({
 
           {!isDeleting && !isRenaming && (
             <>
+              <SidebarActionButton
+                handleClick={(e) => {
+                  e.stopPropagation();
+                  switch (currentFolder.type) {
+                    case 'chat':
+                      handleNewConversation(currentFolder.id);
+                    case 'prompt':
+                      handleCreatePrompt(currentFolder.id);
+                  }
+                  setIsOpen(true);
+                }}
+              >
+                {currentFolder.type === 'chat' ? (
+                  <IconMessagePlus size={18} />
+                ) : (
+                  <IconPlus size={18} />
+                )}
+              </SidebarActionButton>
               <SidebarActionButton
                 handleClick={(e) => {
                   e.stopPropagation();

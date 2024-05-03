@@ -1,6 +1,6 @@
 import { Fragment, useContext } from 'react';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { Conversation } from '@/types/chat';
 
@@ -33,9 +33,12 @@ export const Conversations = ({ conversations }: Props) => {
       const reorderedConversations = reorderItem(
         unfilteredConversations,
         conversation.id,
-        generateRank(conversations, index),
-        { updates: { folderId: null }},
-      );
+        generateRank(
+          unfilteredConversations.filter((c) => c.folderId == null),
+          index,
+        ),
+        { updates: { folderId: null } },
+      )
       dispatch({ field: 'conversations', value: reorderedConversations });
       saveConversations(reorderedConversations);
       updateConversationLastUpdatedAtTimeStamp();

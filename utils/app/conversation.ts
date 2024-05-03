@@ -2,8 +2,9 @@ import { Conversation } from '@/types/chat';
 
 import dayjs from 'dayjs';
 
-export const getNonDeletedCollection = (collection: any[]): any[] =>
-  collection.filter((c) => !c.deleted);
+export const getNonDeletedCollection = <T extends { deleted?: boolean }>(
+  collection: T[],
+): T[] => collection.filter((c) => !c.deleted);
 
 export const updateConversation = (
   updatedConversation: Conversation,
@@ -42,4 +43,8 @@ export const saveConversation = (conversation: Conversation) => {
 
 export const saveConversations = (conversations: Conversation[]) => {
   localStorage.setItem('conversationHistory', JSON.stringify(conversations));
+};
+
+export const savePrompts = (prompts: any[]) => {
+  localStorage.setItem('prompts', JSON.stringify(prompts));
 };

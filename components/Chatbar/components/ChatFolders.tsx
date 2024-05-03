@@ -2,12 +2,12 @@ import React, { Fragment, useContext, useMemo } from 'react';
 
 import { getNonDeletedCollection, saveConversations, updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import { saveFolders } from '@/utils/app/folders';
-import { generateRank, reorderItem } from '@/utils/app/rank';
+import { generateRank, reorderFolder, reorderItem } from '@/utils/app/rank';
 
 import { FolderInterface } from '@/types/folder';
 import { Conversation } from '@/types/chat';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import Folder from '@/components/Folder';
 import DropArea from '@/components/DropArea/DropArea';
@@ -27,7 +27,6 @@ export const ChatFolders = ({ searchTerm }: Props) => {
       folders,
     },
     dispatch,
-    handleUpdateConversation,
   } = useContext(HomeContext);
 
   const {
@@ -43,18 +42,14 @@ export const ChatFolders = ({ searchTerm }: Props) => {
     if (currentDrag && currentDrag.type === 'conversation') {
       const conversation = currentDrag.data as Conversation;
 
-      const filter = (otherConversation: Conversation) =>
-        otherConversation.folderId === folder.id;
-      const refinedFilteredConversations = filteredConversations.filter(filter);
+      const refinedFilteredConversations = filteredConversations
+        .filter((c) => c.folderId === folder.id);
 
       const updatedConversations = reorderItem(
         conversations,
         conversation.id,
         generateRank(refinedFilteredConversations, index),
-        {
-          filter,
-          updates: { folderId: folder.id },
-        }
+        { updates: { folderId: folder.id } },
       );
 
       dispatch({ field: 'conversations', value: updatedConversations });
@@ -71,11 +66,10 @@ export const ChatFolders = ({ searchTerm }: Props) => {
     if (currentDrag && currentDrag.type === 'folder') {
       const folder: FolderInterface = currentDrag.data as FolderInterface;
       if (folder.type !== 'chat') return;
-      const reorderedFolders = reorderItem(
+      const reorderedFolders = reorderFolder(
         folders,
         folder.id,
         generateRank(filteredFolders, index),
-        { filter: (folder: FolderInterface) => folder.type === 'chat' },
       );
       dispatch({ field: 'folders', value: reorderedFolders });
       saveFolders(reorderedFolders);

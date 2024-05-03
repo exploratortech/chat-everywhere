@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
-import HomeContext from '@/pages/api/home/home.context';
+import HomeContext from '@/components/home/home.context';
 
 import { ReferralCodeEnter } from '../ReferralCodeEnter';
 import { LineConnectionButton } from './LineConnectionButton';
@@ -21,7 +21,7 @@ export default function Settings_Account() {
   const [displayReferralCodeEnterer, setDisplayReferralCodeEnterer] =
     useState(false);
   const {
-    state: { user, isPaidUser },
+    state: { user, isTempUser, isPaidUser, teacherSettings },
     dispatch,
   } = useContext(HomeContext);
 
@@ -54,6 +54,11 @@ export default function Settings_Account() {
     process.env.NEXT_PUBLIC_ENV === 'production'
       ? 'https://billing.stripe.com/p/login/5kAbMj0wt5VF6AwaEE'
       : 'https://billing.stripe.com/p/login/test_28o4jFe6GaqK1UY5kk';
+
+  const isStudentAccount = isTempUser;
+  const lineButtonDisplayCondition =
+    !isStudentAccount ||
+    (isStudentAccount && teacherSettings.allow_student_use_line);
 
   return (
     <div>
@@ -185,7 +190,7 @@ export default function Settings_Account() {
             {t('Integrations (pro plan)')}
           </span>
         </div>
-        <LineConnectionButton />
+        {lineButtonDisplayCondition && <LineConnectionButton />}
       </div>
     </div>
   );
@@ -212,12 +217,17 @@ const UltraPlanContent = () => {
   const { t } = useTranslation('model');
   return (
     <>
-      <span 
-          className="text-2xl font-bold bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] font-medium rounded bg-gray-700 text-indigo-400"
-          style={{color: "transparent", WebkitBackgroundClip: 'text', WebkitTextStrokeWidth: '1px', WebkitTextStrokeColor: 'transparent'}}
-        >
-          Ultra
-        </span>
+      <span
+        className="text-2xl font-bold bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] font-medium rounded bg-gray-700 text-indigo-400"
+        style={{
+          color: 'transparent',
+          WebkitBackgroundClip: 'text',
+          WebkitTextStrokeWidth: '1px',
+          WebkitTextStrokeColor: 'transparent',
+        }}
+      >
+        Ultra
+      </span>
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
         <FeatureItem featureName={t('Priority response time')} />
