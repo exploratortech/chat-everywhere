@@ -11,34 +11,48 @@ export const config = {
 };
 
 const handler = async (req: Request): Promise<Response> => {
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+  try {
+    if (req.method !== 'POST') {
+      return new Response('Method not allowed', { status: 405 });
+    }
+
+    const { code, uniqueId } = (await req.json()) as {
+      code: string;
+      uniqueId: string;
+    };
+
+    // 1. Verify the code
+    const { teacherProfileId, validCodeId, maxTempAccountQuota } =
+      await verifyCodeAndGetMaxTempAccountQuota(code);
+
+    // 2. Check if the teacher profile has reached the max temp account quota
+    const activeStudentAccountsNumber = await findActiveStudentAccountsNumber(
+      teacherProfileId,
+    );
+    if (activeStudentAccountsNumber >= maxTempAccountQuota) {
+      throw new Error('Max temp account quota reached');
+    }
+
+    // 3. Create a temp user with the uniqueId and code
+
+    const user = await createTempUser(code, validCodeId, uniqueId);
+
+    serverSideTrackEvent(user.userId, 'One-time code redeemed', {
+      tempAccountName: uniqueId,
+    });
+    // 4. Return login info to the client
+    return new Response(JSON.stringify(user), { status: 200 });
+  } catch (error) {
+    console.error('Error in handler:', error);
+    if (error instanceof Error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 500,
+      });
+    }
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+    });
   }
-
-  const { code, uniqueId } = (await req.json()) as {
-    code: string;
-    uniqueId: string;
-  };
-
-  // 1. Verify the code and return the teacher profile id
-  const { teacherProfileId, validCodeId, maxTempAccountQuota } =
-    await verifyCodeAndGetMaxTempAccountQuota(code);
-
-  const activeStudentAccountsNumber = await findActiveStudentAccountsNumber(
-    teacherProfileId,
-  );
-  if (activeStudentAccountsNumber >= maxTempAccountQuota) {
-    throw new Error('Max temp account quota reached');
-  }
-
-  // 2. Create a temp user with the uniqueId and code
-  const user = await createTempUser(code, validCodeId, uniqueId);
-
-  // 3. Return login info to the client
-  serverSideTrackEvent(user.userId, 'One-time code redeemed', {
-    tempAccountName: uniqueId,
-  });
-  return new Response(JSON.stringify(user), { status: 200 });
 };
 
 export default handler;
