@@ -123,7 +123,7 @@ const Export = ({
       size={'lg'}
       onClick={exportSubmissionsAsHTML}
     >
-      {t('Export')} ({selection})
+      {t('Export')} ({t(selection)})
     </Button>
   );
 };

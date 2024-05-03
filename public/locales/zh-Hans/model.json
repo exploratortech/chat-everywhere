@@ -214,5 +214,8 @@
   "Edit titles": "编辑标题",
   "Enter new title": "输入新的标题",
   "Titles updated successfully": "标题已成功更新",
-  "Failed to update titles": "更新标题时出错"
+  "Failed to update titles": "更新标题时出错",
+  "Export": "导出",
+  "All": "全部",
+  "All in tags": "标签中的全部"
 }
