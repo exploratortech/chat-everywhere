@@ -16,6 +16,14 @@ const nextConfig = {
       asyncWebAssembly: true,
       layers: true,
     };
+    // Fix for mismatch in wasm file hash in staging and production env
+    if (isServer) {
+      config.output.webassemblyModuleFilename =
+        './../static/wasm/[modulehash].wasm';
+    } else {
+      config.output.webassemblyModuleFilename =
+        'static/wasm/[modulehash].wasm';
+    }
 
     return config;
   },
