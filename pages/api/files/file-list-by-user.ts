@@ -11,18 +11,19 @@ export const config = {
   runtime: 'edge',
 };
 
+const BUCKET_NAME = process.env.GCP_CHAT_WITH_DOCUMENTS_BUCKET_NAME as string;
 export default async function handler(req: Request) {
   if (req.method === 'GET') {
-    const userProfile = await fetchUserProfileWithAccessToken(req);
-    if (!userProfile || !userProfile.isTeacherAccount)
+    const [userProfile, accessToken] = await Promise.all([
+      fetchUserProfileWithAccessToken(req),
+      getAccessToken(),
+    ]);
+    if (!userProfile || userProfile.plan !== 'ultra')
       return unauthorizedResponse;
     const folderPath = userProfile.id;
-    const BUCKET_NAME = process.env
-      .GCP_CHAT_WITH_DOCUMENTS_BUCKET_NAME as string;
 
     try {
       const apiUrl = `https://storage.googleapis.com/storage/v1/b/${BUCKET_NAME}/o?prefix=${folderPath}`;
-      const accessToken = await getAccessToken();
       const response = await fetch(apiUrl, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -38,7 +39,7 @@ export default async function handler(req: Request) {
         id: file.id,
         filename:
           file.metadata && file.metadata['file-name']
-            ? file.metadata['file-name']
+            ? decodeURIComponent(file.metadata['file-name'])
             : file.name.replace(new RegExp(`^${userProfile.id}/`), ''),
         filetype: file.contentType,
         timeCreated: file.timeCreated,

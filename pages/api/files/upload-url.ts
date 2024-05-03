@@ -80,7 +80,10 @@ export default async function handler(req: Request) {
   const canonicalHeaders = Object.keys(headers)
     .sort()
     .map(
-      (key) => `${key.toLowerCase()}:${headers[key as keyof typeof headers]}\n`,
+      (key) =>
+        `${key.toLowerCase()}:${encodeURIComponent(
+          headers[key as keyof typeof headers],
+        )}\n`,
     )
     .join('');
   const queryParams = {
@@ -136,10 +139,16 @@ export default async function handler(req: Request) {
 
   const signedUrl = `${schemeAndHost}${canonicalUri}?${canonicalQueryString}&x-goog-signature=${signature}`;
 
+  const encodedHeaders = Object.fromEntries(
+    Object.entries(headers).map(([key, value]) => [
+      key,
+      encodeURIComponent(value),
+    ]),
+  );
   return new Response(
     JSON.stringify({
       url: signedUrl,
-      headers,
+      headers: encodedHeaders,
     }),
     {
       status: 200,
