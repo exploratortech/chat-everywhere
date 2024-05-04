@@ -8,7 +8,7 @@ import { IconUpload } from '@tabler/icons-react';
 import React, { Fragment, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useFileUpload } from '@/hooks/file/useFileUpload2';
+import { useFileUpload } from '@/hooks/file/useFileUpload';
 
 import { FileListGridView } from '@/components/Files/FileListGridView';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
