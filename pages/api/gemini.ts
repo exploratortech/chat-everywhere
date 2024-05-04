@@ -159,11 +159,16 @@ async function callGeminiAPI(
 
   const stream = new ReadableStream({
     start(controller) {
+      let isStreamClosed = false;
       const placeHolder = '[PLACEHOLDER]';
       controller.enqueue(encoder.encode(placeHolder));
 
       const intervalId = setInterval(() => {
-        controller.enqueue(encoder.encode(placeHolder));
+        if (isStreamClosed) {
+          clearInterval(intervalId);
+        } else {
+          controller.enqueue(encoder.encode(placeHolder));
+        }
       }, 10000);
 
       fetch(url, {
@@ -191,6 +196,7 @@ async function callGeminiAPI(
                 try {
                   if (data === '[DONE]') {
                     controller.close();
+                    isStreamClosed = true;
                     return;
                   }
                   const json = JSON.parse(data) as GenerateContentResponse;
@@ -204,12 +210,13 @@ async function callGeminiAPI(
                     }
                     if (item.finishReason && item.finishReason === 'STOP') {
                       controller.close();
-                      clearInterval(intervalId);
+                      isStreamClosed = true;
                     }
                   });
                 } catch (e) {
                   console.error(e);
                   controller.error(e);
+                  isStreamClosed = true;
                 }
               }
             },
@@ -223,6 +230,7 @@ async function callGeminiAPI(
         .catch((error) => {
           console.error('Failed to call Gemini API:', error);
           controller.error(error);
+          isStreamClosed = true;
         });
     },
   });
