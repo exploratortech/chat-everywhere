@@ -99,7 +99,7 @@ export async function getTeacherSettings(
   let { data, error } = await supabase
     .from('teacher_settings')
     .select(
-      'allow_student_use_line, hidden_chateverywhere_default_character_prompt, should_clear_conversations_on_logout',
+      'allow_student_use_line, hidden_chateverywhere_default_character_prompt, should_clear_conversations_on_logout, items_per_page, sort_key, sort_order',
     )
     .eq('teacher_profile_id', teacher_profile_id);
 
@@ -112,10 +112,13 @@ export async function getTeacherSettings(
           allow_student_use_line: false,
           hidden_chateverywhere_default_character_prompt: false,
           should_clear_conversations_on_logout: false,
+          items_per_page: 20,
+          sort_key: 'created_at', 
+          sort_order: 'desc'
         },
       ])
       .select(
-        'allow_student_use_line, hidden_chateverywhere_default_character_prompt, should_clear_conversations_on_logout',
+        'allow_student_use_line, hidden_chateverywhere_default_character_prompt, should_clear_conversations_on_logout, items_per_page, sort_key, sort_order',
       );
 
     if (insertError) {
@@ -136,12 +139,15 @@ export async function getTeacherSettings(
       data[0].hidden_chateverywhere_default_character_prompt,
     should_clear_conversations_on_logout:
       data[0].should_clear_conversations_on_logout,
+    items_per_page: data[0].items_per_page,
+    sort_key: data[0].sort_key, 
+    sort_order: data[0].sort_order
   };
 }
 
 export async function updateTeacherSettings(
   teacher_profile_id: string,
-  settings: TeacherSettingsInPortal,
+  settings: Partial<TeacherSettingsInPortal>,
 ): Promise<TeacherSettingsInPortal> {
   const { data, error } = await supabase
     .from('teacher_settings')
