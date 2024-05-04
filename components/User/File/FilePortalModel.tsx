@@ -74,11 +74,6 @@ export default function FilePortalModel({ onClose }: Props) {
                             {t('Warning')}
                           </AlertTitle>
                           <AlertDescription>
-                            <p>
-                              {t(
-                                'Currently we only support PDF and TXT files.',
-                              )}
-                            </p>
                             <ul>
                               <li>{t('File Size Limitation')}: 50 MB</li>
                               <li>
