@@ -12,7 +12,7 @@ export const useFetchFileList = () => {
   const supabase = useSupabaseClient();
   const { withLoading } = useHomeLoadingBar();
   const {
-    state: { user },
+    state: { user, showFilePortalModel },
   } = useContext(HomeContext);
   const fetchFileList = async () => {
     if (!user) {
@@ -32,11 +32,21 @@ export const useFetchFileList = () => {
     return data.files as UserFile[];
   };
 
-  return useQuery(['gcp-files', user?.id], () => withLoading(fetchFileList), {
-    keepPreviousData: true,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    onError: (error) => {
-      console.error('There was a problem with your fetch operation:', error);
+  return useQuery(
+    ['gcp-files', user?.id],
+    () => {
+      if (showFilePortalModel) {
+        return withLoading(fetchFileList);
+      } else {
+        return fetchFileList();
+      }
     },
-  });
+    {
+      keepPreviousData: true,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      onError: (error) => {
+        console.error('There was a problem with your fetch operation:', error);
+      },
+    },
+  );
 };
