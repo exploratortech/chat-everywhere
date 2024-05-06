@@ -1,11 +1,12 @@
 import { IconDownload, IconMessagePlus, IconTrash } from '@tabler/icons-react';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { useDeleteObject } from '@/hooks/file/useDeleteObject';
 import { useDownloadObjectUrl } from '@/hooks/file/useDownloadObjectUrl';
 import { useFetchFileList } from '@/hooks/file/useFetchFileList';
+import useHomeLoadingBar from '@/hooks/useHomeLoadingBar';
 
 import { UserFile } from '@/types/UserFile';
 import { PluginID } from '@/types/plugin';
@@ -25,8 +26,18 @@ export function FileListGridView({
 }: {
   closeDialogCallback: () => void;
 }) {
-  const { data: userFiles } = useFetchFileList();
+  const { data: userFiles, isFetching } = useFetchFileList();
   const { t } = useTranslation('model');
+
+  const { startLoadingBar, completeLoadingBar } = useHomeLoadingBar();
+
+  useEffect(() => {
+    if (isFetching) {
+      startLoadingBar();
+    } else {
+      completeLoadingBar();
+    }
+  }, [isFetching, startLoadingBar, completeLoadingBar]);
 
   return (
     <div className="flex flex-col">
