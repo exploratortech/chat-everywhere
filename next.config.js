@@ -1,5 +1,7 @@
 const { withAxiom } = require('next-axiom');
 const { i18n } = require('./next-i18next.config');
+const { join } = require('path');
+const { access, symlink } = require('fs').promises;
 
 const withPWA = require('next-pwa')({
   dest: 'public',
@@ -16,15 +18,38 @@ const nextConfig = {
       asyncWebAssembly: true,
       layers: true,
     };
-    // Fix for mismatch in wasm file hash in staging and production env
-    if (isServer) {
-      config.output.webassemblyModuleFilename =
-        './../static/wasm/[modulehash].wasm';
-    } else {
-      config.output.webassemblyModuleFilename =
-        'static/wasm/[modulehash].wasm';
-    }
+    // Fix for mismatch in wasm file hash
+    config.plugins.push(
+      new (class {
+        apply(compiler) {
+          compiler.hooks.afterEmit.tapPromise(
+            'SymlinkWebpackPlugin',
+            async () => {
+              if (isServer) {
+                const from = join(compiler.options.output.path, '../static');
+                const to = join(compiler.options.output.path, 'static');
 
+                try {
+                  await access(from);
+                  console.log(`${from} already exists`);
+                  return;
+                } catch (error) {
+                  if (error.code === 'ENOENT') {
+                    // No link exists
+                  } else {
+                    throw error;
+                  }
+                }
+
+                await symlink(to, from, 'junction');
+                console.log(`created symlink ${from} -> ${to}`);
+              }
+            },
+          );
+        }
+      })(),
+    );
+    // -----------
     return config;
   },
 
