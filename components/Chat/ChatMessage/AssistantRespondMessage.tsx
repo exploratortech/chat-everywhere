@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, useMemo } from 'react';
 
 import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
@@ -10,11 +10,9 @@ import MjImageComponentV2 from '../components/MjImageComponentV2';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 
-import rehypeMathjax from 'rehype-mathjax';
 import rehypeRaw from 'rehype-raw';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
 
 const AssistantRespondMessage = memo(
   ({
@@ -136,8 +134,8 @@ const AssistantRespondMessage = memo(
     return (
       <MemoizedReactMarkdown
         className="prose dark:prose-invert min-w-full"
-        remarkPlugins={[remarkGfm, remarkMath, remarkBreaks]}
-        rehypePlugins={[rehypeMathjax, rehypeRaw]}
+        remarkPlugins={[remarkGfm, remarkBreaks]}
+        rehypePlugins={[rehypeRaw]}
         components={{
           div: ({ node, children, ...props }) => {
             if (node?.properties?.id === 'ai-painter-generated-image') {
