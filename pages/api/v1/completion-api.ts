@@ -10,7 +10,7 @@ import { getAdminSupabaseClient } from '@/utils/server/supabase';
 import model from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 // @ts-expect-error
-import * as wasm from '@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
+import wasm from '@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
 import {
   ParsedEvent,
   ReconnectInterval,
