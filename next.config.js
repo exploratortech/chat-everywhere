@@ -25,7 +25,7 @@ const nextConfig = {
           compiler.hooks.afterEmit.tapPromise(
             'SymlinkWebpackPlugin',
             async () => {
-              if (isServer) {
+              // if (isServer) {
                 const from = join(compiler.options.output.path, '../static');
                 const to = join(compiler.options.output.path, 'static');
 
@@ -44,7 +44,7 @@ const nextConfig = {
                 await symlink(to, from, 'junction');
                 console.log(`created symlink ${from} -> ${to}`);
               }
-            },
+            // },
           );
         }
       })(),
