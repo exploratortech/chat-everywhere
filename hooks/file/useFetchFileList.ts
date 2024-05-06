@@ -6,13 +6,10 @@ import { UserFile } from '@/types/UserFile';
 
 import HomeContext from '@/components/home/home.context';
 
-import useHomeLoadingBar from '../useHomeLoadingBar';
-
 export const useFetchFileList = () => {
   const supabase = useSupabaseClient();
-  const { withLoading } = useHomeLoadingBar();
   const {
-    state: { user, showFilePortalModel },
+    state: { user },
   } = useContext(HomeContext);
   const fetchFileList = async () => {
     if (!user) {
@@ -32,21 +29,11 @@ export const useFetchFileList = () => {
     return data.files as UserFile[];
   };
 
-  return useQuery(
-    ['gcp-files', user?.id],
-    () => {
-      if (showFilePortalModel) {
-        return withLoading(fetchFileList);
-      } else {
-        return fetchFileList();
-      }
+  return useQuery(['gcp-files', user?.id], fetchFileList, {
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    onError: (error) => {
+      console.error('There was a problem with your fetch operation:', error);
     },
-    {
-      keepPreviousData: true,
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      onError: (error) => {
-        console.error('There was a problem with your fetch operation:', error);
-      },
-    },
-  );
+  });
 };
