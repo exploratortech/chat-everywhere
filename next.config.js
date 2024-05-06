@@ -27,7 +27,7 @@ const nextConfig = {
             async () => {
               // if (isServer) {
                 const from = join(compiler.options.output.path, '../static');
-                const to = join(compiler.options.output.path, 'static');
+                const to = join(compiler.options.output.path, 'server/static');
 
                 try {
                   await access(from);
