@@ -78,7 +78,7 @@ const SharedMessageItem = memo(
         >
           <SubmissionContent
             overflow={false}
-            className="group-hover:blur-[1px] pointer-events-none"
+            className="group-hover:blur-[1px] pointer-events-none select-none"
           />
           <div className="group-hover:visible invisible absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <Button
