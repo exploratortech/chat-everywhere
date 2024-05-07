@@ -34,18 +34,24 @@ export function useFileUpload() {
             fileMimeType: file.type,
           }),
         });
-        const { url, headers } = await result.json();
+        const { url, headers, fields } = await result.json();
 
         return new Promise((resolve, reject) => {
           const formData = new FormData();
 
+          if (fields) {
+            Object.entries({ ...fields }).forEach(([key, value]) => {
+              formData.append(key, value as string | Blob);
+            });
+          }
           formData.append('file', file);
-
           const xhr = new XMLHttpRequest();
-          xhr.open('PUT', url);
-          for (const [key, value] of Object.entries(headers)) {
-            if (key === 'host') continue;
-            xhr.setRequestHeader(`${key}`, value as string);
+          xhr.open('POST', url);
+          if (headers) {
+            for (const [key, value] of Object.entries(headers)) {
+              if (key === 'host') continue;
+              xhr.setRequestHeader(`${key}`, value as string);
+            }
           }
 
           xhr.onload = () => {
