@@ -30,6 +30,8 @@ export interface HomeContextProps {
   setDragData: (dragData: DragData) => void;
   removeDragData: () => void;
   stopConversationRef: MutableRefObject<boolean>;
+  startLoadingBar: () => void;
+  completeLoadingBar: () => void;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

@@ -2,6 +2,7 @@ import {
   IconBrandFacebook,
   IconBrandGoogle,
   IconCurrencyDollar,
+  IconFolder,
   IconHighlight,
   IconLogin,
   IconNews,
@@ -18,6 +19,7 @@ import { trackEvent } from '@/utils/app/eventTracking';
 import CloudSyncStatusComponent from '../../Sidebar/components/CloudSyncComponent';
 import UserAccountBadge from '@/components/User/UserAccountBadge';
 import HomeContext from '@/components/home/home.context';
+import PreviewVersionFlag from '@/components/ui/preview-version-flag';
 
 import { SidebarButton } from '../../Sidebar/SidebarButton';
 import { ClearConversations } from './ClearConversations';
@@ -26,12 +28,21 @@ export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
 
   const {
-    state: { conversations, folders, prompts, user, isTeacherAccount },
+    state: {
+      conversations,
+      folders,
+      prompts,
+      user,
+      isTeacherAccount,
+      featureFlags,
+    },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
+  const isUltraUser = user && user.plan === 'ultra';
+  const isChatWithDocEnabled = featureFlags['enable-chat-with-doc'];
 
   const filteredConversations = useMemo(
     () => getNonDeletedCollection(conversations),
@@ -94,6 +105,19 @@ export const ChatbarSettings = () => {
           <ClearConversations />
         ) : null}
 
+        {isUltraUser && isChatWithDocEnabled && (
+          <SidebarButton
+            text={`${t('File Portal')}`}
+            icon={<IconFolder size={18} />}
+            onClick={() => {
+              homeDispatch({
+                field: 'showFilePortalModel',
+                value: true,
+              });
+            }}
+            suffixIcon={<PreviewVersionFlag />}
+          />
+        )}
         <SidebarButton
           text={t('Settings')}
           icon={<IconSettings size={18} />}
@@ -124,6 +148,7 @@ export const ChatbarSettings = () => {
             onClick={() => teacherPortalBtnOnClick()}
           />
         )}
+
         {isEduUser && (
           <SidebarButton
             text={t('Referral Program')}

@@ -40,6 +40,7 @@ export interface HomeInitialState {
 
   // User Auth
   showSettingsModel: boolean;
+  showFilePortalModel: boolean;
   showLoginSignUpModel: boolean;
   showOneTimeCodeLoginModel: boolean;
   showReferralModel: boolean;
@@ -78,6 +79,11 @@ export interface HomeInitialState {
   // Teacher Portal
   teacherPrompts: TeacherPromptForTeacherPortal[];
   teacherSettings: TeacherSettings;
+
+  // Posthog feature flags
+  featureFlags: {
+    'enable-chat-with-doc': boolean;
+  };
 }
 
 export const initialState: HomeInitialState = {
@@ -111,6 +117,7 @@ export const initialState: HomeInitialState = {
 
   // User Auth
   showSettingsModel: false,
+  showFilePortalModel: false,
   showLoginSignUpModel: false,
   showOneTimeCodeLoginModel: false,
   showReferralModel: false,
@@ -151,5 +158,10 @@ export const initialState: HomeInitialState = {
   teacherSettings: {
     allow_student_use_line: false,
     hidden_chateverywhere_default_character_prompt: false,
+  },
+
+  // Posthog feature flags
+  featureFlags: {
+    'enable-chat-with-doc': false,
   },
 };

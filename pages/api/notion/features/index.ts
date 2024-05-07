@@ -83,7 +83,6 @@ const handler = async (req: NextRequest): Promise<Response> => {
       },
     });
   } catch (error) {
-    console.error(error);
     return new Response('Error', {
       status: 500,
       statusText: 'Internal server error',

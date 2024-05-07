@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics/dist/interactions';
 
+import { useFetchFileList } from '@/hooks/file/useFetchFileList';
 import useCustomInstructionDefaultMode from '@/hooks/useCustomInstructionDefaultMode';
 
 import chat from '@/utils/app/chat';
@@ -47,6 +48,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const { t } = useTranslation('chat');
   const { t: promptT } = useTranslation('prompts');
   const { t: commonT } = useTranslation('common');
+  const { data: userFiles } = useFetchFileList();
 
   const {
     state: {
@@ -82,6 +84,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       customInstructionPrompt?: Prompt,
     ) => {
       const message = overrideCurrentMessage || currentMessage;
+
       const isCreatingConversationWithCustomInstruction =
         !!customInstructionPrompt;
 
@@ -128,6 +131,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           updatedConversation,
           plugin,
           selectedConversation,
+          userFiles,
         );
 
         const isTeacherPromptConversation =

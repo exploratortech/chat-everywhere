@@ -11,7 +11,6 @@ import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/components/home/home.context';
 
-import ImageToPromptUpload from '../ImageToPromptUpload/ImageUpload';
 import ChangeOutputLanguageButton from './ChangeOutputLanguageButton';
 import ConversationStyleSelector from './ConversationStyleSelector';
 import ImageGenerationSelectors from './ImageGenerationSelectors';
@@ -56,7 +55,7 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
       <div
         ref={ref}
         className={`absolute w-full h-fit left-0 overflow-hidden
-          bg-white dark:bg-[#343541] text-black dark:text-white 
+          bg-white dark:bg-[#343541] text-black dark:text-white
           z-10 rounded-md -translate-y-[100%]
           border dark:border-gray-900/50 shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]
           transition-all ease-in-out ${

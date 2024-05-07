@@ -163,6 +163,7 @@ async function addCreditToUser(
       | PluginID.IMAGE_TO_PROMPT
       | PluginID.aiPainter
       | PluginID.default
+      | PluginID.GEMINI
     >,
     credit,
   );

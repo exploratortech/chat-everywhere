@@ -2,7 +2,6 @@ import { IconPlayerStop, IconRepeat, IconSend } from '@tabler/icons-react';
 import {
   KeyboardEvent,
   MutableRefObject,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -13,12 +12,15 @@ import {
 
 import { useTranslation } from 'next-i18next';
 
+import { useFileList } from '@/hooks/chatInput/useFileList';
+import { usePromptList } from '@/hooks/chatInput/usePromptList';
 import useDisplayAttribute from '@/hooks/useDisplayAttribute';
 import useFocusHandler from '@/hooks/useFocusInputHandler';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
 
+import { UserFile } from '@/types/UserFile';
 import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
@@ -28,7 +30,9 @@ import HomeContext from '@/components/home/home.context';
 
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../Voice/VoiceInputButton';
+import { FileList } from './FileList';
 import { PromptList } from './PromptList';
+import UserFileItem from './UserFileItem';
 import { VariableModal } from './VariableModal';
 
 interface Props {
@@ -59,15 +63,30 @@ export const ChatInput = ({
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
+  const {
+    showPromptList,
+    setShowPromptList,
+    activePromptIndex,
+    setActivePromptIndex,
+    filteredPrompts,
+    updatePromptListVisibility,
+  } = usePromptList({ originalPrompts });
+  const {
+    showFileList,
+    setShowFileList,
+    activeFileIndex,
+    setActiveFileIndex,
+    filteredFiles,
+    updateFileListVisibility,
+  } = useFileList();
 
   const [content, setContent] = useState<string>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const [showPromptList, setShowPromptList] = useState(false);
-  const [activePromptIndex, setActivePromptIndex] = useState(0);
-  const [promptInputValue, setPromptInputValue] = useState('');
+
   const [variables, setVariables] = useState<string[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const promptListRef = useRef<HTMLUListElement | null>(null);
+  const fileListRef = useRef<HTMLUListElement | null>(null);
 
   const { isFocused, setIsFocused, menuRef } = useFocusHandler(textareaRef);
   const [isOverTokenLimit, setIsOverTokenLimit] = useState(false);
@@ -76,10 +95,6 @@ export const ChatInput = ({
   const prompts = useMemo(() => {
     return getNonDeletedCollection(originalPrompts);
   }, [originalPrompts]);
-
-  const filteredPrompts = prompts.filter((prompt) =>
-    prompt.name.toLowerCase().includes(promptInputValue.toLowerCase()),
-  );
 
   const enhancedMenuDisplayValue = useDisplayAttribute(menuRef);
 
@@ -92,6 +107,7 @@ export const ChatInput = ({
 
     setContent(value);
     updatePromptListVisibility(value);
+    updateFileListVisibility(value);
   };
 
   const handleSend = () => {
@@ -116,6 +132,14 @@ export const ChatInput = ({
         role: 'user',
       });
       setContent('');
+      homeDispatch({
+        field: 'currentMessage',
+        value: {
+          ...currentMessage,
+          content: '',
+          fileList: [],
+        },
+      });
       if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
         textareaRef.current.blur();
       }
@@ -181,6 +205,31 @@ export const ChatInput = ({
       } else {
         setActivePromptIndex(0);
       }
+    } else if (showFileList) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveFileIndex((prevIndex) =>
+          prevIndex < filteredFiles.length - 1 ? prevIndex + 1 : prevIndex,
+        );
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveFileIndex((prevIndex) =>
+          prevIndex > 0 ? prevIndex - 1 : prevIndex,
+        );
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        setActiveFileIndex((prevIndex) =>
+          prevIndex < filteredFiles.length - 1 ? prevIndex + 1 : 0,
+        );
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        handleFileSelect(filteredFiles[activeFileIndex]);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowFileList(false);
+      } else {
+        setActiveFileIndex(0);
+      }
     } else if (e.key === 'Enter' && !isTyping && !isMobile() && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -201,18 +250,28 @@ export const ChatInput = ({
     return foundVariables;
   };
 
-  const updatePromptListVisibility = useCallback((text: string) => {
-    const match = text.match(/\/\w*$/);
+  const handleFileSelect = (file: UserFile) => {
+    const existingFiles = currentMessage?.fileList || [];
+    const isFileAlreadyIncluded = existingFiles.some(
+      (existingFile) => existingFile.id === file.id,
+    );
 
-    if (match) {
-      setShowPromptList(true);
-      setPromptInputValue(match[0].slice(1));
-    } else {
-      setShowPromptList(false);
-      setPromptInputValue('');
+    if (!isFileAlreadyIncluded) {
+      homeDispatch({
+        field: 'currentMessage',
+        value: {
+          ...currentMessage,
+          fileList: [...existingFiles, file],
+          pluginId: PluginID.GEMINI,
+        },
+      });
     }
-  }, []);
-
+    setContent((prevContent) => {
+      const newContent = prevContent?.replace(/\@\w*$/, '');
+      return newContent;
+    });
+    setShowFileList(false);
+  };
   const handlePromptSelect = (prompt: Prompt) => {
     const parsedVariables = parseVariables(prompt.content);
     setVariables(parsedVariables);
@@ -344,10 +403,10 @@ export const ChatInput = ({
           )}
 
         <div
-          className={`relative mx-2 flex w-full flex-grow flex-col rounded-md 
-            border bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] 
-            dark:bg-[#40414F] dark:text-white 
-            dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4 
+          className={`relative mx-2 flex w-full flex-grow flex-col rounded-md
+            border bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)]
+            dark:bg-[#40414F] dark:text-white
+            dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4
             ${
               isOverTokenLimit && !isSpeechRecognitionActive
                 ? '!border-red-500 dark:!border-red-600'
@@ -356,6 +415,8 @@ export const ChatInput = ({
             ${
               !currentMessage || currentMessage.pluginId === null
                 ? 'border-black/10 dark:border-gray-900/50'
+                : currentMessage.pluginId === PluginID.GEMINI
+                ? 'border-yellow-500 dark:border-yellow-400'
                 : 'border-blue-800 dark:border-blue-700'
             }
           `}
@@ -370,42 +431,73 @@ export const ChatInput = ({
               </button>
             </div>
 
-            <textarea
-              onFocus={() => setIsFocused(true)}
-              ref={textareaRef}
-              className={`
-                m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md
-                ${
-                  isSpeechRecognitionActive
-                    ? 'z-[1100] pointer-events-none'
-                    : ''
-                }
-                ${
-                  isOverTokenLimit && isSpeechRecognitionActive
-                    ? 'border !border-red-500 dark:!border-red-600'
-                    : 'border-0'
-                }
-              `}
-              style={{
-                paddingBottom: `${
-                  isCloseToTokenLimit || isOverTokenLimit ? '2.2' : '0.75'
-                }rem `,
-                resize: 'none',
-                bottom: `${textareaRef?.current?.scrollHeight}px`,
-                maxHeight: '400px',
-                overflow: `${
-                  textareaRef.current && textareaRef.current.scrollHeight > 400
-                    ? 'auto'
-                    : 'hidden'
-                }`,
-              }}
-              placeholder={t('Type a message ...') || ''}
-              value={content}
-              rows={1}
-              onKeyUp={(e) => setIsTyping(e.nativeEvent.isComposing)}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
-            />
+            <div className="flex flex-col w-full">
+              <textarea
+                onFocus={() => setIsFocused(true)}
+                ref={textareaRef}
+                className={`
+                  m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md
+                  ${
+                    isSpeechRecognitionActive
+                      ? 'z-[1100] pointer-events-none'
+                      : ''
+                  }
+                  ${
+                    isOverTokenLimit && isSpeechRecognitionActive
+                      ? 'border !border-red-500 dark:!border-red-600'
+                      : 'border-0'
+                  }
+                `}
+                style={{
+                  paddingBottom: `${
+                    isCloseToTokenLimit || isOverTokenLimit ? '2.2' : '0.75'
+                  }rem `,
+                  resize: 'none',
+                  bottom: `${textareaRef?.current?.scrollHeight}px`,
+                  maxHeight: '400px',
+                  overflow: `${
+                    textareaRef.current &&
+                    textareaRef.current.scrollHeight > 400
+                      ? 'auto'
+                      : 'hidden'
+                  }`,
+                }}
+                placeholder={t('Type a message ...') || ''}
+                value={content}
+                rows={1}
+                onKeyUp={(e) => setIsTyping(e.nativeEvent.isComposing)}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+              />
+
+              {currentMessage &&
+                currentMessage.fileList &&
+                currentMessage.fileList.length > 0 && (
+                  <div className="flex flex-row gap-2 p-2 flex-wrap">
+                    {currentMessage.fileList.map((file, index) => {
+                      return (
+                        <UserFileItem
+                          key={`chat-input-file-${file.id}-${index}`}
+                          file={file}
+                          onRemove={() => {
+                            if (!currentMessage || !currentMessage.fileList)
+                              return;
+                            homeDispatch({
+                              field: 'currentMessage',
+                              value: {
+                                ...currentMessage,
+                                fileList: currentMessage.fileList.filter(
+                                  (f) => f.id !== file.id,
+                                ),
+                              },
+                            });
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
+            </div>
           </div>
 
           <TokenCounter
@@ -443,6 +535,17 @@ export const ChatInput = ({
                 onSelect={handleInitModal}
                 onMouseOver={setActivePromptIndex}
                 promptListRef={promptListRef}
+              />
+            </div>
+          )}
+          {showFileList && filteredFiles.length > 0 && (
+            <div className="absolute bottom-12 w-full z-20">
+              <FileList
+                fileListRef={fileListRef}
+                activeFileIndex={activeFileIndex}
+                files={filteredFiles}
+                onSelect={handleFileSelect}
+                onMouseOver={setActiveFileIndex}
               />
             </div>
           )}

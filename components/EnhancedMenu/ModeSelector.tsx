@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { saveOutputLanguage } from '@/utils/app/outputLanguage';
@@ -11,9 +11,18 @@ const ModeSelector = () => {
   const { t } = useTranslation('model');
 
   const {
-    state: { currentMessage, isPaidUser, hasMqttConnection },
+    state: {
+      currentMessage,
+      isPaidUser,
+      hasMqttConnection,
+      isUltraUser,
+      selectedConversation,
+      featureFlags,
+    },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
+
+  const isChatWithDocEnabled = featureFlags['enable-chat-with-doc'];
 
   const currentSelectedPluginId = useMemo(() => {
     if (!currentMessage || currentMessage?.pluginId === null) {
@@ -24,6 +33,18 @@ const ModeSelector = () => {
   }, [currentMessage]);
 
   const pluginOnChange = (pluginId: string) => {
+    // add checker to see if the current conversation has files
+    const hasFiles = selectedConversation?.messages.some(
+      (message) => message.fileList && message.fileList.length > 0,
+    );
+    if (hasFiles && pluginId !== PluginID.GEMINI) {
+      alert(
+        t(
+          'Sorry, only the Gemini mode supports files, please clear all files to use other mode.',
+        ),
+      );
+      return;
+    }
     homeDispatch({
       field: 'currentMessage',
       value: {
@@ -32,6 +53,31 @@ const ModeSelector = () => {
       },
     });
   };
+
+  // If the selected conversation has files, and the current selected plugin is not Gemini, switch to Gemini
+  useEffect(() => {
+    const hasFiles = selectedConversation?.messages.some(
+      (message) => message.fileList && message.fileList.length > 0,
+    );
+    if (hasFiles && currentSelectedPluginId !== PluginID.GEMINI) {
+      if (isUltraUser) {
+        homeDispatch({
+          field: 'currentMessage',
+          value: {
+            ...currentMessage,
+            pluginId: PluginID.GEMINI,
+          },
+        });
+      }
+    }
+  }, [
+    selectedConversation,
+    currentSelectedPluginId,
+    t,
+    homeDispatch,
+    currentMessage,
+    isUltraUser,
+  ]);
 
   return (
     <div className="flex flex-row items-center justify-between md:justify-start">
@@ -98,6 +144,14 @@ const ModeSelector = () => {
                 {t('AI Painter')}
               </option>
             </>
+          )}
+          {isUltraUser && isChatWithDocEnabled && (
+            <option
+              value={PluginID.GEMINI}
+              className="dark:bg-[#343541] dark:text-white text-yellow-600"
+            >
+              {t('Gemini')}
+            </option>
           )}
         </select>
       </div>

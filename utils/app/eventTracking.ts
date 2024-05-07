@@ -144,6 +144,10 @@ export const initializePosthog = () => {
   });
 };
 
+export const isFeatureEnabled = (featureName: string) => {
+  return !!posthog.isFeatureEnabled(featureName);
+};
+
 export const updateUserInfo = (user: User) => {
   if (!enableTracking) return;
   posthog.identify(user.id, {

@@ -279,7 +279,10 @@ export const OpenAIStream = async (
       console.error(error, attemptLogs);
 
       // Propagate custom error to terminate the retry mechanism
-      if((error as Error).message === ERROR_MESSAGES.content_filter_triggered.message) {
+      if (
+        (error as Error).message ===
+        ERROR_MESSAGES.content_filter_triggered.message
+      ) {
         throw new Error(ERROR_MESSAGES.content_filter_triggered.message);
       }
 
