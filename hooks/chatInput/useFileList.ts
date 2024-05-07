@@ -1,4 +1,6 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
+
+import HomeContext from '@/components/home/home.context';
 
 import { useFetchFileList } from '../file/useFetchFileList';
 
@@ -8,11 +10,15 @@ export const useFileList = () => {
   const [activeFileIndex, setActiveFileIndex] = useState(0);
 
   const { data: files } = useFetchFileList();
+  const {
+    state: { user, featureFlags },
+  } = useContext(HomeContext);
   const filteredFiles = useMemo(() => {
+    if (!user || !featureFlags['enable-chat-with-doc']) return [];
     return (files || []).filter((file) =>
       file.filename.toLowerCase().includes(fileInputValue.toLowerCase()),
     );
-  }, [files, fileInputValue]);
+  }, [user, featureFlags, files, fileInputValue]);
 
   const updateFileListVisibility = useCallback(
     (text: string) => {
