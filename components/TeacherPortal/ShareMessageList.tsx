@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 
 interface SharedMessageListProps {
   sharedMessages: ShareMessagesByTeacherProfilePayload['submissions'] | null;
-  handleSelectMessage: (id: number) => void;
+  handleSelectMessage: (id: number, isShiftKey?: boolean) => void;
   selectedMessageIds: number[];
 }
 

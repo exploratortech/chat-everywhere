@@ -82,12 +82,23 @@ const SharedMessages = () => {
     setPagination((prev) => ({ ...prev, current_page: newPage }));
   };
 
-  const handleSelectMessage = (id: number) => {
+  const handleSelectMessage = (id: number, isShiftKey?: boolean) => {
     setSelectedMessageIds((prev) => {
-      if (prev.includes(id)) {
-        return prev.filter((messageId) => messageId !== id);
+      if (sharedMessages) {
+        if (isShiftKey && prev.length > 0) {
+          const newSelectedIds = new Set(prev);
+          const start = sharedMessages.findIndex(message => message.id === prev[0]);
+          const end = sharedMessages.findIndex(message => message.id === id);
+          const [from, to] = start < end ? [start, end] : [end, start];
+          sharedMessages.slice(from, to + 1).forEach(message => newSelectedIds.add(message.id));
+          return Array.from(newSelectedIds);
+        } else if (prev.includes(id)) {
+          return prev.filter((messageId) => messageId !== id);
+        } else {
+          return [...prev, id];
+        }
       }
-      return [...prev, id];
+      return prev;
     });
   };
 
