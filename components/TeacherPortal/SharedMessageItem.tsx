@@ -15,7 +15,7 @@ import dayjs from 'dayjs';
 interface ShareMessageItemProps {
   submission: StudentMessageSubmission;
   className?: string;
-  onSelectMessage: (id: number) => void;
+  onSelectMessage: (id: number, isShiftKey?: boolean) => void;
   isSelected?: boolean;
 }
 const SharedMessageItem = memo(
@@ -69,7 +69,7 @@ const SharedMessageItem = memo(
     return (
       <div className="w-full">
         <div
-          onClick={() => onSelectMessage(submission.id)}
+          onClick={(event) => onSelectMessage(submission.id, event?.shiftKey)}
           className={cn(
             'group bg-neutral-800 relative cursor-pointer w-[300px] mobile:w-full max-w-[300px] max-h-[250px] h-[250px] overflow-hidden text-neutral-200 p-4 rounded-lg shadow-md transition-all duration-100',
             className,
