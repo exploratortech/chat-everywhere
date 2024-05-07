@@ -6,7 +6,7 @@ import {
 import { Message } from '@/types/chat';
 
 // @ts-expect-error
-import wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
+import * as wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
 import {
   AZURE_DALL_E_3_ENDPOINTS,
   AZURE_DALL_E_API_KEYS,
