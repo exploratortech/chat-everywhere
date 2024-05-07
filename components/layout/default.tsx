@@ -3,9 +3,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
 
-import { GetServerSideProps } from 'next';
 import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { event } from 'nextjs-google-analytics';
@@ -36,6 +34,7 @@ import {
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import {
   clearUserInfo,
+  isFeatureEnabled,
   logUsageSnapshot,
   trackEvent,
   updateUserInfo,
@@ -55,7 +54,6 @@ import {
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
-import { userProfileQuery } from '@/utils/server/supabase';
 
 import { Conversation } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
@@ -572,6 +570,13 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
               isInReferralTrial: userProfile.isInReferralTrial,
             },
           });
+
+          dispatch({
+            field: 'featureFlags',
+            value: {
+              'enable-chat-with-doc': isFeatureEnabled('enable-chat-with-doc'),
+            },
+          });
         })
         .catch((error) => {
           console.log(error);
@@ -640,6 +645,13 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     } else {
       resetStateOnLogout({});
     }
+
+    dispatch({
+      field: 'featureFlags',
+      value: {
+        'enable-chat-with-doc': false,
+      },
+    });
 
     toast.success(t('You have been logged out'));
     clearUserInfo();
