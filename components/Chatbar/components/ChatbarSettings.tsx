@@ -28,13 +28,21 @@ export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
 
   const {
-    state: { conversations, folders, prompts, user, isTeacherAccount },
+    state: {
+      conversations,
+      folders,
+      prompts,
+      user,
+      isTeacherAccount,
+      featureFlags,
+    },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
   const isUltraUser = user && user.plan === 'ultra';
+  const isChatWithDocEnabled = featureFlags['enable-chat-with-doc'];
 
   const filteredConversations = useMemo(
     () => getNonDeletedCollection(conversations),
@@ -97,7 +105,7 @@ export const ChatbarSettings = () => {
           <ClearConversations />
         ) : null}
 
-        {isUltraUser && (
+        {isUltraUser && isChatWithDocEnabled && (
           <SidebarButton
             text={`${t('File Portal')}`}
             icon={<IconFolder size={18} />}

@@ -79,6 +79,11 @@ export interface HomeInitialState {
   // Teacher Portal
   teacherPrompts: TeacherPromptForTeacherPortal[];
   teacherSettings: TeacherSettings;
+
+  // Posthog feature flags
+  featureFlags: {
+    'enable-chat-with-doc': boolean;
+  };
 }
 
 export const initialState: HomeInitialState = {
@@ -153,5 +158,10 @@ export const initialState: HomeInitialState = {
   teacherSettings: {
     allow_student_use_line: false,
     hidden_chateverywhere_default_character_prompt: false,
+  },
+
+  // Posthog feature flags
+  featureFlags: {
+    'enable-chat-with-doc': false,
   },
 };
