@@ -574,7 +574,8 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           dispatch({
             field: 'featureFlags',
             value: {
-              'enable-chat-with-doc': isFeatureEnabled('enable-chat-with-doc'),
+              // Ignore feature flag on staging and local env
+              'enable-chat-with-doc': isFeatureEnabled('enable-chat-with-doc') || process.env.NEXT_PUBLIC_ENV !== 'production',
             },
           });
         })
