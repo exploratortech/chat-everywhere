@@ -1,4 +1,5 @@
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { unauthorizedResponse } from '@/utils/server/auth';
 import { getAccessToken } from '@/utils/server/google/auth';
 import {
@@ -81,6 +82,8 @@ const handler = async (req: Request): Promise<Response> => {
         messageToSend[messageToSend.length - 1].content
       }`;
     }
+
+    await serverSideTrackEvent(data.user.id, 'Chat with doc message');
 
     // GEMINI API STARTS HERE
     const generationConfig: GenerationConfig = {
