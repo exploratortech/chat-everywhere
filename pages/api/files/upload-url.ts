@@ -8,6 +8,10 @@ import { getBucket } from '@/utils/server/gcpBucket';
 
 import { v4 as uuidv4 } from 'uuid';
 
+export const config = {
+  maxDuration: 300,
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
