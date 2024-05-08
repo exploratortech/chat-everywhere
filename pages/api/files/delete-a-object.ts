@@ -22,7 +22,7 @@ export default async function handler(
   }
 
   const userProfile = await fetchUserProfileWithAccessTokenServerless(req);
-  if (!userProfile || !userProfile.isTeacherAccount) {
+  if (!userProfile) {
     return unauthorizedResponse;
   }
 
