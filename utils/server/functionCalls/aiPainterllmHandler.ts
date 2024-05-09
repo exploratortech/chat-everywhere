@@ -101,7 +101,6 @@ export const aiPainterLlmHandler = async ({
           onUpdate(token);
         },
         functionCalls: functionCallsToSend,
-        useOpenAI: true,
       });
 
       // No function call required, exiting

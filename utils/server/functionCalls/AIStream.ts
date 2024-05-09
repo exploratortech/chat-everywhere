@@ -34,20 +34,19 @@ export const AIStream = async ({
   messages,
   onUpdateToken,
   functionCalls,
-  useOpenAI = false,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
-  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true, countryCode);
+  const apimOpenAIEndpoint = process.env.AZURE_APIM_OPENAI_ENDPOINT;
+  const apimSubscriptionKey = process.env.AZURE_APIM_OPENAI_SUBSCRIPTION_KEY;
+  if (!apimOpenAIEndpoint || !apimSubscriptionKey)
+    throw new Error('Missing endpoint/key');
 
-  let attempt = 0,
-    stop = false,
+  let stop = false,
     functionCallName = '',
     functionCallArgumentInJsonString = '';
 
-  const openAIEndpoint = openAIEndpoints[attempt] || '';
-  const openAIKey = openAIKeys[attempt] || '';
   const model = OpenAIModels[OpenAIModelID.GPT_4];
 
-  let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2024-02-01`;
+  let url = `${apimOpenAIEndpoint}/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2024-02-01`;
 
   const messagesToSend = await shortenMessagesBaseOnTokenLimit(
     '',
@@ -79,34 +78,15 @@ export const AIStream = async ({
 
   const requestHeaders: { [header: string]: string } = {
     'Content-Type': 'application/json',
+    'ocp-apim-subscription-key': apimSubscriptionKey,
   };
 
-  requestHeaders['api-key'] = openAIKey;
-
-  let res;
-  if (useOpenAI) {
-    bodyToSend.model = 'gpt-4-0125-preview';
-    console.log(
-      'Sending request to: https://api.openai.com/v1/chat/completions',
-    );
-
-    res = await fetch('https://api.openai.com/v1/chat/completions', {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      method: 'POST',
-      body: JSON.stringify(bodyToSend),
-    });
-  } else {
-    console.log('Sending request to: ' + url);
-    res = await fetch(url, {
-      headers: requestHeaders,
-      method: 'POST',
-      body: JSON.stringify(bodyToSend),
-    });
-  }
-
+  console.log('Sending request to: ' + url);
+  const res = await fetch(url, {
+    headers: requestHeaders,
+    method: 'POST',
+    body: JSON.stringify(bodyToSend),
+  });
   const decoder = new TextDecoder();
 
   if (res.status !== 200) {
