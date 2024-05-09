@@ -1,13 +1,13 @@
 import { FunctionCall } from '@/types/chat';
 
-import { getEndpointsAndKeys } from './api';
-
 export const translateAndEnhancePrompt = async (prompt: string) => {
-  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true);
-  const openAIEndpoint = openAIEndpoints[0] || '';
-  const openAIKey = openAIKeys[0] || '';
+  const apimOpenAIEndpoint = process.env.AZURE_APIM_OPENAI_ENDPOINT;
+  const apimSubscriptionKey = process.env.AZURE_APIM_OPENAI_SUBSCRIPTION_KEY;
 
-  let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2024-02-01`;
+  if (!apimOpenAIEndpoint || !apimSubscriptionKey)
+    throw new Error('Missing endpoint/key');
+
+  let url = `${apimOpenAIEndpoint}/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2024-02-01`;
 
   const translateSystemPrompt = `
     Act as an AI image generation expert and a professional translator, follow user's instruction as strictly as possible.
@@ -61,7 +61,7 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
   const completionResponse = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
-      'api-key': openAIKey,
+      'ocp-apim-subscription-key': apimSubscriptionKey,
     },
     method: 'POST',
     body: JSON.stringify({
