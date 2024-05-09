@@ -34,6 +34,7 @@ export const AIStream = async ({
   messages,
   onUpdateToken,
   functionCalls,
+  useOpenAI = false,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
   const apimOpenAIEndpoint = process.env.AZURE_APIM_OPENAI_ENDPOINT;
   const apimSubscriptionKey = process.env.AZURE_APIM_OPENAI_SUBSCRIPTION_KEY;
@@ -76,17 +77,34 @@ export const AIStream = async ({
     bodyToSend.functions = functionCalls;
   }
 
-  const requestHeaders: { [header: string]: string } = {
-    'Content-Type': 'application/json',
-    'ocp-apim-subscription-key': apimSubscriptionKey,
-  };
+  let res;
+  if (useOpenAI) {
+    bodyToSend.model = 'gpt-4-0125-preview';
+    console.log(
+      'Sending request to: https://api.openai.com/v1/chat/completions',
+    );
 
-  console.log('Sending request to: ' + url);
-  const res = await fetch(url, {
-    headers: requestHeaders,
-    method: 'POST',
-    body: JSON.stringify(bodyToSend),
-  });
+    res = await fetch('https://api.openai.com/v1/chat/completions', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      method: 'POST',
+      body: JSON.stringify(bodyToSend),
+    });
+  } else {
+    const requestHeaders: { [header: string]: string } = {
+      'Content-Type': 'application/json',
+      'ocp-apim-subscription-key': apimSubscriptionKey,
+    };
+    console.log('Sending request to: ' + url);
+    res = await fetch(url, {
+      headers: requestHeaders,
+      method: 'POST',
+      body: JSON.stringify(bodyToSend),
+    });
+  }
+
   const decoder = new TextDecoder();
 
   if (res.status !== 200) {
