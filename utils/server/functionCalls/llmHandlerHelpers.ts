@@ -23,7 +23,9 @@ const helperFunctionNames = {
   generateHtmlForAiPainterImages: 'generate-html-for-ai-painter-images',
 };
 
-const isInProductionOrLocalEnv = process.env.NEXT_PUBLIC_ENV === 'production' || process.env.NEXT_PUBLIC_ENV === 'local';
+const isInProductionOrLocalEnv =
+  process.env.NEXT_PUBLIC_ENV === 'production' ||
+  process.env.NEXT_PUBLIC_ENV === 'local';
 
 export const getHelperFunctionCalls = (
   lineAccessToken?: string,
@@ -170,7 +172,6 @@ export const triggerHelperFunction = async (
           const { data: imagePublicUrlData } = await supabase.storage
             .from('ai-images')
             .getPublicUrl(imageFileName);
-  
 
           const compressedImageUrl = supabase.storage
             .from('ai-images')
@@ -200,6 +201,7 @@ export const triggerHelperFunction = async (
                 `Failed to generate image, below is the error message: ${imageGenerationResponse.errorMessage}`,
               );
           }
+          console.log('image response:', imageGenerationResponse.data[0].url);
           const generatedImageInBase64 =
             imageGenerationResponse.data[0].b64_json;
           if (!generatedImageInBase64) {
@@ -215,7 +217,9 @@ export const triggerHelperFunction = async (
           }
           return {
             revised_prompt: imageGenerationResponse.data[0].revised_prompt,
-            imagePublicUrl: isInProductionOrLocalEnv ? compressedUrl : imagePublicUrl,
+            imagePublicUrl: isInProductionOrLocalEnv
+              ? compressedUrl
+              : imagePublicUrl,
             fileName,
           };
         } catch (e) {
