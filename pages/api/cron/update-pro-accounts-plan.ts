@@ -8,6 +8,7 @@ import {
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
+import { ServerClient } from 'postmark';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -41,37 +42,36 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-const sendOutTrialEndEmail = async (userEmail: string) => {
-  const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
-    },
-    body: JSON.stringify({
-      from: {
-        email: 'team@chateverywhere.app',
-        name: 'Chat Everywhere Team',
-      },
-      reply_to: {
-        email: 'jack@exploratorlabs.com',
-        name: 'Jack',
-      },
-      personalizations: [
-        {
-          to: [
-            {
-              email: userEmail,
-            },
-          ],
-        },
-      ],
-      template_id: 'd-e5fff0aa9b5948b4871c436812392134',
-    }),
-  });
+const postmarkClient = new ServerClient(process.env.SENDGRID_WEBHOOK_PUBLIC_KEY || '');
 
-  if (!response.ok) {
-    throw new Error(`Failed to send email: ${response.statusText}`);
+const sendOutTrialEndEmail = async (userEmail: string) => {
+  try {
+    const response = await postmarkClient.sendEmailWithTemplate({
+      From: "Chat Everywhere Team <team@chateverywhere.app>",
+      ReplyTo: 'Jack <jack@exploratorlabs.com>',
+      To: userEmail,
+      TemplateId: 35875013, // Replace with your actual numeric template ID
+      TemplateModel: {
+        // The properties here should match the variables in your Postmark template
+        "product_url": "product_url_Value",
+        "product_name": "Chat Everywhere",
+        "action_url": "action_url_Value",
+        "trial_extension_url": "trial_extension_url_Value",
+        "feedback_url": "feedback_url_Value",
+        "export_url": "export_url_Value",
+        "close_account_url": "close_account_url_Value",
+        "sender_name": "sender_name_Value",
+        "company_name": "company_name_Value",
+        "company_address": "company_address_Value"
+      }
+    });
+    console.log('Email sent successfully:', response);
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Failed to send email:', error.message);
+    } else {
+      console.error('An unexpected error occurred:', error);
+    }
   }
 };
 
