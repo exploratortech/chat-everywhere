@@ -1,6 +1,10 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useContext } from 'react';
+import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+
+import { UserFile } from '@/types/UserFile';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -36,18 +40,40 @@ export const useDeleteObject = () => {
   };
 
   const { withLoading } = useHomeLoadingBar();
+  const { t } = useTranslation('model');
   return useMutation(
     async (objectPath: string) => withLoading(() => deleteFile(objectPath)),
     {
-      onError: (error: Error) => {
-        console.error('Error deleting file:', error.message);
-      },
+      onMutate: async (objectPath: string) => {
+        await queryClient.cancelQueries(['gcp-files', user?.id]);
 
+        const previousFiles = queryClient.getQueryData(['gcp-files', user?.id]);
+
+        queryClient.setQueryData(
+          ['gcp-files', user?.id],
+          (old: UserFile[] | undefined) => {
+            if (old) {
+              return old.filter((file: any) => file.objectPath !== objectPath);
+            } else {
+              return old;
+            }
+          },
+        );
+
+        return { previousFiles };
+      },
+      onError: (error: Error, objectPath: string, context) => {
+        toast.error(t('Error deleting file'));
+        console.error('Error deleting file:', error.message);
+        if (context) {
+          queryClient.setQueryData(
+            ['gcp-files', user?.id],
+            context.previousFiles,
+          );
+        }
+      },
       onSettled: () => {
         queryClient.invalidateQueries(['gcp-files', user?.id]);
-      },
-      onSuccess: () => {
-        console.log('File deleted successfully');
       },
     },
   );
