@@ -230,5 +230,7 @@
   "Export": "导出",
   "All": "全部",
   "All in tags": "标签中的全部",
-  "Error deleting file": "文件删除失败"
+  "Error deleting file": "文件删除失败",
+  "Download failed!": "下载失败",
+  "Downloading...": "下载中..."
 }

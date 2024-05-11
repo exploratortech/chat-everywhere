@@ -2,6 +2,7 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useContext } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -36,11 +37,12 @@ export const useDownloadObjectUrl = () => {
   };
 
   const { withLoading } = useHomeLoadingBar();
+  const { t } = useTranslation('model');
   return useMutation(
     async (objectPath: string) => withLoading(() => downloadFile(objectPath)),
     {
       onMutate: () => {
-        const toastId = toast.loading('Downloading...');
+        const toastId = toast.loading(t('Downloading...'));
         return { toastId };
       },
       onError: (error: Error, variables, context) => {
@@ -51,7 +53,7 @@ export const useDownloadObjectUrl = () => {
         });
         console.error('Error getting download URL:', error.message);
         toast.dismiss(context?.toastId);
-        toast.error('Download failed!');
+        toast.error(t('Download failed!'));
       },
       onSettled: (data, error, variables, context) => {
         toast.dismiss(context?.toastId);
