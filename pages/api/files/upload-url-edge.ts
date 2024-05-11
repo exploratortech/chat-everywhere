@@ -43,8 +43,7 @@ export default async function handler(req: Request) {
     fetchUserProfileWithAccessToken(req),
     updateBucketCORS(),
   ]);
-  if (!userProfile || !userProfile.isTeacherAccount)
-    return unauthorizedResponse;
+  if (!userProfile || userProfile.plan !== 'ultra') return unauthorizedResponse;
 
   const folderPath = userProfile.id;
   const randomUUID = uuidv4();

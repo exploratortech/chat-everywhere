@@ -6,7 +6,6 @@ import {
 } from '@/utils/server/auth';
 import { getBucket } from '@/utils/server/gcpBucket';
 
-const BUCKET_NAME = process.env.GCP_CHAT_WITH_DOCUMENTS_BUCKET_NAME as string;
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
