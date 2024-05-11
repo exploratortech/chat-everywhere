@@ -119,6 +119,7 @@
     "@types/voucher-code-generator": "^1.1.1",
     "@vitest/coverage-c8": "^0.29.7",
     "autoprefixer": "^10.4.14",
+    "copy-webpack-plugin": "^12.0.2",
     "endent": "^2.1.0",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",

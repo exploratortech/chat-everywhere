@@ -8,6 +8,10 @@ import { getBucket } from '@/utils/server/gcpBucket';
 
 import { v4 as uuidv4 } from 'uuid';
 
+export const config = {
+  maxDuration: 60,
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -23,8 +27,7 @@ export default async function handler(
   }
 
   const userProfile = await fetchUserProfileWithAccessTokenServerless(req);
-  if (!userProfile || !userProfile.isTeacherAccount)
-    return unauthorizedResponse;
+  if (!userProfile) return unauthorizedResponse;
   const folderPath = userProfile.id;
   const randomUUID = uuidv4();
   const fileWithPath = `${folderPath}/${fileName}_${randomUUID}`;
