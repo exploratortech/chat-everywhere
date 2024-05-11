@@ -1,6 +1,9 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useContext } from 'react';
+import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+
 import { UserFile } from '@/types/UserFile';
 
 import HomeContext from '@/components/home/home.context';
@@ -37,6 +40,7 @@ export const useDeleteObject = () => {
   };
 
   const { withLoading } = useHomeLoadingBar();
+  const { t } = useTranslation('model');
   return useMutation(
     async (objectPath: string) => withLoading(() => deleteFile(objectPath)),
     {
@@ -59,7 +63,7 @@ export const useDeleteObject = () => {
         return { previousFiles };
       },
       onError: (error: Error, objectPath: string, context) => {
-      onError: (error: Error) => {
+        toast.error(t('Error deleting file'));
         console.error('Error deleting file:', error.message);
         if (context) {
           queryClient.setQueryData(
