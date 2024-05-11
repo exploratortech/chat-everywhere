@@ -1,4 +1,4 @@
-import { NextApiRequest } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 import {
   getAdminSupabaseClient,
@@ -30,6 +30,9 @@ export async function fetchUserProfileWithAccessToken(
 export const unauthorizedResponse = new Response('Unauthorized', {
   status: 401,
 });
+export const unauthorizedResponseServerless = (res: NextApiResponse) => {
+  return res.status(401).json({ message: 'Unauthorized' });
+};
 
 export async function isStudentAccount(userId: string): Promise<boolean> {
   const user = await getUserProfile(userId);
