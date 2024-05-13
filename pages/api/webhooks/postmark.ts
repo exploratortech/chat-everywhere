@@ -40,75 +40,32 @@ type PostmarkPayload = {
   Recipient: string;
 };
 
-// const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-//   console.log('Webhook triggered:', res);
-//   // if (req.method !== 'POST') {
-//   //   res.status(405).end('Method Not Allowed');
-//   // }
-
-//   // // const publicKey = process.env.SENDGRID_WEBHOOK_PUBLIC_KEY || '';
-//   // // const signature = req.headers[
-//   // //   'x-twilio-email-event-webhook-signature'
-//   // // ] as string;
-//   // // const timestamp = req.headers[
-//   // //   'x-twilio-email-event-webhook-timestamp'
-//   // // ] as string;
-//   // const payload = req.body;
-//   // console.log('payload:', payload);
-//   // //const eventWebhook = new EventWebhook();
-//   // // const key = eventWebhook.convertPublicKeyToECDSA(publicKey);
-//   // // const isValidWebHookEvent = eventWebhook.verifySignature(
-//   // //   key,
-//   // //   payload,
-//   // //   signature,
-//   // //   timestamp,
-//   // // );
-
-//   // // if (!isValidWebHookEvent) {
-//   // //   return res.status(400).send(`Webhook signature verification failed.`);
-//   // // }
-
-//   // const eventPayload = payload
-//   // console.log('eventPayload:', eventPayload);
-//   // // const openedEvents = eventPayload.filter(
-//   // //   (event) =>
-//   // //     event.RecordType === "Open"
-//   // // );
-
-//   // const openedEvents = payload
-//   // for (const event of openedEvents) {
-//   //   const supabase = getAdminSupabaseClient();
-
-//   //   const { data: user } = await supabase
-//   //     .from('profiles')
-//   //     .select('id, email')
-//   //     .eq('email', event.Recipient)
-//   //     .single();
-
-//   //   if (user) {
-//   //     await serverSideTrackEvent(user.id, `Trial end email opened`);
-//   //     console.log('Trial end email opened on user with email', user.email);
-//   //   }
-//   //   console.log('No user found for:', event.Recipient);
-//   // }
-
-//   //return res.status(200);
-// };
-
-// export default handler;
-
-// export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-//   console.log('Webhook triggered with body:', req.body);
-
-//   res.status(200).json({ message: 'Webhook received' });
-// }
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log('Webhook triggered with body:', req.body);
 
-  // Assuming req.body is already parsed as JSON
   const payload: PostmarkPayload = req.body;
 
+  // Verifying the authenticity of request 
+  if (req.method !== 'POST') {
+    res.status(405).end('Method Not Allowed');
+  }
+  // The name of the header or body field where the token will be expected
+  const tokenHeaderName = 'x-custom-auth-token';
+
+  // The expected token value
+  // const expectedToken = process.env.WEBHOOK_SECRET_TOKEN;
+  const expectedToken = "12345678";
+
+  // Extract the token from the request headers
+  const providedToken = req.headers[tokenHeaderName];
+
+  // Check if the token matches the expected value
+  if (!providedToken || providedToken !== expectedToken) {
+    res.status(401).json({ message: `Unauthorized: ${providedToken}`});
+    return;
+  }
+//-------
+  
   // Check if the RecordType is 'Open' and it's the first time the email is opened
   if (payload.RecordType === 'Open') {
     const supabase = getAdminSupabaseClient();
