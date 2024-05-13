@@ -1,6 +1,8 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useContext } from 'react';
+import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -31,19 +33,30 @@ export const useDownloadObjectUrl = () => {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to get download URL');
     }
-
     return response.json();
   };
 
   const { withLoading } = useHomeLoadingBar();
+  const { t } = useTranslation('model');
   return useMutation(
     async (objectPath: string) => withLoading(() => downloadFile(objectPath)),
     {
-      onError: (error: Error) => {
-        console.error('Error getting download URL:', error.message);
+      onMutate: () => {
+        const toastId = toast.loading(t('Downloading...'));
+        return { toastId };
       },
-
-      onSettled: () => {
+      onError: (error: Error, variables, context) => {
+        console.log({
+          error,
+          variables,
+          context,
+        });
+        console.error('Error getting download URL:', error.message);
+        toast.dismiss(context?.toastId);
+        toast.error(t('Download failed!'));
+      },
+      onSettled: (data, error, variables, context) => {
+        toast.dismiss(context?.toastId);
         queryClient.invalidateQueries(['gcp-files', user?.id]);
       },
     },

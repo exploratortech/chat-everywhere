@@ -230,5 +230,8 @@
   "Failed to update titles": "更新標題時出錯",
   "Export": "匯出",
   "All": "全部",
-  "All in tags": "標籤中的全部"
+  "All in tags": "標籤中的全部",
+  "Error deleting file": "檔案刪除失敗",
+  "Download failed!": "下載失敗",
+  "Downloading...": "下載中..."
 }

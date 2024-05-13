@@ -34,8 +34,7 @@ export default async function handler(req: Request) {
     fetchUserProfileWithAccessToken(req),
     updateBucketCORS(),
   ]);
-  if (!userProfile || !userProfile.isTeacherAccount)
-    return unauthorizedResponse;
+  if (!userProfile || userProfile.plan !== 'ultra') return unauthorizedResponse;
 
   if (!objectPath.includes(userProfile.id)) {
     return unauthorizedResponse;

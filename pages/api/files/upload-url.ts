@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import {
   fetchUserProfileWithAccessTokenServerless,
-  unauthorizedResponse,
+  unauthorizedResponseServerless,
 } from '@/utils/server/auth';
 import { getBucket } from '@/utils/server/gcpBucket';
 
@@ -27,7 +27,10 @@ export default async function handler(
   }
 
   const userProfile = await fetchUserProfileWithAccessTokenServerless(req);
-  if (!userProfile) return unauthorizedResponse;
+
+  if (!userProfile || userProfile.plan !== 'ultra')
+    return unauthorizedResponseServerless(res);
+
   const folderPath = userProfile.id;
   const randomUUID = uuidv4();
   const fileWithPath = `${folderPath}/${fileName}_${randomUUID}`;
