@@ -70,6 +70,7 @@
     "notion-client": "^6.16.0",
     "notion-utils": "^6.16.0",
     "posthog-js": "^1.96.1",
+    "postmark": "^4.0.2",
     "puppeteer": "^19.11.1",
     "raw-body": "^2.5.2",
     "react": "18.2.0",
