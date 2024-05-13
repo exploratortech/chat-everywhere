@@ -97,10 +97,40 @@ type PostmarkPayload = {
 
 // export default handler;
 
+// export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+//   console.log('Webhook triggered with body:', req.body);
+
+//   res.status(200).json({ message: 'Webhook received' });
+// }
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log('Webhook triggered with body:', req.body);
 
-  // Your logic here...
+  // Assuming req.body is already parsed as JSON
+  const payload: PostmarkPayload = req.body;
 
+  // Check if the RecordType is 'Open' and it's the first time the email is opened
+  if (payload.RecordType === 'Open') {
+    const supabase = getAdminSupabaseClient();
+
+    // Fetch the user from your database using the recipient's email
+    const { data: user, error } = await supabase
+      .from('profiles')
+      .select('id, email')
+      .eq('email', payload.Recipient)
+      .single();
+
+    // If a user is found, track the event and log it
+    if (user) {
+      // Replace `serverSideTrackEvent` with your actual event tracking function
+      await serverSideTrackEvent(user.id, `Trial end email opened`);
+      console.log('Trial end email opened on user with email', user.email);
+    } else if (error) {
+      console.error('Error fetching user:', error);
+    } else {
+      console.log('No user found for:', payload.Recipient);
+    }
+  }
+  // Respond to Postmark to acknowledge receipt of the webhook
   res.status(200).json({ message: 'Webhook received' });
 }
