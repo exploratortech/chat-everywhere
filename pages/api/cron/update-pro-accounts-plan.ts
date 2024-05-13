@@ -42,7 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 };
 
-const postmarkClient = new ServerClient(process.env.SENDGRID_WEBHOOK_PUBLIC_KEY || '');
+const postmarkClient = new ServerClient(process.env.POSTMARK_SERVER_TOKEN || '');
 
 const sendOutTrialEndEmail = async (userEmail: string) => {
   try {
