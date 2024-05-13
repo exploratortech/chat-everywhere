@@ -40,59 +40,67 @@ type PostmarkPayload = {
   Recipient: string;
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  console.log('Webhook triggered:', res);
-  // if (req.method !== 'POST') {
-  //   res.status(405).end('Method Not Allowed');
-  // }
+// const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+//   console.log('Webhook triggered:', res);
+//   // if (req.method !== 'POST') {
+//   //   res.status(405).end('Method Not Allowed');
+//   // }
 
-  // // const publicKey = process.env.SENDGRID_WEBHOOK_PUBLIC_KEY || '';
-  // // const signature = req.headers[
-  // //   'x-twilio-email-event-webhook-signature'
-  // // ] as string;
-  // // const timestamp = req.headers[
-  // //   'x-twilio-email-event-webhook-timestamp'
-  // // ] as string;
-  // const payload = req.body;
-  // console.log('payload:', payload);
-  // //const eventWebhook = new EventWebhook();
-  // // const key = eventWebhook.convertPublicKeyToECDSA(publicKey);
-  // // const isValidWebHookEvent = eventWebhook.verifySignature(
-  // //   key,
-  // //   payload,
-  // //   signature,
-  // //   timestamp,
-  // // );
+//   // // const publicKey = process.env.SENDGRID_WEBHOOK_PUBLIC_KEY || '';
+//   // // const signature = req.headers[
+//   // //   'x-twilio-email-event-webhook-signature'
+//   // // ] as string;
+//   // // const timestamp = req.headers[
+//   // //   'x-twilio-email-event-webhook-timestamp'
+//   // // ] as string;
+//   // const payload = req.body;
+//   // console.log('payload:', payload);
+//   // //const eventWebhook = new EventWebhook();
+//   // // const key = eventWebhook.convertPublicKeyToECDSA(publicKey);
+//   // // const isValidWebHookEvent = eventWebhook.verifySignature(
+//   // //   key,
+//   // //   payload,
+//   // //   signature,
+//   // //   timestamp,
+//   // // );
 
-  // // if (!isValidWebHookEvent) {
-  // //   return res.status(400).send(`Webhook signature verification failed.`);
-  // // }
+//   // // if (!isValidWebHookEvent) {
+//   // //   return res.status(400).send(`Webhook signature verification failed.`);
+//   // // }
 
-  // const eventPayload = payload
-  // console.log('eventPayload:', eventPayload);
-  // // const openedEvents = eventPayload.filter(
-  // //   (event) =>
-  // //     event.RecordType === "Open"
-  // // );
+//   // const eventPayload = payload
+//   // console.log('eventPayload:', eventPayload);
+//   // // const openedEvents = eventPayload.filter(
+//   // //   (event) =>
+//   // //     event.RecordType === "Open"
+//   // // );
 
-  // const openedEvents = payload
-  // for (const event of openedEvents) {
-  //   const supabase = getAdminSupabaseClient();
+//   // const openedEvents = payload
+//   // for (const event of openedEvents) {
+//   //   const supabase = getAdminSupabaseClient();
 
-  //   const { data: user } = await supabase
-  //     .from('profiles')
-  //     .select('id, email')
-  //     .eq('email', event.Recipient)
-  //     .single();
+//   //   const { data: user } = await supabase
+//   //     .from('profiles')
+//   //     .select('id, email')
+//   //     .eq('email', event.Recipient)
+//   //     .single();
 
-  //   if (user) {
-  //     await serverSideTrackEvent(user.id, `Trial end email opened`);
-  //     console.log('Trial end email opened on user with email', user.email);
-  //   }
-  //   console.log('No user found for:', event.Recipient);
-  // }
+//   //   if (user) {
+//   //     await serverSideTrackEvent(user.id, `Trial end email opened`);
+//   //     console.log('Trial end email opened on user with email', user.email);
+//   //   }
+//   //   console.log('No user found for:', event.Recipient);
+//   // }
 
-  //return res.status(200);
-};
+//   //return res.status(200);
+// };
 
-export default handler;
+// export default handler;
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('Webhook triggered with body:', req.body);
+
+  // Your logic here...
+
+  res.status(200).json({ message: 'Webhook received' });
+}
