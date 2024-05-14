@@ -142,14 +142,14 @@ export const ChatInput = ({
         });
         setContent('');
         homeDispatch({
-        field: 'currentMessage',
-        value: {
-          ...currentMessage,
-          content: '',
-          fileList: [],
-        },
-      });
-      if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
+          field: 'currentMessage',
+          value: {
+            ...currentMessage,
+            content: '',
+            fileList: [],
+          },
+        });
+        if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
           textareaRef.current.blur();
         }
       } else {
@@ -462,16 +462,15 @@ export const ChatInput = ({
               </button>
             </div>
 
-<<<<<<< HEAD
             <div className="flex flex-col w-full">
-              <textarea
+            <textarea
                 onFocus={() => setIsFocused(true)}
                 ref={textareaRef}
                 className={`
                   m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md
                   ${
-                    isSpeechRecognitionActive
-                      ? 'z-[1100] pointer-events-none'
+                    isSpeechRecognitionActive || isConversing
+                      ? 'pointer-events-none'
                       : ''
                   }
                   ${
@@ -530,44 +529,6 @@ export const ChatInput = ({
                   </div>
                 )}
             </div>
-=======
-            <textarea
-              onFocus={() => setIsFocused(true)}
-              ref={textareaRef}
-              className={`
-                m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md
-                ${
-                  isSpeechRecognitionActive || isConversing
-                    ? 'pointer-events-none'
-                    : ''
-                }
-                ${
-                  isOverTokenLimit && isSpeechRecognitionActive
-                    ? 'border !border-red-500 dark:!border-red-600'
-                    : 'border-0'
-                }
-              `}
-              style={{
-                paddingBottom: `${
-                  isCloseToTokenLimit || isOverTokenLimit ? '2.2' : '0.75'
-                }rem `,
-                resize: 'none',
-                bottom: `${textareaRef?.current?.scrollHeight}px`,
-                maxHeight: '400px',
-                overflow: `${
-                  textareaRef.current && textareaRef.current.scrollHeight > 400
-                    ? 'auto'
-                    : 'hidden'
-                }`,
-              }}
-              placeholder={t('Type a message ...') || ''}
-              value={content}
-              rows={1}
-              onKeyUp={(e) => setIsTyping(e.nativeEvent.isComposing)}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
-            />
->>>>>>> a2289073 (Highlight generated message; fix voice input overlay)
           </div>
 
           <TokenCounter
