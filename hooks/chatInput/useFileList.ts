@@ -14,7 +14,7 @@ export const useFileList = () => {
     state: { user, featureFlags },
   } = useContext(HomeContext);
   const filteredFiles = useMemo(() => {
-    if (!user || !featureFlags['enable-chat-with-doc']) return [];
+    if (!user) return [];
     return (files || []).filter((file) =>
       file.filename.toLowerCase().includes(fileInputValue.toLowerCase()),
     );

@@ -22,7 +22,7 @@ const ModeSelector = () => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const isChatWithDocEnabled = featureFlags['enable-chat-with-doc'];
+  const isChatWithDocEnabled = true;
 
   const currentSelectedPluginId = useMemo(() => {
     if (!currentMessage || currentMessage?.pluginId === null) {

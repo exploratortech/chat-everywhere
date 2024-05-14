@@ -42,7 +42,7 @@ export const ChatbarSettings = () => {
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
   const isUltraUser = user && user.plan === 'ultra';
-  const isChatWithDocEnabled = featureFlags['enable-chat-with-doc'];
+  const isChatWithDocEnabled = true;
 
   const filteredConversations = useMemo(
     () => getNonDeletedCollection(conversations),
