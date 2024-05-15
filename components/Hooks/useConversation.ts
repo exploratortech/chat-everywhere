@@ -39,7 +39,6 @@ export const useConversation = () => {
     // This line prevents queuing the remaining content more than once.
     if (pointer.current >= content.length) return;
 
-    // Ensure that we have at least 1 complete sentence to process.
     const sentences = Array.from(segmenter.current.segment(subContent));
 
     if (!messageIsStreaming) {
@@ -47,6 +46,7 @@ export const useConversation = () => {
       pointer.current += subContent.length;
       queueMessage(subContent);
     } else {
+      // Ensure that we have at least 1 complete sentence to process.
       if (sentences.length >= 2) {
         let message = '';
 
