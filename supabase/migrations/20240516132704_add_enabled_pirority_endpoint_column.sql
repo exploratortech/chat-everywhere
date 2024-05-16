@@ -1,0 +1,1 @@
+alter table "public"."profiles" add column "enabled_priority_endpoint" boolean not null default false;
