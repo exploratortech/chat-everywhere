@@ -3,6 +3,7 @@ import { Button } from '../../ui/button';
 import { useTranslation } from 'react-i18next';
 import { Tag } from '@/types/tags';
 import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
+import { marked } from 'marked';
 
 const Export = ({
   allSharedMessages,  
@@ -92,15 +93,19 @@ const Export = ({
         <p>Selection: ${exportSelection}</p>
       </header>
 
-      ${filteredSubmissions?.map(submission => `
-        <div class='submission'>
-          <h2>${submission.student_name}</h2>
-          <p>Tags: ${submission.message_tags.map(tag => tag.name).join(', ')}</p>
-          <p>Submitted at: ${new Date(submission.created_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-          <p>${submission.message_content}</p>
-          ${submission.image_file_url ? `<img src="${submission.image_file_url}" alt="Student work">` : ''}
-        </div>
-      `).join('')}
+      ${filteredSubmissions?.map(submission => {
+          // Convert markdown message content to HTML
+          const messageContentHtml = marked.parse(submission.message_content);
+          return `
+          <div class='submission'>
+            <h2>${submission.student_name}</h2>
+            <p>Tags: ${submission.message_tags.map(tag => tag.name).join(', ')}</p>
+            <p>Submitted at: ${new Date(submission.created_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+            <div>${messageContentHtml}</div>
+            ${submission.image_file_url ? `<img src="${submission.image_file_url}" alt="Student work">` : ''}
+          </div>
+        `;
+      }).join('')}
     `;
 
     // Create a new Blob with the HTML content
