@@ -78,6 +78,21 @@ async function verifyCodeAndReferrerAccount(code: string) {
 }
 
 async function createTempUser(code: string, codeId: string, uniqueId: string) {
+  // Fetch the teacher profile using the codeId
+  const { data: teacherProfile, error: teacherProfileError } = await supabase
+    .from('one_time_codes')
+    .select('teacher_profile_id, profiles(enabled_priority_endpoint)')
+    .eq('id', codeId)
+    .single();
+
+  if (teacherProfileError) {
+    throw teacherProfileError;
+  }
+
+  const isEnabledPriorityEndpoint = !!(
+    teacherProfile.profiles as unknown as { enabled_priority_endpoint: boolean }
+  ).enabled_priority_endpoint;
+
   const randomUniqueId = uuidv4().replace(/-/g, '');
   const randomEmail = `temp-user-${code}-${randomUniqueId}@chateverywhere.app`;
   const randomPassword = uuidv4();
@@ -108,7 +123,10 @@ async function createTempUser(code: string, codeId: string, uniqueId: string) {
   // update profile
   const { error: updateProfileError } = await supabase
     .from('profiles')
-    .update({ plan: 'ultra' })
+    .update({
+      plan: 'ultra',
+      enabled_priority_endpoint: isEnabledPriorityEndpoint,
+    })
     .eq('id', userId);
 
   if (updateProfileError) {
