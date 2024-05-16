@@ -7,8 +7,8 @@ import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
   getMessagesTokenCount,
+  getStringTokenCount,
   shortenMessagesBaseOnTokenLimit,
-  getStringTokenCount
 } from '@/utils/server/api';
 import { isPaidUserByAuthToken } from '@/utils/server/supabase';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
@@ -25,7 +25,10 @@ export const config = {
 };
 
 const handler = async (req: Request): Promise<Response> => {
-  retrieveUserSessionAndLogUsages(req);
+  const userProfile = await retrieveUserSessionAndLogUsages(req);
+
+  const usePriorityEndpoint = !!userProfile?.enabledPriorityEndpoint;
+
   const { country } = geolocation(req);
 
   const log = new Logger();
@@ -55,8 +58,11 @@ const handler = async (req: Request): Promise<Response> => {
       OpenAIModels[OpenAIModelID.GPT_3_5_16K].tokenLimit;
 
     const requireToUseLargerContextWindowModel =
-      (await getMessagesTokenCount(messages) + await getStringTokenCount(promptToSend)) + 1000 > defaultTokenLimit;
-    
+      (await getMessagesTokenCount(messages)) +
+        (await getStringTokenCount(promptToSend)) +
+        1000 >
+      defaultTokenLimit;
+
     const isPaidUser = await isPaidUserByAuthToken(
       req.headers.get('user-token'),
     );
@@ -86,18 +92,19 @@ const handler = async (req: Request): Promise<Response> => {
       messageToStreamBack = '[16K-Optional]';
     }
 
-    const stream = await OpenAIStream(
-      useLargerContextWindowModel
+    const stream = await OpenAIStream({
+      model: useLargerContextWindowModel
         ? OpenAIModels[OpenAIModelID.GPT_3_5_16K]
         : OpenAIModels[OpenAIModelID.GPT_3_5],
-      promptToSend,
-      temperatureToUse,
-      messagesToSend,
-      messageToStreamBack,
-      userIdentifier || undefined,
-      pluginId === '' ? 'Default mode message' : null,
-      country,
-    );
+      systemPrompt: promptToSend,
+      temperature: temperatureToUse,
+      messages: messagesToSend,
+      customMessageToStreamBack: messageToStreamBack,
+      userIdentifier: userIdentifier || undefined,
+      eventName: pluginId === '' ? 'Default mode message' : null,
+      requestCountryCode: country,
+      usePriorityEndpoint: usePriorityEndpoint,
+    });
 
     return new Response(stream);
   } catch (error) {
