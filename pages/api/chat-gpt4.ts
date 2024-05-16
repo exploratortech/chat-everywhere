@@ -34,6 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
   const isUserInUltraPlan = user.plan === 'ultra';
+  const usePriorityEndpoint = user.enabledPriorityEndpoint;
 
   if (
     !isUserInUltraPlan &&
@@ -79,15 +80,16 @@ const handler = async (req: Request): Promise<Response> => {
       await subtractCredit(data.user.id, PluginID.GPT4);
     }
 
-    const stream = await OpenAIStream(
-      OpenAIModels[OpenAIModelID.GPT_4],
-      promptToSend,
-      temperatureToUse,
-      messageToSend,
-      null,
-      data.user.id,
-      'GPT4 mode message',
-    );
+    const stream = await OpenAIStream({
+      model: OpenAIModels[OpenAIModelID.GPT_4],
+      systemPrompt: promptToSend,
+      temperature: temperatureToUse,
+      messages: messageToSend,
+      customMessageToStreamBack: null,
+      userIdentifier: data.user.id,
+      eventName: 'GPT4 mode message',
+      usePriorityEndpoint,
+    });
 
     return new Response(stream);
   } catch (error) {
