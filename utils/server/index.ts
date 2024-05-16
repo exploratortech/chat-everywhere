@@ -5,7 +5,10 @@ import {
   type EventNameTypes,
   serverSideTrackEvent,
 } from '@/utils/app/eventTracking';
-import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
+import {
+  getPriorityEndpointsAndKeys,
+  shortenMessagesBaseOnTokenLimit,
+} from '@/utils/server/api';
 import { getEndpointsAndKeys, logEvent } from '@/utils/server/api';
 
 import { Message } from '@/types/chat';
@@ -43,23 +46,33 @@ export class OpenAIError extends Error {
 export const normalizeMessages = (messages: Message[]) =>
   messages.map(({ role, content, name }) => ({ role, content, name }));
 
-export const OpenAIStream = async (
-  model: OpenAIModel,
-  systemPrompt: string,
-  temperature: number,
-  messages: Message[],
-  customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
-  userIdentifier?: string,
-  eventName?: EventNameTypes | null,
-  requestCountryCode?: string,
-) => {
+export const OpenAIStream = async ({
+  model,
+  systemPrompt,
+  temperature,
+  messages,
+  customMessageToStreamBack = null, // Stream this string at the end of the streaming
+  userIdentifier,
+  eventName = null,
+  requestCountryCode,
+  usePriorityEndpoint = false,
+}: {
+  model: OpenAIModel;
+  systemPrompt: string;
+  temperature: number;
+  messages: Message[];
+  customMessageToStreamBack?: string | null;
+  userIdentifier?: string;
+  eventName?: EventNameTypes | null;
+  requestCountryCode?: string;
+  usePriorityEndpoint?: boolean;
+}) => {
   const log = new Logger();
 
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
-  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(
-    isGPT4Model,
-    requestCountryCode,
-  );
+  const [openAIEndpoints, openAIKeys] = usePriorityEndpoint
+    ? getPriorityEndpointsAndKeys(isGPT4Model)
+    : getEndpointsAndKeys(isGPT4Model, requestCountryCode);
 
   let attempt = 0;
   let attemptLogs = '';

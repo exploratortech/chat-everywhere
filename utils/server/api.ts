@@ -14,6 +14,9 @@ import {
   AZURE_OPENAI_GPT_4_ENDPOINTS,
   AZURE_OPENAI_GPT_4_KEYS,
   AZURE_OPENAI_KEYS,
+  OPENAI_ENDPOINT,
+  OPENAI_GPT_4_KEY,
+  OPENAI_KEY,
 } from '../app/const';
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
@@ -156,6 +159,15 @@ export const getEndpointsAndKeys = (
   const filteredKeys = shuffled.keys.filter((key) => key !== undefined);
 
   return [filteredEndpoints, filteredKeys];
+};
+
+export const getPriorityEndpointsAndKeys = (
+  includeGPT4: boolean = false,
+): [string[], (string | undefined)[]] => {
+  if (includeGPT4) {
+    return [[OPENAI_ENDPOINT], [OPENAI_GPT_4_KEY]];
+  }
+  return [[OPENAI_ENDPOINT], [OPENAI_KEY]];
 };
 
 export const getDalle3EndpointAndKeys = (): {
