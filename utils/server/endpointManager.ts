@@ -14,7 +14,7 @@ type EndpointInfo = {
   isThrottled: boolean;
 };
 
-class EndpointManager {
+export class EndpointManager {
   private endpoints: EndpointInfo[] = [];
 
   constructor(
@@ -76,20 +76,3 @@ class EndpointManager {
     }
   }
 }
-
-// // Usage example
-// const manager = new EndpointManager(
-//   includeGPT4 ? AZURE_OPENAI_GPT_4_ENDPOINTS : AZURE_OPENAI_ENDPOINTS,
-//   includeGPT4 ? AZURE_OPENAI_GPT_4_KEYS : AZURE_OPENAI_KEYS,
-//   includeGPT4 ? AZURE_OPENAI_GPT_4_TPM : AZURE_OPENAI_TPM,
-// );
-
-// const { endpoint, key } = manager.getEndpointAndKey();
-// if (endpoint && key) {
-//   // Use the endpoint and key
-// } else {
-//   console.error('No available endpoints');
-// }
-
-// // Mark an endpoint as throttled
-// manager.markEndpointAsThrottled(endpoint);
