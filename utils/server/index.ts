@@ -1,15 +1,26 @@
 import { Logger } from 'next-axiom';
 
-import { ERROR_MESSAGES } from '@/utils/app/const';
+import {
+  AZURE_OPENAI_ENDPOINTS,
+  AZURE_OPENAI_GPT_4_ENDPOINTS,
+  AZURE_OPENAI_GPT_4_KEYS,
+  AZURE_OPENAI_GPT_4_TPM,
+  AZURE_OPENAI_KEYS,
+  AZURE_OPENAI_TPM,
+  ERROR_MESSAGES,
+} from '@/utils/app/const';
 import {
   type EventNameTypes,
   serverSideTrackEvent,
 } from '@/utils/app/eventTracking';
+import { throttle } from '@/utils/data/throttle';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import { getEndpointsAndKeys, logEvent } from '@/utils/server/api';
 
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
+
+import { EndpointManager } from './endpointManager';
 
 import {
   ParsedEvent,
@@ -56,9 +67,10 @@ export const OpenAIStream = async (
   const log = new Logger();
 
   const isGPT4Model = model.id === OpenAIModelID.GPT_4;
-  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(
-    isGPT4Model,
-    requestCountryCode,
+  const endpointManager = new EndpointManager(
+    isGPT4Model ? AZURE_OPENAI_GPT_4_ENDPOINTS : AZURE_OPENAI_ENDPOINTS,
+    isGPT4Model ? AZURE_OPENAI_GPT_4_KEYS : AZURE_OPENAI_KEYS,
+    isGPT4Model ? AZURE_OPENAI_GPT_4_TPM : AZURE_OPENAI_TPM,
   );
 
   let attempt = 0;
@@ -81,21 +93,24 @@ export const OpenAIStream = async (
     ...normalizeMessages(messagesToSend),
   ];
 
-  while (attempt < openAIEndpoints.length) {
-    const openAIEndpoint = openAIEndpoints[attempt];
-    const openAIKey = openAIKeys[attempt];
+  while (attempt < AZURE_OPENAI_GPT_4_ENDPOINTS.length) {
+    const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
+
+    if (!endpoint || !apiKey) {
+      throw new Error('No available endpoints');
+    }
 
     try {
-      if (!openAIEndpoint || !openAIKey)
-        throw new Error('Missing endpoint/key');
+      attemptLogs += `Attempt ${attempt + 1}: Using endpoint ${endpoint}\n`;
 
-      attemptLogs += `Attempt ${
-        attempt + 1
-      }: Using endpoint ${openAIEndpoint}\n`;
+      // TODO: Remove this test-only endpoint
+      const deploymentName = endpoint.includes('internal-ai-usages')
+        ? 'test-only'
+        : model.deploymentName;
 
-      let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2024-02-01`;
-      if (openAIEndpoint.includes('openai.com')) {
-        url = `${openAIEndpoint}/v1/chat/completions`;
+      let url = `${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=2024-02-01`;
+      if (endpoint.includes('openai.com')) {
+        url = `${endpoint}/v1/chat/completions`;
       }
 
       const bodyToSend: any = {
@@ -111,11 +126,11 @@ export const OpenAIStream = async (
         'Content-Type': 'application/json',
       };
 
-      if (openAIEndpoint.includes('openai.com')) {
+      if (endpoint.includes('openai.com')) {
         // Use the model the user specified on the first attempt, otherwise, use
         // a fallback model.
         bodyToSend.model = attempt === 0 ? model.id : OpenAIModelID.GPT_3_5;
-        requestHeaders.Authorization = `Bearer ${openAIKey}`;
+        requestHeaders.Authorization = `Bearer ${apiKey}`;
 
         // For GPT 4 Model (Pro user)
         if (attempt !== 0 && isGPT4Model) {
@@ -123,7 +138,7 @@ export const OpenAIStream = async (
           requestHeaders.Authorization = `Bearer ${process.env.OPENAI_API_GPT_4_KEY}`;
         }
       } else {
-        requestHeaders['api-key'] = openAIKey;
+        requestHeaders['api-key'] = apiKey;
       }
 
       const abortController = new AbortController();
@@ -142,8 +157,14 @@ export const OpenAIStream = async (
       const encoder = new TextEncoder();
       const decoder = new TextDecoder();
 
-      if (res.status !== 200) {
+      if (res.status === 429 || res.status === 500) {
+        endpointManager.markEndpointAsThrottled(endpoint);
+        attempt += 1;
+        continue;
+      } else if (res.status !== 200) {
+        console.log({ resCode: res.status });
         const result = await res.json();
+        console.log({ errorResult: result });
         if (result.error.code === 'content_filter') {
           throw new Error(ERROR_MESSAGES.content_filter_triggered.message);
         }
@@ -266,7 +287,7 @@ export const OpenAIStream = async (
               completionMessage: respondMessage,
               totalDurationInMs: Date.now() - startTime,
               timeToFirstTokenInMs,
-              endpoint: openAIEndpoint,
+              endpoint,
             });
 
             stop = true;
