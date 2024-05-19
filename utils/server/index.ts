@@ -66,6 +66,20 @@ export const OpenAIStream = async (
   const requestStartTime = Date.now();
   let timeToFirstTokenInMs = 0;
   const startTime = Date.now();
+  const messagesToSend = await shortenMessagesBaseOnTokenLimit(
+    systemPrompt,
+    messages,
+    model.tokenLimit,
+    model.completionTokenLimit,
+  );
+
+  const messagesToSendInArray = [
+    {
+      role: 'system',
+      content: systemPrompt,
+    },
+    ...normalizeMessages(messagesToSend),
+  ];
 
   while (attempt < openAIEndpoints.length) {
     const openAIEndpoint = openAIEndpoints[attempt];
@@ -83,21 +97,6 @@ export const OpenAIStream = async (
       if (openAIEndpoint.includes('openai.com')) {
         url = `${openAIEndpoint}/v1/chat/completions`;
       }
-
-      const messagesToSend = await shortenMessagesBaseOnTokenLimit(
-        systemPrompt,
-        messages,
-        model.tokenLimit,
-        model.completionTokenLimit,
-      );
-
-      const messagesToSendInArray = [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        ...normalizeMessages(messagesToSend),
-      ];
 
       const bodyToSend: any = {
         messages: messagesToSendInArray,
