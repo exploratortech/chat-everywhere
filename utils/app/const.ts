@@ -48,6 +48,13 @@ export const AZURE_OPENAI_KEYS = [
   process.env.AZURE_OPENAI_KEY_3,
 ];
 
+// TOKEN PER MINUTE
+export const AZURE_OPENAI_TPM = [
+  Number(process.env.AZURE_OPENAI_TPM_0) || 0,
+  Number(process.env.AZURE_OPENAI_TPM_1) || 0,
+  Number(process.env.AZURE_OPENAI_TPM_2) || 0,
+  Number(process.env.AZURE_OPENAI_TPM_3) || 0,
+];
 // To be enabled, currently we goes with this order of region regardless of request origin
 export const ENDPOINT_TRAFFIC_DISTRIBUTION = [
   0.75, // Japan East
@@ -68,6 +75,11 @@ export const AZURE_OPENAI_GPT_4_KEYS = [
   process.env.AZURE_OPENAI_GPT_4_KEY_2,
 ];
 
+export const AZURE_OPENAI_GPT_4_TPM = [
+  Number(process.env.AZURE_OPENAI_GPT_4_TPM_0) || 0,
+  Number(process.env.AZURE_OPENAI_GPT_4_TPM_1) || 0,
+  Number(process.env.AZURE_OPENAI_GPT_4_TPM_2) || 0,
+];
 export const AZURE_DALL_E_3_ENDPOINTS = [
   process.env.AZURE_DALL_E_3_ENDPOINT_0,
   // process.env.AZURE_DALL_E_3_ENDPOINT_1, // RESOURCE NOT FOUND
