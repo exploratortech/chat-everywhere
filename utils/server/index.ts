@@ -13,9 +13,8 @@ import {
   type EventNameTypes,
   serverSideTrackEvent,
 } from '@/utils/app/eventTracking';
-import { throttle } from '@/utils/data/throttle';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
-import { getEndpointsAndKeys, logEvent } from '@/utils/server/api';
+import { logEvent } from '@/utils/server/api';
 
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
