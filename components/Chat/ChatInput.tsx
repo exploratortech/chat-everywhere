@@ -2,6 +2,7 @@ import { IconPlayerStop, IconRepeat, IconSend } from '@tabler/icons-react';
 import {
   KeyboardEvent,
   MutableRefObject,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
