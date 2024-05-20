@@ -27,7 +27,7 @@ type EnhancedMenuProps = {
 const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
   ({ isFocused }, ref) => {
     const {
-      state: { messageIsStreaming, currentMessage },
+      state: { messageIsStreaming, currentMessage, featureFlags },
     } = useContext(HomeContext);
 
     const shouldShow = useMemo(() => {
@@ -73,7 +73,9 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
             {/* {currentMessage?.pluginId === PluginID.IMAGE_GEN && (
               <ImageToPromptUpload />
             )} */}
-            <ConversationModeToggle />
+            {featureFlags['enable-conversation-mode'] && (
+              <ConversationModeToggle />
+            )}
           </div>
           <div className="flex flex-col md:flex-row w-full justify-between">
             <ModeSelector />

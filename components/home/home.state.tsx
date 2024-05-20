@@ -74,6 +74,7 @@ export interface HomeInitialState {
   // Posthog feature flags
   featureFlags: {
     'enable-chat-with-doc': boolean;
+    'enable-conversation-mode': boolean;
   };
 }
 
@@ -145,5 +146,6 @@ export const initialState: HomeInitialState = {
   // Posthog feature flags
   featureFlags: {
     'enable-chat-with-doc': false,
+    'enable-conversation-mode': false,
   },
 };
