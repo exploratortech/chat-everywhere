@@ -2,6 +2,7 @@ import { IconPlayerStop, IconRepeat, IconSend } from '@tabler/icons-react';
 import {
   KeyboardEvent,
   MutableRefObject,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -28,12 +29,15 @@ import { Prompt } from '@/types/prompt';
 import TokenCounter from './components/TokenCounter';
 import HomeContext from '@/components/home/home.context';
 
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 import EnhancedMenu from '../EnhancedMenu/EnhancedMenu';
 import VoiceInputButton from '../Voice/VoiceInputButton';
 import { FileList } from './FileList';
 import { PromptList } from './PromptList';
 import UserFileItem from './UserFileItem';
 import { VariableModal } from './VariableModal';
+
+import { cn } from '@/lib/utils';
 
 interface Props {
   onSend: (currentMessage: Message) => void;
@@ -56,8 +60,6 @@ export const ChatInput = ({
       messageIsStreaming,
       prompts: originalPrompts,
       currentMessage,
-      speechContent,
-      isSpeechRecognitionActive,
       showSettingsModel,
       user,
     },
@@ -79,6 +81,13 @@ export const ChatInput = ({
     filteredFiles,
     updateFileListVisibility,
   } = useFileList();
+
+  const {
+    isConversing,
+    setSendMessage,
+    speechContent,
+    isSpeechRecognitionActive,
+  } = useCognitiveService();
 
   const [content, setContent] = useState<string>();
   const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -110,43 +119,54 @@ export const ChatInput = ({
     updateFileListVisibility(value);
   };
 
-  const handleSend = () => {
-    if (messageIsStreaming || isSpeechRecognitionActive) {
-      return;
-    }
-
-    const content = textareaRef.current?.value;
-    if (!content) {
-      alert(t('Please enter a message'));
-      return;
-    }
-
-    if (isOverTokenLimit) {
-      return;
-    }
-
-    if (currentMessage) {
-      onSend({
-        ...currentMessage,
-        content,
-        role: 'user',
-      });
-      setContent('');
-      homeDispatch({
-        field: 'currentMessage',
-        value: {
-          ...currentMessage,
-          content: '',
-          fileList: [],
-        },
-      });
-      if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
-        textareaRef.current.blur();
+  const handleSend = useCallback(
+    (ignoreEmpty: boolean = false) => {
+      if (messageIsStreaming) {
+        return;
       }
-    } else {
-      alert('currentMessage is null');
-    }
-  };
+
+      const content = textareaRef.current?.value;
+      if (!content) {
+        if (!ignoreEmpty) alert(t('Please enter a message'));
+        return;
+      }
+
+      if (isOverTokenLimit) {
+        return;
+      }
+
+      if (currentMessage) {
+        onSend({
+          ...currentMessage,
+          content,
+          role: 'user',
+        });
+        setContent('');
+        homeDispatch({
+          field: 'currentMessage',
+          value: {
+            ...currentMessage,
+            content: '',
+            fileList: [],
+          },
+        });
+        if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
+          textareaRef.current.blur();
+        }
+      } else {
+        alert('currentMessage is null');
+      }
+    },
+    [
+      homeDispatch,
+      messageIsStreaming,
+      textareaRef,
+      isOverTokenLimit,
+      currentMessage,
+      onSend,
+      t,
+    ],
+  );
 
   const handleStopConversation = () => {
     stopConversationRef.current = true;
@@ -362,13 +382,23 @@ export const ChatInput = ({
     setContent(speechContent);
   }, [speechContent]);
 
+  // Needed for conversation mode
+  useEffect(() => {
+    setSendMessage(handleSend);
+  }, [setSendMessage, handleSend]);
+
   const isAiImagePluginSelected = useMemo(
     () => currentMessage?.pluginId === PluginID.IMAGE_GEN,
     [currentMessage?.pluginId],
   );
 
   return (
-    <div className="absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#343541] dark:to-[#343541] md:pt-2">
+    <div
+      className={cn(
+        'absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#343541] dark:to-[#343541] md:pt-2',
+        isConversing && 'z-[1200]',
+      )}
+    >
       <div
         className={` ${
           enhancedMenuDisplayValue === 'none'
@@ -382,6 +412,7 @@ export const ChatInput = ({
       >
         {/* Disable stop generating button for image generation until implemented */}
         {messageIsStreaming &&
+          !isConversing &&
           currentMessage?.pluginId !== PluginID.IMAGE_GEN && (
             <button
               className="absolute top-0 left-0 right-0 mx-auto mb-3 flex w-fit items-center gap-3 rounded border border-neutral-200 bg-white py-2 px-4 text-black hover:opacity-50 dark:border-neutral-600 dark:bg-[#343541] dark:text-white md:mb-0 md:mt-2"
@@ -392,6 +423,7 @@ export const ChatInput = ({
           )}
 
         {!messageIsStreaming &&
+          !isConversing &&
           selectedConversation &&
           selectedConversation.messages.length > 0 && (
             <button
@@ -425,21 +457,21 @@ export const ChatInput = ({
 
           <div className="flex items-start">
             <div className="flex items-center pt-1 pl-1">
-              <VoiceInputButton />
+              <VoiceInputButton onClick={() => setIsFocused(false)} />
               <button className="rounded-sm p-1 text-zinc-500 dark:text-zinc-400 cursor-default">
                 {getPluginIcon(currentMessage?.pluginId)}
               </button>
             </div>
 
             <div className="flex flex-col w-full">
-              <textarea
+            <textarea
                 onFocus={() => setIsFocused(true)}
                 ref={textareaRef}
                 className={`
                   m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md
                   ${
-                    isSpeechRecognitionActive
-                      ? 'z-[1100] pointer-events-none'
+                    isSpeechRecognitionActive || isConversing
+                      ? 'pointer-events-none'
                       : ''
                   }
                   ${
@@ -508,7 +540,7 @@ export const ChatInput = ({
                   ? 'visible'
                   : 'invisible'
               }
-              ${isSpeechRecognitionActive ? 'z-[1100] pointer-events-none' : ''}
+              ${isSpeechRecognitionActive ? 'pointer-events-none' : ''}
               absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400
             `}
             value={content}
@@ -516,16 +548,18 @@ export const ChatInput = ({
             setIsCloseToLimit={setIsCloseToTokenLimit}
           />
 
-          <button
-            className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
-            onClick={handleSend}
-          >
-            {messageIsStreaming ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
-            ) : (
-              <IconSend size={18} />
-            )}
-          </button>
+          {!isConversing && (
+            <button
+              className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+              onClick={() => handleSend()}
+            >
+              {messageIsStreaming ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
+              ) : (
+                <IconSend size={18} />
+              )}
+            </button>
+          )}
 
           {showPromptList && filteredPrompts.length > 0 && (
             <div className="absolute bottom-12 w-full z-20">

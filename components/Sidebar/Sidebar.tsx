@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { SidebarToggleButton } from './components/SidebarToggleButton';
 
 import Search from '../Search';
+import VoiceInputActiveOverlay from '../Voice/VoiceInputActiveOverlay';
 
 interface Props<T> {
   isOpen: boolean;
@@ -141,6 +142,7 @@ const Sidebar = <T,>({
         </div>
         {footerComponent}
       </div>
+      <VoiceInputActiveOverlay />
     </div>
   );
 };

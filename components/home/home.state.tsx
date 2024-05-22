@@ -64,16 +64,7 @@ export interface HomeInitialState {
   hasMqttConnection: boolean;
   isConnectedWithLine: boolean;
 
-  // Text to Speech
-  currentSpeechId: null | string;
-  speechToken: null | string;
-  speechRegion: null | string;
-  isPlaying: boolean;
-  isLoading: boolean;
-
-  // Speech to Text
-  speechContent: string;
-  isSpeechRecognitionActive: boolean;
+  // Speech
   speechRecognitionLanguage: string;
 
   // Teacher Portal
@@ -83,6 +74,7 @@ export interface HomeInitialState {
   // Posthog feature flags
   featureFlags: {
     'enable-chat-with-doc': boolean;
+    'enable-conversation-mode': boolean;
   };
 }
 
@@ -141,16 +133,7 @@ export const initialState: HomeInitialState = {
   hasMqttConnection: false,
   isConnectedWithLine: false,
 
-  // Text to Speech
-  currentSpeechId: null,
-  speechToken: null,
-  speechRegion: null,
-  isPlaying: false,
-  isLoading: false,
-
-  // Speech to Text
-  speechContent: '',
-  isSpeechRecognitionActive: false,
+  // Speech
   speechRecognitionLanguage: 'en-US',
 
   // Teacher Portal
@@ -163,5 +146,6 @@ export const initialState: HomeInitialState = {
   // Posthog feature flags
   featureFlags: {
     'enable-chat-with-doc': false,
+    'enable-conversation-mode': false,
   },
 };
