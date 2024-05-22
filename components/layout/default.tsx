@@ -573,7 +573,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
             value: {
               // Ignore feature flag on staging and local env
               'enable-chat-with-doc': isFeatureEnabled('enable-chat-with-doc') || process.env.NEXT_PUBLIC_ENV !== 'production',
-              'enable-conversation-mode': isFeatureEnabled('enable-conversation-mode')
+              'enable-conversation-mode': isFeatureEnabled('enable-conversation-mode') || process.env.NEXT_PUBLIC_ENV !== 'production',
             },
           });
         })
