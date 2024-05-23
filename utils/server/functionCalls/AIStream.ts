@@ -1,12 +1,18 @@
 // This is a simpler rewrite of the OpenAIStream function, which is the main function that handles the AI response.
 // This should be used in tendon with the handler.ts file. For GPT-4 only
-import { DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import {
+  AZURE_OPENAI_GPT_4O_ENDPOINTS,
+  AZURE_OPENAI_GPT_4O_KEYS,
+  AZURE_OPENAI_GPT_4O_TPM,
+  DEFAULT_TEMPERATURE,
+} from '@/utils/app/const';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
-import { getEndpointsAndKeys } from '@/utils/server/api';
 import { normalizeMessages } from '@/utils/server/index';
 
 import { FunctionCall, Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
+
+import { EndpointManager } from '../endpointManager';
 
 import {
   ParsedEvent,
@@ -34,20 +40,29 @@ export const AIStream = async ({
   messages,
   onUpdateToken,
   functionCalls,
-  useOpenAI = false,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
-  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true, countryCode);
+  const selectedModelProfile = {
+    endpoints: AZURE_OPENAI_GPT_4O_ENDPOINTS,
+    keys: AZURE_OPENAI_GPT_4O_KEYS,
+    tpm: AZURE_OPENAI_GPT_4O_TPM,
+  };
+  const endpointManager = new EndpointManager(
+    selectedModelProfile.endpoints,
+    selectedModelProfile.keys,
+    selectedModelProfile.tpm,
+  );
 
-  let attempt = 0,
-    stop = false,
+  const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
+
+  let stop = false,
     functionCallName = '',
     functionCallArgumentInJsonString = '';
 
-  const openAIEndpoint = openAIEndpoints[attempt] || '';
-  const openAIKey = openAIKeys[attempt] || '';
-  const model = OpenAIModels[OpenAIModelID.GPT_4];
+  const openAIEndpoint = endpoint || '';
+  const openAIKey = apiKey || '';
+  const model = OpenAIModels[OpenAIModelID.GPT_4O];
 
-  let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2024-02-01`;
+  let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2024-02-01`;
 
   const messagesToSend = await shortenMessagesBaseOnTokenLimit(
     '',
@@ -84,28 +99,13 @@ export const AIStream = async ({
   requestHeaders['api-key'] = openAIKey;
 
   let res;
-  if (useOpenAI) {
-    bodyToSend.model = 'gpt-4-0125-preview';
-    console.log(
-      'Sending request to: https://api.openai.com/v1/chat/completions',
-    );
 
-    res = await fetch('https://api.openai.com/v1/chat/completions', {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      method: 'POST',
-      body: JSON.stringify(bodyToSend),
-    });
-  } else {
-    console.log('Sending request to: ' + url);
-    res = await fetch(url, {
-      headers: requestHeaders,
-      method: 'POST',
-      body: JSON.stringify(bodyToSend),
-    });
-  }
+  console.log('Sending request to: ' + url);
+  res = await fetch(url, {
+    headers: requestHeaders,
+    method: 'POST',
+    body: JSON.stringify(bodyToSend),
+  });
 
   const decoder = new TextDecoder();
 
