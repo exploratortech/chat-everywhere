@@ -72,6 +72,7 @@ export const getPluginIcon = (
     case PluginID.LANGCHAIN_CHAT:
       return <IconBrain size={size} />;
     case PluginID.GPT4:
+    case PluginID.GPT4O:
       return <IconNumber4 size={size} />;
     case PluginID.IMAGE_GEN:
       return <IconPaint size={size} />;

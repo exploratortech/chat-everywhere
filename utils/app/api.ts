@@ -15,7 +15,7 @@ export const getEndpoint = (plugin: Plugin | null) => {
     return 'api/langchain-api';
   }
 
-  if (plugin.id === PluginID.GPT4) {
+  if (plugin.id === PluginID.GPT4 || plugin.id === PluginID.GPT4O) {
     return 'api/chat-gpt4';
   }
 
