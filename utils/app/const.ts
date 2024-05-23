@@ -80,6 +80,17 @@ export const AZURE_OPENAI_GPT_4_TPM = [
   Number(process.env.AZURE_OPENAI_GPT_4_TPM_1) || 0,
   Number(process.env.AZURE_OPENAI_GPT_4_TPM_2) || 0,
 ];
+
+export const AZURE_OPENAI_GPT_4O_ENDPOINTS = [
+  process.env.AZURE_OPENAI_GPT_4O_ENDPOINT_0,
+];
+
+export const AZURE_OPENAI_GPT_4O_KEYS = [process.env.AZURE_OPENAI_GPT_4O_KEY_0];
+
+export const AZURE_OPENAI_GPT_4O_TPM = [
+  Number(process.env.AZURE_OPENAI_GPT_4O_TPM_0) || 0,
+];
+
 export const AZURE_DALL_E_3_ENDPOINTS = [
   process.env.AZURE_DALL_E_3_ENDPOINT_0,
   // process.env.AZURE_DALL_E_3_ENDPOINT_1, // RESOURCE NOT FOUND
