@@ -20,13 +20,18 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
 
   if (
     creditUsage === null ||
-    (pluginId !== PluginID.GPT4 && pluginId !== PluginID.IMAGE_GEN) ||
+    (pluginId !== PluginID.GPT4 &&
+      pluginId !== PluginID.IMAGE_GEN &&
+      pluginId !== PluginID.GPT4O) ||
     isUltraUser
   )
     return <></>;
 
   const remainingCredits =
-    (pluginId && creditUsage[pluginId].remainingCredits) || 0;
+    (pluginId &&
+      creditUsage[pluginId === PluginID.GPT4O ? PluginID.GPT4 : pluginId]
+        .remainingCredits) ||
+    0;
 
   return (
     <div
