@@ -73,11 +73,15 @@ Start chatting and enjoy!
 2. Deploy the Firebase functions using `npm run deploy`.
 3. Update the `WEB_CONTENT_FUNCTION_ENDPOINT` after completing the initial deployment.
 
-# Set up image-to-prompt feature bucket for Local development 
+# Set up `ai-images` bucket for AI Painter feature for Local development
+
+1. Create a supabase bucket `ai-images` and make it public in the Local supabase server.
+
+# Set up image-to-prompt feature bucket for Local development
 
 1. Create a supabase bucket `image-to-prompt` and make it public in the Local supabase server.
 2. Go to file `pages/api/image-to-prompt.ts` and uncomment the function `replaceLocalhost`
-3. Update the variable `ngrokHost ` and `localSupabaseHost` 
+3. Update the variable `ngrokHost ` and `localSupabaseHost`
 4. Uncomment the line where url is passed to `url: replaceLocalhost(url)`, in function `nextLegDescribe`
 5. Now that your supabase bucket is accessible from the internet, so that the next leg api can access it.
 
