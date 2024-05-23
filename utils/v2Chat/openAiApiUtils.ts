@@ -156,6 +156,7 @@ export const generateImage = async (
   }
 
   if (!response) {
+    console.log('Failed to generate image, empty response.');
     throw new Error('Failed to generate image, empty response.');
   }
 
@@ -165,10 +166,10 @@ export const generateImage = async (
   } = imageResponse;
 
   if (!response.ok) {
-    console.error(imageResponse?.error?.message);
+    console.log(imageResponse?.error?.message);
     imageGenerationResponse.errorMessage = imageResponse?.error?.message;
   } else if (retries === maxRetries) {
-    console.error('Failed to generate image, max retries reached');
+    console.log('Failed to generate image, max retries reached');
     imageGenerationResponse.errorMessage =
       'Server is busy, please try again later.';
   }
@@ -338,6 +339,7 @@ const authorizedOpenAiRequest = async (
     'Content-Type': 'application/json',
     ...options.headers,
   };
+  console.log('hitting openai endpoint: ', url);
   return fetch(url, { ...options, headers });
 };
 
