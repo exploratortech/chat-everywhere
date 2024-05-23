@@ -80,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const stream = await OpenAIStream(
-      OpenAIModels[OpenAIModelID.GPT_4],
+      OpenAIModels[OpenAIModelID.GPT_4O],
       promptToSend,
       temperatureToUse,
       messageToSend,
