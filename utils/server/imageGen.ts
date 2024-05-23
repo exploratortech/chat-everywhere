@@ -1,13 +1,15 @@
 import { FunctionCall } from '@/types/chat';
+import { OpenAIModels } from '@/types/openai';
 
 import { getEndpointsAndKeys } from './api';
 
 export const translateAndEnhancePrompt = async (prompt: string) => {
-  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true);
+  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(false);
   const openAIEndpoint = openAIEndpoints[0] || '';
   const openAIKey = openAIKeys[0] || '';
 
-  let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2024-02-01`;
+  const model = OpenAIModels['gpt-35-turbo'];
+  let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2024-02-01`;
 
   const translateSystemPrompt = `
     Act as an AI image generation expert and a professional translator, follow user's instruction as strictly as possible.
@@ -58,6 +60,7 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
     },
   ];
 
+  console.log('Send request to', url);
   const completionResponse = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
