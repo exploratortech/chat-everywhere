@@ -461,7 +461,6 @@ export const ChatMessage: FC<Props> = memo(
                         formattedMessage={formattedMessage}
                         messageIndex={messageIndex}
                         messagePluginId={message.pluginId}
-                        onContinue={onContinue}
                       />
                     </div>
                   )}

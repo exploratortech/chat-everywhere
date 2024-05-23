@@ -25,7 +25,7 @@ const AssistantRespondMessage = memo(
     formattedMessage: string;
     messagePluginId: Message['pluginId'];
     messageIndex: number;
-    onContinue: (lastWords: string) => void;
+    onContinue?: (lastWords: string) => void;
   }) => {
     const ImgComponent = useMemo(() => {
       const Component = ({
@@ -141,13 +141,14 @@ const AssistantRespondMessage = memo(
         rehypePlugins={[rehypeRaw]}
         components={{
           div: ({ node, children, ...props }) => {
-            if (node?.properties?.id === 'chat-continue-button') {
+            if (node?.properties?.id === 'chat-continue-button' && onContinue) {
               const lastWords =
                 (node?.properties?.['dataLastWords'] as string) || '';
               return (
                 <ContinueChat lastWords={lastWords} onContinue={onContinue} />
               );
             }
+
             if (node?.properties?.id === 'ai-painter-generated-image') {
               const imageTags = node?.children;
               if (!imageTags) return <>{children}</>;
