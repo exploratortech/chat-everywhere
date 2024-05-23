@@ -1,12 +1,3 @@
-import {
-  AZURE_OPENAI_ENDPOINTS,
-  AZURE_OPENAI_GPT_4_ENDPOINTS,
-  AZURE_OPENAI_GPT_4_KEYS,
-  AZURE_OPENAI_GPT_4_TPM,
-  AZURE_OPENAI_KEYS,
-  AZURE_OPENAI_TPM,
-} from '../app/const';
-
 type EndpointInfo = {
   endpoint: string | undefined;
   key: string | undefined;
