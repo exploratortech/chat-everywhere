@@ -472,6 +472,7 @@ export const ChatMessage: FC<Props> = memo(
                 <div className="flex flex-row items-center mt-3 w-full justify-between">
                   <div className="flex flex-row items-center">
                     {(message.pluginId === PluginID.GPT4 ||
+                      message.pluginId === PluginID.GPT4O ||
                       !message.pluginId) && (
                       <SpeechButton inputText={message.content} />
                     )}
