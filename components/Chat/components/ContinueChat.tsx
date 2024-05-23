@@ -10,14 +10,16 @@ const ContinueChat = ({
   onContinue: (lastWords: string) => void;
 }) => {
   return (
-    <Button
-      variant={'outline'}
-      onClick={() => {
-        onContinue(lastWords);
-      }}
-    >
-      Continue
-    </Button>
+    <div className="flex justify-center">
+      <Button
+        variant={'outline'}
+        onClick={() => {
+          onContinue(lastWords);
+        }}
+      >
+        Continue
+      </Button>
+    </div>
   );
 };
 

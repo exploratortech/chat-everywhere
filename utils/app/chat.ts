@@ -21,7 +21,7 @@ import {
   removeTempHtmlString,
 } from './htmlStringHandler';
 import { reorderItem } from './rank';
-import { removeSecondLastLine } from './ui';
+import { addContinueButton, removeSecondLastLine } from './ui';
 
 import '@formatjs/intl-segmenter/polyfill';
 import dayjs from 'dayjs';
@@ -265,6 +265,11 @@ async function handleDataResponse(
     if (text.includes('[REMOVE_LAST_LINE]')) {
       text = text.replace('[REMOVE_LAST_LINE]', '');
       text = removeSecondLastLine(text);
+    }
+
+    if (text.includes('[PLACEHOLDER_FOR_CONTINUE_BUTTON]')) {
+      text = text.replace('[PLACEHOLDER_FOR_CONTINUE_BUTTON]', '');
+      text = addContinueButton(text);
     }
 
     // We can use this command to trigger the initial stream of Edge function response
