@@ -230,8 +230,14 @@ export const OpenAIStream = async (
 
               try {
                 const json = JSON.parse(data);
+
                 if (json.choices[0]) {
                   if (json.choices[0].finish_reason != null) {
+                    if (json.choices[0].finish_reason === 'length') {
+                      buffer.push(
+                        encoder.encode('[PLACEHOLDER_FOR_CONTINUE_BUTTON]'),
+                      );
+                    }
                     if (customMessageToStreamBack) {
                       buffer.push(encoder.encode(customMessageToStreamBack));
                     }
