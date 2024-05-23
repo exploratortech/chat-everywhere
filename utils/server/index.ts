@@ -2,6 +2,9 @@ import { Logger } from 'next-axiom';
 
 import {
   AZURE_OPENAI_ENDPOINTS,
+  AZURE_OPENAI_GPT_4O_ENDPOINTS,
+  AZURE_OPENAI_GPT_4O_KEYS,
+  AZURE_OPENAI_GPT_4O_TPM,
   AZURE_OPENAI_GPT_4_ENDPOINTS,
   AZURE_OPENAI_GPT_4_KEYS,
   AZURE_OPENAI_GPT_4_TPM,
@@ -65,12 +68,35 @@ export const OpenAIStream = async (
 ) => {
   const log = new Logger();
 
-  const isGPT4Model = model.id === OpenAIModelID.GPT_4;
+  const selectedModelProfile = (() => {
+    switch (model.id) {
+      case OpenAIModelID.GPT_4O:
+        return {
+          endpoints: AZURE_OPENAI_GPT_4O_ENDPOINTS,
+          keys: AZURE_OPENAI_GPT_4O_KEYS,
+          tpm: AZURE_OPENAI_GPT_4O_TPM,
+        };
+      case OpenAIModelID.GPT_4:
+        return {
+          endpoints: AZURE_OPENAI_GPT_4_ENDPOINTS,
+          keys: AZURE_OPENAI_GPT_4_KEYS,
+          tpm: AZURE_OPENAI_GPT_4_TPM,
+        };
+      default:
+        return {
+          endpoints: AZURE_OPENAI_ENDPOINTS,
+          keys: AZURE_OPENAI_KEYS,
+          tpm: AZURE_OPENAI_TPM,
+        };
+    }
+  })();
   const endpointManager = new EndpointManager(
-    isGPT4Model ? AZURE_OPENAI_GPT_4_ENDPOINTS : AZURE_OPENAI_ENDPOINTS,
-    isGPT4Model ? AZURE_OPENAI_GPT_4_KEYS : AZURE_OPENAI_KEYS,
-    isGPT4Model ? AZURE_OPENAI_GPT_4_TPM : AZURE_OPENAI_TPM,
+    selectedModelProfile.endpoints,
+    selectedModelProfile.keys,
+    selectedModelProfile.tpm,
   );
+  const isGPT4Model =
+    model.id === OpenAIModelID.GPT_4 || model.id === OpenAIModelID.GPT_4O;
 
   let attempt = 0;
   let attemptLogs = '';
@@ -92,7 +118,7 @@ export const OpenAIStream = async (
     ...normalizeMessages(messagesToSend),
   ];
 
-  while (attempt < AZURE_OPENAI_GPT_4_ENDPOINTS.length) {
+  while (attempt < selectedModelProfile.endpoints.length) {
     const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
 
     if (!endpoint || !apiKey) {
@@ -102,10 +128,7 @@ export const OpenAIStream = async (
     try {
       attemptLogs += `Attempt ${attempt + 1}: Using endpoint ${endpoint}\n`;
 
-      // TODO: Remove this test-only endpoint
-      const deploymentName = endpoint.includes('internal-ai-usages')
-        ? 'test-only'
-        : model.deploymentName;
+      const deploymentName = model.deploymentName;
 
       let url = `${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=2024-02-01`;
       if (endpoint.includes('openai.com')) {
@@ -133,7 +156,7 @@ export const OpenAIStream = async (
 
         // For GPT 4 Model (Pro user)
         if (attempt !== 0 && isGPT4Model) {
-          bodyToSend.model = OpenAIModelID.GPT_4;
+          bodyToSend.model = model.id;
           requestHeaders.Authorization = `Bearer ${process.env.OPENAI_API_GPT_4_KEY}`;
         }
       } else {
@@ -161,9 +184,7 @@ export const OpenAIStream = async (
         attempt += 1;
         continue;
       } else if (res.status !== 200) {
-        console.log({ resCode: res.status });
         const result = await res.json();
-        console.log({ errorResult: result });
         if (result.error.code === 'content_filter') {
           throw new Error(ERROR_MESSAGES.content_filter_triggered.message);
         }
@@ -263,7 +284,7 @@ export const OpenAIStream = async (
           const parser = createParser(onParse);
 
           // Dynamically adjust stream speed base on the model
-          let bufferTime = isGPT4Model ? 45 : 10;
+          let bufferTime = 10;
           const interval = setInterval(() => {
             if (buffer.length > 0) {
               const data = buffer.shift();
