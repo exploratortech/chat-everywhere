@@ -1,6 +1,5 @@
-import { IconArrowDown, IconClearAll } from '@tabler/icons-react';
+import { IconClearAll } from '@tabler/icons-react';
 import {
-  Fragment,
   MutableRefObject,
   memo,
   useCallback,
@@ -24,11 +23,7 @@ import { throttle } from '@/utils/data/throttle';
 
 import { Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
-import {
-  Prompt,
-  isCustomInstructionPrompt,
-  isTeacherPrompt,
-} from '@/types/prompt';
+import { Prompt, isTeacherPrompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -302,6 +297,26 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     },
     [handleSend, selectedConversation, setCurrentMessage],
   );
+  const onContinue = useCallback(
+    (lastWords: string) => {
+      const continueTemplate = `Your response got cut off, because you only have limited response space. Continue writing exactly where you left off. Do not repeat yourself.
+Continue from "${lastWords}<your response>"`;
+
+      const message: Message = {
+        role: 'user',
+        content: continueTemplate,
+        pluginId: currentMessage?.pluginId || null,
+      };
+
+      setCurrentMessage(message);
+      handleSend(0, message);
+      event('interaction', {
+        category: 'Chat',
+        label: 'Continue',
+      });
+    },
+    [currentMessage?.pluginId, handleSend, setCurrentMessage],
+  );
 
   useCustomInstructionDefaultMode(selectedConversation);
 
@@ -332,10 +347,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                             }
                           : {
                               role: 'user',
-                              content: customInstructionPrompt.content || promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
+                              content:
+                                customInstructionPrompt.content ||
+                                promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
                               pluginId: null,
                             };
-                        
+
                         setCurrentMessage(message);
                         handleSend(0, message, customInstructionPrompt);
                       }}
@@ -387,6 +404,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       messages={selectedConversation.messages}
                       messageIsStreaming={messageIsStreaming}
                       onEdit={onEdit}
+                      onContinue={onContinue}
                     />
                   )}
                 </div>

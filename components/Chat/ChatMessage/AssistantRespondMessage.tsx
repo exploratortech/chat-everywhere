@@ -5,6 +5,7 @@ import { PluginID } from '@/types/plugin';
 
 import AiPainter from '../components/AiPainter';
 import AiPainterResult from '../components/AiPainterResult';
+import ContinueChat from '../components/ContinueChat';
 import { ImageGenerationComponent } from '../components/ImageGenerationComponent';
 import MjImageComponentV2 from '../components/MjImageComponentV2';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
@@ -19,10 +20,12 @@ const AssistantRespondMessage = memo(
     formattedMessage,
     messagePluginId,
     messageIndex,
+    onContinue,
   }: {
     formattedMessage: string;
     messagePluginId: Message['pluginId'];
     messageIndex: number;
+    onContinue: (lastWords: string) => void;
   }) => {
     const ImgComponent = useMemo(() => {
       const Component = ({
@@ -138,6 +141,13 @@ const AssistantRespondMessage = memo(
         rehypePlugins={[rehypeRaw]}
         components={{
           div: ({ node, children, ...props }) => {
+            if (node?.properties?.id === 'chat-continue-button') {
+              const lastWords =
+                (node?.properties?.['dataLastWords'] as string) || '';
+              return (
+                <ContinueChat lastWords={lastWords} onContinue={onContinue} />
+              );
+            }
             if (node?.properties?.id === 'ai-painter-generated-image') {
               const imageTags = node?.children;
               if (!imageTags) return <>{children}</>;

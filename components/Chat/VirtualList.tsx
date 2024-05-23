@@ -12,10 +12,12 @@ const VirtualList = ({
   messages,
   messageIsStreaming,
   onEdit,
+  onContinue,
 }: {
   messages: Message[];
   messageIsStreaming: any;
   onEdit: any;
+  onContinue: (lastWords: string) => void;
 }) => {
   const virtuoso = useRef<VirtuosoHandle>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -78,8 +80,9 @@ const VirtualList = ({
               <ChatMessage
                 message={message}
                 messageIndex={index}
-                onEdit={onEdit}
                 messageIsStreaming={messageIsStreaming}
+                onEdit={onEdit}
+                onContinue={onContinue}
               />
             </div>
           );
