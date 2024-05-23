@@ -23,8 +23,6 @@ export interface HomeContextProps {
   ) => void;
   handleCreatePrompt: (folderId?: string | null) => void;
   handleUserLogout: () => void;
-  playMessage: (message: string, speechId: string) => void;
-  stopPlaying: () => void;
   toggleChatbar: () => void;
   togglePromptbar: () => void;
   setDragData: (dragData: DragData) => void;

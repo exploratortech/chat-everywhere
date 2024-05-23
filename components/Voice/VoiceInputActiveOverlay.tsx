@@ -1,17 +1,24 @@
-import { useContext } from 'react';
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 
-import HomeContext from '@/components/home/home.context';
+import { cn } from '@/lib/utils';
 
-const VoiceInputActiveOverlay = () => {
-  const {
-    state: { isSpeechRecognitionActive },
-  } = useContext(HomeContext);
+type VoiceInputActiveOverlayProps = {
+  interactable?: boolean;
+};
 
-  if (!isSpeechRecognitionActive) return null;
+const VoiceInputActiveOverlay = ({
+  interactable = false,
+}: VoiceInputActiveOverlayProps) => {
+  const { isConversing, isSpeechRecognitionActive } = useCognitiveService();
+
+  if (!isConversing && !isSpeechRecognitionActive) return null;
 
   return (
     <div
-      className="absolute top-0 left-0 w-full h-full bg-black opacity-60 z-[1000]"
+      className={cn(
+        'absolute top-0 left-0 w-full h-full bg-black opacity-40 z-[1000]',
+        interactable && 'pointer-events-none',
+      )}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     />
