@@ -9,7 +9,7 @@ export interface OpenAIModel {
 
 export enum OpenAIModelID {
   // 0613 is the latest model with better model steerability, enable by default.
-  GPT_3_5 = 'gpt-3.5-turbo-0613',
+  GPT_3_5 = 'gpt-3.5-turbo',
   GPT_3_5_AZ = 'gpt-35-turbo',
   GPT_3_5_16K = 'gpt-3.5-turbo-16k',
   GPT_4 = 'gpt-4',
