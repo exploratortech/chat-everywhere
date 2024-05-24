@@ -1,17 +1,6 @@
 import { Logger } from 'next-axiom';
 
-import {
-  AZURE_OPENAI_ENDPOINTS,
-  AZURE_OPENAI_GPT_4O_ENDPOINTS,
-  AZURE_OPENAI_GPT_4O_KEYS,
-  AZURE_OPENAI_GPT_4O_TPM,
-  AZURE_OPENAI_GPT_4_ENDPOINTS,
-  AZURE_OPENAI_GPT_4_KEYS,
-  AZURE_OPENAI_GPT_4_TPM,
-  AZURE_OPENAI_KEYS,
-  AZURE_OPENAI_TPM,
-  ERROR_MESSAGES,
-} from '@/utils/app/const';
+import { ERROR_MESSAGES } from '@/utils/app/const';
 import {
   type EventNameTypes,
   serverSideTrackEvent,
@@ -22,7 +11,7 @@ import { logEvent } from '@/utils/server/api';
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
-import { EndpointManager } from './endpointManager';
+import { ChatEndpointManager } from './endpointManager';
 
 import {
   ParsedEvent,
@@ -68,7 +57,7 @@ export const OpenAIStream = async (
 ) => {
   const log = new Logger();
 
-  const endpointManager = new EndpointManager(model.id);
+  const endpointManager = new ChatEndpointManager(model.id);
   const isGPT4Model =
     model.id === OpenAIModelID.GPT_4 || model.id === OpenAIModelID.GPT_4O;
 

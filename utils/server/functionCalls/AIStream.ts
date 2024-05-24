@@ -12,7 +12,7 @@ import { normalizeMessages } from '@/utils/server/index';
 import { FunctionCall, Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 
-import { EndpointManager } from '../endpointManager';
+import { ChatEndpointManager } from '../endpointManager';
 
 import {
   ParsedEvent,
@@ -41,7 +41,7 @@ export const AIStream = async ({
   onUpdateToken,
   functionCalls,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
-  const endpointManager = new EndpointManager(OpenAIModelID.GPT_4O);
+  const endpointManager = new ChatEndpointManager(OpenAIModelID.GPT_4O);
 
   const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
 

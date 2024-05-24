@@ -19,7 +19,7 @@ type EndpointInfo = {
   isThrottled: boolean;
 };
 
-export class EndpointManager {
+export class ChatEndpointManager {
   private endpoints: EndpointInfo[] = [];
 
   constructor(modelId: OpenAIModelID) {
