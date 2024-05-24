@@ -30,6 +30,7 @@ export interface UserProfile {
   hasMqttConnection: boolean;
   isTempUser: boolean;
   isTeacherAccount: boolean;
+  associatedTeacherId: string | undefined;
 }
 
 export interface CreditUsage {

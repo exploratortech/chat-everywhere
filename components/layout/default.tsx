@@ -577,20 +577,12 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
             },
           });
           updateUserInfo({
-            ...{
-              id: session.user.id,
-              email: session.user.email,
-              plan: userProfile.plan || 'free',
-              token: session.access_token,
-              referralCode: userProfile.referralCode,
-              referralCodeExpirationDate:
-                userProfile.referralCodeExpirationDate,
-              proPlanExpirationDate: userProfile.proPlanExpirationDate,
-              hasReferrer: userProfile.hasReferrer,
-              hasReferee: userProfile.hasReferee,
-              isInReferralTrial: userProfile.isInReferralTrial,
-            },
-            ...userProfile,
+            id: userProfile.id,
+            email: userProfile.email,
+            plan: userProfile.plan || 'free',
+            associatedTeacherId: userProfile.associatedTeacherId,
+            isTeacherAccount: userProfile.isTeacherAccount,
+            isTempUser: userProfile.isTempUser,
           });
         })
         .catch((error) => {
