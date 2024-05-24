@@ -12,7 +12,7 @@ import { normalizeMessages } from '@/utils/server/index';
 import { FunctionCall, Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 
-import { ChatEndpointManager } from '../endpointManager';
+import { ChatEndpointManager } from '../ChatEndpointManager';
 
 import {
   ParsedEvent,

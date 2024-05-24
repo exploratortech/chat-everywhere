@@ -11,7 +11,7 @@ import { logEvent } from '@/utils/server/api';
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
-import { ChatEndpointManager } from './endpointManager';
+import { ChatEndpointManager } from './ChatEndpointManager';
 
 import {
   ParsedEvent,
@@ -112,9 +112,6 @@ export const OpenAIStream = async (
       };
 
       if (endpoint.includes('openai.com')) {
-        // Use the model the user specified on the first attempt, otherwise, use
-        // a fallback model.
-        bodyToSend.model = attempt === 0 ? model.id : OpenAIModelID.GPT_3_5;
         requestHeaders.Authorization = `Bearer ${apiKey}`;
 
         // For GPT 4 Model (Pro user)
