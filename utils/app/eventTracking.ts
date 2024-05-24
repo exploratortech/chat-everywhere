@@ -174,8 +174,6 @@ export const updateUserInfo = (userProfile: UserPostHogProfile) => {
     userProfile.associatedTeacherId
   ) {
     posthog.group('teacher-group', userProfile.associatedTeacherId, {
-      email: userProfile.email,
-      plan: userProfile.plan,
       associatedTeacherId: userProfile.associatedTeacherId,
     });
   }
