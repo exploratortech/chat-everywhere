@@ -57,9 +57,7 @@ export const OpenAIStream = async (
 ) => {
   const log = new Logger();
 
-  const endpointManager = new ChatEndpointManager(model.id);
-  const isGPT4Model =
-    model.id === OpenAIModelID.GPT_4 || model.id === OpenAIModelID.GPT_4O;
+  const endpointManager = new ChatEndpointManager(model);
 
   let attempt = 0;
   let attemptLogs = '';
@@ -91,43 +89,19 @@ export const OpenAIStream = async (
     try {
       attemptLogs += `Attempt ${attempt + 1}: Using endpoint ${endpoint}\n`;
 
-      const deploymentName = model.deploymentName;
-
-      let url = `${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=2024-02-01`;
-      if (endpoint.includes('openai.com')) {
-        url = `${endpoint}/v1/chat/completions`;
-      }
-
-      const bodyToSend: any = {
-        messages: messagesToSendInArray,
-        max_tokens: model.completionTokenLimit,
-        temperature,
-        stream: true,
-        presence_penalty: 0,
-        frequency_penalty: 0,
-      };
-
-      const requestHeaders: { [header: string]: string } = {
-        'Content-Type': 'application/json',
-      };
-
-      if (endpoint.includes('openai.com')) {
-        requestHeaders.Authorization = `Bearer ${apiKey}`;
-        bodyToSend.model = model.id;
-      } else {
-        requestHeaders['api-key'] = apiKey;
-      }
-
       const abortController = new AbortController();
       const timeout = setTimeout(() => abortController.abort(), 10000);
+
+      const { url, options } = endpointManager.getFetchOptions({
+        messagesToSendInArray,
+        temperature,
+      });
 
       console.log(`Sending request to ${url}`);
       attemptLogs += `Attempt ${attempt + 1}: Sending request to ${url}\n`;
 
       const res = await fetch(url, {
-        headers: requestHeaders,
-        method: 'POST',
-        body: JSON.stringify(bodyToSend),
+        ...options,
         signal: abortController.signal,
       });
 
