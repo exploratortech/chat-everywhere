@@ -8,6 +8,8 @@ import {
   AZURE_OPENAI_GPT_4_TPM,
   AZURE_OPENAI_KEYS,
   AZURE_OPENAI_TPM,
+  OPENAI_API_HOST,
+  OPENAI_API_KEY,
 } from '@/utils/app/const';
 
 import { OpenAIModelID } from '@/types/openai';
@@ -21,6 +23,7 @@ type EndpointInfo = {
 
 export class ChatEndpointManager {
   private endpoints: EndpointInfo[] = [];
+  private useBackupEndpoint: boolean = false;
 
   constructor(modelId: OpenAIModelID) {
     const { endpoints, keys, tpm } = this.getEndpointConfigByModel(modelId);
@@ -53,6 +56,17 @@ export class ChatEndpointManager {
           tpm: AZURE_OPENAI_TPM,
         };
     }
+  }
+
+  // Add OPENAI ENDPOINT as a backup endpoint
+  // This will be selected if all endpoints are throttled
+  private addBackupEndpoint() {
+    this.endpoints.push({
+      endpoint: OPENAI_API_HOST,
+      key: OPENAI_API_KEY,
+      weight: 1,
+      isThrottled: false,
+    });
   }
 
   private selectEndpointByWeight(): EndpointInfo | null {
@@ -99,6 +113,10 @@ export class ChatEndpointManager {
     if (endpointInfo) {
       endpointInfo.isThrottled = true;
     }
+    if (this.getAvailableEndpoints().length === 0 && !this.useBackupEndpoint) {
+      this.useBackupEndpoint = true;
+      this.addBackupEndpoint();
+    }
   }
 
   public getTotalEndpoints(): EndpointInfo[] {
@@ -108,6 +126,10 @@ export class ChatEndpointManager {
     return this.endpoints.filter((e) => e.isThrottled);
   }
   public getAvailableEndpoints(): EndpointInfo[] {
+    console.log(
+      '✅ AVAILABLE ENDPOINTS LENGTH: ',
+      this.endpoints.filter((e) => !e.isThrottled).length,
+    );
     return this.endpoints.filter((e) => !e.isThrottled);
   }
 }

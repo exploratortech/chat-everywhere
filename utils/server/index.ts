@@ -81,7 +81,7 @@ export const OpenAIStream = async (
     ...normalizeMessages(messagesToSend),
   ];
 
-  while (attempt < endpointManager.getTotalEndpoints().length) {
+  while (endpointManager.getAvailableEndpoints().length !== 0) {
     const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
 
     if (!endpoint || !apiKey) {
@@ -113,12 +113,7 @@ export const OpenAIStream = async (
 
       if (endpoint.includes('openai.com')) {
         requestHeaders.Authorization = `Bearer ${apiKey}`;
-
-        // For GPT 4 Model (Pro user)
-        if (attempt !== 0 && isGPT4Model) {
-          bodyToSend.model = model.id;
-          requestHeaders.Authorization = `Bearer ${process.env.OPENAI_API_GPT_4_KEY}`;
-        }
+        bodyToSend.model = model.id;
       } else {
         requestHeaders['api-key'] = apiKey;
       }
@@ -139,7 +134,7 @@ export const OpenAIStream = async (
       const encoder = new TextEncoder();
       const decoder = new TextDecoder();
 
-      if (res.status === 429 || res.status === 500) {
+      if (res.status === 429 || res.status === 500 || res.status === 404) {
         endpointManager.markEndpointAsThrottled(endpoint);
         attempt += 1;
         continue;
