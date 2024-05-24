@@ -41,16 +41,7 @@ export const AIStream = async ({
   onUpdateToken,
   functionCalls,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
-  const selectedModelProfile = {
-    endpoints: AZURE_OPENAI_GPT_4O_ENDPOINTS,
-    keys: AZURE_OPENAI_GPT_4O_KEYS,
-    tpm: AZURE_OPENAI_GPT_4O_TPM,
-  };
-  const endpointManager = new EndpointManager(
-    selectedModelProfile.endpoints,
-    selectedModelProfile.keys,
-    selectedModelProfile.tpm,
-  );
+  const endpointManager = new EndpointManager(OpenAIModelID.GPT_4O);
 
   const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
 

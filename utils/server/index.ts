@@ -68,33 +68,7 @@ export const OpenAIStream = async (
 ) => {
   const log = new Logger();
 
-  const selectedModelProfile = (() => {
-    switch (model.id) {
-      case OpenAIModelID.GPT_4O:
-        return {
-          endpoints: AZURE_OPENAI_GPT_4O_ENDPOINTS,
-          keys: AZURE_OPENAI_GPT_4O_KEYS,
-          tpm: AZURE_OPENAI_GPT_4O_TPM,
-        };
-      case OpenAIModelID.GPT_4:
-        return {
-          endpoints: AZURE_OPENAI_GPT_4_ENDPOINTS,
-          keys: AZURE_OPENAI_GPT_4_KEYS,
-          tpm: AZURE_OPENAI_GPT_4_TPM,
-        };
-      default:
-        return {
-          endpoints: AZURE_OPENAI_ENDPOINTS,
-          keys: AZURE_OPENAI_KEYS,
-          tpm: AZURE_OPENAI_TPM,
-        };
-    }
-  })();
-  const endpointManager = new EndpointManager(
-    selectedModelProfile.endpoints,
-    selectedModelProfile.keys,
-    selectedModelProfile.tpm,
-  );
+  const endpointManager = new EndpointManager(model.id);
   const isGPT4Model =
     model.id === OpenAIModelID.GPT_4 || model.id === OpenAIModelID.GPT_4O;
 
@@ -118,7 +92,7 @@ export const OpenAIStream = async (
     ...normalizeMessages(messagesToSend),
   ];
 
-  while (attempt < selectedModelProfile.endpoints.length) {
+  while (attempt < endpointManager.getTotalEndpoints().length) {
     const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
 
     if (!endpoint || !apiKey) {
