@@ -576,6 +576,22 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
               'enable-conversation-mode': isFeatureEnabled('enable-conversation-mode') || process.env.NEXT_PUBLIC_ENV !== 'production',
             },
           });
+          updateUserInfo({
+            ...{
+              id: session.user.id,
+              email: session.user.email,
+              plan: userProfile.plan || 'free',
+              token: session.access_token,
+              referralCode: userProfile.referralCode,
+              referralCodeExpirationDate:
+                userProfile.referralCodeExpirationDate,
+              proPlanExpirationDate: userProfile.proPlanExpirationDate,
+              hasReferrer: userProfile.hasReferrer,
+              hasReferee: userProfile.hasReferee,
+              isInReferralTrial: userProfile.isInReferralTrial,
+            },
+            ...userProfile,
+          });
         })
         .catch((error) => {
           console.log(error);
@@ -606,7 +622,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (!user) return;
-    updateUserInfo(user);
     fetchAndUpdateCreditUsage(user.id, isPaidUser);
   }, [user, isPaidUser, conversations]);
 
