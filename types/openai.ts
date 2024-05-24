@@ -1,5 +1,5 @@
 export interface OpenAIModel {
-  id: string;
+  id: OpenAIModelID;
   name: string;
   maxLength: number; // maximum length of a message
   tokenLimit: number;
