@@ -17,12 +17,9 @@ const ModeSelector = () => {
       hasMqttConnection,
       isUltraUser,
       selectedConversation,
-      featureFlags,
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
-
-  const isChatWithDocEnabled = featureFlags['enable-chat-with-doc'];
 
   const currentSelectedPluginId = useMemo(() => {
     if (!currentMessage || currentMessage?.pluginId === null) {
@@ -145,7 +142,7 @@ const ModeSelector = () => {
               </option>
             </>
           )}
-          {isUltraUser && isChatWithDocEnabled && (
+          {isUltraUser && (
             <option
               value={PluginID.GEMINI}
               className="dark:bg-[#343541] dark:text-white text-yellow-600"

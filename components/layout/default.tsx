@@ -572,8 +572,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
             field: 'featureFlags',
             value: {
               // Ignore feature flag on staging and local env
-              'enable-chat-with-doc': isFeatureEnabled('enable-chat-with-doc') || process.env.NEXT_PUBLIC_ENV !== 'production',
-              'enable-conversation-mode': isFeatureEnabled('enable-conversation-mode') || process.env.NEXT_PUBLIC_ENV !== 'production',
+              'enable-conversation-mode':
+                isFeatureEnabled('enable-conversation-mode') ||
+                process.env.NEXT_PUBLIC_ENV !== 'production',
             },
           });
         })
@@ -648,7 +649,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     dispatch({
       field: 'featureFlags',
       value: {
-        'enable-chat-with-doc': false,
         'enable-conversation-mode': false,
       },
     });

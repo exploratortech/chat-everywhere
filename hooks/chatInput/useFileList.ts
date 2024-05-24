@@ -11,14 +11,14 @@ export const useFileList = () => {
 
   const { data: files } = useFetchFileList();
   const {
-    state: { user, featureFlags },
+    state: { user },
   } = useContext(HomeContext);
   const filteredFiles = useMemo(() => {
-    if (!user || !featureFlags['enable-chat-with-doc']) return [];
+    if (!user) return [];
     return (files || []).filter((file) =>
       file.filename.toLowerCase().includes(fileInputValue.toLowerCase()),
     );
-  }, [user, featureFlags, files, fileInputValue]);
+  }, [user, files, fileInputValue]);
 
   const updateFileListVisibility = useCallback(
     (text: string) => {
