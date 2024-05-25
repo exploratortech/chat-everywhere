@@ -487,6 +487,7 @@ export const ChatMessage: FC<Props> = memo(
                     )}
                     {(message.pluginId === PluginID.aiPainter ||
                       message.pluginId === PluginID.GPT4 ||
+                      message.pluginId === PluginID.GPT4O ||
                       message.pluginId === PluginID.default ||
                       !message.pluginId) &&
                       !messageIsStreaming && (
