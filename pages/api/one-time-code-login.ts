@@ -78,6 +78,19 @@ async function verifyCodeAndReferrerAccount(code: string) {
 }
 
 async function createTempUser(code: string, codeId: string, uniqueId: string) {
+  // get teacher profile id by codeId
+  const { data: oneTimeCodeData, error: oneTimeCodeError } = await supabase
+    .from('one_time_codes')
+    .select('teacher_profile_id')
+    .eq('id', codeId)
+    .single();
+
+  if (oneTimeCodeError) {
+    throw oneTimeCodeError;
+  }
+
+  const teacherProfileId = oneTimeCodeData.teacher_profile_id;
+
   const randomUniqueId = uuidv4().replace(/-/g, '');
   const randomEmail = `temp-user-${code}-${randomUniqueId}@chateverywhere.app`;
   const randomPassword = uuidv4();
@@ -99,6 +112,7 @@ async function createTempUser(code: string, codeId: string, uniqueId: string) {
         one_time_code_id: codeId,
         profile_id: userId,
         uniqueId: uniqueId,
+        teacher_profile_id: teacherProfileId,
       },
     ]);
   if (createTempProfileError) {
