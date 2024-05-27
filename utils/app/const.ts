@@ -1,4 +1,5 @@
 import { OpenAIModels, fallbackModelID } from '@/types/openai';
+import { SubscriptionPlan } from '@/types/user';
 
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -100,3 +101,21 @@ export const newDefaultConversation = {
   folderId: null,
   lastUpdateAtUTC: dayjs().valueOf(),
 };
+
+export const OrderedSubscriptionPlans: SubscriptionPlan[] = [
+  'free',
+  'pro',
+  'ultra',
+  'edu',
+];
+
+export const ProPlanPaymentLink =
+  process.env.NEXT_PUBLIC_ENV === 'production'
+    ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
+    : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
+
+// TODO: Update the link
+export const UltraPlanPaymentLink =
+  process.env.NEXT_PUBLIC_ENV === 'production'
+    ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
+    : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
