@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
+import { V2ChatUpgradeLink } from '@/utils/app/const';
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { UserProfile } from '@/types/user';
@@ -44,10 +45,7 @@ export const PaymentDialog = ({
   const userId = userProfile.id;
 
   const upgradeLinkOnClick = () => {
-    const paymentLink =
-      process.env.NEXT_PUBLIC_ENV === 'production'
-        ? 'https://buy.stripe.com/4gw9Ez6U2gt71NudRd'
-        : 'https://buy.stripe.com/test_dR68y152Y7aWagUcMU';
+    const paymentLink = V2ChatUpgradeLink;
 
     trackEvent('v2 Payment link clicked');
 

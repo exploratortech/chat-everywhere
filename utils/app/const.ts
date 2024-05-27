@@ -119,3 +119,18 @@ export const UltraPlanPaymentLink =
   process.env.NEXT_PUBLIC_ENV === 'production'
     ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
     : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
+
+export const Gpt4CreditPurchaseLinks = {
+  '50': 'https://buy.stripe.com/28o03Z0vE3Glak09AJ',
+  '150': 'https://buy.stripe.com/cN2dUP6U2dgV0JqcMW',
+  '300': 'https://buy.stripe.com/dR6g2Xemu5Otcs83cn',
+};
+export const AiImageCreditPurchaseLinks = {
+  '100': 'https://buy.stripe.com/fZeg2Xdiq4Kp8bS9AT',
+  '500': 'https://buy.stripe.com/8wMg2XcemccR2Ry8wQ',
+};
+
+export const V2ChatUpgradeLink =
+  process.env.NEXT_PUBLIC_ENV === 'production'
+    ? 'https://buy.stripe.com/4gw9Ez6U2gt71NudRd'
+    : 'https://buy.stripe.com/test_dR68y152Y7aWagUcMU';
