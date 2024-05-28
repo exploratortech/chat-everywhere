@@ -1,3 +1,5 @@
+import { SubscriptionPlan } from '@/types/paid_plan';
+
 import { getAdminSupabaseClient } from '../supabase';
 
 // Skip any account operation on Edu accounts
@@ -17,14 +19,14 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
     const { error: updatedUserError } = await supabase
       .from('profiles')
       .update({
-        plan: 'pro',
+        plan: props.plan,
         stripe_subscription_id: props.stripeSubscriptionId,
         pro_plan_expiration_date: props.proPlanExpirationDate || null,
       })
       .eq('id', props.userId);
 
     if (updatedUserError) throw updatedUserError;
-    console.log(`User ${props.userId} updated to pro`);
+    console.log(`User ${props.userId} updated to ${props.plan}`);
   } else if (isUpgradeUserAccountByEmailProps(props)) {
     // Update user account by Email
     const { data: userProfile } = await supabase
@@ -38,13 +40,13 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
     const { error: updatedUserError } = await supabase
       .from('profiles')
       .update({
-        plan: 'pro',
+        plan: props.plan,
         stripe_subscription_id: props.stripeSubscriptionId,
         pro_plan_expiration_date: props.proPlanExpirationDate || null,
       })
       .eq('email', props.email);
     if (updatedUserError) throw updatedUserError;
-    console.log(`User ${props.email} updated to pro`);
+    console.log(`User ${props.email} updated to ${props.plan}`);
   } else if (isDowngradeUserAccountProps(props)) {
     // Downgrade user account
 
@@ -84,13 +86,13 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
       .eq('email', props.email);
     if (updatedUserError) throw updatedUserError;
     console.log(`User subscription ${props.email} downgrade back to free`);
-  } else if (isExtendProPlanProps(props)) {
-    // Extend pro plan
-
+  } else if (isExtendMembershipProps(props)) {
+    // Extend pro / ultra plan
     const { data: userProfile } = await supabase
       .from('profiles')
       .select('plan')
       .eq('stripe_subscription_id', props.stripeSubscriptionId)
+      .eq('plan', props.plan)
       .single();
 
     if (userProfile?.plan === 'edu') return;
@@ -113,6 +115,7 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
 interface UpgradeUserAccountProps {
   upgrade: true;
   userId: string;
+  plan: SubscriptionPlan;
   stripeSubscriptionId?: string;
   proPlanExpirationDate?: Date;
 }
@@ -120,6 +123,7 @@ interface UpgradeUserAccountProps {
 interface UpgradeUserAccountByEmailProps {
   upgrade: true;
   email: string;
+  plan: SubscriptionPlan;
   stripeSubscriptionId?: string;
   proPlanExpirationDate?: Date;
 }
@@ -137,6 +141,7 @@ interface DowngradeUserAccountByEmailProps {
 
 interface ExtendProPlanProps {
   upgrade: true;
+  plan: SubscriptionPlan;
   stripeSubscriptionId: string;
   proPlanExpirationDate: Date | undefined;
 }
@@ -156,6 +161,7 @@ function isUpgradeUserAccountProps(
     props.upgrade === true &&
     'userId' in props &&
     typeof props.userId === 'string' &&
+    !!props.plan &&
     (props.proPlanExpirationDate instanceof Date ||
       props.proPlanExpirationDate === undefined)
   );
@@ -168,6 +174,7 @@ function isUpgradeUserAccountByEmailProps(
     props.upgrade === true &&
     'email' in props &&
     typeof props.email === 'string' &&
+    !!props.plan &&
     (props.proPlanExpirationDate instanceof Date ||
       props.proPlanExpirationDate === undefined)
   );
@@ -197,12 +204,13 @@ function isDowngradeUserAccountByEmailProps(
   );
 }
 
-function isExtendProPlanProps(
+function isExtendMembershipProps(
   props: UpdateUserAccountProps,
 ): props is ExtendProPlanProps {
   return (
     (props.upgrade === true &&
       typeof props.stripeSubscriptionId === 'string' &&
+      !!props.plan &&
       props.proPlanExpirationDate instanceof Date) ||
     props.proPlanExpirationDate === undefined
   );
