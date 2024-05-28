@@ -10,17 +10,11 @@ import {
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
-import { SubscriptionPlan, User } from '@/types/user';
+import { User } from '@/types/user';
 
 import dayjs from 'dayjs';
 
-const PlanComparison = ({
-  user,
-  isPaidUser,
-}: {
-  user: User | null;
-  isPaidUser: boolean;
-}) => {
+const PlanComparison = ({ user }: { user: User | null }) => {
   const { t } = useTranslation('model');
 
   const upgradeLinkOnClick = (upgradePlan: 'pro' | 'ultra') => {
@@ -149,7 +143,17 @@ const ProPlanContent = () => {
   const { t } = useTranslation('model');
   return (
     <>
-      <span className="text-2xl font-bold">Pro</span>
+      <span
+        className="text-clip-transparent bg-gradient-pro py-0.5 mr-0 animate-background-gradient-slide bg-500% text-2xl font-bold rounded bg-gray-700"
+        style={{
+          color: 'transparent',
+          WebkitBackgroundClip: 'text',
+          WebkitTextStrokeWidth: '1px',
+          WebkitTextStrokeColor: 'transparent',
+        }}
+      >
+        Pro
+      </span>
       <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
@@ -167,7 +171,7 @@ const UltraPlanContent = () => {
   return (
     <>
       <span
-        className="text-2xl font-bold bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] font-medium rounded bg-gray-700 text-indigo-400"
+        className="text-clip-transparent bg-gradient-ultra py-0.5 mr-0 animate-background-gradient-slide bg-500% text-2xl font-bold rounded bg-gray-700"
         style={{
           color: 'transparent',
           WebkitBackgroundClip: 'text',

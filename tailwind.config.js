@@ -15,15 +15,13 @@ module.exports = {
       ...defaultTheme.screens,
     },
     extend: {
-      screens:{
-        mobile: 
-        {
-          'raw': '(max-width: 640px)',
+      screens: {
+        mobile: {
+          raw: '(max-width: 640px)',
         },
-        tablet: 
-        {
-          'raw': '(max-width: 768px)',
-        }
+        tablet: {
+          raw: '(max-width: 768px)',
+        },
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -33,63 +31,71 @@ module.exports = {
         foreground: 'hsl(var(--foreground))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))'
+          foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))'
+          foreground: 'hsl(var(--secondary-foreground))',
         },
         destructive: {
           DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))'
+          foreground: 'hsl(var(--destructive-foreground))',
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))'
+          foreground: 'hsl(var(--muted-foreground))',
         },
         accent: {
           DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))'
+          foreground: 'hsl(var(--accent-foreground))',
         },
         popover: {
           DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))'
+          foreground: 'hsl(var(--popover-foreground))',
         },
         card: {
           DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))'
-        }
+          foreground: 'hsl(var(--card-foreground))',
+        },
       },
       borderRadius: {
         lg: `var(--radius)`,
         md: `calc(var(--radius) - 2px)`,
-        sm: 'calc(var(--radius) - 4px)'
+        sm: 'calc(var(--radius) - 4px)',
       },
       keyframes: {
         'accordion-down': {
           from: { height: 0 },
-          to: { height: 'var(--radix-accordion-content-height)' }
+          to: { height: 'var(--radix-accordion-content-height)' },
         },
         'accordion-up': {
           from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: 0 }
+          to: { height: 0 },
         },
         'slide-from-left': {
           '0%': {
-            transform: 'translateX(-100%)'
+            transform: 'translateX(-100%)',
           },
           '100%': {
-            transform: 'translateX(0)'
-          }
+            transform: 'translateX(0)',
+          },
         },
         'slide-to-left': {
           '0%': {
-            transform: 'translateX(0)'
+            transform: 'translateX(0)',
           },
           '100%': {
-            transform: 'translateX(-100%)'
-          }
-        }
+            transform: 'translateX(-100%)',
+          },
+        },
+        'background-gradient-slide': {
+          '0%': {
+            backgroundPosition: '-20% 50%',
+          },
+          '100%': {
+            backgroundPosition: '100% 50%',
+          },
+        },
       },
       animation: {
         'slide-from-left':
@@ -97,8 +103,19 @@ module.exports = {
         'slide-to-left':
           'slide-to-left 0.25s cubic-bezier(0.82, 0.085, 0.395, 0.895)',
         'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out'
-      }
+        'accordion-up': 'accordion-up 0.2s ease-out',
+        'background-gradient-slide':
+          'background-gradient-slide 6s linear infinite',
+      },
+      backgroundSize: {
+        '500%': '500% 100%',
+      },
+      backgroundImage: {
+        'gradient-ultra':
+          'linear-gradient(to right, #fd68a6, #6c62f7, #fd68a6)',
+        'gradient-pro':
+          'linear-gradient(to right, rgb(99 102 241), rgb(129 140 248), rgb(99 102 241))',
+      },
     },
   },
   variants: {

@@ -24,7 +24,8 @@
   height: 6px;
 }
 
-html, body {
+html,
+body {
   overscroll-behavior-y: none;
 }
 
@@ -159,4 +160,11 @@ body {
       @apply bg-background text-foreground;
     }
   }
+}
+
+.text-clip-transparent {
+  color: transparent;
+  -webkit-background-clip: text;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: transparent;
 }

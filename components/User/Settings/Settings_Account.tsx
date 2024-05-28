@@ -1,10 +1,6 @@
 import { IconCircleCheck } from '@tabler/icons-react';
 import React, { useContext, useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-
-import { trackEvent } from '@/utils/app/eventTracking';
-import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -62,7 +58,7 @@ export default function Settings_Account() {
               </p>
             </div>
           )}
-          {<PlanComparison user={user} isPaidUser={isPaidUser} />}
+          {<PlanComparison user={user} />}
 
           {displayReferralCodeEnterer && <ReferralCodeEnter />}
           <div>
