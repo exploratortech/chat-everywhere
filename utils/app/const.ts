@@ -116,7 +116,7 @@ export const ProPlanPaymentLink =
 
 export const UltraPlanPaymentLink =
   process.env.NEXT_PUBLIC_ENV === 'production'
-    ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1' // TODO: Update the link
+    ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1' // TODO: Update the production link
     : 'https://buy.stripe.com/test_00gcOhbrmgLwbkYdR0';
 
 export const Gpt4CreditPurchaseLinks = {
@@ -134,10 +134,14 @@ export const V2ChatUpgradeLink =
     ? 'https://buy.stripe.com/4gw9Ez6U2gt71NudRd'
     : 'https://buy.stripe.com/test_dR68y152Y7aWagUcMU';
 
-// STRIPE
+// STRIPE CREDIT CODE
 export const STRIPE_PLAN_CODE_GPT4_CREDIT = 'GPT4_CREDIT';
 export const STRIPE_PLAN_CODE_IMAGE_CREDIT = 'IMAGE_CREDIT';
+
+// STRIPE MONTHLY PLAN CODE
 export const STRIPE_PLAN_CODE_MONTHLY_PRO_PLAN_SUBSCRIPTION =
   'monthly_pro_plan_subscription';
+
+// STRIPE ONE TIME PLAN CODE
 export const STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH =
   'one_time_pro_plan_for_1_month';
