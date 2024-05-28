@@ -57,18 +57,13 @@ const PlanComparison = ({ user }: { user: User | null }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] justify-center gap-3 mb-3">
       {/* Free Plan */}
-      <div className="flex flex-col w-full col-start-1 row-span-1 border rounded-lg p-4 text-neutral-400 border-neutral-400">
-        <span className="text-2xl font-bold">Free</span>
-        <div className="text-xs leading-5">
-          {PlanDetail.free.features.map((feature, index) => (
-            <FeatureItem key={index} featureName={t(feature)} />
-          ))}
-        </div>
+      <div className="flex flex-col w-full col-start-1 row-span-1 border rounded-lg p-4 text-neutral-3000 border-neutral-400">
+        <FreePlanContent user={user} />
       </div>
 
       {/* Pro Plan */}
       <div className="flex flex-col w-full col-start-1 row-span-1 border rounded-lg p-4">
-        <ProPlanContent />
+        <ProPlanContent user={user} />
 
         {/* Upgrade button */}
         {showUpgradeToPro && (
@@ -95,7 +90,7 @@ const PlanComparison = ({ user }: { user: User | null }) => {
 
       {/* Ultra Plan */}
       <div className="flex flex-col w-full col-start-1 row-start-auto md:row-start-1 md:col-start-2 row-span-2 border rounded-lg p-4">
-        <UltraPlanContent />
+        <UltraPlanContent user={user} />
 
         {/* Upgrade button */}
         {showUpgradeToUltra && (
@@ -139,21 +134,40 @@ const PlanExpirationDate: React.FC<{ expirationDate: string }> = ({
   );
 };
 
-const ProPlanContent = () => {
+const FreePlanContent = ({ user }: { user: User | null }) => {
   const { t } = useTranslation('model');
   return (
     <>
-      <span
-        className="text-clip-transparent bg-gradient-pro py-0.5 mr-0 animate-background-gradient-slide bg-500% text-2xl font-bold rounded bg-gray-700"
-        style={{
-          color: 'transparent',
-          WebkitBackgroundClip: 'text',
-          WebkitTextStrokeWidth: '1px',
-          WebkitTextStrokeColor: 'transparent',
-        }}
-      >
-        Pro
-      </span>
+      <div className="flex flex-row items-center justify-between gap-2">
+        <span className="text-2xl py-0.5 font-bold">Free</span>
+        {(user?.plan === 'free' || !user) && <CurrentTag />}
+      </div>
+      <div className="text-xs leading-5">
+        {PlanDetail.free.features.map((feature, index) => (
+          <FeatureItem key={index} featureName={t(feature)} />
+        ))}
+      </div>
+    </>
+  );
+};
+const ProPlanContent = ({ user }: { user: User | null }) => {
+  const { t } = useTranslation('model');
+  return (
+    <>
+      <div className="flex flex-row items-center justify-between gap-2">
+        <span
+          className="text-clip-transparent bg-gradient-pro py-0.5 mr-0 animate-background-gradient-slide bg-500% text-2xl font-bold rounded bg-gray-700"
+          style={{
+            color: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextStrokeWidth: '1px',
+            WebkitTextStrokeColor: 'transparent',
+          }}
+        >
+          Pro
+        </span>
+        {user?.plan === 'pro' && <CurrentTag />}
+      </div>
       <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
@@ -166,21 +180,26 @@ const ProPlanContent = () => {
   );
 };
 
-const UltraPlanContent = () => {
+const UltraPlanContent = ({ user }: { user: User | null }) => {
   const { t } = useTranslation('model');
   return (
     <>
-      <span
-        className="text-clip-transparent bg-gradient-ultra py-0.5 mr-0 animate-background-gradient-slide bg-500% text-2xl font-bold rounded bg-gray-700"
-        style={{
-          color: 'transparent',
-          WebkitBackgroundClip: 'text',
-          WebkitTextStrokeWidth: '1px',
-          WebkitTextStrokeColor: 'transparent',
-        }}
-      >
-        Ultra
-      </span>
+      <div className="flex flex-row items-center justify-between gap-2">
+        <span
+          className="text-clip-transparent bg-gradient-ultra py-0.5 mr-0 animate-background-gradient-slide bg-500% text-2xl font-bold rounded bg-gray-700"
+          style={{
+            color: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextStrokeWidth: '1px',
+            WebkitTextStrokeColor: 'transparent',
+          }}
+        >
+          Ultra
+        </span>
+        {user?.plan === 'ultra' && <CurrentTag />}
+      </div>
+      <span className="text-sm mb-2">{t('USD$19.99 / month')}</span>
+
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
         <FeatureItem featureName={t('Priority response time')} />
@@ -189,5 +208,13 @@ const UltraPlanContent = () => {
         ))}
       </div>
     </>
+  );
+};
+
+const CurrentTag = () => {
+  return (
+    <span className="h-max bg-neutral-600 text-neutral-400 text-[10px]  font-medium mr-2 px-2 py-[.5px] rounded w-max">
+      CURRENT PLAN
+    </span>
   );
 };
