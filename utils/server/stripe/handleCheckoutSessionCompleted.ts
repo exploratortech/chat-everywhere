@@ -6,6 +6,7 @@ import {
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 
 import { PluginID } from '@/types/plugin';
+import { UserProfile } from '@/types/user';
 
 import {
   addCredit,
@@ -16,6 +17,8 @@ import updateUserAccount from './updateUserAccount';
 
 import dayjs from 'dayjs';
 import Stripe from 'stripe';
+
+const supabase = getAdminSupabaseClient();
 
 export default async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
@@ -28,6 +31,14 @@ export default async function handleCheckoutSessionCompleted(
   const credit = session.metadata?.credit;
   const stripeSubscriptionId = session.subscription as string;
 
+  console.log({
+    userId,
+    email,
+    planCode,
+    planGivingWeeks,
+    credit,
+    stripeSubscriptionId,
+  });
   if (!planCode && !planGivingWeeks) {
     throw new Error('no plan code or plan giving weeks from Stripe webhook');
   }
@@ -36,6 +47,11 @@ export default async function handleCheckoutSessionCompleted(
     throw new Error('missing Email from Stripe webhook');
   }
 
+  const user = await userProfileQuery({
+    client: supabase,
+    email,
+  });
+
   const isTopUpCreditRequest =
     (planCode === STRIPE_PLAN_CODE_IMAGE_CREDIT ||
       planCode === STRIPE_PLAN_CODE_GPT4_CREDIT) &&
@@ -43,7 +59,7 @@ export default async function handleCheckoutSessionCompleted(
   // Handle TopUp Image Credit / GPT4 Credit
   if (isTopUpCreditRequest) {
     return await addCreditToUser(
-      email,
+      user,
       +credit,
       planCode === STRIPE_PLAN_CODE_IMAGE_CREDIT
         ? PluginID.IMAGE_GEN
@@ -52,10 +68,12 @@ export default async function handleCheckoutSessionCompleted(
   }
 
   const sinceDate = dayjs.unix(session.created).utc().toDate();
+  // Retrieve user profile using email
+
   const proPlanExpirationDate = await getProPlanExpirationDate(
     planGivingWeeks,
     planCode,
-    email,
+    user,
     sinceDate,
   );
 
@@ -88,25 +106,21 @@ export default async function handleCheckoutSessionCompleted(
 async function getProPlanExpirationDate(
   planGivingWeeks: string | undefined,
   planCode: string | undefined,
-  email: string,
+  user: UserProfile,
   sinceDate: Date,
-) {
-  // Takes plan_giving_weeks priority over plan_code
+): Promise<Date | undefined> {
+  // Check if planGivingWeeks is defined and is a string
   if (planGivingWeeks && typeof planGivingWeeks === 'string') {
-    // Get users' pro expiration date
-    const supabase = getAdminSupabaseClient();
-    const user = await userProfileQuery({
-      client: supabase,
-      email,
-    });
     const userProPlanExpirationDate = user?.proPlanExpirationDate;
+
+    // User has a previous one-time pro plan or a referral trial
     if (userProPlanExpirationDate) {
-      // when user bought one-time pro plan previously or user has referral trial
       return dayjs(userProPlanExpirationDate)
         .add(+planGivingWeeks, 'week')
         .toDate();
-    } else if (user.plan === 'pro' && !user.proPlanExpirationDate) {
-      // when user is pro monthly subscriber
+    }
+    // Error handling for monthly pro subscribers who should not buy one-time plans
+    else if (user.plan === 'pro' && !user.proPlanExpirationDate) {
       throw new Error(
         'Monthly Pro subscriber bought one-time pro plan, should not happen',
         {
@@ -115,35 +129,31 @@ async function getProPlanExpirationDate(
           },
         },
       );
-    } else {
-      // when user is not pro yet
+    }
+    // User is not a pro user yet
+    else {
       return dayjs(sinceDate).add(+planGivingWeeks, 'week').toDate();
     }
-  } else if (
+  }
+  // Handle one-month pro plan based on planCode
+  else if (
     planCode?.toUpperCase() ===
     STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH.toUpperCase()
   ) {
-    // Only store expiration for one month plan
     return dayjs(sinceDate).add(1, 'month').toDate();
-  } else {
-    return undefined;
   }
+  // Return undefined if no conditions are met
+  return undefined;
 }
 
 async function addCreditToUser(
-  email: string,
+  user: UserProfile,
   credit: number,
   creditType: Exclude<
     PluginID,
     PluginID.LANGCHAIN_CHAT | PluginID.IMAGE_TO_PROMPT
   >,
 ) {
-  // Get user id by email address
-  const supabase = getAdminSupabaseClient();
-  const user = await userProfileQuery({
-    client: supabase,
-    email,
-  });
   // Check is Pro user
   if (user.plan === 'free') {
     throw Error(`A free user try to top up ${creditType}}`, {
