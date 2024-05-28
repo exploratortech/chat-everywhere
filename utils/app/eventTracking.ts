@@ -130,6 +130,15 @@ export type PayloadType = {
   tempAccountName?: string;
 };
 
+export interface UserPostHogProfile {
+  id: string;
+  email: string;
+  plan: string;
+  isTeacherAccount: boolean;
+  isTempUser: boolean;
+  associatedTeacherId: string | undefined;
+}
+
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
 export const enableTracking = process.env.NEXT_PUBLIC_ENV === 'production';
 
@@ -149,17 +158,27 @@ export const isFeatureEnabled = (featureName: string) => {
   return !!posthog.isFeatureEnabled(featureName);
 };
 
-export const updateUserInfo = (user: User) => {
+export const updateUserInfo = (userProfile: UserPostHogProfile) => {
   if (!enableTracking) return;
-  posthog.identify(user.id, {
-    email: user.email,
-    plan: user.plan,
+  posthog.identify(userProfile.id, {
+    email: userProfile.email,
+    plan: userProfile.plan,
     env: process.env.NEXT_PUBLIC_ENV,
-    isTeacherAccount: user.isTeacherAccount,
-    isTempUser: user.isTempUser,
+    isTeacherAccount: userProfile.isTeacherAccount,
+    isTempUser: userProfile.isTempUser,
+    associatedTeacherId: userProfile.associatedTeacherId,
   });
 
-  posthog.alias(user.id, getOrGenerateUserId());
+  if (
+    (userProfile.isTempUser || userProfile.isTeacherAccount) &&
+    userProfile.associatedTeacherId
+  ) {
+    posthog.group('teacher-group', userProfile.associatedTeacherId, {
+      associatedTeacherId: userProfile.associatedTeacherId,
+    });
+  }
+
+  posthog.alias(userProfile.id, getOrGenerateUserId());
 };
 
 export const clearUserInfo = () => {
