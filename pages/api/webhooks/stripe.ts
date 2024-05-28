@@ -43,13 +43,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     switch (event.type) {
       case 'checkout.session.completed':
-        // One time payment / Initial Monthly Pro Plan Subscription
+        // One time payment / Initial Monthly Pro / Ultra Plan Subscription
         await handleCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
         );
         break;
       case 'customer.subscription.updated':
-        // Monthly Pro Plan Subscription recurring payment
+        // Monthly Pro / Ultra Plan Subscription recurring payment
         await handleCustomerSubscriptionUpdated(
           event.data.object as Stripe.Subscription,
         );
