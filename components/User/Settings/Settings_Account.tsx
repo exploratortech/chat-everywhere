@@ -113,14 +113,15 @@ export default function Settings_Account() {
                 </div>
               )}
 
-              {user?.plan === 'pro' && user.proPlanExpirationDate && (
-                <div className="text-left text-neutral-500 p-2 text-xs">
-                  {`${t('Expires on')}: 
+              {(user?.plan === 'pro' || user?.plan === 'ultra') &&
+                user.proPlanExpirationDate && (
+                  <div className="text-left text-neutral-500 p-2 text-xs">
+                    {`${t('Expires on')}: 
                             ${dayjs(user.proPlanExpirationDate).format(
                               'll',
                             )}`}{' '}
-                </div>
-              )}
+                  </div>
+                )}
             </div>
           </div>
           {displayReferralCodeEnterer && <ReferralCodeEnter />}

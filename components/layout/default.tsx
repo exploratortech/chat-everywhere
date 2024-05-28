@@ -577,6 +577,14 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
                 process.env.NEXT_PUBLIC_ENV !== 'production',
             },
           });
+          updateUserInfo({
+            id: userProfile.id,
+            email: userProfile.email,
+            plan: userProfile.plan || 'free',
+            associatedTeacherId: userProfile.associatedTeacherId,
+            isTeacherAccount: userProfile.isTeacherAccount,
+            isTempUser: userProfile.isTempUser,
+          });
         })
         .catch((error) => {
           console.log(error);
@@ -607,7 +615,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (!user) return;
-    updateUserInfo(user);
     fetchAndUpdateCreditUsage(user.id, isPaidUser);
   }, [user, isPaidUser, conversations]);
 
