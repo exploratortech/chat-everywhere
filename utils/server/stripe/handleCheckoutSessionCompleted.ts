@@ -2,7 +2,7 @@ import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import {
   getPaidPlan,
   getSubscriptionPlanByPaidPlan,
-} from '@/utils/app/paid_plan';
+} from '@/utils/app/paid_plan_helper';
 
 import { PaidPlan, TopUpRequest } from '@/types/paid_plan';
 import { PluginID } from '@/types/plugin';
