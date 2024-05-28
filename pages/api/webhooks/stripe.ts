@@ -67,6 +67,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Return a response to acknowledge receipt of the event
     res.json({ received: true });
   } catch (error) {
+    console.log(error);
     if (error instanceof Error) {
       const user =
         error.cause && typeof error.cause === 'object' && 'user' in error.cause
