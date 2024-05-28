@@ -4,8 +4,8 @@ import { FC, Fragment, useContext, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
 
 import {
-  AiImageCreditPurchaseLinks,
-  Gpt4CreditPurchaseLinks,
+  AI_IMAGE_CREDIT_PURCHASE_LINKS,
+  GPT4_CREDIT_PURCHASE_LINKS,
 } from '@/utils/app/const';
 import { DefaultMonthlyCredits } from '@/utils/config';
 
@@ -101,7 +101,7 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                             : gpt4Credit}
                         </td>
                         <td className="px-6 py-4 flex flex-col text-left">
-                          {Object.entries(Gpt4CreditPurchaseLinks).map(
+                          {Object.entries(GPT4_CREDIT_PURCHASE_LINKS).map(
                             ([key, value]) => (
                               <a
                                 href={`${value}?prefilled_email=${userEmail}`}
@@ -138,7 +138,7 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                             : aiImageCredit}
                         </td>
                         <td className="px-6 py-4 flex flex-col text-left">
-                          {Object.entries(AiImageCreditPurchaseLinks).map(
+                          {Object.entries(AI_IMAGE_CREDIT_PURCHASE_LINKS).map(
                             ([key, value]) => (
                               <a
                                 href={`${value}?prefilled_email=${userEmail}`}

@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import {
   OrderedSubscriptionPlans,
-  ProPlanPaymentLink,
-  UltraPlanPaymentLink,
+  PRO_PLAN_PAYMENT_LINK,
+  ULTRA_PLAN_PAYMENT_LINK,
 } from '@/utils/app/const';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
@@ -20,9 +20,9 @@ const PlanComparison = ({ user }: { user: User | null }) => {
   const upgradeLinkOnClick = (upgradePlan: 'pro' | 'ultra') => {
     let paymentLink = '';
     if (upgradePlan === 'pro') {
-      paymentLink = ProPlanPaymentLink;
+      paymentLink = PRO_PLAN_PAYMENT_LINK;
     } else if (upgradePlan === 'ultra') {
-      paymentLink = UltraPlanPaymentLink;
+      paymentLink = ULTRA_PLAN_PAYMENT_LINK;
     }
 
     const userEmail = user?.email;

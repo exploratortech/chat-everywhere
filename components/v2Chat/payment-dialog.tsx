@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { V2ChatUpgradeLink } from '@/utils/app/const';
+import { V2_CHAT_UPGRADE_LINK } from '@/utils/app/const';
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { UserProfile } from '@/types/user';
@@ -45,7 +45,7 @@ export const PaymentDialog = ({
   const userId = userProfile.id;
 
   const upgradeLinkOnClick = () => {
-    const paymentLink = V2ChatUpgradeLink;
+    const paymentLink = V2_CHAT_UPGRADE_LINK;
 
     trackEvent('v2 Payment link clicked');
 
