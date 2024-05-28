@@ -1,4 +1,4 @@
-import { PaidPlan, TopUpRequest } from '@/types/paid_plan';
+import { PaidPlan, SubscriptionPlan, TopUpRequest } from '@/types/paid_plan';
 
 import {
   STRIPE_PLAN_CODE_GPT4_CREDIT,
@@ -27,5 +27,22 @@ export const getPaidPlan = (
       return TopUpRequest.GPT4Credit;
     default:
       return undefined;
+  }
+};
+
+export const getSubscriptionPlanByPaidPlan = (
+  paidPlan: PaidPlan,
+): SubscriptionPlan => {
+  switch (paidPlan) {
+    case PaidPlan.ProMonthly:
+      return 'pro';
+    case PaidPlan.ProOneTime:
+      return 'pro';
+    case PaidPlan.UltraMonthly:
+      return 'ultra';
+    case PaidPlan.UltraOneTime:
+      return 'ultra';
+    default:
+      return 'free';
   }
 };
