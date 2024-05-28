@@ -4,6 +4,20 @@ import { SubscriptionPlan } from '@/types/user';
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 
+export {
+  STRIPE_PLAN_CODE_GPT4_CREDIT,
+  STRIPE_PLAN_CODE_IMAGE_CREDIT,
+  STRIPE_PLAN_CODE_MONTHLY_PRO_PLAN_SUBSCRIPTION,
+  STRIPE_PLAN_CODE_MONTHLY_ULTRA_PLAN_SUBSCRIPTION,
+  STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH,
+  STRIPE_PLAN_CODE_ONE_TIME_ULTRA_PLAN_FOR_1_MONTH,
+  PRO_PLAN_PAYMENT_LINK,
+  ULTRA_PLAN_PAYMENT_LINK,
+  GPT4_CREDIT_PURCHASE_LINKS,
+  AI_IMAGE_CREDIT_PURCHASE_LINKS,
+  V2_CHAT_UPGRADE_LINK,
+} from './stripe_config';
+
 export const DEFAULT_SYSTEM_PROMPT =
   "You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Always be aware of the current date and time, and make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format." +
   'If the input includes text such as [lang=xxx], the response should not include this text.' +
@@ -108,40 +122,3 @@ export const OrderedSubscriptionPlans: SubscriptionPlan[] = [
   'ultra',
   'edu',
 ];
-
-export const ProPlanPaymentLink =
-  process.env.NEXT_PUBLIC_ENV === 'production'
-    ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
-    : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
-
-export const UltraPlanPaymentLink =
-  process.env.NEXT_PUBLIC_ENV === 'production'
-    ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1' // TODO: Update the production link
-    : 'https://buy.stripe.com/test_00gcOhbrmgLwbkYdR0';
-
-export const Gpt4CreditPurchaseLinks = {
-  '50': 'https://buy.stripe.com/28o03Z0vE3Glak09AJ',
-  '150': 'https://buy.stripe.com/cN2dUP6U2dgV0JqcMW',
-  '300': 'https://buy.stripe.com/dR6g2Xemu5Otcs83cn',
-};
-export const AiImageCreditPurchaseLinks = {
-  '100': 'https://buy.stripe.com/fZeg2Xdiq4Kp8bS9AT',
-  '500': 'https://buy.stripe.com/8wMg2XcemccR2Ry8wQ',
-};
-
-export const V2ChatUpgradeLink =
-  process.env.NEXT_PUBLIC_ENV === 'production'
-    ? 'https://buy.stripe.com/4gw9Ez6U2gt71NudRd'
-    : 'https://buy.stripe.com/test_dR68y152Y7aWagUcMU';
-
-// STRIPE CREDIT CODE
-export const STRIPE_PLAN_CODE_GPT4_CREDIT = 'GPT4_CREDIT';
-export const STRIPE_PLAN_CODE_IMAGE_CREDIT = 'IMAGE_CREDIT';
-
-// STRIPE MONTHLY PLAN CODE
-export const STRIPE_PLAN_CODE_MONTHLY_PRO_PLAN_SUBSCRIPTION =
-  'monthly_pro_plan_subscription';
-
-// STRIPE ONE TIME PLAN CODE
-export const STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH =
-  'one_time_pro_plan_for_1_month';
