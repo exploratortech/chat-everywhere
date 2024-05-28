@@ -1,5 +1,8 @@
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
-import { getPaidPlan } from '@/utils/app/paid_plan';
+import {
+  getPaidPlan,
+  getSubscriptionPlanByPaidPlan,
+} from '@/utils/app/paid_plan';
 
 import { PaidPlan, TopUpRequest } from '@/types/paid_plan';
 import { PluginID } from '@/types/plugin';
@@ -20,6 +23,7 @@ const supabase = getAdminSupabaseClient();
 export default async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
 ): Promise<void> {
+  console.log('handleCheckoutSessionCompleted');
   const userId = session.client_reference_id;
   const email = session.customer_details?.email;
 
@@ -45,11 +49,12 @@ export default async function handleCheckoutSessionCompleted(
     email,
   });
 
-  const isTopUpCreditRequest =
-    Object.values(TopUpRequest).includes(planCode as TopUpRequest) && credit;
+  const isTopUpCreditRequest = Object.values(TopUpRequest).includes(
+    planCode as TopUpRequest,
+  );
 
   // # REQUEST: Top Up Image Credit / GPT4 Credit
-  if (isTopUpCreditRequest) {
+  if (isTopUpCreditRequest && credit) {
     return await addCreditToUser(
       user,
       +credit,
@@ -79,7 +84,7 @@ export default async function handleCheckoutSessionCompleted(
     });
 
     if (!proPlanExpirationDate) {
-      throw new Error('undefined extended pro plan expiration date', {
+      throw new Error('undefined extended membership expiration date', {
         cause: {
           user,
         },
@@ -90,6 +95,7 @@ export default async function handleCheckoutSessionCompleted(
     if (userId) {
       await updateUserAccount({
         upgrade: true,
+        plan: getSubscriptionPlanByPaidPlan(planCode as PaidPlan),
         userId,
         stripeSubscriptionId,
         proPlanExpirationDate: proPlanExpirationDate,
@@ -98,6 +104,7 @@ export default async function handleCheckoutSessionCompleted(
       // Update user account by Email
       await updateUserAccount({
         upgrade: true,
+        plan: getSubscriptionPlanByPaidPlan(planCode as PaidPlan),
         email: email!,
         stripeSubscriptionId,
         proPlanExpirationDate: proPlanExpirationDate,
