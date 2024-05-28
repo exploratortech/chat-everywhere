@@ -13,6 +13,8 @@ export const STRIPE_PLAN_CODE_MONTHLY_ULTRA_PLAN_SUBSCRIPTION =
 // STRIPE ONE TIME PLAN CODE
 export const STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH =
   'one_time_pro_plan_for_1_month';
+
+// (Not in used)
 export const STRIPE_PLAN_CODE_ONE_TIME_ULTRA_PLAN_FOR_1_MONTH =
   'one_time_ultra_plan_for_1_month';
 
