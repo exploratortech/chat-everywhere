@@ -1,10 +1,7 @@
-import {
-  STRIPE_PLAN_CODE_GPT4_CREDIT,
-  STRIPE_PLAN_CODE_IMAGE_CREDIT,
-  STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH,
-} from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+import { getPaidPlan } from '@/utils/app/paid_plan';
 
+import { PaidPlan, TopUpRequest } from '@/types/paid_plan';
 import { PluginID } from '@/types/plugin';
 import { UserProfile } from '@/types/user';
 
@@ -26,21 +23,17 @@ export default async function handleCheckoutSessionCompleted(
   const userId = session.client_reference_id;
   const email = session.customer_details?.email;
 
-  const planCode = session.metadata?.plan_code;
+  const planCode = session.metadata?.plan_code
+    ? getPaidPlan(session.metadata?.plan_code)
+    : undefined;
   const planGivingWeeks = session.metadata?.plan_giving_weeks;
   const credit = session.metadata?.credit;
   const stripeSubscriptionId = session.subscription as string;
 
-  console.log({
-    userId,
-    email,
-    planCode,
-    planGivingWeeks,
-    credit,
-    stripeSubscriptionId,
-  });
   if (!planCode && !planGivingWeeks) {
-    throw new Error('no plan code or plan giving weeks from Stripe webhook');
+    throw new Error(
+      'no plan code and plan giving weeks from Stripe webhook, one of them must be provided',
+    );
   }
 
   if (!email) {
@@ -53,94 +46,90 @@ export default async function handleCheckoutSessionCompleted(
   });
 
   const isTopUpCreditRequest =
-    (planCode === STRIPE_PLAN_CODE_IMAGE_CREDIT ||
-      planCode === STRIPE_PLAN_CODE_GPT4_CREDIT) &&
-    credit;
-  // Handle TopUp Image Credit / GPT4 Credit
+    Object.values(TopUpRequest).includes(planCode as TopUpRequest) && credit;
+
+  // # REQUEST: Top Up Image Credit / GPT4 Credit
   if (isTopUpCreditRequest) {
     return await addCreditToUser(
       user,
       +credit,
-      planCode === STRIPE_PLAN_CODE_IMAGE_CREDIT
+      planCode === TopUpRequest.ImageCredit
         ? PluginID.IMAGE_GEN
         : PluginID.GPT4,
     );
   }
 
-  const sinceDate = dayjs.unix(session.created).utc().toDate();
-  // Retrieve user profile using email
+  // # REQUEST: Upgrade plan
+  return await (async () => {
+    const sessionCreatedDate = dayjs.unix(session.created).utc().toDate();
+    // Retrieve user profile using email
 
-  const proPlanExpirationDate = await getProPlanExpirationDate(
-    planGivingWeeks,
-    planCode,
-    user,
-    sinceDate,
-  );
+    const proPlanExpirationDate = await getExtendedMembershipExpirationDate(
+      planGivingWeeks,
+      planCode,
+      user,
+      sessionCreatedDate,
+    );
 
-  serverSideTrackEvent(userId || 'N/A', 'New paying customer', {
-    paymentDetail:
-      !session.amount_subtotal || session.amount_subtotal <= 50000
-        ? 'One-time'
-        : 'Monthly',
-  });
-
-  // Update user account by User id
-  if (userId) {
-    await updateUserAccount({
-      upgrade: true,
-      userId,
-      stripeSubscriptionId,
-      proPlanExpirationDate: proPlanExpirationDate,
+    serverSideTrackEvent(userId || 'N/A', 'New paying customer', {
+      paymentDetail:
+        !session.amount_subtotal || session.amount_subtotal <= 50000
+          ? 'One-time'
+          : 'Monthly',
     });
-  } else {
-    // Update user account by Email
-    await updateUserAccount({
-      upgrade: true,
-      email: email!,
-      stripeSubscriptionId,
-      proPlanExpirationDate: proPlanExpirationDate,
-    });
-  }
+
+    if (!proPlanExpirationDate) {
+      throw new Error('undefined extended pro plan expiration date', {
+        cause: {
+          user,
+        },
+      });
+    }
+
+    // Update user account by User id
+    if (userId) {
+      await updateUserAccount({
+        upgrade: true,
+        userId,
+        stripeSubscriptionId,
+        proPlanExpirationDate: proPlanExpirationDate,
+      });
+    } else {
+      // Update user account by Email
+      await updateUserAccount({
+        upgrade: true,
+        email: email!,
+        stripeSubscriptionId,
+        proPlanExpirationDate: proPlanExpirationDate,
+      });
+    }
+  })();
 }
 
-async function getProPlanExpirationDate(
+async function getExtendedMembershipExpirationDate(
   planGivingWeeks: string | undefined,
   planCode: string | undefined,
   user: UserProfile,
-  sinceDate: Date,
+  sessionCreatedDate: Date,
 ): Promise<Date | undefined> {
-  // Check if planGivingWeeks is defined and is a string
-  if (planGivingWeeks && typeof planGivingWeeks === 'string') {
-    const userProPlanExpirationDate = user?.proPlanExpirationDate;
+  const userProPlanExpirationDate = user?.proPlanExpirationDate;
 
-    // User has a previous one-time pro plan or a referral trial
-    if (userProPlanExpirationDate) {
-      return dayjs(userProPlanExpirationDate)
-        .add(+planGivingWeeks, 'week')
-        .toDate();
-    }
-    // Error handling for monthly pro subscribers who should not buy one-time plans
-    else if (user.plan === 'pro' && !user.proPlanExpirationDate) {
-      throw new Error(
-        'Monthly Pro subscriber bought one-time pro plan, should not happen',
-        {
-          cause: {
-            user,
-          },
-        },
-      );
-    }
-    // User is not a pro user yet
-    else {
-      return dayjs(sinceDate).add(+planGivingWeeks, 'week').toDate();
-    }
+  const previousDate = dayjs(
+    userProPlanExpirationDate || sessionCreatedDate || undefined,
+  );
+  // If has planGivingWeeks, use it to calculate the expiration date
+  if (planGivingWeeks && typeof planGivingWeeks === 'string') {
+    return previousDate.add(+planGivingWeeks, 'week').toDate();
   }
-  // Handle one-month pro plan based on planCode
-  else if (
-    planCode?.toUpperCase() ===
-    STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH.toUpperCase()
-  ) {
-    return dayjs(sinceDate).add(1, 'month').toDate();
+  // else extend the expiration date based on the plan code
+  else if (planCode === PaidPlan.ProOneTime) {
+    return previousDate.add(1, 'month').toDate();
+  } else if (planCode === PaidPlan.ProMonthly) {
+    return previousDate.add(1, 'month').toDate();
+  } else if (planCode === PaidPlan.UltraOneTime) {
+    return previousDate.add(1, 'month').toDate();
+  } else if (planCode === PaidPlan.UltraMonthly) {
+    return previousDate.add(1, 'month').toDate();
   }
   // Return undefined if no conditions are met
   return undefined;
