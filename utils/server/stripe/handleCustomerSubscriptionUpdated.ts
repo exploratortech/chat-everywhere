@@ -1,4 +1,4 @@
-import getCustomerEmailByCustomerID from './getCustomerEmailByCustomerID';
+import getCustomerEmailByCustomerID from './strip_helper';
 import updateUserAccount from './updateUserAccount';
 
 import dayjs from 'dayjs';
