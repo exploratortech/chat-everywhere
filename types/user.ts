@@ -1,14 +1,15 @@
 import { ExportFormatV4 } from './export';
+import { SubscriptionPlan } from './paid_plan';
 import { PluginID } from './plugin';
 
 import { SupabaseClient } from '@supabase/supabase-js';
+
+export type { SubscriptionPlan } from './paid_plan';
 
 export interface User extends UserProfile {
   email: string;
   token: string;
 }
-
-export type SubscriptionPlan = 'free' | 'pro' | 'ultra' | 'edu';
 
 export interface UserConversation {
   id: string;

@@ -9,3 +9,4 @@ export enum TopUpRequest {
   ImageCredit = 'image-credit',
   GPT4Credit = 'gpt4-credit',
 }
+export type SubscriptionPlan = 'free' | 'pro' | 'ultra' | 'edu';
