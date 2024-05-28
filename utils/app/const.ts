@@ -114,11 +114,10 @@ export const ProPlanPaymentLink =
     ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
     : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
 
-// TODO: Update the link
 export const UltraPlanPaymentLink =
   process.env.NEXT_PUBLIC_ENV === 'production'
-    ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
-    : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
+    ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1' // TODO: Update the link
+    : 'https://buy.stripe.com/test_00gcOhbrmgLwbkYdR0';
 
 export const Gpt4CreditPurchaseLinks = {
   '50': 'https://buy.stripe.com/28o03Z0vE3Glak09AJ',
@@ -134,3 +133,11 @@ export const V2ChatUpgradeLink =
   process.env.NEXT_PUBLIC_ENV === 'production'
     ? 'https://buy.stripe.com/4gw9Ez6U2gt71NudRd'
     : 'https://buy.stripe.com/test_dR68y152Y7aWagUcMU';
+
+// STRIPE
+export const STRIPE_PLAN_CODE_GPT4_CREDIT = 'GPT4_CREDIT';
+export const STRIPE_PLAN_CODE_IMAGE_CREDIT = 'IMAGE_CREDIT';
+export const STRIPE_PLAN_CODE_MONTHLY_PRO_PLAN_SUBSCRIPTION =
+  'monthly_pro_plan_subscription';
+export const STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH =
+  'one_time_pro_plan_for_1_month';

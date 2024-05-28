@@ -1,3 +1,8 @@
+import {
+  STRIPE_PLAN_CODE_GPT4_CREDIT,
+  STRIPE_PLAN_CODE_IMAGE_CREDIT,
+  STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH,
+} from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 
 import { PluginID } from '@/types/plugin';
@@ -11,14 +16,6 @@ import updateUserAccount from './updateUserAccount';
 
 import dayjs from 'dayjs';
 import Stripe from 'stripe';
-
-const MONTHLY_PRO_PLAN_SUBSCRIPTION =
-  process.env.STRIPE_PLAN_CODE_MONTHLY_PRO_PLAN_SUBSCRIPTION;
-const ONE_TIME_PRO_PLAN_FOR_1_MONTH =
-  process.env.STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH;
-
-const IMAGE_CREDIT = process.env.STRIPE_PLAN_CODE_IMAGE_CREDIT;
-const GPT4_CREDIT = process.env.STRIPE_PLAN_CODE_GPT4_CREDIT;
 
 export default async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
@@ -40,13 +37,17 @@ export default async function handleCheckoutSessionCompleted(
   }
 
   const isTopUpCreditRequest =
-    (planCode === IMAGE_CREDIT || planCode === GPT4_CREDIT) && credit;
+    (planCode === STRIPE_PLAN_CODE_IMAGE_CREDIT ||
+      planCode === STRIPE_PLAN_CODE_GPT4_CREDIT) &&
+    credit;
   // Handle TopUp Image Credit / GPT4 Credit
   if (isTopUpCreditRequest) {
     return await addCreditToUser(
       email,
       +credit,
-      planCode === IMAGE_CREDIT ? PluginID.IMAGE_GEN : PluginID.GPT4,
+      planCode === STRIPE_PLAN_CODE_IMAGE_CREDIT
+        ? PluginID.IMAGE_GEN
+        : PluginID.GPT4,
     );
   }
 
@@ -119,7 +120,8 @@ async function getProPlanExpirationDate(
       return dayjs(sinceDate).add(+planGivingWeeks, 'week').toDate();
     }
   } else if (
-    planCode?.toUpperCase() === ONE_TIME_PRO_PLAN_FOR_1_MONTH?.toUpperCase()
+    planCode?.toUpperCase() ===
+    STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH.toUpperCase()
   ) {
     // Only store expiration for one month plan
     return dayjs(sinceDate).add(1, 'month').toDate();
