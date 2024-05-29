@@ -1,6 +1,7 @@
 export enum PaidPlan {
   ProMonthly = 'pro-monthly',
   ProOneTime = 'pro-one-time',
+  ProYearly = 'pro-yearly',
   UltraMonthly = 'ultra-monthly',
   UltraOneTime = 'ultra-one-time',
   UltraYearly = 'ultra-yearly',

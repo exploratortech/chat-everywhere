@@ -2,15 +2,9 @@ import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import {
-  OrderedSubscriptionPlans,
-  PRO_MONTHLY_PLAN_PAYMENT_LINK_TWD,
-  PRO_MONTHLY_PLAN_PAYMENT_LINK_USD,
-  ULTRA_MONTHLY_PLAN_PAYMENT_LINK_TWD,
-  ULTRA_MONTHLY_PLAN_PAYMENT_LINK_USD,
-  ULTRA_YEARLY_PLAN_PAYMENT_LINK_TWD,
-  ULTRA_YEARLY_PLAN_PAYMENT_LINK_USD,
-} from '@/utils/app/const';
+import { useChangeSubscriptionPlan } from '@/hooks/useChangeSubscriptionPlan';
+
+import { OrderedSubscriptionPlans, STRIPE_PRODUCTS } from '@/utils/app/const';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
@@ -84,11 +78,18 @@ const ProPlanContent = ({ user }: { user: User | null }) => {
     const proPlanIndex = OrderedSubscriptionPlans.indexOf('pro');
     return userPlanIndex < proPlanIndex;
   }, [user]);
+  const isPaidUser = user?.plan === 'pro' || user?.plan === 'ultra';
+  const { mutate: changeSubscriptionPlan } = useChangeSubscriptionPlan();
+
   const upgradeLinkOnClick = () => {
+    if (isPaidUser) {
+      changeSubscriptionPlan();
+      return;
+    }
     const paymentLink =
       i18n.language === 'zh-Hant' || i18n.language === 'zh'
-        ? PRO_MONTHLY_PLAN_PAYMENT_LINK_TWD
-        : PRO_MONTHLY_PLAN_PAYMENT_LINK_USD;
+        ? STRIPE_PRODUCTS.MEMBERSHIP_PLAN.pro.monthly.currencies.TWD.link
+        : STRIPE_PRODUCTS.MEMBERSHIP_PLAN.pro.monthly.currencies.USD.link;
 
     const userEmail = user?.email;
     const userId = user?.id;
@@ -163,19 +164,32 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
     return userPlanIndex < ultraPlanIndex;
   }, [user]);
 
+  const isPaidUser = user?.plan === 'pro' || user?.plan === 'ultra';
+  const { mutate: changeSubscriptionPlan } = useChangeSubscriptionPlan();
+
   const upgradeLinkOnClick = () => {
-    let paymentLink = ULTRA_MONTHLY_PLAN_PAYMENT_LINK_USD;
+    if (isPaidUser) {
+      changeSubscriptionPlan();
+      return;
+    }
+
+    let paymentLink =
+      STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.monthly.currencies.USD.link;
     if (priceType === 'monthly') {
       if (i18n.language === 'zh-Hant' || i18n.language === 'zh') {
-        paymentLink = ULTRA_MONTHLY_PLAN_PAYMENT_LINK_TWD;
+        paymentLink =
+          STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.monthly.currencies.TWD.link;
       } else {
-        paymentLink = ULTRA_MONTHLY_PLAN_PAYMENT_LINK_USD;
+        paymentLink =
+          STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.monthly.currencies.USD.link;
       }
     } else {
       if (i18n.language === 'zh-Hant' || i18n.language === 'zh') {
-        paymentLink = ULTRA_YEARLY_PLAN_PAYMENT_LINK_TWD;
+        paymentLink =
+          STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.yearly.currencies.TWD.link;
       } else {
-        paymentLink = ULTRA_YEARLY_PLAN_PAYMENT_LINK_USD;
+        paymentLink =
+          STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.yearly.currencies.USD.link;
       }
     }
 

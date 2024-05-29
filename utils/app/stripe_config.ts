@@ -1,61 +1,230 @@
-// P.S. All of the code below is used in the product payment link
-
 // STRIPE CREDIT CODE
 export const STRIPE_PLAN_CODE_GPT4_CREDIT = 'GPT4_CREDIT';
 export const STRIPE_PLAN_CODE_IMAGE_CREDIT = 'IMAGE_CREDIT';
 
-// STRIPE MONTHLY PLAN CODE
-export const STRIPE_PLAN_CODE_MONTHLY_PRO_PLAN_SUBSCRIPTION =
-  'monthly_pro_plan_subscription';
-export const STRIPE_PLAN_CODE_MONTHLY_ULTRA_PLAN_SUBSCRIPTION =
-  'monthly_ultra_plan_subscription';
-
-// STRIPE YEARLY PLAN CODE
-export const STRIPE_PLAN_CODE_YEARLY_ULTRA_PLAN_SUBSCRIPTION =
-  'yearly_ultra_plan_subscription';
-
-// STRIPE ONE TIME PLAN CODE
-export const STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH =
-  'one_time_pro_plan_for_1_month';
-
-// (Not in used)
-export const STRIPE_PLAN_CODE_ONE_TIME_ULTRA_PLAN_FOR_1_MONTH =
-  'one_time_ultra_plan_for_1_month';
-
 // =========== PRO PLAN LINKS ===========
 // PRO MONTHLY PLAN
-export const PRO_MONTHLY_PLAN_PAYMENT_LINK_USD =
-  process.env.NEXT_PUBLIC_ENV === 'production'
-    ? 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1'
-    : 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY';
+type MemberShipPlanPeriodType = 'monthly' | 'yearly' | 'one-time';
+type MemberShipPlanCurrencyType = 'USD' | 'TWD';
 
-export const PRO_MONTHLY_PLAN_PAYMENT_LINK_TWD =
-  process.env.NEXT_PUBLIC_ENV === 'production'
-    ? '' // TODO: Update the production link
-    : 'https://buy.stripe.com/test_00gcOhdzucvg1Ko00e';
+// P.S. All of the code below is used in the product payment link
+type PlanCode =
+  | 'one_time_pro_plan_for_1_month'
+  | 'one_time_ultra_plan_for_1_month'
+  | 'monthly_pro_plan_subscription'
+  | 'monthly_ultra_plan_subscription'
+  | 'yearly_pro_plan_subscription'
+  | 'yearly_ultra_plan_subscription';
 
-// =========== ULTRA PLAN LINKS ===========
-// ULTRA MONTHLY PLAN
-export const ULTRA_MONTHLY_PLAN_PAYMENT_LINK_USD =
-  process.env.NEXT_PUBLIC_ENV === 'production'
-    ? '' // TODO: Update the production link
-    : 'https://buy.stripe.com/test_6oEdSl67266SexafZ9';
+interface MemberShipPlanItem {
+  link: string;
+  price_id: string;
+}
 
-export const ULTRA_MONTHLY_PLAN_PAYMENT_LINK_TWD =
-  process.env.NEXT_PUBLIC_ENV === 'production'
-    ? '' // TODO: Update the production link
-    : 'https://buy.stripe.com/test_00gcOhbrmgLwbkYdR0';
+interface PlanDetails {
+  plan_code: PlanCode;
+  currencies: {
+    [currency in MemberShipPlanCurrencyType]: MemberShipPlanItem;
+  };
+}
 
-// ULTRA YEARLY PLAN
-export const ULTRA_YEARLY_PLAN_PAYMENT_LINK_USD =
-  process.env.NEXT_PUBLIC_ENV === 'production'
-    ? '' // TODO: Update the production link
-    : 'https://buy.stripe.com/test_14k7tX7b6brcexa4gs';
+interface MemberShipPlan {
+  pro: {
+    [period in MemberShipPlanPeriodType]: PlanDetails;
+  };
+  ultra: {
+    [period in MemberShipPlanPeriodType]: PlanDetails;
+  };
+}
+interface StripeProduct {
+  MEMBERSHIP_PLAN: MemberShipPlan;
+}
 
-export const ULTRA_YEARLY_PLAN_PAYMENT_LINK_TWD =
+const STRIPE_PRODUCTS_PRODUCTION: StripeProduct = {
+  MEMBERSHIP_PLAN: {
+    pro: {
+      monthly: {
+        // META DATA use in the payment link
+        plan_code: 'monthly_pro_plan_subscription',
+        currencies: {
+          USD: {
+            link: 'https://buy.stripe.com/8wM8Av2DM0u99fWfZ1',
+            price_id: '',
+          },
+          TWD: {
+            link: '',
+            price_id: '',
+          },
+        },
+      },
+      // NOTE: NOT IN USED IN APP
+      'one-time': {
+        plan_code: 'one_time_pro_plan_for_1_month',
+        currencies: {
+          USD: {
+            link: '',
+            price_id: '',
+          },
+          TWD: {
+            link: '',
+            price_id: '',
+          },
+        },
+      },
+      // NOTE: NOT IN USED IN APP
+      yearly: {
+        plan_code: 'yearly_pro_plan_subscription',
+        currencies: {
+          USD: {
+            link: '',
+            price_id: '',
+          },
+          TWD: {
+            link: '',
+            price_id: '',
+          },
+        },
+      },
+    },
+    ultra: {
+      'one-time': {
+        plan_code: 'one_time_ultra_plan_for_1_month',
+        currencies: {
+          USD: {
+            link: '',
+            price_id: '',
+          },
+          TWD: {
+            link: '',
+            price_id: '',
+          },
+        },
+      },
+      monthly: {
+        plan_code: 'monthly_ultra_plan_subscription',
+        currencies: {
+          USD: {
+            link: '',
+            price_id: '',
+          },
+          TWD: {
+            link: '',
+            price_id: '',
+          },
+        },
+      },
+      yearly: {
+        plan_code: 'yearly_ultra_plan_subscription',
+        currencies: {
+          USD: {
+            link: '',
+            price_id: '',
+          },
+          TWD: {
+            link: '',
+            price_id: '',
+          },
+        },
+      },
+    },
+  },
+};
+
+const STRIPE_PRODUCTS_STAGING: StripeProduct = {
+  MEMBERSHIP_PLAN: {
+    pro: {
+      // NOTE: NOT IN USED IN APP
+      'one-time': {
+        plan_code: 'one_time_pro_plan_for_1_month',
+        currencies: {
+          USD: {
+            link: '',
+            price_id: '',
+          },
+          TWD: {
+            link: '',
+            price_id: '',
+          },
+        },
+      },
+      monthly: {
+        // META DATA use in the payment link
+        plan_code: 'monthly_pro_plan_subscription',
+        currencies: {
+          USD: {
+            link: 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY',
+            price_id: 'price_1N09fTEEvfd1BzvuJwBCAfg2',
+          },
+          TWD: {
+            link: 'https://buy.stripe.com/test_6oE01v1QM66S74I7sH',
+            price_id: 'price_1PLhJREEvfd1BzvuxCM477DD',
+          },
+        },
+      },
+      // NOTE: NOT IN USED IN APP
+      yearly: {
+        plan_code: 'yearly_pro_plan_subscription',
+        currencies: {
+          USD: {
+            link: '',
+            price_id: '',
+          },
+          TWD: {
+            link: '',
+            price_id: '',
+          },
+        },
+      },
+    },
+    ultra: {
+      // NOTE: NOT IN USED IN APP
+      'one-time': {
+        plan_code: 'one_time_ultra_plan_for_1_month',
+        currencies: {
+          USD: {
+            link: '',
+            price_id: '',
+          },
+          TWD: {
+            link: '',
+            price_id: '',
+          },
+        },
+      },
+      monthly: {
+        plan_code: 'monthly_ultra_plan_subscription',
+        currencies: {
+          USD: {
+            link: 'https://buy.stripe.com/test_cN29C5dzu8f0dt6fZe',
+            price_id: 'price_1PLhlhEEvfd1Bzvu0UEqwm9y',
+          },
+          TWD: {
+            link: 'https://buy.stripe.com/test_fZe6pT1QM1QC2Os6oF',
+            price_id: 'price_1PLiWBEEvfd1BzvunVr1yZ55',
+          },
+        },
+      },
+      yearly: {
+        plan_code: 'yearly_ultra_plan_subscription',
+        currencies: {
+          USD: {
+            link: 'https://buy.stripe.com/test_3csaG952Y2UG74IfZg',
+            price_id: 'price_1PLiWmEEvfd1BzvuDFmiLKI6',
+          },
+          TWD: {
+            link: 'https://buy.stripe.com/test_8wM9C5fHCan8agUdR9',
+            price_id: 'price_1PLiWVEEvfd1Bzvu7voi21Jw',
+          },
+        },
+      },
+    },
+  },
+};
+
+export const STRIPE_PRODUCTS =
   process.env.NEXT_PUBLIC_ENV === 'production'
-    ? '' // TODO: Update the production link
-    : 'https://buy.stripe.com/test_eVa15z6720Myexa7sF';
+    ? STRIPE_PRODUCTS_PRODUCTION
+    : STRIPE_PRODUCTS_STAGING;
 
 // =========== TOP UP LINKS ===========
 export const GPT4_CREDIT_PURCHASE_LINKS = {
