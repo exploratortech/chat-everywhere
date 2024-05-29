@@ -108,7 +108,7 @@ export default async function handleCheckoutSessionCompleted(
     });
 
     if (!proPlanExpirationDate) {
-      throw new Error('undefined extended membership expiration date', {
+      throw new Error('calculate membership expiration date: undefined ', {
         cause: {
           user,
         },
@@ -154,6 +154,8 @@ async function calculateMembershipExpirationDate(
     return previousDate.add(1, 'month').toDate();
   } else if (planCode === PaidPlan.UltraMonthly) {
     return previousDate.add(1, 'month').toDate();
+  } else if (planCode === PaidPlan.UltraYearly) {
+    return previousDate.add(1, 'year').toDate();
   }
   // Return undefined if no conditions are met
   return undefined;
