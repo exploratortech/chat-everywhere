@@ -1,5 +1,6 @@
-import getCustomerEmailByCustomerID from './strip_helper';
-import updateUserAccount from './updateUserAccount';
+import getCustomerEmailByCustomerID, {
+  downgradeUserAccount,
+} from './strip_helper';
 
 import Stripe from 'stripe';
 
@@ -11,13 +12,11 @@ export default async function handleCustomerSubscriptionDeleted(
   if (!stripeSubscriptionId) {
     const customerId = session.customer as string;
     const email = await getCustomerEmailByCustomerID(customerId);
-    await updateUserAccount({
-      upgrade: false,
+    await downgradeUserAccount({
       email,
     });
   } else {
-    await updateUserAccount({
-      upgrade: false,
+    await downgradeUserAccount({
       stripeSubscriptionId,
     });
   }
