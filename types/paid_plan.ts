@@ -3,6 +3,7 @@ export enum PaidPlan {
   ProOneTime = 'pro-one-time',
   UltraMonthly = 'ultra-monthly',
   UltraOneTime = 'ultra-one-time',
+  UltraYearly = 'ultra-yearly',
 }
 
 export enum TopUpRequest {
