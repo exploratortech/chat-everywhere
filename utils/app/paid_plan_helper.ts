@@ -41,6 +41,8 @@ export const getSubscriptionPlanByPaidPlan = (
       return 'pro';
     case PaidPlan.ProOneTime:
       return 'pro';
+    case PaidPlan.UltraYearly:
+      return 'ultra';
     case PaidPlan.UltraMonthly:
       return 'ultra';
     case PaidPlan.UltraOneTime:
