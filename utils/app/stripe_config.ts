@@ -59,13 +59,28 @@ export const ULTRA_YEARLY_PLAN_PAYMENT_LINK_TWD =
 
 // =========== TOP UP LINKS ===========
 export const GPT4_CREDIT_PURCHASE_LINKS = {
-  '50': 'https://buy.stripe.com/28o03Z0vE3Glak09AJ',
-  '150': 'https://buy.stripe.com/cN2dUP6U2dgV0JqcMW',
-  '300': 'https://buy.stripe.com/dR6g2Xemu5Otcs83cn',
+  '50':
+    process.env.NEXT_PUBLIC_ENV === 'production'
+      ? 'https://buy.stripe.com/28o03Z0vE3Glak09AJ'
+      : 'https://buy.stripe.com/test_9AQ01v8fabrccp228b',
+  '150':
+    process.env.NEXT_PUBLIC_ENV === 'production'
+      ? 'https://buy.stripe.com/cN2dUP6U2dgV0JqcMW'
+      : 'https://buy.stripe.com/test_9AQ01v8fabrccp228b',
+  '300':
+    process.env.NEXT_PUBLIC_ENV === 'production'
+      ? 'https://buy.stripe.com/dR6g2Xemu5Otcs83cn'
+      : 'https://buy.stripe.com/test_9AQ01v8fabrccp228b',
 };
 export const AI_IMAGE_CREDIT_PURCHASE_LINKS = {
-  '100': 'https://buy.stripe.com/fZeg2Xdiq4Kp8bS9AT',
-  '500': 'https://buy.stripe.com/8wMg2XcemccR2Ry8wQ',
+  '100':
+    process.env.NEXT_PUBLIC_ENV === 'production'
+      ? 'https://buy.stripe.com/fZeg2Xdiq4Kp8bS9AT'
+      : 'https://buy.stripe.com/test_9AQ01v8fabrccp228b',
+  '500':
+    process.env.NEXT_PUBLIC_ENV === 'production'
+      ? 'https://buy.stripe.com/8wMg2XcemccR2Ry8wQ'
+      : 'https://buy.stripe.com/test_9AQ01v8fabrccp228b',
 };
 
 // =========== V2 UPGRADE LINKS ===========
