@@ -18,6 +18,7 @@ import { User } from '@/types/user';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+import { cn } from '@/lib/utils';
 import dayjs from 'dayjs';
 
 const PlanComparison = ({ user }: { user: User | null }) => {
@@ -51,8 +52,10 @@ const PlanExpirationDate: React.FC<{ expirationDate: string }> = ({
   });
   const { t } = useTranslation('model');
   return (
-    <div className="text-left text-neutral-500 p-2 text-xs">
-      {`${t('Expires on')}: ${dayjs(expirationDate).format('ll')}`}
+    <div className="flex mt-4 grow items-end justify-center">
+      <div className="text-left text-neutral-500 p-2 text-xs">
+        {`${t('Expires on')}: ${dayjs(expirationDate).format('ll')}`}
+      </div>
     </div>
   );
 };
@@ -143,10 +146,9 @@ const ProPlanContent = ({ user }: { user: User | null }) => {
         </div>
       )}
 
-      {(user?.plan === 'pro' || user?.plan === 'ultra') &&
-        user.proPlanExpirationDate && (
-          <PlanExpirationDate expirationDate={user.proPlanExpirationDate} />
-        )}
+      {user?.plan === 'pro' && user.proPlanExpirationDate && (
+        <PlanExpirationDate expirationDate={user.proPlanExpirationDate} />
+      )}
     </>
   );
 };
@@ -208,7 +210,7 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
         </span>
         {user?.plan === 'ultra' && <CurrentPlanTag />}
       </div>
-      <UltraPlanPrice setPriceType={setPriceType} />
+      {user?.plan !== 'ultra' && <UltraPlanPrice setPriceType={setPriceType} />}
 
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
@@ -234,10 +236,9 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
         </div>
       )}
 
-      {(user?.plan === 'pro' || user?.plan === 'ultra') &&
-        user.proPlanExpirationDate && (
-          <PlanExpirationDate expirationDate={user.proPlanExpirationDate} />
-        )}
+      {user?.plan === 'ultra' && user.proPlanExpirationDate && (
+        <PlanExpirationDate expirationDate={user.proPlanExpirationDate} />
+      )}
     </>
   );
 };
