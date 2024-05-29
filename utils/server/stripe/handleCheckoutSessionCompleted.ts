@@ -13,7 +13,10 @@ import {
   getAdminSupabaseClient,
   userProfileQuery,
 } from '../supabase';
-import updateUserAccount from './updateUserAccount';
+import {
+  updateUserAccountByEmail,
+  updateUserAccountById,
+} from './strip_helper';
 
 import dayjs from 'dayjs';
 import Stripe from 'stripe';
@@ -23,7 +26,6 @@ const supabase = getAdminSupabaseClient();
 export default async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
 ): Promise<void> {
-  console.log('handleCheckoutSessionCompleted');
   const userId = session.client_reference_id;
   const email = session.customer_details?.email;
 
@@ -93,19 +95,17 @@ export default async function handleCheckoutSessionCompleted(
 
     // Update user account by User id
     if (userId) {
-      await updateUserAccount({
-        upgrade: true,
-        plan: getSubscriptionPlanByPaidPlan(planCode as PaidPlan),
+      await updateUserAccountById({
         userId,
+        plan: getSubscriptionPlanByPaidPlan(planCode as PaidPlan),
         stripeSubscriptionId,
         proPlanExpirationDate: proPlanExpirationDate,
       });
     } else {
       // Update user account by Email
-      await updateUserAccount({
-        upgrade: true,
-        plan: getSubscriptionPlanByPaidPlan(planCode as PaidPlan),
+      await updateUserAccountByEmail({
         email: email!,
+        plan: getSubscriptionPlanByPaidPlan(planCode as PaidPlan),
         stripeSubscriptionId,
         proPlanExpirationDate: proPlanExpirationDate,
       });
