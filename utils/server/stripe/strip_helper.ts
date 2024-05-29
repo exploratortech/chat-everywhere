@@ -4,7 +4,18 @@ import Stripe from 'stripe';
 
 const supabase = getAdminSupabaseClient();
 
-export default async function getCustomerEmailByCustomerID(
+export async function fetchSubscriptionIdByUserId(
+  userId: string,
+): Promise<string> {
+  const { data: userProfile } = await supabase
+    .from('profiles')
+    .select('stripe_subscription_id')
+    .eq('id', userId)
+    .single();
+  return userProfile?.stripe_subscription_id;
+}
+
+export async function getCustomerEmailByCustomerID(
   customerID: string,
 ): Promise<string> {
   try {
