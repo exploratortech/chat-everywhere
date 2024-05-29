@@ -1,5 +1,6 @@
-import getCustomerEmailByCustomerID, {
+import {
   downgradeUserAccount,
+  getCustomerEmailByCustomerID,
 } from './strip_helper';
 
 import Stripe from 'stripe';
