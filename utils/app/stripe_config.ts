@@ -32,14 +32,14 @@ export const PRO_MONTHLY_PLAN_PAYMENT_LINK_USD =
 export const PRO_MONTHLY_PLAN_PAYMENT_LINK_TWD =
   process.env.NEXT_PUBLIC_ENV === 'production'
     ? '' // TODO: Update the production link
-    : ''; // TODO: Update the test link
+    : 'https://buy.stripe.com/test_00gcOhdzucvg1Ko00e';
 
 // =========== ULTRA PLAN LINKS ===========
 // ULTRA MONTHLY PLAN
 export const ULTRA_MONTHLY_PLAN_PAYMENT_LINK_USD =
   process.env.NEXT_PUBLIC_ENV === 'production'
     ? '' // TODO: Update the production link
-    : '';
+    : 'https://buy.stripe.com/test_6oEdSl67266SexafZ9';
 
 export const ULTRA_MONTHLY_PLAN_PAYMENT_LINK_TWD =
   process.env.NEXT_PUBLIC_ENV === 'production'
@@ -50,12 +50,12 @@ export const ULTRA_MONTHLY_PLAN_PAYMENT_LINK_TWD =
 export const ULTRA_YEARLY_PLAN_PAYMENT_LINK_USD =
   process.env.NEXT_PUBLIC_ENV === 'production'
     ? '' // TODO: Update the production link
-    : ''; // TODO: Update the test link
+    : 'https://buy.stripe.com/test_14k7tX7b6brcexa4gs';
 
 export const ULTRA_YEARLY_PLAN_PAYMENT_LINK_TWD =
   process.env.NEXT_PUBLIC_ENV === 'production'
     ? '' // TODO: Update the production link
-    : ''; // TODO: Update the test link
+    : 'https://buy.stripe.com/test_eVa15z6720Myexa7sF';
 
 // =========== TOP UP LINKS ===========
 export const GPT4_CREDIT_PURCHASE_LINKS = {
