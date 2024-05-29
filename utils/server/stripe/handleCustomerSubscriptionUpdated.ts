@@ -14,9 +14,6 @@ export default async function handleCustomerSubscriptionUpdated(
 ): Promise<void> {
   const stripeSubscriptionId = session.id;
 
-  console.log('handleCustomerSubscriptionUpdated');
-  console.log({ session });
-
   const currentPeriodStart = dayjs
     .unix(session.current_period_start)
     .utc()
