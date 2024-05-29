@@ -92,7 +92,6 @@ export default async function updateUserAccount(props: UpdateUserAccountProps) {
       .from('profiles')
       .select('plan')
       .eq('stripe_subscription_id', props.stripeSubscriptionId)
-      .eq('plan', props.plan)
       .single();
 
     if (userProfile?.plan === 'edu') return;
@@ -139,9 +138,8 @@ interface DowngradeUserAccountByEmailProps {
   proPlanExpirationDate?: Date;
 }
 
-interface ExtendProPlanProps {
+interface ExtendMemberShipProps {
   upgrade: true;
-  plan: SubscriptionPlan;
   stripeSubscriptionId: string;
   proPlanExpirationDate: Date | undefined;
 }
@@ -151,7 +149,7 @@ type UpdateUserAccountProps =
   | UpgradeUserAccountByEmailProps
   | DowngradeUserAccountProps
   | DowngradeUserAccountByEmailProps
-  | ExtendProPlanProps;
+  | ExtendMemberShipProps;
 
 // Type Assertion functions
 function isUpgradeUserAccountProps(
@@ -206,11 +204,11 @@ function isDowngradeUserAccountByEmailProps(
 
 function isExtendMembershipProps(
   props: UpdateUserAccountProps,
-): props is ExtendProPlanProps {
+): props is ExtendMemberShipProps {
   return (
     (props.upgrade === true &&
       typeof props.stripeSubscriptionId === 'string' &&
-      !!props.plan &&
+      !Object.keys(props).includes('plan') &&
       props.proPlanExpirationDate instanceof Date) ||
     props.proPlanExpirationDate === undefined
   );
