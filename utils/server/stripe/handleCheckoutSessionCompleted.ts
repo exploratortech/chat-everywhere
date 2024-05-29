@@ -69,12 +69,34 @@ export default async function handleCheckoutSessionCompleted(
   // # REQUEST: Upgrade plan
   return await (async () => {
     const sessionCreatedDate = dayjs.unix(session.created).utc().toDate();
-    // Retrieve user profile using email
+    const userIsInPaidPlan = user.plan !== 'free' && user.plan !== 'edu';
+    const isBuyingOneTimePlan =
+      planCode === PaidPlan.ProOneTime || planCode === PaidPlan.UltraOneTime;
+    if (userIsInPaidPlan && isBuyingOneTimePlan) {
+      throw new Error(
+        'One-time plan purchase is disallowed for users already on a paid subscription plan',
+        {
+          cause: {
+            user,
+          },
+        },
+      );
+    }
+    if (userIsInPaidPlan) {
+      throw new Error(
+        'User is already in a paid plan, cannot purchase a new plan, should issue an refund',
+        {
+          cause: {
+            user,
+          },
+        },
+      );
+    }
 
-    const proPlanExpirationDate = await getExtendedMembershipExpirationDate(
+    // Extend membership expiration date if user has a pro plan expiration date already
+    const proPlanExpirationDate = await calculateMembershipExpirationDate(
       planGivingWeeks,
       planCode,
-      user,
       sessionCreatedDate,
     );
 
@@ -113,17 +135,12 @@ export default async function handleCheckoutSessionCompleted(
   })();
 }
 
-async function getExtendedMembershipExpirationDate(
+async function calculateMembershipExpirationDate(
   planGivingWeeks: string | undefined,
   planCode: string | undefined,
-  user: UserProfile,
   sessionCreatedDate: Date,
 ): Promise<Date | undefined> {
-  const userProPlanExpirationDate = user?.proPlanExpirationDate;
-
-  const previousDate = dayjs(
-    userProPlanExpirationDate || sessionCreatedDate || undefined,
-  );
+  const previousDate = dayjs(sessionCreatedDate || undefined);
   // If has planGivingWeeks, use it to calculate the expiration date
   if (planGivingWeeks && typeof planGivingWeeks === 'string') {
     return previousDate.add(+planGivingWeeks, 'week').toDate();
