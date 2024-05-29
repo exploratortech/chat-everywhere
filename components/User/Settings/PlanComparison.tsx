@@ -131,12 +131,12 @@ const ProPlanContent = ({ user }: { user: User | null }) => {
       </div>
       {/* Upgrade button */}
       {showUpgradeToPro && (
-        <div className="flex flex-col">
+        <div className="flex items-center flex-col">
           <a
             target="_blank"
             rel="noreferrer"
             onClick={upgradeLinkOnClick}
-            className="px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
+            className="w-full px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
           >
             {t('Upgrade')}
           </a>
@@ -221,14 +221,14 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
       </div>
       {/* Upgrade button */}
       {showUpgradeToUltra && (
-        <div className="flex flex-col">
+        <div className="flex items-center flex-col">
           <a
             target="_blank"
             rel="noreferrer"
             onClick={upgradeLinkOnClick}
-            className="px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
+            className="w-full px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
           >
-            {t('Upgrade')}
+            {t('Upgrade to Ultra')}
           </a>
           <p className="text-xs text-neutral-400 mt-2">
             {t('No Strings Attached - Cancel Anytime!')}
