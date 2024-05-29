@@ -1,6 +1,7 @@
-import getCustomerEmailByCustomerID, {
+import {
   downgradeUserAccount,
   extendMembershipByStripeSubscriptionId,
+  getCustomerEmailByCustomerID,
 } from './strip_helper';
 
 import dayjs from 'dayjs';
