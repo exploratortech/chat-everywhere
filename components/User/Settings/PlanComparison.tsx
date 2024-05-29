@@ -267,7 +267,7 @@ const UltraPlanPrice = ({
 }: {
   setPriceType: (type: 'monthly' | 'yearly') => void;
 }) => {
-  const { i18n } = useTranslation('model');
+  const { t, i18n } = useTranslation('model');
 
   return (
     <Tabs defaultValue="monthly" className="mt-2 mb-4 w-full">
@@ -279,7 +279,7 @@ const UltraPlanPrice = ({
             setPriceType('monthly');
           }}
         >
-          MONTHLY
+          {t('MONTHLY')}
         </TabsTrigger>
         <TabsTrigger
           value="yearly"
@@ -288,7 +288,7 @@ const UltraPlanPrice = ({
             setPriceType('yearly');
           }}
         >
-          YEARLY
+          {t('YEARLY')}
         </TabsTrigger>
       </TabsList>
       <TabsContent value="monthly">
