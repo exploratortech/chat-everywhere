@@ -7,6 +7,7 @@ import {
   STRIPE_PLAN_CODE_MONTHLY_ULTRA_PLAN_SUBSCRIPTION,
   STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH,
   STRIPE_PLAN_CODE_ONE_TIME_ULTRA_PLAN_FOR_1_MONTH,
+  STRIPE_PLAN_CODE_YEARLY_ULTRA_PLAN_SUBSCRIPTION,
 } from './const';
 
 export const getPaidPlan = (
@@ -19,6 +20,8 @@ export const getPaidPlan = (
       return PaidPlan.ProOneTime;
     case STRIPE_PLAN_CODE_MONTHLY_ULTRA_PLAN_SUBSCRIPTION.toUpperCase():
       return PaidPlan.UltraMonthly;
+    case STRIPE_PLAN_CODE_YEARLY_ULTRA_PLAN_SUBSCRIPTION.toUpperCase():
+      return PaidPlan.UltraYearly;
     case STRIPE_PLAN_CODE_ONE_TIME_ULTRA_PLAN_FOR_1_MONTH.toUpperCase():
       return PaidPlan.UltraOneTime;
     case STRIPE_PLAN_CODE_IMAGE_CREDIT.toUpperCase():
