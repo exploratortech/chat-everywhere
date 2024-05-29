@@ -63,7 +63,7 @@ const FreePlanContent = ({ user }: { user: User | null }) => {
     <>
       <div className="flex flex-row items-center justify-between gap-2">
         <span className="text-2xl py-0.5 font-bold">Free</span>
-        {(user?.plan === 'free' || !user) && <CurrentTag />}
+        {(user?.plan === 'free' || !user) && <CurrentPlanTag />}
       </div>
       <div className="text-xs leading-5">
         {PlanDetail.free.features.map((feature, index) => (
@@ -116,7 +116,7 @@ const ProPlanContent = ({ user }: { user: User | null }) => {
         >
           Pro
         </span>
-        {user?.plan === 'pro' && <CurrentTag />}
+        {user?.plan === 'pro' && <CurrentPlanTag />}
       </div>
       <ProPlanPrice />
       <div className="text-xs leading-5">
@@ -206,7 +206,7 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
         >
           Ultra
         </span>
-        {user?.plan === 'ultra' && <CurrentTag />}
+        {user?.plan === 'ultra' && <CurrentPlanTag />}
       </div>
       <UltraPlanPrice setPriceType={setPriceType} />
 
@@ -242,7 +242,7 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
   );
 };
 
-const CurrentTag = () => {
+const CurrentPlanTag = () => {
   return (
     <span className="h-max bg-neutral-600 text-neutral-400 text-[10px]  font-medium mr-2 px-2 py-[.5px] rounded w-max">
       CURRENT PLAN

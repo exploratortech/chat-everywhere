@@ -44,18 +44,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     switch (event.type) {
       case 'checkout.session.completed':
         // One time payment / Initial Monthly Pro / Ultra Plan Subscription
+        console.log('✅ checkout.session.completed');
         await handleCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
         );
         break;
       case 'customer.subscription.updated':
         // Monthly Pro / Ultra Plan Subscription recurring payment
+        console.log('✅ customer.subscription.updated');
         await handleCustomerSubscriptionUpdated(
           event.data.object as Stripe.Subscription,
         );
         break;
       case 'customer.subscription.deleted':
         // Monthly Pro Plan Subscription removal
+        console.log('✅ customer.subscription.deleted');
         await handleCustomerSubscriptionDeleted(
           event.data.object as Stripe.Subscription,
         );
