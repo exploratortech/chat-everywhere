@@ -1,5 +1,7 @@
-import getCustomerEmailByCustomerID from './strip_helper';
-import updateUserAccount from './updateUserAccount';
+import getCustomerEmailByCustomerID, {
+  downgradeUserAccount,
+  extendMembershipByStripeSubscriptionId,
+} from './strip_helper';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -12,42 +14,48 @@ export default async function handleCustomerSubscriptionUpdated(
 ): Promise<void> {
   const stripeSubscriptionId = session.id;
 
-  if (!session.cancel_at) {
-    return;
-  }
+  console.log('handleCustomerSubscriptionUpdated');
+  console.log({ session });
 
-  const cancelAtDate = dayjs.unix(session.cancel_at!).utc().toDate();
+  const currentPeriodStart = dayjs
+    .unix(session.current_period_start)
+    .utc()
+    .toDate();
+  const currentPeriodEnd = dayjs
+    .unix(session.current_period_end)
+    .utc()
+    .toDate();
+
+  console.log({
+    currentPeriodStart,
+    currentPeriodEnd,
+  });
+  const cancelAtDate = session.cancel_at
+    ? dayjs.unix(session.cancel_at).utc().toDate()
+    : null;
   const today = dayjs().utc().toDate();
 
-  if (cancelAtDate < today) {
+  if (cancelAtDate && cancelAtDate < today) {
     // Downgrade to free plan
     if (!stripeSubscriptionId) {
       const customerId = session.customer as string;
       const email = await getCustomerEmailByCustomerID(customerId);
-      await updateUserAccount({
-        upgrade: false,
+      await downgradeUserAccount({
         email,
       });
     } else {
-      await updateUserAccount({
-        upgrade: false,
+      await downgradeUserAccount({
         stripeSubscriptionId,
       });
     }
   } else {
-    // Monthly Pro Plan Subscription recurring payment, extend expiration date
+    // Monthly Pro / Ultra Plan Subscription recurring payment, extend expiration date
     if (!stripeSubscriptionId) {
-      const customerId = session.customer as string;
-      const email = await getCustomerEmailByCustomerID(customerId);
-      await updateUserAccount({
-        upgrade: true,
-        email,
-      });
+      throw new Error('Stripe subscription ID not found');
     } else {
-      await updateUserAccount({
-        upgrade: true,
+      await extendMembershipByStripeSubscriptionId({
         stripeSubscriptionId,
-        proPlanExpirationDate: undefined,
+        proPlanExpirationDate: currentPeriodEnd,
       });
     }
   }
