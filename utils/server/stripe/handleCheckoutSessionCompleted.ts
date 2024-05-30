@@ -1,7 +1,7 @@
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import {
+  getDbSubscriptionPlanByPaidPlan,
   getPaidPlan,
-  getSubscriptionPlanByPaidPlan,
 } from '@/utils/app/paid_plan_helper';
 
 import { PaidPlan, TopUpRequest } from '@/types/paid_plan';
@@ -119,7 +119,7 @@ export default async function handleCheckoutSessionCompleted(
     if (userId) {
       await updateUserAccountById({
         userId,
-        plan: getSubscriptionPlanByPaidPlan(planCode as PaidPlan),
+        plan: getDbSubscriptionPlanByPaidPlan(planCode as PaidPlan),
         stripeSubscriptionId,
         proPlanExpirationDate: proPlanExpirationDate,
       });
@@ -127,7 +127,7 @@ export default async function handleCheckoutSessionCompleted(
       // Update user account by Email
       await updateUserAccountByEmail({
         email: email!,
-        plan: getSubscriptionPlanByPaidPlan(planCode as PaidPlan),
+        plan: getDbSubscriptionPlanByPaidPlan(planCode as PaidPlan),
         stripeSubscriptionId,
         proPlanExpirationDate: proPlanExpirationDate,
       });

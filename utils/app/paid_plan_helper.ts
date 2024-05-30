@@ -36,7 +36,7 @@ export const getPaidPlan = (
   }
 };
 
-export const getSubscriptionPlanByPaidPlan = (
+export const getDbSubscriptionPlanByPaidPlan = (
   paidPlan: PaidPlan,
 ): SubscriptionPlan => {
   switch (paidPlan) {
