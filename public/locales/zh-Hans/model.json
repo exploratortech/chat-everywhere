@@ -234,5 +234,8 @@
   "Error deleting file": "文件删除失败",
   "Download failed!": "下载失败",
   "Downloading...": "下载中...",
-  "Please sign-up before upgrading to paid plan": "请在注册后再升级到付费方案"
+  "Please sign-up before upgrading to paid plan": "请在注册后再升级到付费方案",
+  "MONTHLY": "月费",
+  "YEARLY": "年费",
+  "Chat with document": "文档对话"
 }
