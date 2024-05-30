@@ -1,6 +1,12 @@
+import { PaidPlan } from '@/types/paid_plan';
+
 import { getAdminSupabaseClient } from '../supabase';
 
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import Stripe from 'stripe';
+
+dayjs.extend(utc);
 
 const supabase = getAdminSupabaseClient();
 
@@ -162,4 +168,30 @@ export async function extendMembershipByStripeSubscriptionId({
   console.log(
     `User ${userProfile?.email} with plan ${userProfile?.plan} extended to ${proPlanExpirationDate}`,
   );
+}
+
+export async function calculateMembershipExpirationDate(
+  planGivingWeeks: string | undefined,
+  planCode: string | undefined,
+  sessionCreatedDate: Date,
+): Promise<Date | undefined> {
+  const previousDate = dayjs(sessionCreatedDate || undefined);
+  // If has planGivingWeeks, use it to calculate the expiration date
+  if (planGivingWeeks && typeof planGivingWeeks === 'string') {
+    return previousDate.add(+planGivingWeeks, 'week').toDate();
+  }
+  // else extend the expiration date based on the plan code
+  else if (planCode === PaidPlan.ProOneTime) {
+    return previousDate.add(1, 'month').toDate();
+  } else if (planCode === PaidPlan.ProMonthly) {
+    return previousDate.add(1, 'month').toDate();
+  } else if (planCode === PaidPlan.UltraOneTime) {
+    return previousDate.add(1, 'month').toDate();
+  } else if (planCode === PaidPlan.UltraMonthly) {
+    return previousDate.add(1, 'month').toDate();
+  } else if (planCode === PaidPlan.UltraYearly) {
+    return previousDate.add(1, 'year').toDate();
+  }
+  // Return undefined if no conditions are met
+  return undefined;
 }
