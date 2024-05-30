@@ -12,7 +12,6 @@ import { User } from '@/types/user';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { cn } from '@/lib/utils';
 import dayjs from 'dayjs';
 
 const PlanComparison = ({ user }: { user: User | null }) => {
@@ -78,14 +77,9 @@ const ProPlanContent = ({ user }: { user: User | null }) => {
     const proPlanIndex = OrderedSubscriptionPlans.indexOf('pro');
     return userPlanIndex < proPlanIndex;
   }, [user]);
-  const isPaidUser = user?.plan === 'pro' || user?.plan === 'ultra';
   const { mutate: changeSubscriptionPlan } = useChangeSubscriptionPlan();
 
   const upgradeLinkOnClick = () => {
-    if (isPaidUser) {
-      changeSubscriptionPlan();
-      return;
-    }
     const paymentLink =
       i18n.language === 'zh-Hant' || i18n.language === 'zh'
         ? STRIPE_PRODUCTS.MEMBERSHIP_PLAN.pro.monthly.currencies.TWD.link
@@ -146,6 +140,18 @@ const ProPlanContent = ({ user }: { user: User | null }) => {
           </p>
         </div>
       )}
+      {user?.plan === 'ultra' && user.proPlanExpirationDate && (
+        <div className="flex items-center flex-col">
+          <a
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => changeSubscriptionPlan()}
+            className="w-full px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
+          >
+            {t('Change to Pro Plan')}
+          </a>
+        </div>
+      )}
 
       {user?.plan === 'pro' && user.proPlanExpirationDate && (
         <PlanExpirationDate expirationDate={user.proPlanExpirationDate} />
@@ -164,15 +170,9 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
     return userPlanIndex < ultraPlanIndex;
   }, [user]);
 
-  const isPaidUser = user?.plan === 'pro' || user?.plan === 'ultra';
   const { mutate: changeSubscriptionPlan } = useChangeSubscriptionPlan();
 
   const upgradeLinkOnClick = () => {
-    if (isPaidUser) {
-      changeSubscriptionPlan();
-      return;
-    }
-
     let paymentLink =
       STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.monthly.currencies.USD.link;
     if (priceType === 'monthly') {
@@ -247,6 +247,19 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
           <p className="text-xs text-neutral-400 mt-2">
             {t('No Strings Attached - Cancel Anytime!')}
           </p>
+        </div>
+      )}
+
+      {user?.plan === 'pro' && user.proPlanExpirationDate && (
+        <div className="flex items-center flex-col">
+          <a
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => changeSubscriptionPlan()}
+            className="w-full px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
+          >
+            {t('Change to Ultra Plan')}
+          </a>
         </div>
       )}
 
