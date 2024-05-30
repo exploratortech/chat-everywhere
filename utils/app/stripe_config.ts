@@ -1,8 +1,106 @@
-import { StripeProduct } from '@/types/stripe-product';
+import { NewStripeProduct, StripeProduct } from '@/types/stripe-product';
 
 // STRIPE CREDIT CODE
 export const STRIPE_PLAN_CODE_GPT4_CREDIT = 'GPT4_CREDIT';
 export const STRIPE_PLAN_CODE_IMAGE_CREDIT = 'IMAGE_CREDIT';
+
+// Add production one
+const STRIPE_PRODUCT_LIST_STAGING: NewStripeProduct[] = [
+  {
+    type: 'paid_plan',
+    productValue: 'ultra',
+    productId: 'prod_QC5xRJFNyaB3h7',
+  },
+  {
+    type: 'paid_plan',
+    productValue: 'pro',
+    productId: 'prod_Nlh3dRKPO799ja',
+  },
+  {
+    type: 'top_up',
+    productValue: '50_GPT4_CREDIT',
+    productId: 'prod_OKKu2YQZyaJTYN',
+    credit: 50,
+  },
+  {
+    type: 'top_up',
+    productValue: '150_GPT4_CREDIT',
+    productId: 'prod_OKKu2YQZyaJTYN',
+    credit: 150,
+  },
+  {
+    type: 'top_up',
+    productValue: '300_GPT4_CREDIT',
+    productId: 'prod_OKKu2YQZyaJTYN',
+    credit: 300,
+  },
+  {
+    type: 'top_up',
+    productValue: '500_IMAGE_CREDIT',
+    productId: 'prod_OKJgVwM66OOWuR',
+    credit: 500,
+  },
+  {
+    type: 'top_up',
+    productValue: '100_IMAGE_CREDIT',
+    productId: 'prod_OKJgVwM66OOWuR',
+    credit: 100,
+  },
+];
+const STRIPE_PRODUCT_LIST_PRODUCTION: NewStripeProduct[] = [
+  {
+    type: 'paid_plan',
+    productValue: 'ultra',
+    productId: 'prod_Q6j96oOouZMFN4',
+  },
+  {
+    type: 'paid_plan',
+    productValue: 'ultra',
+    productId: 'prod_PGES2QxP0aYFr4',
+    note: 'This is the pre-sell plan for the Ultra plan',
+  },
+
+  {
+    type: 'paid_plan',
+    productValue: 'pro',
+    productId: 'prod_NlR6az1csuoBHl',
+  },
+  {
+    type: 'top_up',
+    productValue: '50_GPT4_CREDIT',
+    productId: 'prod_Nofw6ncuYiYD81',
+    credit: 50,
+  },
+  {
+    type: 'top_up',
+    productValue: '150_GPT4_CREDIT',
+    productId: 'prod_Nog8i22B8eLX6y',
+    credit: 150,
+  },
+  {
+    type: 'top_up',
+    productValue: '300_GPT4_CREDIT',
+    productId: 'prod_Nog91rmXzSJY1w',
+    credit: 300,
+  },
+  {
+    type: 'top_up',
+    productValue: '100_IMAGE_CREDIT',
+    productId: 'prod_OKYWXZGkysAtFS',
+    credit: 100,
+  },
+  {
+    type: 'top_up',
+    productValue: '500_IMAGE_CREDIT',
+    productId: 'prod_OKYouQss6inD9q',
+    credit: 500,
+  },
+];
+
+export const STRIPE_PRODUCT_LIST =
+  process.env.NEXT_PUBLIC_ENV === 'production'
+    ? STRIPE_PRODUCT_LIST_PRODUCTION
+    : STRIPE_PRODUCT_LIST_STAGING;
 
 const STRIPE_PRODUCTS_PRODUCTION: StripeProduct = {
   MEMBERSHIP_PLAN: {
