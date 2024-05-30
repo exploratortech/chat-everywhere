@@ -30,13 +30,17 @@ const StripeHelper = {
     getSubscriptionById,
   },
   product: {
-    getProductBySessionId,
+    getProductByCheckoutSessionId: getProductByCheckoutSessionId,
+    getProductByProductId: getProductByProductId,
   },
 };
 export default StripeHelper;
 
-export async function getProductBySessionId(sessionId: string) {
-  const productId = await getProductIdBySessionId(sessionId);
+async function getProductByCheckoutSessionId(sessionId: string) {
+  const productId = await getProductIdByCheckoutSessionId(sessionId);
+  return getProductByProductId(productId);
+}
+async function getProductByProductId(productId: string) {
   const product = STRIPE_PRODUCT_LIST.find(
     (product) => product.productId === productId,
   );
@@ -44,14 +48,15 @@ export async function getProductBySessionId(sessionId: string) {
     throw new Error('The product id does not exist in our codebase', {
       cause: {
         productId,
-        sessionId,
       },
     });
   }
   return product;
 }
 
-async function getProductIdBySessionId(sessionId: string): Promise<string> {
+async function getProductIdByCheckoutSessionId(
+  sessionId: string,
+): Promise<string> {
   const session = await stripe.checkout.sessions.retrieve(sessionId, {
     expand: ['line_items'],
   });
@@ -83,10 +88,6 @@ export async function getCustomerEmailByCustomerID(
   customerID: string,
 ): Promise<string> {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2022-11-15',
-    });
-
     // We get the customer id from webhook, so we know the customer is not deleted
     const customer = (await stripe.customers.retrieve(
       customerID,
@@ -198,34 +199,6 @@ export async function downgradeUserAccount({
     );
   if (updatedUserError) throw updatedUserError;
   console.log(`User ${email || stripeSubscriptionId} downgraded to free plan`);
-}
-
-export async function extendMembershipByStripeSubscriptionId({
-  stripeSubscriptionId,
-  proPlanExpirationDate,
-}: {
-  stripeSubscriptionId: string;
-  proPlanExpirationDate: Date;
-}) {
-  // Extend pro / ultra plan
-  const { data: userProfile } = await supabase
-    .from('profiles')
-    .select('plan, email')
-    .eq('stripe_subscription_id', stripeSubscriptionId)
-    .single();
-
-  if (userProfile?.plan === 'edu') return;
-
-  const { error: updatedUserError } = await supabase
-    .from('profiles')
-    .update({
-      pro_plan_expiration_date: proPlanExpirationDate,
-    })
-    .eq('stripe_subscription_id', stripeSubscriptionId);
-  if (updatedUserError) throw updatedUserError;
-  console.log(
-    `User ${userProfile?.email} with plan ${userProfile?.plan} extended to ${proPlanExpirationDate}`,
-  );
 }
 
 export async function calculateMembershipExpirationDate(
