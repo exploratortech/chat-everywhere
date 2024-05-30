@@ -43,7 +43,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     switch (event.type) {
       case 'checkout.session.completed':
-        // One time payment / Initial Monthly Pro / Ultra Plan Subscription
+        // One time payment / Initial Monthly [Pro / Ultra] Plan Subscription / Top Up Request
         console.log('✅ checkout.session.completed');
         await handleCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
