@@ -19,8 +19,9 @@ export type StripeProductName =
 
 export interface BaseStripeProduct {
   type: StripeProductType;
-  productName: StripeProductName;
+  productValue: StripeProductName;
   productId: string;
+  note?: string;
 }
 
 export interface StripeTopUpProduct extends BaseStripeProduct {
