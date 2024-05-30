@@ -1,7 +1,7 @@
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import {
   getDbSubscriptionPlanByPaidPlan,
-  getPaidPlan,
+  getPaidPlanByPlanCode,
 } from '@/utils/app/paid_plan_helper';
 
 import { PaidPlan, TopUpRequest } from '@/types/paid_plan';
@@ -30,7 +30,7 @@ export default async function handleCheckoutSessionCompleted(
   const email = session.customer_details?.email;
 
   const planCode = session.metadata?.plan_code
-    ? getPaidPlan(session.metadata?.plan_code)
+    ? getPaidPlanByPlanCode(session.metadata?.plan_code)
     : undefined;
   const planGivingWeeks = session.metadata?.plan_giving_weeks;
   const credit = session.metadata?.credit;

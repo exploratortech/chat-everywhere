@@ -6,27 +6,30 @@ import {
   STRIPE_PRODUCTS,
 } from './const';
 
-export const getPaidPlan = (
+export const getPaidPlanByPlanCode = (
   planCode: string,
 ): PaidPlan | TopUpRequest | undefined => {
+  const PRO = STRIPE_PRODUCTS.MEMBERSHIP_PLAN.pro;
+  const ULTRA = STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra;
+
   switch (planCode.toUpperCase()) {
-    case STRIPE_PRODUCTS.MEMBERSHIP_PLAN.pro.monthly.plan_code.toUpperCase():
+    // PRO
+    case PRO['monthly'].plan_code.toUpperCase():
       return PaidPlan.ProMonthly;
-    case STRIPE_PRODUCTS.MEMBERSHIP_PLAN.pro[
-      'one-time'
-    ].plan_code.toUpperCase():
+    case PRO['one-time'].plan_code.toUpperCase():
       return PaidPlan.ProOneTime;
-    case STRIPE_PRODUCTS.MEMBERSHIP_PLAN.pro['yearly'].plan_code.toUpperCase():
+    case PRO['yearly'].plan_code.toUpperCase():
       return PaidPlan.ProYearly;
-    case STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.monthly.plan_code.toUpperCase():
+
+    // ULTRA
+    case ULTRA['monthly'].plan_code.toUpperCase():
       return PaidPlan.UltraMonthly;
-    case STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.yearly.plan_code.toUpperCase():
+    case ULTRA['yearly'].plan_code.toUpperCase():
       return PaidPlan.UltraYearly;
-    case STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra[
-      'one-time'
-    ].plan_code.toUpperCase():
+    case ULTRA['one-time'].plan_code.toUpperCase():
       return PaidPlan.UltraOneTime;
 
+    // TOP UP REQUEST
     case STRIPE_PLAN_CODE_IMAGE_CREDIT.toUpperCase():
       return TopUpRequest.ImageCredit;
     case STRIPE_PLAN_CODE_GPT4_CREDIT.toUpperCase():
