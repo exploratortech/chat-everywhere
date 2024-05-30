@@ -78,8 +78,8 @@ export default async function handleCheckoutSessionCompleted(
     return await addCreditToUser(
       user,
       product.credit,
-      product.productName === '500_IMAGE_CREDIT' ||
-        product.productName === '100_IMAGE_CREDIT'
+      product.productValue === '500_IMAGE_CREDIT' ||
+        product.productValue === '100_IMAGE_CREDIT'
         ? PluginID.IMAGE_GEN
         : PluginID.GPT4,
     );
@@ -159,7 +159,7 @@ async function handleSubscription(
   if (userId) {
     await updateUserAccountById({
       userId,
-      plan: product.productName,
+      plan: product.productValue,
       stripeSubscriptionId,
       proPlanExpirationDate: currentPeriodEnd,
     });
@@ -167,7 +167,7 @@ async function handleSubscription(
     // Update user account by Email
     await updateUserAccountByEmail({
       email: email!,
-      plan: product.productName,
+      plan: product.productValue,
       stripeSubscriptionId,
       proPlanExpirationDate: currentPeriodEnd,
     });
