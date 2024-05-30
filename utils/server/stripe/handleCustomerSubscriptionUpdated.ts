@@ -1,6 +1,6 @@
-import {
+import { getAdminSupabaseClient } from '../supabase';
+import StripeHelper, {
   downgradeUserAccount,
-  extendMembershipByStripeSubscriptionId,
   getCustomerEmailByCustomerID,
 } from './strip_helper';
 
@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import Stripe from 'stripe';
 
+const supabase = getAdminSupabaseClient();
 dayjs.extend(utc);
 
 export default async function handleCustomerSubscriptionUpdated(
@@ -47,14 +48,30 @@ export default async function handleCustomerSubscriptionUpdated(
       });
     }
   } else {
-    // Monthly Pro / Ultra Plan Subscription recurring payment, extend expiration date
+    // Monthly Pro / Ultra Plan Subscription recurring payment, extend expiration date / change to new plan
     if (!stripeSubscriptionId) {
       throw new Error('Stripe subscription ID not found');
-    } else {
-      await extendMembershipByStripeSubscriptionId({
-        stripeSubscriptionId,
-        proPlanExpirationDate: currentPeriodEnd,
+    }
+
+    const userSubscription =
+      await StripeHelper.subscription.getSubscriptionById(stripeSubscriptionId);
+    const productId = userSubscription.items.data[0].price.product;
+    if (!productId || typeof productId !== 'string') {
+      throw new Error('The session does not have a product id', {
+        cause: {
+          session,
+        },
       });
     }
+    const product = await StripeHelper.product.getProductByProductId(productId);
+    if (product.type !== 'paid_plan') return;
+    const { error: updatedUserError } = await supabase
+      .from('profiles')
+      .update({
+        plan: product.productValue,
+        pro_plan_expiration_date: currentPeriodEnd,
+      })
+      .eq('stripe_subscription_id', stripeSubscriptionId);
+    if (updatedUserError) throw updatedUserError;
   }
 }
