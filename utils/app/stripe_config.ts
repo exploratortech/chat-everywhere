@@ -1,44 +1,8 @@
+import { StripeProduct } from '@/types/stripe-product';
+
 // STRIPE CREDIT CODE
 export const STRIPE_PLAN_CODE_GPT4_CREDIT = 'GPT4_CREDIT';
 export const STRIPE_PLAN_CODE_IMAGE_CREDIT = 'IMAGE_CREDIT';
-
-// =========== PRO PLAN LINKS ===========
-// PRO MONTHLY PLAN
-type MemberShipPlanPeriodType = 'monthly' | 'yearly' | 'one-time';
-type MemberShipPlanCurrencyType = 'USD' | 'TWD';
-
-// P.S. All of the code below is used in the product payment link
-type PlanCode =
-  | 'one_time_pro_plan_for_1_month'
-  | 'one_time_ultra_plan_for_1_month'
-  | 'monthly_pro_plan_subscription'
-  | 'monthly_ultra_plan_subscription'
-  | 'yearly_pro_plan_subscription'
-  | 'yearly_ultra_plan_subscription';
-
-interface MemberShipPlanItem {
-  link: string;
-  price_id: string;
-}
-
-interface PlanDetails {
-  plan_code: PlanCode;
-  currencies: {
-    [currency in MemberShipPlanCurrencyType]: MemberShipPlanItem;
-  };
-}
-
-interface MemberShipPlan {
-  pro: {
-    [period in MemberShipPlanPeriodType]: PlanDetails;
-  };
-  ultra: {
-    [period in MemberShipPlanPeriodType]: PlanDetails;
-  };
-}
-interface StripeProduct {
-  MEMBERSHIP_PLAN: MemberShipPlan;
-}
 
 const STRIPE_PRODUCTS_PRODUCTION: StripeProduct = {
   MEMBERSHIP_PLAN: {
