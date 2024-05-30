@@ -31,7 +31,9 @@ export default async function handleCheckoutSessionCompleted(
   const stripeSubscriptionId = session.subscription as string;
 
   const sessionId = session.id;
-  const product = await StripeHelper.product.getProductBySessionId(sessionId);
+  const product = await StripeHelper.product.getProductByCheckoutSessionId(
+    sessionId,
+  );
 
   if (!email) {
     throw new Error('missing Email from Stripe webhook');
