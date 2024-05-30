@@ -1,4 +1,4 @@
-import { PaidPlan, SubscriptionPlan, TopUpRequest } from '@/types/paid_plan';
+import { PaidPlan, TopUpRequest } from '@/types/paid_plan';
 import {
   MemberShipPlanCurrencyType,
   MemberShipPlanItem,
@@ -71,27 +71,6 @@ export const getPaidPlanByPlanCode = (
   }
 };
 
-export const getDbSubscriptionPlanByPaidPlan = (
-  paidPlan: PaidPlan,
-): SubscriptionPlan => {
-  switch (paidPlan) {
-    case PaidPlan.ProMonthly:
-      return 'pro';
-    case PaidPlan.ProOneTime:
-      return 'pro';
-    case PaidPlan.ProYearly:
-      return 'pro';
-    case PaidPlan.UltraYearly:
-      return 'ultra';
-    case PaidPlan.UltraMonthly:
-      return 'ultra';
-    case PaidPlan.UltraOneTime:
-      return 'ultra';
-    default:
-      return 'free';
-  }
-};
-
 export const getPaidPlanByPriceId = (priceId: string): PaidPlan | undefined => {
   for (const planType of ['pro', 'ultra'] as const) {
     for (const period of ['monthly', 'yearly', 'one-time'] as const) {
@@ -101,10 +80,6 @@ export const getPaidPlanByPriceId = (priceId: string): PaidPlan | undefined => {
           planDetails.currencies,
         ) as MemberShipPlanCurrencyType[]) {
           if (planDetails.currencies[currency].price_id === priceId) {
-            console.log(
-              'current plan',
-              getPaidPlanByPlanCode(planDetails.plan_code) as PaidPlan,
-            );
             console.log('current plan currency ', currency);
             return getPaidPlanByPlanCode(planDetails.plan_code) as PaidPlan;
           }
