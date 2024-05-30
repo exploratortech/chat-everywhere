@@ -1,3 +1,40 @@
+import { SubscriptionPlan } from './paid_plan';
+
+export type StripeProductType = 'top_up' | 'paid_plan';
+
+export type StripeProductPaidPlanType = Exclude<
+  SubscriptionPlan,
+  'free' | 'edu'
+>;
+export type StripeProductTopUpType =
+  | '50_GPT4_CREDIT'
+  | '150_GPT4_CREDIT'
+  | '300_GPT4_CREDIT'
+  | '100_IMAGE_CREDIT'
+  | '500_IMAGE_CREDIT';
+
+export type StripeProductName =
+  | StripeProductPaidPlanType
+  | StripeProductTopUpType;
+
+export interface BaseStripeProduct {
+  type: StripeProductType;
+  productName: StripeProductName;
+  productId: string;
+}
+
+export interface StripeTopUpProduct extends BaseStripeProduct {
+  type: 'top_up';
+  credit: number;
+}
+
+export interface StripePaidPlanProduct extends BaseStripeProduct {
+  type: 'paid_plan';
+}
+
+export type NewStripeProduct = StripeTopUpProduct | StripePaidPlanProduct;
+
+// TODO: To be remove START ================================
 export type MemberShipPlanPeriodType = 'monthly' | 'yearly' | 'one-time';
 export type MemberShipPlanCurrencyType = 'USD' | 'TWD';
 
@@ -33,3 +70,4 @@ export interface MemberShipPlan {
 export interface StripeProduct {
   MEMBERSHIP_PLAN: MemberShipPlan;
 }
+// TODO: To be remove END =============================================
