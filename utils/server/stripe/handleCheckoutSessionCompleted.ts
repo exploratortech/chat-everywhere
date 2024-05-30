@@ -1,11 +1,7 @@
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
-import {
-  getDbSubscriptionPlanByPaidPlan,
-  getPaidPlanByPlanCode,
-} from '@/utils/app/paid_plan_helper';
 
-import { PaidPlan, TopUpRequest } from '@/types/paid_plan';
 import { PluginID } from '@/types/plugin';
+import { NewStripeProduct } from '@/types/stripe-product';
 import { UserProfile } from '@/types/user';
 
 import {
@@ -13,8 +9,7 @@ import {
   getAdminSupabaseClient,
   userProfileQuery,
 } from '../supabase';
-import {
-  calculateMembershipExpirationDate,
+import StripeHelper, {
   updateUserAccountByEmail,
   updateUserAccountById,
 } from './strip_helper';
@@ -33,110 +28,62 @@ export default async function handleCheckoutSessionCompleted(
   const userId = session.client_reference_id;
   const email = session.customer_details?.email;
 
-  const planCode = session.metadata?.plan_code
-    ? getPaidPlanByPlanCode(session.metadata?.plan_code)
-    : undefined;
-  const planGivingWeeks = session.metadata?.plan_giving_weeks;
-  const credit = session.metadata?.credit;
   const stripeSubscriptionId = session.subscription as string;
 
-  if (!planCode && !planGivingWeeks) {
-    throw new Error(
-      'no plan code and plan giving weeks from Stripe webhook, one of them must be provided',
-    );
-  }
+  const sessionId = session.id;
+  const product = await StripeHelper.product.getProductBySessionId(sessionId);
 
   if (!email) {
     throw new Error('missing Email from Stripe webhook');
   }
-
   const user = await userProfileQuery({
     client: supabase,
     email,
   });
 
-  const isTopUpCreditRequest = Object.values(TopUpRequest).includes(
-    planCode as TopUpRequest,
-  );
-
-  // # REQUEST: Top Up Image Credit / GPT4 Credit
-  if (isTopUpCreditRequest && credit) {
+  // # Upgrade plan flow
+  if (product.type === 'paid_plan') {
+    if (session.mode === 'subscription') {
+      // Recurring payment flow
+      await handleSubscription(
+        session,
+        user,
+        product,
+        stripeSubscriptionId,
+        userId || undefined,
+        email || undefined,
+      );
+    } else if (session.mode === 'payment') {
+      // One-time payment flow
+      throw new Error(
+        'One-time payment flow not implemented, need to setup user account manually',
+        {
+          cause: {
+            email,
+            product,
+            session,
+          },
+        },
+      );
+    } else {
+      throw new Error(`Unhandled session mode ${session.mode}`, {
+        cause: {
+          session,
+          product,
+        },
+      });
+    }
+  } else {
+    // Top Up Credit flow
     return await addCreditToUser(
       user,
-      +credit,
-      planCode === TopUpRequest.ImageCredit
+      product.credit,
+      product.productName === '500_IMAGE_CREDIT' ||
+        product.productName === '100_IMAGE_CREDIT'
         ? PluginID.IMAGE_GEN
         : PluginID.GPT4,
     );
   }
-
-  // # REQUEST: Upgrade plan
-  return await (async () => {
-    const sessionCreatedDate = dayjs.unix(session.created).utc().toDate();
-    const userIsInPaidPlan = user.plan !== 'free' && user.plan !== 'edu';
-    const isBuyingOneTimePlan =
-      planCode === PaidPlan.ProOneTime || planCode === PaidPlan.UltraOneTime;
-    if (userIsInPaidPlan && isBuyingOneTimePlan) {
-      throw new Error(
-        'One-time plan purchase is disallowed for users already on a paid subscription plan',
-        {
-          cause: {
-            user,
-          },
-        },
-      );
-    }
-    if (userIsInPaidPlan) {
-      throw new Error(
-        'User is already in a paid plan, cannot purchase a new plan, should issue an refund',
-        {
-          cause: {
-            user,
-          },
-        },
-      );
-    }
-
-    // Extend membership expiration date if user has a pro plan expiration date already
-    const proPlanExpirationDate = await calculateMembershipExpirationDate(
-      planGivingWeeks,
-      planCode,
-      sessionCreatedDate,
-    );
-
-    serverSideTrackEvent(userId || 'N/A', 'New paying customer', {
-      paymentDetail:
-        !session.amount_subtotal || session.amount_subtotal <= 50000
-          ? 'One-time'
-          : 'Monthly',
-    });
-
-    if (!proPlanExpirationDate) {
-      throw new Error('calculate membership expiration date: undefined ', {
-        cause: {
-          user,
-        },
-      });
-    }
-
-    // Update user account by User id
-    if (userId) {
-      await updateUserAccountById({
-        userId,
-        plan: getDbSubscriptionPlanByPaidPlan(planCode as PaidPlan),
-        stripeSubscriptionId,
-        proPlanExpirationDate: proPlanExpirationDate,
-      });
-    } else {
-      // Update user account by Email
-      await updateUserAccountByEmail({
-        email: email!,
-        plan: getDbSubscriptionPlanByPaidPlan(planCode as PaidPlan),
-        stripeSubscriptionId,
-        proPlanExpirationDate: proPlanExpirationDate,
-      });
-    }
-  })();
 }
 
 async function addCreditToUser(
@@ -172,4 +119,57 @@ async function addCreditToUser(
     >,
     credit,
   );
+}
+
+async function handleSubscription(
+  session: Stripe.Checkout.Session,
+  user: UserProfile,
+  product: NewStripeProduct,
+  stripeSubscriptionId: string,
+  userId: string | undefined,
+  email: string | undefined,
+) {
+  const subscription = await StripeHelper.subscription.getSubscriptionById(
+    stripeSubscriptionId,
+  );
+  const currentPeriodEnd = dayjs
+    .unix(subscription.current_period_end)
+    .utc()
+    .toDate();
+
+  const userIsInPaidPlan = user.plan !== 'free' && user.plan !== 'edu';
+  if (userIsInPaidPlan) {
+    throw new Error(
+      'User is already in a paid plan, cannot purchase a new plan, should issue an refund',
+      {
+        cause: {
+          user,
+        },
+      },
+    );
+  }
+  serverSideTrackEvent(userId || 'N/A', 'New paying customer', {
+    paymentDetail:
+      !session.amount_subtotal || session.amount_subtotal <= 50000
+        ? 'One-time'
+        : 'Monthly',
+  });
+
+  // Update user account by User id
+  if (userId) {
+    await updateUserAccountById({
+      userId,
+      plan: product.productName,
+      stripeSubscriptionId,
+      proPlanExpirationDate: currentPeriodEnd,
+    });
+  } else {
+    // Update user account by Email
+    await updateUserAccountByEmail({
+      email: email!,
+      plan: product.productName,
+      stripeSubscriptionId,
+      proPlanExpirationDate: currentPeriodEnd,
+    });
+  }
 }

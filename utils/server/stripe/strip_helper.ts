@@ -1,3 +1,5 @@
+import { STRIPE_PRODUCT_LIST } from '@/utils/app/stripe_config';
+
 import { PaidPlan } from '@/types/paid_plan';
 
 import { getAdminSupabaseClient } from '../supabase';
@@ -9,6 +11,62 @@ import Stripe from 'stripe';
 dayjs.extend(utc);
 
 const supabase = getAdminSupabaseClient();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2022-11-15',
+});
+
+async function getSubscriptionById(subscriptionId: string) {
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    return subscription;
+  } catch (error) {
+    console.error('Error retrieving subscription:', error);
+    throw error;
+  }
+}
+const StripeHelper = {
+  subscription: {
+    getSubscriptionById,
+  },
+  product: {
+    getProductBySessionId,
+  },
+};
+export default StripeHelper;
+
+export async function getProductBySessionId(sessionId: string) {
+  const productId = await getProductIdBySessionId(sessionId);
+  const product = STRIPE_PRODUCT_LIST.find(
+    (product) => product.productId === productId,
+  );
+  if (!product) {
+    throw new Error('The product id does not exist in our codebase', {
+      cause: {
+        productId,
+        sessionId,
+      },
+    });
+  }
+  return product;
+}
+
+async function getProductIdBySessionId(sessionId: string): Promise<string> {
+  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+    expand: ['line_items'],
+  });
+  const lineItems = session.line_items;
+
+  const productId = lineItems?.data[0]?.price?.product;
+  if (!productId || typeof productId !== 'string') {
+    throw new Error('The session does not have a product id', {
+      cause: {
+        session,
+      },
+    });
+  }
+  return productId;
+}
 
 export async function fetchSubscriptionIdByUserId(
   userId: string,
