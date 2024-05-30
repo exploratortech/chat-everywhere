@@ -20,9 +20,12 @@ import {
 } from './strip_helper';
 
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import Stripe from 'stripe';
 
 const supabase = getAdminSupabaseClient();
+
+dayjs.extend(utc);
 
 export default async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
