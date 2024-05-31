@@ -1,12 +1,5 @@
-import {
-  getPaidPlanByPriceId,
-  getPriceIdByPaidPlan,
-} from '@/utils/app/paid_plan_helper';
 import { fetchUserProfileWithAccessToken } from '@/utils/server/auth';
 import { fetchSubscriptionIdByUserId } from '@/utils/server/stripe/strip_helper';
-
-import { PaidPlan } from '@/types/paid_plan';
-import { MemberShipPlanCurrencyType } from '@/types/stripe-product';
 
 import Stripe from 'stripe';
 
@@ -24,14 +17,15 @@ const handler = async (req: Request) => {
   }
 
   try {
-    // TODO: add zod validation to validate if the request newPaidPlan is the PaidPlan type
-    // TODO: add zod validation to validate if the request currency is the MemberShipPlanCurrencyType type
-    const newPaidPlan = PaidPlan.UltraMonthly;
-    const currency = 'TWD' as MemberShipPlanCurrencyType;
-    const newPriceId = getPriceIdByPaidPlan(newPaidPlan, currency);
-    if (!newPriceId) {
-      throw new Error('New plan is not a valid plan');
-    }
+    // TODO: add zod validation to validate if the request PriceId is the PaidPlan type
+    // ULTRA yearly price id USD
+    // const newPaidPlanPriceId = 'price_1PLiWmEEvfd1BzvuDFmiLKI6';
+
+    // ULTRA monthly price id TWD
+    const newPaidPlanPriceId = 'price_1PLiWBEEvfd1BzvunVr1yZ55';
+
+    // ULTRA monthly price id USD
+    // const newPaidPlanPriceId = 'price_1PLhlhEEvfd1Bzvu0UEqwm9y';
 
     // Step 1: Get User Profile and Subscription ID
     const userProfile = await fetchUserProfileWithAccessToken(req);
@@ -43,30 +37,23 @@ const handler = async (req: Request) => {
       throw new Error('User does not have a valid subscription in Stripe');
     }
 
-    // Step 2: Retrieve Current Subscription
+    // Step 2: Check if the new price id is valid
+    const newPricePlan = await stripe.prices.retrieve(newPaidPlanPriceId);
+    if (!newPricePlan) {
+      throw new Error('New price id is not valid');
+    }
+
+    // Step 3: Retrieve Current Subscription
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    console.log({
-      subscription,
-    });
+
     // Check if user has any active items
     if (!(subscription.items.data?.[0].object === 'subscription_item')) {
       throw new Error('Subscription has no active subscription plan');
     }
-    const currentPaidPlan = getPaidPlanByPriceId(
-      subscription.items.data[0].plan.id,
-    );
-
-    if (!currentPaidPlan) {
+    const currentPriceId = subscription.items.data?.[0].price;
+    if (!currentPriceId) {
       throw new Error('Subscription has no active subscription plan');
     }
-    if (currentPaidPlan === newPaidPlan) {
-      throw new Error(
-        'The current Subscription plan is the same as the new plan',
-      );
-    }
-
-    // Step 3: Calculate Proration
-    const prorationDate = Math.floor(Date.now() / 1000);
 
     // Step 4: Update Subscription
     const updatedSubscription = await stripe.subscriptions.update(
@@ -75,23 +62,22 @@ const handler = async (req: Request) => {
         items: [
           {
             id: subscription.items.data[0].id,
-            price: newPriceId,
+            price: newPaidPlanPriceId,
           },
         ],
-        proration_behavior: 'create_prorations',
+        proration_behavior: 'always_invoice',
       },
     );
 
-    // Step 5: Notify User
-    // For this example, we'll just return the updated subscription details
-
-    // TODO:Lets see if it called the stripe webhooks to update our db
+    // Step 5: Retrieve Invoice URL
+    const invoice = await stripe.invoices.retrieve(
+      updatedSubscription.latest_invoice as string,
+    );
+    const invoiceUrl = invoice.hosted_invoice_url;
 
     return new Response(
       JSON.stringify({
-        previousSubscription: subscription,
-        newSubscription: updatedSubscription,
-        prorationDate,
+        invoiceUrl: invoiceUrl,
       }),
       {
         status: 200,
@@ -99,6 +85,10 @@ const handler = async (req: Request) => {
     );
   } catch (error) {
     console.error(error);
+    if (error instanceof Error) {
+      return new Response(error.message, { status: 500 });
+    }
+
     return new Response('Internal Server Error', { status: 500 });
   }
 };
