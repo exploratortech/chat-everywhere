@@ -51,9 +51,11 @@ async function getProductByProductId(
     (product) => product.productId === productId && product.mode === mode,
   );
   if (!product) {
-    throw new Error('The product id does not exist in our codebase', {
+    throw new Error('No product found in our codebase', {
       cause: {
         productId,
+        mode,
+        STRIPE_PRODUCT_LIST,
       },
     });
   }
