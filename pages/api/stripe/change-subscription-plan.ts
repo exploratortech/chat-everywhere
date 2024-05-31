@@ -2,6 +2,7 @@ import { fetchUserProfileWithAccessToken } from '@/utils/server/auth';
 import { fetchSubscriptionIdByUserId } from '@/utils/server/stripe/strip_helper';
 
 import Stripe from 'stripe';
+import { z } from 'zod';
 
 export const config = {
   runtime: 'edge',
@@ -17,15 +18,17 @@ const handler = async (req: Request) => {
   }
 
   try {
-    // TODO: add zod validation to validate if the request PriceId is the PaidPlan type
-    // ULTRA yearly price id USD
-    // const newPaidPlanPriceId = 'price_1PLiWmEEvfd1BzvuDFmiLKI6';
+    const requestBodySchema = z.object({
+      priceId: z.string(),
+    });
 
-    // ULTRA monthly price id TWD
-    const newPaidPlanPriceId = 'price_1PLiWBEEvfd1BzvunVr1yZ55';
-
-    // ULTRA monthly price id USD
-    // const newPaidPlanPriceId = 'price_1PLhlhEEvfd1Bzvu0UEqwm9y';
+    const body = await req.json();
+    const result = requestBodySchema.safeParse(body);
+    if (!result.success) {
+      return new Response('Invalid request body', { status: 400 });
+    }
+    const { priceId } = result.data;
+    const newPaidPlanPriceId = priceId;
 
     // Step 1: Get User Profile and Subscription ID
     const userProfile = await fetchUserProfileWithAccessToken(req);

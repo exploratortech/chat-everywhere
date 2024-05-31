@@ -13,7 +13,7 @@ export const useChangeSubscriptionPlan = () => {
   } = useContext(HomeContext);
   const { t } = useTranslation('common');
 
-  const changeSubscriptionPlan = async () => {
+  const changeSubscriptionPlan = async (priceId: string) => {
     if (!user) {
       throw new Error('User is not authenticated');
     }
@@ -25,6 +25,7 @@ export const useChangeSubscriptionPlan = () => {
         'access-token': accessToken,
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ priceId }),
     });
     if (!response.ok) {
       throw new Error('Network response was not ok');
