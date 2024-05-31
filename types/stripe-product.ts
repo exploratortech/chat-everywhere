@@ -1,5 +1,7 @@
 import { SubscriptionPlan } from './paid_plan';
 
+import Stripe from 'stripe';
+
 export type StripeProductType = 'top_up' | 'paid_plan';
 
 export type StripeProductPaidPlanType = Exclude<
@@ -19,6 +21,7 @@ export type StripeProductName =
 
 export interface BaseStripeProduct {
   type: StripeProductType;
+  mode: Stripe.Checkout.Session.Mode;
   productValue: StripeProductName;
   productId: string;
   note?: string;
@@ -29,8 +32,17 @@ export interface StripeTopUpProduct extends BaseStripeProduct {
   credit: number;
 }
 
-export interface StripePaidPlanProduct extends BaseStripeProduct {
+export type StripePaidPlanProduct =
+  | StripeSubscriptionPaidPlanProduct
+  | StripeOneTimePaidPlanProduct;
+export interface StripeSubscriptionPaidPlanProduct extends BaseStripeProduct {
   type: 'paid_plan';
+  mode: 'subscription';
+}
+export interface StripeOneTimePaidPlanProduct extends BaseStripeProduct {
+  type: 'paid_plan';
+  mode: 'payment';
+  givenDays: number;
 }
 
 export type NewStripeProduct = StripeTopUpProduct | StripePaidPlanProduct;
