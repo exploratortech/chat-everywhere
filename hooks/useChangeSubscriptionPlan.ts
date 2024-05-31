@@ -1,6 +1,8 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useMutation } from '@tanstack/react-query';
 import { useContext } from 'react';
+import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -9,6 +11,7 @@ export const useChangeSubscriptionPlan = () => {
   const {
     state: { user },
   } = useContext(HomeContext);
+  const { t } = useTranslation('common');
 
   const changeSubscriptionPlan = async () => {
     if (!user) {
@@ -33,7 +36,14 @@ export const useChangeSubscriptionPlan = () => {
 
   return useMutation(changeSubscriptionPlan, {
     onError: (error) => {
-      console.error('There was a problem with your mutation operation:', error);
+      if (error instanceof Error) {
+        console.log(error.message);
+      }
+      toast.error(
+        t(
+          'There was a problem when changing subscription plan, please contact support team',
+        ),
+      );
     },
   });
 };
