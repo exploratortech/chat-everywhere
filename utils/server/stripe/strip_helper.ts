@@ -36,13 +36,19 @@ const StripeHelper = {
 };
 export default StripeHelper;
 
-async function getProductByCheckoutSessionId(sessionId: string) {
+async function getProductByCheckoutSessionId(
+  sessionId: string,
+  mode: Stripe.Checkout.Session.Mode,
+) {
   const productId = await getProductIdByCheckoutSessionId(sessionId);
-  return getProductByProductId(productId);
+  return getProductByProductId(productId, mode);
 }
-async function getProductByProductId(productId: string) {
+async function getProductByProductId(
+  productId: string,
+  mode: Stripe.Checkout.Session.Mode,
+) {
   const product = STRIPE_PRODUCT_LIST.find(
-    (product) => product.productId === productId,
+    (product) => product.productId === productId && product.mode === mode,
   );
   if (!product) {
     throw new Error('The product id does not exist in our codebase', {
