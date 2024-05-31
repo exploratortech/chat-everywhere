@@ -1,7 +1,10 @@
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 
 import { PluginID } from '@/types/plugin';
-import { NewStripeProduct } from '@/types/stripe-product';
+import {
+  NewStripeProduct,
+  StripeOneTimePaidPlanProduct,
+} from '@/types/stripe-product';
 import { UserProfile } from '@/types/user';
 
 import {
@@ -33,6 +36,7 @@ export default async function handleCheckoutSessionCompleted(
   const sessionId = session.id;
   const product = await StripeHelper.product.getProductByCheckoutSessionId(
     sessionId,
+    session.mode,
   );
 
   if (!email) {
@@ -57,15 +61,13 @@ export default async function handleCheckoutSessionCompleted(
       );
     } else if (session.mode === 'payment') {
       // One-time payment flow
-      throw new Error(
-        'One-time payment flow not implemented, need to setup user account manually',
-        {
-          cause: {
-            email,
-            product,
-            session,
-          },
-        },
+      await handleOneTimePayment(
+        session,
+        user,
+        product as StripeOneTimePaidPlanProduct,
+        stripeSubscriptionId,
+        userId || undefined,
+        email || undefined,
       );
     } else {
       throw new Error(`Unhandled session mode ${session.mode}`, {
@@ -75,7 +77,7 @@ export default async function handleCheckoutSessionCompleted(
         },
       });
     }
-  } else {
+  } else if (product.type === 'top_up') {
     // Top Up Credit flow
     return await addCreditToUser(
       user,
@@ -146,15 +148,75 @@ async function handleSubscription(
       {
         cause: {
           user,
+          buyingProduct: product,
+          session,
+        },
+      },
+    );
+  }
+  const subscriptionBillPeriod = (() => {
+    switch (subscription.items.data?.[0].plan?.interval) {
+      case 'month':
+        return 'Monthly';
+      case 'year':
+        return 'Yearly';
+      case 'week':
+        return 'Weekly';
+      case 'day':
+        return 'Daily';
+      default:
+        return 'Monthly';
+    }
+  })();
+  serverSideTrackEvent(userId || 'N/A', 'New paying customer', {
+    paymentDetail: subscriptionBillPeriod,
+  });
+
+  // Update user account by User id
+  if (userId) {
+    await updateUserAccountById({
+      userId,
+      plan: product.productValue,
+      stripeSubscriptionId,
+      proPlanExpirationDate: currentPeriodEnd,
+    });
+  } else {
+    // Update user account by Email
+    await updateUserAccountByEmail({
+      email: email!,
+      plan: product.productValue,
+      stripeSubscriptionId,
+      proPlanExpirationDate: currentPeriodEnd,
+    });
+  }
+}
+
+async function handleOneTimePayment(
+  session: Stripe.Checkout.Session,
+  user: UserProfile,
+  product: StripeOneTimePaidPlanProduct,
+  stripeSubscriptionId: string,
+  userId: string | undefined,
+  email: string | undefined,
+) {
+  const productGivenDays = product.givenDays;
+  const currentPeriodEnd = dayjs().add(productGivenDays, 'day').utc().toDate();
+
+  const userIsInPaidPlan = user.plan !== 'free' && user.plan !== 'edu';
+  if (userIsInPaidPlan) {
+    throw new Error(
+      'User is already in a paid plan, cannot purchase a new plan, should issue an refund',
+      {
+        cause: {
+          user,
+          buyingProduct: product,
+          session,
         },
       },
     );
   }
   serverSideTrackEvent(userId || 'N/A', 'New paying customer', {
-    paymentDetail:
-      !session.amount_subtotal || session.amount_subtotal <= 50000
-        ? 'One-time'
-        : 'Monthly',
+    paymentDetail: 'One-time',
   });
 
   // Update user account by User id
