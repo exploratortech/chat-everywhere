@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 
 export {
-  STRIPE_PRODUCTS,
+  STRIPE_PAID_PLAN_LINKS,
   STRIPE_PLAN_CODE_GPT4_CREDIT,
   STRIPE_PLAN_CODE_IMAGE_CREDIT,
   GPT4_CREDIT_PURCHASE_LINKS,
