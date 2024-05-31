@@ -1,4 +1,4 @@
-import { STRIPE_PRODUCT_LIST } from '@/utils/app/stripe_config';
+import { STRIPE_PRODUCT_LIST } from '@/utils/app/stripe/stripe_config';
 
 import { PaidPlan } from '@/types/paid_plan';
 
