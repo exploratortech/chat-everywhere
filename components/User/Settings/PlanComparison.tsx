@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { useChangeSubscriptionPlan } from '@/hooks/useChangeSubscriptionPlan';
 
-import { OrderedSubscriptionPlans, STRIPE_PRODUCTS } from '@/utils/app/const';
+import {
+  OrderedSubscriptionPlans,
+  STRIPE_PAID_PLAN_LINKS,
+} from '@/utils/app/const';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
@@ -82,8 +85,8 @@ const ProPlanContent = ({ user }: { user: User | null }) => {
   const upgradeLinkOnClick = () => {
     const paymentLink =
       i18n.language === 'zh-Hant' || i18n.language === 'zh'
-        ? STRIPE_PRODUCTS.MEMBERSHIP_PLAN.pro.monthly.currencies.TWD.link
-        : STRIPE_PRODUCTS.MEMBERSHIP_PLAN.pro.monthly.currencies.USD.link;
+        ? STRIPE_PAID_PLAN_LINKS['pro-monthly'].twd.link
+        : STRIPE_PAID_PLAN_LINKS['pro-monthly'].usd.link;
 
     const userEmail = user?.email;
     const userId = user?.id;
@@ -173,23 +176,18 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
   const { mutate: changeSubscriptionPlan } = useChangeSubscriptionPlan();
 
   const upgradeLinkOnClick = () => {
-    let paymentLink =
-      STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.monthly.currencies.USD.link;
+    let paymentLink = STRIPE_PAID_PLAN_LINKS['ultra-monthly'].usd.link;
     if (priceType === 'monthly') {
       if (i18n.language === 'zh-Hant' || i18n.language === 'zh') {
-        paymentLink =
-          STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.monthly.currencies.TWD.link;
+        paymentLink = STRIPE_PAID_PLAN_LINKS['ultra-monthly'].twd.link;
       } else {
-        paymentLink =
-          STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.monthly.currencies.USD.link;
+        paymentLink = STRIPE_PAID_PLAN_LINKS['ultra-monthly'].usd.link;
       }
     } else {
       if (i18n.language === 'zh-Hant' || i18n.language === 'zh') {
-        paymentLink =
-          STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.yearly.currencies.TWD.link;
+        paymentLink = STRIPE_PAID_PLAN_LINKS['ultra-yearly'].twd.link;
       } else {
-        paymentLink =
-          STRIPE_PRODUCTS.MEMBERSHIP_PLAN.ultra.yearly.currencies.USD.link;
+        paymentLink = STRIPE_PAID_PLAN_LINKS['ultra-yearly'].usd.link;
       }
     }
 
