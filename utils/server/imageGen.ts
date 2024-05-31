@@ -23,7 +23,7 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
       if there are anything wrong or the prompt is not ready for processing:
         - call the 'error-message' function indicating the errorMessage
 
-    Important to note: you should always called the function with the name 'generate-image' or 'error-message' and there is no need to response without calling the function.
+    Important to note: you must only called the function with the name 'generate-image' or 'error-message', there is no need to response without calling the function.
     `;
   const functionCallsToSend: FunctionCall[] = [
     {
@@ -57,11 +57,11 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
   const completionResponse = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      Authorization: `Bearer ${process.env.OPENAI_API_GPT_4_KEY}`,
     },
     method: 'POST',
     body: JSON.stringify({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o',
       temperature: 0.1,
       stream: false,
       functions: functionCallsToSend,
@@ -118,6 +118,9 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
       return functionParameters.prompt;
     }
   } else {
+    console.log({
+      completionResponseJson,
+    });
     throw new Error('Translate and enhance prompt error');
   }
 };
