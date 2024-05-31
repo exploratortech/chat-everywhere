@@ -66,11 +66,12 @@ export const STRIPE_PAID_PLAN_LINKS_STAGING: PaidPlanLinks = {
   },
   'pro-monthly': {
     twd: {
-      //
+      // $249.99 TWD / month
       link: 'https://buy.stripe.com/test_6oE01v1QM66S74I7sH',
       price_id: 'price_1PLhJREEvfd1BzvuxCM477DD',
     },
     usd: {
+      // $9.99 USD / month
       link: 'https://buy.stripe.com/test_4gw4hLcvq52Odt6fYY',
       price_id: 'price_1N09fTEEvfd1BzvuJwBCAfg2',
     },
