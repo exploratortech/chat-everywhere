@@ -63,7 +63,10 @@ export default async function handleCustomerSubscriptionUpdated(
         },
       });
     }
-    const product = await StripeHelper.product.getProductByProductId(productId);
+    const product = await StripeHelper.product.getProductByProductId(
+      productId,
+      'subscription',
+    );
     if (product.type !== 'paid_plan') return;
     const { error: updatedUserError } = await supabase
       .from('profiles')
