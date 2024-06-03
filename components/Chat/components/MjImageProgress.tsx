@@ -1,20 +1,23 @@
 import ProgressBar from '@ramonak/react-progress-bar';
 import { IconArrowUp, IconCheck, IconX } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 
 import Spinner from '@/components/Spinner/Spinner';
-
-// THE COMPONENT IS USED FOR STATIC HTML GENERATION, SO DON'T USE HOOKS OR STATE
 
 export interface MjImageProgressProps {
   content: string;
   state: 'loading' | 'completed' | 'error';
   percentage?: `${number}`;
+  errorMessage?: string;
 }
 export default function MjImageProgress({
   content,
   state,
   percentage,
+  errorMessage,
 }: MjImageProgressProps) {
+  const { t } = useTranslation('common');
+  const { t: chatT } = useTranslation('chat');
   return (
     <details
       className={`${state === 'loading' ? 'bg-white disabled' : ''} ${
@@ -52,7 +55,14 @@ export default function MjImageProgress({
         )}
       </summary>
       <main>
-        <div className="panel p-2 max-h-full">{content}</div>
+        <div className="panel p-2 max-h-full whitespace-pre-line">
+          {content}
+        </div>
+        {errorMessage && (
+          <div className="panel p-2 max-h-full whitespace-pre-line">
+            {`${t('Error')}: ${chatT(errorMessage)} `}
+          </div>
+        )}
       </main>
     </details>
   );
