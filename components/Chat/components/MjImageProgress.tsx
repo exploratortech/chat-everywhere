@@ -1,10 +1,5 @@
 import ProgressBar from '@ramonak/react-progress-bar';
-import {
-  IconArrowDown,
-  IconArrowUp,
-  IconCheck,
-  IconX,
-} from '@tabler/icons-react';
+import { IconArrowUp, IconCheck, IconX } from '@tabler/icons-react';
 
 import Spinner from '@/components/Spinner/Spinner';
 
@@ -27,7 +22,7 @@ export default function MjImageProgress({
       } ${
         state === 'error' ? 'bg-red-200' : ''
       } relative my-4 block text-black rounded-lg`}
-      open={state === 'loading'}
+      open={state === 'loading' || state === 'error'}
     >
       <summary className="cursor-pointer p-2 flex gap-2 items-center justify-between">
         <div className="flex gap-2 items-center flex-grow font-bold">

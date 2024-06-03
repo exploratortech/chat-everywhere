@@ -81,14 +81,16 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
   const completionResponseJson = await completionResponse.json();
 
   console.log('completionResponseJson', JSON.stringify(completionResponseJson));
+
   if (
     completionResponseJson.error &&
     completionResponseJson.error.code === 'content_filter'
   ) {
     throw new Error('Translate and enhance prompt error', {
       cause: {
-        translateAndEnhancePromptErrorMessage:
-          'Your input appears to contain elements that could be related to sexual content, hate speech, self-harm, or violence. These topics are against our guidelines. We kindly ask you to revise your content and try again. We appreciate your understanding and cooperation in maintaining a safe and respectful environment',
+        code: completionResponseJson.error.code,
+        message:
+          'Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.',
       },
     });
   }
@@ -124,3 +126,5 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
     throw new Error('Translate and enhance prompt error');
   }
 };
+
+// TODO: Handle not calling any function

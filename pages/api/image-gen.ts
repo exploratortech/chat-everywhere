@@ -40,6 +40,12 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
+const ContentFilterErrorMessageListFromMyMidjourneyProvider = [
+  'Our AI moderator thinks this prompt is probably against our community standards',
+  'Request cancelled due to image filters',
+  'forbidden: The prompt has blocked words',
+];
+
 const generateMjPrompt = (
   userInputText: string,
   style: string = DEFAULT_IMAGE_GENERATION_STYLE,
@@ -195,7 +201,7 @@ const handler = async (req: Request): Promise<Response> => {
           headers: requestHeader,
           body: JSON.stringify({
             prompt: generationPrompt,
-            webhookOverride: `${getHomeUrl()}/api/webhooks/mj-health-check`
+            webhookOverride: `${getHomeUrl()}/api/webhooks/mj-health-check`,
           }),
         },
       );
@@ -203,7 +209,28 @@ const handler = async (req: Request): Promise<Response> => {
       const imageGenerationResponseText = await imageGenerationResponse.text();
 
       if (!imageGenerationResponse.ok) {
-        console.log(imageGenerationResponse);
+        console.log({
+          imageGenerationResponseText,
+          ContentFilterErrorMessageListFromMyMidjourneyProvider,
+          isInclude: ContentFilterErrorMessageListFromMyMidjourneyProvider.some(
+            (errorMessage) =>
+              imageGenerationResponseText.includes(errorMessage),
+          ),
+        });
+        if (
+          ContentFilterErrorMessageListFromMyMidjourneyProvider.some(
+            (errorMessage) =>
+              imageGenerationResponseText.includes(errorMessage),
+          )
+        ) {
+          await logEvent('Image generation failed due to content filter');
+          throw new Error('Image generation failed due to content filter', {
+            cause: {
+              message:
+                'Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.',
+            },
+          });
+        }
 
         await logEvent('Image generation failed');
         throw new Error('Image generation failed');
@@ -383,17 +410,15 @@ const handler = async (req: Request): Promise<Response> => {
       return;
     } catch (error) {
       jobTerminated = true;
-      console.log(error);
       if (
         error instanceof Error &&
         error.cause &&
         typeof error.cause === 'object' &&
-        'translateAndEnhancePromptErrorMessage' in error.cause
+        'message' in error.cause
       ) {
-        const translateAndEnhancePromptErrorMessage =
-          error.cause.translateAndEnhancePromptErrorMessage;
+        const customErrorMessage = error.cause.message;
         await progressHandler.updateProgress({
-          content: `Error: ${translateAndEnhancePromptErrorMessage} \n`,
+          content: `Error: ${customErrorMessage} \n`,
           state: 'error',
         });
       } else {
