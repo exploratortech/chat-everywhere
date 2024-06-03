@@ -146,7 +146,7 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
       return functionParameters.prompt;
     }
   } catch (error) {
-    // Handle and rethrow the error
+    // Throw the error above
     throw error;
   }
 };
