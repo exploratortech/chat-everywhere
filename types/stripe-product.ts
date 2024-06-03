@@ -48,7 +48,7 @@ export interface StripeOneTimePaidPlanProduct extends BaseStripeProduct {
 export type NewStripeProduct = StripeTopUpProduct | StripePaidPlanProduct;
 
 export type PaidPlanCurrencyType = 'usd' | 'twd';
-export type PaidAvailablePlanType =
+export type AvailablePaidPlanType =
   | 'ultra-yearly'
   | 'ultra-monthly'
   | 'pro-monthly';
@@ -60,4 +60,4 @@ export type PaidPlanLink = {
   };
 };
 
-export type PaidPlanLinks = Record<PaidAvailablePlanType, PaidPlanLink>;
+export type PaidPlanLinks = Record<AvailablePaidPlanType, PaidPlanLink>;
