@@ -83,7 +83,7 @@ async function getProductIdByCheckoutSessionId(
 
 export async function fetchSubscriptionIdByUserId(
   userId: string,
-): Promise<string> {
+): Promise<string | null> {
   const { data: userProfile } = await supabase
     .from('profiles')
     .select('stripe_subscription_id')
