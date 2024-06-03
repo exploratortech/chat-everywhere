@@ -209,14 +209,6 @@ const handler = async (req: Request): Promise<Response> => {
       const imageGenerationResponseText = await imageGenerationResponse.text();
 
       if (!imageGenerationResponse.ok) {
-        console.log({
-          imageGenerationResponseText,
-          ContentFilterErrorMessageListFromMyMidjourneyProvider,
-          isInclude: ContentFilterErrorMessageListFromMyMidjourneyProvider.some(
-            (errorMessage) =>
-              imageGenerationResponseText.includes(errorMessage),
-          ),
-        });
         if (
           ContentFilterErrorMessageListFromMyMidjourneyProvider.some(
             (errorMessage) =>
