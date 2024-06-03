@@ -1,5 +1,5 @@
 import {
-  type EventNameTypes,
+  EventNameTypes,
   serverSideTrackEvent,
 } from '@/utils/app/eventTracking';
 
@@ -15,9 +15,11 @@ import {
   AZURE_OPENAI_GPT_4_KEYS,
   AZURE_OPENAI_KEYS,
 } from '../app/const';
+import { getTokenCountForPrompt } from './google';
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
+import { Content } from '@google-cloud/vertexai';
 
 const tokenCounterBuffer = 100;
 
@@ -214,6 +216,8 @@ export const logEvent = async ({
   totalDurationInMs,
   timeToFirstTokenInMs,
   endpoint,
+  geminiRequestPayload,
+  geminiFinalPayload,
 }: {
   userIdentifier?: string;
   eventName?: EventNameTypes | null;
@@ -222,10 +226,40 @@ export const logEvent = async ({
   totalDurationInMs: number;
   timeToFirstTokenInMs: number;
   endpoint?: string;
+  geminiRequestPayload?: {
+    contents: Content[];
+    system_instruction: Content;
+  };
+  geminiFinalPayload?: {
+    contents: Content[];
+    system_instruction: Content;
+  };
 }) => {
   if (userIdentifier && userIdentifier !== '' && eventName) {
-    const promptTokenLength = await getMessagesTokenCount(promptMessages);
-    const completionTokenLength = await getStringTokenCount(completionMessage);
+    let promptTokenLength = 0;
+    let completionTokenLength = 0;
+    if (geminiRequestPayload && geminiFinalPayload) {
+      const [promptTokenLengthPromise, totalTokenLengthPromise] =
+        await Promise.all([
+          getTokenCountForPrompt(geminiRequestPayload),
+          getTokenCountForPrompt(geminiFinalPayload),
+        ]);
+      promptTokenLength = promptTokenLengthPromise;
+      completionTokenLength = totalTokenLengthPromise - promptTokenLength;
+    } else {
+      const [promptTokenLengthPromise, completionTokenLengthPromise] =
+        await Promise.all([
+          getMessagesTokenCount(promptMessages),
+          getStringTokenCount(completionMessage),
+        ]);
+      promptTokenLength = promptTokenLengthPromise;
+      completionTokenLength = completionTokenLengthPromise;
+    }
+    console.log({
+      promptTokenLength,
+      completionTokenLength,
+    });
+
     await serverSideTrackEvent(userIdentifier, eventName, {
       promptTokenLength: promptTokenLength,
       completionTokenLength: completionTokenLength,
