@@ -4,7 +4,7 @@ import { IMAGE_GEN_MAX_TIMEOUT } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import {
-  ProgressHandler,
+  MjProgressProgressHandler,
   makeCreateImageSelectorV2,
   makeWriteToStream,
 } from '@/utils/app/streamHandler';
@@ -70,7 +70,7 @@ const handler = async (req: Request): Promise<Response> => {
     Math.round((Date.now() - generationStartedAt) / 1000);
 
   const createImageSelector = makeCreateImageSelectorV2(writeToStream);
-  const progressHandler = new ProgressHandler(writeToStream);
+  const progressHandler = new MjProgressProgressHandler(writeToStream);
 
   progressHandler.updateProgress({ content: `Command: ${button} ... \n` });
   progressHandler.updateProgress({
@@ -197,7 +197,7 @@ const handler = async (req: Request): Promise<Response> => {
         if (imageGenerationProgress === null) {
           progressHandler.updateProgress({
             content: `Start to generate \n`,
-            removeLastLine: true
+            removeLastLine: true,
           });
         } else {
           progressHandler.updateProgress({

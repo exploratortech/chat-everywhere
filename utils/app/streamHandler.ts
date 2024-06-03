@@ -1,5 +1,6 @@
 import { removeLastLine as removeLastLineF } from './../../utils/app/ui';
 
+import GeneralHtmlComponentParser from '@/components/Chat/components/GeneralHtmlComponentParser';
 import MjImageProgress from '@/components/Chat/components/MjImageProgress';
 import MjImageSelector, {
   MjImageSelectorProps,
@@ -65,7 +66,7 @@ export const makeCreateImageSelector = (writeToStream: WriteToStream) => {
   };
 };
 
-export class ProgressHandler {
+export class MjProgressProgressHandler {
   private progressContent = '';
 
   constructor(private writeToStream: WriteToStream) {}
@@ -75,23 +76,29 @@ export class ProgressHandler {
     state = 'loading',
     removeLastLine = false,
     percentage,
+    errorMessage,
   }: {
     content: string;
     state?: 'loading' | 'completed' | 'error';
     removeLastLine?: boolean;
     percentage?: `${number}`;
     previewImageUrl?: string;
+    errorMessage?: string;
   }) {
     if (removeLastLine) {
       this.progressContent = removeLastLineF(this.progressContent);
     }
     this.progressContent += content;
     const html = await generateComponentHTML({
-      component: MjImageProgress,
+      component: GeneralHtmlComponentParser,
       props: {
-        content: this.progressContent,
-        state,
-        percentage,
+        id: 'MjImageProgress',
+        componentState: {
+          content: this.progressContent,
+          state,
+          percentage,
+          errorMessage: errorMessage || undefined,
+        },
       },
       temp: true,
     });
