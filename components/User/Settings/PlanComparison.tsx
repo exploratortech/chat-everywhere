@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import { useChangeSubscriptionPlan } from '@/hooks/useChangeSubscriptionPlan';
+import { useUserSubscriptionDetail } from '@/hooks/stripeSubscription/useUserSubscriptionDetail';
 
 import {
   OrderedSubscriptionPlans,
@@ -11,13 +11,35 @@ import {
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
-import { User } from '@/types/user';
+import { User, UserSubscriptionDetail } from '@/types/user';
 
+import Spinner from '@/components/Spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import ChangeSubscriptionButton from './ChangeSubscriptionButton';
 
 import dayjs from 'dayjs';
 
-const PlanComparison = ({ user }: { user: User | null }) => {
+const PlanComparison = ({
+  user,
+  isPaidUser,
+}: {
+  user: User | null;
+  isPaidUser: boolean;
+}) => {
+  const { data: userSubscriptionDetail, isFetched } = useUserSubscriptionDetail(
+    {
+      isPaidUser,
+    },
+  );
+
+  if (isPaidUser && !isFetched) {
+    return (
+      <div className="w-full h-full min-h-52 flex items-center justify-center">
+        <Spinner size="16px" />
+      </div>
+    );
+  }
   return (
     <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] justify-center gap-3 mb-3">
       {/* Free Plan */}
@@ -27,12 +49,15 @@ const PlanComparison = ({ user }: { user: User | null }) => {
 
       {/* Pro Plan */}
       <div className="flex flex-col w-full col-start-1 row-span-1 border rounded-lg p-4">
-        <ProPlanContent user={user} />
+        <ProPlanContent user={user} userSubscription={userSubscriptionDetail} />
       </div>
 
       {/* Ultra Plan */}
       <div className="flex flex-col w-full col-start-1 row-start-auto md:row-start-1 md:col-start-2 row-span-2 border rounded-lg p-4">
-        <UltraPlanContent user={user} />
+        <UltraPlanContent
+          user={user}
+          userSubscription={userSubscriptionDetail}
+        />
       </div>
     </div>
   );
@@ -72,15 +97,21 @@ const FreePlanContent = ({ user }: { user: User | null }) => {
     </>
   );
 };
-const ProPlanContent = ({ user }: { user: User | null }) => {
+const ProPlanContent = ({
+  user,
+  userSubscription,
+}: {
+  user: User | null;
+  userSubscription: UserSubscriptionDetail | undefined;
+}) => {
   const { t, i18n } = useTranslation('model');
   const showUpgradeToPro = useMemo(() => {
+    if (userSubscription) return false;
     if (!user) return true;
     const userPlanIndex = OrderedSubscriptionPlans.indexOf(user.plan);
     const proPlanIndex = OrderedSubscriptionPlans.indexOf('pro');
     return userPlanIndex < proPlanIndex;
-  }, [user]);
-  const { mutate: changeSubscriptionPlan } = useChangeSubscriptionPlan();
+  }, [user, userSubscription]);
 
   const upgradeLinkOnClick = () => {
     const paymentLink =
@@ -119,7 +150,7 @@ const ProPlanContent = ({ user }: { user: User | null }) => {
         </span>
         {user?.plan === 'pro' && <CurrentPlanTag />}
       </div>
-      <ProPlanPrice />
+      <ProPlanPrice userSubscription={userSubscription} />
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
         <FeatureItem featureName={t('Priority response time')} />
@@ -143,18 +174,13 @@ const ProPlanContent = ({ user }: { user: User | null }) => {
           </p>
         </div>
       )}
-      {user?.plan === 'ultra' && user.proPlanExpirationDate && (
-        <div className="flex items-center flex-col">
-          <a
-            target="_blank"
-            rel="noreferrer"
-            onClick={() => changeSubscriptionPlan()}
-            className="w-full px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
-          >
-            {t('Change to Pro Plan')}
-          </a>
-        </div>
-      )}
+
+      <ChangeSubscriptionButton
+        plan="pro"
+        user={user}
+        userSubscription={userSubscription}
+        interval="monthly"
+      />
 
       {user?.plan === 'pro' && user.proPlanExpirationDate && (
         <PlanExpirationDate expirationDate={user.proPlanExpirationDate} />
@@ -163,17 +189,22 @@ const ProPlanContent = ({ user }: { user: User | null }) => {
   );
 };
 
-const UltraPlanContent = ({ user }: { user: User | null }) => {
+const UltraPlanContent = ({
+  user,
+  userSubscription,
+}: {
+  user: User | null;
+  userSubscription: UserSubscriptionDetail | undefined;
+}) => {
   const { t, i18n } = useTranslation('model');
   const [priceType, setPriceType] = useState<'monthly' | 'yearly'>('monthly');
   const showUpgradeToUltra = useMemo(() => {
+    if (userSubscription) return false;
     if (!user) return true;
     const userPlanIndex = OrderedSubscriptionPlans.indexOf(user.plan);
     const ultraPlanIndex = OrderedSubscriptionPlans.indexOf('ultra');
     return userPlanIndex < ultraPlanIndex;
-  }, [user]);
-
-  const { mutate: changeSubscriptionPlan } = useChangeSubscriptionPlan();
+  }, [user, userSubscription]);
 
   const upgradeLinkOnClick = () => {
     let paymentLink = STRIPE_PAID_PLAN_LINKS['ultra-monthly'].usd.link;
@@ -222,7 +253,12 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
         </span>
         {user?.plan === 'ultra' && <CurrentPlanTag />}
       </div>
-      {user?.plan !== 'ultra' && <UltraPlanPrice setPriceType={setPriceType} />}
+      {user?.plan !== 'ultra' && (
+        <UltraPlanPrice
+          setPriceType={setPriceType}
+          userSubscription={userSubscription}
+        />
+      )}
 
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
@@ -247,21 +283,14 @@ const UltraPlanContent = ({ user }: { user: User | null }) => {
           </p>
         </div>
       )}
+      <ChangeSubscriptionButton
+        plan="ultra"
+        user={user}
+        userSubscription={userSubscription}
+        interval={priceType}
+      />
 
       {user?.plan === 'pro' && user.proPlanExpirationDate && (
-        <div className="flex items-center flex-col">
-          <a
-            target="_blank"
-            rel="noreferrer"
-            onClick={() => changeSubscriptionPlan()}
-            className="w-full px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
-          >
-            {t('Change to Ultra Plan')}
-          </a>
-        </div>
-      )}
-
-      {user?.plan === 'ultra' && user.proPlanExpirationDate && (
         <PlanExpirationDate expirationDate={user.proPlanExpirationDate} />
       )}
     </>
@@ -276,9 +305,19 @@ const CurrentPlanTag = () => {
   );
 };
 
-const ProPlanPrice = () => {
+const ProPlanPrice = ({
+  userSubscription,
+}: {
+  userSubscription: UserSubscriptionDetail | undefined;
+}) => {
   const { i18n } = useTranslation('model');
 
+  if (userSubscription && userSubscription.subscriptionCurrency === 'twd') {
+    return <span className="text-sm mb-2">{'TWD$249.99 / month'}</span>;
+  }
+  if (userSubscription && userSubscription.subscriptionCurrency === 'usd') {
+    return <span className="text-sm mb-2">{'USD$9.99 / month'}</span>;
+  }
   switch (i18n.language) {
     case 'zh-Hant':
     case 'zh':
@@ -290,10 +329,42 @@ const ProPlanPrice = () => {
 
 const UltraPlanPrice = ({
   setPriceType,
+  userSubscription,
 }: {
   setPriceType: (type: 'monthly' | 'yearly') => void;
+  userSubscription: UserSubscriptionDetail | undefined;
 }) => {
   const { t, i18n } = useTranslation('model');
+
+  const monthlyPriceComponent = useMemo(() => {
+    if (userSubscription && userSubscription.subscriptionCurrency === 'twd') {
+      return <span className="text-sm mb-2">{'TWD$880 / month'}</span>;
+    }
+
+    if (userSubscription && userSubscription.subscriptionCurrency === 'usd') {
+      return <span className="text-sm mb-2">{'USD$29.99 / month'}</span>;
+    }
+    if (i18n.language === 'zh-Hant' || i18n.language === 'zh') {
+      return <span className="text-sm mb-2">{'TWD$880 / month'}</span>;
+    } else {
+      return <span className="text-sm mb-2">{'USD$29.99 / month'}</span>;
+    }
+  }, [userSubscription, i18n.language]);
+
+  const yearlyPriceComponent = useMemo(() => {
+    if (userSubscription && userSubscription.subscriptionCurrency === 'twd') {
+      return <span className="text-sm mb-2">{'TWD$8800 / year'}</span>;
+    }
+    if (userSubscription && userSubscription.subscriptionCurrency === 'usd') {
+      return <span className="text-sm mb-2">{'USD$279.99 / year'}</span>;
+    }
+
+    if (i18n.language === 'zh-Hant' || i18n.language === 'zh') {
+      return <span className="text-sm mb-2">{'TWD$8800 / year'}</span>;
+    } else {
+      return <span className="text-sm mb-2">{'USD$279.99 / year'}</span>;
+    }
+  }, [userSubscription, i18n.language]);
 
   return (
     <Tabs defaultValue="monthly" className="mt-2 mb-4 w-full">
@@ -317,20 +388,8 @@ const UltraPlanPrice = ({
           {t('YEARLY')}
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="monthly">
-        {i18n.language === 'zh-Hant' || i18n.language === 'zh' ? (
-          <span className="text-sm mb-2">{'TWD$880 / month'}</span>
-        ) : (
-          <span className="text-sm mb-2">{'USD$29.99 / month'}</span>
-        )}
-      </TabsContent>
-      <TabsContent value="yearly">
-        {i18n.language === 'zh-Hant' || i18n.language === 'zh' ? (
-          <span className="text-sm mb-2">{'TWD$8800 / year'}</span>
-        ) : (
-          <span className="text-sm mb-2">{'USD$279.99 / year'}</span>
-        )}
-      </TabsContent>
+      <TabsContent value="monthly">{monthlyPriceComponent}</TabsContent>
+      <TabsContent value="yearly">{yearlyPriceComponent}</TabsContent>
     </Tabs>
   );
 };
