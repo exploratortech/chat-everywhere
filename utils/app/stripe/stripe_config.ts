@@ -1,5 +1,3 @@
-import { PaidPlanLinks } from '@/types/stripe-product';
-
 import {
   STRIPE_PAID_PLAN_LINKS_PRODUCTION,
   STRIPE_PAID_PLAN_LINKS_STAGING,
