@@ -11,5 +11,6 @@
   "Upload": "上傳",
   "File uploaded successfully": "檔案上傳成功",
   "File upload failed": "檔案上傳失敗",
-  "There was a problem when changing subscription plan, please contact support team": "當您更改訂閱方案時，發生問題，請聯絡支援團隊"
+  "There was a problem when changing subscription plan, please contact support team": "當您更改訂閱方案時，發生問題，請聯絡支援團隊",
+  "There was a problem fetching user subscription detail, please contact support team": "取得使用者訂閱詳細資訊時，發生問題，請聯絡支援團隊"
 }
