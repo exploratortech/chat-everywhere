@@ -7,6 +7,7 @@ import AiPainter from '../components/AiPainter';
 import AiPainterResult from '../components/AiPainterResult';
 import { ImageGenerationComponent } from '../components/ImageGenerationComponent';
 import MjImageComponentV2 from '../components/MjImageComponentV2';
+import MjImageProgress from '../components/MjImageProgress';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 
@@ -138,6 +139,22 @@ const AssistantRespondMessage = memo(
         rehypePlugins={[rehypeRaw]}
         components={{
           div: ({ node, children, ...props }) => {
+            if (
+              node?.properties?.id === 'MjImageProgress' &&
+              node?.properties?.dataComponentState
+            ) {
+              const componentState = JSON.parse(
+                (node?.properties?.dataComponentState as string) || '{}',
+              ) as any;
+              return (
+                <MjImageProgress
+                  content={componentState.content}
+                  state={componentState.state}
+                  percentage={componentState.percentage}
+                  errorMessage={componentState?.errorMessage || undefined}
+                />
+              );
+            }
             if (node?.properties?.id === 'ai-painter-generated-image') {
               const imageTags = node?.children;
               if (!imageTags) return <>{children}</>;
