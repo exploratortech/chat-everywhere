@@ -61,7 +61,8 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
     },
     method: 'POST',
     body: JSON.stringify({
-      model: 'gpt-4o',
+      // model: 'gpt-4o',
+      model: 'gpt-3.5-turbo',
       temperature: 0.1,
       stream: false,
       functions: functionCallsToSend,
@@ -104,27 +105,59 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
 
   let functionCallResponse =
     completionResponseJson.choices[0].message.function_call;
-  if (functionCallResponse) {
-    const functionName = functionCallResponse.name;
-    const functionParameters = JSON.parse(functionCallResponse.arguments);
 
-    if (functionName === 'error-message') {
-      throw new Error('Translate and enhance prompt error', {
-        cause: {
-          translateAndEnhancePromptErrorMessage:
-            functionParameters.errorMessage,
-        },
-      });
-    } else if (functionName === 'generate-image') {
-      console.log('resultPrompt', functionParameters.prompt);
-      return functionParameters.prompt;
-    }
-  } else {
-    console.log({
-      completionResponseJson,
+  const maxRetries = 3;
+  let currentRetry = 0;
+
+  while (!functionCallResponse && currentRetry < maxRetries) {
+    console.log(`Retry ${currentRetry + 1}/${maxRetries}`);
+    const retryResponse = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_GPT_4_KEY}`,
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        temperature: 0.1,
+        stream: false,
+        functions: functionCallsToSend,
+        messages: [
+          {
+            role: 'system',
+            content: translateSystemPrompt,
+          },
+          {
+            role: 'user',
+            content: `Prompt: ${prompt}`,
+          },
+        ],
+      }),
     });
-    throw new Error('Translate and enhance prompt error');
+    const retryResponseJson = await retryResponse.json();
+    functionCallResponse = retryResponseJson.choices[0].message.function_call;
+    currentRetry++;
+  }
+
+  if (!functionCallResponse) {
+    throw new Error('Translate and enhance prompt error', {
+      cause: {
+        message: 'Failed to enhance the prompt after multiple attempts',
+      },
+    });
+  }
+
+  const functionName = functionCallResponse.name;
+  const functionParameters = JSON.parse(functionCallResponse.arguments);
+
+  if (functionName === 'error-message') {
+    throw new Error('Translate and enhance prompt error', {
+      cause: {
+        translateAndEnhancePromptErrorMessage: functionParameters.errorMessage,
+      },
+    });
+  } else if (functionName === 'generate-image') {
+    console.log('resultPrompt', functionParameters.prompt);
+    return functionParameters.prompt;
   }
 };
-
-// TODO: Handle not calling any function
