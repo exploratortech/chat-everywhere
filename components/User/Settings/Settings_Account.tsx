@@ -58,7 +58,7 @@ export default function Settings_Account() {
               </p>
             </div>
           )}
-          {<PlanComparison user={user} />}
+          {<PlanComparison user={user} isPaidUser={isPaidUser} />}
 
           {displayReferralCodeEnterer && <ReferralCodeEnter />}
           <div>
