@@ -12,7 +12,7 @@ import {
 } from '@/utils/app/eventTracking';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import {
-  ProgressHandler,
+  MjProgressProgressHandler,
   makeCreateImageSelectorV2,
   makeWriteToStream,
 } from '@/utils/app/streamHandler';
@@ -130,7 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   const writeToStream = makeWriteToStream(writer, encoder);
   const createImageSelector = makeCreateImageSelectorV2(writeToStream);
-  const progressHandler = new ProgressHandler(writeToStream);
+  const progressHandler = new MjProgressProgressHandler(writeToStream);
 
   const requestBody = (await req.json()) as ChatBody;
 
@@ -332,7 +332,8 @@ const handler = async (req: Request): Promise<Response> => {
               MJ_INVALID_USER_ACTION_LIST.includes(mjResponseContent);
             if (isInvalidUserAction) {
               progressHandler.updateProgress({
-                content: `Error: ${mjResponseContent} \n`,
+                content: mjResponseContent,
+                errorMessage: 'Invalid user action',
                 state: 'error',
               });
 
@@ -409,14 +410,19 @@ const handler = async (req: Request): Promise<Response> => {
         'message' in error.cause
       ) {
         const customErrorMessage = error.cause.message;
+        console.log({
+          customErrorMessage,
+        });
         await progressHandler.updateProgress({
-          content: `Error: ${customErrorMessage} \n`,
+          content: ``,
+          errorMessage: `${customErrorMessage}`,
           state: 'error',
         });
       } else {
         await progressHandler.updateProgress({
-          content:
-            'Error occurred while generating image, please try again later.',
+          content: ``,
+          errorMessage:
+            'Error occurred while generating image, please try again later',
           state: 'error',
         });
       }
