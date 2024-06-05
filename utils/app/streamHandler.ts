@@ -1,5 +1,7 @@
 import { removeLastLine as removeLastLineF } from './../../utils/app/ui';
 
+import { MjJob } from '@/types/mjJob';
+
 import GeneralHtmlComponentParser from '@/components/Chat/components/GeneralHtmlComponentParser';
 import MjImageProgress from '@/components/Chat/components/MjImageProgress';
 import MjImageSelector, {
@@ -103,5 +105,20 @@ export class MjProgressProgressHandler {
       temp: true,
     });
     await this.writeToStream(html);
+  }
+}
+
+export class MjQueueJobComponentHandler {
+  public async generateComponentHTML({ job }: { job: MjJob }) {
+    return await generateComponentHTML({
+      component: GeneralHtmlComponentParser,
+      props: {
+        id: 'MjQueueJob',
+        componentState: {
+          job,
+        },
+      },
+      temp: true,
+    });
   }
 }
