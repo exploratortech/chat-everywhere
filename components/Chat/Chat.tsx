@@ -1,4 +1,4 @@
-import { IconArrowDown, IconClearAll } from '@tabler/icons-react';
+import { IconClearAll } from '@tabler/icons-react';
 import {
   Fragment,
   MutableRefObject,
@@ -332,10 +332,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                             }
                           : {
                               role: 'user',
-                              content: customInstructionPrompt.content || promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
+                              content:
+                                customInstructionPrompt.content ||
+                                promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
                               pluginId: null,
                             };
-                        
+
                         setCurrentMessage(message);
                         handleSend(0, message, customInstructionPrompt);
                       }}
