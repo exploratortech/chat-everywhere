@@ -129,13 +129,7 @@ async function sendRequest(
   outputLanguage: string,
   user: User | null,
 ): Promise<Response> {
-  const body = JSON.stringify({
-    ...chatBody,
-    ...(plugin?.id === PluginID.IMAGE_GEN &&
-      chatBody.messages.length > 0 && {
-        userPrompt: chatBody.messages[chatBody.messages.length - 1].content,
-      }),
-  });
+  const body = JSON.stringify(chatBody);
 
   const response = await fetch(getEndpoint(plugin), {
     method: 'POST',
