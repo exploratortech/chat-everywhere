@@ -20,7 +20,8 @@ export const getEndpoint = (plugin: Plugin | null) => {
   }
 
   if (plugin.id === PluginID.IMAGE_GEN) {
-    return 'api/image-gen';
+    // TODO: rename the path
+    return 'api/mj-queue/add';
   }
 
   if (plugin.id === PluginID.mqtt) {
