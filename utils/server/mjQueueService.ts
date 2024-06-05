@@ -53,7 +53,7 @@ export const MjQueueService = {
     const args = [] as unknown[]; // No additional arguments are needed for this script
     const jobIds = (await redis.eval(script, keys, args)) as string[];
     if (Array.isArray(jobIds) && jobIds.length > 0) {
-      // TODO: Sleep for 30 seconds, replace to callback instead
+      // TODO: Sleep for 5 seconds, replace to callback instead
       for (const jobId of jobIds) {
         console.log(`Processing jobId: ${jobId}`);
         await MjQueueJob.markProcessing(jobId, 0);
@@ -65,7 +65,7 @@ export const MjQueueService = {
 
           await MjQueueJob.markCompleted(jobId, '');
           console.log(`Job ${jobId} marked as completed`);
-        }, 30000);
+        }, 5000);
       }
     } else {
       console.log(
