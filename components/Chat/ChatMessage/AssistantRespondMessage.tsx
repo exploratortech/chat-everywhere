@@ -8,6 +8,7 @@ import AiPainterResult from '../components/AiPainterResult';
 import { ImageGenerationComponent } from '../components/ImageGenerationComponent';
 import MjImageComponentV2 from '../components/MjImageComponentV2';
 import MjImageProgress from '../components/MjImageProgress';
+import MjQueueJobComponent from '../components/MjQueueJobComponent';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 
@@ -152,6 +153,20 @@ const AssistantRespondMessage = memo(
                   state={componentState.state}
                   percentage={componentState.percentage}
                   errorMessage={componentState?.errorMessage || undefined}
+                />
+              );
+            }
+            if (
+              node?.properties?.id === 'MjQueueJob' &&
+              node?.properties?.dataComponentState
+            ) {
+              const componentState = JSON.parse(
+                (node?.properties?.dataComponentState as string) || '{}',
+              ) as any;
+              return (
+                <MjQueueJobComponent
+                  job={componentState.job}
+                  messageIndex={messageIndex}
                 />
               );
             }
