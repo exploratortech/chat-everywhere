@@ -2,6 +2,7 @@ export type JobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
 export interface BasedMjJob {
   jobId: string;
+  userPrompt: string;
   status: JobStatus;
   enqueuedAt: string;
 }
