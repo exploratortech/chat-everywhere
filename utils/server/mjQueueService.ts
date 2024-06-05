@@ -1,81 +1,131 @@
+import {
+  CompletedMjJob,
+  FailedMjJob,
+  MjJob,
+  ProcessingMjJob,
+  QueuedMjJob,
+} from '@/types/mjJob';
+
 import redis from './upstashRedisClient';
 
 import { v4 as uuidv4 } from 'uuid';
 
-const QUEUE_KEY = 'priority_queue';
-const QUEUE_INFO_KEY = 'queue_info';
+const QUEUE_KEY = 'mj_waiting_queue';
+const JOB_INFO_KEY = 'mj_job_info';
+const PROCESSING_KEY = 'mj_processing_jobs';
 
-type JobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+export const MjQueueService = {
+  addJobToQueue: async (): Promise<QueuedMjJob['jobId']> => {
+    const enqueuedAt = new Date().toISOString();
+    const jobId = uuidv4();
 
-interface BasedMjJob {
-  jobId: string;
-  status: JobStatus;
-  enqueuedAt: string;
-}
-interface QueuedMjJob extends BasedMjJob {
-  status: 'QUEUED';
-  position: number;
-}
-interface ProcessingMjJob extends BasedMjJob {
-  status: 'PROCESSING';
-  progress: number;
-}
-interface CompletedMjJob extends BasedMjJob {
-  status: 'COMPLETED';
-  imageUrl: string;
-}
-interface FailedMjJob extends BasedMjJob {
-  status: 'FAILED';
-  reason: string;
-}
-type MjJob = QueuedMjJob | ProcessingMjJob | CompletedMjJob | FailedMjJob;
+    await redis.rpush(QUEUE_KEY, jobId);
 
-export async function addJobToQueue(): Promise<QueuedMjJob['jobId']> {
-  const enqueuedAt = new Date().toISOString();
-  const jobId = uuidv4();
+    await redis.hset(`${JOB_INFO_KEY}:${jobId}`, {
+      jobId,
+      status: 'QUEUED',
+      enqueuedAt,
+    });
 
-  await redis.rpush(QUEUE_KEY, jobId);
+    console.log(`added jobId ${jobId} to queue`);
+    return jobId;
+  },
+  processNextBatch: async () => {
+    // Using lua script to make sure the queue is atomic
+    const script = `
+    local maxCapacity = 5  -- Define the maximum capacity of processing jobs
+    local processingCount = redis.call('SCARD', KEYS[1])
+    local availableCapacity = maxCapacity - processingCount
+    local jobIds = {}
+    if availableCapacity > 0 then
+        for i = 1, availableCapacity do
+            local jobId = redis.call('LPOP', KEYS[2])  -- Pop a job ID from the waiting queue
+            if not jobId then  -- If no job ID is found, break the loop
+                break
+            end
+            redis.call('SADD', KEYS[1], jobId)  -- Add the job ID to the processing set
+            table.insert(jobIds, jobId)
+        end
+    end
+    return jobIds  -- Return the list of job IDs that will be processed
+  `;
+    const keys = [PROCESSING_KEY, QUEUE_KEY, JOB_INFO_KEY];
+    const args = [] as unknown[]; // No additional arguments are needed for this script
+    const jobIds = (await redis.eval(script, keys, args)) as string[];
+    if (Array.isArray(jobIds) && jobIds.length > 0) {
+      // TODO: Sleep for 30 seconds, replace to callback instead
+      for (const jobId of jobIds) {
+        console.log(`Processing jobId: ${jobId}`);
+        await MjQueueJob.markProcessing(jobId, 0);
+        setTimeout(async () => {
+          console.log(`Job ${jobId} processed, Now removing from queue`);
 
-  await redis.hset(`${QUEUE_INFO_KEY}:${jobId}`, {
-    jobId,
-    status: 'QUEUED',
-    enqueuedAt,
-  });
+          await redis.srem(PROCESSING_KEY, jobId); // Remove from processing set
+          console.log(`Job ${jobId} removed from queue`);
 
-  console.log(`added jobId ${jobId} to queue`);
-  return jobId;
-}
+          await MjQueueJob.markCompleted(jobId, '');
+          console.log(`Job ${jobId} marked as completed`);
+        }, 30000);
+      }
+    } else {
+      console.log(
+        'No jobs processed, either due to processing limit or empty queue.',
+      );
+    }
+  },
+};
 
-export async function getJob(jobId: string): Promise<MjJob | null> {
-  const queueList = await redis.lrange(QUEUE_KEY, 0, -1);
-  const position = queueList.indexOf(jobId);
-  console.log({
-    jobId,
-    position,
-  });
-  if (position === -1) return null;
+export const MjQueueJob = {
+  get: async (jobId: string): Promise<MjJob | null> => {
+    const jobInfo = await redis.hgetall(`${JOB_INFO_KEY}:${jobId}`);
+    if (!jobInfo) return null;
 
-  const jobInfo = await redis.hgetall(`${QUEUE_INFO_KEY}:${jobId}`);
-  console.log({
-    jobInfo,
-  });
-  if (!jobInfo) return null;
-  return jobInfo as unknown as MjJob;
-}
+    if (jobInfo.status === 'QUEUED') {
+      const queueList = await redis.lrange(QUEUE_KEY, 0, -1);
+      let position = queueList.indexOf(jobId);
+      if (position === -1) {
+        return null;
+      } else {
+        return {
+          ...jobInfo,
+          position,
+        } as QueuedMjJob;
+      }
+    }
 
-export async function processNextJob() {
-  const jobId = await redis.lpop(QUEUE_KEY); // Pop from the beginning
-  if (jobId) {
-    console.log(`Processing jobId ${jobId}`);
-
-    await redis.hset(`${QUEUE_INFO_KEY}:${jobId}`, { status: 'PROCESSING' });
-
-    // TODO: Sleep for 10 seconds, replace to callback instead
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    console.log(`Job ${jobId} processed, Now removing from queue`);
-
-    await redis.del(`${QUEUE_INFO_KEY}:${jobId}`);
-    console.log(`Job ${jobId} removed from queue`);
-  }
-}
+    return jobInfo as unknown as MjJob;
+  },
+  remove: async (jobId: string) => {
+    // remove from job info
+    await redis.del(`${JOB_INFO_KEY}:${jobId}`);
+    // remove from queue
+    await redis.lrem(QUEUE_KEY, 0, jobId);
+  },
+  markProcessing: async (
+    jobId: ProcessingMjJob['jobId'],
+    progress: ProcessingMjJob['progress'],
+  ) => {
+    await redis.hset(`${JOB_INFO_KEY}:${jobId}`, {
+      status: 'PROCESSING',
+      progress,
+    });
+  },
+  markCompleted: async (
+    jobId: CompletedMjJob['jobId'],
+    imageUrl: CompletedMjJob['imageUrl'],
+  ) => {
+    await redis.hset(`${JOB_INFO_KEY}:${jobId}`, {
+      status: 'COMPLETED',
+      imageUrl,
+    });
+  },
+  markFailed: async (
+    jobId: FailedMjJob['jobId'],
+    reason: FailedMjJob['reason'],
+  ) => {
+    await redis.hset(`${JOB_INFO_KEY}:${jobId}`, {
+      status: 'FAILED',
+      reason,
+    });
+  },
+};
