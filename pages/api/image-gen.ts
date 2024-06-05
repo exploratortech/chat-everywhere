@@ -12,7 +12,7 @@ import {
 } from '@/utils/app/eventTracking';
 import { MJ_INVALID_USER_ACTION_LIST } from '@/utils/app/mj_const';
 import {
-  ProgressHandler,
+  MjProgressProgressHandler,
   makeCreateImageSelectorV2,
   makeWriteToStream,
 } from '@/utils/app/streamHandler';
@@ -39,6 +39,12 @@ export const config = {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
+
+const ContentFilterErrorMessageListFromMyMidjourneyProvider = [
+  'Our AI moderator thinks this prompt is probably against our community standards',
+  'Request cancelled due to image filters',
+  'forbidden: The prompt has blocked words',
+];
 
 const generateMjPrompt = (
   userInputText: string,
@@ -124,7 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   const writeToStream = makeWriteToStream(writer, encoder);
   const createImageSelector = makeCreateImageSelectorV2(writeToStream);
-  const progressHandler = new ProgressHandler(writeToStream);
+  const progressHandler = new MjProgressProgressHandler(writeToStream);
 
   const requestBody = (await req.json()) as ChatBody;
 
@@ -195,7 +201,7 @@ const handler = async (req: Request): Promise<Response> => {
           headers: requestHeader,
           body: JSON.stringify({
             prompt: generationPrompt,
-            webhookOverride: `${getHomeUrl()}/api/webhooks/mj-health-check`
+            webhookOverride: `${getHomeUrl()}/api/webhooks/mj-health-check`,
           }),
         },
       );
@@ -203,7 +209,20 @@ const handler = async (req: Request): Promise<Response> => {
       const imageGenerationResponseText = await imageGenerationResponse.text();
 
       if (!imageGenerationResponse.ok) {
-        console.log(imageGenerationResponse);
+        if (
+          ContentFilterErrorMessageListFromMyMidjourneyProvider.some(
+            (errorMessage) =>
+              imageGenerationResponseText.includes(errorMessage),
+          )
+        ) {
+          await logEvent('Image generation failed due to content filter');
+          throw new Error('Image generation failed due to content filter', {
+            cause: {
+              message:
+                'Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.',
+            },
+          });
+        }
 
         await logEvent('Image generation failed');
         throw new Error('Image generation failed');
@@ -313,7 +332,8 @@ const handler = async (req: Request): Promise<Response> => {
               MJ_INVALID_USER_ACTION_LIST.includes(mjResponseContent);
             if (isInvalidUserAction) {
               progressHandler.updateProgress({
-                content: `Error: ${mjResponseContent} \n`,
+                content: mjResponseContent,
+                errorMessage: 'Invalid user action',
                 state: 'error',
               });
 
@@ -383,23 +403,26 @@ const handler = async (req: Request): Promise<Response> => {
       return;
     } catch (error) {
       jobTerminated = true;
-      console.log(error);
       if (
         error instanceof Error &&
         error.cause &&
         typeof error.cause === 'object' &&
-        'translateAndEnhancePromptErrorMessage' in error.cause
+        'message' in error.cause
       ) {
-        const translateAndEnhancePromptErrorMessage =
-          error.cause.translateAndEnhancePromptErrorMessage;
+        const customErrorMessage = error.cause.message;
+        console.log({
+          customErrorMessage,
+        });
         await progressHandler.updateProgress({
-          content: `Error: ${translateAndEnhancePromptErrorMessage} \n`,
+          content: ``,
+          errorMessage: `${customErrorMessage}`,
           state: 'error',
         });
       } else {
         await progressHandler.updateProgress({
-          content:
-            'Error occurred while generating image, please try again later.',
+          content: ``,
+          errorMessage:
+            'Error occurred while generating image, please try again later',
           state: 'error',
         });
       }
