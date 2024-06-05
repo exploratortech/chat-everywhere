@@ -15,7 +15,7 @@ const JOB_INFO_KEY = 'mj_job_info';
 const PROCESSING_KEY = 'mj_processing_jobs';
 
 export const MjQueueService = {
-  addJobToQueue: async (): Promise<QueuedMjJob['jobId']> => {
+  addJobToQueue: async (userPrompt: string): Promise<QueuedMjJob['jobId']> => {
     const enqueuedAt = new Date().toISOString();
     const jobId = uuidv4();
 
@@ -25,6 +25,7 @@ export const MjQueueService = {
       jobId,
       status: 'QUEUED',
       enqueuedAt,
+      userPrompt,
     });
 
     console.log(`added jobId ${jobId} to queue`);
