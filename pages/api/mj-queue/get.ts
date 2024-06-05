@@ -1,18 +1,28 @@
 import { MjQueueJob } from '@/utils/server/mjQueueService';
 
+import { z } from 'zod';
+
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
 };
 
 const handler = async (req: Request): Promise<Response> => {
-  // TODO: add auth validation
-  // TODO: add zod validation
-
-  const jobId = req.headers.get('job-id');
-  if (!jobId) {
-    return new Response('No job id provided', { status: 400 });
+  if (req.method !== 'GET') {
+    return new Response('Method Not Allowed', { status: 405 });
   }
+
+  // TODO: add auth validation
+
+  const jobIdSchema = z.string().min(1);
+
+  let jobId;
+  try {
+    jobId = jobIdSchema.parse(req.headers.get('job-id'));
+  } catch (error) {
+    return new Response('Invalid job id', { status: 400 });
+  }
+
   const jobInfo = await MjQueueJob.get(jobId);
 
   console.log({
