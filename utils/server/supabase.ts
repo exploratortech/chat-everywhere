@@ -503,9 +503,6 @@ export const userProfileQuery = async ({
   }
 
   if (!userProfile) throw new Error('User not found');
-  console.log({
-    userProfile,
-  });
 
   let referrerRecords,
     refereeRecords,
