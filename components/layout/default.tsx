@@ -618,7 +618,11 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     fetchAndUpdateCreditUsage(user.id, isPaidUser);
   }, [user, isPaidUser, conversations]);
 
-  const handleUserLogout = async () => {
+  const handleUserLogout = async ({
+    clearBrowserChatHistory = false,
+  }: {
+    clearBrowserChatHistory: boolean;
+  }) => {
     const accessToken = (await supabase.auth.getSession()).data.session
       ?.access_token;
 
@@ -630,7 +634,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     }
     await supabase.auth.signOut();
 
-    if (shouldClearConversationsOnLogout) {
+    if (shouldClearConversationsOnLogout || clearBrowserChatHistory) {
       resetStateOnLogout({
         clearConversationHistory: true,
       });
