@@ -9,6 +9,8 @@ import {
 import React, { cloneElement, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import useLogoutHook from '@/hooks/useLogoutHook';
+
 import { trackEvent } from '@/utils/app/eventTracking';
 
 import { LogoutClearBrowserDialog } from '@/components/LogoutClearBrowserDialog';
@@ -40,8 +42,9 @@ export default function Sidebar({
   const {
     state: { user },
     dispatch: homeDispatch,
-    handleUserLogout,
   } = useContext(HomeContext);
+
+  const { handleUserLogout } = useLogoutHook();
   const { t } = useTranslation('model');
   const [open, setOpen] = useState<boolean>(false);
   const iconClass = 'h-[18px] tablet:h-[22px] tablet:w-[36px]';
@@ -152,11 +155,9 @@ export default function Sidebar({
         setOpen={setOpen}
         logoutCallback={() => {
           handleUserLogout({ clearBrowserChatHistory: false });
-          closeModel();
         }}
         logoutAndClearCallback={() => {
           handleUserLogout({ clearBrowserChatHistory: true });
-          closeModel();
         }}
       />
     </div>

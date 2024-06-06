@@ -1,3 +1,4 @@
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -11,6 +12,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 
+import Spinner from './Spinner';
+import HomeContext from './home/home.context';
+
 export function LogoutClearBrowserDialog({
   logoutCallback,
   logoutAndClearCallback,
@@ -23,10 +27,18 @@ export function LogoutClearBrowserDialog({
   setOpen: (open: boolean) => void;
 }) {
   const { t } = useTranslation('model');
+  const {
+    state: { isRequestingLogout },
+    dispatch: homeDispatch,
+  } = useContext(HomeContext);
+  const hasRequestedLogout = useMemo(
+    () => isRequestingLogout !== null,
+    [isRequestingLogout],
+  );
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-max">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-white">
             {t('Sign out option')}
@@ -36,7 +48,10 @@ export function LogoutClearBrowserDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex justify-between">
-          <AlertDialogCancel className="text-white">
+          <AlertDialogCancel
+            className="text-white"
+            disabled={hasRequestedLogout}
+          >
             {t('Cancel')}
           </AlertDialogCancel>
           <div className="flex gap-2 mobile:flex-col">
@@ -44,11 +59,22 @@ export function LogoutClearBrowserDialog({
               className="grow"
               variant="destructive"
               onClick={logoutAndClearCallback}
+              disabled={hasRequestedLogout}
             >
-              {t('Clear Browser Chat History and Sign out')}
+              <div className="flex items-center gap-2">
+                {hasRequestedLogout && <Spinner />}
+                {t('Clear Browser Chat History and Sign out')}
+              </div>
             </Button>
-            <Button className="grow" onClick={logoutCallback}>
-              {t('Sign out')}
+            <Button
+              className="grow"
+              onClick={logoutCallback}
+              disabled={hasRequestedLogout}
+            >
+              <div className="flex items-center gap-2">
+                {hasRequestedLogout && <Spinner />}
+                {t('Sign out')}
+              </div>
             </Button>
           </div>
         </AlertDialogFooter>
