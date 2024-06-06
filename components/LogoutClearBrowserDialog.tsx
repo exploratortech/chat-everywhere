@@ -39,11 +39,17 @@ export function LogoutClearBrowserDialog({
           <AlertDialogCancel className="text-white">
             {t('Cancel')}
           </AlertDialogCancel>
-          <div className="flex gap-2">
-            <Button variant="destructive" onClick={logoutAndClearCallback}>
+          <div className="flex gap-2 mobile:flex-col">
+            <Button
+              className="grow"
+              variant="destructive"
+              onClick={logoutAndClearCallback}
+            >
               {t('Clear Browser Chat History and Sign out')}
             </Button>
-            <Button onClick={logoutCallback}>{t('Sign out')}</Button>
+            <Button className="grow" onClick={logoutCallback}>
+              {t('Sign out')}
+            </Button>
           </div>
         </AlertDialogFooter>
       </AlertDialogContent>
