@@ -1,10 +1,18 @@
 export type JobStatus = 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
+export interface MjImageGenRequest {
+  userPrompt: string;
+  imageStyle: string | undefined;
+  imageQuality: string | undefined;
+  temperature: number | null;
+}
+
 export interface BasedMjJob {
   jobId: string;
-  userPrompt: string;
   status: JobStatus;
   enqueuedAt: string;
+  userId: string;
+  mjRequest: MjImageGenRequest;
 }
 export interface QueuedMjJob extends BasedMjJob {
   status: 'QUEUED';
