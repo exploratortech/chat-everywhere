@@ -1,4 +1,10 @@
+import { getHomeUrl } from '@/utils/app/api';
+import { unauthorizedResponse } from '@/utils/server/auth';
 import { MjQueueJob } from '@/utils/server/mjQueueService';
+import {
+  getAdminSupabaseClient,
+  getUserProfile,
+} from '@/utils/server/supabase';
 
 import { z } from 'zod';
 
@@ -7,12 +13,12 @@ export const config = {
   preferredRegion: 'icn1',
 };
 
+const supabase = getAdminSupabaseClient();
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method !== 'GET') {
     return new Response('Method Not Allowed', { status: 405 });
   }
-
-  // TODO: add auth validation
 
   const jobIdSchema = z.string().min(1);
 
@@ -33,18 +39,20 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('No job found', { status: 404 });
   }
 
+  const host = getHomeUrl();
   switch (jobInfo.status) {
     case 'QUEUED':
-      // TODO: update this to use the actual api
-      fetch('http://localhost:3000/api/mj-queue/process');
+      // TODO: update this to use the api path
+      fetch(`${host}/api/mj-queue/process`);
       return new Response(JSON.stringify(jobInfo), { status: 200 });
     case 'PROCESSING':
       return new Response(JSON.stringify(jobInfo), { status: 200 });
     case 'COMPLETED':
-      // No longer need the job
+      // No longer need the job after return to frontend
       MjQueueJob.remove(jobId);
       return new Response(JSON.stringify(jobInfo), { status: 200 });
     case 'FAILED':
+      // No longer need the job after return to frontend
       MjQueueJob.remove(jobId);
       return new Response(JSON.stringify(jobInfo), { status: 200 });
     default:
