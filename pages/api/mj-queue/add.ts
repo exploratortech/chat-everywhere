@@ -1,5 +1,13 @@
 import { MjQueueJobComponentHandler } from '@/utils/app/streamHandler';
+import { unauthorizedResponse } from '@/utils/server/auth';
 import { MjQueueJob, MjQueueService } from '@/utils/server/mjQueueService';
+import {
+  getAdminSupabaseClient,
+  getUserProfile,
+} from '@/utils/server/supabase';
+
+import { ChatBody } from '@/types/chat';
+import { MjImageGenRequest } from '@/types/mjJob';
 
 import { z } from 'zod';
 
@@ -8,27 +16,43 @@ export const config = {
   preferredRegion: 'icn1',
 };
 
+const supabase = getAdminSupabaseClient();
+
 const handler = async (req: Request): Promise<Response> => {
   // Only allow POST requests
   if (req.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 });
   }
 
-  // TODO: add auth validation
+  const userToken = req.headers.get('user-token');
 
-  const bodySchema = z.object({
-    userPrompt: z.string().min(1),
-  });
+  const { data, error } = await supabase.auth.getUser(userToken || '');
+  if (!data || error) return unauthorizedResponse;
+
+  const user = await getUserProfile(data.user.id);
+  if (!user || user.plan === 'free') return unauthorizedResponse;
 
   let body;
+  let mjRequest: MjImageGenRequest;
   try {
-    body = await req.json();
-    bodySchema.parse(body);
+    const requestBody = (await req.json()) as ChatBody;
+    if (requestBody.messages.length < 1) {
+      return new Response('Invalid request body', { status: 400 });
+    }
+    mjRequest = {
+      userPrompt: requestBody.messages[requestBody.messages.length - 1].content,
+      imageStyle: requestBody.imageStyle,
+      imageQuality: requestBody.imageQuality,
+      temperature: requestBody.temperature,
+    };
   } catch (error) {
     return new Response('Invalid request body', { status: 400 });
   }
 
-  const jobId = await MjQueueService.addJobToQueue(body.userPrompt);
+  const jobId = await MjQueueService.addJobToQueue({
+    mjRequest,
+    userId: user.id,
+  });
   if (!jobId) {
     return new Response('Error', { status: 500 });
   }
