@@ -38,6 +38,11 @@ export interface HomeInitialState {
   syncingConversation: boolean;
   syncSuccess: boolean | null; // null = not yet synced
 
+  // Request Logout
+  isRequestingLogout: {
+    clearBrowserChatHistory: boolean;
+  } | null;
+
   // User Auth
   showSettingsModel: boolean;
   showFilePortalModel: boolean;
@@ -105,6 +110,9 @@ export const initialState: HomeInitialState = {
   replaceRemoteData: false,
   syncingConversation: false,
   syncSuccess: null,
+
+  // Request Logout
+  isRequestingLogout: null,
 
   // User Auth
   showSettingsModel: false,

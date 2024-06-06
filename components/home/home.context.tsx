@@ -22,11 +22,6 @@ export interface HomeContextProps {
     data: KeyValuePair,
   ) => void;
   handleCreatePrompt: (folderId?: string | null) => void;
-  handleUserLogout: ({
-    clearBrowserChatHistory,
-  }: {
-    clearBrowserChatHistory: boolean;
-  }) => void;
   toggleChatbar: () => void;
   togglePromptbar: () => void;
   setDragData: (dragData: DragData) => void;
