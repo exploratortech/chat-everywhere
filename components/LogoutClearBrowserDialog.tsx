@@ -28,16 +28,20 @@ export function LogoutClearBrowserDialog({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{t('Sign out option')}</AlertDialogTitle>
+          <AlertDialogTitle className="text-white">
+            {t('Sign out option')}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            {t('You can choose to clear your chat history or just logout.')}
+            {t('You can choose to clear your chat history or just sign out.')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex justify-between">
-          <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+          <AlertDialogCancel className="text-white">
+            {t('Cancel')}
+          </AlertDialogCancel>
           <div className="flex gap-2">
             <Button variant="destructive" onClick={logoutAndClearCallback}>
-              {t('Clear Browser Chat History')}
+              {t('Clear Browser Chat History and Sign out')}
             </Button>
             <Button onClick={logoutCallback}>{t('Sign out')}</Button>
           </div>
