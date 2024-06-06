@@ -6,11 +6,12 @@ import {
   IconSettings,
   IconUser,
 } from '@tabler/icons-react';
-import React, { cloneElement, useContext } from 'react';
+import React, { cloneElement, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
+import { LogoutClearBrowserDialog } from '@/components/LogoutClearBrowserDialog';
 import HomeContext from '@/components/home/home.context';
 
 import { SettingsModelContext } from './SettingsModel';
@@ -42,6 +43,7 @@ export default function Sidebar({
     handleUserLogout,
   } = useContext(HomeContext);
   const { t } = useTranslation('model');
+  const [open, setOpen] = useState<boolean>(false);
   const iconClass = 'h-[18px] tablet:h-[22px] tablet:w-[36px]';
   const items: sideBarItemType[] = [
     {
@@ -95,7 +97,7 @@ export default function Sidebar({
       <a
         key={`${i} ${item.name}`}
         href="#"
-        className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 tablet:px-2 tablet:py-4 
+        className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 tablet:px-2 tablet:py-4
           ${showing === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
           `}
         onClick={item.callback}
@@ -124,14 +126,14 @@ export default function Sidebar({
           href="#"
           className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"
           onClick={() => {
-            closeModel();
             if (user) {
-              handleUserLogout();
+              setOpen(true);
             } else {
               homeDispatch({
                 field: 'showLoginSignUpModel',
                 value: true,
               });
+              closeModel();
             }
           }}
         >
@@ -145,6 +147,18 @@ export default function Sidebar({
           </div>
         </a>
       </div>
+      <LogoutClearBrowserDialog
+        open={open}
+        setOpen={setOpen}
+        logoutCallback={() => {
+          handleUserLogout({ clearBrowserChatHistory: false });
+          closeModel();
+        }}
+        logoutAndClearCallback={() => {
+          handleUserLogout({ clearBrowserChatHistory: true });
+          closeModel();
+        }}
+      />
     </div>
   );
 }

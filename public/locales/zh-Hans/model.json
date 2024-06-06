@@ -232,5 +232,8 @@
   "All in tags": "标签中的全部",
   "Error deleting file": "文件删除失败",
   "Download failed!": "下载失败",
-  "Downloading...": "下载中..."
+  "Downloading...": "下载中...",
+  "Clear Browser Chat History and Sign out": "清除浏览器对话历史并登出",
+  "You can choose to clear your chat history or just sign out.": "您可以选择清除对话历史或只登出。",
+  "Sign out option": "登出选项"
 }
