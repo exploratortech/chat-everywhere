@@ -623,6 +623,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       ?.access_token;
 
     let shouldClearConversationsOnLogout = false;
+    // TODO: Check if user is a temp user or a teacher account
     if (isTempUser) {
       shouldClearConversationsOnLogout = (
         await fetchShouldClearConversationsOnLogout(accessToken)

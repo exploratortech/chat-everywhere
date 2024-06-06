@@ -1,6 +1,7 @@
 import {
   CompletedMjJob,
   FailedMjJob,
+  MjImageGenRequest,
   MjJob,
   ProcessingMjJob,
   QueuedMjJob,
@@ -15,18 +16,26 @@ const JOB_INFO_KEY = 'mj_job_info';
 const PROCESSING_KEY = 'mj_processing_jobs';
 
 export const MjQueueService = {
-  addJobToQueue: async (userPrompt: string): Promise<QueuedMjJob['jobId']> => {
+  addJobToQueue: async ({
+    userId,
+    mjRequest,
+  }: {
+    userId: string;
+    mjRequest: MjImageGenRequest;
+  }): Promise<QueuedMjJob['jobId']> => {
     const enqueuedAt = new Date().toISOString();
     const jobId = uuidv4();
 
     await redis.rpush(QUEUE_KEY, jobId);
 
-    await redis.hset(`${JOB_INFO_KEY}:${jobId}`, {
+    const newJob: Omit<QueuedMjJob, 'position'> = {
       jobId,
       status: 'QUEUED',
       enqueuedAt,
-      userPrompt,
-    });
+      userId,
+      mjRequest,
+    };
+    await redis.hset(`${JOB_INFO_KEY}:${jobId}`, newJob);
 
     console.log(`added jobId ${jobId} to queue`);
     return jobId;
@@ -54,7 +63,7 @@ export const MjQueueService = {
     const args = [] as unknown[]; // No additional arguments are needed for this script
     const jobIds = (await redis.eval(script, keys, args)) as string[];
     if (Array.isArray(jobIds) && jobIds.length > 0) {
-      // TODO: Sleep for 5 seconds, replace to callback instead
+      // TODO: Sleep for 30 seconds, replace to callback instead
       for (const jobId of jobIds) {
         console.log(`Processing jobId: ${jobId}`);
         await MjQueueJob.markProcessing(jobId, 0);
@@ -66,7 +75,7 @@ export const MjQueueService = {
 
           await MjQueueJob.markCompleted(jobId, '');
           console.log(`Job ${jobId} marked as completed`);
-        }, 5000);
+        }, 30000);
       }
     } else {
       console.log(
