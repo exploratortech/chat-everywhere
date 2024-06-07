@@ -110,7 +110,8 @@ const useLogoutHook = () => {
       // if the user is requesting logout, we need to wait for the conversation to be synced
       if (!state.syncingConversation) {
         actualUserLogout({
-          clearBrowserChatHistory: true,
+          clearBrowserChatHistory:
+            state.isRequestingLogout.clearBrowserChatHistory,
         });
       }
     }
