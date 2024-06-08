@@ -3,36 +3,21 @@ export const config = {
   preferredRegion: 'icn1',
 };
 
-const handler = async (req: Request): Promise<Response> => {
-  // Send Slack notification if and only if status is 'FAILED'
-  let messageId = 'N/A',
-    errorMessage = 'N/A',
-    prompt = 'N/A';
-  try {
-    const reqBody = await req.json();
-    if (reqBody.status === 'FAILED') {
-      messageId = reqBody.messageId;
-      errorMessage = reqBody.error;
-      prompt = reqBody.prompt;
-    } else {
-      return new Response('', { status: 200 });
-    }
-  } catch (error) {
-    console.error(error);
-    errorMessage = JSON.stringify(error);
-  }
+const handleFailedStatus = async (reqBody: any) => {
+  const messageId = reqBody.messageId || 'N/A';
+  const errorMessage = reqBody.error || 'N/A';
+  const prompt = reqBody.prompt || 'N/A';
 
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL || "";
-
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL || '';
   let slackMessage = 'Midjourney generation Error:\n';
 
-  if (messageId) {
+  if (messageId !== 'N/A') {
     slackMessage += `Message ID: ${messageId}\n`;
   }
-  if (prompt) {
+  if (prompt !== 'N/A') {
     slackMessage += `Prompt: ${prompt}\n`;
   }
-  if (errorMessage) {
+  if (errorMessage !== 'N/A') {
     slackMessage += `Error: ${errorMessage}`;
   }
 
@@ -50,6 +35,20 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error) {
     console.error('Failed to send Slack notification', error);
+  }
+};
+
+const handler = async (req: Request): Promise<Response> => {
+  try {
+    const reqBody = await req.json();
+    if (reqBody.status === 'FAILED') {
+      await handleFailedStatus(reqBody);
+    } else {
+      // TODO: Handle other status (E.X. update mj queue job info)
+      return new Response('', { status: 200 });
+    }
+  } catch (error) {
+    console.log('Failed to handle request', error);
   }
 
   return new Response('', { status: 200 });
