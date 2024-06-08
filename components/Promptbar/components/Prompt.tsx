@@ -97,7 +97,7 @@ export const PromptComponent = ({ prompt }: Props) => {
     `}
     >
       <Dialog>
-        <DialogTrigger className="w-full">
+        <DialogTrigger className="w-full" asChild>
           <div className="relative w-full flex justify-between items-center">
             <div
               className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 translate-x-0 z-10"
@@ -133,7 +133,6 @@ export const PromptComponent = ({ prompt }: Props) => {
                 </SidebarActionButton>
               </div>
             )}
-
             {!isDeleting && !isRenaming && (
               <div className="absolute right-1 z-10 flex text-gray-300">
                 <SidebarActionButton handleClick={handleOpenDeleteModal}>
