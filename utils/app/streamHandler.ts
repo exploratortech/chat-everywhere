@@ -95,6 +95,7 @@ export class MjQueueJobComponentHandler {
         id: 'MjQueueJob',
         componentState: {
           job,
+          identifier: job.jobId,
         },
       },
       temp: true,
