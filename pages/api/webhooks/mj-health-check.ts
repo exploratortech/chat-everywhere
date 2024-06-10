@@ -1,9 +1,14 @@
+import { MjQueueJob } from '@/utils/server/mjQueueService';
+
+import { CompletedMjJob, ProcessingMjJob } from '@/types/mjJob';
+
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
 };
 
 const handleFailedStatus = async (reqBody: any) => {
+  console.log('handleFailedStatus', reqBody);
   const messageId = reqBody.messageId || 'N/A';
   const errorMessage = reqBody.error || 'N/A';
   const prompt = reqBody.prompt || 'N/A';
@@ -38,13 +43,53 @@ const handleFailedStatus = async (reqBody: any) => {
   }
 };
 
+const handleProcessingStatus = async (reqBody: any) => {
+  console.log('handleProcessingStatus', reqBody);
+  const progress = reqBody.progress;
+  const jobId = reqBody.ref;
+  if (!jobId) {
+    console.error('handleProcessingStatus: jobId is not found');
+    return;
+  }
+  if (!progress) {
+    console.error('handleProcessingStatus: progress is not found');
+    return;
+  }
+  const imageUrl = reqBody.uri;
+
+  await MjQueueJob.update(jobId, {
+    status: 'PROCESSING',
+    progress,
+    imageUrl: imageUrl || '',
+  } as Partial<ProcessingMjJob>);
+};
+
+const handleDoneStatus = async (reqBody: any) => {
+  console.log('handleDoneStatus', reqBody);
+
+  const jobId = reqBody.ref;
+  const uri = reqBody.uri;
+  const buttons = reqBody.buttons;
+  const messageId = reqBody.messageId;
+
+  await MjQueueJob.update(jobId, {
+    status: 'COMPLETED',
+    imageUrl: uri,
+    buttons,
+  } as Partial<CompletedMjJob>);
+};
+
 const handler = async (req: Request): Promise<Response> => {
   try {
     const reqBody = await req.json();
     if (reqBody.status === 'FAILED') {
       await handleFailedStatus(reqBody);
+    } else if (reqBody.status === 'PROCESSING') {
+      await handleProcessingStatus(reqBody);
+    } else if (reqBody.status === 'DONE') {
+      await handleDoneStatus(reqBody);
     } else {
-      // TODO: Handle other status (E.X. update mj queue job info)
+      console.log('mj-health-check webhook (other status):', reqBody);
       return new Response('', { status: 200 });
     }
   } catch (error) {
