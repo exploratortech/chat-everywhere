@@ -11,5 +11,6 @@
   "Upload": "上傳",
   "File uploaded successfully": "檔案上傳成功",
   "File upload failed": "檔案上傳失敗",
-  "Error": "錯誤"
+  "Error": "錯誤",
+  "Retry": "重試"
 }
