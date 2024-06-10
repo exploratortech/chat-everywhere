@@ -3,20 +3,11 @@ import React, { useCallback, useContext } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
+import useRunButtonCommand from '@/hooks/mjQueue/useRunButtonCommand';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
-import {
-  saveConversation,
-  saveConversations,
-  updateConversation,
-  updateConversationLastUpdatedAtTimeStamp,
-} from '@/utils/app/conversation';
-import {
-  removeRedundantTempHtmlString,
-  removeTempHtmlString,
-} from '@/utils/app/htmlStringHandler';
+import { updateConversation } from '@/utils/app/conversation';
 import { getUpdatedAssistantMjConversationV2 } from '@/utils/app/mjImage';
-import { removeSecondLastLine } from '@/utils/app/ui';
 
 import { Conversation, Message } from '@/types/chat';
 
@@ -32,6 +23,7 @@ interface MjImageComponentProps {
   buttons: string[];
   buttonMessageId: string;
   prompt: string;
+  messageIndex: number;
 }
 
 export default function MjImageComponentV2({
@@ -39,15 +31,10 @@ export default function MjImageComponentV2({
   buttons,
   buttonMessageId,
   prompt,
+  messageIndex,
 }: MjImageComponentProps) {
   const {
-    state: {
-      user,
-      isTempUser,
-      selectedConversation,
-      conversations,
-      messageIsStreaming,
-    },
+    state: { isTempUser, messageIsStreaming },
     dispatch: homeDispatch,
     stopConversationRef,
   } = useContext(HomeContext);
@@ -62,152 +49,11 @@ export default function MjImageComponentV2({
     (button) => !buttonCommandBlackList.includes(button),
   );
 
-  const runButtonCommand = useCallback(
-    async (button: string) => {
-      if (!user) return;
-      let updatedConversation: Conversation;
-      if (!selectedConversation) return;
-      updatedConversation = selectedConversation;
-
-      homeDispatch({ field: 'loading', value: true });
-      homeDispatch({ field: 'messageIsStreaming', value: true });
-
-      const controller = new AbortController();
-      const response = await fetch('api/mj-image-command', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'user-token': user?.token || '',
-        },
-        signal: controller.signal,
-        body: JSON.stringify({
-          button: button,
-          buttonMessageId,
-          prompt,
-        }),
-      });
-      if (!response.ok) {
-        homeDispatch({ field: 'loading', value: false });
-        homeDispatch({ field: 'messageIsStreaming', value: false });
-        throw new Error('Network response was not ok');
-      }
-
-      const data = response.body;
-      if (!data) {
-        homeDispatch({ field: 'loading', value: false });
-        homeDispatch({ field: 'messageIsStreaming', value: false });
-        return;
-      }
-      // response is ok, continue
-      homeDispatch({ field: 'loading', value: false });
-      const reader = data.getReader();
-      const decoder = new TextDecoder();
-      let done = false;
-      let text = '';
-      let largeContextResponse = false;
-      let showHintForLargeContextResponse = false;
-      const originalMessages =
-        updatedConversation.messages[updatedConversation.messages.length - 1]
-          .content;
-      while (!done) {
-        if (stopConversationRef.current === true) {
-          controller.abort();
-          done = true;
-          break;
-        }
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
-        const chunkValue = decoder.decode(value);
-        text += chunkValue;
-
-        if (text.includes('[DONE]')) {
-          text = text.replace('[DONE]', '');
-          done = true;
-        }
-        if (text.includes('[REMOVE_TEMP_HTML]')) {
-          text = removeTempHtmlString(text);
-        }
-
-        if (text.includes('[REMOVE_LAST_LINE]')) {
-          text = text.replace('[REMOVE_LAST_LINE]', '');
-          text = removeSecondLastLine(text);
-        }
-
-        const updatedMessages: Message[] = updatedConversation.messages.map(
-          (message, index) => {
-            if (index === updatedConversation.messages.length - 1) {
-              return {
-                ...message,
-                content:
-                  removeTempHtmlString(originalMessages) +
-                  removeRedundantTempHtmlString(text),
-                largeContextResponse,
-                showHintForLargeContextResponse,
-              };
-            }
-            return message;
-          },
-        );
-        updatedConversation = {
-          ...updatedConversation,
-          messages: updatedMessages,
-          lastUpdateAtUTC: dayjs().valueOf(),
-        };
-        homeDispatch({
-          field: 'selectedConversation',
-          value: updatedConversation,
-        });
-      }
-      const updatedConversations: Conversation[] = conversations.map(
-        (conversation) => {
-          if (conversation.id === selectedConversation.id) {
-            return updatedConversation;
-          }
-          return conversation;
-        },
-      );
-      saveConversation(updatedConversation);
-
-      homeDispatch({ field: 'conversations', value: updatedConversations });
-      saveConversations(updatedConversations);
-
-      homeDispatch({ field: 'messageIsStreaming', value: false });
-      updateConversationLastUpdatedAtTimeStamp();
-    },
-    [
-      buttonMessageId,
-      conversations,
-      homeDispatch,
-      selectedConversation,
-      user,
-      stopConversationRef,
-    ],
-  );
+  const runButtonCommand = useRunButtonCommand();
 
   const imageButtonOnClick = async (button: string) => {
-    if (!user) {
-      toast.error(commonT('Please sign in to use ai image feature'));
-    }
-    const updatedConversation = getUpdatedAssistantMjConversationV2(
-      selectedConversation!,
-      buttonMessageId,
-    );
-    console.log('updatedConversation', updatedConversation);
-    if (!updatedConversation) return;
-    handleUpdateConversation(updatedConversation);
-    await runButtonCommand(button);
+    await runButtonCommand(button, buttonMessageId, messageIndex);
   };
-  const handleUpdateConversation = useCallback(
-    (updatedConversation: Conversation) => {
-      const { single, all } = updateConversation(
-        updatedConversation,
-        conversations,
-      );
-      homeDispatch({ field: 'selectedConversation', value: single });
-      homeDispatch({ field: 'conversations', value: all });
-    },
-    [conversations, homeDispatch],
-  );
   const { i18n } = useTranslation();
 
   const helpButtonOnClick = () => {
@@ -225,28 +71,12 @@ export default function MjImageComponentV2({
       value: true,
     });
   };
-  const [isFocus, setIsFocus] = React.useState(false);
-  // Function to show the buttons
-  const handleDivFocus = () => {
-    setIsFocus(true);
-  };
 
-  // Function to hide the buttons
-  const handleDivBlur = () => {
-    setTimeout(() => {
-      setIsFocus(false);
-    }, 300);
-  };
   const isMobileLayout = useMediaQuery('(max-width: 640px)');
 
   return (
     <div className="flex flex-col gap-4">
-      <div
-        className={`group/image relative`}
-        tabIndex={1}
-        onFocus={handleDivFocus}
-        onBlur={handleDivBlur}
-      >
+      <div className={`group/image relative`} tabIndex={1}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}

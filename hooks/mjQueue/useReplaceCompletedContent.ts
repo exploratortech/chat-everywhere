@@ -49,7 +49,10 @@ async function addMjImageSelectorV2toConversation(
       buttonMessageId: job.messageId,
       imageUrl: job.imageUrl,
       buttons: job.buttons,
-      prompt: job.mjRequest.enhancedPrompt,
+      prompt:
+        job.mjRequest.type === 'MJ_IMAGE_GEN'
+          ? job.mjRequest.enhancedPrompt
+          : '',
     },
   });
   const updatedMessages: Message[] = selectedConversation.messages.map(
@@ -57,6 +60,7 @@ async function addMjImageSelectorV2toConversation(
       if (index === messageIndex) {
         return {
           ...message,
+          // TODO: Replace only the html content of the message that has the same job id, and not the whole message
           content: html,
         };
       }

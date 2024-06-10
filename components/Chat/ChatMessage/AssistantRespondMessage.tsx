@@ -90,6 +90,7 @@ const AssistantRespondMessage = memo(
               buttons={aiImageButtons}
               buttonMessageId={aiImageButtonMessageId}
               prompt={aiImagePrompt}
+              messageIndex={messageIndex}
             />
           );
         }
