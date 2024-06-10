@@ -36,11 +36,6 @@ const useRunButtonCommand = () => {
       if (!selectedConversation) return;
 
       const html = await postButtonCommand(button, messageId, accessToken);
-      console.log('postButtonCommand');
-
-      console.log({
-        html,
-      });
 
       updateConversationWithNewHtml(
         conversations,
@@ -91,7 +86,6 @@ const postButtonCommand = async (
   return await response.text();
 };
 
-// New isolated function
 function updateConversationWithNewHtml(
   conversations: Conversation[],
   selectedConversation: Conversation,
@@ -104,8 +98,7 @@ function updateConversationWithNewHtml(
       if (index === messageIndex) {
         return {
           ...message,
-          // TODO: Replace only the html content of the message that has the same job id, and not the whole message
-          content: html,
+          content: message.content + html,
         };
       }
       return message;
