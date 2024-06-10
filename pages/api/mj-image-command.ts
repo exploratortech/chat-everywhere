@@ -153,15 +153,13 @@ const handler = async (req: Request): Promise<Response> => {
             return;
           }
           throw new Error(
-            `Internal error during image generation process {${
-              mjResponseContent || 'No response content'
+            `Internal error during image generation process {${mjResponseContent || 'No response content'
             }}`,
           );
         } else {
           // run when image url is available
           if (isUpscaleCommand) {
             await createImageSelector({
-              previousButtonCommand: button,
               buttonMessageId,
               imageUrl,
               buttons,
@@ -169,7 +167,6 @@ const handler = async (req: Request): Promise<Response> => {
             });
           } else {
             await createImageSelector({
-              previousButtonCommand: button,
               buttonMessageId,
               imageUrl,
               buttons,
@@ -201,11 +198,10 @@ const handler = async (req: Request): Promise<Response> => {
           });
         } else {
           progressHandler.updateProgress({
-            content: `${
-              generationProgress === 0
-                ? 'Waiting to be processed'
-                : `${generationProgress}% complete`
-            } ... ${getTotalGenerationTime()}s \n`,
+            content: `${generationProgress === 0
+              ? 'Waiting to be processed'
+              : `${generationProgress}% complete`
+              } ... ${getTotalGenerationTime()}s \n`,
             removeLastLine: true,
             percentage:
               typeof generationProgress === 'number'
