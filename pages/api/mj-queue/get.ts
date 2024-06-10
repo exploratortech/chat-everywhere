@@ -1,10 +1,5 @@
 import { getHomeUrl } from '@/utils/app/api';
-import { unauthorizedResponse } from '@/utils/server/auth';
 import { MjQueueJob } from '@/utils/server/mjQueueService';
-import {
-  getAdminSupabaseClient,
-  getUserProfile,
-} from '@/utils/server/supabase';
 
 import { z } from 'zod';
 
@@ -12,8 +7,6 @@ export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
 };
-
-const supabase = getAdminSupabaseClient();
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method !== 'GET') {
@@ -30,10 +23,6 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   const jobInfo = await MjQueueJob.get(jobId);
-
-  console.log({
-    get: jobInfo,
-  });
 
   if (!jobInfo) {
     return new Response('No job found', { status: 404 });
