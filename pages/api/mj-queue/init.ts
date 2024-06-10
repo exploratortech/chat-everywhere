@@ -7,7 +7,6 @@ import {
 } from '@/utils/server/supabase';
 
 import { ChatBody } from '@/types/chat';
-import { MjImageGenRequest } from '@/types/mjJob';
 
 export const config = {
   runtime: 'edge',
