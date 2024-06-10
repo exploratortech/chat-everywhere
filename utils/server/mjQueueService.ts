@@ -1,8 +1,7 @@
 import {
-  CompletedMjJob,
   FailedMjJob,
-  MjImageGenRequest,
   MjJob,
+  MjRequest,
   ProcessingMjJob,
   QueuedMjJob,
 } from '@/types/mjJob';
@@ -22,7 +21,7 @@ export const MjQueueService = {
     mjRequest,
   }: {
     userId: string;
-    mjRequest: MjImageGenRequest;
+    mjRequest: MjRequest;
   }): Promise<QueuedMjJob['jobId']> => {
     const enqueuedAt = new Date().toISOString();
     const jobId = uuidv4();
