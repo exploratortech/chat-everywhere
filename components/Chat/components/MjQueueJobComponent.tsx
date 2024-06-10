@@ -4,6 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useLatestJobInfo from '@/hooks/mjQueue/useLatestJobInfo';
+import useReplaceCompletedContent from '@/hooks/mjQueue/useReplaceCompletedContent';
 
 import {
   CompletedMjJob,
@@ -14,7 +15,6 @@ import {
 } from '@/types/mjJob';
 
 import Spinner from '@/components/Spinner';
-import HomeContext from '@/components/home/home.context';
 
 const MjQueueJobComponent = ({
   job: initialJob,
@@ -28,7 +28,7 @@ const MjQueueJobComponent = ({
   if (job.status === 'PROCESSING' || job.status === 'QUEUED') {
     return <ProcessingJobComponent job={job} />;
   } else {
-    return <CompletedJobComponent job={job} />;
+    return <CompletedJobComponent job={job} messageIndex={messageIndex} />;
   }
 };
 
@@ -66,8 +66,12 @@ const ProcessingJobComponent = ({
       <main>
         <div className="panel p-2 max-h-full whitespace-pre-line">
           <div>{`ID: ${job.jobId}`}</div>
-          {job.status === 'QUEUED' && <div>{`POSITION: ${job.position}`}</div>}
           <div>{`ENQUEUED AT: ${job.enqueuedAt}`}</div>
+          {job.status === 'QUEUED' && <div>{`POSITION: ${job.position}`}</div>}
+          {job.status === 'PROCESSING' && job.imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={job.imageUrl} alt="content" />
+          )}
         </div>
       </main>
     </details>
@@ -76,11 +80,14 @@ const ProcessingJobComponent = ({
 
 const CompletedJobComponent = ({
   job,
+  messageIndex,
 }: {
   job: CompletedMjJob | FailedMjJob;
+  messageIndex: number;
 }) => {
   const { t } = useTranslation('common');
   const { t: chatT } = useTranslation('chat');
+  useReplaceCompletedContent(job, messageIndex);
 
   return (
     <details
@@ -103,7 +110,8 @@ const CompletedJobComponent = ({
         </div>
         {job.status === 'COMPLETED' && (
           <div className="panel p-2 max-h-full whitespace-pre-line">
-            <div className="">{JSON.stringify(job)}</div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={job.imageUrl} alt="content" />
           </div>
         )}
         {job.status === 'FAILED' && job.reason && (
