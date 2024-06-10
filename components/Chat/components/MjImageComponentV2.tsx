@@ -1,15 +1,9 @@
 import { IconHelp } from '@tabler/icons-react';
-import React, { useCallback, useContext } from 'react';
-import { toast } from 'react-hot-toast';
+import React, { memo, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useRunButtonCommand from '@/hooks/mjQueue/useRunButtonCommand';
 import useMediaQuery from '@/hooks/useMediaQuery';
-
-import { updateConversation } from '@/utils/app/conversation';
-import { getUpdatedAssistantMjConversationV2 } from '@/utils/app/mjImage';
-
-import { Conversation, Message } from '@/types/chat';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -26,7 +20,7 @@ interface MjImageComponentProps {
   messageIndex: number;
 }
 
-export default function MjImageComponentV2({
+export default memo(function MjImageComponentV2({
   src,
   buttons,
   buttonMessageId,
@@ -36,13 +30,11 @@ export default function MjImageComponentV2({
   const {
     state: { isTempUser, messageIsStreaming },
     dispatch: homeDispatch,
-    stopConversationRef,
   } = useContext(HomeContext);
   const isStudentAccount = isTempUser;
   const isImageGrid =
     ['U1', 'U2', 'U3', 'U4'].every((u) => buttons.includes(u)) ||
     ['V1', 'V2', 'V3', 'V4'].every((v) => buttons.includes(v));
-  const { t: commonT } = useTranslation('common');
   const { t: mjImageT } = useTranslation('mjImage');
   const buttonCommandBlackList = ['Vary (Region)'];
   const validButtons = buttons.filter(
@@ -155,7 +147,8 @@ export default function MjImageComponentV2({
       </div>
     </div>
   );
-}
+},
+areEqual);
 function NumberDisplay({ number }: { number: number }) {
   return (
     <div className="w-full h-full flex items-center justify-center">
@@ -188,3 +181,10 @@ const downloadFile = async (url: string, filename: string) => {
   link.click();
   document.body.removeChild(link);
 };
+
+function areEqual(
+  prevProps: MjImageComponentProps,
+  nextProps: MjImageComponentProps,
+) {
+  return prevProps.buttonMessageId === nextProps.buttonMessageId;
+}
