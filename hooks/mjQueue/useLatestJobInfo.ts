@@ -5,7 +5,6 @@ import {
   saveConversations,
   updateConversationLastUpdatedAtTimeStamp,
 } from '@/utils/app/conversation';
-import { removeRedundantTempHtmlString } from '@/utils/app/htmlStringHandler';
 import { MjQueueJobComponentHandler } from '@/utils/app/streamHandler';
 
 import { FailedMjJob } from './../../types/mjJob';
