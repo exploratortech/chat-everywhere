@@ -6,7 +6,7 @@ import {
   getUserProfile,
 } from '@/utils/server/supabase';
 
-import { ChatBody } from '@/types/chat';
+import { MjButtonCommandRequest } from '@/types/mjJob';
 
 export const config = {
   runtime: 'edge',
@@ -20,7 +20,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('Method Not Allowed', { status: 405 });
   }
 
-  const userToken = req.headers.get('user-token');
+  const userToken = req.headers.get('access-token');
   if (!userToken) return unauthorizedResponse;
 
   const { data, error } = await supabase.auth.getUser(userToken);
@@ -30,16 +30,17 @@ const handler = async (req: Request): Promise<Response> => {
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
   try {
-    const requestBody = (await req.json()) as ChatBody;
-    if (!requestBody.messages.length) {
+    const requestBody = (await req.json()) as Exclude<
+      MjButtonCommandRequest,
+      { type: 'MJ_IMAGE_GEN' }
+    >;
+    if (!requestBody.messageId || !requestBody.button) {
       return new Response('Invalid request body', { status: 400 });
     }
     const mjRequest = {
-      type: 'MJ_IMAGE_GEN' as const,
-      userPrompt: requestBody.messages[requestBody.messages.length - 1].content,
-      imageStyle: requestBody.imageStyle,
-      imageQuality: requestBody.imageQuality,
-      temperature: requestBody.temperature,
+      type: 'MJ_BUTTON_COMMAND' as const,
+      button: requestBody.button,
+      messageId: requestBody.messageId,
     };
 
     const jobId = await MjQueueService.addJobToQueue({
