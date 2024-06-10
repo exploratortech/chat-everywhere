@@ -1,6 +1,6 @@
 import { MjQueueJob } from '@/utils/server/mjQueueService';
 
-import { CompletedMjJob, ProcessingMjJob } from '@/types/mjJob';
+import { CompletedMjJob, FailedMjJob, ProcessingMjJob } from '@/types/mjJob';
 
 export const config = {
   runtime: 'edge',
@@ -26,6 +26,14 @@ const handleFailedStatus = async (reqBody: any) => {
     slackMessage += `Error: ${errorMessage}`;
   }
 
+  // Update JobInfo
+  const jobId = reqBody.ref;
+  await MjQueueJob.update(jobId, {
+    status: 'FAILED',
+    reason: errorMessage,
+  } as Partial<FailedMjJob>);
+
+  // Send to Slack
   const slackPayload = {
     text: slackMessage,
   };
@@ -44,7 +52,6 @@ const handleFailedStatus = async (reqBody: any) => {
 };
 
 const handleProcessingStatus = async (reqBody: any) => {
-  console.log('handleProcessingStatus', reqBody);
   const progress = reqBody.progress;
   const jobId = reqBody.ref;
   if (!jobId) {
@@ -65,8 +72,6 @@ const handleProcessingStatus = async (reqBody: any) => {
 };
 
 const handleDoneStatus = async (reqBody: any) => {
-  console.log('handleDoneStatus', reqBody);
-
   const jobId = reqBody.ref;
   const uri = reqBody.uri;
   const buttons = reqBody.buttons;
