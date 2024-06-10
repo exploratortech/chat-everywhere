@@ -28,10 +28,9 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('No job found', { status: 404 });
   }
 
-  const host = getHomeUrl();
   switch (jobInfo.status) {
     case 'QUEUED':
-      // TODO: update this to use the api path
+      const host = getHomeUrl();
       fetch(`${host}/api/mj-queue/process`);
       return new Response(JSON.stringify(jobInfo), { status: 200 });
     case 'PROCESSING':
