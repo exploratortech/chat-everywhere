@@ -32,7 +32,6 @@ export const makeCreateImageSelectorV2 = (writeToStream: WriteToStream) => {
     buttonMessageId,
     imageUrl,
     buttons,
-    previousButtonCommand,
     prompt,
   }: MjImageSelectorV2Props) => {
     const html = await generateComponentHTML({
@@ -41,26 +40,6 @@ export const makeCreateImageSelectorV2 = (writeToStream: WriteToStream) => {
         buttonMessageId,
         imageUrl,
         buttons,
-        previousButtonCommand,
-        prompt,
-      },
-    });
-    return writeToStream(html);
-  };
-};
-export const makeCreateImageSelector = (writeToStream: WriteToStream) => {
-  return async ({
-    buttonMessageId,
-    imageList,
-    previousButtonCommand,
-    prompt,
-  }: MjImageSelectorProps) => {
-    const html = await generateComponentHTML({
-      component: MjImageSelector,
-      props: {
-        buttonMessageId,
-        imageList,
-        previousButtonCommand,
         prompt,
       },
     });
