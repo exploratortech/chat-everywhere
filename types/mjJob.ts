@@ -5,6 +5,7 @@ export interface MjImageGenRequest {
   imageStyle: string | undefined;
   imageQuality: string | undefined;
   temperature: number | null;
+  enhancedPrompt?: string;
 }
 
 export interface BasedMjJob {
@@ -21,10 +22,14 @@ export interface QueuedMjJob extends BasedMjJob {
 export interface ProcessingMjJob extends BasedMjJob {
   status: 'PROCESSING';
   progress: number;
+  imageUrl: string;
+  messageId: string;
 }
 export interface CompletedMjJob extends BasedMjJob {
   status: 'COMPLETED';
   imageUrl: string;
+  buttons: string[];
+  messageId: string;
 }
 export interface FailedMjJob extends BasedMjJob {
   status: 'FAILED';
