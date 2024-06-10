@@ -76,6 +76,7 @@ const handleDoneStatus = async (reqBody: any) => {
     status: 'COMPLETED',
     imageUrl: uri,
     buttons,
+    messageId,
   } as Partial<CompletedMjJob>);
 };
 

@@ -23,7 +23,6 @@ export interface ProcessingMjJob extends BasedMjJob {
   status: 'PROCESSING';
   progress: number;
   imageUrl: string;
-  messageId: string;
 }
 export interface CompletedMjJob extends BasedMjJob {
   status: 'COMPLETED';

@@ -349,7 +349,6 @@ const handler = async (req: Request): Promise<Response> => {
           } else {
             // run when image url is available
             await createImageSelector({
-              previousButtonCommand: '',
               buttonMessageId,
               imageUrl,
               buttons,
