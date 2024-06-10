@@ -9,8 +9,6 @@ import {
 import { ChatBody } from '@/types/chat';
 import { MjImageGenRequest } from '@/types/mjJob';
 
-import { z } from 'zod';
-
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
@@ -25,47 +23,40 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   const userToken = req.headers.get('user-token');
+  if (!userToken) return unauthorizedResponse;
 
-  const { data, error } = await supabase.auth.getUser(userToken || '');
-  if (!data || error) return unauthorizedResponse;
+  const { data, error } = await supabase.auth.getUser(userToken);
+  if (error || !data) return unauthorizedResponse;
 
   const user = await getUserProfile(data.user.id);
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
-  let body;
-  let mjRequest: MjImageGenRequest;
   try {
     const requestBody = (await req.json()) as ChatBody;
-    if (requestBody.messages.length < 1) {
+    if (!requestBody.messages.length) {
       return new Response('Invalid request body', { status: 400 });
     }
-    mjRequest = {
+    const mjRequest = {
       userPrompt: requestBody.messages[requestBody.messages.length - 1].content,
       imageStyle: requestBody.imageStyle,
       imageQuality: requestBody.imageQuality,
       temperature: requestBody.temperature,
     };
-  } catch (error) {
-    return new Response('Invalid request body', { status: 400 });
-  }
 
-  const jobId = await MjQueueService.addJobToQueue({
-    mjRequest,
-    userId: user.id,
-  });
-  if (!jobId) {
-    return new Response('Error', { status: 500 });
-  }
-  const jobInfo = await MjQueueJob.get(jobId);
-  if (!jobInfo) {
-    return new Response('Error', { status: 500 });
-  }
-  const componentGenerator = new MjQueueJobComponentHandler();
-  const html = await componentGenerator.generateComponentHTML({
-    job: jobInfo,
-  });
+    const jobId = await MjQueueService.addJobToQueue({
+      mjRequest,
+      userId: user.id,
+    });
+    if (!jobId) throw new Error('Job ID not generated');
 
-  try {
+    const jobInfo = await MjQueueJob.get(jobId);
+    if (!jobInfo) throw new Error('Job info not found');
+
+    const componentGenerator = new MjQueueJobComponentHandler();
+    const html = await componentGenerator.generateComponentHTML({
+      job: jobInfo,
+    });
+
     return new Response(html, {
       status: 200,
       headers: {
