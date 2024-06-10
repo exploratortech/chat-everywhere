@@ -5,6 +5,7 @@ import {
   saveConversations,
   updateConversationLastUpdatedAtTimeStamp,
 } from '@/utils/app/conversation';
+import { swapHtmlSegmentByDataIdentifier } from '@/utils/app/htmlStringHandler';
 import { MjQueueJobComponentHandler } from '@/utils/app/streamHandler';
 
 import { FailedMjJob } from './../../types/mjJob';
@@ -46,6 +47,10 @@ const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
       }
       setJob(updatedJob);
 
+      // If JOB not completed, no need to update the job info in the local storage
+      if (updatedJob.status === 'QUEUED' || updatedJob.status === 'PROCESSING')
+        return;
+
       // 2. Update the job info in the local storage
       const html = await componentGenerator.generateComponentHTML({
         job: updatedJob,
@@ -58,6 +63,7 @@ const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
           messageIndex,
           html,
           homeDispatch,
+          job,
         );
       }
     };
@@ -77,14 +83,22 @@ const updateConversationWithNewJobInfo = (
   messageIndex: number,
   html: string,
   homeDispatch: Function,
+  job: MjJob,
 ) => {
   const updatedMessages: Message[] = selectedConversation.messages.map(
     (message, index) => {
       if (index === messageIndex) {
-        return {
-          ...message,
-          content: html,
-        };
+        const swappedContent = swapHtmlSegmentByDataIdentifier(
+          selectedConversation.messages[messageIndex].content,
+          job.jobId,
+          html,
+        );
+        if (swappedContent) {
+          return {
+            ...message,
+            content: swappedContent,
+          };
+        }
       }
       return message;
     },

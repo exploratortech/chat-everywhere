@@ -5,7 +5,10 @@ import {
   saveConversations,
   updateConversationLastUpdatedAtTimeStamp,
 } from '@/utils/app/conversation';
-import { generateComponentHTML } from '@/utils/app/htmlStringHandler';
+import {
+  generateComponentHTML,
+  swapHtmlSegmentByDataIdentifier,
+} from '@/utils/app/htmlStringHandler';
 
 import { Conversation, Message } from '@/types/chat';
 import { CompletedMjJob, FailedMjJob } from '@/types/mjJob';
@@ -24,6 +27,7 @@ const useReplaceCompletedContent = (
     dispatch: homeDispatch,
   } = useContext(HomeContext);
   if (selectedConversation && job.status === 'COMPLETED') {
+    console.log('completed job add MjImageSelectorV2toConversation');
     addMjImageSelectorV2toConversation(
       selectedConversation,
       conversations,
@@ -43,7 +47,7 @@ async function addMjImageSelectorV2toConversation(
   homeDispatch: Function,
   job: CompletedMjJob,
 ) {
-  const html = await generateComponentHTML({
+  const newHtml = await generateComponentHTML({
     component: MjImageSelectorV2,
     props: {
       buttonMessageId: job.messageId,
@@ -55,14 +59,24 @@ async function addMjImageSelectorV2toConversation(
           : '',
     },
   });
+
+  const swappedContent = swapHtmlSegmentByDataIdentifier(
+    selectedConversation.messages[messageIndex].content,
+    job.jobId,
+    newHtml,
+  );
+  console.log({
+    swappedContent,
+  });
   const updatedMessages: Message[] = selectedConversation.messages.map(
     (message, index) => {
       if (index === messageIndex) {
-        return {
-          ...message,
-          // TODO: Replace only the html content of the message that has the same job id, and not the whole message
-          content: html,
-        };
+        if (swappedContent) {
+          return {
+            ...message,
+            content: swappedContent,
+          };
+        }
       }
       return message;
     },
