@@ -5,9 +5,7 @@ export const config = {
   preferredRegion: 'icn1',
 };
 
-const handler = async (req: Request): Promise<Response> => {
-  // TODO: add auth validation
-
+const handler = async (): Promise<Response> => {
   MjQueueService.processNextBatch();
 
   try {
