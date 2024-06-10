@@ -7,6 +7,7 @@ import {
   QueuedMjJob,
 } from '@/types/mjJob';
 
+import { getHomeUrl } from '../app/api';
 import redis from './upstashRedisClient';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -63,19 +64,20 @@ export const MjQueueService = {
     const args = [] as unknown[]; // No additional arguments are needed for this script
     const jobIds = (await redis.eval(script, keys, args)) as string[];
     if (Array.isArray(jobIds) && jobIds.length > 0) {
-      // TODO: Sleep for 30 seconds, replace to callback instead
       for (const jobId of jobIds) {
         console.log(`Processing jobId: ${jobId}`);
         await MjQueueJob.markProcessing(jobId, 0);
-        setTimeout(async () => {
-          console.log(`Job ${jobId} processed, Now removing from queue`);
 
-          await redis.srem(PROCESSING_KEY, jobId); // Remove from processing set
-          console.log(`Job ${jobId} removed from queue`);
-
-          await MjQueueJob.markCompleted(jobId, '');
-          console.log(`Job ${jobId} marked as completed`);
-        }, 30000);
+        const host = getHomeUrl();
+        fetch(`${host}/api/image-gen-v2`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            jobId,
+          }),
+        });
       }
     } else {
       console.log(
@@ -105,11 +107,22 @@ export const MjQueueJob = {
 
     return jobInfo as unknown as MjJob;
   },
+  update: async (jobId: string, content: Partial<MjJob>) => {
+    // Convert content to a format compatible with Redis hset
+    const redisCompatibleContent = Object.fromEntries(
+      Object.entries(content).map(([key, value]) => [
+        key,
+        JSON.stringify(value),
+      ]),
+    );
+    await redis.hset(`${JOB_INFO_KEY}:${jobId}`, redisCompatibleContent);
+  },
   remove: async (jobId: string) => {
     // remove from job info
     await redis.del(`${JOB_INFO_KEY}:${jobId}`);
-    // remove from queue
+    // remove from both queue and processing
     await redis.lrem(QUEUE_KEY, 0, jobId);
+    await redis.srem(PROCESSING_KEY, jobId);
   },
   markProcessing: async (
     jobId: ProcessingMjJob['jobId'],
@@ -118,15 +131,6 @@ export const MjQueueJob = {
     await redis.hset(`${JOB_INFO_KEY}:${jobId}`, {
       status: 'PROCESSING',
       progress,
-    });
-  },
-  markCompleted: async (
-    jobId: CompletedMjJob['jobId'],
-    imageUrl: CompletedMjJob['imageUrl'],
-  ) => {
-    await redis.hset(`${JOB_INFO_KEY}:${jobId}`, {
-      status: 'COMPLETED',
-      imageUrl,
     });
   },
   markFailed: async (
