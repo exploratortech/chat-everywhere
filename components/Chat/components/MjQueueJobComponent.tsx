@@ -90,12 +90,19 @@ const CompletedJobComponent = ({
 }) => {
   const { t } = useTranslation('common');
   const { t: chatT } = useTranslation('chat');
+  const { t: mjImageT } = useTranslation('mjImage');
   useReplaceCompletedContent(job, messageIndex);
 
-  const retryJob = useRetryMjJob(job as FailedMjJob, messageIndex);
+  const retryJob = useRetryMjJob(messageIndex);
 
   const handleRetry = () => {
-    retryJob();
+    if (job.status === 'FAILED' && !job.mjRequest) {
+      alert(mjImageT('Request expired, please click regenerate to retry'));
+      return;
+    }
+    if (job.status === 'FAILED' && job.mjRequest) {
+      retryJob(job);
+    }
   };
 
   return (
@@ -128,7 +135,8 @@ const CompletedJobComponent = ({
             {`${t('Error')}: ${chatT(job.reason)} `}
           </div>
         )}
-        {job.status === 'FAILED' && (
+        {/* If a job is expired it may not have a mjRequest */}
+        {job.status === 'FAILED' && job.mjRequest && (
           <div className="w-full flex my-3 justify-center">
             <Button
               variant={'destructive'}

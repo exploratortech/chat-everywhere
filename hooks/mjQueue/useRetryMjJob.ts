@@ -11,14 +11,14 @@ import { FailedMjJob } from '@/types/mjJob';
 
 import HomeContext from '@/components/home/home.context';
 
-const useRetryMjJob = (job: FailedMjJob, messageIndex: number) => {
+const useRetryMjJob = (messageIndex: number) => {
   const {
     state: { selectedConversation, conversations },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
   const supabase = useSupabaseClient();
 
-  return async () => {
+  return async (job: FailedMjJob) => {
     if (!selectedConversation) return;
     if (job.status !== 'FAILED') return;
     const {

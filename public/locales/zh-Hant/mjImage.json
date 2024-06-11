@@ -10,5 +10,6 @@
   "V4": "延伸變化",
   "View Image": "查看圖像",
   "Download Image": "下載圖像",
-  "Image processing... ": "圖像處理中..."
+  "Image processing... ": "圖像處理中...",
+  "Request expired, please click regenerate to retry": "請求已過期，請點擊重新生成以重試"
 }

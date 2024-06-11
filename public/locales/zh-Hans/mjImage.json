@@ -10,5 +10,6 @@
   "V4": "延伸变化",
   "View Image": "打开图像",
   "Download Image": "下载图像",
-  "Image processing... ": "图像处理中..."
+  "Image processing... ": "图像处理中...",
+  "Request expired, please click regenerate to retry": "请求已过期，请点击重新生成以重试"
 }
