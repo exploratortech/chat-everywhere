@@ -18,6 +18,8 @@ import {
 import Spinner from '@/components/Spinner';
 import { Button } from '@/components/ui/button';
 
+import dayjs from 'dayjs';
+
 const MjQueueJobComponent = ({
   job: initialJob,
   messageIndex,
@@ -41,9 +43,37 @@ const ProcessingJobComponent = ({
 }: {
   job: ProcessingMjJob | QueuedMjJob;
 }) => {
-  const { t } = useTranslation('common');
-  const { t: chatT } = useTranslation('chat');
+  const { t: mjImageT } = useTranslation('mjImage');
 
+  const ProcessingContent = () => {
+    if (job.status !== 'PROCESSING') {
+      return <></>;
+    }
+    if (job.mjRequest.type === 'MJ_IMAGE_GEN') {
+      // Only MJ_IMAGE_GEN has enhancedPrompt
+      if (!job.mjRequest.enhancedPrompt) {
+        return <div>{`✨ ${mjImageT('Enhancing your prompt...')}`}</div>;
+      } else {
+        return (
+          <>
+            <div>{`📝 ${mjImageT('Prompt used')}: ${
+              job.mjRequest.enhancedPrompt
+            }`}</div>
+            <div>{`🚀 ${mjImageT(
+              'Mid Journey AI is processing your request...',
+            )}`}</div>
+          </>
+        );
+      }
+    } else if (job.progress === 0) {
+      return (
+        <div>{`🚀 ${mjImageT(
+          'Mid Journey AI is processing your request...',
+        )}`}</div>
+      );
+    }
+    return <></>;
+  };
   return (
     <details
       className={`relative my-4 block text-black rounded-lg bg-white`}
@@ -52,7 +82,7 @@ const ProcessingJobComponent = ({
       <summary className="cursor-pointer p-2 flex gap-2 items-center justify-between">
         <div className="flex gap-2 items-center flex-grow font-bold">
           <Spinner size="16px" />
-          {job.status}
+          {mjImageT(job.status)}
 
           {job.status === 'PROCESSING' && !!job.progress && (
             <ProgressBar
@@ -68,9 +98,11 @@ const ProcessingJobComponent = ({
       </summary>
       <main>
         <div className="panel p-2 max-h-full whitespace-pre-line">
-          <div>{`ID: ${job.jobId}`}</div>
-          <div>{`ENQUEUED AT: ${job.enqueuedAt}`}</div>
-          {job.status === 'QUEUED' && <div>{`POSITION: ${job.position}`}</div>}
+          <div>{`${mjImageT('Enqueued At')}: ${dayjs(job.enqueuedAt).format(
+            'YYYY-MM-DD HH:mm:ss',
+          )}`}</div>
+          <ProcessingContent />
+
           {job.status === 'PROCESSING' && job.imageUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={job.imageUrl} alt="content" />
@@ -117,12 +149,14 @@ const CompletedJobComponent = ({
           {job.status === 'FAILED' && <IconX size="16px" />}
           {job.status === 'COMPLETED' && <IconCheck size="16px" />}
 
-          {job.status}
+          {mjImageT(job.status)}
         </div>
       </summary>
       <main>
         <div className="panel p-2 max-h-full whitespace-pre-line">
-          {job.enqueuedAt}
+          {`${mjImageT('Enqueued At')}: ${dayjs(job.enqueuedAt).format(
+            'YYYY-MM-DD HH:mm:ss',
+          )}`}
         </div>
         {job.status === 'COMPLETED' && (
           <div className="panel p-2 max-h-full whitespace-pre-line">
