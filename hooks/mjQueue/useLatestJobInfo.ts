@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { updateConversationWithNewContentByIdentifier } from '@/utils/app/conversation';
 import { MjQueueJobComponentHandler } from '@/utils/app/streamHandler';
@@ -14,6 +15,7 @@ const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
     state: { selectedConversation, conversations },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
+  const { t: mjImageT } = useTranslation('mjImage');
 
   useEffect(() => {
     const componentGenerator = new MjQueueJobComponentHandler();
@@ -33,7 +35,7 @@ const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
         updatedJob = {
           jobId: job.jobId,
           status: 'FAILED',
-          reason: 'Job expired, please re-generate the mj image',
+          reason: mjImageT('Request expired, please click regenerate to retry'),
           enqueuedAt: job.enqueuedAt,
         } as FailedMjJob;
       }
