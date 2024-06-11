@@ -6,8 +6,6 @@ import {
 
 import { CompletedMjJob, FailedMjJob, ProcessingMjJob } from '@/types/mjJob';
 
-import dayjs from 'dayjs';
-
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
@@ -117,7 +115,6 @@ const handler = async (req: Request): Promise<Response> => {
     } else if (reqBody.status === 'DONE') {
       await handleDoneStatus(reqBody);
     } else {
-      console.log('mj-health-check webhook (other status):', reqBody);
       return new Response('', { status: 200 });
     }
   } catch (error) {
