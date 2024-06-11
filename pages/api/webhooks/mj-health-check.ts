@@ -157,7 +157,7 @@ const handleDoneStatus = async (reqBody: any) => {
 const handler = async (req: Request): Promise<Response> => {
   try {
     const reqBody = await req.json();
-    if (reqBody.status === 'FAILED') {
+    if (reqBody.status === 'FAIL' || reqBody.status === 'FAILED') {
       await handleFailedStatus(reqBody);
     } else if (reqBody.status === 'PROCESSING') {
       await handleProcessingStatus(reqBody);
