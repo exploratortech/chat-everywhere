@@ -52,13 +52,14 @@ const ProcessingJobComponent = ({
           <Spinner size="16px" />
           {job.status}
 
-          {job.status === 'PROCESSING' && job.progress && (
+          {job.status === 'PROCESSING' && !!job.progress && (
             <ProgressBar
               completed={job.progress ? +job.progress : 1}
               className="basis-[50%]"
               bgColor="#70cc60"
               height="15px"
               labelSize="12px"
+              isLabelVisible={!!(job.progress && job.progress > 20)}
             />
           )}
         </div>
