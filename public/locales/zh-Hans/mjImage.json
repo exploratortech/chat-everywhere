@@ -11,5 +11,13 @@
   "View Image": "打开图像",
   "Download Image": "下载图像",
   "Image processing... ": "图像处理中...",
-  "Request expired, please click regenerate to retry": "请求已过期，请点击重新生成以重试"
+  "Request expired, please click regenerate to retry": "请求已过期，请点击重新生成以重试",
+  "QUEUED": "排队中",
+  "FAILED": "失败",
+  "COMPLETED": "完成",
+  "PROCESSING": "处理中",
+  "Mid Journey AI is processing your request...": "Mid Journey AI 正在处理您的请求...",
+  "Enqueued At": "排队时间",
+  "Enhancing your prompt...": "正在优化您的提示...",
+  "Prompt used": "使用的提示"
 }
