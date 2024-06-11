@@ -1,31 +1,53 @@
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useContext } from 'react';
 
-import { Conversation } from '@/types/chat';
+import { updateConversationWithNewContentByIdentifier } from '@/utils/app/conversation';
+import {
+  executeButtonCommand,
+  executeNewImageGen,
+} from '@/utils/app/mj-service';
+
 import { FailedMjJob } from '@/types/mjJob';
 
 import HomeContext from '@/components/home/home.context';
 
 const useRetryMjJob = (job: FailedMjJob, messageIndex: number) => {
   const {
-    state: { selectedConversation },
+    state: { selectedConversation, conversations },
+    dispatch: homeDispatch,
   } = useContext(HomeContext);
-  // Logic v1 :
-  // If the current message has no previous mj image component v2, then retry init the job using the previous message as prompt to start
-  // If the current message has a previous mj image component v2, then retry buttonCommand (it must be buttonCommand)
+  const supabase = useSupabaseClient();
 
-  // Logic v2:
-  // Use the failed job to reinit the job using the mjRequest from the failed job
-
-  return () => {
+  return async () => {
     if (!selectedConversation) return;
     if (job.status !== 'FAILED') return;
-    if (job.mjRequest.type === 'MJ_IMAGE_GEN') {
-      // CALL API initMjImageGen
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) return;
+    const accessToken = session.access_token;
+    if (job.mjRequest.type === 'MJ_BUTTON_COMMAND') {
+      const newHtml = await executeButtonCommand(job.mjRequest, accessToken);
+      await updateConversationWithNewContentByIdentifier({
+        selectedConversation,
+        conversations,
+        messageIndex,
+        homeDispatch,
+        newHtml,
+        targetIdentifier: job.jobId,
+      });
       return;
     }
-    if (job.mjRequest.type === 'MJ_BUTTON_COMMAND') {
-      // CALL API initMjButtonCommand
-      return;
+    if (job.mjRequest.type === 'MJ_IMAGE_GEN') {
+      const newHtml = await executeNewImageGen(job.mjRequest, accessToken);
+      await updateConversationWithNewContentByIdentifier({
+        selectedConversation,
+        conversations,
+        messageIndex,
+        homeDispatch,
+        newHtml,
+        targetIdentifier: job.jobId,
+      });
     }
   };
 };
