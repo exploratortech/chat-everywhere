@@ -20,7 +20,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('Method Not Allowed', { status: 405 });
   }
 
-  const userToken = req.headers.get('access-token');
+  const userToken = req.headers.get('user-token');
   if (!userToken) return unauthorizedResponse;
 
   const { data, error } = await supabase.auth.getUser(userToken);
