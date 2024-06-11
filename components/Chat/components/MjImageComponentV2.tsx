@@ -68,7 +68,7 @@ export default memo(function MjImageComponentV2({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className={`group/image relative`} tabIndex={1}>
+      <div className={`group/image relative min-h-[592px]`} tabIndex={1}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
