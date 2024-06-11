@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { updateConversationWithNewContent } from '@/utils/app/conversation';
+import { executeButtonCommand } from '@/utils/app/mj-service';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -27,7 +28,13 @@ const useRunButtonCommand = () => {
       }
       if (!selectedConversation) return;
 
-      const newHtml = await postButtonCommand(button, messageId, accessToken);
+      const newHtml = await executeButtonCommand(
+        {
+          messageId,
+          button,
+        },
+        accessToken,
+      );
 
       await updateConversationWithNewContent({
         conversations,
@@ -51,29 +58,3 @@ const useRunButtonCommand = () => {
 };
 
 export default useRunButtonCommand;
-
-const postButtonCommand = async (
-  button: string,
-  messageId: string,
-  accessToken: string,
-) => {
-  const response = await fetch(`/api/mj-queue/initBtnCommand`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'user-token': accessToken,
-    },
-    body: JSON.stringify({
-      button,
-      messageId,
-    }),
-  });
-
-  if (!response.ok) {
-    console.log({
-      text: await response.text(),
-    });
-    throw new Error('Network response was not ok');
-  }
-  return await response.text();
-};
