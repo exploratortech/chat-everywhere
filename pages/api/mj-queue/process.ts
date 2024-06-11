@@ -6,7 +6,7 @@ export const config = {
 };
 
 const handler = async (): Promise<Response> => {
-  MjQueueService.processNextBatch();
+  await MjQueueService.processNextBatch();
 
   try {
     return new Response(JSON.stringify({}), {
