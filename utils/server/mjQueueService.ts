@@ -64,7 +64,6 @@ export const MjQueueService = {
     const jobIds = (await redis.eval(script, keys, args)) as string[];
     if (Array.isArray(jobIds) && jobIds.length > 0) {
       for (const jobId of jobIds) {
-        console.log(`Processing jobId: ${jobId}`);
         await MjQueueJob.markProcessing(jobId, 0);
 
         const host = getHomeUrl();
