@@ -33,6 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
   switch (jobInfo.status) {
     case 'QUEUED':
       const host = getHomeUrl();
+      // No need to wait for the response, just trigger the processing
       fetch(`${host}/api/mj-queue/process`);
       return new Response(JSON.stringify(jobInfo), { status: 200 });
     case 'PROCESSING':
@@ -55,11 +56,11 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(JSON.stringify(jobInfo), { status: 200 });
     case 'COMPLETED':
       // No longer need the job after returned to frontend
-      MjQueueJob.remove(jobId);
+      await MjQueueJob.remove(jobId);
       return new Response(JSON.stringify(jobInfo), { status: 200 });
     case 'FAILED':
       // No longer need the job after returned to frontend
-      MjQueueJob.remove(jobId);
+      await MjQueueJob.remove(jobId);
       return new Response(JSON.stringify(jobInfo), { status: 200 });
     default:
       return new Response('Invalid status', { status: 400 });
