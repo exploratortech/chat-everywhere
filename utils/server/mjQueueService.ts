@@ -9,6 +9,7 @@ import {
 import { getHomeUrl } from '../app/api';
 import redis from './upstashRedisClient';
 
+import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 
 const QUEUE_KEY = 'mj_waiting_queue';
@@ -23,7 +24,7 @@ export const MjQueueService = {
     userId: string;
     mjRequest: MjRequest;
   }): Promise<QueuedMjJob['jobId']> => {
-    const enqueuedAt = new Date().toISOString();
+    const enqueuedAt = dayjs().toISOString();
     const jobId = uuidv4();
 
     await redis.rpush(QUEUE_KEY, jobId);
@@ -129,7 +130,7 @@ export const MjQueueJob = {
     await redis.hset(`${JOB_INFO_KEY}:${jobId}`, {
       status: 'PROCESSING',
       progress,
-      startProcessingAt: new Date().toISOString(),
+      startProcessingAt: dayjs().toISOString(),
     });
   },
   markFailed: async (
@@ -140,5 +141,54 @@ export const MjQueueJob = {
       status: 'FAILED',
       reason,
     });
+  },
+  // Clean up processing jobs that have been in the processing state for more than 5 minutes
+  cleanUpProcessingJobs: async () => {
+    const fiveMinutesAgo = dayjs().subtract(5, 'minute');
+
+    // Get all keys that match the pattern 'mj_job_info:*'
+    const jobKeys = await redis.keys(`${JOB_INFO_KEY}:*`);
+    if (!jobKeys || jobKeys.length === 0) return;
+
+    const cleanedUpJobs = [];
+    for (const jobKey of jobKeys) {
+      const jobData = await redis.hgetall(jobKey);
+
+      const job = jobData as unknown as MjJob;
+
+      if (
+        job.status === 'PROCESSING' &&
+        dayjs(job.enqueuedAt).isBefore(dayjs(fiveMinutesAgo))
+      ) {
+        const jobId = jobKey.split(':')[1];
+        await MjQueueJob.remove(jobId);
+        cleanedUpJobs.push(job);
+      }
+    }
+    return cleanedUpJobs;
+  },
+
+  // Clean up completed and failed jobs that are older than 7 days
+  cleanUpCompletedAndFailedJobs: async () => {
+    const oneWeekAgo = dayjs().subtract(7, 'day');
+
+    // Get all keys that match the pattern 'mj_job_info:*'
+    const jobKeys = await redis.keys(`${JOB_INFO_KEY}:*`);
+    if (!jobKeys || jobKeys.length === 0) return;
+
+    const cleanedUpJobs = [];
+    for (const jobKey of jobKeys) {
+      const jobData = await redis.hgetall(jobKey);
+      const job = jobData as unknown as MjJob;
+      if (
+        (job.status === 'COMPLETED' || job.status === 'FAILED') &&
+        dayjs(job.enqueuedAt).isBefore(oneWeekAgo)
+      ) {
+        const jobId = jobKey.split(':')[1];
+        await MjQueueJob.remove(jobId);
+        cleanedUpJobs.push(job);
+      }
+    }
+    return cleanedUpJobs;
   },
 };

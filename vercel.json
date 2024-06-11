@@ -11,6 +11,14 @@
     {
       "path": "/api/cron/update-pro-accounts-plan",
       "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/cron/clean-up-mj-processing-queue",
+      "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/clean-up-mj-completed-failed-job-info",
+      "schedule": "0 0 * * 0"
     }
   ],
   "functions": {
