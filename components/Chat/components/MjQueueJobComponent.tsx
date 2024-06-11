@@ -98,6 +98,9 @@ const ProcessingJobComponent = ({
       </summary>
       <main>
         <div className="panel p-2 max-h-full whitespace-pre-line">
+          {job.status === 'QUEUED' && (
+            <div>{`${mjImageT('Queue Position')}: ${job.position}`}</div>
+          )}
           <div>{`${mjImageT('Enqueued At')}: ${dayjs(job.enqueuedAt).format(
             'YYYY-MM-DD HH:mm:ss',
           )}`}</div>

@@ -19,5 +19,6 @@
   "Mid Journey AI is processing your request...": "Mid Journey AI 正在處理您的請求...",
   "Enqueued At": "排隊時間",
   "Enhancing your prompt...": "正在優化您的提示...",
-  "Prompt used": "使用的提示"
+  "Prompt used": "使用的提示",
+  "Queue Position": "排隊位置"
 }
