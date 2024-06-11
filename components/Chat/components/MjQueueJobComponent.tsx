@@ -1,6 +1,6 @@
 import ProgressBar from '@ramonak/react-progress-bar';
 import { IconCheck, IconX } from '@tabler/icons-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useLatestJobInfo from '@/hooks/mjQueue/useLatestJobInfo';
@@ -127,13 +127,17 @@ const CompletedJobComponent = ({
 
   const retryJob = useRetryMjJob(messageIndex);
 
+  const [retryLoading, setRetryLoading] = useState(false);
   const handleRetry = () => {
+    setRetryLoading(true);
     if (job.status === 'FAILED' && !job.mjRequest) {
       alert(mjImageT('Request expired, please click regenerate to retry'));
       return;
     }
     if (job.status === 'FAILED' && job.mjRequest) {
-      retryJob(job);
+      retryJob(job).finally(() => {
+        setRetryLoading(false);
+      });
     }
   };
 
@@ -178,8 +182,12 @@ const CompletedJobComponent = ({
               onClick={() => {
                 handleRetry();
               }}
+              disabled={retryLoading}
             >
-              {t('Retry')}
+              <div className="flex items-center">
+                {retryLoading && <Spinner />}
+                {t('Retry')}
+              </div>
             </Button>
           </div>
         )}

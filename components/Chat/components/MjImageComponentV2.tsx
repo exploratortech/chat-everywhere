@@ -1,10 +1,11 @@
 import { IconHelp } from '@tabler/icons-react';
-import React, { memo, useContext } from 'react';
+import React, { memo, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useRunButtonCommand from '@/hooks/mjQueue/useRunButtonCommand';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
+import Spinner from '@/components/Spinner';
 import HomeContext from '@/components/home/home.context';
 
 import { LineShareButton } from '../LineShareButton';
@@ -43,8 +44,11 @@ export default memo(function MjImageComponentV2({
 
   const runButtonCommand = useRunButtonCommand();
 
+  const [loading, setLoading] = useState(false);
   const imageButtonOnClick = async (button: string) => {
+    setLoading(true);
     await runButtonCommand(button, buttonMessageId, messageIndex);
+    setLoading(false);
   };
   const { i18n } = useTranslation();
 
@@ -136,8 +140,12 @@ export default memo(function MjImageComponentV2({
                     key={`${command}-${index}`}
                     className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500 flex-shrink-0 min-w-max"
                     onClick={() => imageButtonOnClick(command)}
+                    disabled={loading}
                   >
-                    {command}
+                    <div className="flex items-center">
+                      {loading && <Spinner />}
+                      {command}
+                    </div>
                   </button>
                 );
               })}
