@@ -1,4 +1,5 @@
 import {
+  CompletedMjJob,
   FailedMjJob,
   MjJob,
   MjRequest,
@@ -150,7 +151,9 @@ export const MjQueueJob = {
     const jobKeys = await redis.keys(`${JOB_INFO_KEY}:*`);
     if (!jobKeys || jobKeys.length === 0) return;
 
-    const cleanedUpJobs = [];
+    const cleanedUpJobs: (ProcessingMjJob & {
+      fiveMinutesAgo: string;
+    })[] = [];
     for (const jobKey of jobKeys) {
       const jobData = await redis.hgetall(jobKey);
 
@@ -162,7 +165,10 @@ export const MjQueueJob = {
       ) {
         const jobId = jobKey.split(':')[1];
         await MjQueueJob.remove(jobId);
-        cleanedUpJobs.push(job);
+        cleanedUpJobs.push({
+          ...job,
+          fiveMinutesAgo: fiveMinutesAgo.toISOString(),
+        });
       }
     }
     return cleanedUpJobs;
@@ -176,7 +182,9 @@ export const MjQueueJob = {
     const jobKeys = await redis.keys(`${JOB_INFO_KEY}:*`);
     if (!jobKeys || jobKeys.length === 0) return;
 
-    const cleanedUpJobs = [];
+    const cleanedUpJobs: ((CompletedMjJob | FailedMjJob) & {
+      oneWeekAgo: string;
+    })[] = [];
     for (const jobKey of jobKeys) {
       const jobData = await redis.hgetall(jobKey);
       const job = jobData as unknown as MjJob;
@@ -186,7 +194,10 @@ export const MjQueueJob = {
       ) {
         const jobId = jobKey.split(':')[1];
         await MjQueueJob.remove(jobId);
-        cleanedUpJobs.push(job);
+        cleanedUpJobs.push({
+          ...job,
+          oneWeekAgo: oneWeekAgo.toISOString(),
+        });
       }
     }
     return cleanedUpJobs;

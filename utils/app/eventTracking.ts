@@ -90,6 +90,10 @@ export const EventNames = [
   // MJ Queue
   'MJ Image Gen Completed',
   'MJ Image Gen Failed',
+
+  // MJ Queue Cleanup Monitor (for cron job)
+  'MJ Queue Cleanup Completed / Failed Job',
+  'MJ Queue Cleanup Processing Job',
 ];
 
 export type EventNameTypes = (typeof EventNames)[number];
@@ -140,6 +144,14 @@ export type PayloadType = {
   mjImageGenTotalWaitingInQueueTimeInSeconds?: number;
   mjImageGenTotalProcessingTimeInSeconds?: number;
   mjImageGenErrorMessage?: string;
+
+  // MJ Queue Cleanup Monitor (for cron job)
+  mjQueueCleanupCompletedFailedJobEnqueuedAt?: string;
+  mjQueueCleanupProcessingJobEnqueuedAt?: string;
+  mjQueueCleanupExecutedAt?: string;
+  mjQueueCleanupJobEnqueuedAt?: string;
+  mjQueueCleanupJobOneWeekAgo?: string;
+  mjQueueCleanupJobFiveMinutesAgo?: string;
 };
 
 export interface UserPostHogProfile {
@@ -232,6 +244,29 @@ export const serverSideTrackEvent = async (
   }
 };
 
+export const serverSideTrackSystemEvent = async (
+  eventName: EventNameTypes,
+  additionalPayload?: PayloadType,
+) => {
+  try {
+    const response = await fetch('https://app.posthog.com/capture/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        event: eventName,
+        api_key: POSTHOG_KEY,
+        distinct_id: 'system',
+        properties: additionalPayload,
+      }),
+    });
+    const data = await response.json();
+    console.log('Event captured', data);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
 export const logUsageSnapshot = (
   folders: FolderInterface[] | [],
   conversations: Conversation[],

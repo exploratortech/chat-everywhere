@@ -1,4 +1,5 @@
 import { MjQueueJob } from '@/utils/server/mjQueueService';
+import { trackCleanupJobEvent } from '@/utils/server/mjServiceServerHelper';
 
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
@@ -13,7 +14,19 @@ export const config = {
 
 const handler = async (): Promise<Response> => {
   try {
+    const executionTime = dayjs().toISOString();
     const cleanedUpProcessingJobs = await MjQueueJob.cleanUpProcessingJobs();
+    if (cleanedUpProcessingJobs) {
+      const trackEventPromises = cleanedUpProcessingJobs.map((jobDetail) =>
+        trackCleanupJobEvent({
+          event: 'MJ Queue Cleanup Processing Job',
+          executedAt: executionTime,
+          enqueuedAt: jobDetail.enqueuedAt,
+          fiveMinutesAgo: jobDetail.fiveMinutesAgo,
+        }),
+      );
+      await Promise.all(trackEventPromises);
+    }
 
     return new Response(
       JSON.stringify({ success: true, cleanedUpProcessingJobs }),

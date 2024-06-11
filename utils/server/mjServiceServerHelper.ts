@@ -1,6 +1,9 @@
 import { MjJob } from '@/types/mjJob';
 
-import { serverSideTrackEvent } from '../app/eventTracking';
+import {
+  serverSideTrackEvent,
+  serverSideTrackSystemEvent,
+} from '../app/eventTracking';
 
 import dayjs from 'dayjs';
 
@@ -61,5 +64,29 @@ export const trackSuccessEvent = (jobInfo: MjJob) => {
     },
   );
 
+  return trackEventPromise;
+};
+
+export const trackCleanupJobEvent = ({
+  event,
+  executedAt,
+  enqueuedAt,
+  oneWeekAgo,
+  fiveMinutesAgo,
+}: {
+  event:
+    | 'MJ Queue Cleanup Completed / Failed Job'
+    | 'MJ Queue Cleanup Processing Job';
+  executedAt: string;
+  enqueuedAt: string;
+  oneWeekAgo?: string;
+  fiveMinutesAgo?: string;
+}) => {
+  const trackEventPromise = serverSideTrackSystemEvent(event, {
+    mjQueueCleanupJobEnqueuedAt: enqueuedAt,
+    mjQueueCleanupJobOneWeekAgo: oneWeekAgo,
+    mjQueueCleanupJobFiveMinutesAgo: fiveMinutesAgo,
+    mjQueueCleanupExecutedAt: executedAt,
+  });
   return trackEventPromise;
 };
