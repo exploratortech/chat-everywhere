@@ -30,10 +30,7 @@ const handler = async (req: Request): Promise<Response> => {
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
   try {
-    const requestBody = (await req.json()) as Exclude<
-      MjImageGenRequest,
-      'type'
-    >;
+    const requestBody = (await req.json()) as Omit<MjImageGenRequest, 'type'>;
     const mjRequest = {
       type: 'MJ_IMAGE_GEN' as const,
       userPrompt: requestBody.userPrompt,
