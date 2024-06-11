@@ -163,7 +163,7 @@ const imageGeneration = async (job: MjJob) => {
       body: JSON.stringify({
         prompt: generationPrompt,
         ref: job.jobId,
-        webhookOverride: `${getHomeUrl()}/api/webhooks/mj-health-check`,
+        webhookOverride: `${getHomeUrl()}/api/webhooks/mj-webhook-handler`,
       }),
     },
   );
@@ -212,7 +212,7 @@ const buttonCommand = async (job: MjJob) => {
         messageId: job.mjRequest.messageId,
         button: job.mjRequest.button,
         ref: job.jobId,
-        webhookOverride: `${getHomeUrl()}/api/webhooks/mj-health-check`,
+        webhookOverride: `${getHomeUrl()}/api/webhooks/mj-webhook-handler`,
       }),
     },
   );
