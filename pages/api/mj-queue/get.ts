@@ -1,8 +1,6 @@
 import { getHomeUrl } from '@/utils/app/api';
-import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { MjQueueJob } from '@/utils/server/mjQueueService';
-
-import { MjJob } from '@/types/mjJob';
+import { trackFailedEvent } from '@/utils/server/mjServiceServerHelper';
 
 import dayjs from 'dayjs';
 import { z } from 'zod';
@@ -69,33 +67,3 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 export default handler;
-
-const trackFailedEvent = (jobInfo: MjJob, errorMessage: string) => {
-  const now = dayjs().valueOf();
-  const totalDurationInSeconds =
-    (now - dayjs(jobInfo.enqueuedAt).valueOf()) / 1000;
-  const totalWaitingInQueueTimeInSeconds =
-    (dayjs(jobInfo.startProcessingAt).valueOf() -
-      dayjs(jobInfo.enqueuedAt).valueOf()) /
-    1000;
-  const totalProcessingTimeInSeconds =
-    (now - dayjs(jobInfo.startProcessingAt).valueOf()) / 1000;
-
-  const trackEventPromise = serverSideTrackEvent(
-    jobInfo.userId,
-    'MJ Image Gen Failed',
-    {
-      mjImageGenType: jobInfo.mjRequest.type,
-      mjImageGenButtonCommand:
-        jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
-          ? jobInfo.mjRequest.button
-          : undefined,
-      mjImageGenTotalDurationInSeconds: totalDurationInSeconds,
-      mjImageGenTotalWaitingInQueueTimeInSeconds:
-        totalWaitingInQueueTimeInSeconds,
-      mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
-      mjImageGenErrorMessage: errorMessage,
-    },
-  );
-  return trackEventPromise;
-};

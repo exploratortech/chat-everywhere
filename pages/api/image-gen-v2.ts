@@ -5,14 +5,12 @@ import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
 } from '@/utils/app/const';
-import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
 import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
 import { MjQueueJob } from '@/utils/server/mjQueueService';
+import { trackFailedEvent } from '@/utils/server/mjServiceServerHelper';
 
 import { MjJob } from '@/types/mjJob';
-
-import dayjs from 'dayjs';
 
 export const config = {
   runtime: 'edge',
@@ -76,36 +74,6 @@ const handler = async (req: Request) => {
 };
 
 export default handler;
-
-const trackFailedEvent = (jobInfo: MjJob, errorMessage: string) => {
-  const now = dayjs().valueOf();
-  const totalDurationInSeconds =
-    (now - dayjs(jobInfo.enqueuedAt).valueOf()) / 1000;
-  const totalWaitingInQueueTimeInSeconds =
-    (dayjs(jobInfo.startProcessingAt).valueOf() -
-      dayjs(jobInfo.enqueuedAt).valueOf()) /
-    1000;
-  const totalProcessingTimeInSeconds =
-    (now - dayjs(jobInfo.startProcessingAt).valueOf()) / 1000;
-
-  const trackEventPromise = serverSideTrackEvent(
-    jobInfo.userId,
-    'MJ Image Gen Failed',
-    {
-      mjImageGenType: jobInfo.mjRequest.type,
-      mjImageGenButtonCommand:
-        jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
-          ? jobInfo.mjRequest.button
-          : undefined,
-      mjImageGenTotalDurationInSeconds: totalDurationInSeconds,
-      mjImageGenTotalWaitingInQueueTimeInSeconds:
-        totalWaitingInQueueTimeInSeconds,
-      mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
-      mjImageGenErrorMessage: errorMessage,
-    },
-  );
-  return trackEventPromise;
-};
 
 const generateMjPrompt = (
   userInputText: string,

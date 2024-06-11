@@ -1,5 +1,8 @@
-import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { MjQueueJob } from '@/utils/server/mjQueueService';
+import {
+  trackFailedEvent,
+  trackSuccessEvent,
+} from '@/utils/server/mjServiceServerHelper';
 
 import { CompletedMjJob, FailedMjJob, ProcessingMjJob } from '@/types/mjJob';
 
@@ -35,33 +38,7 @@ const handleFailedStatus = async (reqBody: any) => {
     return;
   }
 
-  const now = dayjs().valueOf();
-  const totalDurationInSeconds =
-    (now - dayjs(jobInfo.enqueuedAt).valueOf()) / 1000;
-  const totalWaitingInQueueTimeInSeconds =
-    (dayjs(jobInfo.startProcessingAt).valueOf() -
-      dayjs(jobInfo.enqueuedAt).valueOf()) /
-    1000;
-  const totalProcessingTimeInSeconds =
-    (now - dayjs(jobInfo.startProcessingAt).valueOf()) / 1000;
-
-  const trackEventPromise = serverSideTrackEvent(
-    jobInfo.userId,
-    'MJ Image Gen Failed',
-    {
-      mjImageGenType: jobInfo.mjRequest.type,
-      mjImageGenButtonCommand:
-        jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
-          ? jobInfo.mjRequest.button
-          : undefined,
-      mjImageGenTotalDurationInSeconds: totalDurationInSeconds,
-      mjImageGenTotalWaitingInQueueTimeInSeconds:
-        totalWaitingInQueueTimeInSeconds,
-      mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
-      mjImageGenErrorMessage: errorMessage,
-    },
-  );
-
+  const trackEventPromise = trackFailedEvent(jobInfo, errorMessage);
   const updateJobPromise = MjQueueJob.update(jobId, {
     status: 'FAILED',
     reason: errorMessage,
@@ -118,31 +95,7 @@ const handleDoneStatus = async (reqBody: any) => {
     return;
   }
 
-  const now = dayjs().valueOf();
-  const totalDurationInSeconds =
-    (now - dayjs(jobInfo.enqueuedAt).valueOf()) / 1000;
-  const totalWaitingInQueueTimeInSeconds =
-    (dayjs(jobInfo.startProcessingAt).valueOf() -
-      dayjs(jobInfo.enqueuedAt).valueOf()) /
-    1000;
-  const totalProcessingTimeInSeconds =
-    (now - dayjs(jobInfo.startProcessingAt).valueOf()) / 1000;
-
-  const trackEventPromise = serverSideTrackEvent(
-    jobInfo.userId,
-    'MJ Image Gen Completed',
-    {
-      mjImageGenType: jobInfo.mjRequest.type,
-      mjImageGenButtonCommand:
-        jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
-          ? jobInfo.mjRequest.button
-          : undefined,
-      mjImageGenTotalDurationInSeconds: totalDurationInSeconds,
-      mjImageGenTotalWaitingInQueueTimeInSeconds:
-        totalWaitingInQueueTimeInSeconds,
-      mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
-    },
-  );
+  const trackEventPromise = trackSuccessEvent(jobInfo);
 
   const updateJobPromise = MjQueueJob.update(jobId, {
     status: 'COMPLETED',
