@@ -5,8 +5,8 @@ import {
 
 import { Conversation } from '@/types/chat';
 import { FolderInterface } from '@/types/folder';
+import { MjButtonCommandRequest, MjImageGenRequest } from '@/types/mjJob';
 import { Prompt } from '@/types/prompt';
-import { User } from '@/types/user';
 
 import posthog from 'posthog-js';
 
@@ -86,6 +86,10 @@ export const EventNames = [
   // Error tracing
   'Error',
   'v2 Error',
+
+  // MJ Queue
+  'MJ Image Gen Completed',
+  'MJ Image Gen Failed',
 ];
 
 export type EventNameTypes = (typeof EventNames)[number];
@@ -128,6 +132,14 @@ export type PayloadType = {
 
   // Teacher portal
   tempAccountName?: string;
+
+  // MJ Queue
+  mjImageGenType?: MjImageGenRequest['type'] | MjButtonCommandRequest['type'];
+  mjImageGenButtonCommand?: string;
+  mjImageGenTotalDurationInSeconds?: number;
+  mjImageGenTotalWaitingInQueueTimeInSeconds?: number;
+  mjImageGenTotalProcessingTimeInSeconds?: number;
+  mjImageGenErrorMessage?: string;
 };
 
 export interface UserPostHogProfile {
