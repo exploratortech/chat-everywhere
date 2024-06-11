@@ -1,6 +1,9 @@
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { MjQueueJob } from '@/utils/server/mjQueueService';
 
 import { CompletedMjJob, FailedMjJob, ProcessingMjJob } from '@/types/mjJob';
+
+import dayjs from 'dayjs';
 
 export const config = {
   runtime: 'edge',
@@ -8,7 +11,6 @@ export const config = {
 };
 
 const handleFailedStatus = async (reqBody: any) => {
-  console.log('handleFailedStatus', reqBody);
   const messageId = reqBody.messageId || 'N/A';
   const errorMessage = reqBody.error || 'N/A';
   const prompt = reqBody.prompt || 'N/A';
@@ -28,10 +30,44 @@ const handleFailedStatus = async (reqBody: any) => {
 
   // Update JobInfo
   const jobId = reqBody.ref;
-  await MjQueueJob.update(jobId, {
+  const jobInfo = await MjQueueJob.get(jobId);
+  if (!jobInfo) {
+    return;
+  }
+
+  const now = dayjs().valueOf();
+  const totalDurationInSeconds =
+    (now - dayjs(jobInfo.enqueuedAt).valueOf()) / 1000;
+  const totalWaitingInQueueTimeInSeconds =
+    (dayjs(jobInfo.startProcessingAt).valueOf() -
+      dayjs(jobInfo.enqueuedAt).valueOf()) /
+    1000;
+  const totalProcessingTimeInSeconds =
+    (now - dayjs(jobInfo.startProcessingAt).valueOf()) / 1000;
+
+  const trackEventPromise = serverSideTrackEvent(
+    jobInfo.userId,
+    'MJ Image Gen Failed',
+    {
+      mjImageGenType: jobInfo.mjRequest.type,
+      mjImageGenButtonCommand:
+        jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
+          ? jobInfo.mjRequest.button
+          : undefined,
+      mjImageGenTotalDurationInSeconds: totalDurationInSeconds,
+      mjImageGenTotalWaitingInQueueTimeInSeconds:
+        totalWaitingInQueueTimeInSeconds,
+      mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
+      mjImageGenErrorMessage: errorMessage,
+    },
+  );
+
+  const updateJobPromise = MjQueueJob.update(jobId, {
     status: 'FAILED',
     reason: errorMessage,
   } as Partial<FailedMjJob>);
+
+  await Promise.all([trackEventPromise, updateJobPromise]);
 
   // Send to Slack
   const slackPayload = {
@@ -77,12 +113,45 @@ const handleDoneStatus = async (reqBody: any) => {
   const buttons = reqBody.buttons;
   const messageId = reqBody.messageId;
 
-  await MjQueueJob.update(jobId, {
+  const jobInfo = await MjQueueJob.get(jobId);
+  if (!jobInfo) {
+    return;
+  }
+
+  const now = dayjs().valueOf();
+  const totalDurationInSeconds =
+    (now - dayjs(jobInfo.enqueuedAt).valueOf()) / 1000;
+  const totalWaitingInQueueTimeInSeconds =
+    (dayjs(jobInfo.startProcessingAt).valueOf() -
+      dayjs(jobInfo.enqueuedAt).valueOf()) /
+    1000;
+  const totalProcessingTimeInSeconds =
+    (now - dayjs(jobInfo.startProcessingAt).valueOf()) / 1000;
+
+  const trackEventPromise = serverSideTrackEvent(
+    jobInfo.userId,
+    'MJ Image Gen Completed',
+    {
+      mjImageGenType: jobInfo.mjRequest.type,
+      mjImageGenButtonCommand:
+        jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
+          ? jobInfo.mjRequest.button
+          : undefined,
+      mjImageGenTotalDurationInSeconds: totalDurationInSeconds,
+      mjImageGenTotalWaitingInQueueTimeInSeconds:
+        totalWaitingInQueueTimeInSeconds,
+      mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
+    },
+  );
+
+  const updateJobPromise = MjQueueJob.update(jobId, {
     status: 'COMPLETED',
     imageUrl: uri,
     buttons,
     messageId,
   } as Partial<CompletedMjJob>);
+
+  await Promise.all([trackEventPromise, updateJobPromise]);
 };
 
 const handler = async (req: Request): Promise<Response> => {

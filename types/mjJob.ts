@@ -19,6 +19,7 @@ export interface BasedMjJob {
   jobId: string;
   status: JobStatus;
   enqueuedAt: string;
+  startProcessingAt?: string;
   userId: string;
   mjRequest: MjRequest;
 }

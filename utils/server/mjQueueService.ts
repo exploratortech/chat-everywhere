@@ -130,6 +130,7 @@ export const MjQueueJob = {
     await redis.hset(`${JOB_INFO_KEY}:${jobId}`, {
       status: 'PROCESSING',
       progress,
+      startProcessingAt: new Date().toISOString(),
     });
   },
   markFailed: async (

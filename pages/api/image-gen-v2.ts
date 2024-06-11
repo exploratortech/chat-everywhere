@@ -5,11 +5,14 @@ import {
   DEFAULT_IMAGE_GENERATION_QUALITY,
   DEFAULT_IMAGE_GENERATION_STYLE,
 } from '@/utils/app/const';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
 import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
-import { MjQueueJob, MjQueueService } from '@/utils/server/mjQueueService';
+import { MjQueueJob } from '@/utils/server/mjQueueService';
 
-import { MjImageGenRequest, MjJob } from '@/types/mjJob';
+import { MjJob } from '@/types/mjJob';
+
+import dayjs from 'dayjs';
 
 export const config = {
   runtime: 'edge',
@@ -25,6 +28,84 @@ const ContentFilterErrorMessageListFromMyMidjourneyProvider = [
   'Request cancelled due to image filters',
   'forbidden: The prompt has blocked words',
 ];
+
+const handler = async (req: Request) => {
+  const requestBody = (await req.json()) as {
+    jobId: string;
+  } | null;
+  if (!requestBody) {
+    return new Response('Bad request', { status: 400 });
+  }
+
+  if (!requestBody.jobId) {
+    return new Response('Invalid request body', { status: 400 });
+  }
+  const jobInfo = await MjQueueJob.get(requestBody.jobId);
+  if (!jobInfo) {
+    return new Response('Invalid job id', { status: 400 });
+  }
+
+  try {
+    if (jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND') {
+      await buttonCommand(jobInfo);
+    }
+    if (jobInfo.mjRequest.type === 'MJ_IMAGE_GEN') {
+      await imageGeneration(jobInfo);
+    }
+
+    return new NextResponse(JSON.stringify({}), {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      const errorMessage =
+        (error.cause as { message?: string })?.message || error.message;
+      const trackFailedEventPromise = trackFailedEvent(jobInfo, errorMessage);
+      const markFailedPromise = MjQueueJob.markFailed(
+        jobInfo.jobId,
+        errorMessage,
+      );
+      await Promise.all([trackFailedEventPromise, markFailedPromise]);
+    }
+
+    return new Response('Image generation failed', { status: 500 });
+  }
+};
+
+export default handler;
+
+const trackFailedEvent = (jobInfo: MjJob, errorMessage: string) => {
+  const now = dayjs().valueOf();
+  const totalDurationInSeconds =
+    (now - dayjs(jobInfo.enqueuedAt).valueOf()) / 1000;
+  const totalWaitingInQueueTimeInSeconds =
+    (dayjs(jobInfo.startProcessingAt).valueOf() -
+      dayjs(jobInfo.enqueuedAt).valueOf()) /
+    1000;
+  const totalProcessingTimeInSeconds =
+    (now - dayjs(jobInfo.startProcessingAt).valueOf()) / 1000;
+
+  const trackEventPromise = serverSideTrackEvent(
+    jobInfo.userId,
+    'MJ Image Gen Failed',
+    {
+      mjImageGenType: jobInfo.mjRequest.type,
+      mjImageGenButtonCommand:
+        jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
+          ? jobInfo.mjRequest.button
+          : undefined,
+      mjImageGenTotalDurationInSeconds: totalDurationInSeconds,
+      mjImageGenTotalWaitingInQueueTimeInSeconds:
+        totalWaitingInQueueTimeInSeconds,
+      mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
+      mjImageGenErrorMessage: errorMessage,
+    },
+  );
+  return trackEventPromise;
+};
 
 const generateMjPrompt = (
   userInputText: string,
@@ -75,50 +156,6 @@ const generateMjPrompt = (
 
   return resultPrompt;
 };
-
-const handler = async (req: Request) => {
-  const requestBody = (await req.json()) as {
-    jobId: string;
-  } | null;
-  if (!requestBody) {
-    return new Response('Bad request', { status: 400 });
-  }
-
-  if (!requestBody.jobId) {
-    return new Response('Invalid request body', { status: 400 });
-  }
-
-  try {
-    const jobInfo = await MjQueueJob.get(requestBody.jobId);
-    if (!jobInfo) {
-      return new Response('Invalid job id', { status: 400 });
-    }
-
-    if (jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND') {
-      await buttonCommand(jobInfo);
-    }
-    if (jobInfo.mjRequest.type === 'MJ_IMAGE_GEN') {
-      await imageGeneration(jobInfo);
-    }
-
-    return new NextResponse(JSON.stringify({}), {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      const errorMessage =
-        (error.cause as { message?: string })?.message || error.message;
-      await MjQueueJob.markFailed(requestBody.jobId, errorMessage);
-    }
-
-    return new Response('Image generation failed', { status: 500 });
-  }
-};
-
-export default handler;
 
 const imageGeneration = async (job: MjJob) => {
   if (job.mjRequest.type !== 'MJ_IMAGE_GEN') {
