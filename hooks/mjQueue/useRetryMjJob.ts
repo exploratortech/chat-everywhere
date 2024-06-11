@@ -5,7 +5,7 @@ import { updateConversationWithNewContentByIdentifier } from '@/utils/app/conver
 import {
   executeButtonCommand,
   executeNewImageGen,
-} from '@/utils/app/mj-service';
+} from '@/utils/app/mjServiceHelper';
 
 import { FailedMjJob } from '@/types/mjJob';
 

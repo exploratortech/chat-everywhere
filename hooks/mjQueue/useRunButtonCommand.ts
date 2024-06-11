@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { updateConversationWithNewContent } from '@/utils/app/conversation';
-import { executeButtonCommand } from '@/utils/app/mj-service';
+import { executeButtonCommand } from '@/utils/app/mjServiceHelper';
 
 import HomeContext from '@/components/home/home.context';
 
