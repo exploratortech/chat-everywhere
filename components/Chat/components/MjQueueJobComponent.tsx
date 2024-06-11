@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import useLatestJobInfo from '@/hooks/mjQueue/useLatestJobInfo';
 import useReplaceCompletedContent from '@/hooks/mjQueue/useReplaceCompletedContent';
+import useRetryMjJob from '@/hooks/mjQueue/useRetryMjJob';
 
 import {
   CompletedMjJob,
@@ -15,6 +16,7 @@ import {
 } from '@/types/mjJob';
 
 import Spinner from '@/components/Spinner';
+import { Button } from '@/components/ui/button';
 
 const MjQueueJobComponent = ({
   job: initialJob,
@@ -90,6 +92,12 @@ const CompletedJobComponent = ({
   const { t: chatT } = useTranslation('chat');
   useReplaceCompletedContent(job, messageIndex);
 
+  const retryJob = useRetryMjJob(job as FailedMjJob, messageIndex);
+
+  const handleRetry = () => {
+    retryJob();
+  };
+
   return (
     <details
       className={`${job.status === 'COMPLETED' ? 'bg-green-200' : ''} ${
@@ -118,6 +126,19 @@ const CompletedJobComponent = ({
         {job.status === 'FAILED' && job.reason && (
           <div className="panel p-2 max-h-full whitespace-pre-line">
             {`${t('Error')}: ${chatT(job.reason)} `}
+          </div>
+        )}
+        {job.status === 'FAILED' && (
+          <div className="w-full flex my-3 justify-center">
+            <Button
+              variant={'destructive'}
+              className="px-8"
+              onClick={() => {
+                handleRetry();
+              }}
+            >
+              {t('Retry')}
+            </Button>
           </div>
         )}
       </main>
