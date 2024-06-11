@@ -3,22 +3,14 @@ import { useCallback, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import {
-  saveConversation,
-  saveConversations,
-  updateConversationLastUpdatedAtTimeStamp,
-} from '@/utils/app/conversation';
-
-import { Conversation, Message } from '@/types/chat';
+import { updateConversationWithNewContent } from '@/utils/app/conversation';
 
 import HomeContext from '@/components/home/home.context';
-
-import dayjs from 'dayjs';
 
 const useRunButtonCommand = () => {
   const { t: commonT } = useTranslation('common');
   const {
-    state: { user, selectedConversation, conversations, messageIsStreaming },
+    state: { user, selectedConversation, conversations },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -35,15 +27,15 @@ const useRunButtonCommand = () => {
       }
       if (!selectedConversation) return;
 
-      const html = await postButtonCommand(button, messageId, accessToken);
+      const newHtml = await postButtonCommand(button, messageId, accessToken);
 
-      updateConversationWithNewHtml(
+      await updateConversationWithNewContent({
         conversations,
         selectedConversation,
-        html,
         messageIndex,
         homeDispatch,
-      );
+        newHtml,
+      });
     },
     [
       commonT,
@@ -69,7 +61,7 @@ const postButtonCommand = async (
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'access-token': accessToken,
+      'user-token': accessToken,
     },
     body: JSON.stringify({
       button,
@@ -85,51 +77,3 @@ const postButtonCommand = async (
   }
   return await response.text();
 };
-
-function updateConversationWithNewHtml(
-  conversations: Conversation[],
-  selectedConversation: Conversation,
-  html: string,
-  messageIndex: number,
-  homeDispatch: Function,
-) {
-  const updatedMessages: Message[] = selectedConversation.messages.map(
-    (message, index) => {
-      if (index === messageIndex) {
-        return {
-          ...message,
-          content: message.content + html,
-        };
-      }
-      return message;
-    },
-  );
-
-  const updatedConversation = {
-    ...selectedConversation,
-    messages: updatedMessages,
-    lastUpdateAtUTC: dayjs().valueOf(),
-  };
-
-  const updatedConversations: Conversation[] = conversations.map(
-    (conversation) => {
-      if (conversation.id === selectedConversation.id) {
-        return updatedConversation;
-      }
-      return conversation;
-    },
-  );
-
-  homeDispatch({
-    field: 'selectedConversation',
-    value: updatedConversation,
-  });
-
-  saveConversation(updatedConversation);
-  homeDispatch({
-    field: 'conversations',
-    value: updatedConversations,
-  });
-  saveConversations(updatedConversations);
-  updateConversationLastUpdatedAtTimeStamp();
-}

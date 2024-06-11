@@ -1,20 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 
-import {
-  saveConversation,
-  saveConversations,
-  updateConversationLastUpdatedAtTimeStamp,
-} from '@/utils/app/conversation';
-import { swapHtmlSegmentByDataIdentifier } from '@/utils/app/htmlStringHandler';
+import { updateConversationWithNewContentByIdentifier } from '@/utils/app/conversation';
 import { MjQueueJobComponentHandler } from '@/utils/app/streamHandler';
 
 import { FailedMjJob } from './../../types/mjJob';
-import { Conversation, Message } from '@/types/chat';
 import { MjJob } from '@/types/mjJob';
 
 import HomeContext from '@/components/home/home.context';
-
-import dayjs from 'dayjs';
 
 const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
   const [job, setJob] = useState<MjJob>(initialJob);
@@ -52,19 +44,19 @@ const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
         return;
 
       // 2. Update the job info in the local storage
-      const html = await componentGenerator.generateComponentHTML({
+      const newHtml = await componentGenerator.generateComponentHTML({
         job: updatedJob,
       });
 
       if (selectedConversation) {
-        updateConversationWithNewJobInfo(
-          selectedConversation,
+        await updateConversationWithNewContentByIdentifier({
           conversations,
+          selectedConversation,
           messageIndex,
-          html,
           homeDispatch,
-          job,
-        );
+          newHtml,
+          targetIdentifier: job.jobId,
+        });
       }
     };
     if (job.status === 'QUEUED' || job.status === 'PROCESSING') {
@@ -76,56 +68,3 @@ const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
 };
 
 export default useLatestJobInfo;
-
-const updateConversationWithNewJobInfo = (
-  selectedConversation: Conversation,
-  conversations: Conversation[],
-  messageIndex: number,
-  html: string,
-  homeDispatch: Function,
-  job: MjJob,
-) => {
-  const updatedMessages: Message[] = selectedConversation.messages.map(
-    (message, index) => {
-      if (index === messageIndex) {
-        const swappedContent = swapHtmlSegmentByDataIdentifier(
-          selectedConversation.messages[messageIndex].content,
-          job.jobId,
-          html,
-        );
-        if (swappedContent) {
-          return {
-            ...message,
-            content: swappedContent,
-          };
-        }
-      }
-      return message;
-    },
-  );
-  const updatedConversation = {
-    ...selectedConversation,
-    messages: updatedMessages,
-    lastUpdateAtUTC: dayjs().valueOf(),
-  };
-  const updatedConversations: Conversation[] = conversations.map(
-    (conversation) => {
-      if (conversation.id === selectedConversation.id) {
-        return updatedConversation;
-      }
-      return conversation;
-    },
-  );
-  homeDispatch({
-    field: 'selectedConversation',
-    value: updatedConversation,
-  });
-
-  saveConversation(updatedConversation);
-  homeDispatch({
-    field: 'conversations',
-    value: updatedConversations,
-  });
-  saveConversations(updatedConversations);
-  updateConversationLastUpdatedAtTimeStamp();
-};
