@@ -64,11 +64,18 @@ export const MjQueueService = {
     const keys = [PROCESSING_KEY, QUEUE_KEY, JOB_INFO_KEY];
     const args = [] as unknown[]; // No additional arguments are needed for this script
     const jobIds = (await redis.eval(script, keys, args)) as string[];
+    console.log({
+      jobIds,
+    });
     if (Array.isArray(jobIds) && jobIds.length > 0) {
       for (const jobId of jobIds) {
         await MjQueueJob.markProcessing(jobId, 0);
 
         const host = getHomeUrl();
+        console.log({
+          url: `${host}/api/image-gen-v2`,
+          jobId,
+        });
         fetch(`${host}/api/image-gen-v2`, {
           method: 'POST',
           headers: {
