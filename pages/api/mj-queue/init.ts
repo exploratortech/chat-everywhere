@@ -6,7 +6,7 @@ import {
   getUserProfile,
 } from '@/utils/server/supabase';
 
-import { ChatBody } from '@/types/chat';
+import { MjImageGenRequest } from '@/types/mjJob';
 
 export const config = {
   runtime: 'edge',
@@ -30,13 +30,13 @@ const handler = async (req: Request): Promise<Response> => {
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
   try {
-    const requestBody = (await req.json()) as ChatBody;
-    if (!requestBody.messages.length) {
-      return new Response('Invalid request body', { status: 400 });
-    }
+    const requestBody = (await req.json()) as Exclude<
+      MjImageGenRequest,
+      'type'
+    >;
     const mjRequest = {
       type: 'MJ_IMAGE_GEN' as const,
-      userPrompt: requestBody.messages[requestBody.messages.length - 1].content,
+      userPrompt: requestBody.userPrompt,
       imageStyle: requestBody.imageStyle,
       imageQuality: requestBody.imageQuality,
       temperature: requestBody.temperature,
