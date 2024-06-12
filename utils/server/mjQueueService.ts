@@ -43,9 +43,10 @@ export const MjQueueService = {
     return jobId;
   },
   processNextBatch: async () => {
+    const maxCapacity = 20;
     // Using lua script to make sure the queue is atomic
     const script = `
-    local maxCapacity = 5  -- Define the maximum capacity of processing jobs
+    local maxCapacity = tonumber(ARGV[1])  -- Get maxCapacity from the first argument
     local processingCount = redis.call('SCARD', KEYS[1])
     local availableCapacity = maxCapacity - processingCount
     local jobIds = {}
@@ -61,31 +62,28 @@ export const MjQueueService = {
     end
     return jobIds  -- Return the list of job IDs that will be processed
   `;
-    const keys = [PROCESSING_QUEUE_KEY, WAITING_QUEUE_KEY, JOB_INFO_KEY];
-    const args = [] as unknown[]; // No additional arguments are needed for this script
+    const keys = [PROCESSING_QUEUE_KEY, WAITING_QUEUE_KEY];
+    const args = [maxCapacity.toString()];
     const jobIds = (await redis.eval(script, keys, args)) as string[];
-    console.log({
-      jobIds,
-    });
-    if (Array.isArray(jobIds) && jobIds.length > 0) {
-      for (const jobId of jobIds) {
-        await MjQueueJob.markProcessing(jobId, 0);
 
-        const host = getHomeUrl();
-        console.log({
-          url: `${host}/api/image-gen-v2`,
-          jobId,
-        });
-        fetch(`${host}/api/image-gen-v2`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            jobId,
-          }),
-        });
-      }
+    if (Array.isArray(jobIds) && jobIds.length > 0) {
+      const tasks = jobIds.map((jobId) => {
+        return (async () => {
+          await MjQueueJob.markProcessing(jobId, 0);
+          const host = getHomeUrl();
+          return fetch(`${host}/api/image-gen-v2`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              jobId,
+            }),
+          });
+        })();
+      });
+
+      await Promise.all(tasks);
     } else {
       console.log(
         'No jobs processed, either due to processing limit or empty queue.',
