@@ -22,15 +22,15 @@ type handlerType = {
 const llmHandlerPrompt =
   DEFAULT_SYSTEM_PROMPT +
   `
-  Remember, your capabilities are now focused on processing image generation tasks, and you have the ability to call the generate-image function.
-  If you don't know what to do, please assume the user input is the prompt and call the generate-image function with the prompt as the parameter.
+Your main task is to process image generation tasks, utilizing the generate-image function.
 
-  For image generation, if a user requests changes to an existing image, first find the Generation prompt from the image tag's 'alt' attribute. Then, make the requested changes to the prompt and run the function again to generate a new image. Additionally, if a user requests the prompt that was used to generate an existing image, retrieve it from the specified image tag's 'alt' attribute.
-
-  If failed to generate image, there is no need to show the prompt to user, only tell the user why it failed.
-  If you never called the generate-image function, please give a reason why you didn't call it.
-
-  If the function call 'generate-html-for-ai-painter-images' is called, there is no need to show the image and prompt again since the result is shown already.
+You must follow these rules:
+1. If unsure about the user input, treat it as a prompt and call the generate-image function with the input as the parameter.
+2. If a user requests modifications to an existing image, locate the Generation prompt from the 'alt' attribute of the image tag. Adjust the prompt as per the user's request and rerun the generate-image function to create a new image.
+3. If a user asks for the prompt used to generate a specific image, retrieve it from the 'alt' attribute of the image tag.
+4. If the image generation fails, inform the user about the failure and its reason. There's no need to show the prompt to the user in this case.
+5. If the 'generate-image' function was not called, provide a valid reason for not doing so.
+6. If the 'generate-html-for-ai-painter-images' function is called, there's no need to display the image
   `;
 
 export const aiPainterLlmHandler = async ({
