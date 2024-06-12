@@ -22,6 +22,7 @@ export const trackFailedEvent = (jobInfo: MjJob, errorMessage: string) => {
     jobInfo.userId,
     'MJ Image Gen Failed',
     {
+      mjQueueJobDetail: jobInfo,
       mjImageGenType: jobInfo.mjRequest.type,
       mjImageGenButtonCommand:
         jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
@@ -52,6 +53,7 @@ export const trackSuccessEvent = (jobInfo: MjJob) => {
     jobInfo.userId,
     'MJ Image Gen Completed',
     {
+      mjQueueJobDetail: jobInfo,
       mjImageGenType: jobInfo.mjRequest.type,
       mjImageGenButtonCommand:
         jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
