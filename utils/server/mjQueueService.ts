@@ -123,6 +123,9 @@ export const MjQueueJob = {
       ]),
     );
     await redis.hset(`${JOB_INFO_KEY}:${jobId}`, redisCompatibleContent);
+    if (content.status === 'COMPLETED' || content.status === 'FAILED') {
+      await redis.srem(PROCESSING_QUEUE_KEY, jobId);
+    }
   },
   remove: async (jobId: string) => {
     // remove from job info
