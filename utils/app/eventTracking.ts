@@ -5,7 +5,11 @@ import {
 
 import { Conversation } from '@/types/chat';
 import { FolderInterface } from '@/types/folder';
-import { MjButtonCommandRequest, MjImageGenRequest } from '@/types/mjJob';
+import {
+  MjButtonCommandRequest,
+  MjImageGenRequest,
+  MjJob,
+} from '@/types/mjJob';
 import { Prompt } from '@/types/prompt';
 
 import posthog from 'posthog-js';
@@ -152,6 +156,7 @@ export type PayloadType = {
   mjQueueCleanupJobEnqueuedAt?: string;
   mjQueueCleanupJobOneWeekAgo?: string;
   mjQueueCleanupJobFiveMinutesAgo?: string;
+  mjQueueJobDetail?: MjJob;
 };
 
 export interface UserPostHogProfile {
