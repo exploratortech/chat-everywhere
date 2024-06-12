@@ -8,7 +8,10 @@ import {
 import { capitalizeFirstLetter } from '@/utils/app/ui';
 import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
 import { MjQueueJob, MjQueueService } from '@/utils/server/mjQueueService';
-import { trackFailedEvent } from '@/utils/server/mjServiceServerHelper';
+import {
+  OriginalMjLogEvent,
+  trackFailedEvent,
+} from '@/utils/server/mjServiceServerHelper';
 
 import { MjJob } from '@/types/mjJob';
 
@@ -177,6 +180,13 @@ const imageGeneration = async (job: MjJob) => {
         (errorMessage) => imageGenerationResponseText.includes(errorMessage),
       )
     ) {
+      await OriginalMjLogEvent({
+        userId: job.userId,
+        startTime: job.startProcessingAt || job.enqueuedAt,
+        errorMessage: 'Image generation failed due to content filter',
+        promptBeforeProcessing: job.mjRequest.userPrompt,
+        generationPrompt: generationPrompt,
+      });
       throw new Error('Image generation failed due to content filter', {
         cause: {
           message:
@@ -184,6 +194,14 @@ const imageGeneration = async (job: MjJob) => {
         },
       });
     }
+
+    await OriginalMjLogEvent({
+      userId: job.userId,
+      startTime: job.startProcessingAt || job.enqueuedAt,
+      errorMessage: 'Image generation failed',
+      promptBeforeProcessing: job.mjRequest.userPrompt,
+      generationPrompt: generationPrompt,
+    });
 
     throw new Error('Image generation failed');
   }
@@ -196,6 +214,14 @@ const imageGeneration = async (job: MjJob) => {
   ) {
     console.log(imageGenerationResponseJson);
     console.error('Failed during submitting request');
+    await OriginalMjLogEvent({
+      userId: job.userId,
+      startTime: job.startProcessingAt || job.enqueuedAt,
+      errorMessage: 'Failed during submitting request',
+      promptBeforeProcessing: job.mjRequest.userPrompt,
+      generationPrompt: generationPrompt,
+    });
+
     throw new Error('Image generation failed');
   }
 };

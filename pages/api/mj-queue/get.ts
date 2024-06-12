@@ -1,6 +1,9 @@
 import { getHomeUrl } from '@/utils/app/api';
 import { MjQueueJob } from '@/utils/server/mjQueueService';
-import { trackFailedEvent } from '@/utils/server/mjServiceServerHelper';
+import {
+  OriginalMjLogEvent,
+  trackFailedEvent,
+} from '@/utils/server/mjServiceServerHelper';
 
 import dayjs from 'dayjs';
 import { z } from 'zod';
@@ -43,6 +46,12 @@ const handler = async (req: Request): Promise<Response> => {
         jobInfo.progress === 0
       ) {
         await Promise.all([
+          OriginalMjLogEvent({
+            userId: jobInfo.userId,
+            startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
+            errorMessage:
+              'Request timeout, please retry (Never received webhook response from MJ)',
+          }),
           trackFailedEvent(
             jobInfo,
             'Request timeout, please retry (Never received webhook response from MJ)',

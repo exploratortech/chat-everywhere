@@ -1,6 +1,7 @@
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { MjQueueJob } from '@/utils/server/mjQueueService';
 import {
+  OriginalMjLogEvent,
   trackFailedEvent,
   trackSuccessEvent,
 } from '@/utils/server/mjServiceServerHelper';
@@ -44,8 +45,25 @@ const handleFailedStatus = async (reqBody: any) => {
     status: 'FAILED',
     reason: errorMessage,
   } as Partial<FailedMjJob>);
+  const logOriginalEventPromise = OriginalMjLogEvent({
+    userId: jobInfo.userId,
+    startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
+    errorMessage: errorMessage,
+    promptBeforeProcessing:
+      jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
+        ? jobInfo.mjRequest.button
+        : jobInfo.mjRequest.userPrompt,
+    generationPrompt:
+      jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
+        ? jobInfo.mjRequest.button
+        : jobInfo.mjRequest.enhancedPrompt,
+  });
 
-  await Promise.all([trackEventPromise, updateJobPromise]);
+  await Promise.all([
+    trackEventPromise,
+    updateJobPromise,
+    logOriginalEventPromise,
+  ]);
 
   // Send to Slack
   const slackPayload = {
@@ -97,6 +115,18 @@ const handleDoneStatus = async (reqBody: any) => {
   }
 
   const trackEventPromise = trackSuccessEvent(jobInfo);
+  const logOriginalEventPromise = OriginalMjLogEvent({
+    userId: jobInfo.userId,
+    startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
+    promptBeforeProcessing:
+      jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
+        ? jobInfo.mjRequest.button
+        : jobInfo.mjRequest.userPrompt,
+    generationPrompt:
+      jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
+        ? jobInfo.mjRequest.button
+        : jobInfo.mjRequest.enhancedPrompt,
+  });
 
   const updateJobPromise = MjQueueJob.update(jobId, {
     status: 'COMPLETED',
@@ -105,7 +135,11 @@ const handleDoneStatus = async (reqBody: any) => {
     messageId,
   } as Partial<CompletedMjJob>);
 
-  await Promise.all([trackEventPromise, updateJobPromise]);
+  await Promise.all([
+    trackEventPromise,
+    updateJobPromise,
+    logOriginalEventPromise,
+  ]);
 
   // Track original PostHog Event
   const originalJobInfo = await MjQueueJob.get(jobId);

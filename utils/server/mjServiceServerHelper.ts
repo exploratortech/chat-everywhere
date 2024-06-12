@@ -1,6 +1,7 @@
 import { MjJob } from '@/types/mjJob';
 
 import {
+  PayloadType,
   serverSideTrackEvent,
   serverSideTrackSystemEvent,
 } from '../app/eventTracking';
@@ -91,4 +92,34 @@ export const trackCleanupJobEvent = ({
     mjQueueCleanupExecutedAt: executedAt,
   });
   return trackEventPromise;
+};
+
+export const OriginalMjLogEvent = async ({
+  errorMessage,
+  startTime,
+  promptBeforeProcessing,
+  generationPrompt,
+  userId,
+}: {
+  userId: string;
+  startTime: string;
+  errorMessage?: string;
+  promptBeforeProcessing?: string;
+  generationPrompt?: string;
+}) => {
+  const now = dayjs().valueOf();
+  const totalDurationInSeconds = (now - dayjs(startTime).valueOf()) / 1000;
+  const payloadToLog: PayloadType = {
+    generationLengthInSecond: totalDurationInSeconds,
+  };
+
+  if (errorMessage) {
+    payloadToLog.imageGenerationFailed = 'true';
+    payloadToLog.imageGenerationErrorMessage = errorMessage;
+    payloadToLog.imageGenerationPrompt = `${
+      promptBeforeProcessing || 'N/A'
+    } -> ${generationPrompt || 'N/A'}`;
+  }
+
+  await serverSideTrackEvent(userId, 'AI image generation', payloadToLog);
 };
