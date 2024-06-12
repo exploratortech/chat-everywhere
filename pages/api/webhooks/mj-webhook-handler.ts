@@ -1,3 +1,4 @@
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { MjQueueJob } from '@/utils/server/mjQueueService';
 import {
   trackFailedEvent,
@@ -5,6 +6,8 @@ import {
 } from '@/utils/server/mjServiceServerHelper';
 
 import { CompletedMjJob, FailedMjJob, ProcessingMjJob } from '@/types/mjJob';
+
+import dayjs from 'dayjs';
 
 export const config = {
   runtime: 'edge',
@@ -103,6 +106,26 @@ const handleDoneStatus = async (reqBody: any) => {
   } as Partial<CompletedMjJob>);
 
   await Promise.all([trackEventPromise, updateJobPromise]);
+
+  // Track original PostHog Event
+  const originalJobInfo = await MjQueueJob.get(jobId);
+  if (!originalJobInfo) {
+    return;
+  }
+  if (originalJobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND') {
+    const now = dayjs().valueOf();
+    const totalDurationInSeconds =
+      (now - dayjs(jobInfo.enqueuedAt).valueOf()) / 1000;
+
+    await serverSideTrackEvent(
+      originalJobInfo.userId,
+      'AI image button clicked',
+      {
+        aiImageButtonCommand: originalJobInfo.mjRequest.button,
+        generationLengthInSecond: totalDurationInSeconds,
+      },
+    );
+  }
 };
 
 const handler = async (req: Request): Promise<Response> => {
