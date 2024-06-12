@@ -92,6 +92,12 @@ export const MjQueueService = {
       );
     }
   },
+  removeFromWaitingQueue: async (jobId: string) => {
+    await redis.lrem(WAITING_QUEUE_KEY, 0, jobId);
+  },
+  removeFromProcessingSet: async (jobId: string) => {
+    await redis.srem(PROCESSING_QUEUE_KEY, jobId);
+  },
 };
 
 export const MjQueueJob = {
@@ -131,8 +137,8 @@ export const MjQueueJob = {
     // remove from job info
     await redis.del(`${JOB_INFO_KEY}:${jobId}`);
     // remove from both waiting queue and processing
-    await redis.lrem(WAITING_QUEUE_KEY, 0, jobId);
-    await redis.srem(PROCESSING_QUEUE_KEY, jobId);
+    await MjQueueService.removeFromWaitingQueue(jobId);
+    await MjQueueService.removeFromProcessingSet(jobId);
   },
   markProcessing: async (
     jobId: ProcessingMjJob['jobId'],
