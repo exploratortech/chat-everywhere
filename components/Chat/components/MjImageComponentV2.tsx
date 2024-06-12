@@ -11,6 +11,7 @@ import HomeContext from '@/components/home/home.context';
 import { LineShareButton } from '../LineShareButton';
 import StudentShareMessageButton from '../StudentShareMessageButton';
 
+import { cn } from '@/lib/utils';
 import dayjs from 'dayjs';
 
 interface MjImageComponentProps {
@@ -138,14 +139,16 @@ export default memo(function MjImageComponentV2({
                 return (
                   <button
                     key={`${command}-${index}`}
-                    className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500 flex-shrink-0 min-w-max"
+                    className={cn(
+                      'cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500 flex-shrink-0 min-w-max',
+                      {
+                        'opacity-50': loading || messageIsStreaming,
+                      },
+                    )}
                     onClick={() => imageButtonOnClick(command)}
-                    disabled={loading}
+                    disabled={loading || messageIsStreaming}
                   >
-                    <div className="flex items-center">
-                      {loading && <Spinner />}
-                      {command}
-                    </div>
+                    {command}
                   </button>
                 );
               })}

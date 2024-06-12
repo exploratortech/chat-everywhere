@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import useLatestJobInfo from '@/hooks/mjQueue/useLatestJobInfo';
 import useReplaceCompletedContent from '@/hooks/mjQueue/useReplaceCompletedContent';
 import useRetryMjJob from '@/hooks/mjQueue/useRetryMjJob';
+import useIsStreaming from '@/hooks/useIsStreaming';
 
 import {
   CompletedMjJob,
@@ -28,11 +29,18 @@ const MjQueueJobComponent = ({
   messageIndex: number;
 }) => {
   const job = useLatestJobInfo(initialJob, messageIndex);
+  const isStreaming = useIsStreaming(job);
 
   if (job.status === 'PROCESSING' || job.status === 'QUEUED') {
     return <ProcessingJobComponent job={job} />;
   } else {
-    return <CompletedJobComponent job={job} messageIndex={messageIndex} />;
+    return (
+      <CompletedJobComponent
+        job={job}
+        isStreaming={isStreaming}
+        messageIndex={messageIndex}
+      />
+    );
   }
 };
 
@@ -119,9 +127,11 @@ const ProcessingJobComponent = ({
 const CompletedJobComponent = ({
   job,
   messageIndex,
+  isStreaming,
 }: {
   job: CompletedMjJob | FailedMjJob;
   messageIndex: number;
+  isStreaming: boolean;
 }) => {
   const { t } = useTranslation('common');
   const { t: chatT } = useTranslation('chat');
@@ -185,7 +195,7 @@ const CompletedJobComponent = ({
               onClick={() => {
                 handleRetry();
               }}
-              disabled={retryLoading}
+              disabled={retryLoading || isStreaming}
             >
               <div className="flex items-center">
                 {retryLoading && <Spinner />}
