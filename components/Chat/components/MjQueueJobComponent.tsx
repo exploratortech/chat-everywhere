@@ -68,7 +68,7 @@ const ProcessingJobComponent = ({
               job.mjRequest.enhancedPrompt
             }`}</div>
             <div>{`🚀 ${mjImageT(
-              'Mid Journey AI is processing your request...',
+              'AI Image service is processing your request...',
             )}`}</div>
           </>
         );
@@ -76,7 +76,7 @@ const ProcessingJobComponent = ({
     } else if (job.progress === 0) {
       return (
         <div>{`🚀 ${mjImageT(
-          'Mid Journey AI is processing your request...',
+          'AI Image service is processing your request...',
         )}`}</div>
       );
     }
