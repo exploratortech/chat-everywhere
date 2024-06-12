@@ -108,6 +108,7 @@ const handleDoneStatus = async (reqBody: any) => {
   const uri = reqBody.uri;
   const buttons = reqBody.buttons;
   const messageId = reqBody.messageId;
+  const progress = reqBody.progress;
 
   const jobInfo = await MjQueueJob.get(jobId);
   if (!jobInfo) {
@@ -133,6 +134,7 @@ const handleDoneStatus = async (reqBody: any) => {
     imageUrl: uri,
     buttons,
     messageId,
+    progress,
   } as Partial<CompletedMjJob>);
 
   await Promise.all([
