@@ -7,7 +7,7 @@ import {
 } from '@/utils/app/const';
 import { capitalizeFirstLetter } from '@/utils/app/ui';
 import { translateAndEnhancePrompt } from '@/utils/server/imageGen';
-import { MjQueueJob } from '@/utils/server/mjQueueService';
+import { MjQueueJob, MjQueueService } from '@/utils/server/mjQueueService';
 import { trackFailedEvent } from '@/utils/server/mjServiceServerHelper';
 
 import { MjJob } from '@/types/mjJob';
@@ -69,6 +69,8 @@ const handler = async (req: Request) => {
       await Promise.all([trackFailedEventPromise, markFailedPromise]);
     }
 
+    // Remove the job from the processing set
+    await MjQueueService.removeFromProcessingSet(jobInfo.jobId);
     return new Response('Image generation failed', { status: 500 });
   }
 };
