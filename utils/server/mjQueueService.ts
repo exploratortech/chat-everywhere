@@ -46,24 +46,54 @@ export const MjQueueService = {
     const maxCapacity = 20;
     // Using lua script to make sure the queue is atomic
     const script = `
-    local maxCapacity = tonumber(ARGV[1])  -- Get maxCapacity from the first argument
-    local processingCount = redis.call('SCARD', KEYS[1])
-    local availableCapacity = maxCapacity - processingCount
-    local jobIds = {}
-    if availableCapacity > 0 then
+      -- Get the maximum capacity, current timestamp, and TTL from arguments
+      local maxCapacity = tonumber(ARGV[1])
+      local currentTime = tonumber(ARGV[2])
+      local ttl = tonumber(ARGV[3])
+
+      -- Remove expired jobs from the processing queue to avoid the redis delay
+      redis.call('ZREMRANGEBYSCORE', KEYS[1], 0, currentTime)
+
+      -- Get the current count of jobs in the processing queue
+      local processingCount = redis.call('ZCARD', KEYS[1])
+
+      -- Calculate the available capacity
+      local availableCapacity = maxCapacity - processingCount
+
+      -- Initialize an empty table to store the job IDs
+      local jobIds = {}
+
+      -- If there is available capacity, move jobs from waiting to processing queue
+      if availableCapacity > 0 then
         for i = 1, availableCapacity do
-            local jobId = redis.call('LPOP', KEYS[2])  -- Pop a job ID from the waiting queue
-            if not jobId then  -- If no job ID is found, break the loop
-                break
-            end
-            redis.call('SADD', KEYS[1], jobId)  -- Add the job ID to the processing set
-            table.insert(jobIds, jobId)
+          -- Pop a job ID from the waiting queue
+          local jobId = redis.call('LPOP', KEYS[2])
+
+          -- If there are no more jobs in the waiting queue, exit the loop
+          if not jobId then
+            break
+          end
+
+          -- Add the job ID to the processing queue with an expiration timestamp
+          redis.call('ZADD', KEYS[1], currentTime + ttl, jobId)
+
+          -- Insert the job ID into the jobIds table
+          table.insert(jobIds, jobId)
         end
-    end
-    return jobIds  -- Return the list of job IDs that will be processed
-  `;
+      end
+
+      -- Return the table of job IDs
+      return jobIds
+    `;
+
     const keys = [PROCESSING_QUEUE_KEY, WAITING_QUEUE_KEY];
-    const args = [maxCapacity.toString()];
+    const currentTime = Math.floor(Date.now() / 1000);
+    const ttl = 300; // TTL of 5 minutes (300 seconds)
+    const args = [
+      maxCapacity.toString(),
+      currentTime.toString(),
+      ttl.toString(),
+    ];
     const jobIds = (await redis.eval(script, keys, args)) as string[];
 
     if (Array.isArray(jobIds) && jobIds.length > 0) {
@@ -95,7 +125,7 @@ export const MjQueueService = {
     await redis.lrem(WAITING_QUEUE_KEY, 0, jobId);
   },
   removeFromProcessingSet: async (jobId: string) => {
-    await redis.srem(PROCESSING_QUEUE_KEY, jobId);
+    await redis.zrem(PROCESSING_QUEUE_KEY, jobId);
   },
 };
 
@@ -129,7 +159,7 @@ export const MjQueueJob = {
     );
     await redis.hset(`${JOB_INFO_KEY}:${jobId}`, redisCompatibleContent);
     if (content.status === 'COMPLETED' || content.status === 'FAILED') {
-      await redis.srem(PROCESSING_QUEUE_KEY, jobId);
+      await MjQueueService.removeFromProcessingSet(jobId);
     }
   },
   remove: async (jobId: string) => {
