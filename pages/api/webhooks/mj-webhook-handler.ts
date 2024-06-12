@@ -5,8 +5,10 @@ import {
   trackFailedEvent,
   trackSuccessEvent,
 } from '@/utils/server/mjServiceServerHelper';
+import { addCredit, getUserProfile } from '@/utils/server/supabase';
 
 import { CompletedMjJob, FailedMjJob, ProcessingMjJob } from '@/types/mjJob';
+import { PluginID } from '@/types/plugin';
 
 import dayjs from 'dayjs';
 
@@ -63,6 +65,7 @@ const handleFailedStatus = async (reqBody: any) => {
     trackEventPromise,
     updateJobPromise,
     logOriginalEventPromise,
+    handleAddBackUserCredit(jobInfo.userId),
   ]);
 
   // Send to Slack
@@ -184,3 +187,17 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 export default handler;
+
+async function handleAddBackUserCredit(userId: string) {
+  try {
+    const userProfile = await getUserProfile(userId);
+    if (!userProfile) {
+      throw new Error('User profile not found');
+    }
+    if (userProfile.plan === 'pro') {
+      addCredit(userId, PluginID.IMAGE_GEN, 1);
+    }
+  } catch (error) {
+    console.error('Failed to handle add back user credit', error);
+  }
+}
