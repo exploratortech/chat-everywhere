@@ -108,10 +108,8 @@ docker compose up
 3. Update the `.env` file with the Redis URL
 
 ```bash
-UPSTASH_REDIS_REST_READ_ONLY_TOKEN="example_token"
 UPSTASH_REDIS_REST_URL="http://localhost:8079"
 UPSTASH_REDIS_REST_TOKEN="example_token"
-UPSTASH_REDIS_URL="redis://localhost:6379" # Change the port if you are using a different port
 ```
 
 
