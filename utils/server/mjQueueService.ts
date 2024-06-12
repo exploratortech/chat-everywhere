@@ -68,10 +68,10 @@ export const MjQueueService = {
 
     if (Array.isArray(jobIds) && jobIds.length > 0) {
       const tasks = jobIds.map((jobId) => {
-        return (async () => {
-          await MjQueueJob.markProcessing(jobId, 0);
+        const func = async () => {
           const host = getHomeUrl();
-          return fetch(`${host}/api/image-gen-v2`, {
+          await MjQueueJob.markProcessing(jobId, 0);
+          await fetch(`${host}/api/image-gen-v2`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -80,10 +80,11 @@ export const MjQueueService = {
               jobId,
             }),
           });
-        })();
+        };
+        return func;
       });
 
-      await Promise.all(tasks);
+      await Promise.all(tasks.map((task) => task()));
     } else {
       console.log(
         'No jobs processed, either due to processing limit or empty queue.',
