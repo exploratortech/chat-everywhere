@@ -13,9 +13,9 @@ import redis from './upstashRedisClient';
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 
-const QUEUE_KEY = 'mj_waiting_queue';
+const WAITING_QUEUE_KEY = 'mj_waiting_queue';
 const JOB_INFO_KEY = 'mj_job_info';
-const PROCESSING_KEY = 'mj_processing_jobs';
+const PROCESSING_QUEUE_KEY = 'mj_processing_jobs';
 
 export const MjQueueService = {
   addJobToQueue: async ({
@@ -28,7 +28,7 @@ export const MjQueueService = {
     const enqueuedAt = dayjs().toISOString();
     const jobId = uuidv4();
 
-    await redis.rpush(QUEUE_KEY, jobId);
+    await redis.rpush(WAITING_QUEUE_KEY, jobId);
 
     const newJob: Omit<QueuedMjJob, 'position'> = {
       jobId,
@@ -61,7 +61,7 @@ export const MjQueueService = {
     end
     return jobIds  -- Return the list of job IDs that will be processed
   `;
-    const keys = [PROCESSING_KEY, QUEUE_KEY, JOB_INFO_KEY];
+    const keys = [PROCESSING_QUEUE_KEY, WAITING_QUEUE_KEY, JOB_INFO_KEY];
     const args = [] as unknown[]; // No additional arguments are needed for this script
     const jobIds = (await redis.eval(script, keys, args)) as string[];
     console.log({
@@ -100,7 +100,7 @@ export const MjQueueJob = {
     if (!jobInfo) return null;
 
     if (jobInfo.status === 'QUEUED') {
-      const queueList = await redis.lrange(QUEUE_KEY, 0, -1);
+      const queueList = await redis.lrange(WAITING_QUEUE_KEY, 0, -1);
       let position = queueList.indexOf(jobId);
       if (position === -1) {
         return null;
@@ -127,9 +127,9 @@ export const MjQueueJob = {
   remove: async (jobId: string) => {
     // remove from job info
     await redis.del(`${JOB_INFO_KEY}:${jobId}`);
-    // remove from both queue and processing
-    await redis.lrem(QUEUE_KEY, 0, jobId);
-    await redis.srem(PROCESSING_KEY, jobId);
+    // remove from both waiting queue and processing
+    await redis.lrem(WAITING_QUEUE_KEY, 0, jobId);
+    await redis.srem(PROCESSING_QUEUE_KEY, jobId);
   },
   markProcessing: async (
     jobId: ProcessingMjJob['jobId'],
