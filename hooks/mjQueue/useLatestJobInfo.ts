@@ -65,7 +65,14 @@ const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
       const intervalId = setInterval(getLatestJobInfoToChat, 2000); // Poll every 2 seconds
       return () => clearInterval(intervalId); // Cleanup on component unmount or job update
     }
-  }, [conversations, homeDispatch, job, messageIndex, selectedConversation]);
+  }, [
+    conversations,
+    homeDispatch,
+    job,
+    messageIndex,
+    mjImageT,
+    selectedConversation,
+  ]);
   return job;
 };
 
