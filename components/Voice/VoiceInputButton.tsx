@@ -161,7 +161,7 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
         ctx?.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       }
     } else {
-      if (user && user.token) {
+      if (user) {
         await startSpeechRecognition();
       } else {
         toast.error(t('Please register and sign in to enable voice input'));

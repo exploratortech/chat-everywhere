@@ -1,3 +1,4 @@
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconClearAll } from '@tabler/icons-react';
 import {
   Fragment,
@@ -80,6 +81,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const supabase = useSupabaseClient();
   const handleSend = useCallback(
     async (
       deleteCount = 0,
@@ -147,12 +149,21 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           selectedConversation.messages.shift();
           updatedConversation.messages.shift();
         }
+
+        const accessToken = (await supabase.auth.getSession())?.data.session
+          ?.access_token;
+        if (!accessToken) {
+          alert('Please sign in to continue');
+          return;
+        }
+
         const response = await sendRequest(
           chatBody,
           plugin,
           controller,
           outputLanguage,
           user,
+          accessToken,
         );
 
         if (!response.ok) {
@@ -236,14 +247,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         toast.error('No image found from previous conversation');
         return;
       }
-      handleImageToPromptSend({
-        regenerate: true,
-        conversations,
-        selectedConversation,
-        homeDispatch,
-        imageUrl,
-        stopConversationRef,
-        user,
+
+      supabase.auth.getSession().then((session) => {
+        const accessToken = session?.data.session?.access_token;
+        if (!accessToken) {
+          alert('Please sign in to continue');
+          return;
+        }
+
+        handleImageToPromptSend({
+          regenerate: true,
+          conversations,
+          selectedConversation,
+          homeDispatch,
+          imageUrl,
+          stopConversationRef,
+          accessToken,
+        });
       });
       return;
     }

@@ -67,6 +67,7 @@ import OrientationBlock from '@/components/Mobile/OrientationBlock';
 import { CognitiveServiceProvider } from '../CognitiveService/CognitiveServiceProvider';
 import HomeContext from '../home/home.context';
 import { HomeInitialState, initialState } from '../home/home.state';
+import { Button } from '../ui/button';
 
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -741,4 +742,5 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     </OrientationBlock>
   );
 };
+
 export default DefaultLayout;

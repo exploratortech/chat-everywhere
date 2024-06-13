@@ -12,7 +12,8 @@
     "gen-supabase-type": "supabase gen types typescript --local --schema public > types/supabase.ts",
     "coverage": "vitest run --coverage",
     "deploy-firebase-function": "npm run deploy --prefix firebase/functions/",
-    "deploy-firebase-function-production": "npm run deploy-production --prefix firebase/functions/"
+    "deploy-firebase-function-production": "npm run deploy-production --prefix firebase/functions/",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@ctrl/react-adsense": "^1.6.2",

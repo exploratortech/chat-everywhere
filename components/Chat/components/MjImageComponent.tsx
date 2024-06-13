@@ -1,3 +1,4 @@
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconHelp } from '@tabler/icons-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
@@ -55,6 +56,7 @@ export default function MjImageComponent({
   const isStudentAccount = isTempUser;
   const { t: commonT } = useTranslation('common');
   const { t: mjImageT } = useTranslation('mjImage');
+  const supabase = useSupabaseClient();
 
   const runButtonCommand = useCallback(
     async (button: string) => {
@@ -67,11 +69,18 @@ export default function MjImageComponent({
       homeDispatch({ field: 'messageIsStreaming', value: true });
 
       const controller = new AbortController();
+
+      const accessToken = (await supabase.auth.getSession())?.data.session
+        ?.access_token;
+      if (!accessToken) {
+        alert('Please sign in to continue');
+        return;
+      }
       const response = await fetch('api/mj-image-command', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'user-token': user?.token || '',
+          'user-token': accessToken,
         },
         signal: controller.signal,
         body: JSON.stringify({

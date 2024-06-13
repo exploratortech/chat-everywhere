@@ -1,3 +1,4 @@
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconHelp } from '@tabler/icons-react';
 import React, { memo, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
