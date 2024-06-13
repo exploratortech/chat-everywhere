@@ -479,7 +479,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id)',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId)',
       )
       .eq('id', userId)
       .single();
@@ -492,7 +492,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id)',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId)',
       )
       .eq('email', email)
       .single();
@@ -552,6 +552,9 @@ export const userProfileQuery = async ({
     : isTeacherAccount
     ? userProfile.id
     : undefined;
+  const tempUserUniqueId = isTempUser
+    ? userProfile.temporary_account_profiles[0].uniqueId
+    : undefined;
 
   return {
     id: userProfile.id,
@@ -568,6 +571,7 @@ export const userProfileQuery = async ({
     isTempUser: isTempUser,
     isTeacherAccount: isTeacherAccount,
     associatedTeacherId: associatedTeacherId,
+    tempUserUniqueId: tempUserUniqueId,
   } as UserProfile;
 };
 

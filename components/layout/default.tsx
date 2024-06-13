@@ -547,6 +547,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
             associatedTeacherId: userProfile.associatedTeacherId,
             isTeacherAccount: userProfile.isTeacherAccount,
             isTempUser: userProfile.isTempUser,
+            tempUserUniqueId: userProfile.tempUserUniqueId,
           });
         })
         .catch((error) => {
