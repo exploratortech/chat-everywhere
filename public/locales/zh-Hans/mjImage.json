@@ -16,6 +16,7 @@
   "FAILED": "失败",
   "COMPLETED": "完成",
   "PROCESSING": "处理中",
+  "GENERATING": "生成中",
   "AI Image service is processing your request...": "AI Image service 正在处理您的请求...",
   "Enqueued At": "排队时间",
   "Enhancing your prompt...": "正在优化您的提示...",

@@ -90,7 +90,7 @@ const ProcessingJobComponent = ({
       <summary className="cursor-pointer p-2 flex gap-2 items-center justify-between">
         <div className="flex gap-2 items-center flex-grow font-bold">
           <Spinner size="16px" />
-          {mjImageT(job.status)}
+          {mjImageT(job.status === 'PROCESSING' ? 'GENERATING' : job.status)}
 
           {job.status === 'PROCESSING' && !!job.progress && (
             <ProgressBar
