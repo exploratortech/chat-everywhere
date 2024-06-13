@@ -137,6 +137,7 @@ export interface UserPostHogProfile {
   isTeacherAccount: boolean;
   isTempUser: boolean;
   associatedTeacherId: string | undefined;
+  tempUserUniqueId: string | undefined;
 }
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
@@ -167,6 +168,7 @@ export const updateUserInfo = (userProfile: UserPostHogProfile) => {
     isTeacherAccount: userProfile.isTeacherAccount,
     isTempUser: userProfile.isTempUser,
     associatedTeacherId: userProfile.associatedTeacherId,
+    tempUserUniqueId: userProfile.tempUserUniqueId,
   });
 
   if (
@@ -175,6 +177,7 @@ export const updateUserInfo = (userProfile: UserPostHogProfile) => {
   ) {
     posthog.group('teacher-group', userProfile.associatedTeacherId, {
       associatedTeacherId: userProfile.associatedTeacherId,
+      tempUserUniqueId: userProfile.tempUserUniqueId,
     });
   }
 
