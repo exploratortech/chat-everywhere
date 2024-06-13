@@ -24,7 +24,7 @@ const useRunButtonCommand = () => {
       const accessToken = (await supabase.auth.getSession()).data.session
         ?.access_token;
       if (!accessToken) {
-        return;
+        return toast.error(commonT('Please sign in to use ai image feature'));
       }
       if (!selectedConversation) return;
 
