@@ -28,8 +28,10 @@ export const MjQueueService = {
     const enqueuedAt = dayjs().toISOString();
     const jobId = uuidv4();
 
-    await redis.rpush(WAITING_QUEUE_KEY, jobId);
+    // Transaction
+    const transaction = redis.multi();
 
+    transaction.rpush(WAITING_QUEUE_KEY, jobId);
     const newJob: Omit<QueuedMjJob, 'position'> = {
       jobId,
       status: 'QUEUED',
@@ -37,7 +39,9 @@ export const MjQueueService = {
       userId,
       mjRequest,
     };
-    await redis.hset(`${JOB_INFO_KEY}:${jobId}`, newJob);
+    transaction.hset(`${JOB_INFO_KEY}:${jobId}`, newJob);
+
+    await transaction.exec();
 
     console.log(`added jobId ${jobId} to queue`);
     return jobId;
