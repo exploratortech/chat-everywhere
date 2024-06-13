@@ -229,6 +229,7 @@ export const serverSideTrackEvent = async (
   eventName: EventNameTypes,
   additionalPayload?: PayloadType,
 ) => {
+  if (!enableTracking) return;
   try {
     const response = await fetch('https://app.posthog.com/capture/', {
       method: 'POST',
@@ -253,6 +254,7 @@ export const serverSideTrackSystemEvent = async (
   eventName: EventNameTypes,
   additionalPayload?: PayloadType,
 ) => {
+  if (!enableTracking) return;
   try {
     const response = await fetch('https://app.posthog.com/capture/', {
       method: 'POST',
@@ -278,6 +280,7 @@ export const logUsageSnapshot = (
   promptTemplates: Prompt[],
 ) => {
   try {
+    if (!enableTracking) return;
     const numberOfConversationFolders = folders.filter(
       (folder) => folder.type === 'chat' && !folder.deleted,
     ).length;
