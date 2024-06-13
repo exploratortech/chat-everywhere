@@ -137,8 +137,7 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
     if (functionName === 'error-message') {
       throw new Error('Translate and enhance prompt error', {
         cause: {
-          translateAndEnhancePromptErrorMessage:
-            functionParameters.errorMessage,
+          message: functionParameters.errorMessage,
         },
       });
     } else if (functionName === 'generate-image') {
@@ -146,7 +145,6 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
       return functionParameters.prompt;
     }
   } catch (error) {
-    // Throw the error above
     throw error;
   }
 };

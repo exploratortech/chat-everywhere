@@ -1,4 +1,3 @@
-// TODO: rewrite this file and implement DRY
 // This is a handler to execute and return the result of a function call to LLM.
 // This would seat between the endpoint and LLM.
 import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
