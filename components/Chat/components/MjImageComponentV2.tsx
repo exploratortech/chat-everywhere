@@ -1,3 +1,4 @@
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconHelp } from '@tabler/icons-react';
 import React, { useCallback, useContext } from 'react';
 import { toast } from 'react-hot-toast';
@@ -62,9 +63,18 @@ export default function MjImageComponentV2({
     (button) => !buttonCommandBlackList.includes(button),
   );
 
+  const supabase = useSupabaseClient();
+
   const runButtonCommand = useCallback(
     async (button: string) => {
       if (!user) return;
+      const accessToken = (await supabase.auth.getSession())?.data.session
+        ?.access_token;
+      if (!accessToken) {
+        alert('Please sign in to continue');
+        return;
+      }
+
       let updatedConversation: Conversation;
       if (!selectedConversation) return;
       updatedConversation = selectedConversation;
@@ -77,7 +87,7 @@ export default function MjImageComponentV2({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'user-token': user?.token || '',
+          'user-token': accessToken,
         },
         signal: controller.signal,
         body: JSON.stringify({

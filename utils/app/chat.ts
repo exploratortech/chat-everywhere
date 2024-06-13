@@ -128,6 +128,7 @@ async function sendRequest(
   controller: AbortController,
   outputLanguage: string,
   user: User | null,
+  accessToken: string,
 ): Promise<Response> {
   const body = JSON.stringify(chatBody);
 
@@ -136,7 +137,7 @@ async function sendRequest(
     headers: {
       'Content-Type': 'application/json',
       'Output-Language': outputLanguage,
-      'user-token': user?.token || '',
+      'user-token': accessToken,
       'user-browser-id': getOrGenerateUserId() || '',
       'user-selected-plugin-id': plugin?.id || '',
     },

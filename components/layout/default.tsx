@@ -468,10 +468,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   // USER AUTH ------------------------------------------
   useEffect(() => {
-    // TODO: remove debug
-    console.log({
-      sessionChanged: session,
-    });
     if (session?.user) {
       // User info has been updated for this session
       if (session.user.id === user?.id) return;
@@ -740,33 +736,11 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
         </Head>
         <LoadingBar color={'white'} ref={loadingRef} />
         <CognitiveServiceProvider>
-          <>
-            {children}
-            <DebugComponent />
-          </>
+          <>{children}</>
         </CognitiveServiceProvider>
       </HomeContext.Provider>
     </OrientationBlock>
   );
 };
+
 export default DefaultLayout;
-
-const DebugComponent = () => {
-  const supabase = useSupabaseClient();
-
-  const retrieveSession = async () => {
-    const { data, error } = await supabase.auth.getSession();
-    console.log({
-      session: data?.session,
-      error,
-    });
-  };
-  return (
-    <div>
-      <Button onClick={retrieveSession}>
-        retrieve session(Returns the session, refreshing it if necessary)
-      </Button>
-      <Button>Refresh session</Button>
-    </div>
-  );
-};

@@ -5,7 +5,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface User extends UserProfile {
   email: string;
-  token: string;
 }
 
 export type SubscriptionPlan = 'free' | 'pro' | 'ultra' | 'edu';
