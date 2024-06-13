@@ -203,7 +203,8 @@ export const MjQueueJob = {
     const cleanedUpJobs: (ProcessingMjJob & {
       fiveMinutesAgo: string;
     })[] = [];
-    for (const jobKey of jobKeys) {
+
+    const cleanByJobKey = async (jobKey: string) => {
       const jobData = await redis.hgetall(jobKey);
 
       const job = jobData as unknown as MjJob;
@@ -219,7 +220,12 @@ export const MjQueueJob = {
           fiveMinutesAgo: fiveMinutesAgo.toISOString(),
         });
       }
-    }
+    };
+
+    const tasks = jobKeys.map(cleanByJobKey);
+
+    await Promise.all(tasks);
+
     return cleanedUpJobs;
   },
 
