@@ -2,12 +2,15 @@ import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { updateConversationWithNewContentByIdentifier } from '@/utils/app/conversation';
+import { trackEvent } from '@/utils/app/eventTracking';
 import { MjQueueJobComponentHandler } from '@/utils/app/streamHandler';
 
 import { FailedMjJob } from './../../types/mjJob';
 import { MjJob } from '@/types/mjJob';
 
 import HomeContext from '@/components/home/home.context';
+
+import dayjs from 'dayjs';
 
 const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
   const [job, setJob] = useState<MjJob>(initialJob);
@@ -38,6 +41,29 @@ const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
           reason: mjImageT('Request expired, please click regenerate to retry'),
           enqueuedAt: job.enqueuedAt,
         } as FailedMjJob;
+        const now = dayjs().valueOf();
+        const totalDurationInSeconds =
+          (now - dayjs(job.enqueuedAt).valueOf()) / 1000;
+        const totalWaitingInQueueTimeInSeconds =
+          (dayjs(job.startProcessingAt).valueOf() -
+            dayjs(job.enqueuedAt).valueOf()) /
+          1000;
+        const totalProcessingTimeInSeconds =
+          (now - dayjs(job.startProcessingAt).valueOf()) / 1000;
+
+        trackEvent('MJ Image Gen Failed', {
+          mjQueueJobDetail: job,
+          mjImageGenType: job.mjRequest.type,
+          mjImageGenButtonCommand:
+            job.mjRequest.type === 'MJ_BUTTON_COMMAND'
+              ? job.mjRequest.button
+              : undefined,
+          mjImageGenTotalDurationInSeconds: totalDurationInSeconds,
+          mjImageGenTotalWaitingInQueueTimeInSeconds:
+            totalWaitingInQueueTimeInSeconds,
+          mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
+          mjImageGenErrorMessage: updatedJob.reason,
+        });
       }
       setJob(updatedJob);
 
@@ -62,8 +88,17 @@ const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
       }
     };
     if (job.status === 'QUEUED' || job.status === 'PROCESSING') {
-      const intervalId = setInterval(getLatestJobInfoToChat, 2000); // Poll every 2 seconds
-      return () => clearInterval(intervalId); // Cleanup on component unmount or job update
+      let isRequestInProgress = false;
+
+      const intervalId = setInterval(async () => {
+        if (!isRequestInProgress) {
+          isRequestInProgress = true;
+          await getLatestJobInfoToChat();
+          isRequestInProgress = false;
+        }
+      }, 3000);
+
+      return () => clearInterval(intervalId);
     }
   }, [
     conversations,
