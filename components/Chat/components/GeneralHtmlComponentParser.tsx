@@ -5,12 +5,18 @@ import React from 'react';
 const GeneralHtmlComponentParser = ({
   id,
   componentState,
+  identifier = undefined,
 }: {
   id: string;
   componentState: object;
+  identifier?: string | undefined;
 }) => {
   return (
-    <div id={id} data-component-state={JSON.stringify(componentState)}></div>
+    <div
+      id={id}
+      data-component-state={JSON.stringify(componentState)}
+      data-identifier={identifier}
+    ></div>
   );
 };
 

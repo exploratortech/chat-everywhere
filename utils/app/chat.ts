@@ -130,8 +130,7 @@ async function sendRequest(
   user: User | null,
   accessToken: string,
 ): Promise<Response> {
-  const body = JSON.stringify(chatBody);
-
+  const body = formatBody(chatBody, plugin);
   const response = await fetch(getEndpoint(plugin), {
     method: 'POST',
     headers: {
@@ -146,6 +145,22 @@ async function sendRequest(
   });
 
   return response;
+}
+
+function formatBody(chatBody: ChatBody, plugin: Plugin | null) {
+  if (plugin?.id === PluginID.IMAGE_GEN) {
+    if (!chatBody.messages || chatBody.messages.length === 0) {
+      throw new Error('Chat body is empty');
+    }
+    return JSON.stringify({
+      userPrompt: chatBody.messages[chatBody.messages.length - 1].content,
+      imageStyle: chatBody.imageStyle,
+      imageQuality: chatBody.imageQuality,
+      temperature: chatBody.temperature,
+    });
+  } else {
+    return JSON.stringify(chatBody);
+  }
 }
 
 function handleErrorResponse(

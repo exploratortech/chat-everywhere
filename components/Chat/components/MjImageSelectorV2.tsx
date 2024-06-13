@@ -7,7 +7,6 @@ export interface MjImageItem {
   buttons: string[];
 }
 export interface MjImageSelectorV2Props {
-  previousButtonCommand: string;
   imageUrl: string;
   buttons: string[];
   buttonMessageId: string;
@@ -16,15 +15,11 @@ export interface MjImageSelectorV2Props {
 
 // THE COMPONENT IS USED FOR STATIC HTML GENERATION, SO DON'T USE HOOKS OR STATE
 export default function MjImageSelectorV2({
-  previousButtonCommand,
   imageUrl,
   buttons,
   buttonMessageId,
   prompt,
 }: MjImageSelectorV2Props) {
-  const upscalePattern = /^U\d$/i;
-  const isPreviousUpscaleCommand = upscalePattern.test(previousButtonCommand);
-
   return (
     <div id="mj-image-static-v2" className="my-4">
       {/* // DO NOT EDIT THE <IMG> TAG BELOW. IT WILL BE SWAPPED OUT BY THE ReactMarkdown COMPONENT. */}

@@ -40,9 +40,7 @@ export function removeTempHtmlString(
   content: string,
   replaceString: string = '',
 ) {
-  content = content.replace(
-    "[REMOVE_TEMP_HTML]",'',
-  );
+  content = content.replace('[REMOVE_TEMP_HTML]', '');
   content = content.replace(
     /<!-- Temp HTML start -->(.*?)<!-- Temp HTML end -->/gs,
     replaceString,
@@ -59,4 +57,34 @@ export function removeRedundantTempHtmlString(content: string) {
     content += matches[matches.length - 1];
   }
   return content;
+}
+
+export function swapHtmlSegmentByDataIdentifier(
+  markdownContent: string,
+  targetIdentifier: string,
+  replacementHtml: string,
+): string | null {
+  // Step 1: Extract the HTML content
+  const tempHtmlRegex = /<!-- Temp HTML start -->(.*?)<!-- Temp HTML end -->/gs;
+  const matches = Array.from(markdownContent.matchAll(tempHtmlRegex));
+  if (!matches.length) return null;
+
+  // Step 2: Parse the HTML and find the div with the matching data-identifier
+  const parser = new DOMParser();
+  let updatedContent = markdownContent;
+
+  matches.forEach((match) => {
+    const doc = parser.parseFromString(match[1], 'text/html');
+    const divElement = doc.querySelector('div');
+
+    if (divElement) {
+      const identifier = divElement.getAttribute('data-identifier');
+      if (identifier === targetIdentifier) {
+        // Replace the whole div including the Temp HTML comments
+        updatedContent = updatedContent.replace(match[0], replacementHtml);
+      }
+    }
+  });
+
+  return updatedContent;
 }
