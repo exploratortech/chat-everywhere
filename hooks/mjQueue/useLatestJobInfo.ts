@@ -38,6 +38,29 @@ const useLatestJobInfo = (initialJob: MjJob, messageIndex: number) => {
           reason: mjImageT('Request expired, please click regenerate to retry'),
           enqueuedAt: job.enqueuedAt,
         } as FailedMjJob;
+        const now = dayjs().valueOf();
+        const totalDurationInSeconds =
+          (now - dayjs(job.enqueuedAt).valueOf()) / 1000;
+        const totalWaitingInQueueTimeInSeconds =
+          (dayjs(job.startProcessingAt).valueOf() -
+            dayjs(job.enqueuedAt).valueOf()) /
+          1000;
+        const totalProcessingTimeInSeconds =
+          (now - dayjs(job.startProcessingAt).valueOf()) / 1000;
+
+        trackEvent('MJ Image Gen Failed', {
+          mjQueueJobDetail: job,
+          mjImageGenType: job.mjRequest.type,
+          mjImageGenButtonCommand:
+            job.mjRequest.type === 'MJ_BUTTON_COMMAND'
+              ? job.mjRequest.button
+              : undefined,
+          mjImageGenTotalDurationInSeconds: totalDurationInSeconds,
+          mjImageGenTotalWaitingInQueueTimeInSeconds:
+            totalWaitingInQueueTimeInSeconds,
+          mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
+          mjImageGenErrorMessage: updatedJob.reason,
+        });
       }
       setJob(updatedJob);
 
