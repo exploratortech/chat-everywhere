@@ -67,6 +67,7 @@ import OrientationBlock from '@/components/Mobile/OrientationBlock';
 import { CognitiveServiceProvider } from '../CognitiveService/CognitiveServiceProvider';
 import HomeContext from '../home/home.context';
 import { HomeInitialState, initialState } from '../home/home.state';
+import { Button } from '../ui/button';
 
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -467,6 +468,10 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   // USER AUTH ------------------------------------------
   useEffect(() => {
+    // TODO: remove debug
+    console.log({
+      sessionChanged: session,
+    });
     if (session?.user) {
       // User info has been updated for this session
       if (session.user.id === user?.id) return;
@@ -735,10 +740,33 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
         </Head>
         <LoadingBar color={'white'} ref={loadingRef} />
         <CognitiveServiceProvider>
-          <>{children}</>
+          <>
+            {children}
+            <DebugComponent />
+          </>
         </CognitiveServiceProvider>
       </HomeContext.Provider>
     </OrientationBlock>
   );
 };
 export default DefaultLayout;
+
+const DebugComponent = () => {
+  const supabase = useSupabaseClient();
+
+  const retrieveSession = async () => {
+    const { data, error } = await supabase.auth.getSession();
+    console.log({
+      session: data?.session,
+      error,
+    });
+  };
+  return (
+    <div>
+      <Button onClick={retrieveSession}>
+        retrieve session(Returns the session, refreshing it if necessary)
+      </Button>
+      <Button>Refresh session</Button>
+    </div>
+  );
+};
