@@ -175,11 +175,6 @@ export const updateUserInfo = (userProfile: UserPostHogProfile) => {
     (userProfile.isTempUser || userProfile.isTeacherAccount) &&
     userProfile.associatedTeacherId
   ) {
-    console.log({
-      userProfile,
-      associatedTeacherId: userProfile.associatedTeacherId,
-      tempUserUniqueId: userProfile.tempUserUniqueId,
-    });
     posthog.group('teacher-group', userProfile.associatedTeacherId, {
       associatedTeacherId: userProfile.associatedTeacherId,
       tempUserUniqueId: userProfile.tempUserUniqueId,
