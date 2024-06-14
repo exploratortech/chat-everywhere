@@ -1,1 +1,12 @@
-{}
+{
+  "This feature is not available at the moment. Please try again later": "Fitur ini tidak tersedia saat ini. Silakan coba lagi nanti",
+  "Unable to access microphone": "Tidak dapat mengakses mikrofon",
+  "The speech service is unavailable at the moment, please try again later": "Layanan ucapan tidak tersedia saat ini, silakan coba lagi nanti",
+  "Please register and sign in to enable voice input": "Silakan daftar dan masuk untuk mengaktifkan input suara",
+  "Please sign in to use ai image feature": "Silakan masuk untuk menggunakan fitur gambar AI",
+  "Please sign in to use image to prompt feature": "Silakan masuk untuk menggunakan fitur gambar untuk prompt",
+  "We appreciate your use of our application.": "Kami menghargai penggunaan aplikasi kami.",
+  "Currently, our app is optimized to work in portrait mode and unfortunately, we do not support landscape mode at this moment.": "Saat ini, aplikasi kami dioptimalkan untuk bekerja dalam mode potret dan sayangnya, kami tidak mendukung mode lanskap saat ini.",
+  "Thank you for your understanding and patience.": "Terima kasih atas pengertian dan kesabaran Anda.",
+  "Upload": "Unggah"
+}
