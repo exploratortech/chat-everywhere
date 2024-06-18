@@ -3,9 +3,11 @@ import { aiPainterLlmHandler } from '@/utils/server/functionCalls/aiPainterllmHa
 import {
   getAdminSupabaseClient,
   getUserProfile,
+  hasUserRunOutOfCredits,
 } from '@/utils/server/supabase';
 
 import { ChatBody } from '@/types/chat';
+import { PluginID } from '@/types/plugin';
 
 import AiPainterProgress from '@/components/Chat/components/AiPainterProgress';
 
@@ -32,7 +34,17 @@ const handler = async (req: Request): Promise<Response> => {
 
   const user = await getUserProfile(data.user.id);
   if (!user || user.plan === 'free') return unauthorizedResponse;
+  const isUserInUltraPlan = user.plan === 'ultra';
 
+  if (
+    !isUserInUltraPlan &&
+    (await hasUserRunOutOfCredits(user.id, PluginID.IMAGE_GEN))
+  ) {
+    return new Response('Error', {
+      status: 402,
+      statusText: 'Ran out of GPT-4 credit',
+    });
+  }
   const chatbody = (await req.json()) as ChatBody;
   const { messages, prompt } = chatbody;
 

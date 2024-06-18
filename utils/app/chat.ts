@@ -182,6 +182,8 @@ function handleErrorResponse(
     toastError(
       t('Sorry something went wrong. Please refresh the page and try again.'),
     );
+  } else if (response.status === 402) {
+    toastError(t("You don't have enough credits to use this feature"));
   } else if (
     response.status === ERROR_MESSAGES.content_filter_triggered.httpCode
   ) {

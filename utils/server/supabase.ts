@@ -129,6 +129,9 @@ export const subtractCredit = async (
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
   const newBalance = userCredits.balance - 1;
+  if (newBalance < 0) {
+    throw new Error('User has not enough credits to use this feature');
+  }
   await updateUserCredits(userId, apiType, newBalance);
 };
 
@@ -550,8 +553,8 @@ export const userProfileQuery = async ({
   const associatedTeacherId = isTempUser
     ? userProfile.temporary_account_profiles[0].teacher_profile_id
     : isTeacherAccount
-    ? userProfile.id
-    : undefined;
+      ? userProfile.id
+      : undefined;
   const tempUserUniqueId = isTempUser
     ? userProfile.temporary_account_profiles[0].uniqueId
     : undefined;
