@@ -115,7 +115,7 @@ const ModeSelector = () => {
           {isPaidUser && (
             <>
               <option
-                value={PluginID.GPT4O}
+                value={PluginID.GPT4}
                 className="dark:bg-[#343541] dark:text-white text-yellow-600"
               >
                 {t('GPT-4')}
