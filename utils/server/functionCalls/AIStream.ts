@@ -1,9 +1,6 @@
 // This is a simpler rewrite of the OpenAIStream function, which is the main function that handles the AI response.
 // This should be used in tendon with the handler.ts file. For GPT-4 only
 import {
-  AZURE_OPENAI_GPT_4O_ENDPOINTS,
-  AZURE_OPENAI_GPT_4O_KEYS,
-  AZURE_OPENAI_GPT_4O_TPM,
   DEFAULT_TEMPERATURE,
 } from '@/utils/app/const';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
