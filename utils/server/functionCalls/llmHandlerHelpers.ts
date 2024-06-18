@@ -153,7 +153,7 @@ export const triggerHelperFunction = async (
       serverSideTrackEvent('N/A', 'Helper function triggered', {
         helperFunctionName: helperFunctionNames.aiPainter,
       });
-      serverSideTrackEvent('N/A', 'DallE image generation');
+      serverSideTrackEvent(userId, 'DallE image generation');
 
       const generateAndStoreImage = async () => {
         const storeImage = async (imageBase64: string) => {
