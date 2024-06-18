@@ -38,6 +38,11 @@ export interface HomeInitialState {
   syncingConversation: boolean;
   syncSuccess: boolean | null; // null = not yet synced
 
+  // Request Logout
+  isRequestingLogout: {
+    clearBrowserChatHistory: boolean;
+  } | null;
+
   // User Auth
   showSettingsModel: boolean;
   showFilePortalModel: boolean;
@@ -73,7 +78,6 @@ export interface HomeInitialState {
 
   // Posthog feature flags
   featureFlags: {
-    'enable-chat-with-doc': boolean;
     'enable-conversation-mode': boolean;
   };
 }
@@ -106,6 +110,9 @@ export const initialState: HomeInitialState = {
   replaceRemoteData: false,
   syncingConversation: false,
   syncSuccess: null,
+
+  // Request Logout
+  isRequestingLogout: null,
 
   // User Auth
   showSettingsModel: false,
@@ -145,7 +152,6 @@ export const initialState: HomeInitialState = {
 
   // Posthog feature flags
   featureFlags: {
-    'enable-chat-with-doc': false,
     'enable-conversation-mode': false,
   },
 };

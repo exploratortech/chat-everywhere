@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 
 import { IMAGE_TO_PROMPT_MAX_TIMEOUT } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
-import { ProgressHandler, makeWriteToStream } from '@/utils/app/streamHandler';
+import {
+  MjProgressProgressHandler,
+  makeWriteToStream,
+} from '@/utils/app/streamHandler';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
 const supabase = getAdminSupabaseClient();
@@ -31,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
   const startTime = Date.now();
 
   const writeToStream = makeWriteToStream(writer, encoder);
-  const progressHandler = new ProgressHandler(writeToStream);
+  const progressHandler = new MjProgressProgressHandler(writeToStream);
 
   let jobTerminated = false;
 
@@ -109,7 +112,7 @@ const handler = async (req: Request): Promise<Response> => {
         } else if (textGenerationProgress === null) {
           progressHandler.updateProgress({
             content: `Start to generate \n`,
-            removeLastLine: true
+            removeLastLine: true,
           });
           textGenerationProgress = generationProgress || 0;
         } else {

@@ -51,6 +51,7 @@ const ImageToPromptUpload = () => {
     setImageFile(null);
   };
 
+  const supabase = useSupabaseClient();
   const confirmHandler = useCallback(async () => {
     try {
       if (!imageFile) return;
@@ -87,13 +88,20 @@ const ImageToPromptUpload = () => {
       const imageUrl = await uploadImage(file);
       if (!imageUrl) return;
 
+      const accessToken = (await supabase.auth.getSession())?.data.session
+        ?.access_token;
+      if (!accessToken) {
+        alert('Please sign in to continue');
+        return;
+      }
+
       await handleImageToPromptSend({
         imageUrl,
         conversations,
         homeDispatch,
         selectedConversation,
         stopConversationRef,
-        user,
+        accessToken,
       });
     } catch (e) {
       const isErrorMessage =

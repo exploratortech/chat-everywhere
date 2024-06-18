@@ -8,6 +8,8 @@ import AiPainterResult from '../components/AiPainterResult';
 import ContinueChat from '../components/ContinueChat';
 import { ImageGenerationComponent } from '../components/ImageGenerationComponent';
 import MjImageComponentV2 from '../components/MjImageComponentV2';
+import MjImageProgress from '../components/MjImageProgress';
+import MjQueueJobComponent from '../components/MjQueueJobComponent';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 
@@ -91,6 +93,7 @@ const AssistantRespondMessage = memo(
               buttons={aiImageButtons}
               buttonMessageId={aiImageButtonMessageId}
               prompt={aiImagePrompt}
+              messageIndex={messageIndex}
             />
           );
         }

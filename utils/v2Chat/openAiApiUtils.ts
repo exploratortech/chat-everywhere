@@ -128,20 +128,21 @@ export const generateImage = async (
   let response;
   let delay = 500; // Initial delay of 500ms
   let retries = 0; // Initial retry count
-  const maxRetries = 10;
+  const maxRetries = 5;
 
   while (retries < maxRetries) {
-    if (retries < 4) {
-      response = await authorizedDalle3AzureRequest({
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-    } else {
-      response = await authorizedOpenAiRequest(openAiUrl, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-    }
+    // TODO: We need to fix this after Azure opted-out the content-filter
+    // if (retries < 4) {
+    //   response = await authorizedDalle3AzureRequest({
+    //     method: 'POST',
+    //     body: JSON.stringify(payload),
+    //   });
+    // } else {
+    response = await authorizedOpenAiRequest(openAiUrl, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    // }
 
     if (response.status !== 429 && response.status !== 404) {
       break;

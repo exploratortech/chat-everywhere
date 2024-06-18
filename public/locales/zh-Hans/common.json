@@ -11,5 +11,6 @@
   "Upload": "上传",
   "File uploaded successfully": "文件上传成功",
   "File upload failed": "文件上传失败",
-  "Continue": "继续"
+  "Error": "错误",
+  "Retry": "重试"
 }

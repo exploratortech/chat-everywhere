@@ -1,4 +1,7 @@
+import { swapHtmlSegmentByDataIdentifier } from '@/utils/app/htmlStringHandler';
+
 import { Conversation } from '@/types/chat';
+import { Message } from '@/types/chat';
 
 import dayjs from 'dayjs';
 
@@ -48,3 +51,119 @@ export const saveConversations = (conversations: Conversation[]) => {
 export const savePrompts = (prompts: any[]) => {
   localStorage.setItem('prompts', JSON.stringify(prompts));
 };
+
+export async function updateConversationWithNewContent({
+  selectedConversation,
+  conversations,
+  messageIndex,
+  homeDispatch,
+  newHtml,
+}: {
+  selectedConversation: Conversation;
+  conversations: Conversation[];
+  messageIndex: number;
+  homeDispatch: Function;
+  newHtml: string;
+}) {
+  const updatedMessages: Message[] = selectedConversation.messages.map(
+    (message, index) => {
+      if (index === messageIndex) {
+        const updatedContent = message.content + newHtml;
+
+        return {
+          ...message,
+          content: updatedContent || message.content,
+        };
+      }
+      return message;
+    },
+  );
+
+  updateConversationAndSave({
+    selectedConversation,
+    conversations,
+    updatedMessages,
+    homeDispatch,
+  });
+}
+
+export async function updateConversationWithNewContentByIdentifier({
+  selectedConversation,
+  conversations,
+  messageIndex,
+  homeDispatch,
+  newHtml,
+  targetIdentifier,
+}: {
+  selectedConversation: Conversation;
+  conversations: Conversation[];
+  messageIndex: number;
+  homeDispatch: Function;
+  newHtml: string;
+  targetIdentifier: string;
+}) {
+  const updatedMessages: Message[] = selectedConversation.messages.map(
+    (message, index) => {
+      if (index === messageIndex) {
+        const updatedContent = swapHtmlSegmentByDataIdentifier(
+          message.content,
+          targetIdentifier,
+          newHtml,
+        );
+
+        return {
+          ...message,
+          content: updatedContent || message.content,
+        };
+      }
+      return message;
+    },
+  );
+
+  updateConversationAndSave({
+    selectedConversation,
+    conversations,
+    updatedMessages,
+    homeDispatch,
+  });
+}
+
+function updateConversationAndSave({
+  selectedConversation,
+  conversations,
+  updatedMessages,
+  homeDispatch,
+}: {
+  selectedConversation: Conversation;
+  conversations: Conversation[];
+  updatedMessages: Message[];
+  homeDispatch: Function;
+}) {
+  const updatedConversation = {
+    ...selectedConversation,
+    messages: updatedMessages,
+    lastUpdateAtUTC: dayjs().valueOf(),
+  };
+
+  const updatedConversations: Conversation[] = conversations.map(
+    (conversation) => {
+      if (conversation.id === selectedConversation.id) {
+        return updatedConversation;
+      }
+      return conversation;
+    },
+  );
+
+  homeDispatch({
+    field: 'selectedConversation',
+    value: updatedConversation,
+  });
+
+  saveConversation(updatedConversation);
+  homeDispatch({
+    field: 'conversations',
+    value: updatedConversations,
+  });
+  saveConversations(updatedConversations);
+  updateConversationLastUpdatedAtTimeStamp();
+}

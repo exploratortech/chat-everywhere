@@ -33,14 +33,12 @@ import {
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
 import {
-  clearUserInfo,
   isFeatureEnabled,
   logUsageSnapshot,
   trackEvent,
   updateUserInfo,
 } from '@/utils/app/eventTracking';
 import { saveFolders } from '@/utils/app/folders';
-import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
 import {
   areFoldersBalanced,
@@ -69,6 +67,7 @@ import OrientationBlock from '@/components/Mobile/OrientationBlock';
 import { CognitiveServiceProvider } from '../CognitiveService/CognitiveServiceProvider';
 import HomeContext from '../home/home.context';
 import { HomeInitialState, initialState } from '../home/home.state';
+import { Button } from '../ui/button';
 
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -91,41 +90,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   const contextValue = useCreateReducer<HomeInitialState>({ initialState });
 
-  const resetStateOnLogout = ({
-    clearConversationHistory = false,
-  }: {
-    clearConversationHistory?: boolean;
-  }) => {
-    const newState = {
-      ...initialState,
-      // Preserve the values of the specified properties
-      loading: contextValue.state.loading,
-      lightMode: contextValue.state.lightMode,
-      messageIsStreaming: contextValue.state.messageIsStreaming,
-      modelError: contextValue.state.modelError,
-      folders: contextValue.state.folders,
-      conversations: contextValue.state.conversations,
-      selectedConversation: contextValue.state.selectedConversation,
-      currentMessage: contextValue.state.currentMessage,
-      prompts: contextValue.state.prompts,
-      temperature: contextValue.state.temperature,
-      showChatbar: contextValue.state.showChatbar,
-      showPromptbar: contextValue.state.showPromptbar,
-      currentFolder: contextValue.state.currentFolder,
-      messageError: contextValue.state.messageError,
-      searchTerm: contextValue.state.searchTerm,
-      defaultModelId: contextValue.state.defaultModelId,
-      outputLanguage: contextValue.state.outputLanguage,
-      currentDrag: contextValue.state.currentDrag,
-    };
-    if (clearConversationHistory) {
-      newState.conversations = [];
-      newState.prompts = [];
-      newState.folders = [];
-    }
-
-    dispatch({ type: 'partialReset', payload: newState });
-  };
   const { fetchAndUpdateCreditUsage, creditUsage } = useFetchCreditUsage();
 
   const {
@@ -572,9 +536,19 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
             field: 'featureFlags',
             value: {
               // Ignore feature flag on staging and local env
-              'enable-chat-with-doc': isFeatureEnabled('enable-chat-with-doc') || process.env.NEXT_PUBLIC_ENV !== 'production',
-              'enable-conversation-mode': isFeatureEnabled('enable-conversation-mode') || process.env.NEXT_PUBLIC_ENV !== 'production',
+              'enable-conversation-mode':
+                isFeatureEnabled('enable-conversation-mode') ||
+                process.env.NEXT_PUBLIC_ENV !== 'production',
             },
+          });
+          updateUserInfo({
+            id: userProfile.id,
+            email: userProfile.email,
+            plan: userProfile.plan || 'free',
+            associatedTeacherId: userProfile.associatedTeacherId,
+            isTeacherAccount: userProfile.isTeacherAccount,
+            isTempUser: userProfile.isTempUser,
+            tempUserUniqueId: userProfile.tempUserUniqueId,
           });
         })
         .catch((error) => {
@@ -606,56 +580,8 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (!user) return;
-    updateUserInfo(user);
     fetchAndUpdateCreditUsage(user.id, isPaidUser);
   }, [user, isPaidUser, conversations]);
-
-  const handleUserLogout = async () => {
-    const accessToken = (await supabase.auth.getSession()).data.session
-      ?.access_token;
-
-    let shouldClearConversationsOnLogout = false;
-    if (isTempUser) {
-      shouldClearConversationsOnLogout = (
-        await fetchShouldClearConversationsOnLogout(accessToken)
-      ).should_clear_conversations_on_logout;
-    }
-    await supabase.auth.signOut();
-
-    if (shouldClearConversationsOnLogout) {
-      resetStateOnLogout({
-        clearConversationHistory: true,
-      });
-      saveConversations([]);
-      defaultModelId &&
-        dispatch({
-          field: 'selectedConversation',
-          value: {
-            id: uuidv4(),
-            name: 'New conversation',
-            messages: [],
-            model: OpenAIModels[defaultModelId],
-            prompt: DEFAULT_SYSTEM_PROMPT,
-            temperature: DEFAULT_TEMPERATURE,
-            folderId: null,
-          },
-        });
-      localStorage.removeItem('selectedConversation');
-    } else {
-      resetStateOnLogout({});
-    }
-
-    dispatch({
-      field: 'featureFlags',
-      value: {
-        'enable-chat-with-doc': false,
-        'enable-conversation-mode': false,
-      },
-    });
-
-    toast.success(t('You have been logged out'));
-    clearUserInfo();
-  };
 
   useEffect(() => {
     const theme = localStorage.getItem('theme');
@@ -791,7 +717,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           handleSelectConversation,
           handleUpdateConversation,
           handleCreatePrompt,
-          handleUserLogout,
           toggleChatbar,
           togglePromptbar,
           setDragData,
@@ -817,33 +742,5 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     </OrientationBlock>
   );
 };
-export default DefaultLayout;
 
-const fetchShouldClearConversationsOnLogout = async (
-  accessToken: string | undefined,
-) => {
-  try {
-    if (!accessToken) {
-      throw new Error('No access token');
-    }
-    const res = await fetch('/api/teacher-settings-for-student-logout', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'access-token': accessToken,
-      },
-    });
-    if (!res.ok) {
-      throw new Error('Failed to fetch teacher Settings');
-    }
-    const data = await res.json();
-    return data as {
-      should_clear_conversations_on_logout: boolean;
-    };
-  } catch (error) {
-    console.error(error);
-    return {
-      should_clear_conversations_on_logout: false,
-    };
-  }
-};
+export default DefaultLayout;

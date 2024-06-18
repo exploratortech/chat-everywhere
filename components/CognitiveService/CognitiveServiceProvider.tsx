@@ -1,3 +1,4 @@
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import React, {
   createContext,
   useCallback,
@@ -149,16 +150,23 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
     [t],
   );
 
+  const supabase = useSupabaseClient();
   const fetchSpeechToken = useCallback(async () => {
     const now = dayjs();
 
     if (speechToken.current && speechTokenExpiresAt.current.isAfter(now))
       return;
 
+    const accessToken = (await supabase.auth.getSession())?.data.session
+      ?.access_token;
+    if (!accessToken) {
+      alert('Please sign in to continue');
+      return;
+    }
     try {
       const response = await fetch('/api/getSpeechToken', {
         headers: {
-          'user-token': user?.token || '',
+          'user-token': accessToken,
         },
       });
       const responseJson = await response.json();

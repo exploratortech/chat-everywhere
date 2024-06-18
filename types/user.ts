@@ -5,7 +5,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface User extends UserProfile {
   email: string;
-  token: string;
 }
 
 export type SubscriptionPlan = 'free' | 'pro' | 'ultra' | 'edu';
@@ -30,6 +29,8 @@ export interface UserProfile {
   hasMqttConnection: boolean;
   isTempUser: boolean;
   isTeacherAccount: boolean;
+  associatedTeacherId: string | undefined;
+  tempUserUniqueId: string | undefined;
 }
 
 export interface CreditUsage {
