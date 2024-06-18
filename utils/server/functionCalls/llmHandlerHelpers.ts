@@ -208,7 +208,6 @@ export const triggerHelperFunction = async (
           if (!generatedImageInBase64) {
             throw new Error('Failed to generate image');
           }
-          // Run storeImage and substractUserCredit in parallel
           const { imagePublicUrl, fileName, compressedUrl } = await storeImage(
             generatedImageInBase64,
           );
@@ -251,8 +250,7 @@ export const triggerHelperFunction = async (
           }
         };
         if (user?.plan !== 'ultra') {
-          // TODO: Enable Temp disable subtract credit
-          // await subtractUserCredit();
+          await subtractUserCredit();
         }
 
         const functionResponse = `
@@ -377,7 +375,7 @@ export const triggerMqttConnection = async (
     (mqttConnection: mqttConnectionType) =>
       mqttConnection.name &&
       mqttConnection.name.replace(/\s/g, '-') ===
-        connectionName.replace('mqtt-', ''),
+      connectionName.replace('mqtt-', ''),
   );
 
   if (!mqttConnection) return 'Failed';
@@ -417,7 +415,7 @@ export const retrieveMqttConnectionPayload = async (
     (mqttConnection: mqttConnectionType) =>
       mqttConnection.name &&
       mqttConnection.name.replace(/\s/g, '-') ===
-        connectionName.replace('mqttreceiver-', ''),
+      connectionName.replace('mqttreceiver-', ''),
   );
 
   if (!mqttConnection) return 'Failed';
