@@ -67,5 +67,6 @@
   "Join our event in {{minutes}} minutes!": "不要错过我们这次精彩的官方活动哦！倒计时 {{minutes}} 分钟！",
   "Event is now live!": "活动正式开始，快加入我们吧！",
   "Error occurred while generating image, please try again later": "生成图像时出错，请稍后再试",
-  "Failed to enhance the prompt after multiple attempts": "多次尝试后仍无法优化提示词"
+  "Failed to enhance the prompt after multiple attempts": "多次尝试后仍无法优化提示词",
+  "You don't have enough credits to use this feature": "您点数不足，无法使用此功能"
 }
