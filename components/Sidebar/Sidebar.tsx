@@ -26,7 +26,7 @@ interface Props<T> {
   toggleOpen: () => void;
   handleCreateItem: () => void;
   handleCreateFolder: () => void;
-  handleDrop: (e: any) => void;
+  // handleDrop: (e: any) => void;
   showMobileButton?: boolean;
 }
 
@@ -44,7 +44,7 @@ const Sidebar = <T,>({
   toggleOpen,
   handleCreateItem,
   handleCreateFolder,
-  handleDrop,
+  // handleDrop,
   showMobileButton = true,
 }: Props<T>) => {
   const { t } = useTranslation('promptbar');
@@ -108,7 +108,7 @@ const Sidebar = <T,>({
           onSearch={handleSearchTerm}
         />
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-x-hidden overflow-y-auto">
           <div className="flex border-b border-white/20 pb-2">
             {folderComponent}
           </div>

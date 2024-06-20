@@ -364,6 +364,7 @@ async function handleDataResponse(
     updatedConversations = reorderItem(
       updatedConversations,
       updatedConversation.id,
+      updatedConversations.length - 1,
       0,
     );
   }
