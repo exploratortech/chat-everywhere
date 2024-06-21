@@ -10,6 +10,7 @@ import { CreditUsage, User } from '@/types/user';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface HomeInitialState {
+  appInitialized: boolean;
   loading: boolean;
   lightMode: 'light' | 'dark';
   messageIsStreaming: boolean;
@@ -83,6 +84,7 @@ export interface HomeInitialState {
 }
 
 export const initialState: HomeInitialState = {
+  appInitialized: false,
   loading: false,
   lightMode: 'dark',
   messageIsStreaming: false,

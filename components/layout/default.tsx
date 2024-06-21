@@ -1,4 +1,4 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useCallback, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
@@ -8,11 +8,9 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { event } from 'nextjs-google-analytics';
 
-import useTeacherPromptForStudent from '@/hooks/teacherPortal/useTeacherPromptForStudent';
-import useTeacherSettingsForStudent from '@/hooks/teacherPortal/useTeacherSettingsForStudent';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
+import useLoginHook from '@/hooks/useLoginHook';
 import useMediaQuery from '@/hooks/useMediaQuery';
-import useUserProfile from '@/hooks/useUserProfile';
 
 import { fetchShareableConversation } from '@/utils/app/api';
 import {
@@ -32,12 +30,7 @@ import {
   updateConversation,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import {
-  isFeatureEnabled,
-  logUsageSnapshot,
-  trackEvent,
-  updateUserInfo,
-} from '@/utils/app/eventTracking';
+import { logUsageSnapshot, trackEvent } from '@/utils/app/eventTracking';
 import { saveFolders } from '@/utils/app/folders';
 import { savePrompts } from '@/utils/app/prompts';
 import {
@@ -50,7 +43,6 @@ import {
   sortByRankAndFolder,
 } from '@/utils/app/rank';
 import { syncData } from '@/utils/app/sync';
-import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
 
 import { Conversation } from '@/types/chat';
@@ -67,7 +59,6 @@ import OrientationBlock from '@/components/Mobile/OrientationBlock';
 import { CognitiveServiceProvider } from '../CognitiveService/CognitiveServiceProvider';
 import HomeContext from '../home/home.context';
 import { HomeInitialState, initialState } from '../home/home.state';
-import { Button } from '../ui/button';
 
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -85,7 +76,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   const defaultModelId = fallbackModelID;
   const { t } = useTranslation('chat');
   const router = useRouter();
-  const session = useSession();
   const supabase = useSupabaseClient();
 
   const contextValue = useCreateReducer<HomeInitialState>({ initialState });
@@ -107,7 +97,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       forceSyncConversation,
       replaceRemoteData,
       messageIsStreaming,
-      isTempUser,
     },
     dispatch,
   } = contextValue;
@@ -138,6 +127,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       dispatch({ field: 'showChatbar', value: false });
       dispatch({ field: 'showPromptbar', value: false });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTabletLayout]);
 
   // FOLDER OPERATIONS  --------------------------------------------
@@ -364,6 +354,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     defaultModelId &&
       dispatch({ field: 'defaultModelId', value: defaultModelId });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultModelId]);
 
   // CLOUD SYNC ------------------------------------------
@@ -460,127 +451,13 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     selectedConversation,
   ]);
 
-  const { refetch: fetchUserProfile } = useUserProfile({
-    userId: session?.user.id,
-  });
-  const { refetch: fetchTeacherPrompts } = useTeacherPromptForStudent();
-  const { refetch: fetchTeacherSettings } = useTeacherSettingsForStudent();
-
   // USER AUTH ------------------------------------------
-  useEffect(() => {
-    if (session?.user) {
-      // User info has been updated for this session
-      if (session.user.id === user?.id) return;
-      fetchUserProfile()
-        .then((result) => {
-          const userProfile = result.data;
-          if (!userProfile) return;
-          dispatch({ field: 'showLoginSignUpModel', value: false });
-          dispatch({ field: 'showOneTimeCodeLoginModel', value: false });
-          dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
-          dispatch({ field: 'isTempUser', value: userProfile.isTempUser });
-          if (userProfile.isTempUser || userProfile.isTeacherAccount) {
-            fetchTeacherPrompts().then((res) => {
-              if (res.data) {
-                dispatch({
-                  field: 'teacherPrompts',
-                  value: res.data.prompts,
-                });
-              }
-            });
-          }
-          if (userProfile.isTempUser) {
-            fetchTeacherSettings().then((res) => {
-              if (res.data) {
-                dispatch({
-                  field: 'teacherSettings',
-                  value: res.data.settings,
-                });
-              }
-            });
-          }
-          dispatch({
-            field: 'isTeacherAccount',
-            value: userProfile.isTeacherAccount,
-          });
-          dispatch({
-            field: 'isUltraUser',
-            value: userProfile.plan === 'ultra',
-          });
-          dispatch({
-            field: 'hasMqttConnection',
-            value: userProfile.hasMqttConnection,
-          });
-          dispatch({
-            field: 'isConnectedWithLine',
-            value: userProfile.isConnectedWithLine,
-          });
-          dispatch({
-            field: 'user',
-            value: {
-              id: session.user.id,
-              email: session.user.email,
-              plan: userProfile.plan || 'free',
-              token: session.access_token,
-              referralCode: userProfile.referralCode,
-              referralCodeExpirationDate:
-                userProfile.referralCodeExpirationDate,
-              proPlanExpirationDate: userProfile.proPlanExpirationDate,
-              hasReferrer: userProfile.hasReferrer,
-              hasReferee: userProfile.hasReferee,
-              isInReferralTrial: userProfile.isInReferralTrial,
-            },
-          });
-
-          dispatch({
-            field: 'featureFlags',
-            value: {
-              // Ignore feature flag on staging and local env
-              'enable-conversation-mode':
-                isFeatureEnabled('enable-conversation-mode') ||
-                process.env.NEXT_PUBLIC_ENV !== 'production',
-            },
-          });
-          updateUserInfo({
-            id: userProfile.id,
-            email: userProfile.email,
-            plan: userProfile.plan || 'free',
-            associatedTeacherId: userProfile.associatedTeacherId,
-            isTeacherAccount: userProfile.isTeacherAccount,
-            isTempUser: userProfile.isTempUser,
-            tempUserUniqueId: userProfile.tempUserUniqueId,
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          toast.error(
-            t('Unable to load your information, please try again later.'),
-          );
-        });
-
-      //Check if survey is filled by logged in user
-      supabase
-        .from('user_survey')
-        .select('name')
-        .eq('uid', session.user.id)
-        .then(({ data }) => {
-          if (!data || data.length === 0) {
-            dispatch({ field: 'isSurveyFilled', value: false });
-          } else {
-            dispatch({ field: 'isSurveyFilled', value: true });
-          }
-        });
-    } else {
-      dispatch({
-        field: 'isSurveyFilled',
-        value: getIsSurveyFilledFromLocalStorage(),
-      });
-    }
-  }, [session]);
+  useLoginHook(user, dispatch);
 
   useEffect(() => {
     if (!user) return;
     fetchAndUpdateCreditUsage(user.id, isPaidUser);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isPaidUser, conversations]);
 
   useEffect(() => {
@@ -678,7 +555,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
             router.replace(router.pathname, router.pathname, { shallow: true });
           }
         })
-        .catch((error) => {
+        .catch(() => {
           toast.error(t('Sorry, we could not find this shared conversation.'));
           dispatch({
             field: 'selectedConversation',
@@ -695,11 +572,13 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
         value: newDefaultConversation,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // APPLY HOOKS VALUE TO CONTEXT -------------------------------------
   useEffect(() => {
     dispatch({ field: 'creditUsage', value: creditUsage });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [creditUsage]);
   useEffect(() => {
     document.body.className = lightMode;
