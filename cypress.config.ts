@@ -8,3 +8,5 @@ module.exports = defineConfig({
     baseUrl: 'http://localhost:3000', // Adjust based on your app's URL
   },
 });
+
+export {};
