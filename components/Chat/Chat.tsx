@@ -152,10 +152,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         const accessToken = (await supabase.auth.getSession())?.data.session
           ?.access_token;
-        if (!accessToken) {
-          alert('Please sign in to continue');
-          return;
-        }
 
         const response = await sendRequest(
           chatBody,
