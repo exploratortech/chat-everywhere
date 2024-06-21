@@ -1,20 +1,24 @@
 name: Run Cypress Tests
 
 on:
-  deployment_status
+  issue_comment:
+    types: [edited]
 
 jobs:
-  test:
+  capture_vercel_preview_url:
     runs-on: ubuntu-latest
-    container:
-      image: node:16
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Vitest Suite
-        run: npm test
+      - uses: aaimio/vercel-preview-url-action@v2.2.0
+        id: vercel_preview_url
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'The preview URL is: ${{ steps.vercel_preview_url.outputs.vercel_preview_url }}.'
+            })
