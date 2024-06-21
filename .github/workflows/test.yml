@@ -1,11 +1,7 @@
-name: Run Unit Tests
+name: Run Cypress Tests
+
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  deployment_status
 
 jobs:
   test:
