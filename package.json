@@ -13,7 +13,9 @@
     "coverage": "vitest run --coverage",
     "deploy-firebase-function": "npm run deploy --prefix firebase/functions/",
     "deploy-firebase-function-production": "npm run deploy-production --prefix firebase/functions/",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "dependencies": {
     "@ctrl/react-adsense": "^1.6.2",
@@ -124,6 +126,7 @@
     "@vitest/coverage-c8": "^0.29.7",
     "autoprefixer": "^10.4.14",
     "copy-webpack-plugin": "^12.0.2",
+    "cypress": "^13.12.0",
     "endent": "^2.1.0",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
