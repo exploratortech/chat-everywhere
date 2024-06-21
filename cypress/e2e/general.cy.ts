@@ -6,3 +6,5 @@ describe('Free user usage', () => {
     cy.get('[data-cy="assistant-respond-message"]', { timeout: 10000 }).should('contain.text', 'Hello World')
   })
 })
+
+export {}
