@@ -1,4 +1,4 @@
-name: Run Cypress Tests
+name: Capture Vercel Preview URL
 
 on:
   issue_comment:
