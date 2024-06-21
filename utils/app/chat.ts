@@ -128,18 +128,24 @@ async function sendRequest(
   controller: AbortController,
   outputLanguage: string,
   user: User | null,
-  accessToken: string,
+  accessToken: string | undefined,
 ): Promise<Response> {
   const body = formatBody(chatBody, plugin);
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Output-Language': outputLanguage,
+    'user-browser-id': getOrGenerateUserId() || '',
+    'user-selected-plugin-id': plugin?.id || '',
+  };
+
+  if (accessToken) {
+    headers['user-token'] = accessToken;
+  }
+
   const response = await fetch(getEndpoint(plugin), {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Output-Language': outputLanguage,
-      'user-token': accessToken,
-      'user-browser-id': getOrGenerateUserId() || '',
-      'user-selected-plugin-id': plugin?.id || '',
-    },
+    headers,
     signal: controller.signal,
     body,
   });
