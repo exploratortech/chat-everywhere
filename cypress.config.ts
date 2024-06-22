@@ -1,7 +1,5 @@
 const { defineConfig } = require('cypress');
 
-console.log(process.env.CYPRESS_HOST_URL);
-
 module.exports = defineConfig({
   e2e: {
     setupNodeEvents() {
