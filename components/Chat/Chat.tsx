@@ -1,7 +1,6 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconClearAll } from '@tabler/icons-react';
 import {
-  Fragment,
   MutableRefObject,
   memo,
   useCallback,
@@ -25,11 +24,7 @@ import { throttle } from '@/utils/data/throttle';
 
 import { Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
-import {
-  Prompt,
-  isCustomInstructionPrompt,
-  isTeacherPrompt,
-} from '@/types/prompt';
+import { Prompt, isTeacherPrompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 
