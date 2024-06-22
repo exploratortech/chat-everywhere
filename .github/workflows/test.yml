@@ -1,23 +1,21 @@
-name: Capture Vercel Preview URL
+name: Cypress tests
 
-on: issue_comment
+on:
+  push:
+  pull_request:
 
 jobs:
-  capture_vercel_preview_url:
-    # if: ${{ github.event.issue.pull_request }}
+  start_cypress_tests:
+    name: Start Cypress tests
     runs-on: ubuntu-latest
     steps:
-      - uses: aaimio/vercel-preview-url-action@v2.2.0
+      - run: sleep 210
+      - name: vercel-preview-url
+        uses: zentered/vercel-preview-url@v1.1.9
         id: vercel_preview_url
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/github-script@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: 'The preview URL is: ${{ steps.vercel_preview_url.outputs.vercel_preview_url }}.'
-            })
+          vercel_project_id: "prj_RPBj6sI3IAMH9Wts1aUQ2PYn1u67"
+      - name: Get URL
+        run: echo "https://${{ steps.vercel_preview_url.outputs.preview_url }}"
