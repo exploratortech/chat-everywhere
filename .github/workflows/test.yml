@@ -28,6 +28,9 @@ jobs:
       - name: Create cypress folders
         run: mkdir -p cypress/screenshots cypress/videos
 
+      - name: Install pnpm
+        run: npm install -g pnpm@9
+
       - name: Install packages and run Cypress tests
         uses: cypress-io/github-action@v6
         timeout-minutes: 30 # Limit Cypress tests run time to 30 minutes
