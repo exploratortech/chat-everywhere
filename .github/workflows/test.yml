@@ -17,5 +17,6 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         with:
           vercel_project_id: "prj_RPBj6sI3IAMH9Wts1aUQ2PYn1u67"
+          vercel_team_id: "team_r4LW8hqch5erbYdDR57PILPp"
       - name: Get URL
         run: echo "https://${{ steps.vercel_preview_url.outputs.preview_url }}"
