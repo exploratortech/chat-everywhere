@@ -9,7 +9,7 @@ jobs:
     name: Start Cypress tests
     runs-on: ubuntu-latest
     steps:
-      - run: sleep 180 # Wait for the Vercel preview to be ready
+      # - run: sleep 180 # Wait for the Vercel preview to be ready
       - name: vercel-preview-url
         uses: zentered/vercel-preview-url@v1.1.9
         id: vercel_preview_url
