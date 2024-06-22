@@ -36,7 +36,6 @@ jobs:
           browser: chrome
         env:
           CYPRESS_HOST_URL: "https://${{ steps.vercel_preview_url.outputs.preview_url }}"
-          DEBUG: 'cypress:*'
 
       - uses: actions/upload-artifact@v1
         if: failure()
