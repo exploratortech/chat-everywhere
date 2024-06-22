@@ -20,3 +20,27 @@ jobs:
           vercel_team_id: "team_r4LW8hqch5erbYdDR57PILPp"
       - name: Get URL
         run: echo "https://${{ steps.vercel_preview_url.outputs.preview_url }}"
+
+      - name: Create cypress folders
+        run: mkdir -p cypress/screenshots cypress/videos
+
+      - name: Install packages and run Cypress tests
+        uses: cypress-io/github-action@v6
+        timeout-minutes: 30 # Limit Cypress tests run time to 30 minutes
+        with:
+          start: npm run cypress:run
+          browser: chrome
+          env: HOST_URL="https://${{ steps.vercel_preview_url.outputs.preview_url }}"
+          wait-on: "https://${{ steps.vercel_preview_url.outputs.preview_url }}"
+
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-videos
+          path: cypress/videos
