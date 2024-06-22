@@ -1,11 +1,11 @@
 describe('Free user usage', () => {
-  const hostUrl = Cypress.env('CYPRESS_HOST_URL') || 'http://localhost:3000';
+  const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
 
   it('is able to send messages', () => {
     cy.log('hostUrl: ', hostUrl);
     cy.log(
-      "Cypress.env('CYPRESS_HOST_URL'): ",
-      Cypress.env('CYPRESS_HOST_URL'),
+      "Cypress.env('HOST_URL'): ",
+      Cypress.env('HOST_URL'),
     );
     cy.log('process.env.CYPRESS_HOST_URL: ', process.env.CYPRESS_HOST_URL);
 
