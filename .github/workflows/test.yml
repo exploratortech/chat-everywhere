@@ -34,7 +34,8 @@ jobs:
         with:
           start: npm run cypress:run
           browser: chrome
-          env: CYPRESS_HOST_URL="https://${{ steps.vercel_preview_url.outputs.preview_url }}"
+        env:
+          CYPRESS_HOST_URL: "https://${{ steps.vercel_preview_url.outputs.preview_url }}"
 
       - uses: actions/upload-artifact@v1
         if: failure()
