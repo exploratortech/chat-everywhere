@@ -40,6 +40,7 @@ import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import CustomInstructionInUseIndicator from './CustomInstructionInUseIndicator';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
+import ReportBugForTeacherStudentButton from './ReportBugForTeacherStudentButton';
 import VirtualList from './VirtualList';
 
 interface Props {
@@ -396,9 +397,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </button>
 
                   {selectedConversation && (
-                    <StoreConversationButton
-                      conversation={selectedConversation}
-                    />
+                    <div className="flex items-center gap-2">
+                      <StoreConversationButton
+                        conversation={selectedConversation}
+                      />
+                      <ReportBugForTeacherStudentButton
+                        conversation={selectedConversation}
+                      />
+                    </div>
                   )}
                 </div>
 
