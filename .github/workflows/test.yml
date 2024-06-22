@@ -35,7 +35,7 @@ jobs:
         uses: cypress-io/github-action@v6
         timeout-minutes: 30 # Limit Cypress tests run time to 30 minutes
         with:
-          start: npm run cypress:run
+          start: pnpm cypress:run
           browser: chrome
         env:
           CYPRESS_HOST_URL: "https://${{ steps.vercel_preview_url.outputs.preview_url }}"
