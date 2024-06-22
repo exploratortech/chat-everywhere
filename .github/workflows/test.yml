@@ -9,7 +9,7 @@ jobs:
     name: Start Cypress tests
     runs-on: ubuntu-latest
     steps:
-      - run: sleep 210
+      - run: sleep 180 # Wait for the Vercel preview to be ready
       - name: vercel-preview-url
         uses: zentered/vercel-preview-url@v1.1.9
         id: vercel_preview_url
@@ -18,8 +18,12 @@ jobs:
         with:
           vercel_project_id: "prj_RPBj6sI3IAMH9Wts1aUQ2PYn1u67"
           vercel_team_id: "team_r4LW8hqch5erbYdDR57PILPp"
-      - name: Get URL
+
+      - name: Print out the preview URL
         run: echo "https://${{ steps.vercel_preview_url.outputs.preview_url }}"
+
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Create cypress folders
         run: mkdir -p cypress/screenshots cypress/videos
