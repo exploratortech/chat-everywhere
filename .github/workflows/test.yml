@@ -1,8 +1,8 @@
 name: Cypress tests
 
 on:
-  push:
   pull_request:
+    types: [closed, synchronize, opened, edited]
 
 jobs:
   start_cypress_tests:
