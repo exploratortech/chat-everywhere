@@ -5,7 +5,7 @@ module.exports = defineConfig({
     setupNodeEvents() {
       // implement node event listeners here
     },
-    baseUrl: process.env.HOST_URL || 'http://localhost:3000', // Adjust based on your app's URL
+    baseUrl: process.env.CYPRESS_HOST_URL || 'http://localhost:3000',
   },
 });
 
