@@ -48,6 +48,7 @@
     "@tanstack/react-query-devtools": "^4.36.1",
     "@tanstack/react-table": "^8.12.0",
     "@types/lodash": "^4.14.202",
+    "@upstash/redis": "^1.31.3",
     "@vercel/edge": "^1.1.1",
     "base64-arraybuffer": "^1.0.2",
     "cheerio": "^1.0.0-rc.12",

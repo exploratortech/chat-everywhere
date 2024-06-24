@@ -1,5 +1,8 @@
 import { removeLastLine as removeLastLineF } from './../../utils/app/ui';
 
+import { MjJob } from '@/types/mjJob';
+
+import GeneralHtmlComponentParser from '@/components/Chat/components/GeneralHtmlComponentParser';
 import MjImageProgress from '@/components/Chat/components/MjImageProgress';
 import MjImageSelector, {
   MjImageSelectorProps,
@@ -29,7 +32,6 @@ export const makeCreateImageSelectorV2 = (writeToStream: WriteToStream) => {
     buttonMessageId,
     imageUrl,
     buttons,
-    previousButtonCommand,
     prompt,
   }: MjImageSelectorV2Props) => {
     const html = await generateComponentHTML({
@@ -38,26 +40,6 @@ export const makeCreateImageSelectorV2 = (writeToStream: WriteToStream) => {
         buttonMessageId,
         imageUrl,
         buttons,
-        previousButtonCommand,
-        prompt,
-      },
-    });
-    return writeToStream(html);
-  };
-};
-export const makeCreateImageSelector = (writeToStream: WriteToStream) => {
-  return async ({
-    buttonMessageId,
-    imageList,
-    previousButtonCommand,
-    prompt,
-  }: MjImageSelectorProps) => {
-    const html = await generateComponentHTML({
-      component: MjImageSelector,
-      props: {
-        buttonMessageId,
-        imageList,
-        previousButtonCommand,
         prompt,
       },
     });
@@ -65,7 +47,7 @@ export const makeCreateImageSelector = (writeToStream: WriteToStream) => {
   };
 };
 
-export class ProgressHandler {
+export class MjProgressProgressHandler {
   private progressContent = '';
 
   constructor(private writeToStream: WriteToStream) {}
@@ -75,26 +57,48 @@ export class ProgressHandler {
     state = 'loading',
     removeLastLine = false,
     percentage,
+    errorMessage,
   }: {
     content: string;
     state?: 'loading' | 'completed' | 'error';
     removeLastLine?: boolean;
     percentage?: `${number}`;
     previewImageUrl?: string;
+    errorMessage?: string;
   }) {
     if (removeLastLine) {
       this.progressContent = removeLastLineF(this.progressContent);
     }
     this.progressContent += content;
     const html = await generateComponentHTML({
-      component: MjImageProgress,
+      component: GeneralHtmlComponentParser,
       props: {
-        content: this.progressContent,
-        state,
-        percentage,
+        id: 'MjImageProgress',
+        componentState: {
+          content: this.progressContent,
+          state,
+          percentage,
+          errorMessage: errorMessage || undefined,
+        },
       },
       temp: true,
     });
     await this.writeToStream(html);
+  }
+}
+
+export class MjQueueJobComponentHandler {
+  public async generateComponentHTML({ job }: { job: MjJob }) {
+    return await generateComponentHTML({
+      component: GeneralHtmlComponentParser,
+      props: {
+        id: 'MjQueueJob',
+        componentState: {
+          job,
+        },
+        identifier: job.jobId,
+      },
+      temp: true,
+    });
   }
 }

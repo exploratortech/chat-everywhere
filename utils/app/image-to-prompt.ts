@@ -4,7 +4,6 @@ import { ActionType } from '@/hooks/useCreateReducer';
 
 import { Conversation, Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
-import { User } from '@/types/user';
 
 import { HomeInitialState } from '@/components/home/home.state';
 
@@ -26,9 +25,9 @@ interface HandleImageToPromptSendProps {
   selectedConversation: Conversation;
   conversations: Conversation[];
   homeDispatch: Dispatch<ActionType<HomeInitialState>>;
-  user: User | null;
   stopConversationRef: MutableRefObject<boolean>;
   regenerate?: boolean;
+  accessToken: string;
 }
 
 export async function handleImageToPromptSend({
@@ -37,8 +36,8 @@ export async function handleImageToPromptSend({
   selectedConversation,
   conversations,
   homeDispatch,
-  user,
   stopConversationRef,
+  accessToken,
 }: HandleImageToPromptSendProps) {
   const newMessage: Message = {
     content: `## Image to prompt \n\n ### Image: \n\n <img id="${PluginID.IMAGE_TO_PROMPT}" src="${imageUrl}" />`,
@@ -70,7 +69,7 @@ export async function handleImageToPromptSend({
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'user-token': user?.token || '',
+      'user-token': accessToken,
     },
     signal: controller.signal,
     body: JSON.stringify({

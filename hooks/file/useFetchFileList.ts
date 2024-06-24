@@ -9,7 +9,7 @@ import HomeContext from '@/components/home/home.context';
 export const useFetchFileList = () => {
   const supabase = useSupabaseClient();
   const {
-    state: { user, isUltraUser },
+    state: { user },
   } = useContext(HomeContext);
   const fetchFileList = async () => {
     if (!user) {
@@ -32,7 +32,7 @@ export const useFetchFileList = () => {
   return useQuery(['gcp-files', user?.id], fetchFileList, {
     keepPreviousData: true,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    enabled: !!user && isUltraUser,
+    enabled: !!user && user.plan === 'ultra',
     onError: (error) => {
       console.error('There was a problem with your fetch operation:', error);
     },

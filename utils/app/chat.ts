@@ -128,23 +128,45 @@ async function sendRequest(
   controller: AbortController,
   outputLanguage: string,
   user: User | null,
+  accessToken: string | undefined,
 ): Promise<Response> {
-  const body = JSON.stringify(chatBody);
+  const body = formatBody(chatBody, plugin);
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Output-Language': outputLanguage,
+    'user-browser-id': getOrGenerateUserId() || '',
+    'user-selected-plugin-id': plugin?.id || '',
+  };
+
+  if (accessToken) {
+    headers['user-token'] = accessToken;
+  }
 
   const response = await fetch(getEndpoint(plugin), {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Output-Language': outputLanguage,
-      'user-token': user?.token || '',
-      'user-browser-id': getOrGenerateUserId() || '',
-      'user-selected-plugin-id': plugin?.id || '',
-    },
+    headers,
     signal: controller.signal,
     body,
   });
 
   return response;
+}
+
+function formatBody(chatBody: ChatBody, plugin: Plugin | null) {
+  if (plugin?.id === PluginID.IMAGE_GEN) {
+    if (!chatBody.messages || chatBody.messages.length === 0) {
+      throw new Error('Chat body is empty');
+    }
+    return JSON.stringify({
+      userPrompt: chatBody.messages[chatBody.messages.length - 1].content,
+      imageStyle: chatBody.imageStyle,
+      imageQuality: chatBody.imageQuality,
+      temperature: chatBody.temperature,
+    });
+  } else {
+    return JSON.stringify(chatBody);
+  }
 }
 
 function handleErrorResponse(
@@ -166,6 +188,8 @@ function handleErrorResponse(
     toastError(
       t('Sorry something went wrong. Please refresh the page and try again.'),
     );
+  } else if (response.status === 402) {
+    toastError(t("You don't have enough credits to use this feature"));
   } else if (
     response.status === ERROR_MESSAGES.content_filter_triggered.httpCode
   ) {

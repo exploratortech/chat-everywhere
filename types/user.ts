@@ -12,7 +12,6 @@ export type { SubscriptionPlan } from './paid_plan';
 
 export interface User extends UserProfile {
   email: string;
-  token: string;
 }
 
 export interface UserConversation {
@@ -35,6 +34,8 @@ export interface UserProfile {
   hasMqttConnection: boolean;
   isTempUser: boolean;
   isTeacherAccount: boolean;
+  associatedTeacherId: string | undefined;
+  tempUserUniqueId: string | undefined;
 }
 
 export interface CreditUsage {
