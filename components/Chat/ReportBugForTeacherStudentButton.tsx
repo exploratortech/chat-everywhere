@@ -49,7 +49,7 @@ const ReportBugForTeacherStudentButton: React.FC<Props> = ({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {(isTeacherAccount || isTempUser) && (
         <DialogTrigger>
-          <IconBug size={20} />
+          <IconBug size={20} color="#FFD700" />
         </DialogTrigger>
       )}
 
