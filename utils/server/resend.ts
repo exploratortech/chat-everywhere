@@ -9,28 +9,28 @@ import Stripe from 'stripe';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const isProd = process.env.VERCEL_ENV === 'production';
 const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
-const receiverEmail = process.env.RESEND_EMAIL_RECEIVER!;
-const receiverEmail2 = process.env.RESEND_EMAIL_RECEIVER2!;
 
 export async function sendReport(subject = '', html = '') {
   try {
     const emails = [
       {
         from: 'team@chateverywhere.app',
-        to: receiverEmail,
+        to: 'derek@exploratorlabs.com',
         subject,
         html,
       },
     ];
-    if (receiverEmail2) {
+    if (isProd) {
       emails.push({
         from: 'team@chateverywhere.app',
-        to: receiverEmail2,
+        to: 'jack@exploratorlabs.com',
         subject,
         html,
       });
     }
+
     await resend.batch.send(emails);
   } catch (error) {
     console.error(error);
