@@ -17,15 +17,15 @@ export const config = {
 };
 
 const schema = z.object({
-  title: z.string(),
+  title: z.string().optional(),
   prompts: z.array(
     z.object({
-      role: z.string(),
-      content: z.string(),
+      role: z.string().optional(),
+      content: z.string().optional(),
       pluginId: z.string().optional().nullable(),
     }),
   ),
-  bugDescription: z.string(),
+  bugDescription: z.string().min(1),
 });
 
 export default async function handler(req: Request) {
