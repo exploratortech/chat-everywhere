@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
+import Spinner from '../Spinner';
 import HomeContext from '../home/home.context';
 import { Button } from '../ui/button';
 
@@ -31,9 +32,10 @@ const ReportBugForTeacherStudentButton: React.FC<Props> = ({
   } = useContext(HomeContext);
 
   const { t } = useTranslation('common');
+  const { t: modelT } = useTranslation('model');
   const [bugDescription, setBugDescription] = useState('');
 
-  const { mutateAsync: reportBug } = useReportBugMutation();
+  const { mutateAsync: reportBug, isLoading } = useReportBugMutation();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await reportBug({
@@ -68,9 +70,15 @@ const ReportBugForTeacherStudentButton: React.FC<Props> = ({
               value={bugDescription}
               onChange={(e) => setBugDescription(e.target.value)}
               rows={7}
+              required
             />
             <div className="flex justify-center pt-4">
-              <Button type="submit">Submit</Button>
+              <Button type="submit" disabled={isLoading}>
+                <div className="flex items-center gap-2">
+                  {isLoading && <Spinner />}
+                  {modelT('Submit')}
+                </div>
+              </Button>
             </div>
           </form>
         </DialogHeader>
