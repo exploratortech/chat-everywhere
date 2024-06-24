@@ -66,7 +66,11 @@ const ReportBugForTeacherStudentButton: React.FC<Props> = ({
             <textarea
               className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
               style={{ resize: 'none' }}
-              placeholder={t('Describe the bug here.') || ''}
+              placeholder={
+                t(
+                  'Your report will go directly to our development team, allowing us to resolve your issue as quickly as possible',
+                ) || ''
+              }
               value={bugDescription}
               onChange={(e) => setBugDescription(e.target.value)}
               rows={7}
@@ -91,6 +95,7 @@ export default ReportBugForTeacherStudentButton;
 
 const useReportBugMutation = () => {
   const supabase = useSupabaseClient();
+  const { t: modelT } = useTranslation('model');
   const reportBug = async (bugData: {
     title: string;
     prompts: Message[];
@@ -121,7 +126,7 @@ const useReportBugMutation = () => {
     { title: string; prompts: any[]; bugDescription: string }
   >(reportBug, {
     onSuccess: () => {
-      toast.success('Bug report submitted successfully');
+      toast.success(modelT('Bug report submitted successfully'));
     },
     onError: () => {
       toast.error('Error submitting bug report');
