@@ -12,5 +12,7 @@
   "File uploaded successfully": "文件上传成功",
   "File upload failed": "文件上传失败",
   "Error": "错误",
-  "Retry": "重试"
+  "Retry": "重试",
+  "Report a bug in this conversation to Chat Everywhere": "在此对话中报告错误",
+  "Describe the bug here.": "在此处描述错误"
 }
