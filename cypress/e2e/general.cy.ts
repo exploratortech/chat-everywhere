@@ -55,13 +55,6 @@ describe.only('Pro user usage', () => {
       'Hello World',
     );
   });
-
-  it('is able to send messages 2', () => {
-    cy.visit(hostUrl);
-    cy.get('[data-cy="chat-input"]', { timeout: 20000 }).should('be.visible');
-    cy.get('[data-cy="chat-input"]').type('Yo ');
-    cy.get('[data-cy="chat-send-button"]').click();
-  });
 });
 
 export {};
