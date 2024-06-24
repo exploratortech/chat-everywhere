@@ -464,7 +464,8 @@ export const ChatInput = ({
             </div>
 
             <div className="flex flex-col w-full">
-            <textarea
+              <textarea
+                data-cy="chat-input"
                 onFocus={() => setIsFocused(true)}
                 ref={textareaRef}
                 className={`
@@ -552,6 +553,7 @@ export const ChatInput = ({
             <button
               className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
               onClick={() => handleSend()}
+              data-cy="chat-send-button"
             >
               {messageIsStreaming ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
