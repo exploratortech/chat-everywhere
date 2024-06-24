@@ -532,15 +532,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
             },
           });
 
-          dispatch({
-            field: 'featureFlags',
-            value: {
-              // Ignore feature flag on staging and local env
-              'enable-conversation-mode':
-                isFeatureEnabled('enable-conversation-mode') ||
-                process.env.NEXT_PUBLIC_ENV !== 'production',
-            },
-          });
           updateUserInfo({
             id: userProfile.id,
             email: userProfile.email,

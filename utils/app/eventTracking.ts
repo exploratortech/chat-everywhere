@@ -32,6 +32,7 @@ export const EventNames = [
   'Upgrade button clicked',
   'Upgrade (one-month only) button clicked',
   'Voice input button clicked',
+  'Voice conversation turnaround', // This even is used to measure when a user finish speaking, and machine start speaking
   'AI speech play button clicked',
   'Referral code redemption success',
   'Referral code redemption failed',

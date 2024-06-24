@@ -11,7 +11,7 @@ import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { voiceMap } from '@/utils/app/i18n';
-
+import { trackEvent } from '@/utils/app/eventTracking';
 import HomeContext from '../home/home.context';
 
 import dayjs, { Dayjs } from 'dayjs';
@@ -488,6 +488,7 @@ const CognitiveServiceProvider = ({ children }: React.PropsWithChildren) => {
         if (isConversationModeActive) {
           sendMessage.current && sendMessage.current(true);
           setCurrentSpeaker('model');
+          trackEvent('Voice conversation turnaround');
         }
         stopSpeechRecognition();
       };
