@@ -1,22 +1,72 @@
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
+import { SupabaseClient } from '@supabase/supabase-js';
+import { z } from 'zod';
+
+interface SharedMessageItem {
+  id: number;
+  created_at: string;
+  message_content: string;
+  image_file_url: string;
+  student_name: string;
+  tags_agg: Tag[];
+}
+
+interface Tag {
+  id: number;
+  name: string;
+}
+
+interface FetchMessagesParams {
+  supabase: SupabaseClient;
+  teacherProfileId: string;
+  filter: {
+    tag_ids?: number[];
+    sort_by: {
+      sortKey: string;
+      sortOrder: 'asc' | 'desc';
+    };
+  };
+  page: number;
+  pageSize: number;
+}
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
 };
+const requestSchema = z.object({
+  accessToken: z.string(),
+  page: z.number(),
+  filter: z.object({
+    tag_ids: z.array(z.number()),
+    sort_by: z.object({
+      sortKey: z.enum(['created_at', 'student_name']),
+      sortOrder: z.enum(['asc', 'desc']),
+    }),
+  }),
+  itemPerPage: z
+    .string()
+    .refine(
+      (val) =>
+        ['10', '20', '30', '40', '50', '60', '70', '80', '90', '100'].includes(
+          val,
+        ),
+      'Item per page must be one of the following values: 10, 20, 30, 40, 50, 60, 70, 80, 90, 100',
+    ),
+});
 
 const handler = async (req: Request) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  const { accessToken, page, filter } = (await req.json()) as {
-    accessToken: string;
-    page: number;
-    filter: {
-      tag_ids: number[];
-    };
-  };
+  const parsed = requestSchema.safeParse(await req.json());
+
+  if (!parsed.success) {
+    return new Response('Invalid request format', { status: 400 });
+  }
+
+  const { accessToken, page, filter, itemPerPage } = parsed.data;
 
   const supabase = getAdminSupabaseClient();
 
@@ -39,37 +89,31 @@ const handler = async (req: Request) => {
 
   const teacherProfileId = userId;
 
-  const pageSize = 20;
-  let query = supabase
-    .from('student_message_submissions')
-    .select(
-      `
-      id,
-      message_content,
-      image_file_url,
-      created_at,
-      student_name,
-      message_tags!left(tag_id, tags(name))
-    `,
-      { count: 'exact' },
-    )
-    .eq('teacher_profile_id', teacherProfileId)
-    .order('created_at', { ascending: false });
+  const pageSize = parseInt(itemPerPage);
+  const startTime = new Date().getTime();
 
-  // Apply tag_ids filter if provided
-  if (filter.tag_ids?.length) {
-    query = query.filter(
-      'message_tags.tag_id',
-      'in',
-      `(${filter.tag_ids.join(',')})`,
-    );
-  }
+  const [messagesResult, count] = await Promise.all([
+    fetchMessages({
+      supabase,
+      teacherProfileId,
+      filter,
+      page,
+      pageSize,
+    }),
+    fetchShareMessageCount({
+      supabase,
+      teacherProfileId,
+      filter,
+    }),
+  ]);
 
-  const {
-    data: messagesData,
-    error: messagesError,
-    count,
-  } = await query.range((page - 1) * pageSize, page * pageSize - 1);
+  const { data: messagesData, error: messagesError } = messagesResult;
+
+  console.log(
+    `Time taken to fetch shared messages: ${
+      new Date().getTime() - startTime
+    }ms`,
+  );
 
   if (messagesError) {
     console.error('Error fetching messages:', messagesError);
@@ -78,13 +122,21 @@ const handler = async (req: Request) => {
     });
   }
 
-  let formattedMessagesData = messagesData.map((message) => ({
-    ...message,
-    message_tags: message.message_tags.map((tag) => ({
-      id: tag.tag_id,
-      name: (tag.tags as unknown as { name: string }).name,
-    })),
-  }));
+  let formattedMessagesData = (messagesData as SharedMessageItem[]).map(
+    (message) => ({
+      ...message,
+      message_tags: message.tags_agg
+        .map((tag) =>
+          tag.id
+            ? {
+                id: tag.id,
+                name: tag.name,
+              }
+            : null,
+        )
+        .filter(Boolean),
+    }),
+  );
 
   // Filter out messages with no tags, if tag_ids filter is provided
   if (filter.tag_ids?.length) {
@@ -115,3 +167,39 @@ const handler = async (req: Request) => {
 };
 
 export default handler;
+
+function fetchMessages({
+  supabase,
+  teacherProfileId,
+  filter,
+  page,
+  pageSize,
+}: FetchMessagesParams) {
+  return supabase.rpc('get_student_messages_with_tags', {
+    input_tag_ids: filter.tag_ids || [],
+    // input_tag_ids: [65] || filter.tag_ids || [],
+    input_teacher_profile_id: teacherProfileId,
+    input_sort_by_key: filter.sort_by.sortKey,
+    input_sort_by_order: filter.sort_by.sortOrder,
+    input_page: page,
+    input_page_size: pageSize,
+  });
+}
+
+async function fetchShareMessageCount({
+  supabase,
+  teacherProfileId,
+  filter,
+}: Omit<FetchMessagesParams, 'page' | 'pageSize'>) {
+  const { data: count, error } = await supabase.rpc(
+    'get_student_messages_count',
+    {
+      input_teacher_profile_id: teacherProfileId,
+      input_tag_ids: filter.tag_ids || null,
+    },
+  );
+  if (error) {
+    throw error;
+  }
+  return count as number;
+}

@@ -22,6 +22,8 @@ import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
 
+import FilePortalModel from '../User/File/FilePortalModel';
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 import HomeContext from './home.context';
 
 const Home = () => {
@@ -36,6 +38,7 @@ const Home = () => {
     state: {
       selectedConversation,
       showSettingsModel,
+      showFilePortalModel,
       showLoginSignUpModel,
       showOneTimeCodeLoginModel,
       showReferralModel,
@@ -49,6 +52,8 @@ const Home = () => {
     stopConversationRef,
     dispatch,
   } = useContext(HomeContext);
+
+  const { isConversing } = useCognitiveService();
 
   // ON LOAD --------------------------------------------
 
@@ -95,6 +100,13 @@ const Home = () => {
         <div className="flex flex-1">
           <Chat stopConversationRef={stopConversationRef} />
         </div>
+        {showFilePortalModel && (
+          <FilePortalModel
+            onClose={() =>
+              dispatch({ field: 'showFilePortalModel', value: false })
+            }
+          />
+        )}
         {showSettingsModel && (
           <SettingsModel
             onClose={() =>
@@ -160,7 +172,7 @@ const Home = () => {
         />
         <Promptbar />
       </div>
-      <VoiceInputActiveOverlay />
+      <VoiceInputActiveOverlay interactable={isConversing} />
     </main>
   );
 };

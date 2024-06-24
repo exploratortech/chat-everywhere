@@ -38,8 +38,14 @@ export interface HomeInitialState {
   syncingConversation: boolean;
   syncSuccess: boolean | null; // null = not yet synced
 
+  // Request Logout
+  isRequestingLogout: {
+    clearBrowserChatHistory: boolean;
+  } | null;
+
   // User Auth
   showSettingsModel: boolean;
+  showFilePortalModel: boolean;
   showLoginSignUpModel: boolean;
   showOneTimeCodeLoginModel: boolean;
   showReferralModel: boolean;
@@ -63,21 +69,17 @@ export interface HomeInitialState {
   hasMqttConnection: boolean;
   isConnectedWithLine: boolean;
 
-  // Text to Speech
-  currentSpeechId: null | string;
-  speechToken: null | string;
-  speechRegion: null | string;
-  isPlaying: boolean;
-  isLoading: boolean;
-
-  // Speech to Text
-  speechContent: string;
-  isSpeechRecognitionActive: boolean;
+  // Speech
   speechRecognitionLanguage: string;
 
   // Teacher Portal
   teacherPrompts: TeacherPromptForTeacherPortal[];
   teacherSettings: TeacherSettings;
+
+  // Posthog feature flags
+  featureFlags: {
+    'enable-conversation-mode': boolean;
+  };
 }
 
 export const initialState: HomeInitialState = {
@@ -109,8 +111,12 @@ export const initialState: HomeInitialState = {
   syncingConversation: false,
   syncSuccess: null,
 
+  // Request Logout
+  isRequestingLogout: null,
+
   // User Auth
   showSettingsModel: false,
+  showFilePortalModel: false,
   showLoginSignUpModel: false,
   showOneTimeCodeLoginModel: false,
   showReferralModel: false,
@@ -134,16 +140,7 @@ export const initialState: HomeInitialState = {
   hasMqttConnection: false,
   isConnectedWithLine: false,
 
-  // Text to Speech
-  currentSpeechId: null,
-  speechToken: null,
-  speechRegion: null,
-  isPlaying: false,
-  isLoading: false,
-
-  // Speech to Text
-  speechContent: '',
-  isSpeechRecognitionActive: false,
+  // Speech
   speechRecognitionLanguage: 'en-US',
 
   // Teacher Portal
@@ -151,5 +148,10 @@ export const initialState: HomeInitialState = {
   teacherSettings: {
     allow_student_use_line: false,
     hidden_chateverywhere_default_character_prompt: false,
+  },
+
+  // Posthog feature flags
+  featureFlags: {
+    'enable-conversation-mode': false,
   },
 };

@@ -23,7 +23,7 @@
   "click if using a .env.local file": "click if using a .env.local file",
   "Message limit is {{maxLength}} characters. You have entered {{valueLength}} characters.": "消息字数限制为 {{maxLength}} 个字符。您已输入 {{valueLength}} 个字符。",
   "Please enter a message": "请输入一条消息",
-  "Where the forefront of AI technology meets universal access.": "把AI帶到每個人的生活中",
+  "Where the forefront of AI technology meets universal access.": "把AI带到每个人的生活中",
   "Are you sure you want to clear all messages?": "你确定要清除所有的消息吗？",
   "Switch to Sample Prompts": "切换到范例",
   "Switch to Role Play": "切换到角色扮演",
@@ -60,5 +60,13 @@
   "Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.": "抱歉，我们的安全系统在您的消息中发现了不适当的内容。请尝试更换主题并再次尝试。",
   "AI image generation is temporarily unavailable. We are working to get it back online as soon as possible.": "AI图像生成暂时无法使用。我们正在努力尽快恢复在线状态。",
   "Custom Instruction ({{customInstructionPromptName}}) is in use": "提示词模版 ({{customInstructionPromptName}}) 正在使用中",
-  "Custom Instruction only available in Chat mode": "提示词模版仅在聊天模式下可用"
+  "Custom Instruction only available in Chat mode": "提示词模版仅在聊天模式下可用",
+  "You are not an Ultra user, please upgrade to Ultra to use this Gemini Chat": "您不是 Ultra 用户，请升级为 Ultra 以使用 Gemini Chat",
+  "This file does not exist, it will be deleted from the chat": "此档案不存在，将从对话中删除",
+  "Join our event in {{hours}} hours!": "不要错过我们这次精彩的官方活动哦！倒计时 {{hours}} 小时！",
+  "Join our event in {{minutes}} minutes!": "不要错过我们这次精彩的官方活动哦！倒计时 {{minutes}} 分钟！",
+  "Event is now live!": "活动正式开始，快加入我们吧！",
+  "Error occurred while generating image, please try again later": "生成图像时出错，请稍后再试",
+  "Failed to enhance the prompt after multiple attempts": "多次尝试后仍无法优化提示词",
+  "You don't have enough credits to use this feature": "您点数不足，无法使用此功能"
 }

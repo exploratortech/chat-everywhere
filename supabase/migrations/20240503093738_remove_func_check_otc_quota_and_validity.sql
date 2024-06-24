@@ -1,0 +1,1 @@
+drop function if exists "public"."check_otc_quota_and_validity"(otc_code character varying);

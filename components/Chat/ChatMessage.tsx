@@ -23,18 +23,23 @@ import { updateConversation } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
 import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 
+import { UserFile } from '@/types/UserFile';
 import { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
 import TokenCounter from './components/TokenCounter';
 import HomeContext from '@/components/home/home.context';
 
+import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
 import AssistantRespondMessage from './ChatMessage/AssistantRespondMessage';
 import { CreditCounter } from './CreditCounter';
 import { FeedbackContainer } from './FeedbackContainer';
 import { LineShareButton } from './LineShareButton';
 import { SpeechButton } from './SpeechButton';
 import StudentShareMessageButton from './StudentShareMessageButton';
+import UserFileItem from './UserFileItem';
+
+import { cn } from '@/lib/utils';
 
 interface Props {
   message: Message;
@@ -47,6 +52,8 @@ export const ChatMessage: FC<Props> = memo(
   ({ message, onEdit, messageIsStreaming, messageIndex }) => {
     const { t } = useTranslation('chat');
     const { i18n } = useTranslation();
+
+    const { isConversing } = useCognitiveService();
 
     const {
       state: { isTempUser, selectedConversation, conversations },
@@ -61,6 +68,14 @@ export const ChatMessage: FC<Props> = memo(
         !messageIsStreaming
       );
     }, [messageIndex, messageIsStreaming, selectedConversation]);
+
+    const highlight = useMemo(
+      () =>
+        selectedConversation &&
+        selectedConversation.messages.length - 1 === messageIndex &&
+        isConversing,
+      [selectedConversation, messageIndex, isConversing],
+    );
 
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -96,6 +111,53 @@ export const ChatMessage: FC<Props> = memo(
       });
     };
 
+    const removeFileFromMessages = (
+      messages: Message[],
+      fileToRemove: UserFile,
+    ): Message[] | null => {
+      const messageIndex = messages.findIndex((m) => m === message);
+      if (messageIndex === -1) return null;
+
+      const updatedFiles =
+        messages[messageIndex].fileList?.filter(
+          (f) => f.id !== fileToRemove.id,
+        ) || [];
+      if (messages[messageIndex].fileList?.length === updatedFiles.length)
+        return null;
+
+      const updatedMessage = {
+        ...messages[messageIndex],
+        fileList: updatedFiles,
+      };
+
+      return [
+        ...messages.slice(0, messageIndex),
+        updatedMessage,
+        ...messages.slice(messageIndex + 1),
+      ];
+    };
+
+    const handleFileRemove = (file: UserFile) => {
+      if (!selectedConversation) return;
+
+      const updatedMessages = removeFileFromMessages(
+        selectedConversation.messages,
+        file,
+      );
+      if (!updatedMessages) return; // If no update is needed, exit early
+
+      const updatedConversation = {
+        ...selectedConversation,
+        messages: updatedMessages,
+      };
+
+      const { single, all } = updateConversation(
+        updatedConversation,
+        conversations,
+      );
+      homeDispatch({ field: 'selectedConversation', value: single });
+      homeDispatch({ field: 'conversations', value: all });
+    };
     const handleDeleteMessage = () => {
       if (!selectedConversation) return;
 
@@ -123,6 +185,23 @@ export const ChatMessage: FC<Props> = memo(
       homeDispatch({ field: 'selectedConversation', value: single });
       homeDispatch({ field: 'conversations', value: all });
     };
+
+    // Add a new state for the selected text
+    const [selectedText, setSelectedText] = useState('');
+
+    // Method to handle text selection
+    useEffect(() => {
+      const logSelection = () => {
+        const text = window.getSelection()?.toString();
+        setSelectedText(text || '');
+      };
+
+      document.addEventListener('selectionchange', logSelection);
+
+      return () => {
+        document.removeEventListener('selectionchange', logSelection);
+      };
+    }, []);
 
     const handlePressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       setIsTyping(e.nativeEvent.isComposing);
@@ -200,11 +279,13 @@ export const ChatMessage: FC<Props> = memo(
 
     return (
       <div
-        className={`group px-4 ${
+        className={cn(
+          'group px-4',
           message.role === 'assistant'
             ? 'border-b border-black/10 bg-gray-50 text-gray-800 dark:border-gray-900/50 dark:bg-[#444654] dark:text-gray-100'
-            : 'border-b border-black/10 bg-white text-gray-800 dark:border-gray-900/50 dark:bg-[#343541] dark:text-gray-100'
-        }`}
+            : 'border-b border-black/10 bg-white text-gray-800 dark:border-gray-900/50 dark:bg-[#343541] dark:text-gray-100',
+          isConversing && 'pointer-events-none',
+        )}
         style={{
           overflowWrap: 'anywhere',
         }}
@@ -309,6 +390,18 @@ export const ChatMessage: FC<Props> = memo(
                     <div className="prose whitespace-pre-wrap dark:prose-invert">
                       {message.content}
                     </div>
+                    <div className="flex flex-row gap-2 p-2">
+                      {message.fileList &&
+                        message.fileList.map((file) => {
+                          return (
+                            <UserFileItem
+                              key={file.id}
+                              file={file}
+                              onRemove={() => handleFileRemove(file)}
+                            />
+                          );
+                        })}
+                    </div>
                     {!isEditing && (
                       <div className="flex flex-row items-center mt-3 w-full">
                         <button
@@ -327,11 +420,23 @@ export const ChatMessage: FC<Props> = memo(
                         >
                           <IconTrash size={18} />
                         </button>
-                        <LineShareButton messageContent={message.content} />
+                        <LineShareButton
+                          messageContent={
+                            selectedText !== '' ? selectedText : message.content
+                          }
+                          isSelectedText={selectedText !== '' ? true : false}
+                        />
                         {isStudentAccount && (
                           <div className="ml-2 flex items-center">
                             <StudentShareMessageButton
-                              messageContent={message.content}
+                              messageContent={
+                                selectedText !== ''
+                                  ? selectedText
+                                  : message.content
+                              }
+                              isSelectedText={
+                                selectedText !== '' ? true : false
+                              }
                             />
                           </div>
                         )}
@@ -342,12 +447,21 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
-                <div className="flex flex-row justify-between">
+                <div className="relative flex flex-row justify-between">
                   <AssistantRespondMessage
                     formattedMessage={formattedMessage}
                     messageIndex={messageIndex}
                     messagePluginId={message.pluginId}
                   />
+                  {highlight && (
+                    <div className="absolute z-[1100] -left-2 -top-2 -right-2 -bottom-2 p-2 dark:bg-[#444654] rounded-lg">
+                      <AssistantRespondMessage
+                        formattedMessage={formattedMessage}
+                        messageIndex={messageIndex}
+                        messagePluginId={message.pluginId}
+                      />
+                    </div>
+                  )}
                   <div className="flex m-1 tablet:hidden">
                     <CopyButton />
                   </div>
@@ -370,17 +484,29 @@ export const ChatMessage: FC<Props> = memo(
                     )}
                     {(message.pluginId === PluginID.aiPainter ||
                       message.pluginId === PluginID.GPT4 ||
+                      message.pluginId === PluginID.default ||
                       !message.pluginId) &&
                       !messageIsStreaming && (
                         <>
                           <LineShareButton
-                            messageContent={message.content}
+                            messageContent={
+                              selectedText !== ''
+                                ? selectedText
+                                : message.content
+                            }
+                            isSelectedText={selectedText !== '' ? true : false}
                             className="ml-2"
                           />
-
                           {isStudentAccount && (
                             <StudentShareMessageButton
-                              messageContent={message.content}
+                              messageContent={
+                                selectedText !== ''
+                                  ? selectedText
+                                  : message.content
+                              }
+                              isSelectedText={
+                                selectedText !== '' ? true : false
+                              }
                               className="ml-2"
                             />
                           )}

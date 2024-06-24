@@ -59,8 +59,8 @@ const EventsModel = memo(({ className = '', open, onClose }: Props) => {
                 <div className="flex flex-col justify-between items-center overflow-y-auto">
                   <div className="flex flex-col justify-between items-center">
                     <Image
-                      src="/assets/posters/20240331.jpg"
-                      alt="20240331 event"
+                      src="/assets/posters/20240504.jpg"
+                      alt="20240504 event"
                       className="inline-block mb-4"
                       width="500"
                       height="500"
@@ -70,7 +70,7 @@ const EventsModel = memo(({ className = '', open, onClose }: Props) => {
                         className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent`}
                         onClick={() => {
                           window.open(
-                            'https://docs.google.com/forms/d/e/1FAIpQLSfAC7Gt2c1nplur0EPhSh3xWHOSI93Sc_zLVnaJIxkdK0MgbA/viewform',
+                            'https://docs.google.com/forms/d/e/1FAIpQLSf-9vbM4Qj9xkiwN07N3lZuDxi407cNFx--OGWLxqp8YDOtCg/viewform',
                             '_blank',
                           );
                         }}
@@ -82,7 +82,7 @@ const EventsModel = memo(({ className = '', open, onClose }: Props) => {
                         className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent`}
                         onClick={() => {
                           window.open(
-                            'https://meet.google.com/fng-jczz-iyv',
+                            'https://meet.google.com/oyh-hzir-qdq',
                             '_blank',
                           );
                         }}

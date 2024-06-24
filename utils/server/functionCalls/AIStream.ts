@@ -89,7 +89,7 @@ export const AIStream = async ({
     console.log(
       'Sending request to: https://api.openai.com/v1/chat/completions',
     );
-    
+
     res = await fetch('https://api.openai.com/v1/chat/completions', {
       headers: {
         'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ export const AIStream = async ({
           }
         }
 
-        const text = json.choices[0].delta.content || "";
+        const text = json.choices[0].delta.content || '';
         onUpdateToken(text);
       }
     }
@@ -147,7 +147,7 @@ export const AIStream = async ({
   const parser = createParser(onParse);
 
   for await (const chunk of res.body as any) {
-    parser.feed(decoder.decode(chunk));
+    parser.feed(decoder.decode(chunk, { stream: true }));
   }
 
   if (functionCallName) {

@@ -17,5 +17,8 @@
   "Remove": "删除",
   "First message to GPT": "首次对话内容",
   "The prompt will be used through out the conversation.": "关于这个角色扮演的规则，比如：必须使用繁体中文来回答(zh-hant)，不要使用在对话中没有提到的资讯。",
-  "The first message to start the conversation, such that the student does not need to type anything to start": "首条讯息, 比如：你好，我想知道怎样可以提升我的写作能力。"
+  "The first message to start the conversation, such that the student does not need to type anything to start": "首条讯息, 比如：你好，我想知道怎样可以提升我的写作能力。",
+  "Import from .txt file": "汇入 .txt 档",
+  "Please be aware that for long files, it's best to use this prompt in default mode as a Pro member because it can handle much longer context.": "请注意,如果汇入的是长的文档,请使用Pro会员的预设模式,以避免因对话长度过长而产生错误",
+  "Failed to read the file": "读取档案失败"
 }

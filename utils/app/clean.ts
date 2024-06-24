@@ -1,14 +1,15 @@
 import { Conversation } from '@/types/chat';
 import { FolderInterface } from '@/types/folder';
-import { Prompt } from '@/types/prompt';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
-import dayjs from 'dayjs';
+import { Prompt } from '@/types/prompt';
 
 import {
   DEFAULT_SYSTEM_PROMPT,
   DEFAULT_TEMPERATURE,
   RANK_INTERVAL,
 } from './const';
+
+import dayjs from 'dayjs';
 
 export const cleanSelectedConversation = (conversation: Conversation) => {
   // added model for each conversation (3/20/23)
@@ -80,7 +81,7 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
         conversation.folderId = null;
       }
 
-      if(!conversation.lastUpdateAtUTC) {
+      if (!conversation.lastUpdateAtUTC) {
         conversation.lastUpdateAtUTC = dayjs().valueOf();
       }
 
@@ -101,21 +102,44 @@ export const cleanConversationHistory = (history: any[]): Conversation[] => {
 };
 
 export const cleanFolders = (folders: FolderInterface[]): FolderInterface[] => {
-  return folders.reduce((acc: FolderInterface[], folder: FolderInterface, index) => {
-    if (!folder.rank) {
-      folder.rank = (index + 1) * RANK_INTERVAL;
-    }
-    acc.push(folder);
-    return acc;
-  }, []);
+  return folders.reduce(
+    (acc: FolderInterface[], folder: FolderInterface, index) => {
+      if (!folder.rank) {
+        folder.rank = (index + 1) * RANK_INTERVAL;
+      }
+      acc.push(folder);
+      return acc;
+    },
+    [],
+  );
 };
 
-export const cleanPrompts = (prompts: Prompt[]): Prompt[] => {
-  return prompts.reduce((acc: Prompt[], prompt: Prompt, index) => {
-    if (!prompt.rank) {
-      prompt.rank = (index + 1) * RANK_INTERVAL;
+export const cleanPrompts = (
+  prompts: Prompt[],
+  folders: FolderInterface[],
+): Prompt[] => {
+  const cleanedPrompts = prompts.reduce(
+    (acc: Prompt[], prompt: Prompt, index) => {
+      if (!prompt.rank) {
+        prompt.rank = (index + 1) * RANK_INTERVAL;
+      }
+      acc.push(prompt);
+      return acc;
+    },
+    [],
+  );
+  // Clean the dirtied prompts
+  const promptFolderIds = new Set(
+    folders
+      .filter((folder) => folder.type === 'prompt')
+      .map((folder) => folder.id),
+  );
+
+  for (const prompt of cleanedPrompts) {
+    if (prompt.folderId && !promptFolderIds.has(prompt.folderId)) {
+      prompt.folderId = null;
+      prompt.deleted = true;
     }
-    acc.push(prompt);
-    return acc;
-  }, []);
+  }
+  return cleanedPrompts;
 };

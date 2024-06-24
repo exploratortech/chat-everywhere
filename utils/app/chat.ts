@@ -1,3 +1,4 @@
+import { UserFile } from '@/types/UserFile';
 import { ChatBody, Conversation, Message } from '@/types/chat';
 import { Plugin, PluginID } from '@/types/plugin';
 import { Prompt, isTeacherPrompt } from '@/types/prompt';
@@ -22,6 +23,7 @@ import {
 import { reorderItem } from './rank';
 import { removeSecondLastLine } from './ui';
 
+import '@formatjs/intl-segmenter/polyfill';
 import dayjs from 'dayjs';
 
 function addCustomInstructions(
@@ -67,6 +69,7 @@ function createChatBody(
   updatedConversation: Conversation,
   plugin: Plugin | null,
   selectedConversation: Conversation,
+  allExistedUserFiles: UserFile[] | undefined = [],
 ): ChatBody {
   const chatBody: ChatBody = {
     model: updatedConversation.model,
@@ -92,7 +95,31 @@ function createChatBody(
     chatBody.prompt = '';
   }
 
+  // Filter out the non-existed files
+  chatBody.messages = nonExistedFileFilter(
+    chatBody.messages,
+    allExistedUserFiles,
+  );
+
   return structuredClone(chatBody);
+}
+
+function nonExistedFileFilter(
+  messages: Message[],
+  allExistedUserFiles: UserFile[],
+) {
+  const existingFileIds = new Set(allExistedUserFiles.map((file) => file.id));
+
+  const filteredMessages = messages.map((message) => {
+    if (message.fileList && message.fileList.length > 0) {
+      message.fileList = message.fileList.filter((messageFile) =>
+        existingFileIds.has(messageFile.id),
+      );
+    }
+    return message;
+  });
+
+  return filteredMessages;
 }
 
 async function sendRequest(
@@ -101,23 +128,45 @@ async function sendRequest(
   controller: AbortController,
   outputLanguage: string,
   user: User | null,
+  accessToken: string | undefined,
 ): Promise<Response> {
-  const body = JSON.stringify(chatBody);
+  const body = formatBody(chatBody, plugin);
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Output-Language': outputLanguage,
+    'user-browser-id': getOrGenerateUserId() || '',
+    'user-selected-plugin-id': plugin?.id || '',
+  };
+
+  if (accessToken) {
+    headers['user-token'] = accessToken;
+  }
 
   const response = await fetch(getEndpoint(plugin), {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Output-Language': outputLanguage,
-      'user-token': user?.token || '',
-      'user-browser-id': getOrGenerateUserId() || '',
-      'user-selected-plugin-id': plugin?.id || '',
-    },
+    headers,
     signal: controller.signal,
     body,
   });
 
   return response;
+}
+
+function formatBody(chatBody: ChatBody, plugin: Plugin | null) {
+  if (plugin?.id === PluginID.IMAGE_GEN) {
+    if (!chatBody.messages || chatBody.messages.length === 0) {
+      throw new Error('Chat body is empty');
+    }
+    return JSON.stringify({
+      userPrompt: chatBody.messages[chatBody.messages.length - 1].content,
+      imageStyle: chatBody.imageStyle,
+      imageQuality: chatBody.imageQuality,
+      temperature: chatBody.temperature,
+    });
+  } else {
+    return JSON.stringify(chatBody);
+  }
 }
 
 function handleErrorResponse(
@@ -139,6 +188,8 @@ function handleErrorResponse(
     toastError(
       t('Sorry something went wrong. Please refresh the page and try again.'),
     );
+  } else if (response.status === 402) {
+    toastError(t("You don't have enough credits to use this feature"));
   } else if (
     response.status === ERROR_MESSAGES.content_filter_triggered.httpCode
   ) {
@@ -213,7 +264,7 @@ async function handleDataResponse(
     }
     const { value, done: doneReading } = await reader.read();
     done = doneReading;
-    const chunkValue = decoder.decode(value);
+    const chunkValue = decoder.decode(value, { stream: true });
     text += chunkValue;
 
     if (text.includes('[DONE]')) {

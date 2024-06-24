@@ -105,11 +105,60 @@ export async function setTagsToOneTimeCode(
     tag_ids_param: tag_ids,
   });
 
-  console.log(data);
   if (error) {
     console.error(error);
     return false;
   }
 
   return true;
+}
+
+export async function bulkEditTagsForSelectedSubmissions(
+  messageSubmissionIds: number[],
+  tagIds: number[]
+): Promise<boolean> {
+  try {
+    await supabase
+      .from('message_tags')
+      .delete()
+      .in('message_submission_id', messageSubmissionIds);
+
+    for (const submissionId of messageSubmissionIds) {
+      for (const tagId of tagIds) {
+        const { error } = await supabase
+          .from('message_tags')
+          .insert({ message_submission_id: submissionId, tag_id: tagId });
+
+        if (error) {
+          throw error;
+        }
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}
+
+export async function bulkEditTitlesForSelectedSubmissions(
+  messageSubmissionIds: number[],
+  newTitle: string
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('student_message_submissions')
+      .update({ student_name: newTitle })
+      .in('id', messageSubmissionIds);
+
+    if (error) {
+      throw error;
+    }
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
 }

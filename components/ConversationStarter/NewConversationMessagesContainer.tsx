@@ -27,15 +27,32 @@ type Props = {
   customInstructionOnClick: (customInstructionPrompt: Prompt) => void;
 };
 
-const getEventHourCountDown = () => {
+const getEventMinuteCountDown = () => {
   const eventTimezone = 'Asia/Taipei';
-  const eventDate = dayjs.tz('2024-03-31T09:00:00', eventTimezone);
+  const eventDate = dayjs.tz('2024-05-04T13:00:00', eventTimezone);
   const currentDate = dayjs();
 
-  const timeDifference = eventDate.diff(currentDate, 'hour');
-  const hoursUntilEvent = Math.floor(timeDifference);
+  const timeDifference = eventDate.diff(currentDate, 'minute');
+  const minutesUntilEvent = Math.floor(timeDifference);
 
-  return hoursUntilEvent;
+  return minutesUntilEvent;
+};
+
+const getEventDisplayMessage = (t: any) => {
+  const minutesUntilEvent = getEventMinuteCountDown();
+  if (minutesUntilEvent > 60) {
+    return t('Join our event in {{hours}} hours!', {
+      hours: Math.floor(minutesUntilEvent / 60),
+    });
+  }
+
+  if (minutesUntilEvent < 0) {
+    return t('Event is now live!');
+  }
+
+  return t('Join our event in {{minutes}} minutes!', {
+    minutes: minutesUntilEvent,
+  });
 };
 
 export const NewConversationMessagesContainer: FC<Props> = ({
@@ -133,15 +150,13 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         </div>
       )}
 
-      {getEventHourCountDown() > 0 && (
+      {getEventMinuteCountDown() > -60 && (
         <div
           className="mt-4 flex items-center justify-center rounded-md border border-neutral-200 p-2 dark:bg-none cursor-pointer"
           onClick={eventBannerOnClick}
         >
           <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
-            {t('Join our event in {{hours}} hours!', {
-              hours: getEventHourCountDown(),
-            })}{' '}
+            {getEventDisplayMessage(t)}{' '}
             🎉
           </span>
         </div>

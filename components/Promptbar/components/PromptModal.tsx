@@ -1,9 +1,13 @@
+import { IconFileImport } from '@tabler/icons-react';
 import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import { Tooltip } from 'react-tooltip';
 
 import { useTranslation } from 'next-i18next';
 
 import { CustomInstructionPrompt, Prompt, RegularPrompt } from '@/types/prompt';
 
+import TokenCounter from '@/components/Chat/components/TokenCounter';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
 
 interface Props {
@@ -12,11 +16,15 @@ interface Props {
   onUpdatePrompt: (prompt: Prompt) => void;
 }
 
-export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
+export const PromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
   const { t } = useTranslation('promptbar');
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
   const [content, setContent] = useState(prompt.content);
+  const [isOverTokenLimit, setIsOverTokenLimit] = useState(false);
+  const [isCloseToTokenLimit, setIsCloseToTokenLimit] = useState(false);
+  const [displayFileImportMessage, setDisplayFileImportMessage] =
+    useState(false);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -29,6 +37,32 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
   useEffect(() => {
     nameInputRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (isCloseToTokenLimit || isOverTokenLimit) {
+      setDisplayFileImportMessage(true);
+    }
+  }, [isCloseToTokenLimit, isOverTokenLimit]);
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'text/plain') {
+      setDisplayFileImportMessage(true);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = e.target?.result;
+          const newContent = `${content} \n --- ${file.name} --- \n ${text}`;
+          setContent(newContent.trim() || '');
+        } catch (error) {
+          console.error('Error reading file:', error);
+          toast.error(t('Failed to read the file'));
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
 
   return (
     <div onKeyDown={handleEnter}>
@@ -70,6 +104,49 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
         onChange={(e) => setContent(e.target.value)}
         rows={7}
       />
+      <div className="flex w-full justify-end items-center">
+        <input
+          type="file"
+          accept=".txt"
+          style={{ display: 'none' }}
+          onChange={handleFileImport}
+          id="fileInput"
+        />
+        <div
+          data-tooltip-id="import-tooltip"
+          data-tooltip-place="left"
+          data-tooltip-variant="light"
+        >
+          <IconFileImport
+            size={16}
+            onClick={() => document.getElementById('fileInput')?.click()}
+            className="cursor-pointer text-neutral-400 hover:text-neutral-100"
+          />
+        </div>
+        <Tooltip
+          id="import-tooltip"
+          content={t('Import from .txt file') || ''}
+          place="bottom"
+        />
+        <TokenCounter
+          className={`
+              ${isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''}
+              ${isCloseToTokenLimit || isOverTokenLimit ? 'visible' : 'hidden'}
+              text-sm text-neutral-500 dark:text-neutral-400
+            `}
+          value={content}
+          setIsOverLimit={setIsOverTokenLimit}
+          setIsCloseToLimit={setIsCloseToTokenLimit}
+        />
+      </div>
+
+      {displayFileImportMessage && (
+        <div className="mt-2 text-sm text-yellow-300 font-italic">
+          {t(
+            "Please be aware that for long files, it's best to use this prompt in default mode as a Pro member because it can handle much longer context.",
+          )}
+        </div>
+      )}
 
       <div className="mt-6 flex items-center justify-between">
         <div className="text-sm font-bold text-black dark:text-neutral-200">
@@ -98,7 +175,8 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
         <DialogClose asChild>
           <button
             type="button"
-            className="w-full px-4 py-2 mt-6 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
+            className="w-full px-4 py-2 mt-6 border rounded-lg shadow cursor-pointer border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300 disabled:dark:bg-slate-400 disabled:cursor-not-allowed"
+            disabled={isOverTokenLimit}
             onClick={() => {
               const updatedPrompt = {
                 ...prompt,

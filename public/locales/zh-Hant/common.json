@@ -8,5 +8,11 @@
   "We appreciate your use of our application.": "感謝您使用我們的應用程式。",
   "Currently, our app is optimized to work in portrait mode and unfortunately, we do not support landscape mode at this moment.": "目前，我們的應用程式已經優化為直向模式，但很抱歉，我們目前不支援橫向模式。",
   "Thank you for your understanding and patience.": "感謝您的理解與耐心。",
-  "Upload": "上傳"
+  "Upload": "上傳",
+  "File uploaded successfully": "檔案上傳成功",
+  "File upload failed": "檔案上傳失敗",
+  "Error": "錯誤",
+  "Retry": "重試",
+  "Report a bug in this conversation to Chat Everywhere": "在此對話中報告錯誤",
+  "Describe the bug here.": "在此處描述錯誤"
 }

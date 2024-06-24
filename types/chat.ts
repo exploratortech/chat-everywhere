@@ -1,3 +1,4 @@
+import { UserFile } from './UserFile';
 import { OpenAIModel } from './openai';
 import { PluginID } from './plugin';
 import { Prompt } from './prompt';
@@ -13,10 +14,13 @@ export interface Message {
     | PluginID.IMAGE_TO_PROMPT
     | PluginID.mqtt
     | PluginID.aiPainter
+    | PluginID.GEMINI
     | null
     | PluginID.default;
   largeContextResponse?: boolean; // Use to indicate if the response is from a gpt3.5 16k model
   showHintForLargeContextResponse?: boolean; // Use to indicate if the response can be improved by using a gpt3.5 16k model
+  // Google cloud storage objects
+  fileList?: UserFile[];
 }
 
 export type Role = 'assistant' | 'user' | 'function';

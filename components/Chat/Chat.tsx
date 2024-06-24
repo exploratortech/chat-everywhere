@@ -1,6 +1,6 @@
-import { IconArrowDown, IconClearAll } from '@tabler/icons-react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { IconClearAll } from '@tabler/icons-react';
 import {
-  Fragment,
   MutableRefObject,
   memo,
   useCallback,
@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics/dist/interactions';
 
+import { useFetchFileList } from '@/hooks/file/useFetchFileList';
 import useCustomInstructionDefaultMode from '@/hooks/useCustomInstructionDefaultMode';
 
 import chat from '@/utils/app/chat';
@@ -23,20 +24,18 @@ import { throttle } from '@/utils/data/throttle';
 
 import { Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
-import {
-  Prompt,
-  isCustomInstructionPrompt,
-  isTeacherPrompt,
-} from '@/types/prompt';
+import { Prompt, isTeacherPrompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 
 import { NewConversationMessagesContainer } from '../ConversationStarter/NewConversationMessagesContainer';
+import { useConversation } from '../Hooks/useConversation';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import CustomInstructionInUseIndicator from './CustomInstructionInUseIndicator';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
+import ReportBugForTeacherStudentButton from './ReportBugForTeacherStudentButton';
 import VirtualList from './VirtualList';
 
 interface Props {
@@ -47,6 +46,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const { t } = useTranslation('chat');
   const { t: promptT } = useTranslation('prompts');
   const { t: commonT } = useTranslation('common');
+  const { data: userFiles } = useFetchFileList();
 
   const {
     state: {
@@ -63,6 +63,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
+  useConversation();
+
   const setCurrentMessage = useCallback(
     (message: Message) => {
       homeDispatch({ field: 'currentMessage', value: message });
@@ -75,6 +77,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const supabase = useSupabaseClient();
   const handleSend = useCallback(
     async (
       deleteCount = 0,
@@ -82,6 +85,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       customInstructionPrompt?: Prompt,
     ) => {
       const message = overrideCurrentMessage || currentMessage;
+
       const isCreatingConversationWithCustomInstruction =
         !!customInstructionPrompt;
 
@@ -128,6 +132,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           updatedConversation,
           plugin,
           selectedConversation,
+          userFiles,
         );
 
         const isTeacherPromptConversation =
@@ -140,12 +145,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           selectedConversation.messages.shift();
           updatedConversation.messages.shift();
         }
+
+        const accessToken = (await supabase.auth.getSession())?.data.session
+          ?.access_token;
+
         const response = await sendRequest(
           chatBody,
           plugin,
           controller,
           outputLanguage,
           user,
+          accessToken,
         );
 
         if (!response.ok) {
@@ -229,21 +239,40 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         toast.error('No image found from previous conversation');
         return;
       }
-      handleImageToPromptSend({
-        regenerate: true,
-        conversations,
-        selectedConversation,
-        homeDispatch,
-        imageUrl,
-        stopConversationRef,
-        user,
+
+      supabase.auth.getSession().then((session) => {
+        const accessToken = session?.data.session?.access_token;
+        if (!accessToken) {
+          alert('Please sign in to continue');
+          return;
+        }
+
+        handleImageToPromptSend({
+          regenerate: true,
+          conversations,
+          selectedConversation,
+          homeDispatch,
+          imageUrl,
+          stopConversationRef,
+          accessToken,
+        });
       });
       return;
     }
 
+    const overrideMessage =
+      selectedConversation?.messages[selectedConversation?.messages.length - 2];
+
     handleSend(
       2,
-      selectedConversation?.messages[selectedConversation?.messages.length - 2],
+      overrideMessage
+        ? {
+            ...overrideMessage,
+            pluginId: currentMessage
+              ? currentMessage.pluginId
+              : overrideMessage.pluginId,
+          }
+        : undefined,
     );
   };
 
@@ -315,7 +344,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                             }
                           : {
                               role: 'user',
-                              content: promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
+                              content:
+                                customInstructionPrompt.content ||
+                                promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
                               pluginId: null,
                             };
 
@@ -357,9 +388,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </button>
 
                   {selectedConversation && (
-                    <StoreConversationButton
-                      conversation={selectedConversation}
-                    />
+                    <div className="flex items-center gap-2">
+                      <StoreConversationButton
+                        conversation={selectedConversation}
+                      />
+                      <ReportBugForTeacherStudentButton
+                        conversation={selectedConversation}
+                      />
+                    </div>
                   )}
                 </div>
 

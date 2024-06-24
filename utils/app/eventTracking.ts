@@ -5,8 +5,12 @@ import {
 
 import { Conversation } from '@/types/chat';
 import { FolderInterface } from '@/types/folder';
+import {
+  MjButtonCommandRequest,
+  MjImageGenRequest,
+  MjJob,
+} from '@/types/mjJob';
 import { Prompt } from '@/types/prompt';
-import { User } from '@/types/user';
 
 import posthog from 'posthog-js';
 
@@ -45,6 +49,7 @@ export const EventNames = [
   'AI image button clicked',
   'Image to prompt',
   'DallE image generation',
+  'Chat with doc message',
 
   // Payment
   'Payment success',
@@ -85,6 +90,14 @@ export const EventNames = [
   // Error tracing
   'Error',
   'v2 Error',
+
+  // MJ Queue
+  'MJ Image Gen Completed',
+  'MJ Image Gen Failed',
+
+  // MJ Queue Cleanup Monitor (for cron job)
+  'MJ Queue Cleanup Completed / Failed Job',
+  'MJ Queue Cleanup Processing Job',
 ];
 
 export type EventNameTypes = (typeof EventNames)[number];
@@ -127,7 +140,34 @@ export type PayloadType = {
 
   // Teacher portal
   tempAccountName?: string;
+
+  // MJ Queue
+  mjImageGenType?: MjImageGenRequest['type'] | MjButtonCommandRequest['type'];
+  mjImageGenButtonCommand?: string;
+  mjImageGenTotalDurationInSeconds?: number;
+  mjImageGenTotalWaitingInQueueTimeInSeconds?: number;
+  mjImageGenTotalProcessingTimeInSeconds?: number;
+  mjImageGenErrorMessage?: string;
+
+  // MJ Queue Cleanup Monitor (for cron job)
+  mjQueueCleanupCompletedFailedJobEnqueuedAt?: string;
+  mjQueueCleanupProcessingJobEnqueuedAt?: string;
+  mjQueueCleanupExecutedAt?: string;
+  mjQueueCleanupJobEnqueuedAt?: string;
+  mjQueueCleanupJobOneWeekAgo?: string;
+  mjQueueCleanupJobFiveMinutesAgo?: string;
+  mjQueueJobDetail?: MjJob;
 };
+
+export interface UserPostHogProfile {
+  id: string;
+  email: string;
+  plan: string;
+  isTeacherAccount: boolean;
+  isTempUser: boolean;
+  associatedTeacherId: string | undefined;
+  tempUserUniqueId: string | undefined;
+}
 
 const POSTHOG_KEY = 'phc_9n85Ky3ZOEwVZlg68f8bI3jnOJkaV8oVGGJcoKfXyn1';
 export const enableTracking = process.env.NEXT_PUBLIC_ENV === 'production';
@@ -144,17 +184,33 @@ export const initializePosthog = () => {
   });
 };
 
-export const updateUserInfo = (user: User) => {
+export const isFeatureEnabled = (featureName: string) => {
+  return !!posthog.isFeatureEnabled(featureName);
+};
+
+export const updateUserInfo = (userProfile: UserPostHogProfile) => {
   if (!enableTracking) return;
-  posthog.identify(user.id, {
-    email: user.email,
-    plan: user.plan,
+  posthog.identify(userProfile.id, {
+    email: userProfile.email,
+    plan: userProfile.plan,
     env: process.env.NEXT_PUBLIC_ENV,
-    isTeacherAccount: user.isTeacherAccount,
-    isTempUser: user.isTempUser,
+    isTeacherAccount: userProfile.isTeacherAccount,
+    isTempUser: userProfile.isTempUser,
+    associatedTeacherId: userProfile.associatedTeacherId,
+    tempUserUniqueId: userProfile.tempUserUniqueId,
   });
 
-  posthog.alias(user.id, getOrGenerateUserId());
+  if (
+    (userProfile.isTempUser || userProfile.isTeacherAccount) &&
+    userProfile.associatedTeacherId
+  ) {
+    posthog.group('teacher-group', userProfile.associatedTeacherId, {
+      associatedTeacherId: userProfile.associatedTeacherId,
+      tempUserUniqueId: userProfile.tempUserUniqueId,
+    });
+  }
+
+  posthog.alias(userProfile.id, getOrGenerateUserId());
 };
 
 export const clearUserInfo = () => {
@@ -176,6 +232,7 @@ export const serverSideTrackEvent = async (
   eventName: EventNameTypes,
   additionalPayload?: PayloadType,
 ) => {
+  if (!enableTracking) return;
   try {
     const response = await fetch('https://app.posthog.com/capture/', {
       method: 'POST',
@@ -196,12 +253,37 @@ export const serverSideTrackEvent = async (
   }
 };
 
+export const serverSideTrackSystemEvent = async (
+  eventName: EventNameTypes,
+  additionalPayload?: PayloadType,
+) => {
+  if (!enableTracking) return;
+  try {
+    const response = await fetch('https://app.posthog.com/capture/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        event: eventName,
+        api_key: POSTHOG_KEY,
+        distinct_id: 'system',
+        properties: additionalPayload,
+      }),
+    });
+    const data = await response.json();
+    console.log('Event captured', data);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
 export const logUsageSnapshot = (
   folders: FolderInterface[] | [],
   conversations: Conversation[],
   promptTemplates: Prompt[],
 ) => {
   try {
+    if (!enableTracking) return;
     const numberOfConversationFolders = folders.filter(
       (folder) => folder.type === 'chat' && !folder.deleted,
     ).length;

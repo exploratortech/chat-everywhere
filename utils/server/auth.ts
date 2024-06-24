@@ -1,3 +1,5 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+
 import {
   getAdminSupabaseClient,
   getUserProfile,
@@ -28,6 +30,9 @@ export async function fetchUserProfileWithAccessToken(
 export const unauthorizedResponse = new Response('Unauthorized', {
   status: 401,
 });
+export const unauthorizedResponseServerless = (res: NextApiResponse) => {
+  return res.status(401).json({ message: 'Unauthorized' });
+};
 
 export async function isStudentAccount(userId: string): Promise<boolean> {
   const user = await getUserProfile(userId);
@@ -37,4 +42,20 @@ export async function isStudentAccount(userId: string): Promise<boolean> {
 export async function allowAccountToUseLine(userId: string): Promise<boolean> {
   const teacherSettings = await getTeacherSettingsForStudent(userId);
   return teacherSettings?.allow_student_use_line || false;
+}
+
+export async function fetchUserProfileWithAccessTokenServerless(
+  req: NextApiRequest,
+): Promise<UserProfile> {
+  const accessToken = req.headers['access-token'];
+  if (!accessToken) throw new Error('No access token');
+
+  const { data, error } = await supabase.auth.getUser(accessToken as string);
+  const userId = data?.user?.id;
+  if (!userId || error) throw new Error('User id not found');
+
+  const userProfile = await getUserProfile(userId);
+  if (!userProfile) throw new Error('User profile not found');
+
+  return userProfile;
 }
