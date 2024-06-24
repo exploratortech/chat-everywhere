@@ -29,7 +29,8 @@ const PlanComparison = ({
 }) => {
   const { data: userSubscriptionDetail, isFetched } = useUserSubscriptionDetail(
     {
-      isPaidUser,
+      isPaidUser: isPaidUser,
+      user,
     },
   );
 
@@ -68,9 +69,6 @@ export default PlanComparison;
 const PlanExpirationDate: React.FC<{ expirationDate: string }> = ({
   expirationDate,
 }) => {
-  console.log({
-    expirationDate,
-  });
   const { t } = useTranslation('model');
   return (
     <div className="flex mt-4 grow items-end justify-center">
