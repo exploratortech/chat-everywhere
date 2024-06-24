@@ -128,6 +128,7 @@ export default function Sidebar({
         <a
           href="#"
           className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"
+          data-cy="sign-out-confirmation-button"
           onClick={() => {
             if (user) {
               setOpen(true);
