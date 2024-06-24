@@ -31,6 +31,7 @@ export const useUserSubscriptionDetail = ({
     }
 
     return (await response.json())?.data;
+    return json?.data || undefined;
   };
 
   return useQuery(
