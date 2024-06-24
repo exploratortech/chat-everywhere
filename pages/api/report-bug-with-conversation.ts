@@ -87,11 +87,11 @@ export default async function handler(req: Request) {
     <p>Link: ${url}</p>
   `;
 
+    const title = isTeacherAccount
+      ? 'Teacher reported a bug'
+      : 'Student reported a bug';
     try {
-      await sendReport(
-        `Teacher / Student reported a bug on Chat Everywhere`,
-        emailHtml,
-      );
+      await sendReport(title, emailHtml);
       return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {
       console.error(error);
