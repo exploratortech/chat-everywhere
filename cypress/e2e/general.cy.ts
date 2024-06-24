@@ -14,5 +14,54 @@ describe('Free user usage', () => {
     );
   });
 });
+// Pro user usage
+describe.only('Pro user usage', () => {
+  const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
+
+  const userEmail = 'test@exploratorlabs.com';
+  const userPassword = 'chateverywhere';
+  beforeEach(() => {
+    cy.session(
+      'user',
+      () => {
+        cy.login(userEmail, userPassword);
+      },
+      {
+        validate: () => {
+          cy.get('[data-cy="user-account-badge"]', { timeout: 1000 }).should(
+            'be.visible',
+          );
+        },
+      },
+    );
+  });
+
+  after(() => {
+    cy.get('[data-cy="settings-button"]').click();
+    cy.get('[data-cy="chatbar-settings-modal"]')
+      .scrollIntoView()
+      .should('be.visible');
+    cy.get('[data-cy="sign-out-confirmation-button"]').click();
+    cy.get('[data-cy="sign-out-and-clear-button"]').click();
+    cy.contains('You have been logged out');
+  });
+  it('is able to send messages', () => {
+    cy.visit(hostUrl);
+    cy.get('[data-cy="chat-input"]', { timeout: 20000 }).should('be.visible');
+    cy.get('[data-cy="chat-input"]').type('Reply "Hello World" to me.');
+    cy.get('[data-cy="chat-send-button"]').click();
+    cy.get('[data-cy="assistant-respond-message"]', { timeout: 20000 }).should(
+      'contain.text',
+      'Hello World',
+    );
+  });
+
+  it('is able to send messages 2', () => {
+    cy.visit(hostUrl);
+    cy.get('[data-cy="chat-input"]', { timeout: 20000 }).should('be.visible');
+    cy.get('[data-cy="chat-input"]').type('Yo ');
+    cy.get('[data-cy="chat-send-button"]').click();
+  });
+});
 
 export {};
