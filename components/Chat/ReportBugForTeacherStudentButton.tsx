@@ -70,6 +70,7 @@ const ReportBugForTeacherStudentButton: React.FC<Props> = ({
               value={bugDescription}
               onChange={(e) => setBugDescription(e.target.value)}
               rows={7}
+              required
             />
             <div className="flex justify-center pt-4">
               <Button type="submit" disabled={isLoading}>
