@@ -41,9 +41,12 @@ const ReportBugForTeacherStudentButton: React.FC<Props> = ({
       prompts: conversation.messages,
       bugDescription,
     });
+    setIsOpen(false);
+    setBugDescription('');
   };
+  const [isOpen, setIsOpen] = useState(false);
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {(isTeacherAccount || isTempUser) && (
         <DialogTrigger>
           <IconBug size={20} />

@@ -22,7 +22,7 @@ const schema = z.object({
     z.object({
       role: z.string(),
       content: z.string(),
-      pluginId: z.string(),
+      pluginId: z.string().optional().nullable(),
     }),
   ),
   bugDescription: z.string(),
