@@ -29,16 +29,25 @@ jobs:
       - name: Wait for Vercel deployment
         id: wait_for_vercel
         run: |
-          preview_url="https://${{ steps.vercel_preview_url.outputs.preview_url }}"
-          echo "Preview URL: $preview_url"
+          # Get the current Git commit SHA
+          COMMIT_SHA=$(git rev-parse HEAD)
           for i in {1..30}; do
-            status=$(curl -s -o /dev/null -w "%{http_code}" "$preview_url")
-            echo "Deployment status: $status"
-            if [ "$status" -eq 200 ]; then
+            response=$(curl -s -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+              "https://api.vercel.com/v6/deployments?projectId=prj_RPBj6sI3IAMH9Wts1aUQ2PYn1u67&teamId=team_r4LW8hqch5erbYdDR57PILPp&limit=1&state=BUILDING,READY&meta-githubCommitSha=$COMMIT_SHA")
+            
+            state=$(echo $response | jq -r '.deployments[0].state')
+            url=$(echo $response | jq -r '.deployments[0].url')
+            
+            echo "Deployment state: $state"
+            if [ "$state" = "READY" ]; then
               echo "Vercel deployment is ready"
+              echo "PREVIEW_URL=$url" >> $GITHUB_OUTPUT
               exit 0
+            elif [ "$state" = "ERROR" ]; then
+              echo "Vercel deployment failed"
+              exit 1
             fi
-            sleep 10
+            sleep 20
           done
           echo "Vercel deployment did not complete in time"
           exit 1
