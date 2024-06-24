@@ -553,8 +553,8 @@ export const userProfileQuery = async ({
   const associatedTeacherId = isTempUser
     ? userProfile.temporary_account_profiles[0].teacher_profile_id
     : isTeacherAccount
-      ? userProfile.id
-      : undefined;
+    ? userProfile.id
+    : undefined;
   const tempUserUniqueId = isTempUser
     ? userProfile.temporary_account_profiles[0].uniqueId
     : undefined;
@@ -588,8 +588,8 @@ export const updateProAccountsPlan = async (): Promise<void> => {
 
   const { error: updateError } = await supabase
     .from('profiles')
-    .update({ plan: 'free' })
-    .eq('plan', 'pro')
+    .update({ plan: 'free', is_teacher_account: false })
+    .in('plan', ['ultra', 'pro'])
     .lte('pro_plan_expiration_date', nowMinusOneDay);
 
   if (updateError) {
@@ -605,7 +605,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
   const { data: users, error: fetchError } = await supabase
     .from('profiles')
     .select('id')
-    .eq('plan', 'pro')
+    .in('plan', ['ultra', 'pro'])
     .lte('pro_plan_expiration_date', nowMinusOneDay);
 
   if (fetchError) {
@@ -619,6 +619,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
 
   const trialUserIds: string[] = [];
 
+  // NOTE: only the user has referral record is considered as trial user
   for (const userId of userIds) {
     // Check if user has any referral record in the past 7 days
     const { data: referralRows, error: referralError } = await supabase

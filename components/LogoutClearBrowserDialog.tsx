@@ -60,6 +60,7 @@ export function LogoutClearBrowserDialog({
               variant="destructive"
               onClick={logoutAndClearCallback}
               disabled={hasRequestedLogout}
+              data-cy="sign-out-and-clear-button"
             >
               <div className="flex items-center gap-2">
                 {hasRequestedLogout && <Spinner />}
@@ -70,6 +71,7 @@ export function LogoutClearBrowserDialog({
               className="grow"
               onClick={logoutCallback}
               disabled={hasRequestedLogout}
+              data-cy="sign-out-button"
             >
               <div className="flex items-center gap-2">
                 {hasRequestedLogout && <Spinner />}
