@@ -14,23 +14,38 @@ jobs:
     name: Start Cypress tests
     runs-on: ubuntu-latest
     steps:
-      - run: sleep 180 # Wait for the Vercel preview to be ready
-      - name: vercel-preview-url
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch Vercel preview URL
         uses: zentered/vercel-preview-url@v1.1.9
         id: vercel_preview_url
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         with:
-          vercel_project_id: "prj_RPBj6sI3IAMH9Wts1aUQ2PYn1u67"
-          vercel_team_id: "team_r4LW8hqch5erbYdDR57PILPp"
+          vercel_project_id: 'prj_RPBj6sI3IAMH9Wts1aUQ2PYn1u67'
+          vercel_team_id: 'team_r4LW8hqch5erbYdDR57PILPp'
+
+      - name: Wait for Vercel deployment
+        id: wait_for_vercel
+        run: |
+          preview_url=${{ steps.vercel_preview_url.outputs.preview_url }}
+          for i in {1..30}; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" "$preview_url")
+            echo "Deployment status: $status"
+            if [ "$status" -eq 200 ]; then
+              echo "Vercel deployment is ready"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Vercel deployment did not complete in time"
+          exit 1
 
       - name: Print out the preview URL
         run: echo "https://${{ steps.vercel_preview_url.outputs.preview_url }}"
 
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Create cypress folders
+      - name: Create Cypress folders
         run: mkdir -p cypress/screenshots cypress/videos
 
       - name: Install packages and run Cypress tests
@@ -40,7 +55,7 @@ jobs:
           start: npm run cypress:run
           browser: chrome
         env:
-          CYPRESS_HOST_URL: "https://${{ steps.vercel_preview_url.outputs.preview_url }}"
+          CYPRESS_HOST_URL: 'https://${{ steps.vercel_preview_url.outputs.preview_url }}'
 
       - uses: actions/upload-artifact@v1
         if: failure()
