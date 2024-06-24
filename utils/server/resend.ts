@@ -9,6 +9,7 @@ import Stripe from 'stripe';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const isProd = process.env.VERCEL_ENV === 'production';
 const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
 
 export async function sendReport(subject = '', html = '') {
@@ -20,13 +21,15 @@ export async function sendReport(subject = '', html = '') {
         subject,
         html,
       },
-      {
+    ];
+    if (isProd) {
+      emails.push({
         from: 'team@chateverywhere.app',
         to: 'jack@exploratorlabs.com',
         subject,
         html,
-      },
-    ];
+      });
+    }
 
     await resend.batch.send(emails);
   } catch (error) {
