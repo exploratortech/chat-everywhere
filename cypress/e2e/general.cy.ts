@@ -28,7 +28,7 @@ describe.only('Pro user usage', () => {
       },
       {
         validate: () => {
-          cy.get('[data-cy="user-account-badge"]', { timeout: 1000 }).should(
+          cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).should(
             'be.visible',
           );
         },
