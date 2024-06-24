@@ -30,8 +30,10 @@ jobs:
         id: wait_for_vercel
         run: |
           preview_url=${{ steps.vercel_preview_url.outputs.preview_url }}
+          echo "Preview URL: $preview_url"
           for i in {1..30}; do
             status=$(curl -s -o /dev/null -w "%{http_code}" "$preview_url")
+            echo "Running command: curl -s -o /dev/null -w \"%{http_code}\" \"$preview_url\""
             echo "Deployment status: $status"
             if [ "$status" -eq 200 ]; then
               echo "Vercel deployment is ready"
