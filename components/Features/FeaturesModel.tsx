@@ -58,6 +58,8 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
       const response = await fetch(url);
       const { featuresList } = await response.json();
       setFeaturesList(featuresList);
+    } catch (error) {
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
