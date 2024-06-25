@@ -87,14 +87,6 @@ const useLoginHook = (
           },
         });
 
-        dispatch({
-          field: 'featureFlags',
-          value: {
-            'enable-conversation-mode':
-              isFeatureEnabled('enable-conversation-mode') ||
-              process.env.NEXT_PUBLIC_ENV !== 'production',
-          },
-        });
         updateUserInfo({
           id: userProfile.id,
           email: userProfile.email,
