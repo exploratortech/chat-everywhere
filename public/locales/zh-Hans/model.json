@@ -239,5 +239,6 @@
   "Drag files here": "拖放文件到这里",
   "Upload failed for {{name}}": "上传 {{name}} 失败",
   "File {{name}} size exceeds the maximum limit of {{mb}} MB.": "文件 {{name}} 大小超过最大限制 {{mb}} MB",
-  "You can only upload a maximum of {{count}} files at once.": "您一次只能上传最多 {{count}} 个文件"
+  "You can only upload a maximum of {{count}} files at once.": "您一次只能上传最多 {{count}} 个文件",
+  "No valid files were selected. Please upload only supported file types.": "未选择有效文件。请上传支援的文件格式。"
 }
