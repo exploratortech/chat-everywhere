@@ -1,4 +1,12 @@
-export function UploadProgress({ progressNumber }: { progressNumber: number }) {
+import { cn } from '@/lib/utils';
+
+export function UploadProgress({
+  progressNumber,
+  isSuccessUpload,
+}: {
+  progressNumber: number;
+  isSuccessUpload: boolean | null;
+}) {
   return (
     <div className="">
       <div className="flex mb-2 items-center justify-center">
@@ -6,9 +14,18 @@ export function UploadProgress({ progressNumber }: { progressNumber: number }) {
           {progressNumber}%
         </span>
       </div>
-      <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-[#e0e0e0]">
+      <div
+        className={cn(
+          'overflow-hidden h-2 mb-4 text-xs flex rounded bg-[#e0e0e0]',
+          isSuccessUpload === false && 'bg-red-300',
+        )}
+      >
         <div
-          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-black"
+          className={cn(
+            'shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-black',
+            isSuccessUpload === true && 'bg-green-500',
+            isSuccessUpload === false && 'bg-red-500',
+          )}
           style={{
             width: `${progressNumber}%`,
           }}

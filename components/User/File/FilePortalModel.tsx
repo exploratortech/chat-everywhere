@@ -8,7 +8,6 @@ import { IconUpload } from '@tabler/icons-react';
 import React, { Fragment, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useFileUpload } from '@/hooks/file/useFileUpload';
 import { useMultipleFileUploadHandler } from '@/hooks/file/useMultipleFileUploadHandler';
 
 import DragAndDrop from '@/components/FileDragDropArea/DragAndDrop';
@@ -116,7 +115,7 @@ const UploadFileComponent = () => {
   const onComplete = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
-  const { isLoading, uploadProgress, uploadFiles } =
+  const { isLoading, fileProgresses, uploadFiles } =
     useMultipleFileUploadHandler({ onCompleteFileUpload: onComplete });
 
   const triggerFileInput = () => {
@@ -145,18 +144,33 @@ const UploadFileComponent = () => {
             </>
           )}
         </Button>
-        <div className="flex-1">
-          {isLoading && <UploadProgress progressNumber={uploadProgress || 0} />}
+        <div className="flex-1 space-y-2">
+          {Object.entries(fileProgresses).map(([fileName, state]) => (
+            <div key={fileName}>
+              <div className="text-sm font-medium text-white">{fileName}</div>
+              <UploadProgress
+                progressNumber={state.progress}
+                isSuccessUpload={state.isSuccessUpload}
+              />
+            </div>
+          ))}
         </div>
       </div>
       <input
         ref={fileInputRef}
         type="file"
+        multiple
         accept="application/pdf, text/plain, audio/aac, audio/flac, audio/mp3, audio/m4a, audio/mpeg, audio/mpga, audio/mp4, audio/opus, audio/pcm, audio/wav, audio/webm, image/png, image/jpeg"
         className="hidden"
         onChange={(e) => {
-          if (e.target.files && e.target.files[0]) {
-            uploadFiles(e.target.files[0]);
+          if (e.target.files && e.target.files.length <= 10) {
+            uploadFiles(Array.from(e.target.files));
+          } else {
+            alert(
+              t('You can only upload a maximum of {{count}} files at once.', {
+                count: 10,
+              }),
+            );
           }
         }}
       />

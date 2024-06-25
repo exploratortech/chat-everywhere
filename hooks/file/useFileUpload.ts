@@ -1,6 +1,6 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -15,11 +15,18 @@ export function useFileUpload() {
   const {
     state: { user },
   } = useContext(HomeContext);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const { withLoading } = useHomeLoadingBar();
 
   const uploadFileMutation = useMutation(
-    async ({ filename, file }: { filename: string; file: File }) =>
+    async ({
+      filename,
+      file,
+      onProgress,
+    }: {
+      filename: string;
+      file: File;
+      onProgress?: (progress: number) => void;
+    }) =>
       withLoading(async () => {
         const accessToken = (await supabase.auth.getSession()).data.session
           ?.access_token!;
@@ -65,14 +72,10 @@ export function useFileUpload() {
 
           // Progress listener
           xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
+            if (event.lengthComputable && onProgress) {
               const percentage = (event.loaded / event.total) * 100;
-              setUploadProgress(Math.round(percentage));
+              onProgress(Math.round(percentage));
             }
-          };
-
-          xhr.onloadend = () => {
-            setUploadProgress(null);
           };
 
           xhr.send(formData);
@@ -86,10 +89,12 @@ export function useFileUpload() {
         toast.error(commonT('File upload failed'));
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['gcp-files', user?.id]);
+        queryClient.cancelQueries(['gcp-files', user?.id]).then(() => {
+          queryClient.invalidateQueries(['gcp-files', user?.id]);
+        });
       },
     },
   );
 
-  return { uploadFileMutation, uploadProgress };
+  return { uploadFileMutation };
 }
