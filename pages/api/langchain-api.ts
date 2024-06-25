@@ -6,6 +6,7 @@ import {
   toolNameMapping,
   tools,
 } from '../../utils/app/online_mode';
+import { VERCEL_EDGE_FUNCTIONS_REGIONS } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { trimStringBaseOnTokenLimit } from '@/utils/server/api';
 import { getStringTokenCount, truncateLogMessage } from '@/utils/server/api';
@@ -23,25 +24,7 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 
 export const config = {
   runtime: 'edge',
-  regions: [
-    'arn1',
-    'bom1',
-    'cdg1',
-    'cle1',
-    'cpt1',
-    'dub1',
-    'fra1',
-    'gru1',
-    'hnd1',
-    'iad1',
-    'icn1',
-    'kix1',
-    'lhr1',
-    'pdx1',
-    'sfo1',
-    'sin1',
-    'syd1',
-  ],
+  regions: VERCEL_EDGE_FUNCTIONS_REGIONS,
 };
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
