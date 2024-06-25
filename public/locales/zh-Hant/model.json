@@ -237,5 +237,8 @@
   "Clear Browser Chat History and Sign out": "清除瀏覽器對話歷史並登出",
   "You can choose to clear your chat history or just sign out.": "您可以選擇清除對話歷史或只登出。",
   "Sign out option": "登出選項",
-  "Drag files here": "拖放文件到這裡"
+  "Drag files here": "拖放文件到這裡",
+  "Upload failed for {{name}}": "上載 {{name}} 失敗",
+  "File {{name}} size exceeds the maximum limit of {{mb}} MB.": "檔案 {{name}} 大小超過最大限制 {{mb}} MB",
+  "You can only upload a maximum of {{count}} files at once.": "您一次只能上傳最多 {{count}} 個檔案"
 }
