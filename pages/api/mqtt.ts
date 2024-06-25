@@ -1,4 +1,3 @@
-import { VERCEL_EDGE_FUNCTIONS_REGIONS } from '@/utils/app/const';
 import { llmHandler } from '@/utils/server/functionCalls/llmHandler';
 import {
   getAdminSupabaseClient,
@@ -14,7 +13,25 @@ const supabase = getAdminSupabaseClient();
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
-  regions: VERCEL_EDGE_FUNCTIONS_REGIONS,
+  regions: [
+    'arn1',
+    'bom1',
+    'cdg1',
+    'cle1',
+    'cpt1',
+    'dub1',
+    'fra1',
+    'gru1',
+    'hnd1',
+    'iad1',
+    'icn1',
+    'kix1',
+    'lhr1',
+    'pdx1',
+    'sfo1',
+    'sin1',
+    'syd1',
+  ],
 };
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
