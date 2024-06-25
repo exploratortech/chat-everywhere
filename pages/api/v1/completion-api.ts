@@ -3,6 +3,7 @@ import {
   DEFAULT_SYSTEM_PROMPT,
   DEFAULT_TEMPERATURE,
   OPENAI_API_HOST,
+  VERCEL_EDGE_FUNCTIONS_REGIONS,
 } from '@/utils/app/const';
 import { OpenAIError } from '@/utils/server';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
@@ -19,25 +20,7 @@ import {
 
 export const config = {
   runtime: 'edge',
-  regions: [
-    'arn1',
-    'bom1',
-    'cdg1',
-    'cle1',
-    'cpt1',
-    'dub1',
-    'fra1',
-    'gru1',
-    'hnd1',
-    'iad1',
-    'icn1',
-    'kix1',
-    'lhr1',
-    'pdx1',
-    'sfo1',
-    'sin1',
-    'syd1',
-  ],
+  regions: VERCEL_EDGE_FUNCTIONS_REGIONS,
 };
 
 type RequestBody = {
