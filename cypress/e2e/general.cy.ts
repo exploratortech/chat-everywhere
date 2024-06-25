@@ -14,8 +14,9 @@ describe('Free user usage', () => {
     );
   });
 });
+
 // Pro user usage
-describe.only('Pro user usage', () => {
+describe('Pro user usage', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
 
   const userEmail = 'test@exploratorlabs.com';
