@@ -1,7 +1,6 @@
 // This endpoint only allow GPT-3.5 and GPT-3.5 16K models
 import { Logger } from 'next-axiom';
 
-import { VERCEL_EDGE_FUNCTIONS_REGIONS } from '@/utils/app/const';
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { ERROR_MESSAGES } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
@@ -23,7 +22,25 @@ import { geolocation } from '@vercel/edge';
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
-  regions: VERCEL_EDGE_FUNCTIONS_REGIONS,
+  regions: [
+    'arn1',
+    'bom1',
+    'cdg1',
+    'cle1',
+    'cpt1',
+    'dub1',
+    'fra1',
+    'gru1',
+    'hnd1',
+    'iad1',
+    'icn1',
+    'kix1',
+    'lhr1',
+    'pdx1',
+    'sfo1',
+    'sin1',
+    'syd1',
+  ],
 };
 
 const handler = async (req: Request): Promise<Response> => {
