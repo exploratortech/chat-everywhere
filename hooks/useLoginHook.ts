@@ -113,7 +113,6 @@ const useLoginHook = (
       })
       .finally(() => {
         dispatch({ field: 'appInitialized', value: true });
-        console.log('userProfileQuery appInitialized', true);
       });
   };
 
