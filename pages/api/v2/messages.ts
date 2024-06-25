@@ -14,6 +14,25 @@ import { OpenAIMessageType } from '@/types/v2Chat/chat';
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1', // Only execute this function in the Korea region in case OpenAI blocks it
+  regions: [
+    'arn1',
+    'bom1',
+    'cdg1',
+    'cle1',
+    'cpt1',
+    'dub1',
+    'fra1',
+    'gru1',
+    'hnd1',
+    'iad1',
+    'icn1',
+    'kix1',
+    'lhr1',
+    'pdx1',
+    'sfo1',
+    'sin1',
+    'syd1',
+  ],
 };
 
 export type RequestType =
@@ -40,18 +59,14 @@ const handler = async (req: Request): Promise<Response> => {
     const userProfile = await getUserProfile(user.user.id);
     if (!user || userProfile.plan === 'free') return unauthorizedResponse;
 
-    const {
-      conversationId,
-      latestMessageId,
-      requestType,
-      messageContent,
-    } = (await req.json()) as {
-      requestType: RequestType;
-      conversationId: string;
-      beforeMessageId?: string;
-      latestMessageId?: string;
-      messageContent?: string;
-    };
+    const { conversationId, latestMessageId, requestType, messageContent } =
+      (await req.json()) as {
+        requestType: RequestType;
+        conversationId: string;
+        beforeMessageId?: string;
+        latestMessageId?: string;
+        messageContent?: string;
+      };
 
     if (!requestType)
       return new Response('Invalid request type', { status: 400 });
@@ -62,7 +77,7 @@ const handler = async (req: Request): Promise<Response> => {
         return await retrieveMessages(
           user.user.id,
           conversationId,
-          latestMessageId
+          latestMessageId,
         );
       case 'send message':
         serverSideTrackEvent(userProfile.id, 'v2 Send message');
