@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
+import Spinner from '../Spinner';
 import HomeContext from '../home/home.context';
 import { Button } from '../ui/button';
 
@@ -31,9 +32,10 @@ const ReportBugForTeacherStudentButton: React.FC<Props> = ({
   } = useContext(HomeContext);
 
   const { t } = useTranslation('common');
+  const { t: modelT } = useTranslation('model');
   const [bugDescription, setBugDescription] = useState('');
 
-  const { mutateAsync: reportBug } = useReportBugMutation();
+  const { mutateAsync: reportBug, isLoading } = useReportBugMutation();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await reportBug({
@@ -41,12 +43,15 @@ const ReportBugForTeacherStudentButton: React.FC<Props> = ({
       prompts: conversation.messages,
       bugDescription,
     });
+    setIsOpen(false);
+    setBugDescription('');
   };
+  const [isOpen, setIsOpen] = useState(false);
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {(isTeacherAccount || isTempUser) && (
         <DialogTrigger>
-          <IconBug size={20} />
+          <IconBug size={20} color="#FFD700" />
         </DialogTrigger>
       )}
 
@@ -61,13 +66,23 @@ const ReportBugForTeacherStudentButton: React.FC<Props> = ({
             <textarea
               className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
               style={{ resize: 'none' }}
-              placeholder={t('Describe the bug here.') || ''}
+              placeholder={
+                t(
+                  'Your report will go directly to our development team, allowing us to resolve your issue as quickly as possible',
+                ) || ''
+              }
               value={bugDescription}
               onChange={(e) => setBugDescription(e.target.value)}
               rows={7}
+              required
             />
             <div className="flex justify-center pt-4">
-              <Button type="submit">Submit</Button>
+              <Button type="submit" disabled={isLoading}>
+                <div className="flex items-center gap-2">
+                  {isLoading && <Spinner />}
+                  {modelT('Submit')}
+                </div>
+              </Button>
             </div>
           </form>
         </DialogHeader>
@@ -80,6 +95,7 @@ export default ReportBugForTeacherStudentButton;
 
 const useReportBugMutation = () => {
   const supabase = useSupabaseClient();
+  const { t: modelT } = useTranslation('model');
   const reportBug = async (bugData: {
     title: string;
     prompts: Message[];
@@ -110,7 +126,7 @@ const useReportBugMutation = () => {
     { title: string; prompts: any[]; bugDescription: string }
   >(reportBug, {
     onSuccess: () => {
-      toast.success('Bug report submitted successfully');
+      toast.success(modelT('Bug report submitted successfully'));
     },
     onError: () => {
       toast.error('Error submitting bug report');

@@ -7,8 +7,8 @@ import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
   getMessagesTokenCount,
+  getStringTokenCount,
   shortenMessagesBaseOnTokenLimit,
-  getStringTokenCount
 } from '@/utils/server/api';
 import { isPaidUserByAuthToken } from '@/utils/server/supabase';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
@@ -22,6 +22,25 @@ import { geolocation } from '@vercel/edge';
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
+  regions: [
+    'arn1',
+    'bom1',
+    'cdg1',
+    'cle1',
+    'cpt1',
+    'dub1',
+    'fra1',
+    'gru1',
+    'hnd1',
+    'iad1',
+    'icn1',
+    'kix1',
+    'lhr1',
+    'pdx1',
+    'sfo1',
+    'sin1',
+    'syd1',
+  ],
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -55,8 +74,11 @@ const handler = async (req: Request): Promise<Response> => {
       OpenAIModels[OpenAIModelID.GPT_3_5_16K].tokenLimit;
 
     const requireToUseLargerContextWindowModel =
-      (await getMessagesTokenCount(messages) + await getStringTokenCount(promptToSend)) + 1000 > defaultTokenLimit;
-    
+      (await getMessagesTokenCount(messages)) +
+        (await getStringTokenCount(promptToSend)) +
+        1000 >
+      defaultTokenLimit;
+
     const isPaidUser = await isPaidUserByAuthToken(
       req.headers.get('user-token'),
     );

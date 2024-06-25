@@ -17,15 +17,15 @@ export const config = {
 };
 
 const schema = z.object({
-  title: z.string(),
+  title: z.string().optional(),
   prompts: z.array(
     z.object({
-      role: z.string(),
-      content: z.string(),
-      pluginId: z.string(),
+      role: z.string().optional(),
+      content: z.string().optional(),
+      pluginId: z.string().optional().nullable(),
     }),
   ),
-  bugDescription: z.string(),
+  bugDescription: z.string().min(1),
 });
 
 export default async function handler(req: Request) {
@@ -87,11 +87,11 @@ export default async function handler(req: Request) {
     <p>Link: ${url}</p>
   `;
 
+    const title = isTeacherAccount
+      ? 'Teacher reported a bug'
+      : 'Student reported a bug';
     try {
-      await sendReport(
-        `Teacher / Student reported a bug on Chat Everywhere`,
-        emailHtml,
-      );
+      await sendReport(title, emailHtml);
       return new Response(JSON.stringify({ success: true }), { status: 200 });
     } catch (error) {
       console.error(error);

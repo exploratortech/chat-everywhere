@@ -15,12 +15,14 @@ import {
   createParser,
 } from 'eventsource-parser';
 
+// Refer to this page for all the available models: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models
+
 const PROJECT_ID = process.env.GCP_PROJECT_ID as string;
 // const API_ENDPOINT = 'us-east1-aiplatform.googleapis.com';
 // const LOCATION_ID = 'us-east1';
 const API_ENDPOINT = 'asia-east1-aiplatform.googleapis.com';
 const LOCATION_ID = 'asia-east1';
-const MODEL_ID = 'gemini-1.5-pro-preview-0409';
+const MODEL_ID = 'gemini-1.5-flash';
 
 export const cleanSourceText = (text: string) => {
   return text

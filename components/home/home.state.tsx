@@ -78,9 +78,9 @@ export interface HomeInitialState {
   teacherSettings: TeacherSettings;
 
   // Posthog feature flags
-  featureFlags: {
-    'enable-conversation-mode': boolean;
-  };
+  // featureFlags: {
+  //   'enable-conversation-mode': boolean;
+  // };
 }
 
 export const initialState: HomeInitialState = {
@@ -153,7 +153,7 @@ export const initialState: HomeInitialState = {
   },
 
   // Posthog feature flags
-  featureFlags: {
-    'enable-conversation-mode': false,
-  },
+  // featureFlags: {
+  //   'enable-conversation-mode': false,
+  // },
 };
