@@ -9,7 +9,9 @@ import React, { Fragment, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useFileUpload } from '@/hooks/file/useFileUpload';
+import { useMultipleFileUploadHandler } from '@/hooks/file/useMultipleFileUploadHandler';
 
+import DragAndDrop from '@/components/FileDragDropArea/DragAndDrop';
 import { FileListGridView } from '@/components/Files/FileListGridView';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -51,45 +53,53 @@ export default function FilePortalModel({ onClose }: Props) {
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-[85vw] tablet:max-w-[90vw] h-[85vh] transform overflow-hidden rounded-2xl text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex mobile:h-[100dvh] max-h-[90vh] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
-                <div className="p-6 bg-neutral-900 flex-grow relative overflow-y-auto">
-                  <button
-                    className="w-max min-h-[34px] p-4 absolute top-0 right-0"
-                    onClick={onClose}
-                  >
-                    <IconX />
-                  </button>
-                  <div className="flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2 text-neutral-200 font-bold">
-                        {sidebarT('File Portal')}
-                        <PreviewVersionFlag />
-                      </div>
-                      <div className="p-4">
-                        <UploadFileComponent />
-                      </div>
-                      <div className="p-4">
-                        <Alert className="bg-yellow-100 text-black">
-                          <IconAlertCircle className="h-4 w-4 !text-yellow-500 " />
-                          <AlertTitle className="text-base font-medium">
-                            {t('Warning')}
-                          </AlertTitle>
-                          <AlertDescription>
-                            <ul>
-                              <li>{t('File Size Limitation')}: 50 MB</li>
-                              <li>
-                                {t('PDF Page Limitation')}:{' '}
-                                {t('{{pages}} Pages', { pages: 300 })}
-                              </li>
-                            </ul>
-                          </AlertDescription>
-                        </Alert>
-                      </div>
+                <div className="bg-neutral-900 flex-grow relative overflow-y-auto">
+                  <div className="p-6">
+                    <button
+                      className="w-max min-h-[34px] p-4 absolute top-0 right-0"
+                      onClick={onClose}
+                    >
+                      <IconX />
+                    </button>
+                    <div className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2 text-neutral-200 font-bold">
+                          {sidebarT('File Portal')}
+                          <PreviewVersionFlag />
+                        </div>
+                        <div className="p-4">
+                          <UploadFileComponent />
+                        </div>
+                        <div className="p-4">
+                          <Alert className="bg-yellow-100 text-black">
+                            <IconAlertCircle className="h-4 w-4 !text-yellow-500 " />
+                            <AlertTitle className="text-base font-medium">
+                              {t('Warning')}
+                            </AlertTitle>
+                            <AlertDescription>
+                              <ul>
+                                <li>{t('File Size Limitation')}: 50 MB</li>
+                                <li>
+                                  {t('PDF Page Limitation')}:{' '}
+                                  {t('{{pages}} Pages', { pages: 300 })}
+                                </li>
+                              </ul>
+                            </AlertDescription>
+                          </Alert>
+                        </div>
 
-                      <div className="py-4">
-                        <FileListGridView closeDialogCallback={onClose} />
+                        <div className="py-4">
+                          <FileListGridView closeDialogCallback={onClose} />
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  <DragAndDrop
+                    onFilesDrop={(files) => {
+                      console.log('Files dropped:', files);
+                    }}
+                  />
                 </div>
               </Dialog.Panel>
             </Transition.Child>
@@ -101,38 +111,13 @@ export default function FilePortalModel({ onClose }: Props) {
 }
 
 const UploadFileComponent = () => {
-  const uploadFileMutation = useFileUpload();
-  const {
-    uploadFileMutation: { mutateAsync: uploadFile, isLoading },
-    uploadProgress,
-  } = uploadFileMutation;
-  const fileInputRef = useRef<HTMLInputElement>(null); // Added a ref to the input
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = async (file: File | null) => {
-    if (!file) {
-      alert(t('No file selected.'));
-      return;
-    }
-
-    const maxFileSize = 52428800; // 50 MB in bytes
-
-    // Check file Size
-    if (file.size > maxFileSize) {
-      alert(t('File size exceeds the maximum limit of {{mb}} MB.', { mb: 50 }));
-      return;
-    }
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-    const uploadOk = await uploadFile({ filename: file.name, file });
-
-    if (uploadOk) {
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    } else {
-      console.error('Upload failed');
-    }
+  const onComplete = () => {
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
+  const { isLoading, uploadProgress, uploadFiles } =
+    useMultipleFileUploadHandler({ onCompleteFileUpload: onComplete });
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
@@ -171,7 +156,7 @@ const UploadFileComponent = () => {
         className="hidden"
         onChange={(e) => {
           if (e.target.files && e.target.files[0]) {
-            handleFileSelect(e.target.files[0]);
+            uploadFiles(e.target.files[0]);
           }
         }}
       />
