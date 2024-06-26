@@ -3,7 +3,7 @@ import { Dispatch, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import { isFeatureEnabled, updateUserInfo } from '@/utils/app/eventTracking';
+import { updateUserInfo } from '@/utils/app/eventTracking';
 import { userProfileQuery } from '@/utils/server/supabase';
 
 import { User } from '@/types/user';
