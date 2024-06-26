@@ -2,13 +2,21 @@ import { Dialog, Transition } from '@headlessui/react';
 import {
   IconAlertCircle,
   IconRotateClockwise,
+  IconUpload,
   IconX,
 } from '@tabler/icons-react';
-import { IconUpload } from '@tabler/icons-react';
 import React, { Fragment, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useMultipleFileUploadHandler } from '@/hooks/file/useMultipleFileUploadHandler';
+
+import {
+  allowedTypes,
+  createFileList,
+  handleFileUpload,
+  isFileTypeAllowed,
+  maxFileCount,
+} from '@/utils/app/uploadFileHelper';
 
 import DragAndDrop from '@/components/FileDragDropArea/DragAndDrop';
 import { FileListGridView } from '@/components/Files/FileListGridView';
@@ -25,6 +33,12 @@ type Props = {
 export default function FilePortalModel({ onClose }: Props) {
   const { t } = useTranslation('model');
   const { t: sidebarT } = useTranslation('sidebar');
+
+  const {
+    uploadFiles,
+    isLoading: isUploading,
+    fileProgresses,
+  } = useMultipleFileUploadHandler();
   return (
     <Transition appear show={true} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose} open>
@@ -67,7 +81,27 @@ export default function FilePortalModel({ onClose }: Props) {
                           <PreviewVersionFlag />
                         </div>
                         <div className="p-4">
-                          <UploadFileComponent />
+                          <div className="flex gap-4">
+                            <UploadFileButton
+                              uploadFiles={uploadFiles}
+                              isUploading={isUploading}
+                            />
+                            <div className="flex-1 space-y-2">
+                              {Object.entries(fileProgresses).map(
+                                ([fileName, state]) => (
+                                  <div key={fileName}>
+                                    <div className="text-sm font-medium text-white">
+                                      {fileName}
+                                    </div>
+                                    <UploadProgress
+                                      progressNumber={state.progress}
+                                      isSuccessUpload={state.isSuccessUpload}
+                                    />
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                          </div>
                         </div>
                         <div className="p-4">
                           <Alert className="bg-yellow-100 text-black">
@@ -96,7 +130,15 @@ export default function FilePortalModel({ onClose }: Props) {
 
                   <DragAndDrop
                     onFilesDrop={(files) => {
-                      console.log('Files dropped:', files);
+                      console.log({
+                        fileTypes: Array.from(files).map((file) => file.type),
+                      });
+                      handleFileUpload(
+                        createFileList(files),
+                        uploadFiles,
+                        () => {},
+                        t,
+                      );
                     }}
                   />
                 </div>
@@ -109,14 +151,21 @@ export default function FilePortalModel({ onClose }: Props) {
   );
 }
 
-const UploadFileComponent = () => {
+const UploadFileButton = ({
+  uploadFiles,
+  isUploading,
+}: {
+  uploadFiles: (
+    files: File[],
+    onCompleteFileUpload?: () => void,
+  ) => Promise<void>;
+  isUploading: boolean;
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onComplete = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
-  const { isLoading, fileProgresses, uploadFiles } =
-    useMultipleFileUploadHandler({ onCompleteFileUpload: onComplete });
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
@@ -125,55 +174,34 @@ const UploadFileComponent = () => {
   const { t } = useTranslation('model');
 
   return (
-    <div>
-      <div className="flex gap-4">
-        <Button
-          className="min-w-[7.5rem] inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 bg-neutral-50 text-neutral-900 hover:bg-neutral-50/90 focus:ring-neutral-300"
-          onClick={triggerFileInput}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <IconRotateClockwise className="mr-2 h-4 w-4 animate-spin" />
-              {t('Loading...')}
-            </>
-          ) : (
-            <>
-              <IconUpload className="mr-2 h-4 w-4" />
-              {t('Upload')}
-            </>
-          )}
-        </Button>
-        <div className="flex-1 space-y-2">
-          {Object.entries(fileProgresses).map(([fileName, state]) => (
-            <div key={fileName}>
-              <div className="text-sm font-medium text-white">{fileName}</div>
-              <UploadProgress
-                progressNumber={state.progress}
-                isSuccessUpload={state.isSuccessUpload}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+    <>
+      <Button
+        className="min-w-[7.5rem] inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 bg-neutral-50 text-neutral-900 hover:bg-neutral-50/90 focus:ring-neutral-300"
+        onClick={triggerFileInput}
+        disabled={isUploading}
+      >
+        {isUploading ? (
+          <>
+            <IconRotateClockwise className="mr-2 h-4 w-4 animate-spin" />
+            {t('Loading...')}
+          </>
+        ) : (
+          <>
+            <IconUpload className="mr-2 h-4 w-4" />
+            {t('Upload')}
+          </>
+        )}
+      </Button>
       <input
         ref={fileInputRef}
         type="file"
         multiple
-        accept="application/pdf, text/plain, audio/aac, audio/flac, audio/mp3, audio/m4a, audio/mpeg, audio/mpga, audio/mp4, audio/opus, audio/pcm, audio/wav, audio/webm, image/png, image/jpeg"
+        accept={allowedTypes.join(',')}
         className="hidden"
-        onChange={(e) => {
-          if (e.target.files && e.target.files.length <= 10) {
-            uploadFiles(Array.from(e.target.files));
-          } else {
-            alert(
-              t('You can only upload a maximum of {{count}} files at once.', {
-                count: 10,
-              }),
-            );
-          }
-        }}
+        onChange={(e) =>
+          handleFileUpload(e.target.files, uploadFiles, onComplete, t)
+        }
       />
-    </div>
+    </>
   );
 };

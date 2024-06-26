@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { cn } from '@/lib/utils';
-
 interface DragAndDropProps {
   onFilesDrop: (files: File[]) => void;
 }

@@ -4,11 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useFileUpload } from '@/hooks/file/useFileUpload';
 
-export function useMultipleFileUploadHandler({
-  onCompleteFileUpload,
-}: {
-  onCompleteFileUpload?: () => void;
-}) {
+export function useMultipleFileUploadHandler() {
   const { t } = useTranslation('model');
   const uploadFileMutation = useFileUpload();
   const {
@@ -20,7 +16,10 @@ export function useMultipleFileUploadHandler({
     Record<string, { progress: number; isSuccessUpload: boolean | null }>
   >({});
 
-  const uploadFiles = async (files: File[]) => {
+  const uploadFiles = async (
+    files: File[],
+    onCompleteFileUpload?: () => void,
+  ) => {
     if (files.length === 0) {
       alert(t('No files selected.'));
       return;
