@@ -8,7 +8,7 @@ export function UploadProgress({
   isSuccessUpload: boolean | null;
 }) {
   return (
-    <div className="">
+    <div className="w-full">
       <div className="flex mb-2 items-center justify-center">
         <span className="text-xs font-semibold inline-block text-white">
           {progressNumber}%
