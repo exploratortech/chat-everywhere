@@ -125,10 +125,6 @@ export function useMultipleFileUploadHandler() {
     for (let index = 0; index < files.length; index++) {
       const file = files[index];
       try {
-        // DOING: remove this
-        if (index == 1) {
-          throw new Error('Error');
-        }
         const uploadOk = await uploadFile({
           filename: file.name,
           file,
