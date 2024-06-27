@@ -57,7 +57,6 @@ function App({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
               </ToastBar>
             )}
           </Toaster>
-          ;
           <Component {...pageProps} />
           <GoogleAnalytics trackPageViews strategy="lazyOnload" />
         </div>
