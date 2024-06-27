@@ -11,8 +11,11 @@ const DefaultToaster = () => {
               {icon}
               {message}
               {t.className?.includes('toast-with-close-button') && (
-                <button onClick={() => toast.dismiss(t.id)}>
-                  <IconX />
+                <button
+                  className="self-start "
+                  onClick={() => toast.dismiss(t.id)}
+                >
+                  <IconX size={18} />
                 </button>
               )}
             </>
