@@ -1,10 +1,21 @@
-import { IconX } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { useFileUpload } from '@/hooks/file/useFileUpload';
 
+import { MAX_FILE_SIZE_FOR_UPLOAD } from '@/utils/app/const';
+
+import CustomUploadToast from '@/components/Files/CustomUploadToast';
+
+type FileUploadStatuses = Record<
+  string,
+  {
+    progress: number;
+    isSuccessUpload: boolean | null;
+    toastId: string | undefined;
+  }
+>;
 export function useMultipleFileUploadHandler() {
   const { t } = useTranslation('model');
   const uploadFileMutation = useFileUpload();
@@ -12,81 +23,85 @@ export function useMultipleFileUploadHandler() {
     uploadFileMutation: { mutateAsync: uploadFile, isLoading },
   } = uploadFileMutation;
 
-  // New state to track progress for each file
-  const [fileProgresses, setFileProgresses] = useState<
-    Record<
-      string,
-      {
-        progress: number;
-        isSuccessUpload: boolean | null;
-        toastId: string | null;
-      }
-    >
-  >({});
+  const failedUploadsToastIds = useRef<string[]>([]);
+
+  const [fileProgresses, setFileProgresses] = useState<FileUploadStatuses>({});
 
   useEffect(() => {
     Object.entries(fileProgresses).forEach(([fileName, file]) => {
-      if (file.isSuccessUpload === null) {
-        if (!file.toastId) {
-          const id = toast.loading(
-            `${t('Uploading')}: ${fileName} - ${file.progress}%`,
-            { duration: Infinity, position: 'bottom-right' },
-          );
-          setFileProgresses((prev) => ({
-            ...prev,
-            [fileName]: { ...file, toastId: id },
-          }));
-        } else {
-          toast.loading(`${t('Uploading')}: ${fileName} - ${file.progress}%`, {
-            id: file.toastId,
-            position: 'bottom-right',
+      const { isSuccessUpload, toastId, progress } = file;
+
+      const toastProps = {
+        position: 'bottom-right',
+        id: toastId,
+      } as const;
+
+      const toastContent = (
+        <CustomUploadToast
+          fileName={fileName}
+          progress={progress}
+          isSuccessUpload={isSuccessUpload}
+        />
+      );
+
+      // File is uploading
+      if (isSuccessUpload === null) {
+        if (!toastId) {
+          const id = toast.custom(toastContent, {
+            ...toastProps,
+            duration: Infinity,
           });
+          updateFileProgress(fileName, { ...file, toastId: id });
+        } else {
+          toast.loading(toastContent, toastProps);
         }
       } else {
-        if (file.toastId) {
-          toast.dismiss(file.toastId);
-          if (file.isSuccessUpload) {
-            toast.success(`${t('Uploaded successfully')}: ${fileName}`, {
-              position: 'bottom-right',
-            });
-          } else {
-            // Update the toast creation
-            const errorToastId = toast.custom(
-              () => (
-                <CustomErrorToast
-                  message={`${t('Upload failed')}: ${fileName}`}
-                  close={() => toast.dismiss(errorToastId)}
-                />
-              ),
-              {
-                position: 'bottom-right',
-                duration: Infinity,
-              },
-            );
-            setFileProgresses((prev) => ({
-              ...prev,
-              [fileName]: { ...file, toastId: errorToastId },
-            }));
+        // File completed uploading
+        if (toastId) {
+          toast.dismiss(toastId);
+          const toastMessage = isSuccessUpload
+            ? `${t('Uploaded successfully')}: ${fileName}`
+            : `${t('Upload failed')}: ${fileName}`;
+
+          const toastType = isSuccessUpload ? toast.success : toast.error;
+
+          const newToastId = toastType(toastMessage, {
+            ...toastProps,
+            duration: isSuccessUpload ? undefined : Infinity,
+            className: isSuccessUpload ? undefined : 'toast-with-close-button',
+          });
+
+          // remove the file from the fileProgresses
+          setFileProgresses((prev) => {
+            const newFileProgresses = { ...prev };
+            delete newFileProgresses[fileName];
+            return newFileProgresses;
+          });
+
+          // add the toastId to the failedUploadsToastIds
+          if (!isSuccessUpload) {
+            failedUploadsToastIds.current.push(newToastId);
           }
-          setFileProgresses((prev) => ({
-            ...prev,
-            [fileName]: { ...file, toastId: null },
-          }));
         }
       }
     });
   }, [fileProgresses, t]);
 
+  const updateFileProgress = (
+    fileName: string,
+    newFileState: FileProgresses[string],
+  ) => {
+    setFileProgresses((prev) => ({
+      ...prev,
+      [fileName]: newFileState,
+    }));
+  };
+
   const dismissAllErrorToasts = () => {
-    Object.entries(fileProgresses).forEach(([fileName, file]) => {
-      if (file.isSuccessUpload === false && file.toastId) {
-        toast.dismiss(file.toastId);
-        setFileProgresses((prev) => ({
-          ...prev,
-          [fileName]: { ...prev[fileName], toastId: null },
-        }));
-      }
+    failedUploadsToastIds.current.forEach((toastId) => {
+      toast.dismiss(toastId);
     });
+    failedUploadsToastIds.current = [];
   };
 
   const uploadFiles = async (
@@ -98,18 +113,17 @@ export function useMultipleFileUploadHandler() {
       return;
     }
 
-    // Dismiss all error toasts when starting a new upload
     dismissAllErrorToasts();
 
-    const maxFileSize = 52428800; // 50 MB in bytes
     for (const file of files) {
-      if (file.size > maxFileSize) {
+      if (file.size > MAX_FILE_SIZE_FOR_UPLOAD) {
         alert(
           t('File {{name}} size exceeds the maximum limit of {{mb}} MB.', {
             name: file.name,
             mb: 50,
           }),
         );
+        break;
       }
     }
 
@@ -162,17 +176,16 @@ export function useMultipleFileUploadHandler() {
       onCompleteFileUpload();
     }
 
-    filterFailedUploads();
+    removeSuccessUploads();
   };
 
-  const filterFailedUploads = () => {
+  const removeSuccessUploads = () => {
     setFileProgresses((prev) => {
       const filteredProgresses = Object.entries(prev).reduce(
         (acc, [fileName, state]) => {
           if (state.isSuccessUpload === false) {
             acc[fileName] = state;
           } else if (state.toastId) {
-            // Dismiss the toast for successful uploads
             toast.dismiss(state.toastId);
           }
           return acc;
@@ -182,7 +195,7 @@ export function useMultipleFileUploadHandler() {
           {
             progress: number;
             isSuccessUpload: boolean | null;
-            toastId: string | null;
+            toastId: string | undefined;
           }
         >,
       );
@@ -196,19 +209,3 @@ export function useMultipleFileUploadHandler() {
     uploadFiles,
   };
 }
-
-// Update CustomErrorToast component
-const CustomErrorToast = ({
-  message,
-  close,
-}: {
-  message: string;
-  close: () => void;
-}) => (
-  <div className="flex items-center justify-between bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
-    <div>{message}</div>
-    <button onClick={close} className="text-red-700 hover:text-red-900">
-      <IconX size={18} />
-    </button>
-  </div>
-);
