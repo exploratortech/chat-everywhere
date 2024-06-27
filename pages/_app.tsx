@@ -1,8 +1,8 @@
 import { Session, SessionContextProvider } from '@supabase/auth-helpers-react';
+import { IconX } from '@tabler/icons-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ReactNode, useEffect, useState } from 'react';
-import { Toaster } from 'react-hot-toast';
+import { ToastBar, Toaster, toast } from 'react-hot-toast';
 import 'react-notion-x/src/styles.css';
 
 import { appWithTranslation } from 'next-i18next';
@@ -40,8 +40,24 @@ function App({ Component, pageProps }: AppProps<{ initialSession: Session }>) {
     >
       <QueryClientProvider client={queryClient}>
         <div className={inter.className}>
-          <Toaster />
-
+          <Toaster>
+            {(t) => (
+              <ToastBar toast={t}>
+                {({ icon, message }) => (
+                  <>
+                    {icon}
+                    {message}
+                    {t.className?.includes('toast-with-close-button') && (
+                      <button onClick={() => toast.dismiss(t.id)}>
+                        <IconX />
+                      </button>
+                    )}
+                  </>
+                )}
+              </ToastBar>
+            )}
+          </Toaster>
+          ;
           <Component {...pageProps} />
           <GoogleAnalytics trackPageViews strategy="lazyOnload" />
         </div>
