@@ -1,3 +1,5 @@
+import { UserFile } from '@/types/UserFile';
+
 export const maxFileCount = 100;
 
 export const allowedTypes = [
@@ -69,9 +71,9 @@ export const handleFileUpload = (
   files: FileList | null,
   uploadFiles: (
     files: File[],
-    onCompleteFileUpload?: () => void,
+    onCompleteFileUpload?: (newFile: UserFile[]) => void,
   ) => Promise<void>,
-  onComplete: () => void,
+  onComplete: (newFile: UserFile[]) => void,
   t: (key: string, options?: any) => string,
 ) => {
   if (files) {
