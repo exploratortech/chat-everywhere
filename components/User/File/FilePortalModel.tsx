@@ -34,11 +34,8 @@ export default function FilePortalModel({ onClose }: Props) {
   const { t } = useTranslation('model');
   const { t: sidebarT } = useTranslation('sidebar');
 
-  const {
-    uploadFiles,
-    isLoading: isUploading,
-    fileProgresses,
-  } = useMultipleFileUploadHandler();
+  const { uploadFiles, isLoading: isUploading } =
+    useMultipleFileUploadHandler();
   return (
     <Transition appear show={true} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose} open>
@@ -86,21 +83,6 @@ export default function FilePortalModel({ onClose }: Props) {
                               uploadFiles={uploadFiles}
                               isUploading={isUploading}
                             />
-                            <div className="flex-1 space-y-2">
-                              {Object.entries(fileProgresses).map(
-                                ([fileName, state]) => (
-                                  <div key={fileName}>
-                                    <div className="text-sm font-medium text-white">
-                                      {fileName}
-                                    </div>
-                                    <UploadProgress
-                                      progressNumber={state.progress}
-                                      isSuccessUpload={state.isSuccessUpload}
-                                    />
-                                  </div>
-                                ),
-                              )}
-                            </div>
                           </div>
                         </div>
                         <div className="p-4">

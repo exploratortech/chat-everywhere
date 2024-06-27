@@ -29,7 +29,7 @@ import { Prompt, isTeacherPrompt } from '@/types/prompt';
 import HomeContext from '@/components/home/home.context';
 
 import { NewConversationMessagesContainer } from '../ConversationStarter/NewConversationMessagesContainer';
-import DragAndDrop from '../FileDragDropArea/DragAndDrop';
+import ChatDragAndDropContainer from '../FileDragDropArea/ChatDragAndDropContainer';
 import { useConversation } from '../Hooks/useConversation';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 import { ChatInput } from './ChatInput';
@@ -59,6 +59,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       outputLanguage,
       currentMessage,
       messageIsStreaming,
+      showFilePortalModel,
     },
     handleUpdateConversation,
     dispatch: homeDispatch,
@@ -431,11 +432,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           />
         </>
       )}
-      <DragAndDrop
-        onFilesDrop={(files) => {
-          console.log('Files dropped:', files);
-        }}
-      />
+      <ChatDragAndDropContainer />
     </div>
   );
 });
