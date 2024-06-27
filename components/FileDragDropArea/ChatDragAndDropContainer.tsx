@@ -14,7 +14,7 @@ import DragAndDrop from './DragAndDrop';
 const ChatDragAndDropContainer = () => {
   const { t } = useTranslation('model');
   const {
-    state: { showFilePortalModel, currentMessage },
+    state: { showFilePortalModel, currentMessage, isUltraUser },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
   const { uploadFiles, isLoading: isUploading } =
@@ -38,7 +38,7 @@ const ChatDragAndDropContainer = () => {
   };
   return (
     <>
-      {!showFilePortalModel && (
+      {!showFilePortalModel && isUltraUser && (
         <DragAndDrop
           onFilesDrop={(files) => {
             handleFileUpload(
