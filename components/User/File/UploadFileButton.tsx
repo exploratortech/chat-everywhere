@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { allowedTypes, handleFileUpload } from '@/utils/app/uploadFileHelper';
 
+import { UserFile } from '@/types/UserFile';
+
 import { Button } from '@/components/ui/button';
 
 const UploadFileButton = ({
@@ -12,7 +14,7 @@ const UploadFileButton = ({
 }: {
   uploadFiles: (
     files: File[],
-    onCompleteFileUpload?: () => void,
+    onCompleteFileUpload?: (newFile: UserFile[]) => void,
   ) => Promise<void>;
   isUploading: boolean;
 }) => {
