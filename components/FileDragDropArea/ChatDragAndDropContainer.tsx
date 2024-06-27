@@ -5,23 +5,50 @@ import { useMultipleFileUploadHandler } from '@/hooks/file/useMultipleFileUpload
 
 import { createFileList, handleFileUpload } from '@/utils/app/uploadFileHelper';
 
+import { UserFile } from '@/types/UserFile';
+import { PluginID } from '@/types/plugin';
+
 import HomeContext from '../home/home.context';
 import DragAndDrop from './DragAndDrop';
 
 const ChatDragAndDropContainer = () => {
   const { t } = useTranslation('model');
   const {
-    state: { showFilePortalModel },
+    state: { showFilePortalModel, currentMessage },
+    dispatch: homeDispatch,
   } = useContext(HomeContext);
   const { uploadFiles, isLoading: isUploading } =
     useMultipleFileUploadHandler();
 
+  const handleAddToChat = (userFiles: UserFile[]) => {
+    if (!userFiles) {
+      console.log('no user file ');
+      return;
+    }
+
+    const existingFiles = currentMessage?.fileList || [];
+    homeDispatch({
+      field: 'currentMessage',
+      value: {
+        ...currentMessage,
+        fileList: [...existingFiles, ...userFiles],
+        pluginId: PluginID.GEMINI,
+      },
+    });
+  };
   return (
     <>
       {!showFilePortalModel && (
         <DragAndDrop
           onFilesDrop={(files) => {
-            handleFileUpload(createFileList(files), uploadFiles, () => {}, t);
+            handleFileUpload(
+              createFileList(files),
+              uploadFiles,
+              (latestFiles) => {
+                handleAddToChat(latestFiles);
+              },
+              t,
+            );
           }}
         />
       )}
