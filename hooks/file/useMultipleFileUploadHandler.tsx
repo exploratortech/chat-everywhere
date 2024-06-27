@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -27,8 +27,56 @@ export function useMultipleFileUploadHandler() {
 
   const [fileProgresses, setFileProgresses] = useState<FileUploadStatuses>({});
 
-  useEffect(() => {
-    Object.entries(fileProgresses).forEach(([fileName, file]) => {
+  const handleFileUploading = useCallback(
+    (
+      fileName: string,
+      file: any,
+      toastContent: JSX.Element,
+      toastProps: any,
+    ) => {
+      if (!file.toastId) {
+        const id = toast.custom(toastContent, {
+          ...toastProps,
+          duration: Infinity,
+        });
+        updateFileProgress(fileName, { ...file, toastId: id });
+      } else {
+        toast.loading(toastContent, toastProps);
+      }
+    },
+    [],
+  );
+
+  const handleFileUploaded = useCallback(
+    (fileName: string, file: any, toastProps: any) => {
+      if (file.toastId) {
+        toast.dismiss(file.toastId);
+        const toastMessage = file.isSuccessUpload
+          ? `${t('Uploaded successfully')}: ${fileName}`
+          : `${t('Upload failed')}: ${fileName}`;
+
+        const toastType = file.isSuccessUpload ? toast.success : toast.error;
+
+        const newToastId = toastType(toastMessage, {
+          ...toastProps,
+          duration: file.isSuccessUpload ? undefined : Infinity,
+          className: file.isSuccessUpload
+            ? undefined
+            : 'toast-with-close-button',
+        });
+
+        removeFileFromProgresses(fileName);
+
+        if (!file.isSuccessUpload) {
+          failedUploadsToastIds.current.push(newToastId);
+        }
+      }
+    },
+    [t],
+  );
+
+  const handleFileProgress = useCallback(
+    (fileName: string, file: any) => {
       const { isSuccessUpload, toastId, progress } = file;
 
       const toastProps = {
@@ -44,52 +92,32 @@ export function useMultipleFileUploadHandler() {
         />
       );
 
-      // File is uploading
       if (isSuccessUpload === null) {
-        if (!toastId) {
-          const id = toast.custom(toastContent, {
-            ...toastProps,
-            duration: Infinity,
-          });
-          updateFileProgress(fileName, { ...file, toastId: id });
-        } else {
-          toast.loading(toastContent, toastProps);
-        }
+        handleFileUploading(fileName, file, toastContent, toastProps);
       } else {
-        // File completed uploading
-        if (toastId) {
-          toast.dismiss(toastId);
-          const toastMessage = isSuccessUpload
-            ? `${t('Uploaded successfully')}: ${fileName}`
-            : `${t('Upload failed')}: ${fileName}`;
-
-          const toastType = isSuccessUpload ? toast.success : toast.error;
-
-          const newToastId = toastType(toastMessage, {
-            ...toastProps,
-            duration: isSuccessUpload ? undefined : Infinity,
-            className: isSuccessUpload ? undefined : 'toast-with-close-button',
-          });
-
-          // remove the file from the fileProgresses
-          setFileProgresses((prev) => {
-            const newFileProgresses = { ...prev };
-            delete newFileProgresses[fileName];
-            return newFileProgresses;
-          });
-
-          // add the toastId to the failedUploadsToastIds
-          if (!isSuccessUpload) {
-            failedUploadsToastIds.current.push(newToastId);
-          }
-        }
+        handleFileUploaded(fileName, file, toastProps);
       }
+    },
+    [handleFileUploaded, handleFileUploading],
+  );
+
+  useEffect(() => {
+    Object.entries(fileProgresses).forEach(([fileName, file]) => {
+      handleFileProgress(fileName, file);
     });
-  }, [fileProgresses, t]);
+  }, [fileProgresses, handleFileProgress, t]);
+
+  const removeFileFromProgresses = (fileName: string) => {
+    setFileProgresses((prev) => {
+      const newFileProgresses = { ...prev };
+      delete newFileProgresses[fileName];
+      return newFileProgresses;
+    });
+  };
 
   const updateFileProgress = (
     fileName: string,
-    newFileState: FileProgresses[string],
+    newFileState: FileUploadStatuses[string],
   ) => {
     setFileProgresses((prev) => ({
       ...prev,
