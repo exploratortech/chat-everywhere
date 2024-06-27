@@ -6,7 +6,11 @@ import { useFileUpload } from '@/hooks/file/useFileUpload';
 
 import { MAX_FILE_SIZE_FOR_UPLOAD } from '@/utils/app/const';
 
+import { UserFile } from '@/types/UserFile';
+
 import CustomUploadToast from '@/components/Files/CustomUploadToast';
+
+import { useFetchFileList } from './useFetchFileList';
 
 type FileUploadStatuses = Record<
   string,
@@ -17,6 +21,9 @@ type FileUploadStatuses = Record<
   }
 >;
 export function useMultipleFileUploadHandler() {
+  const { refetch: fetchLatestFileList, data: previousUserFiles } =
+    useFetchFileList();
+
   const { t } = useTranslation('model');
   const uploadFileMutation = useFileUpload();
   const {
@@ -134,7 +141,7 @@ export function useMultipleFileUploadHandler() {
 
   const uploadFiles = async (
     files: File[],
-    onCompleteFileUpload?: () => void,
+    onCompleteFileUpload?: (newFiles: UserFile[]) => void,
   ) => {
     if (files.length === 0) {
       alert(t('No files selected.'));
@@ -151,7 +158,7 @@ export function useMultipleFileUploadHandler() {
             mb: 50,
           }),
         );
-        break;
+        return;
       }
     }
 
@@ -199,9 +206,13 @@ export function useMultipleFileUploadHandler() {
         }));
       }
     }
+    const latestFiles = await fetchLatestFileList();
+    const newFiles = latestFiles.data?.filter(
+      (file) => !previousUserFiles?.some((prevFile) => prevFile.id === file.id),
+    );
 
     if (onCompleteFileUpload) {
-      onCompleteFileUpload();
+      onCompleteFileUpload(newFiles || []);
     }
 
     removeSuccessUploads();
