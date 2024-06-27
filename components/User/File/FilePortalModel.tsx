@@ -1,30 +1,18 @@
 import { Dialog, Transition } from '@headlessui/react';
-import {
-  IconAlertCircle,
-  IconRotateClockwise,
-  IconUpload,
-  IconX,
-} from '@tabler/icons-react';
-import React, { Fragment, useRef } from 'react';
+import { IconAlertCircle, IconX } from '@tabler/icons-react';
+import React, { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useMultipleFileUploadHandler } from '@/hooks/file/useMultipleFileUploadHandler';
 
-import {
-  allowedTypes,
-  createFileList,
-  handleFileUpload,
-  isFileTypeAllowed,
-  maxFileCount,
-} from '@/utils/app/uploadFileHelper';
+import { createFileList, handleFileUpload } from '@/utils/app/uploadFileHelper';
 
 import DragAndDrop from '@/components/FileDragDropArea/DragAndDrop';
 import { FileListGridView } from '@/components/Files/FileListGridView';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import PreviewVersionFlag from '@/components/ui/preview-version-flag';
 
-import { UploadProgress } from './UploadProgress';
+import UploadFileButton from './UploadFileButton';
 
 type Props = {
   onClose: () => void;
@@ -132,58 +120,3 @@ export default function FilePortalModel({ onClose }: Props) {
     </Transition>
   );
 }
-
-const UploadFileButton = ({
-  uploadFiles,
-  isUploading,
-}: {
-  uploadFiles: (
-    files: File[],
-    onCompleteFileUpload?: () => void,
-  ) => Promise<void>;
-  isUploading: boolean;
-}) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const onComplete = () => {
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-
-  const { t } = useTranslation('model');
-
-  return (
-    <>
-      <Button
-        className="min-w-[7.5rem] inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium shadow transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2 bg-neutral-50 text-neutral-900 hover:bg-neutral-50/90 focus:ring-neutral-300"
-        onClick={triggerFileInput}
-        disabled={isUploading}
-      >
-        {isUploading ? (
-          <>
-            <IconRotateClockwise className="mr-2 h-4 w-4 animate-spin" />
-            {t('Loading...')}
-          </>
-        ) : (
-          <>
-            <IconUpload className="mr-2 h-4 w-4" />
-            {t('Upload')}
-          </>
-        )}
-      </Button>
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept={allowedTypes.join(',')}
-        className="hidden"
-        onChange={(e) =>
-          handleFileUpload(e.target.files, uploadFiles, onComplete, t)
-        }
-      />
-    </>
-  );
-};
