@@ -243,5 +243,6 @@
   "You can only upload a maximum of {{count}} files at once.": "您一次只能上傳最多 {{count}} 個檔案",
   "No valid files were selected. Please upload only supported file types.": "未選擇有效檔案。請上傳支援的檔案格式。",
   "Conversation mode": "對話模式",
-  "Bug report submitted successfully": "錯誤報告已成功提交"
+  "Bug report submitted successfully": "錯誤報告已成功提交",
+  "Uploading...": "上傳中..."
 }
