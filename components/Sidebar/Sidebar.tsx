@@ -26,7 +26,6 @@ interface Props<T> {
   toggleOpen: () => void;
   handleCreateItem: () => void;
   handleCreateFolder: () => void;
-  // handleDrop: (e: any) => void;
   showMobileButton?: boolean;
 }
 
@@ -44,7 +43,6 @@ const Sidebar = <T,>({
   toggleOpen,
   handleCreateItem,
   handleCreateFolder,
-  // handleDrop,
   showMobileButton = true,
 }: Props<T>) => {
   const { t } = useTranslation('promptbar');
