@@ -109,7 +109,6 @@
   "MQTT": "MQTT",
   "(Advance user only) Send MQTT payload to your IoT devices. Integrate AI into your control network.": "(僅限進階用戶) 發送 MQTT 訊息到您的 IoT 設備。將 AI 整合到您的控制網絡中。",
   "Loading ...": "載入中...",
-
   "Connections": "指令集",
   "Name": "名稱",
   "Name (English only)": "名稱 (僅限英文)",
@@ -244,5 +243,7 @@
   "No valid files were selected. Please upload only supported file types.": "未選擇有效檔案。請上傳支援的檔案格式。",
   "Conversation mode": "對話模式",
   "Bug report submitted successfully": "錯誤報告已成功提交",
-  "Uploading...": "上傳中..."
+  "Uploading...": "上傳中...",
+  "Uploaded successfully": "上傳成功",
+  "Unable to load your information, please try again later.": "無法載入您的資料，請稍後再試。"
 }
