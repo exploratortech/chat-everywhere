@@ -75,9 +75,6 @@ export function useFileUpload() {
         });
       }),
     {
-      onSuccess: () => {
-        toast.success(commonT('File uploaded successfully'));
-      },
       onError: () => {
         toast.error(commonT('File upload failed'));
       },
