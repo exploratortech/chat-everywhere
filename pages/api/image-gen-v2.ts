@@ -45,6 +45,7 @@ export const config = {
     'sin1',
     'syd1',
   ],
+  maxDuration: 60,
 };
 const requestHeader = {
   Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY || ''}`,

@@ -10,6 +10,7 @@ dayjs.extend(timezone);
 
 export const config = {
   runtime: 'edge',
+  maxDuration: 60,
 };
 
 const handler = async (): Promise<Response> => {
