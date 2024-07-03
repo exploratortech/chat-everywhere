@@ -1,9 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 import { useEffect, useRef, useState } from 'react';
 
 import { useDownloadObjectUrl } from '@/hooks/file/useDownloadObjectUrl';
 
-const AudioPreview = ({ objectPath }: { objectPath: string }) => {
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+const ImagePreview = ({ objectPath }: { objectPath: string }) => {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { mutateAsync: downloadFile } = useDownloadObjectUrl();
@@ -15,13 +16,13 @@ const AudioPreview = ({ objectPath }: { objectPath: string }) => {
       downloadFile(objectPath)
         .then((res) => {
           if (res.url) {
-            setAudioUrl(res.url);
+            setImageUrl(res.url);
           } else {
-            setError('Failed to download audio');
+            setError('Failed to download image');
           }
         })
         .catch((err) => {
-          setError(`Error downloading Audio: ${err.message}`);
+          setError(`Error downloading Image: ${err.message}`);
         });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -32,19 +33,17 @@ const AudioPreview = ({ objectPath }: { objectPath: string }) => {
   }
 
   return (
-    <div className="max-w-[90dvw] max-h-[90dvh] w-[85dvw] h-full flex items-center justify-center">
-      {audioUrl && (
-        <audio
-          controls
-          className="w-full max-h-full"
-          onError={() => setError('Failed to load audio')}
-        >
-          <source src={audioUrl} type="audio/mpeg" />
-          Your browser does not support the audio element.
-        </audio>
+    <div className="max-w-[90dvw] max-h-[90dvh] w-full h-full flex items-center justify-center">
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt="Preview"
+          className="max-w-full max-h-full object-contain"
+          onError={() => setError('Failed to load image')}
+        />
       )}
     </div>
   );
 };
 
-export default AudioPreview;
+export default ImagePreview;

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 
 import AudioPreview from './AudioPreview';
+import ImagePreview from './ImagePreview';
 import PDFPreview from './PDFPreview';
 import VideoPreview from './VideoPreview';
 
@@ -29,6 +30,8 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
       return <VideoPreview objectPath={file.objectPath} />;
     } else if (file.filetype.startsWith('audio/')) {
       return <AudioPreview objectPath={file.objectPath} />;
+    } else if (file.filetype.startsWith('image/')) {
+      return <ImagePreview objectPath={file.objectPath} />;
     } else {
       return <p>Preview not available for this file type.</p>;
     }
