@@ -24,11 +24,11 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
 }) => {
   const renderPreview = () => {
     if (file.filetype.startsWith('application/pdf')) {
-      return <PDFPreview url={file.objectPath} />;
+      return <PDFPreview objectPath={file.objectPath} />;
     } else if (file.filetype.startsWith('video/')) {
       return <VideoPreview objectPath={file.objectPath} />;
     } else if (file.filetype.startsWith('audio/')) {
-      return <AudioPreview url={file.objectPath} />;
+      return <AudioPreview objectPath={file.objectPath} />;
     } else {
       return <p>Preview not available for this file type.</p>;
     }
@@ -36,7 +36,7 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
 
   return (
     <Dialog>
-      <DialogTrigger>{children}</DialogTrigger>
+      <DialogTrigger className="w-full h-full">{children}</DialogTrigger>
       <DialogContent className="min-w-max min-h-max">
         <DialogHeader>
           <DialogTitle>{file.filename}</DialogTitle>
