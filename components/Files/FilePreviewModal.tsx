@@ -37,7 +37,7 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
   return (
     <Dialog>
       <DialogTrigger>{children}</DialogTrigger>
-      <DialogContent className="w-full min-w-[80dvw] min-h-[80dvh]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{file.filename}</DialogTitle>
           <DialogDescription>{renderPreview()}</DialogDescription>
