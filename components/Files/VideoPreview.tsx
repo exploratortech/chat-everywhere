@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useDownloadObjectUrl } from '@/hooks/file/useDownloadObjectUrl';
 
@@ -7,15 +7,23 @@ const VideoPreview = ({ objectPath }: { objectPath: string }) => {
   const [error, setError] = useState<string | null>(null);
 
   const { mutateAsync: downloadFile } = useDownloadObjectUrl();
+  const downloadInitiated = useRef(false);
 
   useEffect(() => {
-    downloadFile(objectPath).then((res) => {
-      if (res.url) {
-        setVideoUrl(res.url);
-      } else {
-        setError('Failed to download video');
-      }
-    });
+    if (!downloadInitiated.current) {
+      downloadInitiated.current = true;
+      downloadFile(objectPath)
+        .then((res) => {
+          if (res.url) {
+            setVideoUrl(res.url);
+          } else {
+            setError('Failed to download video');
+          }
+        })
+        .catch((err) => {
+          setError(`Error downloading Video: ${err.message}`);
+        });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -24,7 +32,7 @@ const VideoPreview = ({ objectPath }: { objectPath: string }) => {
   }
 
   return (
-    <div className="max-w-[80dvw] max-h-[80dvh] w-full h-full flex items-center justify-center">
+    <div className="max-w-[90dvw] max-h-[90dvh] w-full h-full flex items-center justify-center">
       {videoUrl && (
         <video
           controls
