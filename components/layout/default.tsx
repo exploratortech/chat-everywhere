@@ -46,8 +46,8 @@ import {
   generateRank,
   rebalanceFolders,
   rebalanceItems,
-  sortByRank,
   sortByRankAndFolder,
+  sortByRankAndFolderType,
 } from '@/utils/app/rank';
 import { syncData } from '@/utils/app/sync';
 import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
@@ -65,6 +65,7 @@ import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
 import OrientationBlock from '@/components/Mobile/OrientationBlock';
 
 import { CognitiveServiceProvider } from '../CognitiveService/CognitiveServiceProvider';
+import { DragDropContext } from '../DropArea/DragDropContext';
 import HomeContext from '../home/home.context';
 import { HomeInitialState, initialState } from '../home/home.state';
 import { Button } from '../ui/button';
@@ -311,7 +312,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     if (defaultModelId) {
       const newPrompt: Prompt = {
         id: uuidv4(),
-        name: `Prompt ${prompts.length + 1}`,
+        name: `Prompt ${filteredPrompts.length + 1}`,
         description: '',
         content: '',
         model: OpenAIModels[defaultModelId],
@@ -602,7 +603,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     const folders = localStorage.getItem('folders');
     if (folders) {
       const parsedFolders: FolderInterface[] =
-        JSON.parse(folders).sort(sortByRank);
+        sortByRankAndFolderType(JSON.parse(folders));
       cleanedFolders = cleanFolders(parsedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
@@ -727,7 +728,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
         </Head>
         <LoadingBar color={'white'} ref={loadingRef} />
         <CognitiveServiceProvider>
-          <>{children}</>
+          <DragDropContext>
+            {children}
+          </DragDropContext>
         </CognitiveServiceProvider>
       </HomeContext.Provider>
     </OrientationBlock>

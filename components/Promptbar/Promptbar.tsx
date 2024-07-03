@@ -9,7 +9,6 @@ import {
   updateConversationLastUpdatedAtTimeStamp,
 } from '@/utils/app/conversation';
 import { savePrompts } from '@/utils/app/prompts';
-import { generateRank } from '@/utils/app/rank';
 
 import { OpenAIModels } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
@@ -33,7 +32,7 @@ const Promptbar = () => {
   });
 
   const {
-    state: { prompts, defaultModelId, showChatbar, showPromptbar, currentDrag },
+    state: { prompts, defaultModelId, showChatbar, showPromptbar },
     dispatch: homeDispatch,
     handleCreateFolder,
     handleCreatePrompt,
@@ -84,21 +83,6 @@ const Promptbar = () => {
     savePrompts(updatedPrompts);
 
     updateConversationLastUpdatedAtTimeStamp();
-  };
-
-  const handleDrop = (e: any) => {
-    if (currentDrag) {
-      const prompt = currentDrag.data as Prompt;
-
-      const updatedPrompt = {
-        ...prompt,
-        folderId: e.target.dataset.folderId,
-      };
-
-      handleUpdatePrompt(updatedPrompt);
-
-      e.target.style.background = 'none';
-    }
   };
 
   useEffect(() => {
@@ -153,7 +137,6 @@ const Promptbar = () => {
         toggleOpen={togglePromptbar}
         handleCreateItem={handleCreatePrompt}
         handleCreateFolder={() => handleCreateFolder(t('New folder'), 'prompt')}
-        handleDrop={handleDrop}
         showMobileButton={showMobileButtons}
       />
     </PromptbarContext.Provider>
