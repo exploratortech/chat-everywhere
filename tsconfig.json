@@ -21,6 +21,7 @@
     "types": [
       "vitest/globals"
     ],
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
@@ -31,8 +32,8 @@
     "notion-compat.d.ts",
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx", 
-    "utils/app/azureAppInsights.ts"  
+    "**/*.tsx",
+    "utils/app/azureAppInsights.ts"
   ],
   "exclude": [
     "node_modules",
