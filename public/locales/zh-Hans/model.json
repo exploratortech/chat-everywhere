@@ -237,5 +237,7 @@
   "Sign out option": "登出选项",
   "Conversation mode": "对话模式",
   "Bug report submitted successfully": "错误报告已成功提交",
-  "Preview not supported for this file type": "此文件类型不支持预览。"
+  "Preview not supported for this file type": "此文件类型不支持预览。",
+  "Your browser does not support the audio player": "您的浏览器不支持音频播放器",
+  "Your browser does not support the video player": "您的浏览器不支持视频播放器"
 }
