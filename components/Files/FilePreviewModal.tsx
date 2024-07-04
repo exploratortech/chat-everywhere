@@ -13,6 +13,7 @@ import AudioPreview from './AudioPreview';
 import ImagePreview from './ImagePreview';
 import PDFPreview from './PDFPreview';
 import VideoPreview from './VideoPreview';
+import { useTranslation } from 'react-i18next';
 
 interface FilePreviewModalProps {
   file: UserFile;
@@ -23,6 +24,7 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
   file,
   children,
 }) => {
+  const { t } = useTranslation('model');
   const renderPreview = () => {
     if (file.filetype.startsWith('application/pdf')) {
       return <PDFPreview objectPath={file.objectPath} />;
@@ -33,7 +35,7 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
     } else if (file.filetype.startsWith('image/')) {
       return <ImagePreview objectPath={file.objectPath} />;
     } else {
-      return <p>Preview not available for this file type.</p>;
+      return (<p>{t('Preview not supported for this file type')}</p>);
     }
   };
 
