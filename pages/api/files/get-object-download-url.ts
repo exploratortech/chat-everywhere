@@ -41,6 +41,7 @@ export default async function handler(
     expires: Date.now() + 5 * 60 * 1000,
   });
 
+  res.setHeader('Content-Type', 'application/json');
   return res.status(200).json({
     url,
   });
