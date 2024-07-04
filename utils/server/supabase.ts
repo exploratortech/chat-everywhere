@@ -132,6 +132,9 @@ export const subtractCredit = async (
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
   const newBalance = userCredits.balance - 1;
+  if (newBalance < 0) {
+    throw new Error('User has not enough credits to use this feature');
+  }
   await updateUserCredits(userId, apiType, newBalance);
 };
 
@@ -592,8 +595,8 @@ export const updateProAccountsPlan = async (): Promise<void> => {
 
   const { error: updateError } = await supabase
     .from('profiles')
-    .update({ plan: 'free' })
-    .eq('plan', 'pro')
+    .update({ plan: 'free', is_teacher_account: false })
+    .in('plan', ['ultra', 'pro'])
     .lte('pro_plan_expiration_date', nowMinusOneDay);
 
   if (updateError) {
@@ -609,7 +612,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
   const { data: users, error: fetchError } = await supabase
     .from('profiles')
     .select('id')
-    .eq('plan', 'pro')
+    .in('plan', ['ultra', 'pro'])
     .lte('pro_plan_expiration_date', nowMinusOneDay);
 
   if (fetchError) {
@@ -623,6 +626,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
 
   const trialUserIds: string[] = [];
 
+  // NOTE: only the user has referral record is considered as trial user
   for (const userId of userIds) {
     // Check if user has any referral record in the past 7 days
     const { data: referralRows, error: referralError } = await supabase

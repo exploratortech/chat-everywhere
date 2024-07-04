@@ -18,20 +18,32 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
+
   if (
     creditUsage === null ||
     (pluginId !== PluginID.GPT4 &&
       pluginId !== PluginID.IMAGE_GEN &&
-      pluginId !== PluginID.GPT4O) ||
+      pluginId !== PluginID.GPT4O && pluginId !== PluginID.aiPainter) ||
     isUltraUser
   )
     return <></>;
 
-  const remainingCredits =
-    (pluginId &&
-      creditUsage[pluginId === PluginID.GPT4O ? PluginID.GPT4 : pluginId]
-        .remainingCredits) ||
-    0;
+  const remainingCredits = ((): number => {
+    let result = 0;
+    if (pluginId) {
+      switch (pluginId) {
+        case PluginID.GPT4O:
+          result = creditUsage[PluginID.GPT4].remainingCredits;
+          break;
+        case PluginID.aiPainter:
+          result = creditUsage[PluginID.IMAGE_GEN].remainingCredits;
+          break;
+        default:
+          result = creditUsage[pluginId].remainingCredits;
+      }
+    }
+    return result;
+  })()
 
   return (
     <div

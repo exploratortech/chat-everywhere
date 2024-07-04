@@ -26,6 +26,26 @@ import { PluginID } from '@/types/plugin';
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
+  regions: [
+    'arn1',
+    'bom1',
+    'cdg1',
+    'cle1',
+    'cpt1',
+    'dub1',
+    'fra1',
+    'gru1',
+    'hnd1',
+    'iad1',
+    'icn1',
+    'kix1',
+    'lhr1',
+    'pdx1',
+    'sfo1',
+    'sin1',
+    'syd1',
+  ],
+  maxDuration: 60,
 };
 const requestHeader = {
   Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY || ''}`,
@@ -176,6 +196,7 @@ const imageGeneration = async (job: MjJob) => {
     },
   });
 
+  console.log('Fetching image generation response from Midjourney API(imagine)...');
   const imageGenerationResponse = await fetch(
     `https://api.mymidjourney.ai/api/v1/midjourney/imagine`,
     {
@@ -247,6 +268,7 @@ const buttonCommand = async (job: MjJob) => {
     throw new Error('Invalid job type for the calling method');
   }
 
+  console.log('Fetching image generation response from Midjourney API(button)...');
   const imageGenerationResponse = await fetch(
     `https://api.mymidjourney.ai/api/v1/midjourney/button`,
     {
@@ -293,6 +315,7 @@ const buttonCommand = async (job: MjJob) => {
 
 async function subtractedUserCredit(userId: string): Promise<boolean> {
   try {
+    console.log('Checking if user has run out of credits...');
     const userProfile = await getUserProfile(userId);
     if (!userProfile) {
       throw new Error('User profile not found');

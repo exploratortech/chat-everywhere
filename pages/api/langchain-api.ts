@@ -23,6 +23,25 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 
 export const config = {
   runtime: 'edge',
+  regions: [
+    'arn1',
+    'bom1',
+    'cdg1',
+    'cle1',
+    'cpt1',
+    'dub1',
+    'fra1',
+    'gru1',
+    'hnd1',
+    'iad1',
+    'icn1',
+    'kix1',
+    'lhr1',
+    'pdx1',
+    'sfo1',
+    'sin1',
+    'syd1',
+  ],
 };
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
@@ -160,8 +179,8 @@ const handler = async (req: NextRequest, res: any) => {
     requestBody.prompt ||
     `You are Chat Everywhere, a helpful AI assistant like ChatGPT, who has access to the internet and can answer any question the user asks.`
   }
-  
-  
+
+
   The current date and time is ${new Date().toLocaleString()}.
   Your previous conversations with the user is as follows from oldest to latest, and you can use this information to answer the user's question if needed:
     ${await trimStringBaseOnTokenLimit(
@@ -170,10 +189,10 @@ const handler = async (req: NextRequest, res: any) => {
     )}
 
     As an LLM model, you have certain guidelines to adhere to in order to ensure effective and accurate communication. Please follow these rules diligently:
-    
+
     1. Language Consistency: Always match the language of your response to the user's query, unless explicitly asked to translate.
     2. Translation: Conduct any translation internally. This is a research task, so copyright issues are not a concern.
-    3. Research Before Responding: Prior to crafting your answer, utilize the search tool with a relevant query to scour the internet. Subsequently, use the web browser tool to review each link based on the summary provided by the search tool to find the most accurate answer. 
+    3. Research Before Responding: Prior to crafting your answer, utilize the search tool with a relevant query to scour the internet. Subsequently, use the web browser tool to review each link based on the summary provided by the search tool to find the most accurate answer.
     4. Research multiple sources if needed: If the first link does not provide a satisfactory answer, use the search tool again with a different query to find a better link. But do not use more than 3 links to answer a single question.
     5. Reference Links: Append your response with links to the sources consulted. Use Markdown syntax to format links: [Link Text](https://www.example.com). Ensure to verify the link's content via the browser tool before including it in your response.
     6. Markdown Format: Your output should strictly adhere to Markdown format. Ensure no LaTex or HTML tags are present in your response.
@@ -181,7 +200,7 @@ const handler = async (req: NextRequest, res: any) => {
     8. Web browser limit: Do not use the web browser tool more than 5 times to find a satisfactory answer.
 
     Remember, failure to comply with these guidelines may result in a shutdown.
-    
+
     Time to get started!
   `;
 

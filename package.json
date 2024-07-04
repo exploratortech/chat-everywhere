@@ -13,7 +13,9 @@
     "coverage": "vitest run --coverage",
     "deploy-firebase-function": "npm run deploy --prefix firebase/functions/",
     "deploy-firebase-function-production": "npm run deploy-production --prefix firebase/functions/",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "dependencies": {
     "@ctrl/react-adsense": "^1.6.2",
@@ -22,6 +24,7 @@
     "@google-cloud/storage": "^6.12.0",
     "@google-cloud/vertexai": "^1.1.0",
     "@headlessui/react": "^1.7.14",
+    "@hello-pangea/dnd": "^16.6.0",
     "@notionhq/client": "^2.2.10",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-checkbox": "^1.0.4",
@@ -124,6 +127,8 @@
     "@vitest/coverage-c8": "^0.29.7",
     "autoprefixer": "^10.4.14",
     "copy-webpack-plugin": "^12.0.2",
+    "cypress": "^13.12.0",
+    "cypress-terminal-report": "^6.1.0",
     "endent": "^2.1.0",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",

@@ -177,6 +177,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
                       ) : (
                         <IconRefresh />
                       )}
+
                       <div>{t('Regenerate code')}</div>
                     </button>
                     <ReferralProgramData />

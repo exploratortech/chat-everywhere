@@ -128,18 +128,24 @@ async function sendRequest(
   controller: AbortController,
   outputLanguage: string,
   user: User | null,
-  accessToken: string,
+  accessToken: string | undefined,
 ): Promise<Response> {
   const body = formatBody(chatBody, plugin);
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Output-Language': outputLanguage,
+    'user-browser-id': getOrGenerateUserId() || '',
+    'user-selected-plugin-id': plugin?.id || '',
+  };
+
+  if (accessToken) {
+    headers['user-token'] = accessToken;
+  }
+
   const response = await fetch(getEndpoint(plugin), {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Output-Language': outputLanguage,
-      'user-token': accessToken,
-      'user-browser-id': getOrGenerateUserId() || '',
-      'user-selected-plugin-id': plugin?.id || '',
-    },
+    headers,
     signal: controller.signal,
     body,
   });
@@ -182,6 +188,8 @@ function handleErrorResponse(
     toastError(
       t('Sorry something went wrong. Please refresh the page and try again.'),
     );
+  } else if (response.status === 402) {
+    toastError(t("You don't have enough credits to use this feature"));
   } else if (
     response.status === ERROR_MESSAGES.content_filter_triggered.httpCode
   ) {
@@ -260,17 +268,17 @@ async function handleDataResponse(
     text += chunkValue;
 
     if (text.includes('[DONE]')) {
-      text = text.replace('[DONE]', '');
+      text = text.replace(/\[DONE\]/g, '');
       done = true;
     }
 
     if (text.includes('[16K]')) {
-      text = text.replace('[16K]', '');
+      text = text.replace(/\[16K\]/g, '');
       largeContextResponse = true;
     }
 
     if (text.includes('[16K-Optional]')) {
-      text = text.replace('[16K-Optional]', '');
+      text = text.replace(/\[16K-Optional\]/g, '');
       showHintForLargeContextResponse = true;
     }
 
@@ -279,7 +287,7 @@ async function handleDataResponse(
     }
 
     if (text.includes('[REMOVE_LAST_LINE]')) {
-      text = text.replace('[REMOVE_LAST_LINE]', '');
+      text = text.replace(/\[REMOVE_LAST_LINE\]/g, '');
       text = removeSecondLastLine(text);
     }
 
@@ -291,7 +299,7 @@ async function handleDataResponse(
     // We can use this command to trigger the initial stream of Edge function response
     // so we have more than 25 seconds on Vercel Edge network to wait for response
     if (text.includes('[PLACEHOLDER]')) {
-      text = text.replace('[PLACEHOLDER]', '');
+      text = text.replace(/\[PLACEHOLDER\]/g, '');
     }
 
     if (isFirst) {
@@ -361,6 +369,7 @@ async function handleDataResponse(
     updatedConversations = reorderItem(
       updatedConversations,
       updatedConversation.id,
+      updatedConversations.length - 1,
       0,
     );
   }

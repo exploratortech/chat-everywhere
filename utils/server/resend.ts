@@ -9,17 +9,29 @@ import Stripe from 'stripe';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const isProd = process.env.VERCEL_ENV === 'production';
 const resend = new Resend(process.env.RESEND_EMAIL_API_KEY);
-const receiverEmail = process.env.RESEND_EMAIL_RECEIVER!;
 
 export async function sendReport(subject = '', html = '') {
   try {
-    await resend.emails.send({
-      from: 'team@chateverywhere.app',
-      to: receiverEmail,
-      subject,
-      html,
-    });
+    const emails = [
+      {
+        from: 'team@chateverywhere.app',
+        to: 'derek@exploratorlabs.com',
+        subject,
+        html,
+      },
+    ];
+    if (isProd) {
+      emails.push({
+        from: 'team@chateverywhere.app',
+        to: 'jack@exploratorlabs.com',
+        subject,
+        html,
+      });
+    }
+
+    await resend.batch.send(emails);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {

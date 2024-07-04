@@ -45,13 +45,18 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
     return currentSpeechId === componentSpeechId;
   }, [componentSpeechId, currentSpeechId]);
 
+  const removeEmojis = (text: string): string => {
+    return text.replace(/(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g, '');
+  };
+
   const playStopOnClick = async () => {
     if (loadingTts) return;
     if (playingSpeech && isComponentCurrentlyBeingPlayed) {
       closePlayer();
       closeSpeechSynthesizer();
     } else {
-      await playMessage(inputText, componentSpeechId);
+      const sanitizedInputText = removeEmojis(inputText);
+      await playMessage(sanitizedInputText, componentSpeechId);
       logGeneralEvent('speech');
       trackEvent('AI speech play button clicked');
     }

@@ -7,6 +7,7 @@ import { SidebarToggleButton } from '../Sidebar/components/SidebarToggleButton';
 import HomeContext from '@/components/home/home.context';
 
 import CustomInstructionInUseIndicator from '../Chat/CustomInstructionInUseIndicator';
+import ReportBugForTeacherStudentButton from '../Chat/ReportBugForTeacherStudentButton';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 
 interface Props {
@@ -34,7 +35,12 @@ export const Navbar: FC<Props> = ({
 
       <div>
         {selectedConversation.name !== 'New conversation' && (
-          <StoreConversationButton conversation={selectedConversation} />
+          <div className="flex items-center gap-2">
+            <StoreConversationButton conversation={selectedConversation} />
+            <ReportBugForTeacherStudentButton
+              conversation={selectedConversation}
+            />
+          </div>
         )}
       </div>
 

@@ -33,7 +33,7 @@ export const useDownloadObjectUrl = () => {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to get download URL');
     }
-    return response.json();
+    return await response.json();
   };
 
   const { withLoading } = useHomeLoadingBar();
