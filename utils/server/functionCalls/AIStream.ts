@@ -38,19 +38,19 @@ export const AIStream = async ({
   onUpdateToken,
   functionCalls,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
+  const model = OpenAIModels[OpenAIModelID.GPT_4O];
+
   const endpointManager = new ChatEndpointManager(
-    OpenAIModels[OpenAIModelID.GPT_4O],
+    model,
   );
 
   const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
 
-  let stop = false,
-    functionCallName = '',
+  let functionCallName = '',
     functionCallArgumentInJsonString = '';
 
   const openAIEndpoint = endpoint || '';
   const openAIKey = apiKey || '';
-  const model = OpenAIModels[OpenAIModelID.GPT_4O];
 
   let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2024-02-01`;
 
@@ -113,11 +113,10 @@ export const AIStream = async ({
       const json = JSON.parse(data);
       if (json.choices[0]) {
         if (json.choices[0].finish_reason != null) {
-          stop = true;
           return;
         }
 
-        if (json.choices[0].delta.function_call) {
+        if (json.choices[0].delta?.function_call) {
           const delta = json.choices[0].delta;
           if (delta.function_call.arguments) {
             functionCallArgumentInJsonString += delta.function_call.arguments;
@@ -128,7 +127,7 @@ export const AIStream = async ({
           }
         }
 
-        const text = json.choices[0].delta.content || '';
+        const text = json.choices[0].delta?.content || '';
         onUpdateToken(text);
       }
     }
