@@ -111,7 +111,6 @@
   "MQTT": "MQTT",
   "(Advance user only) Send MQTT payload to your IoT devices. Integrate AI into your control network.": "(仅限高级用户) 将 MQTT 载荷发送到您的 IoT 设备。将 AI 集成到您的控制网络中。",
   "Loading ...": "加载中...",
-
   "Connections": "指令集",
   "Name": "名称",
   "Name (English only)": "名稱 (僅限英文)",
@@ -237,5 +236,6 @@
   "You can choose to clear your chat history or just sign out.": "您可以选择清除对话历史或只登出。",
   "Sign out option": "登出选项",
   "Conversation mode": "对话模式",
-  "Bug report submitted successfully": "错误报告已成功提交"
+  "Bug report submitted successfully": "错误报告已成功提交",
+  "Preview not supported for this file type": "此文件类型不支持预览。"
 }
