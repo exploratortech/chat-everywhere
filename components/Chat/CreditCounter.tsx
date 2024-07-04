@@ -33,13 +33,13 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
     if (pluginId) {
       switch (pluginId) {
         case PluginID.GPT4O:
-          result = creditUsage[PluginID.GPT4].remainingCredits;
+          result = creditUsage[PluginID.GPT4].remainingCredits || result;
           break;
         case PluginID.aiPainter:
-          result = creditUsage[PluginID.IMAGE_GEN].remainingCredits;
+          result = creditUsage[PluginID.IMAGE_GEN].remainingCredits || result;
           break;
         default:
-          result = creditUsage[pluginId].remainingCredits;
+          result = creditUsage[pluginId].remainingCredits || result;
       }
     }
     return result;
