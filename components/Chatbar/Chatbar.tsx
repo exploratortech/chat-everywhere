@@ -48,15 +48,12 @@ export const Chatbar = () => {
       conversations,
       showChatbar,
       defaultModelId,
-      folders,
       showPromptbar,
       selectedConversation,
-      currentDrag,
     },
     dispatch: homeDispatch,
     handleCreateFolder,
     handleNewConversation,
-    handleUpdateConversation,
     toggleChatbar,
   } = useContext(HomeContext);
 
@@ -109,15 +106,6 @@ export const Chatbar = () => {
       category: 'Conversation',
       label: 'Delete Conversation',
     });
-  };
-
-  const handleDrop = (e: any) => {
-    if (currentDrag) {
-      const conversation = currentDrag.data as Conversation;
-      handleUpdateConversation(conversation, { key: 'folderId', value: 0 });
-      chatDispatch({ field: 'searchTerm', value: '' });
-      e.currentTarget.style.background = 'none';
-    }
   };
 
   useEffect(() => {
@@ -179,7 +167,6 @@ export const Chatbar = () => {
         toggleOpen={toggleChatbar}
         handleCreateItem={handleNewConversation}
         handleCreateFolder={() => handleCreateFolder(t('New folder'), 'chat')}
-        handleDrop={handleDrop}
         footerComponent={<ChatbarSettings />}
         showMobileButton={showMobileButtons}
       />

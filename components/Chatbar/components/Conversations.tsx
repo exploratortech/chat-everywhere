@@ -1,14 +1,13 @@
-import { Fragment, useContext } from 'react';
-
-import HomeContext from '@/components/home/home.context';
+import { useContext } from 'react';
 
 import { Conversation } from '@/types/chat';
 
-import { generateRank, reorderItem } from '@/utils/app/rank';
+import HomeContext from '@/components/home/home.context';
 
 import { ConversationComponent } from './Conversation';
-import DropArea from '@/components/DropArea/DropArea';
-import { saveConversations, updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
+
+import { cn } from '@/lib/utils';
+import { Droppable } from '@hello-pangea/dnd';
 
 interface Props {
   conversations: Conversation[];
@@ -16,55 +15,34 @@ interface Props {
 
 export const Conversations = ({ conversations }: Props) => {
   const {
-    state: {
-      currentDrag,
-      conversations: unfilteredConversations,
-    },
-    dispatch,
+    state: { currentDrag },
   } = useContext(HomeContext);
 
-  const handleCanDrop = (): boolean => {
-    return !!currentDrag && currentDrag.type === 'conversation';
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLElement>, index: number): void => {
-    if (currentDrag) {
-      const conversation = currentDrag.data as Conversation;
-      const reorderedConversations = reorderItem(
-        unfilteredConversations,
-        conversation.id,
-        generateRank(
-          unfilteredConversations.filter((c) => c.folderId == null),
-          index,
-        ),
-        { updates: { folderId: null } },
-      )
-      dispatch({ field: 'conversations', value: reorderedConversations });
-      saveConversations(reorderedConversations);
-      updateConversationLastUpdatedAtTimeStamp();
-    }
-    e.stopPropagation();
-  };
-
   return (
-    <div className="flex w-full flex-col rounded-lg">
-      <DropArea
-        allowedDragTypes={['conversation']}
-        canDrop={handleCanDrop}
-        index={0}
-        onDrop={(e) => handleDrop(e, 0)}
-      />
-      {conversations.map((conversation, index) => (
-          <Fragment key={conversation.id}>
-            <ConversationComponent conversation={conversation} />
-            <DropArea
-              allowedDragTypes={['conversation']}
-              canDrop={handleCanDrop}
-              index={index + 1}
-              onDrop={(e) => handleDrop(e, index + 1)}
+    <Droppable
+      droppableId="conversations-droppable"
+      isDropDisabled={currentDrag && currentDrag.type !== 'chat'}
+    >
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          className={cn(
+            'flex w-full flex-col rounded-lg min-h-[10px]',
+            snapshot.isDraggingOver &&
+              'bg-[#343541] border-2 border-indigo-400 rounded-lg',
+          )}
+          {...provided.droppableProps}
+        >
+          {conversations.map((conversation, index) => (
+            <ConversationComponent
+              key={conversation.id}
+              conversation={conversation}
+              draggableIndex={index}
             />
-          </Fragment>
-        ))}
-    </div>
+          ))}
+          {provided.placeholder}
+        </div>
+      )}
+    </Droppable>
   );
 };

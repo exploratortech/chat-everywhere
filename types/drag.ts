@@ -1,6 +1,6 @@
 export interface DragData {
-  data: any;
+  id: string;
   type: DragDataType;
 }
 
-export type DragDataType = 'conversation' | 'folder' | 'prompt';
+export type DragDataType = 'chat' | 'prompt' | 'chat-folder' | 'prompt-folder';
