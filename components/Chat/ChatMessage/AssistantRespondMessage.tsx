@@ -14,6 +14,8 @@ import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdo
 import rehypeRaw from 'rehype-raw';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
+import MjQueueJobComponent from '../components/MjQueueJobComponent';
+import MjImageProgress from '../components/MjImageProgress';
 
 const AssistantRespondMessage = memo(
   ({
@@ -149,6 +151,40 @@ const AssistantRespondMessage = memo(
                 <ContinueChat lastWords={lastWords} onContinue={onContinue} />
               );
             }
+
+            // ============================== Mj Image Progress ============================
+            if (
+              node?.properties?.id === 'MjImageProgress' &&
+              node?.properties?.dataComponentState
+            ) {
+              const componentState = JSON.parse(
+                (node?.properties?.dataComponentState as string) || '{}',
+              ) as any;
+              return (
+                <MjImageProgress
+                  content={componentState.content}
+                  state={componentState.state}
+                  percentage={componentState.percentage}
+                  errorMessage={componentState?.errorMessage || undefined}
+                />
+              );
+            }
+            if (
+              node?.properties?.id === 'MjQueueJob' &&
+              node?.properties?.dataComponentState
+            ) {
+              const componentState = JSON.parse(
+                (node?.properties?.dataComponentState as string) || '{}',
+              ) as any;
+              return (
+                <MjQueueJobComponent
+                  job={componentState.job}
+                  messageIndex={messageIndex}
+                />
+              );
+            }
+
+            // ============================== Dall-E Image ============================
             if (node?.properties?.id === 'ai-painter-generated-image') {
               const imageTags = node?.children;
               if (!imageTags) return <>{children}</>;
@@ -199,10 +235,11 @@ const AssistantRespondMessage = memo(
             );
           },
           img: ImgComponent,
-        }}
+        }
+        }
       >
         {formattedMessage}
-      </MemoizedReactMarkdown>
+      </MemoizedReactMarkdown >
     );
   },
   (prevProps, nextProps) =>
