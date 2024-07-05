@@ -106,6 +106,8 @@ export const newDefaultConversation = {
 // NOTE: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models
 // NOTE:https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/document-understanding
 
+export const MAX_FILE_DROP_COUNT = 10;
+
 export const MAX_PDF_PAGES = 300;
 
 export const MAX_VIDEO_DURATION = 1 * 60 * 60; // 1 hour

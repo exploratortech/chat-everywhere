@@ -1,6 +1,6 @@
 import { UserFile } from '@/types/UserFile';
 
-export const maxFileCount = 100;
+import { MAX_FILE_DROP_COUNT } from './const';
 
 export const allowedTypes = [
   'application/pdf',
@@ -78,7 +78,8 @@ export const handleFileUpload = (
 ) => {
   if (files) {
     const validFiles = Array.from(files).filter(isFileTypeAllowed);
-    if (validFiles.length > 0 && validFiles.length <= maxFileCount) {
+
+    if (validFiles.length > 0 && validFiles.length <= MAX_FILE_DROP_COUNT) {
       uploadFiles(validFiles, onComplete);
     } else if (validFiles.length === 0) {
       alert(
@@ -89,7 +90,7 @@ export const handleFileUpload = (
     } else {
       alert(
         t('You can only upload a maximum of {{count}} files at once.', {
-          count: maxFileCount,
+          count: MAX_FILE_DROP_COUNT,
         }),
       );
     }
