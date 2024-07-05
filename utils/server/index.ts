@@ -195,7 +195,7 @@ export const OpenAIStream = async (
                     return;
                   }
 
-                  const text = json.choices[0].delta.content;
+                  const text = json.choices[0]?.delta?.content || '';
 
                   buffer.push(encoder.encode(text));
                   respondMessage += text;
