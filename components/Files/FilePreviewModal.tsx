@@ -42,9 +42,9 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
   return (
     <Dialog>
       <DialogTrigger className="w-full h-full">{children}</DialogTrigger>
-      <DialogContent className="min-w-max min-h-max">
+      <DialogContent className="min-w-max min-h-max mobile:h-[100dvh] mobile:w-[100dvw] mobile:border-none">
         <DialogHeader>
-          <DialogTitle>{file.filename}</DialogTitle>
+          <DialogTitle className='text-white'>{file.filename}</DialogTitle>
           <DialogDescription>{renderPreview()}</DialogDescription>
         </DialogHeader>
       </DialogContent>
