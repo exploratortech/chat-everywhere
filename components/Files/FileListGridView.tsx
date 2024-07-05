@@ -155,6 +155,7 @@ function AddToChatButton({
     state: { currentMessage },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
+
   const handleAddToChat = () => {
     const existingFiles = currentMessage?.fileList || [];
     const isFileAlreadyIncluded = existingFiles.some(
@@ -176,7 +177,9 @@ function AddToChatButton({
       toast.error('File already in current chat');
     }
   };
+
   const { t } = useTranslation('model');
+
   return (
     <Button size="icon" variant="ghost" onClick={handleAddToChat}>
       <IconMessagePlus />

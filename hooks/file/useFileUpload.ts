@@ -1,25 +1,25 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useContext, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-
-import HomeContext from '@/components/home/home.context';
 
 import useHomeLoadingBar from '../useHomeLoadingBar';
 
 export function useFileUpload() {
   const supabase = useSupabaseClient();
   const { t: commonT } = useTranslation('common');
-  const queryClient = useQueryClient();
-  const {
-    state: { user },
-  } = useContext(HomeContext);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const { withLoading } = useHomeLoadingBar();
 
   const uploadFileMutation = useMutation(
-    async ({ filename, file }: { filename: string; file: File }) =>
+    async ({
+      filename,
+      file,
+      onProgress,
+    }: {
+      filename: string;
+      file: File;
+      onProgress?: (progress: number) => void;
+    }) =>
       withLoading(async () => {
         const accessToken = (await supabase.auth.getSession()).data.session
           ?.access_token!;
@@ -65,31 +65,21 @@ export function useFileUpload() {
 
           // Progress listener
           xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
+            if (event.lengthComputable && onProgress) {
               const percentage = (event.loaded / event.total) * 100;
-              setUploadProgress(Math.round(percentage));
+              onProgress(Math.round(percentage));
             }
-          };
-
-          xhr.onloadend = () => {
-            setUploadProgress(null);
           };
 
           xhr.send(formData);
         });
       }),
     {
-      onSuccess: () => {
-        toast.success(commonT('File uploaded successfully'));
-      },
       onError: () => {
         toast.error(commonT('File upload failed'));
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries(['gcp-files', user?.id]);
       },
     },
   );
 
-  return { uploadFileMutation, uploadProgress };
+  return { uploadFileMutation };
 }

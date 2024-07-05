@@ -42,11 +42,14 @@ const ModeSelector = () => {
       );
       return;
     }
+
     homeDispatch({
       field: 'currentMessage',
       value: {
         ...currentMessage,
         pluginId: pluginId === 'default' ? null : pluginId,
+        // clear file list if the plugin is not Gemini
+        fileList: pluginId === PluginID.GEMINI ? currentMessage?.fileList : [],
       },
     });
   };
