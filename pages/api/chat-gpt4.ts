@@ -89,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
       messageToSend[
         messageToSend.length - 1
       ].content = `${selectedOutputLanguage} ${messageToSend[messageToSend.length - 1].content
-        }`;
+      }`;
     }
 
     if (!isUserInUltraPlan) {
@@ -98,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const stream = await OpenAIStream(
-      OpenAIModels[OpenAIModelID.GPT_4],
+      OpenAIModels[OpenAIModelID.GPT_4O],
       promptToSend,
       temperatureToUse,
       messageToSend,
