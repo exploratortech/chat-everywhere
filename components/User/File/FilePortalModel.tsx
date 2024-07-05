@@ -68,7 +68,14 @@ export default function FilePortalModel({ onClose }: Props) {
                         <div className="p-4">
                           <div className="flex gap-4">
                             <UploadFileButton
-                              uploadFiles={uploadFiles}
+                              onFilesDrop={async (files) => {
+                                await handleFileUpload(
+                                  files,
+                                  uploadFiles,
+                                  () => {},
+                                  t,
+                                );
+                              }}
                               isUploading={isUploading}
                             />
                           </div>
@@ -100,9 +107,6 @@ export default function FilePortalModel({ onClose }: Props) {
 
                   <DragAndDrop
                     onFilesDrop={(files) => {
-                      console.log({
-                        fileTypes: Array.from(files).map((file) => file.type),
-                      });
                       handleFileUpload(
                         createFileList(files),
                         uploadFiles,
