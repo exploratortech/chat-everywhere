@@ -8,6 +8,7 @@ import {
   Content,
   GenerateContentResponse,
   GenerationConfig,
+  SafetyRating,
 } from '@google-cloud/vertexai';
 import {
   ParsedEvent,
@@ -34,16 +35,25 @@ export const cleanSourceText = (text: string) => {
     .replace(/\n+(\s*\n)*/g, '\n');
 };
 
-export async function callGeminiAPI(
-  userIdentifier: string,
-  contents: Content[],
-  generationConfig: GenerationConfig,
-  systemInstruction: Content,
-  messagesToSendInArray: Message[],
-) {
+export async function callGeminiAPI({
+  userIdentifier,
+  contents,
+  generationConfig,
+  safetySettings,
+  systemInstruction,
+  messagesToSendInArray,
+}: {
+  userIdentifier: string;
+  contents: Content[];
+  generationConfig: GenerationConfig;
+  safetySettings?: any[];
+  systemInstruction: Content;
+  messagesToSendInArray: Message[];
+}) {
   const requestPayload = {
     contents,
     generationConfig,
+    safetySettings: safetySettings || [],
     systemInstruction,
   };
 
@@ -121,6 +131,15 @@ export async function callGeminiAPI(
                     isStreamClosed = true;
                   }
                 });
+                if (json?.promptFeedback?.blockReason) {
+                  controller.enqueue(
+                    encoder.encode(
+                      `CONTENT BLOCKED BY GOOGLE GEMINI: ${json.promptFeedback.blockReason}`,
+                    ),
+                  );
+                  controller.close();
+                  isStreamClosed = true;
+                }
               } catch (e) {
                 console.error(e);
                 controller.error(e);
