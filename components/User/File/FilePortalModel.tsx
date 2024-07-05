@@ -5,7 +5,10 @@ import { useTranslation } from 'react-i18next';
 
 import { useMultipleFileUploadHandler } from '@/hooks/file/useMultipleFileUploadHandler';
 
-import { createFileList, handleFileUpload } from '@/utils/app/uploadFileHelper';
+import {
+  createFileList,
+  validateAndUploadFiles,
+} from '@/utils/app/uploadFileHelper';
 
 import DragAndDrop from '@/components/FileDragDropArea/DragAndDrop';
 import { FileListGridView } from '@/components/Files/FileListGridView';
@@ -69,7 +72,7 @@ export default function FilePortalModel({ onClose }: Props) {
                           <div className="flex gap-4">
                             <UploadFileButton
                               onFilesDrop={async (files) => {
-                                await handleFileUpload(
+                                await validateAndUploadFiles(
                                   files,
                                   uploadFiles,
                                   () => {},
@@ -107,7 +110,7 @@ export default function FilePortalModel({ onClose }: Props) {
 
                   <DragAndDrop
                     onFilesDrop={(files) => {
-                      handleFileUpload(
+                      validateAndUploadFiles(
                         createFileList(files),
                         uploadFiles,
                         () => {},
