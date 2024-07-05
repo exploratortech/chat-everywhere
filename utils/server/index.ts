@@ -220,7 +220,7 @@ export const OpenAIStream = async (
                     return;
                   }
 
-                  const text = json.choices[0].delta.content;
+                  const text = json.choices[0]?.delta?.content || '';
 
                   buffer.push(encoder.encode(text));
                   respondMessage += text;
@@ -238,7 +238,7 @@ export const OpenAIStream = async (
           const parser = createParser(onParse);
 
           // Dynamically adjust stream speed base on the model
-          let bufferTime = isGPT4Model ? 45 : 10;
+          let bufferTime = 10;
           const interval = setInterval(() => {
             if (buffer.length > 0) {
               const data = buffer.shift();
