@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useFileUpload } from '@/hooks/file/useFileUpload';
 
-import { isFileSizeValid, isMediaDurationValid } from '@/utils/app/file';
+import { validateFile } from '@/utils/app/file';
 
 import { UserFile } from '@/types/UserFile';
 
@@ -150,35 +150,50 @@ export function useMultipleFileUploadHandler() {
 
     dismissAllErrorToasts();
 
-    // Check file size and duration if file is a video or audio
+    // Check file size, duration, and page count
     for (const file of files) {
-      const { valid: isValidFileSize, maxSize } = isFileSizeValid(file);
-      if (!isValidFileSize) {
-        alert(
-          t(
-            'File {{name}} size exceeds the maximum limit of {{mb}} MB for file type {{type}}.',
-            {
+      const validation = await validateFile(file);
+      if (!validation.valid) {
+        let errorMessage = '';
+        switch (validation.errorType) {
+          case 'size':
+            errorMessage = t(
+              'File {{name}} size ({{actualSize}} MB) exceeds the maximum limit of {{maxSize}} MB for file type {{type}}.',
+              {
+                name: file.name,
+                actualSize: (validation.actualSize / 1024 / 1024).toFixed(2),
+                maxSize: (validation.maxSize / 1024 / 1024).toFixed(2),
+                type: file.type,
+              },
+            );
+            break;
+          case 'duration':
+            errorMessage = t(
+              'File {{name}} duration ({{actualDuration}} seconds) exceeds the maximum limit of {{maxDuration}} seconds for file type {{type}}.',
+              {
+                name: file.name,
+                actualDuration: validation.duration?.toFixed(2),
+                maxDuration: validation.maxDuration?.toFixed(2),
+                type: file.type,
+              },
+            );
+            break;
+          case 'pageCount':
+            errorMessage = t(
+              'File {{name}} page count ({{pageCount}} pages) exceeds the maximum limit for PDF files.',
+              {
+                name: file.name,
+                pageCount: validation.pageCount,
+              },
+            );
+            break;
+          default:
+            errorMessage = t('File {{name}} failed validation.', {
               name: file.name,
-              mb: maxSize / 1024 / 1024,
-              type: file.type,
-            },
-          ),
-        );
-        return;
-      }
-      if (file.type.startsWith('video/') || file.type.startsWith('audio/')) {
-        const { valid: isValidDuration, duration } = await isMediaDurationValid(
-          file,
-        );
-        if (!isValidDuration) {
-          alert(
-            t(
-              'File {{name}} duration length exceeds the maximum limit of {{duration}} seconds for file type {{type}}.',
-              { duration, name: file.name, type: file.type },
-            ),
-          );
-          return;
+            });
         }
+        alert(errorMessage);
+        return;
       }
     }
 
