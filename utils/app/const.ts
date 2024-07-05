@@ -113,9 +113,6 @@ export const MAX_PDF_PAGES = 300;
 export const MAX_VIDEO_DURATION = 1 * 60 * 60; // 1 hour
 export const MAX_AUDIO_DURATION = 8 * 60 * 60; // 8 hours
 
-// export const MAX_FILE_SIZE_FOR_UPLOAD = 104857600; // 100 MB in bytes
-// export const MAX_PDF_SIZE_FOR_UPLOAD = 31457280; // 30 MB in bytes
-// export const MAX_IMAGE_SIZE_FOR_UPLOAD = 20971520; // 20 MB in bytes
-export const MAX_FILE_SIZE_FOR_UPLOAD = 1048576; // 1 MB in bytes
-export const MAX_PDF_SIZE_FOR_UPLOAD = 1048576; // 1 MB in bytes
-export const MAX_IMAGE_SIZE_FOR_UPLOAD = 1048576; // 1 MB in bytes
+export const MAX_FILE_SIZE_FOR_UPLOAD = 104857600; // 100 MB in bytes
+export const MAX_PDF_SIZE_FOR_UPLOAD = 31457280; // 30 MB in bytes
+export const MAX_IMAGE_SIZE_FOR_UPLOAD = 20971520; // 20 MB in bytes
