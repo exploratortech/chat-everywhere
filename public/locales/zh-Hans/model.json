@@ -240,6 +240,7 @@
   "File {{name}} size ({{actualSize}} MB) exceeds the maximum limit of {{maxSize}} MB for file type {{type}}.": "文件 {{name}} 大小 ({{actualSize}} MB) 超过最大限制 {{maxSize}} MB 的文件类型 {{type}}",
   "File {{name}} duration ({{actualDuration}} seconds) exceeds the maximum limit of {{maxDuration}} seconds for file type {{type}}.": "文件 {{name}} 时間長度 ({{actualDuration}} 秒) 超过最大限制 {{maxDuration}} 秒的文件類型 {{type}}",
   "File {{name}} page count ({{pageCount}} pages) exceeds the maximum limit for PDF files.": "文件 {{name}} 頁數 ({{pageCount}} 頁) 超過 PDF 文件的最大限制",
+  "The following files are not supported: {{fileNames}}": "不支援以下文件格式：{{fileNames}}",
   "You can only upload a maximum of {{count}} files at once.": "您一次只能上传最多 {{count}} 个文件",
   "No valid files were selected. Please upload only supported file types.": "未选择有效文件。请上传支援的文件格式。",
   "Conversation mode": "对话模式",
