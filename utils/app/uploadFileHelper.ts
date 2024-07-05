@@ -67,7 +67,7 @@ export const createFileList = (files: File[]): FileList => {
   return dataTransfer.files;
 };
 
-export const handleFileUpload = (
+export const handleFileUpload = async (
   files: FileList | null,
   uploadFiles: (
     files: File[],
@@ -80,7 +80,7 @@ export const handleFileUpload = (
     const validFiles = Array.from(files).filter(isFileTypeAllowed);
 
     if (validFiles.length > 0 && validFiles.length <= MAX_FILE_DROP_COUNT) {
-      uploadFiles(validFiles, onComplete);
+      await uploadFiles(validFiles, onComplete);
     } else if (validFiles.length === 0) {
       alert(
         t(
