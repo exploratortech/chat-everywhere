@@ -108,19 +108,7 @@ const useLoginHook = (
       });
   };
 
-  const checkSurveyFilled = (session: Session) => {
-    supabase
-      .from('user_survey')
-      .select('name')
-      .eq('uid', session.user.id)
-      .then(({ data }) => {
-        if (!data || data.length === 0) {
-          dispatch({ field: 'isSurveyFilled', value: false });
-        } else {
-          dispatch({ field: 'isSurveyFilled', value: true });
-        }
-      });
-  };
+
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
@@ -130,23 +118,14 @@ const useLoginHook = (
           dispatch({ field: 'appInitialized', value: true });
         } else {
           handleUserProfileUpdate(session);
-          checkSurveyFilled(session);
         }
       } else if (event === 'SIGNED_IN') {
         if (session?.user && !user) {
           // User info has been updated for this session
           handleUserProfileUpdate(session);
-          checkSurveyFilled(session);
         }
-      } else if (event === 'SIGNED_OUT') {
-        // handle sign out event
-      } else if (event === 'PASSWORD_RECOVERY') {
-        // handle password recovery event
-      } else if (event === 'TOKEN_REFRESHED') {
-        // handle token refreshed event
-      } else if (event === 'USER_UPDATED') {
-        // handle user updated event
       }
+
     });
 
     return () => {
