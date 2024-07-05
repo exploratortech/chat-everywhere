@@ -61,7 +61,6 @@ export interface HomeInitialState {
   user: User | null;
   isPaidUser: boolean;
   isUltraUser: boolean;
-  isSurveyFilled: boolean;
   isTempUser: boolean;
   isTeacherAccount: boolean;
 
@@ -133,7 +132,6 @@ export const initialState: HomeInitialState = {
   user: null,
   isPaidUser: false,
   isUltraUser: false,
-  isSurveyFilled: false,
   isTempUser: false,
   isTeacherAccount: false,
 
