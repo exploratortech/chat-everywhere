@@ -101,3 +101,5 @@ export const newDefaultConversation = {
   folderId: null,
   lastUpdateAtUTC: dayjs().valueOf(),
 };
+
+export const MAX_FILE_SIZE_FOR_UPLOAD = 52428800; // 50 MB in bytes
