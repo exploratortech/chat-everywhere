@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useFileUpload } from '@/hooks/file/useFileUpload';
 
-import { MAX_FILE_SIZE_FOR_UPLOAD } from '@/utils/app/const';
+import { isFileSizeValid, isMediaDurationValid } from '@/utils/app/file';
 
 import { UserFile } from '@/types/UserFile';
 
@@ -150,15 +150,35 @@ export function useMultipleFileUploadHandler() {
 
     dismissAllErrorToasts();
 
+    // Check file size and duration if file is a video or audio
     for (const file of files) {
-      if (file.size > MAX_FILE_SIZE_FOR_UPLOAD) {
+      const { valid: isValidFileSize, maxSize } = isFileSizeValid(file);
+      if (!isValidFileSize) {
         alert(
-          t('File {{name}} size exceeds the maximum limit of {{mb}} MB.', {
-            name: file.name,
-            mb: 50,
-          }),
+          t(
+            'File {{name}} size exceeds the maximum limit of {{mb}} MB for file type {{type}}.',
+            {
+              name: file.name,
+              mb: maxSize / 1024 / 1024,
+              type: file.type,
+            },
+          ),
         );
         return;
+      }
+      if (file.type.startsWith('video/') || file.type.startsWith('audio/')) {
+        const { valid: isValidDuration, duration } = await isMediaDurationValid(
+          file,
+        );
+        if (!isValidDuration) {
+          alert(
+            t(
+              'File {{name}} duration length exceeds the maximum limit of {{duration}} seconds for file type {{type}}.',
+              { duration, name: file.name, type: file.type },
+            ),
+          );
+          return;
+        }
       }
     }
 
