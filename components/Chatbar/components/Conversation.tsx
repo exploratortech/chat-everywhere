@@ -6,33 +6,34 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import {
-  DragEvent,
   KeyboardEvent,
   MouseEventHandler,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from 'react';
 
 import { Conversation } from '@/types/chat';
 
-import HomeContext from '@/components/home/home.context';
-
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 import ChatbarContext from '@/components/Chatbar/Chatbar.context';
+import HomeContext from '@/components/home/home.context';
+
+import { Draggable } from '@hello-pangea/dnd';
 
 interface Props {
   conversation: Conversation;
+  draggableIndex: number;
 }
 
-export const ConversationComponent = ({ conversation }: Props) => {
+export const ConversationComponent = ({
+  conversation,
+  draggableIndex,
+}: Props) => {
   const {
-    state: { currentDrag, selectedConversation, messageIsStreaming },
+    state: { selectedConversation, messageIsStreaming },
     handleSelectConversation,
     handleUpdateConversation,
-    setDragData,
-    removeDragData,
   } = useContext(HomeContext);
 
   const { handleDeleteConversation } = useContext(ChatbarContext);
@@ -40,8 +41,6 @@ export const ConversationComponent = ({ conversation }: Props) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState('');
-
-  const enterTarget = useRef<HTMLElement>();
 
   const handleEnterDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
@@ -54,29 +53,6 @@ export const ConversationComponent = ({ conversation }: Props) => {
     if (['Space', 'Enter'].includes(e.code)) {
       if (!messageIsStreaming) handleSelectConversation(conversation);
     }
-  };
-
-  const handleDrop = (e: any) => {
-    e.currentTarget.style.background = 'none';
-    e.preventDefault();
-  };
-
-  const handleDragStart = () => {
-    setDragData({ data: conversation, type: 'conversation' });
-  };
-
-  const highlightDrop = (e: any) => {
-    enterTarget.current = e.target;
-    e.currentTarget.style.background = '#343541';
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const removeHighlight = (e: any) => {
-    if (enterTarget.current === e.target)
-      e.currentTarget.style.background = 'none';
-    e.preventDefault();
-    e.stopPropagation();
   };
 
   const handleRename = (conversation: Conversation) => {
@@ -126,87 +102,85 @@ export const ConversationComponent = ({ conversation }: Props) => {
   }, [isRenaming, isDeleting]);
 
   return (
-    <div
-      className={`
-      relative flex items-center
-      ${
-        !currentDrag ||
-        (currentDrag.type === 'conversation' &&
-          currentDrag.data.id === conversation.id)
-          ? 'pointer-events-auto'
-          : 'pointer-events-none'
-      }
-    `}
+    <Draggable
+      draggableId={`chat:${conversation.id}`}
+      index={draggableIndex}
+      isDragDisabled={isRenaming || isDeleting}
     >
-      {isRenaming && selectedConversation?.id === conversation.id ? (
-        <div className="flex w-full items-center gap-3 rounded-lg bg-[#343541]/90 p-3">
-          <IconMessage size={18} />
-          <input
-            className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 text-white outline-none focus:border-neutral-100"
-            type="text"
-            value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
-            onKeyDown={handleEnterDown}
-            autoFocus
-          />
-        </div>
-      ) : (
+      {(provided) => (
         <div
-          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90 translate-x-0 z-10
-            ${messageIsStreaming ? 'disabled:cursor-not-allowed' : ''}
-            ${
-              selectedConversation?.id === conversation.id
-                ? '!bg-[#343541]/90'
-                : ''
-            }
-          `}
-          onClick={() => {
-            if (!messageIsStreaming) handleSelectConversation(conversation);
-          }}
-          draggable="true"
-          onDrop={handleDrop}
-          onDragEnter={highlightDrop}
-          onDragLeave={removeHighlight}
-          onDragStart={handleDragStart}
-          onDragEnd={removeDragData}
-          onKeyDown={handleButtonFocusKeyDown}
-          tabIndex={0}
+          className="relative flex items-center"
+          {...provided.dragHandleProps}
+          {...provided.draggableProps}
+          ref={provided.innerRef}
         >
-          <IconMessage size={18} />
-          <div
-            className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3 ${
-              selectedConversation?.id === conversation.id ? 'pr-12' : 'pr-1'
-            }`}
-          >
-            {conversation.name}
-          </div>
+          {isRenaming && selectedConversation?.id === conversation.id ? (
+            <div className="flex w-full items-center gap-3 rounded-lg bg-[#343541]/90 p-3">
+              <IconMessage size={18} />
+              <input
+                className="mr-12 flex-1 overflow-hidden overflow-ellipsis border-neutral-400 bg-transparent text-left text-[12.5px] leading-3 text-white outline-none focus:border-neutral-100"
+                type="text"
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={handleEnterDown}
+                autoFocus
+              />
+            </div>
+          ) : (
+            <div
+              className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90 translate-x-0 z-10
+                ${messageIsStreaming ? 'disabled:cursor-not-allowed' : ''}
+                ${
+                  selectedConversation?.id === conversation.id
+                    ? '!bg-[#343541]/90'
+                    : ''
+                }
+              `}
+              onClick={() => {
+                if (!messageIsStreaming) handleSelectConversation(conversation);
+              }}
+              onKeyDown={handleButtonFocusKeyDown}
+              tabIndex={0}
+            >
+              <IconMessage size={18} />
+              <div
+                className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3 ${
+                  selectedConversation?.id === conversation.id
+                    ? 'pr-12'
+                    : 'pr-1'
+                }`}
+              >
+                {conversation.name}
+              </div>
+            </div>
+          )}
+
+          {(isDeleting || isRenaming) &&
+            selectedConversation?.id === conversation.id && (
+              <div className="absolute right-1 z-10 flex text-gray-300">
+                <SidebarActionButton handleClick={handleConfirm}>
+                  <IconCheck size={18} />
+                </SidebarActionButton>
+                <SidebarActionButton handleClick={handleCancel}>
+                  <IconX size={18} />
+                </SidebarActionButton>
+              </div>
+            )}
+
+          {selectedConversation?.id === conversation.id &&
+            !isDeleting &&
+            !isRenaming && (
+              <div className="absolute right-1 z-10 flex text-gray-300">
+                <SidebarActionButton handleClick={handleOpenRenameModal}>
+                  <IconPencil size={18} />
+                </SidebarActionButton>
+                <SidebarActionButton handleClick={handleOpenDeleteModal}>
+                  <IconTrash size={18} />
+                </SidebarActionButton>
+              </div>
+            )}
         </div>
       )}
-
-      {(isDeleting || isRenaming) &&
-        selectedConversation?.id === conversation.id && (
-          <div className="absolute right-1 z-10 flex text-gray-300">
-            <SidebarActionButton handleClick={handleConfirm}>
-              <IconCheck size={18} />
-            </SidebarActionButton>
-            <SidebarActionButton handleClick={handleCancel}>
-              <IconX size={18} />
-            </SidebarActionButton>
-          </div>
-        )}
-
-      {selectedConversation?.id === conversation.id &&
-        !isDeleting &&
-        !isRenaming && (
-          <div className="absolute right-1 z-10 flex text-gray-300">
-            <SidebarActionButton handleClick={handleOpenRenameModal}>
-              <IconPencil size={18} />
-            </SidebarActionButton>
-            <SidebarActionButton handleClick={handleOpenDeleteModal}>
-              <IconTrash size={18} />
-            </SidebarActionButton>
-          </div>
-        )}
-    </div>
+    </Draggable>
   );
 };

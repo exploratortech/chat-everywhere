@@ -10,6 +10,7 @@ import { CreditUsage, User } from '@/types/user';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface HomeInitialState {
+  appInitialized: boolean;
   loading: boolean;
   lightMode: 'light' | 'dark';
   messageIsStreaming: boolean;
@@ -60,7 +61,6 @@ export interface HomeInitialState {
   user: User | null;
   isPaidUser: boolean;
   isUltraUser: boolean;
-  isSurveyFilled: boolean;
   isTempUser: boolean;
   isTeacherAccount: boolean;
 
@@ -83,6 +83,7 @@ export interface HomeInitialState {
 }
 
 export const initialState: HomeInitialState = {
+  appInitialized: false,
   loading: false,
   lightMode: 'dark',
   messageIsStreaming: false,
@@ -131,7 +132,6 @@ export const initialState: HomeInitialState = {
   user: null,
   isPaidUser: false,
   isUltraUser: false,
-  isSurveyFilled: false,
   isTempUser: false,
   isTeacherAccount: false,
 

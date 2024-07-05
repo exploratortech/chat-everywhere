@@ -27,24 +27,24 @@ const DropArea = ({
 
   const handleDrop = (e: any) => {
     onDrop(e, index);
-    removeHighlight(e);
+    removeHighlight();
   };
 
-  const onDragEnter = (e: any) => {
+  const onDragEnter = () => {
     if (canDrop() && isDragTypeAllowed) {
       if (indicatorRef.current) indicatorRef.current.style.height = '2rem';
     }
   };
 
-  const handleDragLeave = (e: any) => {
-    removeHighlight(e);
+  const handleDragLeave = () => {
+    removeHighlight();
   };
 
   const allowDrop = (e: any) => {
     e.preventDefault(); // Ensures drop event occurs
   };
 
-  const removeHighlight = (e: any) => {
+  const removeHighlight = () => {
     if (indicatorRef.current) indicatorRef.current.style.height = '0px';
   };
 
