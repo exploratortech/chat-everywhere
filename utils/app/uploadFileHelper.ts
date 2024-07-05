@@ -77,22 +77,37 @@ export const handleFileUpload = async (
   t: (key: string, options?: any) => string,
 ) => {
   if (files) {
-    const validFiles = Array.from(files).filter(isFileTypeAllowed);
-
-    if (validFiles.length > 0 && validFiles.length <= MAX_FILE_DROP_COUNT) {
-      await uploadFiles(validFiles, onComplete);
-    } else if (validFiles.length === 0) {
+    if (files.length === 0) {
       alert(
         t(
           'No valid files were selected. Please upload only supported file types.',
         ),
       );
-    } else {
+      return;
+    }
+    if (files.length > MAX_FILE_DROP_COUNT) {
       alert(
         t('You can only upload a maximum of {{count}} files at once.', {
           count: MAX_FILE_DROP_COUNT,
         }),
       );
+      return;
     }
+
+    // Validate the file types
+    const invalidFiles = Array.from(files).filter(
+      (file) => !isFileTypeAllowed(file),
+    );
+    if (invalidFiles.length > 0) {
+      const invalidFileNames = invalidFiles.map((file) => file.name).join(', ');
+      alert(
+        t('The following files are not supported: {{fileNames}}', {
+          fileNames: invalidFileNames,
+        }),
+      );
+      return;
+    }
+
+    await uploadFiles(Array.from(files), onComplete);
   }
 };
