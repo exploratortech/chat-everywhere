@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { UserFile } from '@/types/UserFile';
 
 import {
@@ -13,7 +15,6 @@ import AudioPreview from './AudioPreview';
 import ImagePreview from './ImagePreview';
 import PDFPreview from './PDFPreview';
 import VideoPreview from './VideoPreview';
-import { useTranslation } from 'react-i18next';
 
 interface FilePreviewModalProps {
   file: UserFile;
@@ -35,16 +36,18 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
     } else if (file.filetype.startsWith('image/')) {
       return <ImagePreview objectPath={file.objectPath} />;
     } else {
-      return (<p>{t('Preview not supported for this file type')}</p>);
+      return <p>{t('Preview not supported for this file type')}</p>;
     }
   };
 
   return (
     <Dialog>
       <DialogTrigger className="w-full h-full">{children}</DialogTrigger>
-      <DialogContent className="min-w-max min-h-max mobile:h-[100dvh] mobile:w-[100dvw] mobile:border-none">
+      <DialogContent className="w-max min-h-max mobile:h-[100dvh] mobile:w-[100dvw] tablet:max-w-[100dvw] max-w-[800px]">
         <DialogHeader>
-          <DialogTitle className='text-white'>{file.filename}</DialogTitle>
+          <DialogTitle className="text-white overflow-hidden max-w-[80dvw] text-ellipsis ">
+            {file.filename}
+          </DialogTitle>
           <DialogDescription>{renderPreview()}</DialogDescription>
         </DialogHeader>
       </DialogContent>
