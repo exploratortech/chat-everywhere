@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useDownloadObjectUrl } from '@/hooks/file/useDownloadObjectUrl';
+import useWindowWidth from '@/hooks/useWindowWidth';
 
 const PDFPreview = ({ objectPath }: { objectPath: string }) => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -25,12 +26,16 @@ const PDFPreview = ({ objectPath }: { objectPath: string }) => {
     }
   }, [objectPath, downloadFile]);
 
+  const windowWidth = useWindowWidth();
+
   if (error) {
     return <div>Error: {error}</div>;
   }
   return (
-    <div className="!w-[90dvw] !h-[90dvh] flex items-center justify-center">
-      {pdfUrl && <iframe src={pdfUrl} width="100%" height="100%" />}
+    <div className="w-[50dvw] largeDesktop:w-[750px] mobile:w-full !h-[70dvh] max-w-[800px] flex items-center justify-center">
+      {pdfUrl && <iframe
+        key={windowWidth}
+        src={pdfUrl} width="100%" height="100%" />}
     </div>
   );
 };

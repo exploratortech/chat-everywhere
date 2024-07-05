@@ -34,7 +34,7 @@ const AudioPreview = ({ objectPath }: { objectPath: string }) => {
   }
 
   return (
-    <div className="max-w-[90dvw] max-h-[90dvh] w-[85dvw] h-full flex items-center justify-center">
+    <div className="w-[50dvw] largeDesktop:w-[750px] mobile:w-full h-full max-w-[800px] flex items-center justify-center">
       {audioUrl && (
         <audio
           controls
