@@ -33,7 +33,7 @@ const ImagePreview = ({ objectPath }: { objectPath: string }) => {
   }
 
   return (
-    <div className="max-w-[90dvw] max-h-[90dvh] w-full h-full flex items-center justify-center">
+    <div className="mobile:max-w-[90dvw] max-w-[800px] max-h-[90dvh] w-full h-full flex items-center justify-center">
       {imageUrl && (
         <img
           src={imageUrl}
