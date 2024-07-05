@@ -102,4 +102,11 @@ export const newDefaultConversation = {
   lastUpdateAtUTC: dayjs().valueOf(),
 };
 
-export const MAX_FILE_SIZE_FOR_UPLOAD = 52428800; // 50 MB in bytes
+// Gemini File Upload Constants
+// NOTE: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models
+export const MAX_VIDEO_DURATION = 1 * 60 * 60; // 1 hour
+export const MAX_AUDIO_DURATION = 8 * 60 * 60; // 8 hours
+
+export const MAX_FILE_SIZE_FOR_UPLOAD = 104857600; // 100 MB in bytes
+export const MAX_PDF_SIZE_FOR_UPLOAD = 31457280; // 30 MB in bytes
+export const MAX_IMAGE_SIZE_FOR_UPLOAD = 20971520; // 20 MB in bytes
