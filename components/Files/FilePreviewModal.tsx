@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { UserFile } from '@/types/UserFile';
 
 import {
@@ -23,6 +25,7 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
   file,
   children,
 }) => {
+  const { t } = useTranslation('model');
   const renderPreview = () => {
     if (file.filetype.startsWith('application/pdf')) {
       return <PDFPreview objectPath={file.objectPath} />;
@@ -33,16 +36,18 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
     } else if (file.filetype.startsWith('image/')) {
       return <ImagePreview objectPath={file.objectPath} />;
     } else {
-      return <p>Preview not available for this file type.</p>;
+      return <p>{t('Preview not supported for this file type')}</p>;
     }
   };
 
   return (
     <Dialog>
       <DialogTrigger className="w-full h-full">{children}</DialogTrigger>
-      <DialogContent className="min-w-max min-h-max">
+      <DialogContent className="w-max min-h-max mobile:h-[100dvh] mobile:w-[100dvw] tablet:max-w-[100dvw] max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>{file.filename}</DialogTitle>
+          <DialogTitle className="text-white overflow-hidden max-w-[80dvw] text-ellipsis ">
+            {file.filename}
+          </DialogTitle>
           <DialogDescription>{renderPreview()}</DialogDescription>
         </DialogHeader>
       </DialogContent>

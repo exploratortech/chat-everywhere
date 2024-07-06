@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { useDownloadObjectUrl } from '@/hooks/file/useDownloadObjectUrl';
+import { useTranslation } from 'react-i18next';
 
 const AudioPreview = ({ objectPath }: { objectPath: string }) => {
+  const { t } = useTranslation('model');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +34,7 @@ const AudioPreview = ({ objectPath }: { objectPath: string }) => {
   }
 
   return (
-    <div className="max-w-[90dvw] max-h-[90dvh] w-[85dvw] h-full flex items-center justify-center">
+    <div className="w-[50dvw] largeDesktop:w-[750px] mobile:w-full h-full max-w-[800px] flex items-center justify-center">
       {audioUrl && (
         <audio
           controls
@@ -40,7 +42,9 @@ const AudioPreview = ({ objectPath }: { objectPath: string }) => {
           onError={() => setError('Failed to load audio')}
         >
           <source src={audioUrl} type="audio/mpeg" />
-          Your browser does not support the audio element.
+          {
+            t('Your browser does not support the audio player')
+          }
         </audio>
       )}
     </div>

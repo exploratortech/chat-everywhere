@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useDownloadObjectUrl } from '@/hooks/file/useDownloadObjectUrl';
 
 const VideoPreview = ({ objectPath }: { objectPath: string }) => {
+  const { t } = useTranslation('model');
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +34,7 @@ const VideoPreview = ({ objectPath }: { objectPath: string }) => {
   }
 
   return (
-    <div className="max-w-[90dvw] max-h-[90dvh] w-full h-full flex items-center justify-center">
+    <div className="max-w-[800px] mobile:max-w-[90dvw] max-h-[90dvh] w-full h-full flex items-center justify-center">
       {videoUrl && (
         <video
           controls
@@ -42,7 +44,7 @@ const VideoPreview = ({ objectPath }: { objectPath: string }) => {
           onError={() => setError('Failed to load video')}
         >
           <source src={videoUrl} type="video/mp4" />
-          Your browser does not support the video tag.
+          {t('Your browser does not support the video player')}
         </video>
       )}
     </div>
