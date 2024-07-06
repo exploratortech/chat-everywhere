@@ -100,8 +100,14 @@ export const AIStream = async ({
   const decoder = new TextDecoder();
 
   if (res.status !== 200) {
+    const errorMessage = await res.text();
     throw new Error(
-      `Error: ${res.status} ${res.statusText} ${await res.text()}`,
+      `Error: ${res.status} ${res.statusText} ${errorMessage}`,
+      {
+        cause: {
+          message: `Error: ${res.status} ${res.statusText} ${errorMessage}`,
+        }
+      }
     );
   }
 
