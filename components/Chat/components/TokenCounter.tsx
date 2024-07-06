@@ -6,6 +6,7 @@ import useDebounce from '@/hooks/useDebounce';
 import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
 
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
+import { PluginID } from '@/types/plugin';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -47,10 +48,15 @@ function TokenCounter({
 
   const modelMaxTokenLength = useMemo(() => {
     switch (currentMessage?.pluginId) {
-      case 'gpt-4':
+      case PluginID.GPT4:
         return (
           OpenAIModels[OpenAIModelID.GPT_4].tokenLimit -
           OpenAIModels[OpenAIModelID.GPT_4].completionTokenLimit
+        );
+      case PluginID.GPT4O:
+        return (
+          OpenAIModels[OpenAIModelID.GPT_4O].tokenLimit -
+          OpenAIModels[OpenAIModelID.GPT_4O].completionTokenLimit
         );
       default:
         // Only enable 16k model for pro users

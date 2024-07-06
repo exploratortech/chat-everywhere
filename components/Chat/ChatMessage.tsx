@@ -46,10 +46,11 @@ interface Props {
   messageIndex: number;
   messageIsStreaming: boolean;
   onEdit?: (editedMessage: Message, index: number) => void;
+  onContinue: (lastWords: string) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, onEdit, messageIsStreaming, messageIndex }) => {
+  ({ message, onEdit, onContinue, messageIsStreaming, messageIndex }) => {
     const { t } = useTranslation('chat');
     const { i18n } = useTranslation();
 
@@ -452,6 +453,7 @@ export const ChatMessage: FC<Props> = memo(
                     formattedMessage={formattedMessage}
                     messageIndex={messageIndex}
                     messagePluginId={message.pluginId}
+                    onContinue={onContinue}
                   />
                   {highlight && (
                     <div className="absolute z-[1100] -left-2 -top-2 -right-2 -bottom-2 p-2 dark:bg-[#444654] rounded-lg">
@@ -469,6 +471,7 @@ export const ChatMessage: FC<Props> = memo(
                 <div className="flex flex-row items-center mt-3 w-full justify-between">
                   <div className="flex flex-row items-center">
                     {(message.pluginId === PluginID.GPT4 ||
+                      message.pluginId === PluginID.GPT4O ||
                       !message.pluginId) && (
                       <SpeechButton inputText={message.content} />
                     )}
@@ -484,6 +487,7 @@ export const ChatMessage: FC<Props> = memo(
                     )}
                     {(message.pluginId === PluginID.aiPainter ||
                       message.pluginId === PluginID.GPT4 ||
+                      message.pluginId === PluginID.GPT4O ||
                       message.pluginId === PluginID.default ||
                       !message.pluginId) &&
                       !messageIsStreaming && (

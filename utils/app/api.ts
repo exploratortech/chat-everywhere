@@ -15,7 +15,7 @@ export const getEndpoint = (plugin: Plugin | null) => {
     return 'api/langchain-api';
   }
 
-  if (plugin.id === PluginID.GPT4) {
+  if (plugin.id === PluginID.GPT4 || plugin.id === PluginID.GPT4O) {
     return 'api/chat-gpt4';
   }
 
@@ -58,7 +58,7 @@ export async function fetchShareableConversation(
       id: accessibleId,
       name: title + ' (Shared)',
       messages: JSON.parse(prompts),
-      model: OpenAIModels['gpt-3.5-turbo-0613'],
+      model: OpenAIModels['gpt-3.5-turbo'],
       prompt: DEFAULT_SYSTEM_PROMPT,
       folderId: null,
       temperature: DEFAULT_TEMPERATURE,

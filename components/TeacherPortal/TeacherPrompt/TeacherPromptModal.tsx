@@ -33,7 +33,7 @@ const ModeSelector = ({ mode, setMode }: ModelSelectProps) => {
   const ModeOptions = [
     { value: PluginID.default, label: t('Default mode') },
     { value: PluginID.LANGCHAIN_CHAT, label: t('Online mode') },
-    { value: PluginID.GPT4, label: t('GPT-4') },
+    { value: PluginID.GPT4O, label: t('GPT-4') },
     {
       value: PluginID.aiPainter,
       label: t('AI Painter'),

@@ -20,6 +20,7 @@ const CustomInstructionInUseIndicator = () => {
     currentMessage?.pluginId === null ||
     currentMessage?.pluginId === PluginID.LANGCHAIN_CHAT ||
     currentMessage?.pluginId === PluginID.GPT4 ||
+    currentMessage?.pluginId === PluginID.GPT4O ||
     currentMessage?.pluginId === PluginID.aiPainter;
 
   const [showModal, setShowModal] = useState(false);

@@ -45,7 +45,7 @@ const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
             content: '',
             is_enable: true,
             id: '',
-            model: OpenAIModels[OpenAIModelID.GPT_4],
+            model: OpenAIModels[OpenAIModelID.GPT_4O],
             default_mode: PluginID.default,
             is_teacher_prompt: true,
             first_message_to_gpt: '',

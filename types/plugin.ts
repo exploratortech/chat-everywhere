@@ -10,6 +10,7 @@ export enum PluginID {
   default = 'default',
   LANGCHAIN_CHAT = 'langchain-chat',
   GPT4 = 'gpt-4',
+  GPT4O = 'gpt-4o',
   IMAGE_GEN = 'image-gen',
   IMAGE_TO_PROMPT = 'image-to-prompt',
   mqtt = 'mqtt',
@@ -21,6 +22,7 @@ export enum PluginName {
   default = 'default',
   LANGCHAIN_CHAT = 'Enhance Mode',
   GPT4 = 'GPT-4',
+  GPT4O = 'GPT-4O',
   IMAGE_GEN = 'image-gen',
   IMAGE_TO_PROMPT = 'image-to-prompt',
   mqtt = 'MQTT',
@@ -42,6 +44,11 @@ export const Plugins: Record<PluginID, Plugin> = {
   [PluginID.GPT4]: {
     id: PluginID.GPT4,
     name: PluginName.GPT4,
+    requiredKeys: [],
+  },
+  [PluginID.GPT4O]: {
+    id: PluginID.GPT4O,
+    name: PluginName.GPT4O,
     requiredKeys: [],
   },
   [PluginID.IMAGE_GEN]: {

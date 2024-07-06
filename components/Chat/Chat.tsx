@@ -1,5 +1,6 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconClearAll } from '@tabler/icons-react';
+
 import {
   MutableRefObject,
   memo,
@@ -94,7 +95,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       if (!message) return;
       const plugin =
         isCreatingConversationWithCustomInstruction &&
-        isTeacherPrompt(customInstructionPrompt)
+          isTeacherPrompt(customInstructionPrompt)
           ? Plugins[customInstructionPrompt.default_mode]
           : (message.pluginId && Plugins[message.pluginId]) || null;
 
@@ -269,11 +270,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       2,
       overrideMessage
         ? {
-            ...overrideMessage,
-            pluginId: currentMessage
-              ? currentMessage.pluginId
-              : overrideMessage.pluginId,
-          }
+          ...overrideMessage,
+          pluginId: currentMessage
+            ? currentMessage.pluginId
+            : overrideMessage.pluginId,
+        }
         : undefined,
     );
   };
@@ -316,6 +317,26 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     },
     [handleSend, selectedConversation, setCurrentMessage],
   );
+  const onContinue = useCallback(
+    (lastWords: string) => {
+      const continueTemplate = `Your response got cut off, because you only have limited response space. Continue writing exactly where you left off. Do not repeat yourself.
+Continue from "${lastWords}<your response>"`;
+
+      const message: Message = {
+        role: 'user',
+        content: continueTemplate,
+        pluginId: currentMessage?.pluginId || null,
+      };
+
+      setCurrentMessage(message);
+      handleSend(0, message);
+      event('interaction', {
+        category: 'Chat',
+        label: 'Continue',
+      });
+    },
+    [currentMessage?.pluginId, handleSend, setCurrentMessage],
+  );
 
   useCustomInstructionDefaultMode(selectedConversation);
 
@@ -339,18 +360,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         );
                         const message: Message = isTeacherPromptType
                           ? {
-                              role: 'user',
-                              content:
-                                customInstructionPrompt.first_message_to_gpt,
-                              pluginId: customInstructionPrompt.default_mode,
-                            }
+                            role: 'user',
+                            content:
+                              customInstructionPrompt.first_message_to_gpt,
+                            pluginId: customInstructionPrompt.default_mode,
+                          }
                           : {
-                              role: 'user',
-                              content:
-                                customInstructionPrompt.content ||
-                                promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
-                              pluginId: null,
-                            };
+                            role: 'user',
+                            content:
+                              customInstructionPrompt.content ||
+                              promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
+                            pluginId: null,
+                          };
 
                         setCurrentMessage(message);
                         handleSend(0, message, customInstructionPrompt);
@@ -408,6 +429,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       messages={selectedConversation.messages}
                       messageIsStreaming={messageIsStreaming}
                       onEdit={onEdit}
+                      onContinue={onContinue}
                     />
                   )}
                 </div>
