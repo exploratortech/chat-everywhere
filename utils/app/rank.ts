@@ -1,4 +1,3 @@
-import { Conversation } from '@/types/chat';
 import type { FolderInterface } from '@/types/folder';
 
 import { RANK_INTERVAL } from './const';

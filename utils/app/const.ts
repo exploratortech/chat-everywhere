@@ -12,6 +12,9 @@ export const DEFAULT_SYSTEM_PROMPT =
 export const OPENAI_API_HOST =
   process.env.OPENAI_API_HOST || 'https://api.openai.com';
 
+export const OPENAI_API_KEY =
+  process.env.OPENAI_API_GPT_4_KEY || process.env.OPENAI_API_KEY;
+
 export const DEFAULT_TEMPERATURE = parseFloat(
   process.env.NEXT_PUBLIC_DEFAULT_TEMPERATURE || '0.5',
 );
@@ -49,6 +52,13 @@ export const AZURE_OPENAI_KEYS = [
   process.env.AZURE_OPENAI_KEY_3,
 ];
 
+// TOKEN PER MINUTE
+export const AZURE_OPENAI_TPM = [
+  Number(process.env.AZURE_OPENAI_TPM_0) || 10,
+  Number(process.env.AZURE_OPENAI_TPM_1) || 10,
+  Number(process.env.AZURE_OPENAI_TPM_2) || 10,
+  Number(process.env.AZURE_OPENAI_TPM_3) || 10,
+];
 // To be enabled, currently we goes with this order of region regardless of request origin
 export const ENDPOINT_TRAFFIC_DISTRIBUTION = [
   0.75, // Japan East
@@ -67,6 +77,22 @@ export const AZURE_OPENAI_GPT_4_KEYS = [
   process.env.AZURE_OPENAI_GPT_4_KEY_0,
   process.env.AZURE_OPENAI_GPT_4_KEY_1,
   process.env.AZURE_OPENAI_GPT_4_KEY_2,
+];
+
+export const AZURE_OPENAI_GPT_4_TPM = [
+  Number(process.env.AZURE_OPENAI_GPT_4_TPM_0) || 10,
+  Number(process.env.AZURE_OPENAI_GPT_4_TPM_1) || 10,
+  Number(process.env.AZURE_OPENAI_GPT_4_TPM_2) || 10,
+];
+
+export const AZURE_OPENAI_GPT_4O_ENDPOINTS = [
+  process.env.AZURE_OPENAI_GPT_4O_ENDPOINT_0,
+];
+
+export const AZURE_OPENAI_GPT_4O_KEYS = [process.env.AZURE_OPENAI_GPT_4O_KEY_0];
+
+export const AZURE_OPENAI_GPT_4O_TPM = [
+  Number(process.env.AZURE_OPENAI_GPT_4O_TPM_0) || 10,
 ];
 
 export const AZURE_DALL_E_3_ENDPOINTS = [

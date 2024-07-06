@@ -1,5 +1,5 @@
 export interface OpenAIModel {
-  id: string;
+  id: OpenAIModelID;
   name: string;
   maxLength: number; // maximum length of a message
   tokenLimit: number;
@@ -9,11 +9,12 @@ export interface OpenAIModel {
 
 export enum OpenAIModelID {
   // 0613 is the latest model with better model steerability, enable by default.
-  GPT_3_5 = 'gpt-3.5-turbo-0613',
+  GPT_3_5 = 'gpt-3.5-turbo',
   GPT_3_5_AZ = 'gpt-35-turbo',
   GPT_3_5_16K = 'gpt-3.5-turbo-16k',
   GPT_4 = 'gpt-4',
   GPT_4_32K = 'gpt-4-32k',
+  GPT_4O = 'gpt-4o',
 }
 
 export const fallbackModelID = OpenAIModelID.GPT_3_5;
@@ -58,5 +59,13 @@ export const OpenAIModels: Record<OpenAIModelID, OpenAIModel> = {
     tokenLimit: 32000,
     completionTokenLimit: 8000,
     deploymentName: 'gpt-4-32k',
+  },
+  [OpenAIModelID.GPT_4O]: {
+    id: OpenAIModelID.GPT_4O,
+    name: 'GPT-4o',
+    maxLength: 128000,
+    tokenLimit: 128000,
+    completionTokenLimit: 4096, // added new model
+    deploymentName: 'gpt-4o',
   },
 };
