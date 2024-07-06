@@ -88,8 +88,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (selectedOutputLanguage) {
       messageToSend[
         messageToSend.length - 1
-      ].content = `${selectedOutputLanguage} ${
-        messageToSend[messageToSend.length - 1].content
+      ].content = `${selectedOutputLanguage} ${messageToSend[messageToSend.length - 1].content
       }`;
     }
 
@@ -99,7 +98,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const stream = await OpenAIStream(
-      OpenAIModels[OpenAIModelID.GPT_4],
+      OpenAIModels[OpenAIModelID.GPT_4O],
       promptToSend,
       temperatureToUse,
       messageToSend,

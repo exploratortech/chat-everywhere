@@ -7,16 +7,7 @@ export interface Message {
   role: Role;
   content: string;
   name?: string;
-  pluginId:
-    | PluginID.LANGCHAIN_CHAT
-    | PluginID.GPT4
-    | PluginID.IMAGE_GEN
-    | PluginID.IMAGE_TO_PROMPT
-    | PluginID.mqtt
-    | PluginID.aiPainter
-    | PluginID.GEMINI
-    | null
-    | PluginID.default;
+  pluginId: PluginID | null;
   largeContextResponse?: boolean; // Use to indicate if the response is from a gpt3.5 16k model
   showHintForLargeContextResponse?: boolean; // Use to indicate if the response can be improved by using a gpt3.5 16k model
   // Google cloud storage objects
