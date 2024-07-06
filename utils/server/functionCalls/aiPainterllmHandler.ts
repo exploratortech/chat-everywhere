@@ -208,7 +208,13 @@ export const aiPainterLlmHandler = async ({
       }
     }
   } catch (err) {
-    onErrorUpdate('An error occurred, please try again.');
+    if (err instanceof Error && err.cause) {
+      const errorMessage =
+        (err.cause as { message?: string })?.message || err.message;
+      onErrorUpdate(errorMessage);
+    } else {
+      onErrorUpdate('An error occurred, please try again.');
+    }
     console.error(err);
   } finally {
     onEnd();
