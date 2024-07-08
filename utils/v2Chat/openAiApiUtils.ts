@@ -125,6 +125,8 @@ export const generateImage = async (
     response_format: 'b64_json',
   };
 
+  console.log('payload: ', payload);
+
   let response;
   let delay = 500; // Initial delay of 500ms
   let retries = 0; // Initial retry count
