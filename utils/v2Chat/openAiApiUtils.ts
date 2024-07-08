@@ -146,6 +146,9 @@ export const generateImage = async (
     });
     // }
 
+    console.log('response.status: ', response.status);
+    
+
     if (response.status !== 429 && response.status !== 404) {
       break;
     }
@@ -164,6 +167,8 @@ export const generateImage = async (
   }
 
   const imageResponse: OpenAiImageResponseType = await response.json();
+  console.log('imageResponse: ', imageResponse);
+  
   const imageGenerationResponse: OpenAiImageResponseType & {
     errorMessage?: string;
   } = imageResponse;
