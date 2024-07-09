@@ -123,6 +123,7 @@ export default memo(function MjImageComponentV2({
           // Button selections
           <div className="flex gap-2 flex-col">
             <button
+              data-cy="mj-image-v2-download-button"
               className="max-w-max cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
               onClick={() => {
                 downloadFile(
@@ -134,6 +135,7 @@ export default memo(function MjImageComponentV2({
               {mjImageT('Download Image')}
             </button>
             <div
+              data-cy="mj-image-v2-button-container"
               className={`flex flex-wrap gap-2 items-center h-full mobile:text-sm`}
             >
               {validButtons.map((command, index) => {
@@ -160,7 +162,7 @@ export default memo(function MjImageComponentV2({
     </div>
   );
 },
-areEqual);
+  areEqual);
 function NumberDisplay({ number }: { number: number }) {
   return (
     <div className="w-full h-full flex items-center justify-center">
