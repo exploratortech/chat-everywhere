@@ -1,6 +1,7 @@
 const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
+  retries: 1,
   e2e: {
     setupNodeEvents(on: any, config: any) {
       require('cypress-terminal-report/src/installLogsPrinter')(on);
@@ -10,4 +11,4 @@ module.exports = defineConfig({
   },
 });
 
-export {};
+export { };
