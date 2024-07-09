@@ -52,6 +52,8 @@ const requestHeader = {
   'Content-Type': 'application/json',
 };
 
+const MY_MIDJOURNEY_ON_DEMAND_API_KEY = process.env.MY_MIDJOURNEY_ON_DEMAND_API_KEY || '';
+
 const ContentFilterErrorMessageListFromMyMidjourneyProvider = [
   'Our AI moderator thinks this prompt is probably against our community standards',
   'Request cancelled due to image filters',
@@ -61,6 +63,7 @@ const ContentFilterErrorMessageListFromMyMidjourneyProvider = [
 const handler = async (req: Request) => {
   const requestBody = (await req.json()) as {
     jobId: string;
+    useOnDemand?: boolean;
   } | null;
   if (!requestBody) {
     return new Response('Bad request', { status: 400 });
@@ -69,6 +72,11 @@ const handler = async (req: Request) => {
   if (!requestBody.jobId) {
     return new Response('Invalid request body', { status: 400 });
   }
+
+  if (requestBody.useOnDemand && MY_MIDJOURNEY_ON_DEMAND_API_KEY) {
+    requestHeader.Authorization = `Bearer ${MY_MIDJOURNEY_ON_DEMAND_API_KEY}`;
+  }
+
   const jobInfo = await MjQueueJob.get(requestBody.jobId);
   if (!jobInfo) {
     return new Response('Invalid job id', { status: 400 });
