@@ -4,8 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useFileUpload } from '@/hooks/file/useFileUpload';
 
-import { MAX_FILE_SIZE_FOR_UPLOAD } from '@/utils/app/const';
-
 import { UserFile } from '@/types/UserFile';
 
 import CustomUploadToast from '@/components/Files/CustomUploadToast';
@@ -149,18 +147,6 @@ export function useMultipleFileUploadHandler() {
     }
 
     dismissAllErrorToasts();
-
-    for (const file of files) {
-      if (file.size > MAX_FILE_SIZE_FOR_UPLOAD) {
-        alert(
-          t('File {{name}} size exceeds the maximum limit of {{mb}} MB.', {
-            name: file.name,
-            mb: 50,
-          }),
-        );
-        return;
-      }
-    }
 
     setFileProgresses(() => {
       return files.reduce((acc, file) => {

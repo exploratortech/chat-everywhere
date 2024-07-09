@@ -75,6 +75,7 @@
     "nextjs-google-analytics": "^2.3.3",
     "notion-client": "^6.16.0",
     "notion-utils": "^6.16.0",
+    "pdfjs-dist": "^4.4.168",
     "posthog-js": "^1.96.1",
     "puppeteer": "^19.11.1",
     "raw-body": "^2.5.2",
