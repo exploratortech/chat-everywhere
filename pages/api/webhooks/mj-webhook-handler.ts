@@ -47,6 +47,7 @@ const handleFailedStatus = async (reqBody: any) => {
     status: 'FAILED',
     reason: errorMessage,
   } as Partial<FailedMjJob>);
+
   const logOriginalEventPromise = OriginalMjLogEvent({
     userId: jobInfo.userId,
     startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
@@ -59,6 +60,7 @@ const handleFailedStatus = async (reqBody: any) => {
       jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
         ? jobInfo.mjRequest.button
         : jobInfo.mjRequest.enhancedPrompt,
+    useOnDemandCredit: jobInfo.status !== 'QUEUED' ? !!(jobInfo.useOnDemandCredit) : false,
   });
 
   await Promise.all([
@@ -130,6 +132,7 @@ const handleDoneStatus = async (reqBody: any) => {
       jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
         ? jobInfo.mjRequest.button
         : jobInfo.mjRequest.enhancedPrompt,
+    useOnDemandCredit: jobInfo.status !== 'QUEUED' ? !!(jobInfo.useOnDemandCredit) : false,
   });
 
   const updateJobPromise = MjQueueJob.update(jobId, {

@@ -24,6 +24,7 @@ import {
   MjButtonCommandRequest,
   MjImageGenRequest,
   MjJob,
+  ProcessingMjJob,
 } from '@/types/mjJob';
 import { PluginID } from '@/types/plugin';
 
@@ -279,6 +280,7 @@ const imageGeneration = async (
           promptBeforeProcessing: (job.mjRequest as MjImageGenRequest)
             .userPrompt,
           generationPrompt: generationPrompt,
+          useOnDemandCredit: job.status !== 'QUEUED' ? !!(job.useOnDemandCredit) : false,
         });
         throw new Error('Image generation failed due to content filter', {
           cause: {
@@ -294,6 +296,7 @@ const imageGeneration = async (
         errorMessage: 'Image generation failed',
         promptBeforeProcessing: (job.mjRequest as MjImageGenRequest).userPrompt,
         generationPrompt: generationPrompt,
+        useOnDemandCredit: job.status !== 'QUEUED' ? !!(job.useOnDemandCredit) : false,
       });
       console.log({
         responseText,
@@ -307,12 +310,14 @@ const imageGeneration = async (
     if (responseJson.success !== true || !responseJson.messageId) {
       console.log(responseJson);
       console.error('Failed during submitting request');
+
       await OriginalMjLogEvent({
         userId: job.userId,
         startTime: job.startProcessingAt || job.enqueuedAt,
         errorMessage: 'Failed during submitting request',
         promptBeforeProcessing: (job.mjRequest as MjImageGenRequest).userPrompt,
         generationPrompt: generationPrompt,
+        useOnDemandCredit: job.status !== 'QUEUED' ? !!(job.useOnDemandCredit) : false,
       });
 
       throw new Error('Image generation failed');

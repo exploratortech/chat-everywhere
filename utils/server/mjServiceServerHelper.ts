@@ -78,8 +78,8 @@ export const trackCleanupJobEvent = ({
   fiveMinutesAgo,
 }: {
   event:
-    | 'MJ Queue Cleanup Completed / Failed Job'
-    | 'MJ Queue Cleanup Processing Job';
+  | 'MJ Queue Cleanup Completed / Failed Job'
+  | 'MJ Queue Cleanup Processing Job';
   executedAt: string;
   enqueuedAt: string;
   oneWeekAgo?: string;
@@ -100,25 +100,27 @@ export const OriginalMjLogEvent = async ({
   promptBeforeProcessing,
   generationPrompt,
   userId,
+  useOnDemandCredit,
 }: {
   userId: string;
   startTime: string;
   errorMessage?: string;
   promptBeforeProcessing?: string;
   generationPrompt?: string;
+  useOnDemandCredit: boolean;
 }) => {
   const now = dayjs().valueOf();
   const totalDurationInSeconds = (now - dayjs(startTime).valueOf()) / 1000;
   const payloadToLog: PayloadType = {
     generationLengthInSecond: totalDurationInSeconds,
+    useOnDemandCredit,
   };
 
   if (errorMessage) {
     payloadToLog.imageGenerationFailed = 'true';
     payloadToLog.imageGenerationErrorMessage = errorMessage;
-    payloadToLog.imageGenerationPrompt = `${
-      promptBeforeProcessing || 'N/A'
-    } -> ${generationPrompt || 'N/A'}`;
+    payloadToLog.imageGenerationPrompt = `${promptBeforeProcessing || 'N/A'
+      } -> ${generationPrompt || 'N/A'}`;
   }
 
   await serverSideTrackEvent(userId, 'AI image generation', payloadToLog);
