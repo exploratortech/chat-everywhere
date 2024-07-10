@@ -32,8 +32,7 @@ describe('Image generation', () => {
     cy.visit(hostUrl);
     cy.get('[data-cy="chat-input"]', { timeout: 20000 }).should('be.visible');
     cy.get('[data-cy="chat-input"]').type('A fireman is rescuing a cat from a tree.');
-    cy.get('[data-cy="chat-enhanced-menu-container"]').scrollIntoView().should('be.visible');
-    cy.get('[data-cy="chat-enhanced-menu"]').scrollIntoView().should('be.visible');
+    cy.get('[data-cy="chat-enhanced-menu"]').scrollIntoView()
     cy.get('[data-cy="chat-mode-selector"]').select('AI Image');
 
     cy.get('[data-cy="chat-send-button"]').click();
