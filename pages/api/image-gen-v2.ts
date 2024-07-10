@@ -20,7 +20,11 @@ import {
   subtractCredit,
 } from '@/utils/server/supabase';
 
-import { MjJob } from '@/types/mjJob';
+import {
+  MjButtonCommandRequest,
+  MjImageGenRequest,
+  MjJob,
+} from '@/types/mjJob';
 import { PluginID } from '@/types/plugin';
 
 export const config = {
@@ -221,18 +225,18 @@ const imageGeneration = async (
   if (job.mjRequest.type !== 'MJ_IMAGE_GEN') {
     throw new Error('Invalid job type for the calling method');
   }
-  return retryWithDifferentApiKey(async (currentHeaders) => {
-    if (job.mjRequest.type !== 'MJ_IMAGE_GEN') {
-      return;
-    }
-    const userPrompt = job.mjRequest.userPrompt;
-    const imageStyle = job.mjRequest.imageStyle;
-    const imageQuality = job.mjRequest.imageQuality;
-    const temperature = job.mjRequest.temperature || undefined;
-    let generationPrompt = await translateAndEnhancePrompt(userPrompt);
+  const userPrompt = job.mjRequest.userPrompt;
+  const imageStyle = job.mjRequest.imageStyle;
+  const imageQuality = job.mjRequest.imageQuality;
+  const temperature = job.mjRequest.temperature || undefined;
+  let generationPrompt = await translateAndEnhancePrompt(userPrompt);
+  if (!generationPrompt) {
+    throw new Error('Failed to generate prompt');
+  }
 
+  return retryWithDifferentApiKey(async (currentHeaders) => {
     generationPrompt = generateMjPrompt(
-      generationPrompt,
+      generationPrompt as string,
       imageStyle,
       imageQuality,
       temperature,
@@ -242,7 +246,7 @@ const imageGeneration = async (
     // Put the generated Prompt to JobInfo
     await MjQueueJob.update(job.jobId, {
       mjRequest: {
-        ...job.mjRequest,
+        ...(job.mjRequest as MjImageGenRequest),
         enhancedPrompt: generationPrompt,
       },
     });
@@ -272,7 +276,8 @@ const imageGeneration = async (
           userId: job.userId,
           startTime: job.startProcessingAt || job.enqueuedAt,
           errorMessage: 'Image generation failed due to content filter',
-          promptBeforeProcessing: job.mjRequest.userPrompt,
+          promptBeforeProcessing: (job.mjRequest as MjImageGenRequest)
+            .userPrompt,
           generationPrompt: generationPrompt,
         });
         throw new Error('Image generation failed due to content filter', {
@@ -287,7 +292,7 @@ const imageGeneration = async (
         userId: job.userId,
         startTime: job.startProcessingAt || job.enqueuedAt,
         errorMessage: 'Image generation failed',
-        promptBeforeProcessing: job.mjRequest.userPrompt,
+        promptBeforeProcessing: (job.mjRequest as MjImageGenRequest).userPrompt,
         generationPrompt: generationPrompt,
       });
       console.log({
@@ -306,7 +311,7 @@ const imageGeneration = async (
         userId: job.userId,
         startTime: job.startProcessingAt || job.enqueuedAt,
         errorMessage: 'Failed during submitting request',
-        promptBeforeProcessing: job.mjRequest.userPrompt,
+        promptBeforeProcessing: (job.mjRequest as MjImageGenRequest).userPrompt,
         generationPrompt: generationPrompt,
       });
 
@@ -329,17 +334,14 @@ const buttonCommand = async (
   }
 
   return retryWithDifferentApiKey(async (currentHeaders) => {
-    if (job.mjRequest.type !== 'MJ_BUTTON_COMMAND') {
-      return;
-    }
     const imageGenerationResponse = await fetch(
       `https://api.mymidjourney.ai/api/v1/midjourney/button`,
       {
         method: 'POST',
         headers: currentHeaders,
         body: JSON.stringify({
-          messageId: job.mjRequest.messageId,
-          button: job.mjRequest.button,
+          messageId: (job.mjRequest as MjButtonCommandRequest).messageId,
+          button: (job.mjRequest as MjButtonCommandRequest).button,
           ref: job.jobId,
           // TODO: rollback
           webhookOverride: `${`https://oriented-balanced-owl.ngrok-free.app`}/api/webhooks/mj-webhook-handler`,

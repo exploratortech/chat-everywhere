@@ -31,16 +31,19 @@ export interface ProcessingMjJob extends BasedMjJob {
   status: 'PROCESSING';
   progress: number;
   imageUrl: string;
+  useOnDemandCredit?: boolean;
 }
 export interface CompletedMjJob extends BasedMjJob {
   status: 'COMPLETED';
   imageUrl: string;
   buttons: string[];
   messageId: string;
+  useOnDemandCredit?: boolean;
 }
 export interface FailedMjJob extends BasedMjJob {
   status: 'FAILED';
   reason: string;
+  useOnDemandCredit?: boolean;
 }
 export type MjJob =
   | QueuedMjJob
