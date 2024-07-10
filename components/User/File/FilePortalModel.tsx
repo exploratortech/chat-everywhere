@@ -5,7 +5,10 @@ import { useTranslation } from 'react-i18next';
 
 import { useMultipleFileUploadHandler } from '@/hooks/file/useMultipleFileUploadHandler';
 
-import { createFileList, handleFileUpload } from '@/utils/app/uploadFileHelper';
+import {
+  createFileList,
+  validateAndUploadFiles,
+} from '@/utils/app/uploadFileHelper';
 
 import DragAndDrop from '@/components/FileDragDropArea/DragAndDrop';
 import { FileListGridView } from '@/components/Files/FileListGridView';
@@ -68,7 +71,14 @@ export default function FilePortalModel({ onClose }: Props) {
                         <div className="p-4">
                           <div className="flex gap-4">
                             <UploadFileButton
-                              uploadFiles={uploadFiles}
+                              onFilesDrop={async (files) => {
+                                await validateAndUploadFiles(
+                                  files,
+                                  uploadFiles,
+                                  () => {},
+                                  t,
+                                );
+                              }}
                               isUploading={isUploading}
                             />
                           </div>
@@ -82,10 +92,14 @@ export default function FilePortalModel({ onClose }: Props) {
                             <AlertDescription>
                               <ul>
                                 <li>{t('File Size Limitation')}: 50 MB</li>
+                                <li>{t('PDF File Size Limitation')}: 30 MB</li>
                                 <li>
                                   {t('PDF Page Limitation')}:{' '}
                                   {t('{{pages}} Pages', { pages: 300 })}
                                 </li>
+                                <li>{t('Video Length Limitation')}: {t('{{hours}} hour', { hours: 1 })}</li>
+                                <li>{t('Audio Length Limitation')}: {t('{{hours}} hours', { hours: 8 })}</li>
+                                <li>{t('Image Size Limitation')}: 20 MB</li>
                               </ul>
                             </AlertDescription>
                           </Alert>
@@ -100,13 +114,10 @@ export default function FilePortalModel({ onClose }: Props) {
 
                   <DragAndDrop
                     onFilesDrop={(files) => {
-                      console.log({
-                        fileTypes: Array.from(files).map((file) => file.type),
-                      });
-                      handleFileUpload(
+                      validateAndUploadFiles(
                         createFileList(files),
                         uploadFiles,
-                        () => {},
+                        () => { },
                         t,
                       );
                     }}

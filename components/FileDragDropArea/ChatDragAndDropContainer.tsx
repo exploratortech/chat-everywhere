@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 
 import { useMultipleFileUploadHandler } from '@/hooks/file/useMultipleFileUploadHandler';
 
-import { createFileList, handleFileUpload } from '@/utils/app/uploadFileHelper';
+import {
+  createFileList,
+  validateAndUploadFiles,
+} from '@/utils/app/uploadFileHelper';
 
 import { UserFile } from '@/types/UserFile';
 import { PluginID } from '@/types/plugin';
@@ -41,7 +44,7 @@ const ChatDragAndDropContainer = () => {
       {!showFilePortalModel && isUltraUser && (
         <DragAndDrop
           onFilesDrop={(files) => {
-            handleFileUpload(
+            validateAndUploadFiles(
               createFileList(files),
               uploadFiles,
               (latestFiles) => {
