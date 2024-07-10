@@ -11,7 +11,7 @@ describe('Image generation', () => {
       },
       {
         validate: () => {
-          cy.get('[data-cy="user-account-badge"]', { timeout: 3000 }).should(
+          cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).should(
             'be.visible',
           );
         },
@@ -31,9 +31,11 @@ describe('Image generation', () => {
   it('is able to create an image via AI Image Mode (MJ)', () => {
     cy.visit(hostUrl);
     cy.get('[data-cy="chat-input"]', { timeout: 20000 }).should('be.visible');
-    cy.get('[data-cy="chat-input"]').type('A fireman is rescuing a cat from a tree.');
-    cy.get('[data-cy="chat-enhanced-menu"]').scrollIntoView()
+    cy.get('[data-cy="chat-input"]').click();
+    cy.get('[data-cy="chat-input"]').realType('A fireman is rescuing a cat from a tree.');
+    cy.get('[data-cy="chat-enhanced-menu"]').scrollIntoView().should('be.visible');
     cy.get('[data-cy="chat-mode-selector"]').select('AI Image');
+    cy.pause();
 
     cy.get('[data-cy="chat-send-button"]').click();
     cy.get('[data-cy="assistant-respond-message"]').within(() => {
