@@ -55,6 +55,7 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
     return (
       <div
         ref={ref}
+        data-cy="chat-enhanced-menu-container"
         className={`absolute w-full h-fit left-0 overflow-hidden
           bg-white dark:bg-[#343541] text-black dark:text-white 
           z-10 rounded-md -translate-y-[100%]
