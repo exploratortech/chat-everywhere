@@ -44,12 +44,13 @@ describe('Image generation', () => {
 
     cy.get('[data-cy="chat-enhanced-menu-container"]').should('have.css', 'display', 'flex');
     cy.get('[data-cy="chat-input"]').realClick();
-    cy.get('[data-cy="chat-input"]').realType('A fireman is rescuing a cat from a tree.');
+    cy.get('[data-cy="chat-input"]').type('A fireman is rescuing a cat from a tree.');
     cy.get('[data-cy="chat-enhanced-menu"]').scrollIntoView().should('be.visible');
     cy.get('[data-cy="chat-mode-selector"]').select('AI Image');
 
 
     cy.get('[data-cy="chat-send-button"]').click();
+
     cy.get('[data-cy="assistant-respond-message"]').within(() => {
       cy.get('div#mj-image-static-v2', { timeout: 120000 }).should('exist');
       cy.get('div#mj-image-static-v2').within(() => {
