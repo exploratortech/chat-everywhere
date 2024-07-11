@@ -45,10 +45,8 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   retrieveUserSessionAndLogUsages(req);
-  const { country, city } = geolocation(req);
-  // TODO:Remove this
-  console.log("User country code is " + country);
-  console.log("User city is " + city);
+  const { country } = geolocation(req);
+
 
 
   const log = new Logger();
