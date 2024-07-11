@@ -120,6 +120,16 @@ const handler = async (req: Request) => {
     if (!generationPrompt) {
       throw new Error('Failed to generate prompt');
     }
+    // Put the generated Prompt to JobInfo
+    await MjQueueJob.update(jobInfo.jobId, {
+      mjRequest: {
+        ...(jobInfo.mjRequest as MjImageGenRequest),
+        enhancedPrompt: generationPrompt,
+      },
+    });
+
+    // Add usedOnDemandCredit to jobInfo
+    jobInfo.usedOnDemandCredit = requestBody?.useOnDemand
 
     return retryWithDifferentApiKey(async (currentHeaders) => {
       generationPrompt = generateMjPrompt(
@@ -130,13 +140,9 @@ const handler = async (req: Request) => {
         userPrompt,
       );
 
-      // Put the generated Prompt to JobInfo
-      await MjQueueJob.update(jobInfo.jobId, {
-        mjRequest: {
-          ...(jobInfo.mjRequest as MjImageGenRequest),
-          enhancedPrompt: generationPrompt,
-        },
-      });
+      // Add last used key to jobInfo
+      const currentApiKey = currentHeaders.Authorization.split(' ')[1];
+      jobInfo.lastUsedKey = currentApiKey === MY_MIDJOURNEY_API_KEY ? 'our-discord-key' : 'on-demand-credit-key';
 
       const imageGenerationResponse = await fetch(
         `https://api.mymidjourney.ai/api/v1/midjourney/imagine`,
@@ -311,6 +317,9 @@ const handler = async (req: Request) => {
     if (jobInfo.mjRequest.type === 'MJ_IMAGE_GEN') {
       await imageGeneration(requestHeader);
     }
+
+    // Update the job info to redis
+    await MjQueueJob.update(jobInfo.jobId, jobInfo);
 
     return new NextResponse(JSON.stringify({}), {
       headers: {
