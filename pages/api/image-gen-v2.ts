@@ -70,6 +70,7 @@ const switchApiKey = (authorizationHeader: string) => {
     : `Bearer ${MY_MIDJOURNEY_API_KEY}`;
 };
 
+let hasApiKeySwitched = false;
 const retryWithDifferentApiKey = async <T>(
   operation: (headers: {
     Authorization: string;
@@ -80,6 +81,10 @@ const retryWithDifferentApiKey = async <T>(
   try {
     return await operation(initialHeaders);
   } catch (error) {
+    if (hasApiKeySwitched) {
+      // If the API key has already been switched, do not switch it again
+      throw error;
+    }
     // TODO: Add Posthog event
     console.log('🤧 First attempt failed, retrying with different API key');
     const newAuthorizationHeader = switchApiKey(initialHeaders.Authorization);
@@ -87,11 +92,13 @@ const retryWithDifferentApiKey = async <T>(
       ...initialHeaders,
       Authorization: newAuthorizationHeader,
     };
+    hasApiKeySwitched = true;
     return await operation(retryHeaders);
   }
 };
 
 const handler = async (req: Request) => {
+  hasApiKeySwitched = false;
   const requestBody = (await req.json()) as {
     jobId: string;
     useOnDemand?: boolean;
