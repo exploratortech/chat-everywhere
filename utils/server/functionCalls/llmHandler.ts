@@ -1,6 +1,6 @@
 // This is a handler to execute and return the result of a function call to LLM.
 // This would seat between the endpoint and LLM.
-import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
+import { DEFAULT_SYSTEM_PROMPT, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
 import { AIStream } from '@/utils/server/functionCalls/AIStream';
 import {
   getFunctionCallsFromMqttConnections,
@@ -23,7 +23,7 @@ type handlerType = {
   onEnd: () => void;
 };
 
-const llmHandlerPrompt =
+let llmHandlerPrompt =
   DEFAULT_SYSTEM_PROMPT +
   `
   Remember. You now have the capability to control real world devices via MQTT connections via function calls (the function name starts with 'mqtt'). 
@@ -76,6 +76,10 @@ export const llmHandler = async ({
     ...getReceiverFunctionCallsFromMqttConnections(processedMqttConnections),
     ...getHelperFunctionCalls(profile.line_access_token),
   );
+
+  if (countryCode?.includes('TW')) {
+    llmHandlerPrompt += RESPONSE_IN_CHINESE_PROMPT
+  }
 
   try {
     while (isFunctionCallRequired) {
