@@ -24,7 +24,6 @@ import {
   MjButtonCommandRequest,
   MjImageGenRequest,
   MjJob,
-  ProcessingMjJob,
 } from '@/types/mjJob';
 import { PluginID } from '@/types/plugin';
 
@@ -63,39 +62,13 @@ const ContentFilterErrorMessageListFromMyMidjourneyProvider = [
   'forbidden: The prompt has blocked words',
 ];
 
-const switchApiKey = (authorizationHeader: string) => {
-  const apiKey = authorizationHeader.split(' ')[1];
+const switchApiKey = (apiKey: string) => {
   return apiKey === MY_MIDJOURNEY_API_KEY
-    ? `Bearer ${MY_MIDJOURNEY_ON_DEMAND_API_KEY}`
-    : `Bearer ${MY_MIDJOURNEY_API_KEY}`;
+    ? MY_MIDJOURNEY_ON_DEMAND_API_KEY
+    : MY_MIDJOURNEY_API_KEY;
 };
 
 let hasApiKeySwitched = false;
-const retryWithDifferentApiKey = async <T>(
-  operation: (headers: {
-    Authorization: string;
-    'Content-Type': string;
-  }) => Promise<T>,
-  initialHeaders: { Authorization: string; 'Content-Type': string },
-): Promise<T> => {
-  try {
-    return await operation(initialHeaders);
-  } catch (error) {
-    if (hasApiKeySwitched) {
-      // If the API key has already been switched, do not switch it again
-      throw error;
-    }
-    // TODO: Add Posthog event
-    console.log('🤧 First attempt failed, retrying with different API key');
-    const newAuthorizationHeader = switchApiKey(initialHeaders.Authorization);
-    const retryHeaders = {
-      ...initialHeaders,
-      Authorization: newAuthorizationHeader,
-    };
-    hasApiKeySwitched = true;
-    return await operation(retryHeaders);
-  }
-};
 
 const handler = async (req: Request) => {
   hasApiKeySwitched = false;
@@ -131,14 +104,212 @@ const handler = async (req: Request) => {
     return new Response('Invalid job id', { status: 400 });
   }
 
+  async function imageGeneration(headers: {
+    Authorization: string;
+    'Content-Type': string;
+  }) {
+    if (!jobInfo) return;
+    if (jobInfo.mjRequest.type !== 'MJ_IMAGE_GEN') {
+      throw new Error('Invalid job type for the calling method');
+    }
+    const userPrompt = jobInfo.mjRequest.userPrompt;
+    const imageStyle = jobInfo.mjRequest.imageStyle;
+    const imageQuality = jobInfo.mjRequest.imageQuality;
+    const temperature = jobInfo.mjRequest.temperature || undefined;
+    let generationPrompt = await translateAndEnhancePrompt(userPrompt);
+    if (!generationPrompt) {
+      throw new Error('Failed to generate prompt');
+    }
+
+    return retryWithDifferentApiKey(async (currentHeaders) => {
+      generationPrompt = generateMjPrompt(
+        generationPrompt as string,
+        imageStyle,
+        imageQuality,
+        temperature,
+        userPrompt,
+      );
+
+      // Put the generated Prompt to JobInfo
+      await MjQueueJob.update(jobInfo.jobId, {
+        mjRequest: {
+          ...(jobInfo.mjRequest as MjImageGenRequest),
+          enhancedPrompt: generationPrompt,
+        },
+      });
+
+      const imageGenerationResponse = await fetch(
+        `https://api.mymidjourney.ai/api/v1/midjourney/imagine`,
+        {
+          method: 'POST',
+          headers: currentHeaders,
+          body: JSON.stringify({
+            prompt: generationPrompt,
+            ref: jobInfo.jobId,
+            // TODO: rollback
+            webhookOverride: `${`https://oriented-balanced-owl.ngrok-free.app`}/api/webhooks/mj-webhook-handler`,
+          }),
+        },
+      );
+      const responseText = await imageGenerationResponse.text();
+
+      if (!imageGenerationResponse.ok) {
+        if (
+          ContentFilterErrorMessageListFromMyMidjourneyProvider.some(
+            (errorMessage) => responseText.includes(errorMessage),
+          )
+        ) {
+          await OriginalMjLogEvent({
+            userId: jobInfo.userId,
+            startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
+            errorMessage: 'Image generation failed due to content filter',
+            promptBeforeProcessing: (jobInfo.mjRequest as MjImageGenRequest)
+              .userPrompt,
+            generationPrompt: generationPrompt,
+          });
+          throw new Error('Image generation failed due to content filter', {
+            cause: {
+              message:
+                'Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.',
+            },
+          });
+        }
+
+        await OriginalMjLogEvent({
+          userId: jobInfo.userId,
+          startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
+          errorMessage: 'Image generation failed',
+          promptBeforeProcessing: (jobInfo.mjRequest as MjImageGenRequest).userPrompt,
+          generationPrompt: generationPrompt,
+        });
+        console.log({
+          responseText,
+        });
+
+        throw new Error('Image generation failed');
+      }
+
+      const responseJson = JSON.parse(responseText);
+
+      if (responseJson.success !== true || !responseJson.messageId) {
+        console.log(responseJson);
+        console.error('Failed during submitting request');
+
+        await OriginalMjLogEvent({
+          userId: jobInfo.userId,
+          startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
+          errorMessage: 'Failed during submitting request',
+          promptBeforeProcessing: (jobInfo.mjRequest as MjImageGenRequest).userPrompt,
+          generationPrompt: generationPrompt,
+        });
+
+        throw new Error('Image generation failed');
+      }
+
+      return responseJson;
+    }, headers);
+  };
+
+  const buttonCommand = async (
+    headers: {
+      Authorization: string;
+      'Content-Type': string;
+    },
+  ) => {
+    if (!jobInfo) return;
+    if (jobInfo.mjRequest.type !== 'MJ_BUTTON_COMMAND') {
+      throw new Error('Invalid job type for the calling method');
+    }
+
+    return retryWithDifferentApiKey(async (currentHeaders) => {
+      const imageGenerationResponse = await fetch(
+        `https://api.mymidjourney.ai/api/v1/midjourney/button`,
+        {
+          method: 'POST',
+          headers: currentHeaders,
+          body: JSON.stringify({
+            messageId: (jobInfo.mjRequest as MjButtonCommandRequest).messageId,
+            button: (jobInfo.mjRequest as MjButtonCommandRequest).button,
+            ref: jobInfo.jobId,
+            // TODO: rollback
+            webhookOverride: `${`https://oriented-balanced-owl.ngrok-free.app`}/api/webhooks/mj-webhook-handler`,
+          }),
+        },
+      );
+      const imageGenerationResponseText = await imageGenerationResponse.text();
+
+      if (!imageGenerationResponse.ok) {
+        if (
+          ContentFilterErrorMessageListFromMyMidjourneyProvider.some(
+            (errorMessage) => imageGenerationResponseText.includes(errorMessage),
+          )
+        ) {
+          throw new Error('Image generation failed due to content filter', {
+            cause: {
+              message:
+                'Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.',
+            },
+          });
+        }
+
+        throw new Error('Image generation failed');
+      }
+
+      const imageGenerationResponseJson = JSON.parse(imageGenerationResponseText);
+
+      if (
+        imageGenerationResponseJson.success !== true ||
+        !imageGenerationResponseJson.messageId
+      ) {
+        console.log(imageGenerationResponseJson);
+        console.error('Failed during submitting request');
+        throw new Error('Image generation failed');
+      }
+
+      return imageGenerationResponseJson;
+    }, headers);
+  };
+
+  const retryWithDifferentApiKey = async <T>(
+    operation: (headers: {
+      Authorization: string;
+      'Content-Type': string;
+    }) => Promise<T>,
+    initialHeaders: { Authorization: string; 'Content-Type': string },
+  ): Promise<T> => {
+    if (!jobInfo) throw new Error('Job info not found');
+    try {
+      return await operation(initialHeaders);
+    } catch (error) {
+      if (hasApiKeySwitched) {
+        // If the API key has already been switched, do not switch it again
+        throw error;
+      }
+      // TODO: Add Posthog event
+      console.log('🤧 First attempt failed, retrying with different API key');
+
+      const currentApiKey = initialHeaders.Authorization.split(' ')[1];
+      const newApiKey = switchApiKey(currentApiKey);
+      const newAuthorizationHeader = `Bearer ${newApiKey}`;
+
+      const retryHeaders = {
+        ...initialHeaders,
+        Authorization: newAuthorizationHeader,
+      };
+      hasApiKeySwitched = true;
+      return await operation(retryHeaders);
+    }
+  };
+
+
   let hasSubtractedUserCredit = false;
   try {
     hasSubtractedUserCredit = await subtractedUserCredit(jobInfo.userId);
     if (jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND') {
-      await buttonCommand(jobInfo, requestHeader);
+      await buttonCommand(requestHeader);
     }
     if (jobInfo.mjRequest.type === 'MJ_IMAGE_GEN') {
-      await imageGeneration(jobInfo, requestHeader);
+      await imageGeneration(requestHeader);
     }
 
     return new NextResponse(JSON.stringify({}), {
@@ -223,176 +394,6 @@ const generateMjPrompt = (
   return resultPrompt;
 };
 
-const imageGeneration = async (
-  job: MjJob,
-  headers: {
-    Authorization: string;
-    'Content-Type': string;
-  },
-) => {
-  if (job.mjRequest.type !== 'MJ_IMAGE_GEN') {
-    throw new Error('Invalid job type for the calling method');
-  }
-  const userPrompt = job.mjRequest.userPrompt;
-  const imageStyle = job.mjRequest.imageStyle;
-  const imageQuality = job.mjRequest.imageQuality;
-  const temperature = job.mjRequest.temperature || undefined;
-  let generationPrompt = await translateAndEnhancePrompt(userPrompt);
-  if (!generationPrompt) {
-    throw new Error('Failed to generate prompt');
-  }
-
-  return retryWithDifferentApiKey(async (currentHeaders) => {
-    generationPrompt = generateMjPrompt(
-      generationPrompt as string,
-      imageStyle,
-      imageQuality,
-      temperature,
-      userPrompt,
-    );
-
-    // Put the generated Prompt to JobInfo
-    await MjQueueJob.update(job.jobId, {
-      mjRequest: {
-        ...(job.mjRequest as MjImageGenRequest),
-        enhancedPrompt: generationPrompt,
-      },
-    });
-
-    const imageGenerationResponse = await fetch(
-      `https://api.mymidjourney.ai/api/v1/midjourney/imagine`,
-      {
-        method: 'POST',
-        headers: currentHeaders,
-        body: JSON.stringify({
-          prompt: generationPrompt,
-          ref: job.jobId,
-          // TODO: rollback
-          webhookOverride: `${`https://oriented-balanced-owl.ngrok-free.app`}/api/webhooks/mj-webhook-handler`,
-        }),
-      },
-    );
-    const responseText = await imageGenerationResponse.text();
-
-    if (!imageGenerationResponse.ok) {
-      if (
-        ContentFilterErrorMessageListFromMyMidjourneyProvider.some(
-          (errorMessage) => responseText.includes(errorMessage),
-        )
-      ) {
-        await OriginalMjLogEvent({
-          userId: job.userId,
-          startTime: job.startProcessingAt || job.enqueuedAt,
-          errorMessage: 'Image generation failed due to content filter',
-          promptBeforeProcessing: (job.mjRequest as MjImageGenRequest)
-            .userPrompt,
-          generationPrompt: generationPrompt,
-          usedOnDemandCredit: job.status !== 'QUEUED' ? !!(job.usedOnDemandCredit) : false,
-        });
-        throw new Error('Image generation failed due to content filter', {
-          cause: {
-            message:
-              'Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.',
-          },
-        });
-      }
-
-      await OriginalMjLogEvent({
-        userId: job.userId,
-        startTime: job.startProcessingAt || job.enqueuedAt,
-        errorMessage: 'Image generation failed',
-        promptBeforeProcessing: (job.mjRequest as MjImageGenRequest).userPrompt,
-        generationPrompt: generationPrompt,
-        usedOnDemandCredit: job.status !== 'QUEUED' ? !!(job.usedOnDemandCredit) : false,
-      });
-      console.log({
-        responseText,
-      });
-
-      throw new Error('Image generation failed');
-    }
-
-    const responseJson = JSON.parse(responseText);
-
-    if (responseJson.success !== true || !responseJson.messageId) {
-      console.log(responseJson);
-      console.error('Failed during submitting request');
-
-      await OriginalMjLogEvent({
-        userId: job.userId,
-        startTime: job.startProcessingAt || job.enqueuedAt,
-        errorMessage: 'Failed during submitting request',
-        promptBeforeProcessing: (job.mjRequest as MjImageGenRequest).userPrompt,
-        generationPrompt: generationPrompt,
-        usedOnDemandCredit: job.status !== 'QUEUED' ? !!(job.usedOnDemandCredit) : false,
-      });
-
-      throw new Error('Image generation failed');
-    }
-
-    return responseJson;
-  }, headers);
-};
-
-const buttonCommand = async (
-  job: MjJob,
-  headers: {
-    Authorization: string;
-    'Content-Type': string;
-  },
-) => {
-  if (job.mjRequest.type !== 'MJ_BUTTON_COMMAND') {
-    throw new Error('Invalid job type for the calling method');
-  }
-
-  return retryWithDifferentApiKey(async (currentHeaders) => {
-    const imageGenerationResponse = await fetch(
-      `https://api.mymidjourney.ai/api/v1/midjourney/button`,
-      {
-        method: 'POST',
-        headers: currentHeaders,
-        body: JSON.stringify({
-          messageId: (job.mjRequest as MjButtonCommandRequest).messageId,
-          button: (job.mjRequest as MjButtonCommandRequest).button,
-          ref: job.jobId,
-          // TODO: rollback
-          webhookOverride: `${`https://oriented-balanced-owl.ngrok-free.app`}/api/webhooks/mj-webhook-handler`,
-        }),
-      },
-    );
-    const imageGenerationResponseText = await imageGenerationResponse.text();
-
-    if (!imageGenerationResponse.ok) {
-      if (
-        ContentFilterErrorMessageListFromMyMidjourneyProvider.some(
-          (errorMessage) => imageGenerationResponseText.includes(errorMessage),
-        )
-      ) {
-        throw new Error('Image generation failed due to content filter', {
-          cause: {
-            message:
-              'Sorry, our safety system detected unsafe content in your message. Please try again with a different topic.',
-          },
-        });
-      }
-
-      throw new Error('Image generation failed');
-    }
-
-    const imageGenerationResponseJson = JSON.parse(imageGenerationResponseText);
-
-    if (
-      imageGenerationResponseJson.success !== true ||
-      !imageGenerationResponseJson.messageId
-    ) {
-      console.log(imageGenerationResponseJson);
-      console.error('Failed during submitting request');
-      throw new Error('Image generation failed');
-    }
-
-    return imageGenerationResponseJson;
-  }, headers);
-};
 
 async function subtractedUserCredit(userId: string): Promise<boolean> {
   try {
