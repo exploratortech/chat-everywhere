@@ -1,7 +1,7 @@
 // This endpoint only allow GPT-3.5 and GPT-3.5 16K models
 import { Logger } from 'next-axiom';
 
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
 import { ERROR_MESSAGES } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
@@ -45,7 +45,11 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   retrieveUserSessionAndLogUsages(req);
-  const { country } = geolocation(req);
+  const { country, city } = geolocation(req);
+  // TODO:Remove this
+  console.log("User country code is " + country);
+  console.log("User city is " + city);
+
 
   const log = new Logger();
   const userIdentifier = req.headers.get('user-browser-id');
@@ -61,8 +65,12 @@ const handler = async (req: Request): Promise<Response> => {
 
     promptToSend = prompt;
     if (!promptToSend) {
-      promptToSend = DEFAULT_SYSTEM_PROMPT;
+      promptToSend = DEFAULT_SYSTEM_PROMPT
     }
+    if (country?.includes('TW')) {
+      promptToSend += RESPONSE_IN_CHINESE_PROMPT;
+    }
+
 
     let temperatureToUse = temperature;
     if (temperatureToUse == null) {
@@ -75,8 +83,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const requireToUseLargerContextWindowModel =
       (await getMessagesTokenCount(messages)) +
-        (await getStringTokenCount(promptToSend)) +
-        1000 >
+      (await getStringTokenCount(promptToSend)) +
+      1000 >
       defaultTokenLimit;
 
     const isPaidUser = await isPaidUserByAuthToken(
@@ -94,8 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (selectedOutputLanguage) {
       messagesToSend[
         messagesToSend.length - 1
-      ].content = `${selectedOutputLanguage} ${
-        messagesToSend[messagesToSend.length - 1].content
+      ].content = `${selectedOutputLanguage} ${messagesToSend[messagesToSend.length - 1].content
       }`;
     }
 
