@@ -287,7 +287,7 @@ const imageGeneration = async (
           promptBeforeProcessing: (job.mjRequest as MjImageGenRequest)
             .userPrompt,
           generationPrompt: generationPrompt,
-          useOnDemandCredit: job.status !== 'QUEUED' ? !!(job.useOnDemandCredit) : false,
+          usedOnDemandCredit: job.status !== 'QUEUED' ? !!(job.usedOnDemandCredit) : false,
         });
         throw new Error('Image generation failed due to content filter', {
           cause: {
@@ -303,7 +303,7 @@ const imageGeneration = async (
         errorMessage: 'Image generation failed',
         promptBeforeProcessing: (job.mjRequest as MjImageGenRequest).userPrompt,
         generationPrompt: generationPrompt,
-        useOnDemandCredit: job.status !== 'QUEUED' ? !!(job.useOnDemandCredit) : false,
+        usedOnDemandCredit: job.status !== 'QUEUED' ? !!(job.usedOnDemandCredit) : false,
       });
       console.log({
         responseText,
@@ -324,7 +324,7 @@ const imageGeneration = async (
         errorMessage: 'Failed during submitting request',
         promptBeforeProcessing: (job.mjRequest as MjImageGenRequest).userPrompt,
         generationPrompt: generationPrompt,
-        useOnDemandCredit: job.status !== 'QUEUED' ? !!(job.useOnDemandCredit) : false,
+        usedOnDemandCredit: job.status !== 'QUEUED' ? !!(job.usedOnDemandCredit) : false,
       });
 
       throw new Error('Image generation failed');

@@ -100,20 +100,20 @@ export const OriginalMjLogEvent = async ({
   promptBeforeProcessing,
   generationPrompt,
   userId,
-  useOnDemandCredit,
+  usedOnDemandCredit,
 }: {
   userId: string;
   startTime: string;
   errorMessage?: string;
   promptBeforeProcessing?: string;
   generationPrompt?: string;
-  useOnDemandCredit: boolean;
+  usedOnDemandCredit: boolean;
 }) => {
   const now = dayjs().valueOf();
   const totalDurationInSeconds = (now - dayjs(startTime).valueOf()) / 1000;
   const payloadToLog: PayloadType = {
     generationLengthInSecond: totalDurationInSeconds,
-    useOnDemandCredit,
+    usedOnDemandCredit,
   };
 
   if (errorMessage) {

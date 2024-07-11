@@ -51,7 +51,7 @@ const handler = async (req: Request): Promise<Response> => {
             startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
             errorMessage:
               'Request timeout, please retry (Never received webhook response from MJ)',
-            useOnDemandCredit: !!(jobInfo.useOnDemandCredit)
+            usedOnDemandCredit: !!(jobInfo.usedOnDemandCredit)
           }),
           trackFailedEvent(
             jobInfo,

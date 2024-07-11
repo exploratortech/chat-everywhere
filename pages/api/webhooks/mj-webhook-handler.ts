@@ -60,7 +60,7 @@ const handleFailedStatus = async (reqBody: any) => {
       jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
         ? jobInfo.mjRequest.button
         : jobInfo.mjRequest.enhancedPrompt,
-    useOnDemandCredit: jobInfo.status !== 'QUEUED' ? !!(jobInfo.useOnDemandCredit) : false,
+    usedOnDemandCredit: jobInfo.status !== 'QUEUED' ? !!(jobInfo.usedOnDemandCredit) : false,
   });
 
   await Promise.all([
@@ -132,7 +132,7 @@ const handleDoneStatus = async (reqBody: any) => {
       jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND'
         ? jobInfo.mjRequest.button
         : jobInfo.mjRequest.enhancedPrompt,
-    useOnDemandCredit: jobInfo.status !== 'QUEUED' ? !!(jobInfo.useOnDemandCredit) : false,
+    usedOnDemandCredit: jobInfo.status !== 'QUEUED' ? !!(jobInfo.usedOnDemandCredit) : false,
   });
 
   const updateJobPromise = MjQueueJob.update(jobId, {

@@ -143,7 +143,7 @@ export type PayloadType = {
   tempAccountName?: string;
 
   // Image Generation
-  useOnDemandCredit?: boolean;
+  usedOnDemandCredit?: boolean;
 
   // MJ Queue
   mjImageGenType?: MjImageGenRequest['type'] | MjButtonCommandRequest['type'];
