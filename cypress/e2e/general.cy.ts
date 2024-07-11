@@ -1,3 +1,5 @@
+import { PRO_USER } from "./account";
+
 describe('Free user usage', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
 
@@ -19,13 +21,11 @@ describe('Free user usage', () => {
 describe('Pro user usage', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
 
-  const userEmail = 'test@exploratorlabs.com';
-  const userPassword = 'chateverywhere';
   beforeEach(() => {
     cy.session(
       'user',
       () => {
-        cy.login(userEmail, userPassword);
+        cy.login(PRO_USER.email, PRO_USER.password);
       },
       {
         validate: () => {
@@ -58,4 +58,4 @@ describe('Pro user usage', () => {
   });
 });
 
-export {};
+export { };

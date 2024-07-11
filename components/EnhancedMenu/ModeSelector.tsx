@@ -86,6 +86,7 @@ const ModeSelector = () => {
       </label>
       <div className="rounded-lg border border-neutral-200 bg-transparent text-neutral-900 dark:border-neutral-600 dark:text-white w-fit pr-1 focus:outline-none">
         <select
+          data-cy="chat-mode-selector"
           className="w-max-20 bg-transparent p-2 focus:outline-none"
           placeholder={t('Select a lang') || ''}
           value={currentSelectedPluginId}
