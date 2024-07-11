@@ -116,7 +116,7 @@ export const MjQueueService = {
             },
             body: JSON.stringify({
               jobId,
-              useOnDemand: processingCount >= 1,
+              useOnDemand: processingCount > 10,
             }),
           });
         };
