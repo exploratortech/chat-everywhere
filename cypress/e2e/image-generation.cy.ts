@@ -31,10 +31,11 @@ describe('Image generation', () => {
   it('is able to create an image via AI Image Mode (MJ)', () => {
     cy.visit(hostUrl);
     cy.get('[data-cy="chat-input"]', { timeout: 20000 }).should('be.visible');
-    cy.get('[data-cy="chat-input"]').click();
+    cy.get('[data-cy="chat-input"]').realClick();
     cy.get('[data-cy="chat-input"]').realType('A fireman is rescuing a cat from a tree.');
     cy.get('[data-cy="chat-enhanced-menu"]').scrollIntoView().should('be.visible');
     cy.get('[data-cy="chat-mode-selector"]').select('AI Image');
+    // TODO: fix this
     cy.pause();
 
     cy.get('[data-cy="chat-send-button"]').click();
