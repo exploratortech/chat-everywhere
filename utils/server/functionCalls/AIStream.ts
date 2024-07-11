@@ -1,12 +1,15 @@
 // This is a simpler rewrite of the OpenAIStream function, which is the main function that handles the AI response.
 // This should be used in tendon with the handler.ts file. For GPT-4 only
-import { DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import {
+  DEFAULT_TEMPERATURE,
+} from '@/utils/app/const';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
-import { getEndpointsAndKeys } from '@/utils/server/api';
 import { normalizeMessages } from '@/utils/server/index';
 
 import { FunctionCall, Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
+
+import { ChatEndpointManager } from '../ChatEndpointManager';
 
 import {
   ParsedEvent,
@@ -34,20 +37,22 @@ export const AIStream = async ({
   messages,
   onUpdateToken,
   functionCalls,
-  useOpenAI = false,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
-  const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(true, countryCode);
+  const model = OpenAIModels[OpenAIModelID.GPT_4O];
 
-  let attempt = 0,
-    stop = false,
-    functionCallName = '',
+  const endpointManager = new ChatEndpointManager(
+    model,
+  );
+
+  const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
+
+  let functionCallName = '',
     functionCallArgumentInJsonString = '';
 
-  const openAIEndpoint = openAIEndpoints[attempt] || '';
-  const openAIKey = openAIKeys[attempt] || '';
-  const model = OpenAIModels[OpenAIModelID.GPT_4];
+  const openAIEndpoint = endpoint || '';
+  const openAIKey = apiKey || '';
 
-  let url = `${openAIEndpoint}/openai/deployments/${process.env.AZURE_OPENAI_GPT_4_MODEL_NAME}/chat/completions?api-version=2024-02-01`;
+  let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2024-02-01`;
 
   const messagesToSend = await shortenMessagesBaseOnTokenLimit(
     '',
@@ -84,34 +89,25 @@ export const AIStream = async ({
   requestHeaders['api-key'] = openAIKey;
 
   let res;
-  if (useOpenAI) {
-    bodyToSend.model = 'gpt-4-0125-preview';
-    console.log(
-      'Sending request to: https://api.openai.com/v1/chat/completions',
-    );
 
-    res = await fetch('https://api.openai.com/v1/chat/completions', {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      method: 'POST',
-      body: JSON.stringify(bodyToSend),
-    });
-  } else {
-    console.log('Sending request to: ' + url);
-    res = await fetch(url, {
-      headers: requestHeaders,
-      method: 'POST',
-      body: JSON.stringify(bodyToSend),
-    });
-  }
+  console.log('Sending request to: ' + url);
+  res = await fetch(url, {
+    headers: requestHeaders,
+    method: 'POST',
+    body: JSON.stringify(bodyToSend),
+  });
 
   const decoder = new TextDecoder();
 
   if (res.status !== 200) {
+    const errorMessage = await res.text();
     throw new Error(
-      `Error: ${res.status} ${res.statusText} ${await res.text()}`,
+      `Error: ${res.status} ${res.statusText} ${errorMessage}`,
+      {
+        cause: {
+          message: `Error: ${res.status} ${res.statusText} ${errorMessage}`,
+        }
+      }
     );
   }
 
@@ -123,11 +119,10 @@ export const AIStream = async ({
       const json = JSON.parse(data);
       if (json.choices[0]) {
         if (json.choices[0].finish_reason != null) {
-          stop = true;
           return;
         }
 
-        if (json.choices[0].delta.function_call) {
+        if (json.choices[0].delta?.function_call) {
           const delta = json.choices[0].delta;
           if (delta.function_call.arguments) {
             functionCallArgumentInJsonString += delta.function_call.arguments;
@@ -138,7 +133,7 @@ export const AIStream = async ({
           }
         }
 
-        const text = json.choices[0].delta.content || '';
+        const text = json.choices[0].delta?.content || '';
         onUpdateToken(text);
       }
     }

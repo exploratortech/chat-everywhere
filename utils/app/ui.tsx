@@ -24,6 +24,7 @@ export const PlanDetail = {
       'Cloud sync',
       'AI speech',
       'Online mode',
+      'Conversation mode',
       'GPT-4 (50 response/month + credit)',
       'MidJourney generation (50 images/month + credit)',
       '16K model',
@@ -35,6 +36,7 @@ export const PlanDetail = {
       'Cloud sync',
       'AI speech',
       'Online mode',
+      'Conversation mode',
       '16K model',
       'LINE connection',
       'Unlimited GPT-4',
@@ -72,6 +74,7 @@ export const getPluginIcon = (
     case PluginID.LANGCHAIN_CHAT:
       return <IconBrain size={size} />;
     case PluginID.GPT4:
+    case PluginID.GPT4O:
       return <IconNumber4 size={size} />;
     case PluginID.IMAGE_GEN:
       return <IconPaint size={size} />;
@@ -137,6 +140,18 @@ export const removeSecondLastLine = (originalText: string): string => {
   return originalText.replace(toBeRemovedString, '');
 };
 
+export const addContinueButton = (originalText: string): string => {
+  const textLength = originalText.length;
+  // if text length < 10, we take whole text, else we take last 10 chars
+  const maxChunkLength = textLength < 10 ? textLength : textLength - 10;
+  const lastWords = originalText.slice(-maxChunkLength);
+  const cleanedLastWords = lastWords.replace(/[\n`#*<>]/g, ' ');
+
+  const continueButtonHtml = `<div id="chat-continue-button" data-last-words="${cleanedLastWords}"></div>`;
+  const result = `${originalText}\n ${continueButtonHtml} \n `;
+
+  return result;
+};
 export const capitalizeFirstLetter = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };

@@ -169,7 +169,10 @@ export const triggerHelperFunction = async (
               upsert: false,
               contentType: 'image/png',
             });
-          if (fileUploadError) throw fileUploadError;
+          if (fileUploadError) {
+            console.log('Error in storeImage: ', fileUploadError);
+            throw fileUploadError;
+          }
 
           const { data: imagePublicUrlData } = await supabase.storage
             .from('ai-images')
@@ -184,8 +187,15 @@ export const triggerHelperFunction = async (
               },
             });
 
-          if (!imagePublicUrlData) throw new Error('Image generation failed');
+          if (!imagePublicUrlData) {
+            console.log('Error in storeImage, no imagePublicUrlData');
+            throw new Error('Image generation failed');
+          }
 
+          console.log(
+            'Stored image to Supabase storage completed: ',
+            imagePublicUrlData,
+          );
           return {
             compressedUrl: compressedImageUrl.data.publicUrl,
             imagePublicUrl: imagePublicUrlData.publicUrl,
@@ -231,6 +241,10 @@ export const triggerHelperFunction = async (
         const [imageGenerationResponse1, imageGenerationResponse2] =
           await Promise.all([generateAndStoreImage(), generateAndStoreImage()]);
 
+        console.log({
+          imageGenerationResponse1,
+          imageGenerationResponse2,
+        });
         if (onProgressUpdate) {
           onProgressUpdate({
             content: 'Artwork is done, now adding the final touches...✨',

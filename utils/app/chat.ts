@@ -21,7 +21,7 @@ import {
   removeTempHtmlString,
 } from './htmlStringHandler';
 import { reorderItem } from './rank';
-import { removeSecondLastLine } from './ui';
+import { addContinueButton, removeSecondLastLine } from './ui';
 
 import '@formatjs/intl-segmenter/polyfill';
 import dayjs from 'dayjs';
@@ -268,17 +268,17 @@ async function handleDataResponse(
     text += chunkValue;
 
     if (text.includes('[DONE]')) {
-      text = text.replace('[DONE]', '');
+      text = text.replace(/\[DONE\]/g, '');
       done = true;
     }
 
     if (text.includes('[16K]')) {
-      text = text.replace('[16K]', '');
+      text = text.replace(/\[16K\]/g, '');
       largeContextResponse = true;
     }
 
     if (text.includes('[16K-Optional]')) {
-      text = text.replace('[16K-Optional]', '');
+      text = text.replace(/\[16K-Optional\]/g, '');
       showHintForLargeContextResponse = true;
     }
 
@@ -287,14 +287,19 @@ async function handleDataResponse(
     }
 
     if (text.includes('[REMOVE_LAST_LINE]')) {
-      text = text.replace('[REMOVE_LAST_LINE]', '');
+      text = text.replace(/\[REMOVE_LAST_LINE\]/g, '');
       text = removeSecondLastLine(text);
+    }
+
+    if (text.includes('[PLACEHOLDER_FOR_CONTINUE_BUTTON]')) {
+      text = text.replace('[PLACEHOLDER_FOR_CONTINUE_BUTTON]', '');
+      text = addContinueButton(text);
     }
 
     // We can use this command to trigger the initial stream of Edge function response
     // so we have more than 25 seconds on Vercel Edge network to wait for response
     if (text.includes('[PLACEHOLDER]')) {
-      text = text.replace('[PLACEHOLDER]', '');
+      text = text.replace(/\[PLACEHOLDER\]/g, '');
     }
 
     if (isFirst) {
@@ -364,6 +369,7 @@ async function handleDataResponse(
     updatedConversations = reorderItem(
       updatedConversations,
       updatedConversation.id,
+      updatedConversations.length - 1,
       0,
     );
   }

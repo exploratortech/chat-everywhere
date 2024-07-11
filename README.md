@@ -5,12 +5,13 @@
 Chat Everywhere is an app designed to showcase the capabilities of Large Language Models and make them accessible to everyone without login or geo-restrictions. Our community has contributed valuable feedback during the app's development, resulting in additional features not found in the official ChatGPT.
 
 ## Additional Features
+
 - Folder structures
 - Prompt templates
 - Import/Export conversations
 - Delete message
 - Multi language support
-> ^Thanks to the [open-source community](https://github.com/mckaywrigley/chatbot-ui)
+  > ^Thanks to the [open-source community](https://github.com/mckaywrigley/chatbot-ui)
 - Share conversations
 - Internet connected enhance mode (Beta)
 - Respond Language selection (Coming up)
@@ -66,26 +67,30 @@ npm run dev
 
 Start chatting and enjoy!
 
-
 ### Set up the web browser tool endpoint for Online mode
 
 1. Ensure that the environment variable `WEB_CONTENT_FUNCTION_SECRET` is set in the project's root folder and in `./firebase/functions/`.
 2. Deploy the Firebase functions using `npm run deploy`.
 3. Update the `WEB_CONTENT_FUNCTION_ENDPOINT` after completing the initial deployment.
 
+## # Set up `ai-images` bucket for AI Painter feature for Local development
+
+1. Create a supabase bucket `ai-images` and make it public in the Local supabase server.
+
 ### Set up image-to-prompt feature bucket for Local development
 
 1. Create a supabase bucket `image-to-prompt` and make it public in the Local supabase server.
 2. Go to file `pages/api/image-to-prompt.ts` and uncomment the function `replaceLocalhost`
-3. Update the variable `ngrokHost ` and `localSupabaseHost`
+3. Update the variable `ngrokHost` and `localSupabaseHost`
 4. Uncomment the line where url is passed to `url: replaceLocalhost(url)`, in function `nextLegDescribe`
 5. Now that your supabase bucket is accessible from the internet, so that the next leg api can access it.
 
 ### Set up the Teacher Portal for Local development
+
 1. Create a supabase bucket `student_message_submissions_image` and make it public in the Local supabase server.
 
-
 ### Database migration guide
+
 1. Make the changes in local Supabase emulator
 2. Generate a new migration file with `supabase migration new migration_file_name`
 3. Get database difference with `supabase db diff`
@@ -93,13 +98,14 @@ Start chatting and enjoy!
 
 ### Install Redis for local development
 
-1. Install instructions: https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-mac-os/
+1. Install instructions: <https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-mac-os/>
+
 - After the installation, there is no need to run the Redis server manually. We are using the containerized version of Redis for local development.
 - If you already have Redis installed and have another Redis server running on the default port(6379), you can change the port by modifying the `docker-compose.yml` file.
 
 2. Run Serverless Redis Server(SRS) for local development
 
-Reference: https://upstash.com/docs/oss/sdks/ts/redis/developing
+Reference: <https://upstash.com/docs/oss/sdks/ts/redis/developing>
 
 ```bash
 docker compose up
@@ -111,7 +117,3 @@ docker compose up
 UPSTASH_REDIS_REST_URL="http://localhost:8079"
 UPSTASH_REDIS_REST_TOKEN="example_token"
 ```
-
-
-
-

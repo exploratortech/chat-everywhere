@@ -17,6 +17,25 @@ const supabase = getAdminSupabaseClient();
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
+  regions: [
+    'arn1',
+    'bom1',
+    'cdg1',
+    'cle1',
+    'cpt1',
+    'dub1',
+    'fra1',
+    'gru1',
+    'hnd1',
+    'iad1',
+    'icn1',
+    'kix1',
+    'lhr1',
+    'pdx1',
+    'sfo1',
+    'sin1',
+    'syd1',
+  ],
 };
 
 const BUCKET_NAME = process.env.GCP_CHAT_WITH_DOCUMENTS_BUCKET_NAME as string;
@@ -115,13 +134,31 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
     return new Response(
-      await callGeminiAPI(
-        user.id,
+      await callGeminiAPI({
+        userIdentifier: user.id,
         contents,
         generationConfig,
         systemInstruction,
-        messageToSend,
-      ),
+        messagesToSendInArray: messageToSend,
+        safetySettings: [
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_ONLY_HIGH',
+          },
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_ONLY_HIGH',
+          },
+          {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_ONLY_HIGH',
+          },
+          {
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_ONLY_HIGH',
+          },
+        ],
+      }),
     );
   } catch (error) {
     console.error(error);

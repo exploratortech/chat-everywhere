@@ -56,7 +56,10 @@ export default function SettingsModel({ onClose }: Props) {
         <SettingsModelContext.Provider
           value={{ ...settingsContext, closeModel: onClose }}
         >
-          <div className="fixed inset-0 overflow-y-auto">
+          <div
+            className="fixed inset-0 overflow-y-auto"
+            data-cy="chatbar-settings-modal"
+          >
             <div className="flex min-h-full items-center justify-center text-center mobile:block">
               <Transition.Child
                 as={Fragment}

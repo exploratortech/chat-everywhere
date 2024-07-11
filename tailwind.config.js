@@ -17,11 +17,14 @@ module.exports = {
     extend: {
       screens: {
         mobile: {
-          raw: '(max-width: 640px)',
+          'raw': '(max-width: 640px)',
         },
         tablet: {
-          raw: '(max-width: 768px)',
+          'raw': '(max-width: 768px)',
         },
+        largeDesktop: {
+          'raw': '(min-width: 1040px)',
+        }
       },
       colors: {
         border: 'hsl(var(--border))',

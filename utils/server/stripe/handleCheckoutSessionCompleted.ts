@@ -120,6 +120,7 @@ async function addCreditToUser(
       | PluginID.aiPainter
       | PluginID.default
       | PluginID.GEMINI
+      | PluginID.GPT4O
     >,
     credit,
   );

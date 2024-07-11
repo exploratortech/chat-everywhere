@@ -94,13 +94,6 @@ const useLogoutHook = () => {
       resetStateOnLogout({});
     }
 
-    dispatch({
-      field: 'featureFlags',
-      value: {
-        'enable-conversation-mode': false,
-      },
-    });
-
     toast.success(t('You have been logged out'));
     clearUserInfo();
   };
