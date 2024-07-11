@@ -144,6 +144,7 @@ export type PayloadType = {
 
   // Image Generation
   usedOnDemandCredit?: boolean;
+  lastUsedKey?: MjJob['lastUsedKey'];
 
   // MJ Queue
   mjImageGenType?: MjImageGenRequest['type'] | MjButtonCommandRequest['type'];
