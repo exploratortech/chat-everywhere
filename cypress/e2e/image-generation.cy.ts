@@ -17,6 +17,8 @@ describe('Image generation', () => {
         },
       },
     );
+
+    cy.visit(hostUrl);
   });
 
   after(() => {
@@ -29,14 +31,23 @@ describe('Image generation', () => {
     cy.contains('You have been logged out');
   });
   it('is able to create an image via AI Image Mode (MJ)', () => {
-    cy.visit(hostUrl);
-    cy.get('[data-cy="chat-input"]', { timeout: 20000 }).should('be.visible');
+    cy.get('[data-cy="chat-enhanced-menu-container"]', { timeout: 5000 }).then(() => {
+      // This is to ensure the menu is rendered
+      cy.get('[data-cy="chat-enhanced-menu-container"]').should('have.css', 'display', 'none');
+    })
+
+    cy.get('[data-cy="chat-input"]', { timeout: 2000 }).then(() => {
+      // Ensure the enhanced menu is displayed
+      cy.get('[data-cy="chat-input"]').realTouch();
+      cy.get('[data-cy="chat-input"]').realMouseDown();
+    });
+
+    cy.get('[data-cy="chat-enhanced-menu-container"]').should('have.css', 'display', 'flex');
     cy.get('[data-cy="chat-input"]').realClick();
     cy.get('[data-cy="chat-input"]').realType('A fireman is rescuing a cat from a tree.');
     cy.get('[data-cy="chat-enhanced-menu"]').scrollIntoView().should('be.visible');
     cy.get('[data-cy="chat-mode-selector"]').select('AI Image');
-    // TODO: fix this
-    cy.pause();
+
 
     cy.get('[data-cy="chat-send-button"]').click();
     cy.get('[data-cy="assistant-respond-message"]').within(() => {
