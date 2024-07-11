@@ -93,7 +93,6 @@ const handler = async (req: Request) => {
     requestHeader.Authorization = `Bearer ${MY_MIDJOURNEY_ON_DEMAND_API_KEY}`;
   }
 
-  // TODO: add Posthog event
   console.log(
     '🤧 Using on-demand API key: ',
     !!(requestBody.useOnDemand && MY_MIDJOURNEY_ON_DEMAND_API_KEY),
@@ -152,8 +151,7 @@ const handler = async (req: Request) => {
           body: JSON.stringify({
             prompt: generationPrompt,
             ref: jobInfo.jobId,
-            // TODO: rollback
-            webhookOverride: `${`https://oriented-balanced-owl.ngrok-free.app`}/api/webhooks/mj-webhook-handler`,
+            webhookOverride: `${getHomeUrl()}/api/webhooks/mj-webhook-handler`,
           }),
         },
       );
@@ -237,8 +235,7 @@ const handler = async (req: Request) => {
             messageId: (jobInfo.mjRequest as MjButtonCommandRequest).messageId,
             button: (jobInfo.mjRequest as MjButtonCommandRequest).button,
             ref: jobInfo.jobId,
-            // TODO: rollback
-            webhookOverride: `${`https://oriented-balanced-owl.ngrok-free.app`}/api/webhooks/mj-webhook-handler`,
+            webhookOverride: `${getHomeUrl()}/api/webhooks/mj-webhook-handler`,
           }),
         },
       );
@@ -291,7 +288,6 @@ const handler = async (req: Request) => {
         // If the API key has already been switched, do not switch it again
         throw error;
       }
-      // TODO: Add Posthog event
       console.log('🤧 First attempt failed, retrying with different API key');
 
       const currentApiKey = initialHeaders.Authorization.split(' ')[1];
