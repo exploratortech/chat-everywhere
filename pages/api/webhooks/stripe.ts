@@ -15,11 +15,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const isProd = process.env.VERCEL_ENV === 'production';
+
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     res.status(405).end('Method Not Allowed');
     return;
   }
+
   const sig = req.headers['stripe-signature'] as string;
   let event: Stripe.Event;
 
@@ -33,11 +36,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch (err) {
-    console.error(
-      `Webhook signature verification failed.`,
-      (err as any).message,
-    );
-    return res.status(400).send(`Webhook signature verification failed.`);
+    const bodyData = JSON.parse(rawBody.toString());
+
+    // The testEvent is only available in the non-prod environment, its used by Cypress `api/cypress/test-payment-event`
+    if (!isProd && bodyData.testEvent) {
+      event = bodyData.testEvent;
+    } else {
+      console.error(
+        `Webhook signature verification failed.`,
+        (err as any).message,
+      );
+      return res.status(400).send(`Webhook signature verification failed.`);
+    }
+
   }
 
   try {
