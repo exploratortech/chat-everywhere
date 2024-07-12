@@ -20,12 +20,15 @@ describe('Free user usage', () => {
 // Pro user usage
 describe('Pro user usage', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
+  const isRunningOnProduction = hostUrl === 'https://chateverywhere.app';
 
   beforeEach(() => {
+    const password = isRunningOnProduction ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION') : PRO_USER.password;
+
     cy.session(
       'user',
       () => {
-        cy.login(PRO_USER.email, PRO_USER.password);
+        cy.login(PRO_USER.email, password);
       },
       {
         validate: () => {
