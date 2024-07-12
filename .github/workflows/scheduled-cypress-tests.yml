@@ -61,5 +61,5 @@ jobs:
             
             Please check the GitHub Actions logs for more details:
             https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          to: derek@exploratorlabs.com
+          to: derek@exploratorlabs.com,jack@exploratorlabs.com
           from: Cypress Tests <team@chateverywhere.app>
