@@ -25,7 +25,7 @@ jobs:
           start: npm run cypress:run -- --spec "cypress/e2e/general.cy.ts,cypress/e2e/image-generation.cy.ts"
           browser: chrome
         env:
-          CYPRESS_HOST_URL: 'https://chat-everywhere.com'
+          CYPRESS_HOST_URL: 'https://chateverywhere.app'
 
       - uses: actions/upload-artifact@v1
         if: failure()
