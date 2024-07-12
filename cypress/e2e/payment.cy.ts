@@ -1,0 +1,98 @@
+import { TEST_PAYMENT_USER } from "./account";
+
+describe('Test Payment Flow', () => {
+  const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
+
+
+  beforeEach(() => {
+    cy.session(
+      'user',
+      () => {
+        cy.login(TEST_PAYMENT_USER.email, TEST_PAYMENT_USER.password);
+      },
+      {
+        validate: () => {
+          cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).should(
+            'be.visible',
+          );
+        },
+      },
+    );
+
+    cy.visit(hostUrl);
+  });
+
+  // Reset payment by calling API
+  afterEach(() => {
+    cy.request({
+      method: 'POST',
+      url: '/api/cypress/reset-test-payment-user-subscription',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  });
+
+  // Logout 
+  after(() => {
+    cy.get('[data-cy="settings-button"]').click();
+    cy.get('[data-cy="chatbar-settings-modal"]')
+      .scrollIntoView()
+      .should('be.visible');
+    cy.get('[data-cy="sign-out-confirmation-button"]').click();
+    cy.get('[data-cy="sign-out-and-clear-button"]').click();
+    cy.contains('You have been logged out');
+  });
+  it('upgrade to pro plan', () => {
+    // Make sure the user is on Free plan.
+    cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
+      expect($el).to.have.text('Free');
+    });
+
+    // calls the `/api/cypress/test-payment-event` endpoint to test the payment flow.
+    cy.request({
+      method: 'POST',
+      url: '/api/cypress/test-payment-event',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        plan: 'pro',
+      },
+    });
+
+    // Refreshes the page and checks if the user is on Pro plan.
+    cy.reload();
+    cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
+      expect($el).to.have.text('Pro');
+    });
+  });
+
+  // DOING: add test for Ultra plan
+  it('upgrade to ultra plan', () => {
+    // Make sure the user is on Free plan.
+    cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
+      expect($el).to.have.text('Free');
+    });
+
+    // calls the `/api/cypress/test-payment-event` endpoint to test the payment flow.
+    cy.request({
+      method: 'POST',
+      url: '/api/cypress/test-payment-event',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        plan: 'ultra',
+      },
+    });
+
+
+    // Refreshes the page and checks if the user is on Ultra plan.
+    cy.reload();
+    cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
+      expect($el).to.have.text('Ultra');
+    });
+  });
+});
+
