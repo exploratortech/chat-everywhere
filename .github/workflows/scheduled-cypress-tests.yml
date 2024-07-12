@@ -1,9 +1,6 @@
 name: Scheduled Cypress Tests
 
 on:
-  # TODO: Remove pull_request trigger
-  pull_request:
-    types: [closed, synchronize, opened, edited]
   schedule:
     # every day at 12:00 AM GMT+8 (20:00 UTC)
     - cron: '0 20 * * *'
