@@ -30,7 +30,7 @@ jobs:
           browser: chrome
         env:
           CYPRESS_HOST_URL: 'https://chateverywhere.app'
-          CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION: ${{secrets.CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION}}
+          CYPRESS_PRO_ACCOUNT_PASSOWORD_PRODUCTION: ${{secrets.CYPRESS_PRO_ACCOUNT_PASSOWORD_PRODUCTION}}
           
 
       - uses: actions/upload-artifact@v1
