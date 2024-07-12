@@ -27,6 +27,7 @@ dayjs.extend(utc);
 
 export default async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
+  isFakeEvent = false,
 ): Promise<void> {
   const userId = session.client_reference_id;
   const email = session.customer_details?.email;
@@ -58,6 +59,7 @@ export default async function handleCheckoutSessionCompleted(
         stripeSubscriptionId,
         userId || undefined,
         email || undefined,
+        isFakeEvent,
       );
     } else if (session.mode === 'payment') {
       // One-time payment flow
@@ -133,12 +135,14 @@ async function handleSubscription(
   stripeSubscriptionId: string,
   userId: string | undefined,
   email: string | undefined,
+  isFakeEvent = false,
 ) {
   const subscription = await StripeHelper.subscription.getSubscriptionById(
     stripeSubscriptionId,
   );
+  // NOTE: Since the stripeSubscriptionId is fake, we use the current date to simulate the expiration date
   const currentPeriodEnd = dayjs
-    .unix(subscription.current_period_end)
+    .unix(isFakeEvent ? dayjs().add(2, 'month').unix() : subscription.current_period_end)
     .utc()
     .toDate();
 
