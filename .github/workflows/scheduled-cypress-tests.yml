@@ -30,9 +30,7 @@ jobs:
           browser: chrome
         env:
           CYPRESS_HOST_URL: 'https://chateverywhere.app'
-          # TODO: Remove this when we have a repo environment variable for the password
-          # CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION: ${{secrets.CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION}}
-          CYPRESS_PRO_ACCOUNT_PASSOWORD_PRODUCTION: 'chateverywhere'
+          CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION: ${{secrets.CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION}}
           
 
       - uses: actions/upload-artifact@v1
@@ -55,9 +53,7 @@ jobs:
           server_port: 2465
           secure: true
           username: resend
-          # TODO: Remove this when we have a repo environment variable for the password
-          # password: ${{secrets.RESEND_API_KEY}}
-          password: "re_N9wAqzC6_DrT2tNPjSx2aAW1wrWSSrKhz"
+          password: ${{secrets.RESEND_API_KEY}}
           subject: "Daily Cypress Tests Failed - Chat Everywhere"
           body: |
             The scheduled Cypress tests for Chat Everywhere have failed.
