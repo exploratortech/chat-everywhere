@@ -1,6 +1,7 @@
 name: Scheduled Cypress Tests
 
 on:
+  # TODO: Remove pull_request trigger
   pull_request:
     types: [closed, synchronize, opened, edited]
   schedule:
@@ -29,6 +30,10 @@ jobs:
           browser: chrome
         env:
           CYPRESS_HOST_URL: 'https://chateverywhere.app'
+          # TODO: Remove this when we have a repo environment variable for the password
+          # CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION: ${{secrets.CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION}}
+          CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION: 'chateverywhere'
+          
 
       - uses: actions/upload-artifact@v1
         if: failure()
@@ -50,6 +55,7 @@ jobs:
           server_port: 2465
           secure: true
           username: resend
+          # TODO: Remove this when we have a repo environment variable for the password
           # password: ${{secrets.RESEND_API_KEY}}
           password: "re_N9wAqzC6_DrT2tNPjSx2aAW1wrWSSrKhz"
           subject: "Daily Cypress Tests Failed - Chat Everywhere"
