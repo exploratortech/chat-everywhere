@@ -22,7 +22,10 @@ jobs:
         uses: cypress-io/github-action@v6
         timeout-minutes: 30
         with:
-          start: npm run cypress:run -- --spec "cypress/e2e/general.cy.ts,cypress/e2e/image-generation.cy.ts"
+     start: npm run cypress:run
+          spec: |
+            cypress/e2e/general.cy.ts
+            cypress/e2e/image-generation.cy.ts
           browser: chrome
         env:
           CYPRESS_HOST_URL: 'https://chateverywhere.app'
