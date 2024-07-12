@@ -32,7 +32,7 @@ jobs:
           CYPRESS_HOST_URL: 'https://chateverywhere.app'
           # TODO: Remove this when we have a repo environment variable for the password
           # CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION: ${{secrets.CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION}}
-          CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION: 'chateverywhere'
+          CYPRESS_PRO_ACCOUNT_PASSOWORD_PRODUCTION: 'chateverywhere'
           
 
       - uses: actions/upload-artifact@v1

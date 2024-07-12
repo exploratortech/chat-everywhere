@@ -24,10 +24,7 @@ describe('Pro user usage', () => {
 
   beforeEach(() => {
     // TODO: Remove this when we have a repo environment variable for the password
-    cy.log('isRunningOnProduction: ', isRunningOnProduction);
-    cy.log('Cypress.env(CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION): ', Cypress.env('CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION'));
-    cy.screenshot('cypress-env-CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION');
-    const password = isRunningOnProduction ? Cypress.env('CYPRESS_ACCOUNT_PASSOWORD_PRODUCTION') : PRO_USER.password;
+    const password = isRunningOnProduction ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION') : PRO_USER.password;
 
     cy.session(
       'user',
