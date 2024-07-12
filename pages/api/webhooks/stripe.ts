@@ -15,6 +15,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  let isFakeEvent = false;
   const isProd = process.env.VERCEL_ENV === 'production';
 
   if (req.method !== 'POST') {
@@ -38,9 +39,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } catch (err) {
     const bodyData = JSON.parse(rawBody.toString());
 
-    // The testEvent is only available in the non-prod environment, its used by Cypress `api/cypress/test-payment-event`
-    if (!isProd && bodyData.testEvent) {
-      event = bodyData.testEvent;
+    // The fakeEvent is only available in the non-prod environment, its used by Cypress `api/cypress/test-payment-event`
+    if (!isProd && bodyData.fakeEvent) {
+      event = bodyData.fakeEvent;
+      isFakeEvent = true;
     } else {
       console.error(
         `Webhook signature verification failed.`,
@@ -51,6 +53,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   }
 
+
   try {
     switch (event.type) {
       case 'checkout.session.completed':
@@ -58,6 +61,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         console.log('✅ checkout.session.completed');
         await handleCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
+          isFakeEvent,
         );
         break;
       case 'customer.subscription.updated':
