@@ -57,6 +57,7 @@
     "cheerio": "^1.0.0-rc.12",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "cypress-real-events": "^1.13.0",
     "dayjs": "^1.11.7",
     "eventsource-parser": "^0.1.0",
     "html-to-md": "^0.8.3",

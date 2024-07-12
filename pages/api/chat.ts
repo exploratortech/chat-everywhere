@@ -51,6 +51,8 @@ const handler = async (req: Request): Promise<Response> => {
   console.log("User city is " + city);
 
 
+
+
   const log = new Logger();
   const userIdentifier = req.headers.get('user-browser-id');
   const pluginId = req.headers.get('user-selected-plugin-id');
