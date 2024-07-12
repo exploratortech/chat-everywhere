@@ -1,0 +1,63 @@
+name: Scheduled Cypress Tests
+
+on:
+  pull_request:
+    types: [closed, synchronize, opened, edited]
+  schedule:
+    # every day at 12:00 AM GMT+8 (20:00 UTC)
+    - cron: '0 20 * * *'
+
+jobs:
+  run_scheduled_tests:
+    name: Run Scheduled Cypress Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Cypress folders
+        run: mkdir -p cypress/screenshots cypress/videos
+
+      - name: Install packages and run specific Cypress tests
+        uses: cypress-io/github-action@v6
+        timeout-minutes: 30
+        with:
+          start: npm run cypress:run -- --spec "cypress/e2e/general.cy.ts,cypress/e2e/image-generation.cy.ts"
+          browser: chrome
+        env:
+          CYPRESS_HOST_URL: 'https://chat-everywhere.com'
+
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+            
+      - name: Send email on failure
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.resend.com
+          server_port: 2465
+          secure: true
+          username: resend
+          # password: ${{secrets.RESEND_API_KEY}}
+          password: "re_N9wAqzC6_DrT2tNPjSx2aAW1wrWSSrKhz"
+          subject: "Daily Cypress Tests Failed - Chat Everywhere"
+          body: |
+            The scheduled Cypress tests for Chat Everywhere have failed.
+            
+            Repository: ${{ github.repository }}
+            Workflow: ${{ github.workflow }}
+            Run ID: ${{ github.run_id }}
+            
+            Please check the GitHub Actions logs for more details:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          to: derek@exploratorlabs.com
+          from: Cypress Tests <team@chateverywhere.app>
