@@ -1,13 +1,23 @@
 import { TEST_PAYMENT_USER } from '@/cypress/e2e/account';
 import { getHomeUrl } from '@/utils/app/api';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
+import { z } from 'zod';
 
 export const config = {
   runtime: 'edge',
 };
 
+const requestSchema = z.object({
+  plan: z.enum(['pro', 'ultra'])
+});
+
 const handler = async (req: Request): Promise<Response> => {
   const isProd = process.env.VERCEL_ENV === 'production';
+
+  if (req.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 });
+  }
+
   try {
     if (isProd) {
       return new Response('Not allowed in production', { status: 403 });
@@ -259,17 +269,26 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // read req body (plan: pro/ultra)
-    // const body = await req.json();
-    // const plan = body.plan;
+    const body = await req.json();
+    const validationResult = requestSchema.safeParse(body);
 
+    if (!validationResult.success) {
+      return new Response('Invalid request body. Plan must be either "pro" or "ultra".', { status: 400 });
+    }
+
+    const { plan } = validationResult.data;
+
+    if (!plan) {
+      throw new Error('Missing plan in the request body');
+    }
     const response = await fetch(`${getHomeUrl()}/api/webhooks/stripe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      // TODO: add the correct body for the plan
-      // body: JSON.stringify(plan === 'pro' ? fakeProPlanSubscriptionEvent : fakeUltraPlanSubscriptionEvent),
-      body: JSON.stringify({ fakeEvent: fakeUltraPlanSubscriptionEvent }),
+      body: JSON.stringify({
+        fakeEvent: plan === 'pro' ? fakeProPlanSubscriptionEvent : fakeUltraPlanSubscriptionEvent,
+      }),
     });
 
     if (!response.ok) {
