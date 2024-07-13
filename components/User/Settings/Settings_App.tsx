@@ -53,28 +53,33 @@ export default function Settings_App() {
               {t('Speech configuration')}
             </span>
           </div>
-          <div className="flex mt-0 md:space-x-4 bg-transparent items-center">
-            <div className="w-1/2">
-              <label
-                htmlFor="speechSpeed"
-                className="block text-sm font-medium"
-              >
-                {t('Speech Speed')}
-              </label>
+          <div className="flex flex-col mt-0 md:space-x-4 bg-transparent items-center">
+            <div className="w-full flex flex-row">
+              <div className="w-1/2">
+                <label
+                  htmlFor="speechSpeed"
+                  className="block text-sm font-medium"
+                >
+                  {t('Speech Speed')}
+                </label>
+              </div>
+              <div className="w-1/2">
+                <select
+                  id="speechSpeed"
+                  name="speechSpeed"
+                  value={speechSpeedConfig}
+                  onChange={(e) => speechSpeedOnChange(e.target.value)}
+                  className="mt-1 block w-full pl-3 pr-10 py-2 focus:outline-none text-sm rounded-md bg-[#171717] text-end"
+                >
+                  <option value={'slow'}>{t('Slow')}</option>
+                  <option value={'normal'}>{t('Normal')}</option>
+                  <option value={'fast'}>{t('Fast')}</option>
+                </select>
+              </div>
             </div>
-            <div className="w-1/2">
-              <select
-                id="speechSpeed"
-                name="speechSpeed"
-                value={speechSpeedConfig}
-                onChange={(e) => speechSpeedOnChange(e.target.value)}
-                className="mt-1 block w-full pl-3 pr-10 py-2 focus:outline-none text-sm rounded-md bg-[#171717] text-end"
-              >
-                <option value={'slow'}>{t('Slow')}</option>
-                <option value={'normal'}>{t('Normal')}</option>
-                <option value={'fast'}>{t('Fast')}</option>
-              </select>
-            </div>
+            <p className="text-xs text-gray-500 mt-2 w-full text-left !ml-0">
+              {t("The 'Auto' option in Speech language will not be affected by the Speech speed setting.")}
+            </p>
           </div>
         </>
       )}

@@ -27,9 +27,9 @@ function getAvailableLocales() {
 // https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=stt#supported-languages
 function getAvailableSpeechSourceLanguages() {
   return [
+    { name: 'Auto', value: 'auto' },
     { name: 'English', value: 'en-US' },
-    { name: '國語(簡体)', value: 'zh-CN' },
-    { name: '國語(繁體)', value: 'zh-TW' },
+    { name: '國語', value: 'zh-TW' },
     { name: '廣東話', value: 'zh-HK' },
     { name: 'বাংলা', value: 'bn-IN' },
     { name: 'Deutsch', value: 'de-DE' },
@@ -53,8 +53,8 @@ function getAvailableSpeechSourceLanguages() {
 }
 
 const voiceMap: { [language: string]: string } = {
+  'auto': 'en-US-ShimmerMultilingualNeural',
   'en-US': 'en-US-JennyNeural',
-  'zh-CN': 'zh-CN-XiaoxiaoNeural',
   'zh-TW': 'zh-TW-HsiaoChenNeural',
   'zh-HK': 'zh-HK-HiuMaanNeural',
   'bn-IN': 'bn-IN-TanishaaNeural',
