@@ -2,12 +2,14 @@ import { PRO_USER } from "./account";
 
 describe('Image generation', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
+  const isRunningOnProduction = hostUrl === 'https://chateverywhere.app';
 
   beforeEach(() => {
     cy.session(
       'user',
       () => {
-        cy.login(PRO_USER.email, PRO_USER.password);
+        const password = isRunningOnProduction ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION') : PRO_USER.password;
+        cy.login(PRO_USER.email, password);
       },
       {
         validate: () => {
