@@ -6,13 +6,12 @@ import {
   serverSideTrackEvent,
 } from '@/utils/app/eventTracking';
 import {
-  getPriorityEndpointsAndKeys,
   shortenMessagesBaseOnTokenLimit,
 } from '@/utils/server/api';
-import { getEndpointsAndKeys, logEvent } from '@/utils/server/api';
+import { logEvent } from '@/utils/server/api';
 
 import { Message } from '@/types/chat';
-import { OpenAIModel, OpenAIModelID } from '@/types/openai';
+import { OpenAIModel } from '@/types/openai';
 
 import { ChatEndpointManager } from './ChatEndpointManager';
 
