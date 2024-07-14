@@ -2,25 +2,20 @@ import { IconRotateClockwise, IconUpload } from '@tabler/icons-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { allowedTypes, handleFileUpload } from '@/utils/app/uploadFileHelper';
-
-import { UserFile } from '@/types/UserFile';
+import { allowedTypes } from '@/utils/app/uploadFileHelper';
 
 import { Button } from '@/components/ui/button';
 
 const UploadFileButton = ({
-  uploadFiles,
   isUploading,
+  onFilesDrop,
 }: {
-  uploadFiles: (
-    files: File[],
-    onCompleteFileUpload?: (newFile: UserFile[]) => void,
-  ) => Promise<void>;
+  onFilesDrop: (files: FileList) => Promise<void>;
   isUploading: boolean;
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const onComplete = () => {
+  const clearFileInput = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -55,9 +50,12 @@ const UploadFileButton = ({
         multiple
         accept={allowedTypes.join(',')}
         className="hidden"
-        onChange={(e) =>
-          handleFileUpload(e.target.files, uploadFiles, onComplete, t)
-        }
+        onChange={async (e) => {
+          if (e.target.files) {
+            await onFilesDrop(e.target.files);
+            clearFileInput();
+          }
+        }}
       />
     </>
   );

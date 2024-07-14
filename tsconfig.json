@@ -19,7 +19,10 @@
     "jsx": "preserve",
     "incremental": true,
     "types": [
-      "vitest/globals"
+      "vitest/globals",
+      "cypress",
+      "node",
+      "cypress-real-events"
     ],
     "baseUrl": ".",
     "paths": {

@@ -1,6 +1,6 @@
 // This is a handler to execute and return the result of a function call to LLM.
 // This would seat between the endpoint and LLM.
-import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
+import { DEFAULT_SYSTEM_PROMPT, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
 import { AIStream } from '@/utils/server/functionCalls/AIStream';
 import { triggerHelperFunction } from '@/utils/server/functionCalls/llmHandlerHelpers';
 
@@ -18,7 +18,7 @@ type handlerType = {
   onEnd: () => void;
 };
 
-const llmHandlerPrompt =
+let llmHandlerPrompt =
   DEFAULT_SYSTEM_PROMPT +
   `Your main task is to process image generation tasks, utilizing the generate-image function. Below is the pseudo-code for you to follow:
 def ImageGenerationTask(request):
@@ -103,6 +103,9 @@ export const aiPainterLlmHandler = async ({
   onErrorUpdate,
   onEnd,
 }: handlerType) => {
+  if (countryCode?.includes('TW')) {
+    llmHandlerPrompt += RESPONSE_IN_CHINESE_PROMPT
+  }
   const functionCallsToSend: FunctionCall[] = [
     {
       name: 'generate-html-for-ai-painter-images',

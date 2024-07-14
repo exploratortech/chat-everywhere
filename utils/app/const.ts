@@ -3,9 +3,10 @@ import { OpenAIModels, fallbackModelID } from '@/types/openai';
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 
+export const RESPONSE_IN_CHINESE_PROMPT = `Whenever you respond in Chinese, you must respond in Traditional Chinese (繁體中文).`
+
 export const DEFAULT_SYSTEM_PROMPT =
   "You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Always be aware of the current date and time, and make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format." +
-  'Whenever you respond in Chinese, you must respond in Traditional Chinese (繁體中文).' +
   'If the input includes text such as [lang=xxx], the response should not include this text.' +
   `The current date is ${new Date().toLocaleDateString()}.`;
 
@@ -128,4 +129,17 @@ export const newDefaultConversation = {
   lastUpdateAtUTC: dayjs().valueOf(),
 };
 
-export const MAX_FILE_SIZE_FOR_UPLOAD = 52428800; // 50 MB in bytes
+// Gemini File Upload Constants
+// NOTE: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models
+// NOTE:https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/document-understanding
+
+export const MAX_FILE_DROP_COUNT = 10;
+
+export const MAX_PDF_PAGES = 300;
+
+export const MAX_VIDEO_DURATION = 1 * 60 * 60; // 1 hour
+export const MAX_AUDIO_DURATION = 8 * 60 * 60; // 8 hours
+
+export const MAX_FILE_SIZE_FOR_UPLOAD = 104857600; // 100 MB in bytes
+export const MAX_PDF_SIZE_FOR_UPLOAD = 31457280; // 30 MB in bytes
+export const MAX_IMAGE_SIZE_FOR_UPLOAD = 20971520; // 20 MB in bytes
