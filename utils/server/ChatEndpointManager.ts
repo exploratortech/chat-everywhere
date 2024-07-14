@@ -26,15 +26,21 @@ export class ChatEndpointManager {
   private useBackupEndpoint: boolean = false;
   private model: OpenAIModel;
 
-  constructor(model: OpenAIModel) {
+  constructor(model: OpenAIModel, usePriorityEndpoint: boolean = false,) {
     this.model = model;
-    const { endpoints, keys, tpm } = this.getEndpointConfigByModel(model);
-    this.endpoints = endpoints.map((endpoint, index) => ({
-      endpoint,
-      key: keys[index],
-      weight: tpm[index],
-      isThrottled: false,
-    }));
+    if (usePriorityEndpoint) {
+      this.useBackupEndpoint = true;
+      this.addBackupEndpoint();
+    } else {
+      const { endpoints, keys, tpm } = this.getEndpointConfigByModel(model);
+      this.endpoints = endpoints.map((endpoint, index) => ({
+        endpoint,
+        key: keys[index],
+        weight: tpm[index],
+        isThrottled: false,
+      }));
+    }
+
   }
 
   private getEndpointConfigByModel(model: OpenAIModel) {
