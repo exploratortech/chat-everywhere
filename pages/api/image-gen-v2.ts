@@ -261,6 +261,10 @@ const imageGeneration = async (job: MjJob) => {
 
     throw new Error('Image generation failed');
   }
+
+  await MjQueueJob.update(job.jobId, {
+    myMidJourneyMessageId: imageGenerationResponseJson.messageId,
+  })
 };
 
 const buttonCommand = async (job: MjJob) => {
@@ -311,6 +315,10 @@ const buttonCommand = async (job: MjJob) => {
     console.error('Failed during submitting request');
     throw new Error('Image generation failed');
   }
+
+  await MjQueueJob.update(job.jobId, {
+    myMidJourneyMessageId: imageGenerationResponseJson.messageId,
+  })
 };
 
 async function subtractedUserCredit(userId: string): Promise<boolean> {
