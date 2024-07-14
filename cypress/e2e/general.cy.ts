@@ -6,10 +6,11 @@ import { PRIORITY_USER, PRO_USER } from "./account";
 describe('Free user usage', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
 
-  it('is able to send messages', () => {
-    cy.log('hostUrl: ', hostUrl);
-
+  beforeEach(() => {
     cy.visit(hostUrl);
+  });
+
+  it('is able to send messages', () => {
     cy.get('[data-cy="chat-input"]', { timeout: 20000 }).should('be.visible');
     cy.get('[data-cy="chat-input"]').type('Reply "Hello World" to me.');
     cy.get('[data-cy="chat-send-button"]').click();
@@ -29,7 +30,7 @@ describe('Pro user usage', () => {
     const password = isRunningOnProduction ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION') : PRO_USER.password;
 
     cy.session(
-      'user',
+      'pro-user',
       () => {
         cy.login(PRO_USER.email, password);
       },
@@ -41,6 +42,8 @@ describe('Pro user usage', () => {
         },
       },
     );
+
+    cy.visit(hostUrl);
   });
 
   after(() => {
@@ -53,7 +56,6 @@ describe('Pro user usage', () => {
     cy.contains('You have been logged out');
   });
   it('is able to send messages', () => {
-    cy.visit(hostUrl);
     cy.get('[data-cy="chat-input"]', { timeout: 20000 }).should('be.visible');
     cy.get('[data-cy="chat-input"]').type('Reply "Hello World" to me.');
     cy.get('[data-cy="chat-send-button"]').click();
@@ -74,7 +76,7 @@ describe('Priority user usage', () => {
     const password = isRunningOnProduction ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION') : PRIORITY_USER.password;
 
     cy.session(
-      'user',
+      'priority-user',
       () => {
         cy.login(PRIORITY_USER.email, password);
       },
@@ -86,6 +88,8 @@ describe('Priority user usage', () => {
         },
       },
     );
+
+    cy.visit(hostUrl);
   });
 
   after(() => {
@@ -97,8 +101,7 @@ describe('Priority user usage', () => {
     cy.get('[data-cy="sign-out-and-clear-button"]').click();
     cy.contains('You have been logged out');
   });
-  it('is able to send messages', () => {
-    cy.visit(hostUrl);
+  it.only('is able to send messages', () => {
     cy.get('[data-cy="chat-input"]', { timeout: 20000 }).should('be.visible');
     cy.get('[data-cy="chat-input"]').type('Reply "Hello World" to me.');
     cy.get('[data-cy="chat-send-button"]').click();
@@ -109,5 +112,4 @@ describe('Priority user usage', () => {
   });
 });
 
-export { };
 export { };
