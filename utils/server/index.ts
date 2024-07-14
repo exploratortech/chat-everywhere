@@ -71,16 +71,7 @@ export const OpenAIStream = async ({
 }) => {
   const log = new Logger();
 
-  // const isGPT4Model = model.id === OpenAIModelID.GPT_4;
-  // const [openAIEndpoints, openAIKeys] = usePriorityEndpoint
-  //   ? getPriorityEndpointsAndKeys(isGPT4Model)
-  //   : getEndpointsAndKeys(isGPT4Model, requestCountryCode);
-  // const isGPT4Model = model.id === OpenAIModelID.GPT_4;
-  // const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(
-  //   isGPT4Model,
-  //   requestCountryCode,
-  // );
-  const endpointManager = new ChatEndpointManager(model);
+  const endpointManager = new ChatEndpointManager(model, usePriorityEndpoint);
 
   let attempt = 0;
   let attemptLogs = '';
