@@ -108,9 +108,6 @@ export const AZURE_DALL_E_API_KEYS = [
   process.env.AZURE_DALL_E_API_KEY_2,
 ];
 
-export const OPENAI_ENDPOINT = 'https://api.openai.com';
-export const OPENAI_KEY = process.env.OPENAI_API_KEY;
-export const OPENAI_GPT_4_KEY = process.env.OPENAI_API_GPT_4_KEY;
 
 export const ERROR_MESSAGES = {
   content_filter_triggered: {
