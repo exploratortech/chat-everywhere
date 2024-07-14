@@ -10,6 +10,7 @@ import {
 } from '@/types/v2Chat/chat';
 
 import { getDalle3EndpointAndKeys } from '../server/api';
+import { OPENAI_API_HOST } from '../app/const';
 
 export const addOpenAiMessageToThread = async (
   threadId: string,
@@ -115,7 +116,7 @@ export const getOpenAiLatestRunObject = async (
 export const generateImage = async (
   prompt: string,
 ): Promise<OpenAiImageResponseType & { errorMessage?: string }> => {
-  const openAiUrl = 'https://api.openai.com/v1/images/generations';
+  const openAiUrl = `${OPENAI_API_HOST}/v1/images/generations`;
 
   const payload = {
     model: 'dall-e-3',
@@ -255,8 +256,7 @@ export const waitForRunToComplete = async (
     }
     if (Date.now() - startTime > timeoutLimit) {
       throw new Error(
-        `Timeout after ${
-          timeoutLimit / 1000
+        `Timeout after ${timeoutLimit / 1000
         } seconds while waiting for run to complete. Run status: ${run.status}`,
       );
     }
