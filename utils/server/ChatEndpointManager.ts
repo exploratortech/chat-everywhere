@@ -66,7 +66,7 @@ export class ChatEndpointManager {
     }
   }
 
-  // Add OPENAI ENDPOINT as a backup endpoint
+  // NOTE: Using priority endpoint as the backup endpoint
   // This will be selected if all endpoints are throttled
   private addBackupEndpoint() {
     this.endpoints.push({
@@ -154,7 +154,7 @@ export class ChatEndpointManager {
     }
 
     // Determine the URL based on the endpoint domain
-    const baseUrl = endpoint.includes('openai.com')
+    const baseUrl = endpoint.includes(OPENAI_API_HOST)
       ? `${endpoint}/v1/chat/completions`
       : `${endpoint}/openai/deployments/${this.model.deploymentName}/chat/completions?api-version=2024-02-01`;
 
@@ -165,12 +165,12 @@ export class ChatEndpointManager {
       stream: true,
       presence_penalty: 0,
       frequency_penalty: 0,
-      model: endpoint.includes('openai.com') ? this.model.id : undefined,
+      model: endpoint.includes(OPENAI_API_HOST) ? this.model.id : undefined,
     };
 
     const requestHeaders = {
       'Content-Type': 'application/json',
-      ...(endpoint.includes('openai.com')
+      ...(endpoint.includes(OPENAI_API_HOST)
         ? { Authorization: `Bearer ${apiKey}` }
         : { 'api-key': apiKey }),
     };
