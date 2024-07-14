@@ -14,9 +14,6 @@ import {
   AZURE_OPENAI_GPT_4_ENDPOINTS,
   AZURE_OPENAI_GPT_4_KEYS,
   AZURE_OPENAI_KEYS,
-  OPENAI_ENDPOINT,
-  OPENAI_GPT_4_KEY,
-  OPENAI_KEY,
 } from '../app/const';
 import { getTokenCountForPrompt } from './google';
 
@@ -163,14 +160,6 @@ export const getEndpointsAndKeys = (
   return [filteredEndpoints, filteredKeys];
 };
 
-export const getPriorityEndpointsAndKeys = (
-  includeGPT4: boolean = false,
-): [string[], (string | undefined)[]] => {
-  if (includeGPT4) {
-    return [[OPENAI_ENDPOINT], [OPENAI_GPT_4_KEY]];
-  }
-  return [[OPENAI_ENDPOINT], [OPENAI_KEY]];
-};
 
 export const getDalle3EndpointAndKeys = (): {
   endpoint: string | undefined;
@@ -178,7 +167,7 @@ export const getDalle3EndpointAndKeys = (): {
 } => {
   const endpoint =
     AZURE_DALL_E_3_ENDPOINTS[
-      Math.floor(Math.random() * AZURE_DALL_E_3_ENDPOINTS.length)
+    Math.floor(Math.random() * AZURE_DALL_E_3_ENDPOINTS.length)
     ];
   const keyIndex = AZURE_DALL_E_3_ENDPOINTS.indexOf(endpoint);
   const key = AZURE_DALL_E_API_KEYS[keyIndex];
