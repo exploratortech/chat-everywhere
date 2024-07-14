@@ -3,9 +3,10 @@ import {
   SupabaseClient,
   useSupabaseClient,
 } from '@supabase/auth-helpers-react';
-import React, { useContext, useMemo } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import Spinner from '@/components/Spinner';
 import HomeContext from '@/components/home/home.context';
 
 import { LineShareButton } from '../LineShareButton';
@@ -35,7 +36,8 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
     [results],
   );
   const supabase = useSupabaseClient();
-  
+
+  const [isDownloading, setIsDownloading] = useState(false);
   return (
     <div
       id="ai-painter-result"
@@ -72,15 +74,22 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
           <div className="absolute w-full h-full bg-black opacity-60 hidden group-hover/ai-painter-result:flex items-center justify-center top-0 ">
             <button
               className="max-w-max cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
+              disabled={isDownloading}
               onClick={() => {
+                setIsDownloading(true);
                 downloadFile(
                   supabase,
                   result.filename,
                   generateFilename(result.prompt),
-                );
+                ).finally(() => {
+                  setIsDownloading(false);
+                });
               }}
             >
-              {mjImageT('Download Image')}
+              <div className="flex items-center justify-center">
+                {isDownloading && <Spinner className="ml-2" />}
+                <span>{mjImageT('Download Image')}</span>
+              </div>
             </button>
           </div>
         </div>

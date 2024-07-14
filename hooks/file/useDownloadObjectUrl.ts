@@ -33,7 +33,7 @@ export const useDownloadObjectUrl = () => {
       const errorData = await response.json();
       throw new Error(errorData.error || 'Failed to get download URL');
     }
-    return response.json();
+    return await response.json();
   };
 
   const { withLoading } = useHomeLoadingBar();
@@ -55,9 +55,11 @@ export const useDownloadObjectUrl = () => {
         toast.dismiss(context?.toastId);
         toast.error(t('Download failed!'));
       },
-      onSettled: (data, error, variables, context) => {
+      onSettled: (context) => {
         toast.dismiss(context?.toastId);
-        queryClient.invalidateQueries(['gcp-files', user?.id]);
+        queryClient.cancelQueries(['gcp-files', user?.id]).then(() => {
+          queryClient.invalidateQueries(['gcp-files', user?.id]);
+        });
       },
     },
   );

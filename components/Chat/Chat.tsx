@@ -1,6 +1,7 @@
-import { IconArrowDown, IconClearAll } from '@tabler/icons-react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import { IconClearAll } from '@tabler/icons-react';
+
 import {
-  Fragment,
   MutableRefObject,
   memo,
   useCallback,
@@ -24,20 +25,19 @@ import { throttle } from '@/utils/data/throttle';
 
 import { Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
-import {
-  Prompt,
-  isCustomInstructionPrompt,
-  isTeacherPrompt,
-} from '@/types/prompt';
+import { Prompt, isTeacherPrompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 
 import { NewConversationMessagesContainer } from '../ConversationStarter/NewConversationMessagesContainer';
+import ChatDragAndDropContainer from '../FileDragDropArea/ChatDragAndDropContainer';
+import { useConversation } from '../Hooks/useConversation';
 import { StoreConversationButton } from '../Spinner/StoreConversationButton';
 import { ChatInput } from './ChatInput';
 import { ChatLoader } from './ChatLoader';
 import CustomInstructionInUseIndicator from './CustomInstructionInUseIndicator';
 import { ErrorMessageDiv } from './ErrorMessageDiv';
+import ReportBugForTeacherStudentButton from './ReportBugForTeacherStudentButton';
 import VirtualList from './VirtualList';
 
 interface Props {
@@ -60,10 +60,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       outputLanguage,
       currentMessage,
       messageIsStreaming,
+      showFilePortalModel,
     },
     handleUpdateConversation,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
+
+  useConversation();
 
   const setCurrentMessage = useCallback(
     (message: Message) => {
@@ -77,6 +80,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const supabase = useSupabaseClient();
   const handleSend = useCallback(
     async (
       deleteCount = 0,
@@ -91,7 +95,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       if (!message) return;
       const plugin =
         isCreatingConversationWithCustomInstruction &&
-        isTeacherPrompt(customInstructionPrompt)
+          isTeacherPrompt(customInstructionPrompt)
           ? Plugins[customInstructionPrompt.default_mode]
           : (message.pluginId && Plugins[message.pluginId]) || null;
 
@@ -144,12 +148,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           selectedConversation.messages.shift();
           updatedConversation.messages.shift();
         }
+
+        const accessToken = (await supabase.auth.getSession())?.data.session
+          ?.access_token;
+
         const response = await sendRequest(
           chatBody,
           plugin,
           controller,
           outputLanguage,
           user,
+          accessToken,
         );
 
         if (!response.ok) {
@@ -233,14 +242,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         toast.error('No image found from previous conversation');
         return;
       }
-      handleImageToPromptSend({
-        regenerate: true,
-        conversations,
-        selectedConversation,
-        homeDispatch,
-        imageUrl,
-        stopConversationRef,
-        user,
+
+      supabase.auth.getSession().then((session) => {
+        const accessToken = session?.data.session?.access_token;
+        if (!accessToken) {
+          alert('Please sign in to continue');
+          return;
+        }
+
+        handleImageToPromptSend({
+          regenerate: true,
+          conversations,
+          selectedConversation,
+          homeDispatch,
+          imageUrl,
+          stopConversationRef,
+          accessToken,
+        });
       });
       return;
     }
@@ -252,11 +270,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       2,
       overrideMessage
         ? {
-            ...overrideMessage,
-            pluginId: currentMessage
-              ? currentMessage.pluginId
-              : overrideMessage.pluginId,
-          }
+          ...overrideMessage,
+          pluginId: currentMessage
+            ? currentMessage.pluginId
+            : overrideMessage.pluginId,
+        }
         : undefined,
     );
   };
@@ -299,6 +317,26 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     },
     [handleSend, selectedConversation, setCurrentMessage],
   );
+  const onContinue = useCallback(
+    (lastWords: string) => {
+      const continueTemplate = `Your response got cut off, because you only have limited response space. Continue writing exactly where you left off. Do not repeat yourself.
+Continue from "${lastWords}<your response>"`;
+
+      const message: Message = {
+        role: 'user',
+        content: continueTemplate,
+        pluginId: currentMessage?.pluginId || null,
+      };
+
+      setCurrentMessage(message);
+      handleSend(0, message);
+      event('interaction', {
+        category: 'Chat',
+        label: 'Continue',
+      });
+    },
+    [currentMessage?.pluginId, handleSend, setCurrentMessage],
+  );
 
   useCustomInstructionDefaultMode(selectedConversation);
 
@@ -322,17 +360,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                         );
                         const message: Message = isTeacherPromptType
                           ? {
-                              role: 'user',
-                              content:
-                                customInstructionPrompt.first_message_to_gpt,
-                              pluginId: customInstructionPrompt.default_mode,
-                            }
+                            role: 'user',
+                            content:
+                              customInstructionPrompt.first_message_to_gpt,
+                            pluginId: customInstructionPrompt.default_mode,
+                          }
                           : {
-                              role: 'user',
-                              content: customInstructionPrompt.content || promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
-                              pluginId: null,
-                            };
-                        
+                            role: 'user',
+                            content:
+                              customInstructionPrompt.content ||
+                              promptT(DEFAULT_FIRST_MESSAGE_TO_GPT),
+                            pluginId: null,
+                          };
+
                         setCurrentMessage(message);
                         handleSend(0, message, customInstructionPrompt);
                       }}
@@ -371,9 +411,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </button>
 
                   {selectedConversation && (
-                    <StoreConversationButton
-                      conversation={selectedConversation}
-                    />
+                    <div className="flex items-center gap-2">
+                      <StoreConversationButton
+                        conversation={selectedConversation}
+                      />
+                      <ReportBugForTeacherStudentButton
+                        conversation={selectedConversation}
+                      />
+                    </div>
                   )}
                 </div>
 
@@ -384,6 +429,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       messages={selectedConversation.messages}
                       messageIsStreaming={messageIsStreaming}
                       onEdit={onEdit}
+                      onContinue={onContinue}
                     />
                   )}
                 </div>
@@ -408,6 +454,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           />
         </>
       )}
+      <ChatDragAndDropContainer />
     </div>
   );
 });

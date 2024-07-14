@@ -17,12 +17,9 @@ const ModeSelector = () => {
       hasMqttConnection,
       isUltraUser,
       selectedConversation,
-      featureFlags,
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
-
-  const isChatWithDocEnabled = featureFlags['enable-chat-with-doc'];
 
   const currentSelectedPluginId = useMemo(() => {
     if (!currentMessage || currentMessage?.pluginId === null) {
@@ -45,11 +42,14 @@ const ModeSelector = () => {
       );
       return;
     }
+
     homeDispatch({
       field: 'currentMessage',
       value: {
         ...currentMessage,
         pluginId: pluginId === 'default' ? null : pluginId,
+        // clear file list if the plugin is not Gemini
+        fileList: pluginId === PluginID.GEMINI ? currentMessage?.fileList : [],
       },
     });
   };
@@ -86,6 +86,7 @@ const ModeSelector = () => {
       </label>
       <div className="rounded-lg border border-neutral-200 bg-transparent text-neutral-900 dark:border-neutral-600 dark:text-white w-fit pr-1 focus:outline-none">
         <select
+          data-cy="chat-mode-selector"
           className="w-max-20 bg-transparent p-2 focus:outline-none"
           placeholder={t('Select a lang') || ''}
           value={currentSelectedPluginId}
@@ -145,7 +146,7 @@ const ModeSelector = () => {
               </option>
             </>
           )}
-          {isUltraUser && isChatWithDocEnabled && (
+          {isUltraUser && (
             <option
               value={PluginID.GEMINI}
               className="dark:bg-[#343541] dark:text-white text-yellow-600"

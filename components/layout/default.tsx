@@ -1,4 +1,4 @@
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useCallback, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
@@ -8,11 +8,9 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { event } from 'nextjs-google-analytics';
 
-import useTeacherPromptForStudent from '@/hooks/teacherPortal/useTeacherPromptForStudent';
-import useTeacherSettingsForStudent from '@/hooks/teacherPortal/useTeacherSettingsForStudent';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
+import useLoginHook from '@/hooks/useLoginHook';
 import useMediaQuery from '@/hooks/useMediaQuery';
-import useUserProfile from '@/hooks/useUserProfile';
 
 import { fetchShareableConversation } from '@/utils/app/api';
 import {
@@ -32,15 +30,8 @@ import {
   updateConversation,
 } from '@/utils/app/conversation';
 import { updateConversationLastUpdatedAtTimeStamp } from '@/utils/app/conversation';
-import {
-  clearUserInfo,
-  isFeatureEnabled,
-  logUsageSnapshot,
-  trackEvent,
-  updateUserInfo,
-} from '@/utils/app/eventTracking';
+import { logUsageSnapshot, trackEvent } from '@/utils/app/eventTracking';
 import { saveFolders } from '@/utils/app/folders';
-import { convertMarkdownToText } from '@/utils/app/outputLanguage';
 import { savePrompts } from '@/utils/app/prompts';
 import {
   areFoldersBalanced,
@@ -48,11 +39,10 @@ import {
   generateRank,
   rebalanceFolders,
   rebalanceItems,
-  sortByRank,
   sortByRankAndFolder,
+  sortByRankAndFolderType,
 } from '@/utils/app/rank';
 import { syncData } from '@/utils/app/sync';
-import { getIsSurveyFilledFromLocalStorage } from '@/utils/app/ui';
 import { deepEqual } from '@/utils/app/ui';
 
 import { Conversation } from '@/types/chat';
@@ -63,10 +53,11 @@ import { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModels, fallbackModelID } from '@/types/openai';
 import { Prompt } from '@/types/prompt';
 
-import { useAzureTts } from '@/components/Hooks/useAzureTts';
 import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
 import OrientationBlock from '@/components/Mobile/OrientationBlock';
 
+import { CognitiveServiceProvider } from '../CognitiveService/CognitiveServiceProvider';
+import { DragDropContext } from '../DropArea/DragDropContext';
 import HomeContext from '../home/home.context';
 import { HomeInitialState, initialState } from '../home/home.state';
 
@@ -85,49 +76,11 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   }, []);
   const defaultModelId = fallbackModelID;
   const { t } = useTranslation('chat');
-  const { isLoading, isPlaying, currentSpeechId, speak, stopPlaying } =
-    useAzureTts();
   const router = useRouter();
-  const session = useSession();
   const supabase = useSupabaseClient();
 
   const contextValue = useCreateReducer<HomeInitialState>({ initialState });
 
-  const resetStateOnLogout = ({
-    clearConversationHistory = false,
-  }: {
-    clearConversationHistory?: boolean;
-  }) => {
-    const newState = {
-      ...initialState,
-      // Preserve the values of the specified properties
-      loading: contextValue.state.loading,
-      lightMode: contextValue.state.lightMode,
-      messageIsStreaming: contextValue.state.messageIsStreaming,
-      modelError: contextValue.state.modelError,
-      folders: contextValue.state.folders,
-      conversations: contextValue.state.conversations,
-      selectedConversation: contextValue.state.selectedConversation,
-      currentMessage: contextValue.state.currentMessage,
-      prompts: contextValue.state.prompts,
-      temperature: contextValue.state.temperature,
-      showChatbar: contextValue.state.showChatbar,
-      showPromptbar: contextValue.state.showPromptbar,
-      currentFolder: contextValue.state.currentFolder,
-      messageError: contextValue.state.messageError,
-      searchTerm: contextValue.state.searchTerm,
-      defaultModelId: contextValue.state.defaultModelId,
-      outputLanguage: contextValue.state.outputLanguage,
-      currentDrag: contextValue.state.currentDrag,
-    };
-    if (clearConversationHistory) {
-      newState.conversations = [];
-      newState.prompts = [];
-      newState.folders = [];
-    }
-
-    dispatch({ type: 'partialReset', payload: newState });
-  };
   const { fetchAndUpdateCreditUsage, creditUsage } = useFetchCreditUsage();
 
   const {
@@ -145,8 +98,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       forceSyncConversation,
       replaceRemoteData,
       messageIsStreaming,
-      speechRecognitionLanguage,
-      isTempUser,
     },
     dispatch,
   } = contextValue;
@@ -177,6 +128,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
       dispatch({ field: 'showChatbar', value: false });
       dispatch({ field: 'showPromptbar', value: false });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTabletLayout]);
 
   // FOLDER OPERATIONS  --------------------------------------------
@@ -350,7 +302,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     if (defaultModelId) {
       const newPrompt: Prompt = {
         id: uuidv4(),
-        name: `Prompt ${prompts.length + 1}`,
+        name: `Prompt ${filteredPrompts.length + 1}`,
         description: '',
         content: '',
         model: OpenAIModels[defaultModelId],
@@ -403,6 +355,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     defaultModelId &&
       dispatch({ field: 'defaultModelId', value: defaultModelId });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultModelId]);
 
   // CLOUD SYNC ------------------------------------------
@@ -499,164 +452,14 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     selectedConversation,
   ]);
 
-  const { refetch: fetchUserProfile } = useUserProfile({
-    userId: session?.user.id,
-  });
-  const { refetch: fetchTeacherPrompts } = useTeacherPromptForStudent();
-  const { refetch: fetchTeacherSettings } = useTeacherSettingsForStudent();
-
   // USER AUTH ------------------------------------------
-  useEffect(() => {
-    if (session?.user) {
-      // User info has been updated for this session
-      if (session.user.id === user?.id) return;
-      fetchUserProfile()
-        .then((result) => {
-          const userProfile = result.data;
-          if (!userProfile) return;
-          dispatch({ field: 'showLoginSignUpModel', value: false });
-          dispatch({ field: 'showOneTimeCodeLoginModel', value: false });
-          dispatch({ field: 'isPaidUser', value: userProfile.plan !== 'free' });
-          dispatch({ field: 'isTempUser', value: userProfile.isTempUser });
-          if (userProfile.isTempUser || userProfile.isTeacherAccount) {
-            fetchTeacherPrompts().then((res) => {
-              if (res.data) {
-                dispatch({
-                  field: 'teacherPrompts',
-                  value: res.data.prompts,
-                });
-              }
-            });
-          }
-          if (userProfile.isTempUser) {
-            fetchTeacherSettings().then((res) => {
-              if (res.data) {
-                dispatch({
-                  field: 'teacherSettings',
-                  value: res.data.settings,
-                });
-              }
-            });
-          }
-          dispatch({
-            field: 'isTeacherAccount',
-            value: userProfile.isTeacherAccount,
-          });
-          dispatch({
-            field: 'isUltraUser',
-            value: userProfile.plan === 'ultra',
-          });
-          dispatch({
-            field: 'hasMqttConnection',
-            value: userProfile.hasMqttConnection,
-          });
-          dispatch({
-            field: 'isConnectedWithLine',
-            value: userProfile.isConnectedWithLine,
-          });
-          dispatch({
-            field: 'user',
-            value: {
-              id: session.user.id,
-              email: session.user.email,
-              plan: userProfile.plan || 'free',
-              token: session.access_token,
-              referralCode: userProfile.referralCode,
-              referralCodeExpirationDate:
-                userProfile.referralCodeExpirationDate,
-              proPlanExpirationDate: userProfile.proPlanExpirationDate,
-              hasReferrer: userProfile.hasReferrer,
-              hasReferee: userProfile.hasReferee,
-              isInReferralTrial: userProfile.isInReferralTrial,
-            },
-          });
-
-          dispatch({
-            field: 'featureFlags',
-            value: {
-              // Ignore feature flag on staging and local env
-              'enable-chat-with-doc': isFeatureEnabled('enable-chat-with-doc') || process.env.NEXT_PUBLIC_ENV !== 'production',
-            },
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          toast.error(
-            t('Unable to load your information, please try again later.'),
-          );
-        });
-
-      //Check if survey is filled by logged in user
-      supabase
-        .from('user_survey')
-        .select('name')
-        .eq('uid', session.user.id)
-        .then(({ data }) => {
-          if (!data || data.length === 0) {
-            dispatch({ field: 'isSurveyFilled', value: false });
-          } else {
-            dispatch({ field: 'isSurveyFilled', value: true });
-          }
-        });
-    } else {
-      dispatch({
-        field: 'isSurveyFilled',
-        value: getIsSurveyFilledFromLocalStorage(),
-      });
-    }
-  }, [session]);
+  useLoginHook(user, dispatch);
 
   useEffect(() => {
     if (!user) return;
-    updateUserInfo(user);
     fetchAndUpdateCreditUsage(user.id, isPaidUser);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isPaidUser, conversations]);
-
-  const handleUserLogout = async () => {
-    const accessToken = (await supabase.auth.getSession()).data.session
-      ?.access_token;
-
-    let shouldClearConversationsOnLogout = false;
-    if (isTempUser) {
-      shouldClearConversationsOnLogout = (
-        await fetchShouldClearConversationsOnLogout(accessToken)
-      ).should_clear_conversations_on_logout;
-    }
-    await supabase.auth.signOut();
-
-    if (shouldClearConversationsOnLogout) {
-      resetStateOnLogout({
-        clearConversationHistory: true,
-      });
-      saveConversations([]);
-      defaultModelId &&
-        dispatch({
-          field: 'selectedConversation',
-          value: {
-            id: uuidv4(),
-            name: 'New conversation',
-            messages: [],
-            model: OpenAIModels[defaultModelId],
-            prompt: DEFAULT_SYSTEM_PROMPT,
-            temperature: DEFAULT_TEMPERATURE,
-            folderId: null,
-          },
-        });
-      localStorage.removeItem('selectedConversation');
-    } else {
-      resetStateOnLogout({});
-    }
-
-    dispatch({
-      field: 'featureFlags',
-      value: {
-        'enable-chat-with-doc': false,
-      },
-    });
-
-    toast.success(t('You have been logged out'));
-    clearUserInfo();
-  };
 
   useEffect(() => {
     const theme = localStorage.getItem('theme');
@@ -686,7 +489,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
     const folders = localStorage.getItem('folders');
     if (folders) {
       const parsedFolders: FolderInterface[] =
-        JSON.parse(folders).sort(sortByRank);
+        sortByRankAndFolderType(JSON.parse(folders));
       cleanedFolders = cleanFolders(parsedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
@@ -753,7 +556,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
             router.replace(router.pathname, router.pathname, { shallow: true });
           }
         })
-        .catch((error) => {
+        .catch(() => {
           toast.error(t('Sorry, we could not find this shared conversation.'));
           dispatch({
             field: 'selectedConversation',
@@ -770,23 +573,13 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
         value: newDefaultConversation,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // APPLY HOOKS VALUE TO CONTEXT -------------------------------------
   useEffect(() => {
-    dispatch({ field: 'isPlaying', value: isPlaying });
-  }, [isPlaying]);
-
-  useEffect(() => {
-    dispatch({ field: 'isLoading', value: isLoading });
-  }, [isLoading]);
-
-  useEffect(() => {
-    dispatch({ field: 'currentSpeechId', value: currentSpeechId });
-  }, [currentSpeechId]);
-
-  useEffect(() => {
     dispatch({ field: 'creditUsage', value: creditUsage });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [creditUsage]);
   useEffect(() => {
     document.body.className = lightMode;
@@ -804,15 +597,6 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           handleSelectConversation,
           handleUpdateConversation,
           handleCreatePrompt,
-          handleUserLogout,
-          playMessage: (text, speechId) =>
-            speak(
-              convertMarkdownToText(text),
-              speechId,
-              user?.token || '',
-              speechRecognitionLanguage,
-            ),
-          stopPlaying,
           toggleChatbar,
           togglePromptbar,
           setDragData,
@@ -831,38 +615,14 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
           />
         </Head>
         <LoadingBar color={'white'} ref={loadingRef} />
-        <>{children}</>
+        <CognitiveServiceProvider>
+          <DragDropContext>
+            {children}
+          </DragDropContext>
+        </CognitiveServiceProvider>
       </HomeContext.Provider>
     </OrientationBlock>
   );
 };
-export default DefaultLayout;
 
-const fetchShouldClearConversationsOnLogout = async (
-  accessToken: string | undefined,
-) => {
-  try {
-    if (!accessToken) {
-      throw new Error('No access token');
-    }
-    const res = await fetch('/api/teacher-settings-for-student-logout', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'access-token': accessToken,
-      },
-    });
-    if (!res.ok) {
-      throw new Error('Failed to fetch teacher Settings');
-    }
-    const data = await res.json();
-    return data as {
-      should_clear_conversations_on_logout: boolean;
-    };
-  } catch (error) {
-    console.error(error);
-    return {
-      should_clear_conversations_on_logout: false,
-    };
-  }
-};
+export default DefaultLayout;

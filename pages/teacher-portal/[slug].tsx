@@ -14,7 +14,6 @@ import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 
 import { withCommonServerSideProps } from '@/utils/withCommonServerSideProps';
 
-import { Tag } from '@/types/tags';
 import { RouteType } from '@/types/teacher-portal-sub-route';
 
 import Spinner from '@/components/Spinner';
@@ -27,8 +26,6 @@ import TeacherSettings from '@/components/TeacherPortal/TeacherSettings';
 import { TeacherPortalContext } from '@/components/TeacherPortal/teacher-portal.context';
 import HomeContext from '@/components/home/home.context';
 import DefaultLayout from '@/components/layout/default';
-
-import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs';
 
 const validShowings: RouteType[] = [
   'one-time-code',
@@ -92,22 +89,21 @@ const TeacherPortalContent: React.FC<TeacherPortalContentProps> = ({
   const { fetchQuery } = useTeacherTags();
   const { isLoading: isFetchingTeacherTags } = fetchQuery;
   const {
-    state: { isTeacherAccount },
+    state: { appInitialized, isTeacherAccount },
   } = useContext(HomeContext);
   const isLoading = useMemo(
     () => isFetchingTeacherTags || !isTeacherAccount,
     [isFetchingTeacherTags, isTeacherAccount],
   );
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      // If the user is not a teacher account, redirect them to the home page
+    if (appInitialized) {
+      // Check if user is a teacher account
+      // If not, redirect to the home page
       if (!isTeacherAccount) {
         window.location.href = '/';
       }
-    }, 5000);
-
-    return () => clearTimeout(timeout);
-  }, [isTeacherAccount]);
+    }
+  }, [appInitialized, isTeacherAccount]);
 
   return (
     <div className="fixed inset-0 overflow-y-auto">

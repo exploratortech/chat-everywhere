@@ -19,8 +19,12 @@
     "jsx": "preserve",
     "incremental": true,
     "types": [
-      "vitest/globals"
+      "vitest/globals",
+      "cypress",
+      "node",
+      "cypress-real-events"
     ],
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
@@ -31,8 +35,8 @@
     "notion-compat.d.ts",
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx", 
-    "utils/app/azureAppInsights.ts"  
+    "**/*.tsx",
+    "utils/app/azureAppInsights.ts"
   ],
   "exclude": [
     "node_modules",

@@ -1,4 +1,4 @@
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
@@ -14,18 +14,39 @@ import { ChatBody } from '@/types/chat';
 import { type Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
+import { geolocation } from '@vercel/edge';
 
 const supabase = getAdminSupabaseClient();
 
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
+  regions: [
+    'arn1',
+    'bom1',
+    'cdg1',
+    'cle1',
+    'cpt1',
+    'dub1',
+    'fra1',
+    'gru1',
+    'hnd1',
+    'iad1',
+    'icn1',
+    'kix1',
+    'lhr1',
+    'pdx1',
+    'sfo1',
+    'sin1',
+    'syd1',
+  ],
 };
 
 const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
 const handler = async (req: Request): Promise<Response> => {
   const userToken = req.headers.get('user-token');
+  const { country } = geolocation(req);
 
   const { data, error } = await supabase.auth.getUser(userToken || '');
   if (!data || error) return unauthorizedResponse;
@@ -58,8 +79,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     promptToSend = prompt;
     if (!promptToSend) {
-      promptToSend = DEFAULT_SYSTEM_PROMPT;
+      promptToSend = DEFAULT_SYSTEM_PROMPT
     }
+
+    if (country?.includes('TW')) {
+      promptToSend += RESPONSE_IN_CHINESE_PROMPT;
+    }
+
     let temperatureToUse = temperature;
     if (temperatureToUse == null) {
       temperatureToUse = DEFAULT_TEMPERATURE;
@@ -70,8 +96,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (selectedOutputLanguage) {
       messageToSend[
         messageToSend.length - 1
-      ].content = `${selectedOutputLanguage} ${
-        messageToSend[messageToSend.length - 1].content
+      ].content = `${selectedOutputLanguage} ${messageToSend[messageToSend.length - 1].content
       }`;
     }
 

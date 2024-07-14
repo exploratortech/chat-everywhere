@@ -73,7 +73,9 @@ export const useDeleteObject = () => {
         }
       },
       onSettled: () => {
-        queryClient.invalidateQueries(['gcp-files', user?.id]);
+        queryClient.cancelQueries(['gcp-files', user?.id]).then(() => {
+          queryClient.invalidateQueries(['gcp-files', user?.id]);
+        });
       },
     },
   );

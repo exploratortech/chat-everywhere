@@ -10,6 +10,7 @@ import { CreditUsage, User } from '@/types/user';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface HomeInitialState {
+  appInitialized: boolean;
   loading: boolean;
   lightMode: 'light' | 'dark';
   messageIsStreaming: boolean;
@@ -38,6 +39,11 @@ export interface HomeInitialState {
   syncingConversation: boolean;
   syncSuccess: boolean | null; // null = not yet synced
 
+  // Request Logout
+  isRequestingLogout: {
+    clearBrowserChatHistory: boolean;
+  } | null;
+
   // User Auth
   showSettingsModel: boolean;
   showFilePortalModel: boolean;
@@ -55,7 +61,6 @@ export interface HomeInitialState {
   user: User | null;
   isPaidUser: boolean;
   isUltraUser: boolean;
-  isSurveyFilled: boolean;
   isTempUser: boolean;
   isTeacherAccount: boolean;
 
@@ -64,16 +69,7 @@ export interface HomeInitialState {
   hasMqttConnection: boolean;
   isConnectedWithLine: boolean;
 
-  // Text to Speech
-  currentSpeechId: null | string;
-  speechToken: null | string;
-  speechRegion: null | string;
-  isPlaying: boolean;
-  isLoading: boolean;
-
-  // Speech to Text
-  speechContent: string;
-  isSpeechRecognitionActive: boolean;
+  // Speech
   speechRecognitionLanguage: string;
 
   // Teacher Portal
@@ -81,12 +77,13 @@ export interface HomeInitialState {
   teacherSettings: TeacherSettings;
 
   // Posthog feature flags
-  featureFlags: {
-    'enable-chat-with-doc': boolean;
-  };
+  // featureFlags: {
+  //   'enable-conversation-mode': boolean;
+  // };
 }
 
 export const initialState: HomeInitialState = {
+  appInitialized: false,
   loading: false,
   lightMode: 'dark',
   messageIsStreaming: false,
@@ -115,6 +112,9 @@ export const initialState: HomeInitialState = {
   syncingConversation: false,
   syncSuccess: null,
 
+  // Request Logout
+  isRequestingLogout: null,
+
   // User Auth
   showSettingsModel: false,
   showFilePortalModel: false,
@@ -132,7 +132,6 @@ export const initialState: HomeInitialState = {
   user: null,
   isPaidUser: false,
   isUltraUser: false,
-  isSurveyFilled: false,
   isTempUser: false,
   isTeacherAccount: false,
 
@@ -141,16 +140,7 @@ export const initialState: HomeInitialState = {
   hasMqttConnection: false,
   isConnectedWithLine: false,
 
-  // Text to Speech
-  currentSpeechId: null,
-  speechToken: null,
-  speechRegion: null,
-  isPlaying: false,
-  isLoading: false,
-
-  // Speech to Text
-  speechContent: '',
-  isSpeechRecognitionActive: false,
+  // Speech
   speechRecognitionLanguage: 'en-US',
 
   // Teacher Portal
@@ -161,7 +151,7 @@ export const initialState: HomeInitialState = {
   },
 
   // Posthog feature flags
-  featureFlags: {
-    'enable-chat-with-doc': false,
-  },
+  // featureFlags: {
+  //   'enable-conversation-mode': false,
+  // },
 };

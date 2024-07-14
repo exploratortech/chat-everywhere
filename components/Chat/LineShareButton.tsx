@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 
 import { trackEvent } from '@/utils/app/eventTracking';
+import { truncateText } from '@/utils/data/truncateText';
 
 import HomeContext from '@/components/home/home.context';
 
+import { cn } from '@/lib/utils';
 import { encode } from 'base64-arraybuffer';
-
-import { truncateText } from '@/utils/data/truncateText';
 
 interface LineShareButtonProps {
   displayInProgressToast?: boolean;
@@ -19,7 +19,7 @@ interface LineShareButtonProps {
   messageContent?: string;
   imageFileUrl?: string;
   size?: number;
-  isSelectedText? : boolean
+  isSelectedText?: boolean;
 }
 
 export const LineShareButton: FC<LineShareButtonProps> = ({

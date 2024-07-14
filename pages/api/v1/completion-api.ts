@@ -3,6 +3,7 @@ import {
   DEFAULT_SYSTEM_PROMPT,
   DEFAULT_TEMPERATURE,
   OPENAI_API_HOST,
+  RESPONSE_IN_CHINESE_PROMPT,
 } from '@/utils/app/const';
 import { OpenAIError } from '@/utils/server';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
@@ -11,6 +12,7 @@ import model from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 // @ts-expect-error
 import * as wasm from '@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
+import { geolocation } from '@vercel/edge';
 import {
   ParsedEvent,
   ReconnectInterval,
@@ -19,6 +21,25 @@ import {
 
 export const config = {
   runtime: 'edge',
+  regions: [
+    'arn1',
+    'bom1',
+    'cdg1',
+    'cle1',
+    'cpt1',
+    'dub1',
+    'fra1',
+    'gru1',
+    'hnd1',
+    'iad1',
+    'icn1',
+    'kix1',
+    'lhr1',
+    'pdx1',
+    'sfo1',
+    'sin1',
+    'syd1',
+  ],
 };
 
 type RequestBody = {
@@ -41,6 +62,7 @@ const addApiUsageEntry = async (tokenLength: number) => {
 };
 
 const handler = async (req: Request): Promise<Response> => {
+  const { country } = geolocation(req);
   // check Authorization header
   const auth = req.headers.get('Authorization');
   if (auth !== `Bearer ${process.env.API_ACCESS_KEY}`) {
@@ -59,7 +81,7 @@ const handler = async (req: Request): Promise<Response> => {
       messages: [
         {
           role: 'system',
-          content: DEFAULT_SYSTEM_PROMPT,
+          content: country?.includes('TW') ? DEFAULT_SYSTEM_PROMPT + RESPONSE_IN_CHINESE_PROMPT : DEFAULT_SYSTEM_PROMPT,
         },
         {
           role: 'user',
@@ -95,8 +117,7 @@ const handler = async (req: Request): Promise<Response> => {
         );
       } else {
         throw new Error(
-          `OpenAI API returned an error: ${
-            decoder.decode(result?.value) || result.statusText
+          `OpenAI API returned an error: ${decoder.decode(result?.value) || result.statusText
           }`,
         );
       }

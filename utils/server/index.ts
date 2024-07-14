@@ -14,6 +14,8 @@ import { getEndpointsAndKeys, logEvent } from '@/utils/server/api';
 import { Message } from '@/types/chat';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 
+import { ChatEndpointManager } from './ChatEndpointManager';
+
 import {
   ParsedEvent,
   ReconnectInterval,
@@ -69,94 +71,71 @@ export const OpenAIStream = async ({
 }) => {
   const log = new Logger();
 
-  const isGPT4Model = model.id === OpenAIModelID.GPT_4;
-  const [openAIEndpoints, openAIKeys] = usePriorityEndpoint
-    ? getPriorityEndpointsAndKeys(isGPT4Model)
-    : getEndpointsAndKeys(isGPT4Model, requestCountryCode);
+  // const isGPT4Model = model.id === OpenAIModelID.GPT_4;
+  // const [openAIEndpoints, openAIKeys] = usePriorityEndpoint
+  //   ? getPriorityEndpointsAndKeys(isGPT4Model)
+  //   : getEndpointsAndKeys(isGPT4Model, requestCountryCode);
+  // const isGPT4Model = model.id === OpenAIModelID.GPT_4;
+  // const [openAIEndpoints, openAIKeys] = getEndpointsAndKeys(
+  //   isGPT4Model,
+  //   requestCountryCode,
+  // );
+  const endpointManager = new ChatEndpointManager(model);
 
   let attempt = 0;
   let attemptLogs = '';
   const requestStartTime = Date.now();
   let timeToFirstTokenInMs = 0;
   const startTime = Date.now();
+  const messagesToSend = await shortenMessagesBaseOnTokenLimit(
+    systemPrompt,
+    messages,
+    model.tokenLimit,
+    model.completionTokenLimit,
+  );
 
-  while (attempt < openAIEndpoints.length) {
-    const openAIEndpoint = openAIEndpoints[attempt];
-    const openAIKey = openAIKeys[attempt];
+  const messagesToSendInArray = [
+    {
+      role: 'system',
+      content: systemPrompt,
+    },
+    ...normalizeMessages(messagesToSend),
+  ];
+
+  while (endpointManager.getAvailableEndpoints().length !== 0) {
+    const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
+
+    if (!endpoint || !apiKey) {
+      throw new Error('No available endpoints');
+    }
 
     try {
-      if (!openAIEndpoint || !openAIKey)
-        throw new Error('Missing endpoint/key');
-
-      attemptLogs += `Attempt ${
-        attempt + 1
-      }: Using endpoint ${openAIEndpoint}\n`;
-
-      let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2024-02-01`;
-      if (openAIEndpoint.includes('openai.com')) {
-        url = `${openAIEndpoint}/v1/chat/completions`;
-      }
-
-      const messagesToSend = await shortenMessagesBaseOnTokenLimit(
-        systemPrompt,
-        messages,
-        model.tokenLimit,
-        model.completionTokenLimit,
-      );
-
-      const messagesToSendInArray = [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        ...normalizeMessages(messagesToSend),
-      ];
-
-      const bodyToSend: any = {
-        messages: messagesToSendInArray,
-        max_tokens: model.completionTokenLimit,
-        temperature,
-        stream: true,
-        presence_penalty: 0,
-        frequency_penalty: 0,
-      };
-
-      const requestHeaders: { [header: string]: string } = {
-        'Content-Type': 'application/json',
-      };
-
-      if (openAIEndpoint.includes('openai.com')) {
-        // Use the model the user specified on the first attempt, otherwise, use
-        // a fallback model.
-        bodyToSend.model = attempt === 0 ? model.id : OpenAIModelID.GPT_3_5;
-        requestHeaders.Authorization = `Bearer ${openAIKey}`;
-
-        // For GPT 4 Model (Pro user)
-        if (attempt !== 0 && isGPT4Model) {
-          bodyToSend.model = OpenAIModelID.GPT_4;
-          requestHeaders.Authorization = `Bearer ${process.env.OPENAI_API_GPT_4_KEY}`;
-        }
-      } else {
-        requestHeaders['api-key'] = openAIKey;
-      }
+      attemptLogs += `Attempt ${attempt + 1}: Using endpoint ${endpoint}\n`;
 
       const abortController = new AbortController();
       const timeout = setTimeout(() => abortController.abort(), 10000);
+
+      const { url, options } = endpointManager.getFetchOptions({
+        messagesToSendInArray,
+        temperature,
+      });
 
       console.log(`Sending request to ${url}`);
       attemptLogs += `Attempt ${attempt + 1}: Sending request to ${url}\n`;
 
       const res = await fetch(url, {
-        headers: requestHeaders,
-        method: 'POST',
-        body: JSON.stringify(bodyToSend),
+        ...options,
         signal: abortController.signal,
       });
 
       const encoder = new TextEncoder();
       const decoder = new TextDecoder();
 
-      if (res.status !== 200) {
+      if (res.status === 429 || res.status === 500 || res.status === 404) {
+        endpointManager.markEndpointAsThrottled(endpoint);
+        attempt += 1;
+        continue;
+      } else if (res.status !== 200) {
         const result = await res.json();
         if (result.error.code === 'content_filter') {
           throw new Error(ERROR_MESSAGES.content_filter_triggered.message);
@@ -178,23 +157,19 @@ export const OpenAIStream = async ({
             message: result.error,
           });
 
-          attemptLogs += `Attempt ${attempt + 1}: Error - ${
-            result.error.message
-          }\n`;
+          attemptLogs += `Attempt ${attempt + 1}: Error - ${result.error.message
+            }\n`;
         } else {
           console.error(
             new Error(
-              `Chat endpoint returned an error: ${
-                decoder.decode(result?.value) || result.statusText
+              `Chat endpoint returned an error: ${decoder.decode(result?.value) || result.statusText
               }`,
             ),
           );
 
-          attemptLogs += `Attempt ${
-            attempt + 1
-          }: Error - Chat endpoint returned an error: ${
-            decoder.decode(result?.value) || result.statusText
-          }\n`;
+          attemptLogs += `Attempt ${attempt + 1
+            }: Error - Chat endpoint returned an error: ${decoder.decode(result?.value) || result.statusText
+            }\n`;
         }
 
         attempt += 1;
@@ -224,8 +199,14 @@ export const OpenAIStream = async ({
 
               try {
                 const json = JSON.parse(data);
+
                 if (json.choices[0]) {
                   if (json.choices[0].finish_reason != null) {
+                    if (json.choices[0].finish_reason === 'length') {
+                      buffer.push(
+                        encoder.encode('[PLACEHOLDER_FOR_CONTINUE_BUTTON]'),
+                      );
+                    }
                     if (customMessageToStreamBack) {
                       buffer.push(encoder.encode(customMessageToStreamBack));
                     }
@@ -233,7 +214,7 @@ export const OpenAIStream = async ({
                     return;
                   }
 
-                  const text = json.choices[0].delta.content;
+                  const text = json.choices[0]?.delta?.content || '';
 
                   buffer.push(encoder.encode(text));
                   respondMessage += text;
@@ -251,7 +232,7 @@ export const OpenAIStream = async ({
           const parser = createParser(onParse);
 
           // Dynamically adjust stream speed base on the model
-          let bufferTime = isGPT4Model ? 45 : 10;
+          let bufferTime = 10;
           const interval = setInterval(() => {
             if (buffer.length > 0) {
               const data = buffer.shift();
@@ -280,7 +261,7 @@ export const OpenAIStream = async ({
               completionMessage: respondMessage,
               totalDurationInMs: Date.now() - startTime,
               timeToFirstTokenInMs,
-              endpoint: openAIEndpoint,
+              endpoint,
             });
 
             stop = true;
@@ -305,9 +286,8 @@ export const OpenAIStream = async ({
         attemptLogs,
       });
 
-      attemptLogs += `Attempt ${attempt}: Error - ${
-        (error as Error).message
-      }\n`;
+      attemptLogs += `Attempt ${attempt}: Error - ${(error as Error).message
+        }\n`;
     }
   }
 

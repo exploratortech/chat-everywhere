@@ -25,6 +25,7 @@ export interface TeacherPrompt extends CustomInstructionPrompt {
     | PluginID.default
     | PluginID.LANGCHAIN_CHAT
     | PluginID.GPT4
+    | PluginID.GPT4O
     | PluginID.IMAGE_GEN;
 }
 export function isRegularPrompt(prompt: Prompt): prompt is RegularPrompt {

@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
         status: 400,
       });
     }
-  };
+  }
 
   // Retrieve access token from profiles table
   const { data: profile, error: profileError } = await supabase

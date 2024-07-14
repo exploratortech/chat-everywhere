@@ -65,5 +65,8 @@
   "This file does not exist, it will be deleted from the chat": "此檔案不存在，將從對話中刪除",
   "Join our event in {{hours}} hours!": "不要錯過我們這次精彩的官方活動喔! 倒計時 {{hours}} 小時!",
   "Join our event in {{minutes}} minutes!": "不要錯過我們這次精彩的官方活動喔! 倒計時 {{minutes}} 分鐘!",
-  "Event is now live!": "活動正式開始, 快加入我們吧!"
+  "Event is now live!": "活動正式開始, 快加入我們吧!",
+  "Error occurred while generating image, please try again later": "生成圖像時出錯，請稍後再試",
+  "Failed to enhance the prompt after multiple attempts": "多次嘗試後仍無法優化提示詞",
+  "You don't have enough credits to use this feature": "您點數不足，無法使用此功能"
 }

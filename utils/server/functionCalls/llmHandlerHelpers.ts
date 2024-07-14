@@ -5,6 +5,7 @@ import { generateImage } from '@/utils/v2Chat/openAiApiUtils';
 import { FunctionCall } from '@/types/chat';
 import { mqttConnectionType } from '@/types/data';
 import { PluginID } from '@/types/plugin';
+import { UserProfile } from '@/types/user';
 
 import {
   addUsageEntry,
@@ -23,7 +24,9 @@ const helperFunctionNames = {
   generateHtmlForAiPainterImages: 'generate-html-for-ai-painter-images',
 };
 
-const isInProductionOrLocalEnv = process.env.NEXT_PUBLIC_ENV === 'production' || process.env.NEXT_PUBLIC_ENV === 'local';
+const isInProductionOrLocalEnv =
+  process.env.NEXT_PUBLIC_ENV === 'production' ||
+  process.env.NEXT_PUBLIC_ENV === 'local';
 
 export const getHelperFunctionCalls = (
   lineAccessToken?: string,
@@ -71,6 +74,7 @@ export const triggerHelperFunction = async (
   argumentsString: string,
   userId: string,
   onProgressUpdate?: (payload: { content: string; type: string }) => void,
+  user?: UserProfile,
 ): Promise<string> => {
   console.log('Trying to trigger helperFunction: ', helperFunctionName);
 
@@ -149,7 +153,7 @@ export const triggerHelperFunction = async (
       serverSideTrackEvent('N/A', 'Helper function triggered', {
         helperFunctionName: helperFunctionNames.aiPainter,
       });
-      serverSideTrackEvent('N/A', 'DallE image generation');
+      serverSideTrackEvent(userId, 'DallE image generation');
 
       const generateAndStoreImage = async () => {
         const storeImage = async (imageBase64: string) => {
@@ -165,12 +169,14 @@ export const triggerHelperFunction = async (
               upsert: false,
               contentType: 'image/png',
             });
-          if (fileUploadError) throw fileUploadError;
+          if (fileUploadError) {
+            console.log('Error in storeImage: ', fileUploadError);
+            throw fileUploadError;
+          }
 
           const { data: imagePublicUrlData } = await supabase.storage
             .from('ai-images')
             .getPublicUrl(imageFileName);
-  
 
           const compressedImageUrl = supabase.storage
             .from('ai-images')
@@ -181,8 +187,15 @@ export const triggerHelperFunction = async (
               },
             });
 
-          if (!imagePublicUrlData) throw new Error('Image generation failed');
+          if (!imagePublicUrlData) {
+            console.log('Error in storeImage, no imagePublicUrlData');
+            throw new Error('Image generation failed');
+          }
 
+          console.log(
+            'Stored image to Supabase storage completed: ',
+            imagePublicUrlData,
+          );
           return {
             compressedUrl: compressedImageUrl.data.publicUrl,
             imagePublicUrl: imagePublicUrlData.publicUrl,
@@ -205,7 +218,6 @@ export const triggerHelperFunction = async (
           if (!generatedImageInBase64) {
             throw new Error('Failed to generate image');
           }
-          // Run storeImage and substractUserCredit in parallel
           const { imagePublicUrl, fileName, compressedUrl } = await storeImage(
             generatedImageInBase64,
           );
@@ -215,7 +227,9 @@ export const triggerHelperFunction = async (
           }
           return {
             revised_prompt: imageGenerationResponse.data[0].revised_prompt,
-            imagePublicUrl: isInProductionOrLocalEnv ? compressedUrl : imagePublicUrl,
+            imagePublicUrl: isInProductionOrLocalEnv
+              ? compressedUrl
+              : imagePublicUrl,
             fileName,
           };
         } catch (e) {
@@ -227,6 +241,10 @@ export const triggerHelperFunction = async (
         const [imageGenerationResponse1, imageGenerationResponse2] =
           await Promise.all([generateAndStoreImage(), generateAndStoreImage()]);
 
+        console.log({
+          imageGenerationResponse1,
+          imageGenerationResponse2,
+        });
         if (onProgressUpdate) {
           onProgressUpdate({
             content: 'Artwork is done, now adding the final touches...✨',
@@ -240,11 +258,14 @@ export const triggerHelperFunction = async (
             await addUsageEntry(PluginID.IMAGE_GEN, userId);
             await subtractCredit(userId, PluginID.IMAGE_GEN);
           } catch (e) {
-            throw 'Not enough credit';
+            throw new Error('Failed to subtract credit', {
+              cause: 'not_enough_credit',
+            });
           }
         };
-        // TODO: Enable Temp disable subtract credit
-        // await subtractUserCredit();
+        if (user?.plan !== 'ultra') {
+          await subtractUserCredit();
+        }
 
         const functionResponse = `
         2 Images generated! Below is the detail:
@@ -261,8 +282,11 @@ export const triggerHelperFunction = async (
 
         return functionResponse;
       } catch (error) {
+        if (error instanceof Error && error.cause === 'not_enough_credit') {
+          return 'You do not have enough credit to generate images, please top up your credit.';
+        }
         console.error('Error in parallel execution: ', error);
-        return 'Failed to process image or subtract user credit';
+        return 'Failed to process image';
       }
 
     case helperFunctionNames.generateHtmlForAiPainterImages:
@@ -365,7 +389,7 @@ export const triggerMqttConnection = async (
     (mqttConnection: mqttConnectionType) =>
       mqttConnection.name &&
       mqttConnection.name.replace(/\s/g, '-') ===
-        connectionName.replace('mqtt-', ''),
+      connectionName.replace('mqtt-', ''),
   );
 
   if (!mqttConnection) return 'Failed';
@@ -405,7 +429,7 @@ export const retrieveMqttConnectionPayload = async (
     (mqttConnection: mqttConnectionType) =>
       mqttConnection.name &&
       mqttConnection.name.replace(/\s/g, '-') ===
-        connectionName.replace('mqttreceiver-', ''),
+      connectionName.replace('mqttreceiver-', ''),
   );
 
   if (!mqttConnection) return 'Failed';

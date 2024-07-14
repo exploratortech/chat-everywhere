@@ -53,6 +53,7 @@ export const getUserCredits = async (
     | PluginID.aiPainter
     | PluginID.default
     | PluginID.GEMINI
+    | PluginID.GPT4O
   >,
 ) => {
   const supabase = getAdminSupabaseClient();
@@ -96,6 +97,7 @@ export const updateUserCredits = async (
     | PluginID.aiPainter
     | PluginID.default
     | PluginID.GEMINI
+    | PluginID.GPT4O
   >,
   newBalance: number,
 ): Promise<void> => {
@@ -125,10 +127,14 @@ export const subtractCredit = async (
     | PluginID.aiPainter
     | PluginID.default
     | PluginID.GEMINI
+    | PluginID.GPT4O
   >,
 ): Promise<void> => {
   const userCredits = await getUserCredits(userId, apiType);
   const newBalance = userCredits.balance - 1;
+  if (newBalance < 0) {
+    throw new Error('User has not enough credits to use this feature');
+  }
   await updateUserCredits(userId, apiType, newBalance);
 };
 
@@ -140,6 +146,7 @@ export const addCredit = async (
     | PluginID.aiPainter
     | PluginID.default
     | PluginID.GEMINI
+    | PluginID.GPT4O
   >,
   credit: number,
 ): Promise<void> => {
@@ -157,6 +164,7 @@ export const addUserCreditsEntry = async (
     | PluginID.aiPainter
     | PluginID.default
     | PluginID.GEMINI
+    | PluginID.GPT4O
   >,
 ): Promise<void> => {
   const initialBalance = DefaultMonthlyCredits[apiType];
@@ -179,6 +187,7 @@ export const resetUserCredits = async (
     | PluginID.aiPainter
     | PluginID.default
     | PluginID.GEMINI
+    | PluginID.GPT4O
   >,
 ): Promise<void> => {
   updateUserCredits(userId, apiType, DefaultMonthlyCredits[apiType]);
@@ -193,6 +202,7 @@ export const hasUserRunOutOfCredits = async (
     | PluginID.aiPainter
     | PluginID.default
     | PluginID.GEMINI
+    | PluginID.GPT4O
   >,
 ): Promise<boolean> => {
   const userCredits = await getUserCredits(userId, apiType);
@@ -480,7 +490,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(*), enabled_priority_endpoint',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId), enabled_priority_endpoint',
       )
       .eq('id', userId)
       .single();
@@ -493,7 +503,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(*), enabled_priority_endpoint',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId), enabled_priority_endpoint',
       )
       .eq('email', email)
       .single();
@@ -546,6 +556,17 @@ export const userProfileQuery = async ({
     }
   }
 
+  const isTempUser = userProfile.temporary_account_profiles.length > 0;
+  const isTeacherAccount = userProfile.is_teacher_account;
+  const associatedTeacherId = isTempUser
+    ? userProfile.temporary_account_profiles[0].teacher_profile_id
+    : isTeacherAccount
+      ? userProfile.id
+      : undefined;
+  const tempUserUniqueId = isTempUser
+    ? userProfile.temporary_account_profiles[0].uniqueId
+    : undefined;
+
   return {
     id: userProfile.id,
     email: userProfile.email,
@@ -558,8 +579,10 @@ export const userProfileQuery = async ({
     isInReferralTrial: isInReferralTrial,
     isConnectedWithLine: !!userProfile.line_access_token,
     hasMqttConnection: hasMqttConnection,
-    isTempUser: userProfile.temporary_account_profiles.length > 0,
-    isTeacherAccount: userProfile.is_teacher_account,
+    isTempUser: isTempUser,
+    isTeacherAccount: isTeacherAccount,
+    associatedTeacherId: associatedTeacherId,
+    tempUserUniqueId: tempUserUniqueId,
     enabledPriorityEndpoint: userProfile.enabled_priority_endpoint,
   } as UserProfile;
 };
@@ -574,8 +597,8 @@ export const updateProAccountsPlan = async (): Promise<void> => {
 
   const { error: updateError } = await supabase
     .from('profiles')
-    .update({ plan: 'free' })
-    .eq('plan', 'pro')
+    .update({ plan: 'free', is_teacher_account: false })
+    .in('plan', ['ultra', 'pro'])
     .lte('pro_plan_expiration_date', nowMinusOneDay);
 
   if (updateError) {
@@ -591,7 +614,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
   const { data: users, error: fetchError } = await supabase
     .from('profiles')
     .select('id')
-    .eq('plan', 'pro')
+    .in('plan', ['ultra', 'pro'])
     .lte('pro_plan_expiration_date', nowMinusOneDay);
 
   if (fetchError) {
@@ -605,6 +628,7 @@ export const getTrialExpiredUserProfiles = async (): Promise<String[]> => {
 
   const trialUserIds: string[] = [];
 
+  // NOTE: only the user has referral record is considered as trial user
   for (const userId of userIds) {
     // Check if user has any referral record in the past 7 days
     const { data: referralRows, error: referralError } = await supabase

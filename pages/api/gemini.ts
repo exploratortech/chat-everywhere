@@ -1,7 +1,7 @@
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
+import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { unauthorizedResponse } from '@/utils/server/auth';
-import { getAccessToken } from '@/utils/server/google/auth';
+import { callGeminiAPI } from '@/utils/server/google';
 import {
   getAdminSupabaseClient,
   getUserProfile,
@@ -10,33 +10,39 @@ import {
 import { ChatBody } from '@/types/chat';
 import { type Message } from '@/types/chat';
 
-import {
-  Content,
-  GenerateContentResponse,
-  GenerationConfig,
-} from '@google-cloud/vertexai';
-import {
-  ParsedEvent,
-  ReconnectInterval,
-  createParser,
-} from 'eventsource-parser';
+import { Content, GenerationConfig } from '@google-cloud/vertexai';
+import { geolocation } from '@vercel/edge';
 
 const supabase = getAdminSupabaseClient();
 
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
+  regions: [
+    'arn1',
+    'bom1',
+    'cdg1',
+    'cle1',
+    'cpt1',
+    'dub1',
+    'fra1',
+    'gru1',
+    'hnd1',
+    'iad1',
+    'icn1',
+    'kix1',
+    'lhr1',
+    'pdx1',
+    'sfo1',
+    'sin1',
+    'syd1',
+  ],
 };
 
 const BUCKET_NAME = process.env.GCP_CHAT_WITH_DOCUMENTS_BUCKET_NAME as string;
-const PROJECT_ID = process.env.GCP_PROJECT_ID as string;
-// const API_ENDPOINT = 'us-east1-aiplatform.googleapis.com';
-// const LOCATION_ID = 'us-east1';
-const API_ENDPOINT = 'asia-east1-aiplatform.googleapis.com';
-const LOCATION_ID = 'asia-east1';
-const MODEL_ID = 'gemini-1.5-pro-preview-0409';
 
 const handler = async (req: Request): Promise<Response> => {
+  const { country } = geolocation(req);
   const userToken = req.headers.get('user-token');
 
   const { data, error } = await supabase.auth.getUser(userToken || '');
@@ -66,8 +72,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     promptToSend = prompt;
     if (!promptToSend) {
-      promptToSend = DEFAULT_SYSTEM_PROMPT;
+      promptToSend = DEFAULT_SYSTEM_PROMPT
     }
+
+    if (country?.includes('TW')) {
+      promptToSend += RESPONSE_IN_CHINESE_PROMPT;
+    }
+
     let temperatureToUse = temperature;
     if (temperatureToUse == null) {
       temperatureToUse = DEFAULT_TEMPERATURE;
@@ -78,8 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (selectedOutputLanguage) {
       messageToSend[
         messageToSend.length - 1
-      ].content = `${selectedOutputLanguage} ${
-        messageToSend[messageToSend.length - 1].content
+      ].content = `${selectedOutputLanguage} ${messageToSend[messageToSend.length - 1].content
       }`;
     }
 
@@ -96,11 +106,11 @@ const handler = async (req: Request): Promise<Response> => {
       const textParts = [{ text: message.content }];
       const fileDataList = message.fileList
         ? message.fileList.map((file) => ({
-            fileData: {
-              mimeType: file.filetype,
-              fileUri: `gs://${BUCKET_NAME}/${file.objectPath}`,
-            },
-          }))
+          fileData: {
+            mimeType: file.filetype,
+            fileUri: `gs://${BUCKET_NAME}/${file.objectPath}`,
+          },
+        }))
         : [];
       return {
         role,
@@ -130,7 +140,31 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
     return new Response(
-      await callGeminiAPI(contents, generationConfig, systemInstruction),
+      await callGeminiAPI({
+        userIdentifier: user.id,
+        contents,
+        generationConfig,
+        systemInstruction,
+        messagesToSendInArray: messageToSend,
+        safetySettings: [
+          {
+            category: 'HARM_CATEGORY_HATE_SPEECH',
+            threshold: 'BLOCK_ONLY_HIGH',
+          },
+          {
+            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            threshold: 'BLOCK_ONLY_HIGH',
+          },
+          {
+            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            threshold: 'BLOCK_ONLY_HIGH',
+          },
+          {
+            category: 'HARM_CATEGORY_HARASSMENT',
+            threshold: 'BLOCK_ONLY_HIGH',
+          },
+        ],
+      }),
     );
   } catch (error) {
     console.error(error);
@@ -139,104 +173,3 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 export default handler;
-
-async function callGeminiAPI(
-  contents: Content[],
-  generationConfig: GenerationConfig,
-  systemInstruction: Content,
-) {
-  const requestPayload = {
-    contents,
-    generationConfig,
-    systemInstruction,
-  };
-  console.log({
-    requestPayload,
-  });
-
-  const access_token = await getAccessToken();
-  const url = `https://${API_ENDPOINT}/v1/projects/${PROJECT_ID}/locations/${LOCATION_ID}/publishers/google/models/${MODEL_ID}:streamGenerateContent?alt=sse`;
-
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-
-  const stream = new ReadableStream({
-    start(controller) {
-      let isStreamClosed = false;
-      const placeHolder = '[PLACEHOLDER]';
-      controller.enqueue(encoder.encode(placeHolder));
-
-      const intervalId = setInterval(() => {
-        if (isStreamClosed) {
-          clearInterval(intervalId);
-        } else {
-          controller.enqueue(encoder.encode(placeHolder));
-        }
-      }, 10000);
-
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestPayload),
-      })
-        .then(async (response) => {
-          if (!response.ok) {
-            const res = await response.json();
-            console.error(res);
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.body;
-        })
-        .then(async (body) => {
-          const parser = createParser(
-            async (event: ParsedEvent | ReconnectInterval) => {
-              if (event.type === 'event') {
-                const data = event.data;
-
-                try {
-                  if (data === '[DONE]') {
-                    controller.close();
-                    isStreamClosed = true;
-                    return;
-                  }
-                  const json = JSON.parse(data) as GenerateContentResponse;
-                  json?.candidates?.forEach((item) => {
-                    const content = item.content;
-                    if (content.role === 'model') {
-                      const text = content.parts
-                        .map((part) => part.text)
-                        .join('');
-                      controller.enqueue(encoder.encode(text));
-                    }
-                    if (item.finishReason && item.finishReason === 'STOP') {
-                      controller.close();
-                      isStreamClosed = true;
-                    }
-                  });
-                } catch (e) {
-                  console.error(e);
-                  controller.error(e);
-                  isStreamClosed = true;
-                }
-              }
-            },
-          );
-
-          for await (const chunk of body as any) {
-            const decoded = decoder.decode(chunk, { stream: true });
-            parser.feed(decoded);
-          }
-        })
-        .catch((error) => {
-          console.error('Failed to call Gemini API:', error);
-          controller.error(error);
-          isStreamClosed = true;
-        });
-    },
-  });
-
-  return stream;
-}

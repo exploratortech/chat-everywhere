@@ -28,21 +28,13 @@ export const ChatbarSettings = () => {
   const { t } = useTranslation('sidebar');
 
   const {
-    state: {
-      conversations,
-      folders,
-      prompts,
-      user,
-      isTeacherAccount,
-      featureFlags,
-    },
+    state: { conversations, folders, prompts, user, isTeacherAccount },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const isProUser = user && user.plan === 'pro';
   const isEduUser = user && user.plan === 'edu';
   const isUltraUser = user && user.plan === 'ultra';
-  const isChatWithDocEnabled = featureFlags['enable-chat-with-doc'];
 
   const filteredConversations = useMemo(
     () => getNonDeletedCollection(conversations),
@@ -105,7 +97,7 @@ export const ChatbarSettings = () => {
           <ClearConversations />
         ) : null}
 
-        {isUltraUser && isChatWithDocEnabled && (
+        {isUltraUser && (
           <SidebarButton
             text={`${t('File Portal')}`}
             icon={<IconFolder size={18} />}
@@ -122,6 +114,7 @@ export const ChatbarSettings = () => {
           text={t('Settings')}
           icon={<IconSettings size={18} />}
           suffixIcon={<UserAccountBadge />}
+          data-cy="settings-button"
           onClick={() => {
             homeDispatch({
               field: 'showSettingsModel',
@@ -137,6 +130,7 @@ export const ChatbarSettings = () => {
             suffixIcon={
               <IconBrandGoogle size={18} color="#DB4437" stroke={3} />
             }
+            data-cy="sign-in-button"
             onClick={signInOnClick}
           />
         )}
