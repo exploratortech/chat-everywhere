@@ -27,7 +27,7 @@ interface DataTableProps<TData extends TempAccountProfiles, TValue> {
   handleRemoveAccounts: (ids: number[]) => void;
 }
 
-export function DataTable<TData extends TempAccountProfiles, TValue>({
+export function DataTable({
   columns,
   data,
   handleRemoveAccounts,
@@ -40,6 +40,9 @@ export function DataTable<TData extends TempAccountProfiles, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getRowId: (row) => {
+      return `${row.id}`;
+    }
   });
 
   return (
@@ -55,9 +58,9 @@ export function DataTable<TData extends TempAccountProfiles, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </TableHead>
                   );
                 })}
