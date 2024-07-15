@@ -114,8 +114,38 @@ describe('Test Payment Flow', () => {
   });
 
 
-  it('cancel subscription', () => {
+  it('Make sure downgrade event is working', () => {
+    // Make the user to Pro plan by calling the /api/cypress/test-subscription-plan-payment endpoint
+    cy.request({
+      method: 'POST',
+      url: '/api/cypress/test-subscription-plan-payment',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        plan: 'pro',
+      },
+    });
 
+    // Make sure the user is on Pro plan
+    cy.reload();
+    cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
+      expect($el).to.have.text('Pro');
+    });
+
+    // Call the /api/cypress/test-cancel-subscription endpoint
+    cy.request({
+      method: 'POST',
+      url: '/api/cypress/test-cancel-subscription',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    cy.reload();
+    cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
+      expect($el).to.have.text('Free');
+    });
   });
 });
 
