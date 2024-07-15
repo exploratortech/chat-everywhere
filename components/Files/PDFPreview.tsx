@@ -33,9 +33,9 @@ const PDFPreview = ({ objectPath }: { objectPath: string }) => {
   }
   return (
     <div className="w-[50dvw] largeDesktop:w-[750px] mobile:w-full !h-[70dvh] max-w-[800px] flex items-center justify-center">
-      {pdfUrl && <iframe
-        key={windowWidth}
-        src={pdfUrl} width="100%" height="100%" />}
+      {pdfUrl && (
+        <iframe key={windowWidth} src={pdfUrl} width="100%" height="100%" />
+      )}
     </div>
   );
 };

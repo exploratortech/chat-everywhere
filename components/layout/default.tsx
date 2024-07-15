@@ -488,8 +488,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
     const folders = localStorage.getItem('folders');
     if (folders) {
-      const parsedFolders: FolderInterface[] =
-        sortByRankAndFolderType(JSON.parse(folders));
+      const parsedFolders: FolderInterface[] = sortByRankAndFolderType(
+        JSON.parse(folders),
+      );
       cleanedFolders = cleanFolders(parsedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
@@ -616,9 +617,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
         </Head>
         <LoadingBar color={'white'} ref={loadingRef} />
         <CognitiveServiceProvider>
-          <DragDropContext>
-            {children}
-          </DragDropContext>
+          <DragDropContext>{children}</DragDropContext>
         </CognitiveServiceProvider>
       </HomeContext.Provider>
     </OrientationBlock>

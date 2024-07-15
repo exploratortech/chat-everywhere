@@ -63,11 +63,11 @@ const SharedMessages = () => {
         isPeriodicFetchFlag.current = true;
       },
     );
-    // Refresh shared messages and tag filter count after bulk tag edit
-    const refetchTags = () => {
-      queryClient.invalidateQueries(['shared-messages-with-teacher']);
-      queryClient.invalidateQueries(['teacher-tags']);
-    };
+  // Refresh shared messages and tag filter count after bulk tag edit
+  const refetchTags = () => {
+    queryClient.invalidateQueries(['shared-messages-with-teacher']);
+    queryClient.invalidateQueries(['teacher-tags']);
+  };
 
   useEffect(() => {
     if (user) {
@@ -87,10 +87,14 @@ const SharedMessages = () => {
       if (sharedMessages) {
         if (isShiftKey && prev.length > 0) {
           const newSelectedIds = new Set(prev);
-          const start = sharedMessages.findIndex(message => message.id === prev[0]);
-          const end = sharedMessages.findIndex(message => message.id === id);
+          const start = sharedMessages.findIndex(
+            (message) => message.id === prev[0],
+          );
+          const end = sharedMessages.findIndex((message) => message.id === id);
           const [from, to] = start < end ? [start, end] : [end, start];
-          sharedMessages.slice(from, to + 1).forEach(message => newSelectedIds.add(message.id));
+          sharedMessages
+            .slice(from, to + 1)
+            .forEach((message) => newSelectedIds.add(message.id));
           return Array.from(newSelectedIds);
         } else if (prev.includes(id)) {
           return prev.filter((messageId) => messageId !== id);
@@ -107,9 +111,9 @@ const SharedMessages = () => {
       <h1 className="font-bold mb-4">{t('Shared messages')}</h1>
       <div className="flex flex-col gap-2 my-4">
         <Filter
-        tags={tags} 
-        allSharedMessages={sharedMessages}
-        selectedMessageIds={selectedMessageIds}
+          tags={tags}
+          allSharedMessages={sharedMessages}
+          selectedMessageIds={selectedMessageIds}
         />
         <Separator />
       </div>
@@ -145,7 +149,7 @@ const SharedMessages = () => {
           selectedMessageIds={selectedMessageIds}
           setSelectedMessageIds={setSelectedMessageIds}
           submissions={sharedMessages?.filter((message) =>
-            selectedMessageIds.includes(message.id)
+            selectedMessageIds.includes(message.id),
           )}
           tags={tags}
           refetchTags={refetchTags}

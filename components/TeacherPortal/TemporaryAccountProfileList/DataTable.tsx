@@ -42,7 +42,7 @@ export function DataTable({
     getFilteredRowModel: getFilteredRowModel(),
     getRowId: (row) => {
       return `${row.id}`;
-    }
+    },
   });
 
   return (
@@ -58,9 +58,9 @@ export function DataTable({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}

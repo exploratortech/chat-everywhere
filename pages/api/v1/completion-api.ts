@@ -81,7 +81,9 @@ const handler = async (req: Request): Promise<Response> => {
       messages: [
         {
           role: 'system',
-          content: country?.includes('TW') ? DEFAULT_SYSTEM_PROMPT + RESPONSE_IN_CHINESE_PROMPT : DEFAULT_SYSTEM_PROMPT,
+          content: country?.includes('TW')
+            ? DEFAULT_SYSTEM_PROMPT + RESPONSE_IN_CHINESE_PROMPT
+            : DEFAULT_SYSTEM_PROMPT,
         },
         {
           role: 'user',
@@ -117,7 +119,8 @@ const handler = async (req: Request): Promise<Response> => {
         );
       } else {
         throw new Error(
-          `OpenAI API returned an error: ${decoder.decode(result?.value) || result.statusText
+          `OpenAI API returned an error: ${
+            decoder.decode(result?.value) || result.statusText
           }`,
         );
       }

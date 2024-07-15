@@ -37,7 +37,7 @@ const SimpleFieldLayout: React.FC<{
 );
 
 export const extractAlphabetsAndSpace = (inputString: string) => {
-  return inputString.replace(/[^a-zA-Z -]/g, "");
+  return inputString.replace(/[^a-zA-Z -]/g, '');
 };
 
 export const MQTTConnectionForm: React.FC<MQTTConnectionFormProps> = ({
@@ -64,7 +64,11 @@ export const MQTTConnectionForm: React.FC<MQTTConnectionFormProps> = ({
             <StyledInput
               value={connection.name || ''}
               onChange={(e) =>
-                handleInputChange(connection.id, 'name', extractAlphabetsAndSpace(e.target.value))
+                handleInputChange(
+                  connection.id,
+                  'name',
+                  extractAlphabetsAndSpace(e.target.value),
+                )
               }
               placeholder={t('Name (English only)') || ''}
             />

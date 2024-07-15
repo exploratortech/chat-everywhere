@@ -1,4 +1,5 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
+
 import { useTranslation } from 'next-i18next';
 
 const DEMO_PROMPTS = [

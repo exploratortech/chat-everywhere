@@ -108,8 +108,6 @@ const useLoginHook = (
       });
   };
 
-
-
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'INITIAL_SESSION') {
@@ -125,7 +123,6 @@ const useLoginHook = (
           handleUserProfileUpdate(session);
         }
       }
-
     });
 
     return () => {

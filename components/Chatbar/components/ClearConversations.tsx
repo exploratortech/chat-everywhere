@@ -15,7 +15,9 @@ export const ClearConversations: FC = () => {
     <SidebarButton
       text={t('Clear conversations')}
       icon={<IconTrash size={18} />}
-      onClick={() => dispatch({ field: 'showClearConversationsModal', value: true })}
+      onClick={() =>
+        dispatch({ field: 'showClearConversationsModal', value: true })
+      }
     />
   );
 };

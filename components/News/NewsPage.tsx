@@ -36,7 +36,7 @@ function NewsPage({ pageId }: Props) {
           PageLink: ({ ...props }) => {
             return (
               <a
-                target='_blank'
+                target="_blank"
                 {...props}
                 href={`https://explorator.notion.site/${props.href}`}
               />

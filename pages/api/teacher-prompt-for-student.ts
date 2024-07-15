@@ -13,6 +13,7 @@ export const config = {
 
 const handler = async (req: Request): Promise<Response> => {
   const userProfile = await fetchUserProfileWithAccessToken(req);
+  console.log('123123');
   if (
     !userProfile ||
     (!userProfile.isTempUser && !userProfile.isTeacherAccount)

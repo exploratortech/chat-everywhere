@@ -197,10 +197,10 @@ export const syncData = async (
   }
 
   mergedFolders = sortByRankAndFolderType(
-      mergeTwoMergeableCollections(
+    mergeTwoMergeableCollections(
       localFolders,
       remoteFolders,
-    ) as FolderInterface[]
+    ) as FolderInterface[],
   );
 
   // Merge prompts
@@ -212,10 +212,7 @@ export const syncData = async (
   }
 
   mergedPrompts = sortByRankAndFolder(
-    mergeTwoMergeableCollections(
-      localPrompts,
-      remotePrompts,
-    ) as Prompt[],
+    mergeTwoMergeableCollections(localPrompts, remotePrompts) as Prompt[],
   );
 
   const storableConversationExport: LatestExportFormat = {

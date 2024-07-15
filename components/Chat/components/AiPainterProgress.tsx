@@ -14,9 +14,11 @@ export default function AiPainterProgress({
 }: AiPainterProgressProps) {
   return (
     <details
-      className={`${state === 'loading' ? 'bg-white disabled' : ''} ${state === 'completed' ? 'bg-green-200' : ''
-        } ${state === 'error' ? 'bg-red-200' : ''
-        } relative my-4 block text-black rounded-lg`}
+      className={`${state === 'loading' ? 'bg-white disabled' : ''} ${
+        state === 'completed' ? 'bg-green-200' : ''
+      } ${
+        state === 'error' ? 'bg-red-200' : ''
+      } relative my-4 block text-black rounded-lg`}
       open={state === 'loading' || state === 'error'}
     >
       <summary className="cursor-pointer p-2 flex gap-2 items-center justify-between">

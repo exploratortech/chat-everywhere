@@ -8,14 +8,14 @@ import AiPainterResult from '../components/AiPainterResult';
 import ContinueChat from '../components/ContinueChat';
 import { ImageGenerationComponent } from '../components/ImageGenerationComponent';
 import MjImageComponentV2 from '../components/MjImageComponentV2';
+import MjImageProgress from '../components/MjImageProgress';
+import MjQueueJobComponent from '../components/MjQueueJobComponent';
 import { CodeBlock } from '@/components/Markdown/CodeBlock';
 import { MemoizedReactMarkdown } from '@/components/Markdown/MemoizedReactMarkdown';
 
 import rehypeRaw from 'rehype-raw';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
-import MjQueueJobComponent from '../components/MjQueueJobComponent';
-import MjImageProgress from '../components/MjImageProgress';
 
 const AssistantRespondMessage = memo(
   ({
@@ -235,11 +235,10 @@ const AssistantRespondMessage = memo(
             );
           },
           img: ImgComponent,
-        }
-        }
+        }}
       >
         {formattedMessage}
-      </MemoizedReactMarkdown >
+      </MemoizedReactMarkdown>
     );
   },
   (prevProps, nextProps) =>

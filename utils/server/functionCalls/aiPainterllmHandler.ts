@@ -1,6 +1,9 @@
 // This is a handler to execute and return the result of a function call to LLM.
 // This would seat between the endpoint and LLM.
-import { DEFAULT_SYSTEM_PROMPT, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  RESPONSE_IN_CHINESE_PROMPT,
+} from '@/utils/app/const';
 import { AIStream } from '@/utils/server/functionCalls/AIStream';
 import { triggerHelperFunction } from '@/utils/server/functionCalls/llmHandlerHelpers';
 
@@ -104,7 +107,7 @@ export const aiPainterLlmHandler = async ({
   onEnd,
 }: handlerType) => {
   if (countryCode?.includes('TW')) {
-    llmHandlerPrompt += RESPONSE_IN_CHINESE_PROMPT
+    llmHandlerPrompt += RESPONSE_IN_CHINESE_PROMPT;
   }
   const functionCallsToSend: FunctionCall[] = [
     {
@@ -149,7 +152,7 @@ export const aiPainterLlmHandler = async ({
           },
         },
       },
-    }
+    },
   ];
   let isFunctionCallRequired = true;
   let innerWorkingMessages = messages;

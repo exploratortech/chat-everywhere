@@ -560,8 +560,8 @@ export const userProfileQuery = async ({
   const associatedTeacherId = isTempUser
     ? userProfile.temporary_account_profiles[0].teacher_profile_id
     : isTeacherAccount
-    ? userProfile.id
-    : undefined;
+      ? userProfile.id
+      : undefined;
   const tempUserUniqueId = isTempUser
     ? userProfile.temporary_account_profiles[0].uniqueId
     : undefined;

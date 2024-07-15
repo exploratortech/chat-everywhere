@@ -1,6 +1,9 @@
 // This is a handler to execute and return the result of a function call to LLM.
 // This would seat between the endpoint and LLM.
-import { DEFAULT_SYSTEM_PROMPT, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  RESPONSE_IN_CHINESE_PROMPT,
+} from '@/utils/app/const';
 import { AIStream } from '@/utils/server/functionCalls/AIStream';
 import {
   getFunctionCallsFromMqttConnections,
@@ -78,7 +81,7 @@ export const llmHandler = async ({
   );
 
   if (countryCode?.includes('TW')) {
-    llmHandlerPrompt += RESPONSE_IN_CHINESE_PROMPT
+    llmHandlerPrompt += RESPONSE_IN_CHINESE_PROMPT;
   }
 
   try {

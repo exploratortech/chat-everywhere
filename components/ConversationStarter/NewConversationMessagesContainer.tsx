@@ -156,8 +156,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
           onClick={eventBannerOnClick}
         >
           <span className="flex flex-row flex-wrap items-center justify-center leading-4 text-sm">
-            {getEventDisplayMessage(t)}{' '}
-            🎉
+            {getEventDisplayMessage(t)} 🎉
           </span>
         </div>
       )}

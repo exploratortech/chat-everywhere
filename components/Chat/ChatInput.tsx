@@ -448,8 +448,8 @@ export const ChatInput = ({
               !currentMessage || currentMessage.pluginId === null
                 ? 'border-black/10 dark:border-gray-900/50'
                 : currentMessage.pluginId === PluginID.GEMINI
-                ? 'border-yellow-500 dark:border-yellow-400'
-                : 'border-blue-800 dark:border-blue-700'
+                  ? 'border-yellow-500 dark:border-yellow-400'
+                  : 'border-blue-800 dark:border-blue-700'
             }
           `}
         >

@@ -240,8 +240,8 @@ async function handleDataResponse(
     const customName = updatedConversation.customInstructionPrompt
       ? updatedConversation.customInstructionPrompt.name
       : content.length > 30
-      ? content.substring(0, 30) + '...'
-      : content;
+        ? content.substring(0, 30) + '...'
+        : content;
     updatedConversation = {
       ...updatedConversation,
       name: customName,

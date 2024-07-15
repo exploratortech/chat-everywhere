@@ -1,56 +1,64 @@
 import { useEffect, useState } from 'react';
-import { Button } from '../../ui/button';
 import { useTranslation } from 'react-i18next';
-import { Tag } from '@/types/tags';
+
 import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
+import { Tag } from '@/types/tags';
+
+import { Button } from '../../ui/button';
+
 import { marked } from 'marked';
 
 const Export = ({
-  allSharedMessages,  
+  allSharedMessages,
   selectedTags,
   selectedMessageIds,
-} : {
-  allSharedMessages: ShareMessagesByTeacherProfilePayload['submissions'] | null
-  selectedTags: Tag[],
+}: {
+  allSharedMessages: ShareMessagesByTeacherProfilePayload['submissions'] | null;
+  selectedTags: Tag[];
   selectedMessageIds: number[];
 }) => {
   const { t } = useTranslation('model');
   const [selection, setSelection] = useState<string>('');
 
   useEffect(() => {
-    if (selectedMessageIds.length > 0 ) {
-        setSelection(selectedMessageIds.length.toString())
+    if (selectedMessageIds.length > 0) {
+      setSelection(selectedMessageIds.length.toString());
     } else if (selectedTags.length > 0) {
-        setSelection('All in tags')
+      setSelection('All in tags');
     } else {
-        setSelection('All')
+      setSelection('All');
     }
-  }, [selectedTags, selectedMessageIds])
+  }, [selectedTags, selectedMessageIds]);
 
   const exportSubmissionsAsHTML = () => {
     let filteredSubmissions;
     // Filter submissions based on selected message IDs or tags
     if (selectedMessageIds.length > 0) {
-        // Filter by selected message IDs
-        filteredSubmissions = allSharedMessages?.filter(submission =>
-        selectedMessageIds.includes(submission.id)
-        );
+      // Filter by selected message IDs
+      filteredSubmissions = allSharedMessages?.filter((submission) =>
+        selectedMessageIds.includes(submission.id),
+      );
     } else if (selectedTags.length > 0) {
-        // Filter by selected tags
-        filteredSubmissions = allSharedMessages?.filter(submission =>
-        submission.message_tags.some(tag =>
-            selectedTags.map(t => t.id).includes(tag.id)
-        )
-        );
+      // Filter by selected tags
+      filteredSubmissions = allSharedMessages?.filter((submission) =>
+        submission.message_tags.some((tag) =>
+          selectedTags.map((t) => t.id).includes(tag.id),
+        ),
+      );
     } else {
-        // If no message IDs or tags are selected, use all messages
-        filteredSubmissions = allSharedMessages;
+      // If no message IDs or tags are selected, use all messages
+      filteredSubmissions = allSharedMessages;
     }
     // Convert submissions to HTML
     const exportDate = new Date().toLocaleString();
-    const exportSelection = selectedMessageIds.length > 0 ? `Selected Messages (${selectedMessageIds.length})` : selectedTags.length > 0 ? `All in Tags (${selectedTags.map(tag => tag.name).join(', ')})` : 'All Messages';
+    const exportSelection =
+      selectedMessageIds.length > 0
+        ? `Selected Messages (${selectedMessageIds.length})`
+        : selectedTags.length > 0
+          ? `All in Tags (${selectedTags.map((tag) => tag.name).join(', ')})`
+          : 'All Messages';
     // Styles for exported HTML
-      const styles = `
+    const styles = `
       <style>
         body {
           font-family: 'Arial', sans-serif;
@@ -93,19 +101,21 @@ const Export = ({
         <p>Selection: ${exportSelection}</p>
       </header>
 
-      ${filteredSubmissions?.map(submission => {
+      ${filteredSubmissions
+        ?.map((submission) => {
           // Convert markdown message content to HTML
           const messageContentHtml = marked.parse(submission.message_content);
           return `
           <div class='submission'>
             <h2>${submission.student_name}</h2>
-            <p>Tags: ${submission.message_tags.map(tag => tag.name).join(', ')}</p>
+            <p>Tags: ${submission.message_tags.map((tag) => tag.name).join(', ')}</p>
             <p>Submitted at: ${new Date(submission.created_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
             <div>${messageContentHtml}</div>
             ${submission.image_file_url ? `<img src="${submission.image_file_url}" alt="Student work">` : ''}
           </div>
         `;
-      }).join('')}
+        })
+        .join('')}
     `;
 
     // Create a new Blob with the HTML content

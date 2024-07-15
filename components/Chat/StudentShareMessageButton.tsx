@@ -6,19 +6,18 @@ import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 
 import { trackEvent } from '@/utils/app/eventTracking';
+import { truncateText } from '@/utils/data/truncateText';
 
 import HomeContext from '@/components/home/home.context';
 
 import { encode } from 'base64-arraybuffer';
-
-import { truncateText } from '@/utils/data/truncateText';
 
 interface StudentShareMessageBtnProps {
   className?: string;
   messageContent?: string;
   imageFileUrl?: string;
   size?: number;
-  isSelectedText? : boolean
+  isSelectedText?: boolean;
 }
 
 const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
@@ -81,7 +80,7 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
     <>
       <button
         data-tooltip-id="share-line-tooltip"
-        data-tooltip-content={`${t(`Share to Teacher`)}${isSelectedText? ': ' + truncateText(messageContent, 15) : ''}`}
+        data-tooltip-content={`${t(`Share to Teacher`)}${isSelectedText ? ': ' + truncateText(messageContent, 15) : ''}`}
         data-tooltip-place="bottom"
         className={`translate-x-[9999px] text-[#4c75c7] hover:text-[#89adf4] focus:translate-x-0 group-hover:translate-x-0 h-fit ${className} ${
           loading ? '!translate-x-0' : ''

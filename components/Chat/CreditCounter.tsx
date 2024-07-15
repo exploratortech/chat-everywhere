@@ -18,12 +18,12 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-
   if (
     creditUsage === null ||
     (pluginId !== PluginID.GPT4 &&
       pluginId !== PluginID.IMAGE_GEN &&
-      pluginId !== PluginID.GPT4O && pluginId !== PluginID.aiPainter) ||
+      pluginId !== PluginID.GPT4O &&
+      pluginId !== PluginID.aiPainter) ||
     isUltraUser
   )
     return <></>;
@@ -43,7 +43,7 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
       }
     }
     return result;
-  })()
+  })();
 
   return (
     <div

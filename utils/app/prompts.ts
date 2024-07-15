@@ -1,4 +1,5 @@
 import { Prompt } from '@/types/prompt';
+
 import dayjs from 'dayjs';
 
 export const updatePrompt = (updatedPrompt: Prompt, allPrompts: Prompt[]) => {

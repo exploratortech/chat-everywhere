@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState, memo } from 'react';
+import React, { memo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { Button } from '@/components/v2Chat/ui/button';

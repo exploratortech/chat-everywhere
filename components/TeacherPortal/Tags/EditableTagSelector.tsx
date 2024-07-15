@@ -1,5 +1,7 @@
 import React from 'react';
+
 import { Tag as TagType } from '@/types/tags';
+
 import * as TagComponent from '@/components/TeacherPortal/Tags/Tag';
 
 interface EditableTagSelectorProps {
@@ -14,17 +16,19 @@ const EditableTagSelector: React.FC<EditableTagSelectorProps> = ({
   onTagSelectionChange,
 }) => {
   const handleTagClick = (tag: TagType) => {
-    const isSelected = selectedTags.some(selectedTag => selectedTag.id === tag.id);
+    const isSelected = selectedTags.some(
+      (selectedTag) => selectedTag.id === tag.id,
+    );
     onTagSelectionChange(tag, !isSelected);
   };
 
   return (
     <>
-      {allTags.map(tag => (
+      {allTags.map((tag) => (
         <TagComponent.default
           key={tag.id}
           label={tag.name}
-          selected={selectedTags.some(t => t.id === tag.id)}
+          selected={selectedTags.some((t) => t.id === tag.id)}
           onSelect={() => handleTagClick(tag)}
         />
       ))}

@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -18,17 +14,10 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": [
-      "vitest/globals",
-      "cypress",
-      "node",
-      "cypress-real-events"
-    ],
+    "types": ["vitest/globals", "cypress", "node", "cypress-real-events"],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
@@ -38,8 +27,5 @@
     "**/*.tsx",
     "utils/app/azureAppInsights.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "firebase"
-  ]
+  "exclude": ["node_modules", "firebase"]
 }

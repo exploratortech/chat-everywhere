@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useDownloadObjectUrl } from '@/hooks/file/useDownloadObjectUrl';
-import { useTranslation } from 'react-i18next';
 
 const AudioPreview = ({ objectPath }: { objectPath: string }) => {
   const { t } = useTranslation('model');
@@ -42,9 +42,7 @@ const AudioPreview = ({ objectPath }: { objectPath: string }) => {
           onError={() => setError('Failed to load audio')}
         >
           <source src={audioUrl} type="audio/mpeg" />
-          {
-            t('Your browser does not support the audio player')
-          }
+          {t('Your browser does not support the audio player')}
         </audio>
       )}
     </div>

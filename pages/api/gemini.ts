@@ -1,4 +1,8 @@
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_TEMPERATURE,
+  RESPONSE_IN_CHINESE_PROMPT,
+} from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { unauthorizedResponse } from '@/utils/server/auth';
 import { callGeminiAPI } from '@/utils/server/google';
@@ -72,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     promptToSend = prompt;
     if (!promptToSend) {
-      promptToSend = DEFAULT_SYSTEM_PROMPT
+      promptToSend = DEFAULT_SYSTEM_PROMPT;
     }
 
     if (country?.includes('TW')) {
@@ -87,10 +91,10 @@ const handler = async (req: Request): Promise<Response> => {
     messageToSend = messages;
 
     if (selectedOutputLanguage) {
-      messageToSend[
-        messageToSend.length - 1
-      ].content = `${selectedOutputLanguage} ${messageToSend[messageToSend.length - 1].content
-      }`;
+      messageToSend[messageToSend.length - 1].content =
+        `${selectedOutputLanguage} ${
+          messageToSend[messageToSend.length - 1].content
+        }`;
     }
 
     await serverSideTrackEvent(data.user.id, 'Chat with doc message');
@@ -106,11 +110,11 @@ const handler = async (req: Request): Promise<Response> => {
       const textParts = [{ text: message.content }];
       const fileDataList = message.fileList
         ? message.fileList.map((file) => ({
-          fileData: {
-            mimeType: file.filetype,
-            fileUri: `gs://${BUCKET_NAME}/${file.objectPath}`,
-          },
-        }))
+            fileData: {
+              mimeType: file.filetype,
+              fileUri: `gs://${BUCKET_NAME}/${file.objectPath}`,
+            },
+          }))
         : [];
       return {
         role,

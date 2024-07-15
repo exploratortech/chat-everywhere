@@ -1,9 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconX } from '@tabler/icons-react';
-import React, {
-  Fragment,
-  memo,
-} from 'react';
+import React, { Fragment, memo } from 'react';
 
 import { useTranslation } from 'next-i18next';
 import Image from 'next/image';

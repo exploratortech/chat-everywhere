@@ -1,19 +1,20 @@
-import { PluginID } from "@/types/plugin";
 import {
   addUsageEntry,
   getAdminSupabaseClient,
   getUserProfile,
 } from '@/utils/server/supabase';
 
+import { PluginID } from '@/types/plugin';
+
 // Note that this function is intended to run asynchronously to avoid blocking the main thread.
 // And it will fail silently if there is any error.
 export const retrieveUserSessionAndLogUsages = async (
   req: Request,
-  pluginId?: PluginID
+  pluginId?: PluginID,
 ) => {
-  try{
+  try {
     const userToken = req.headers.get('user-token');
-    if(!userToken) return;
+    if (!userToken) return;
 
     const supabase = getAdminSupabaseClient();
     const { data, error } = await supabase.auth.getUser(userToken || '');
@@ -22,8 +23,8 @@ export const retrieveUserSessionAndLogUsages = async (
     const user = await getUserProfile(data.user.id);
     if (!user) return;
 
-    await addUsageEntry(pluginId || "gpt-3.5", data.user.id);
-  }catch(e){
+    await addUsageEntry(pluginId || 'gpt-3.5', data.user.id);
+  } catch (e) {
     console.log(e);
   }
-}
+};

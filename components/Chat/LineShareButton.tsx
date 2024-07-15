@@ -122,7 +122,7 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
     <>
       <button
         data-tooltip-id="share-line-tooltip"
-        data-tooltip-content={`${t(`Share to LINE`)}${isSelectedText? ': ' + truncateText(messageContent, 15) : ''}`}
+        data-tooltip-content={`${t(`Share to LINE`)}${isSelectedText ? ': ' + truncateText(messageContent, 15) : ''}`}
         data-tooltip-place="bottom"
         className={`translate-x-[9999px] text-[#4CC764] hover:text-[#17ff44] focus:translate-x-0 group-hover:translate-x-0 h-fit ${className} ${
           loading ? '!translate-x-0' : ''

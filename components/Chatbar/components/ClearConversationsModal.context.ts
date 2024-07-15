@@ -1,6 +1,6 @@
-import { Dispatch, createContext } from "react";
+import { Dispatch, createContext } from 'react';
 
-import { ActionType } from "@/hooks/useCreateReducer";
+import { ActionType } from '@/hooks/useCreateReducer';
 
 export interface ClearConversationsModalState {
   selectedConversations: Set<string>;
@@ -19,6 +19,7 @@ export interface ClearConversationsModalContextProps {
   removeFolders: (...ids: string[]) => void;
 }
 
-const ClearConversationsModalContext = createContext<ClearConversationsModalContextProps>(undefined!);
+const ClearConversationsModalContext =
+  createContext<ClearConversationsModalContextProps>(undefined!);
 
 export default ClearConversationsModalContext;

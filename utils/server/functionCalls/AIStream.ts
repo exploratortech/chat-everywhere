@@ -1,8 +1,6 @@
 // This is a simpler rewrite of the OpenAIStream function, which is the main function that handles the AI response.
 // This should be used in tendon with the handler.ts file. For GPT-4 only
-import {
-  DEFAULT_TEMPERATURE,
-} from '@/utils/app/const';
+import { DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import { normalizeMessages } from '@/utils/server/index';
 
@@ -40,9 +38,7 @@ export const AIStream = async ({
 }: AIStreamProps): Promise<AIStreamResponseType> => {
   const model = OpenAIModels[OpenAIModelID.GPT_4O];
 
-  const endpointManager = new ChatEndpointManager(
-    model,
-  );
+  const endpointManager = new ChatEndpointManager(model);
 
   const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
 
@@ -101,14 +97,11 @@ export const AIStream = async ({
 
   if (res.status !== 200) {
     const errorMessage = await res.text();
-    throw new Error(
-      `Error: ${res.status} ${res.statusText} ${errorMessage}`,
-      {
-        cause: {
-          message: `Error: ${res.status} ${res.statusText} ${errorMessage}`,
-        }
-      }
-    );
+    throw new Error(`Error: ${res.status} ${res.statusText} ${errorMessage}`, {
+      cause: {
+        message: `Error: ${res.status} ${res.statusText} ${errorMessage}`,
+      },
+    });
   }
 
   const onParse = (event: ParsedEvent | ReconnectInterval) => {

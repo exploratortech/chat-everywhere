@@ -1,7 +1,9 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import useTeacherSettings from '@/hooks/teacherPortal/useTeacherSettings';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import useTeacherSettings from '@/hooks/teacherPortal/useTeacherSettings';
+
 import {
   Select,
   SelectContent,

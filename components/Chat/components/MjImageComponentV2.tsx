@@ -161,8 +161,7 @@ export default memo(function MjImageComponentV2({
       </div>
     </div>
   );
-},
-  areEqual);
+}, areEqual);
 function NumberDisplay({ number }: { number: number }) {
   return (
     <div className="w-full h-full flex items-center justify-center">

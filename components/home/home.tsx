@@ -22,8 +22,8 @@ import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
 
-import FilePortalModel from '../User/File/FilePortalModel';
 import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
+import FilePortalModel from '../User/File/FilePortalModel';
 import HomeContext from './home.context';
 
 const Home = () => {

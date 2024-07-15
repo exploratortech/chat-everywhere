@@ -546,5 +546,5 @@ export {
   IconExternalLink,
   IconChevronUpDown,
   IconOpenInNewTab,
-  IconProfile
+  IconProfile,
 };

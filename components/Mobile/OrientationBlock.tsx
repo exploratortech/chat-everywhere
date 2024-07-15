@@ -12,7 +12,10 @@ const OrientationBlock: React.FC<OrientationBlockProps> = ({ children }) => {
   const isLandscape = useOrientation();
   const deviceInfo = useDeviceDetect();
   const isMobileOrIOSAndNotTabletAndLandscape =
-    deviceInfo.isMobile && !deviceInfo.isTablet && !deviceInfo.isDesktop && isLandscape;
+    deviceInfo.isMobile &&
+    !deviceInfo.isTablet &&
+    !deviceInfo.isDesktop &&
+    isLandscape;
 
   const showBlocker = isMobileOrIOSAndNotTabletAndLandscape
     ? 'block'
@@ -35,7 +38,9 @@ const OrientationBlock: React.FC<OrientationBlockProps> = ({ children }) => {
             'Currently, our app is optimized to work in portrait mode and unfortunately, we do not support landscape mode at this moment.',
           )}
         </p>
-        <p suppressHydrationWarning>{t('Thank you for your understanding and patience.')}</p>
+        <p suppressHydrationWarning>
+          {t('Thank you for your understanding and patience.')}
+        </p>
       </div>
       <div className={`${showContent}`}>{children}</div>
     </>

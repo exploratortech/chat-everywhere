@@ -448,7 +448,10 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
-                <div className="relative flex flex-row justify-between" data-cy="assistant-respond-message">
+                <div
+                  className="relative flex flex-row justify-between"
+                  data-cy="assistant-respond-message"
+                >
                   <AssistantRespondMessage
                     formattedMessage={formattedMessage}
                     messageIndex={messageIndex}

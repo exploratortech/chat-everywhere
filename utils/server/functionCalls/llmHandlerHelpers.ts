@@ -389,7 +389,7 @@ export const triggerMqttConnection = async (
     (mqttConnection: mqttConnectionType) =>
       mqttConnection.name &&
       mqttConnection.name.replace(/\s/g, '-') ===
-      connectionName.replace('mqtt-', ''),
+        connectionName.replace('mqtt-', ''),
   );
 
   if (!mqttConnection) return 'Failed';
@@ -429,7 +429,7 @@ export const retrieveMqttConnectionPayload = async (
     (mqttConnection: mqttConnectionType) =>
       mqttConnection.name &&
       mqttConnection.name.replace(/\s/g, '-') ===
-      connectionName.replace('mqttreceiver-', ''),
+        connectionName.replace('mqttreceiver-', ''),
   );
 
   if (!mqttConnection) return 'Failed';

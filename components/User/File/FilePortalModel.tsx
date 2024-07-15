@@ -97,8 +97,14 @@ export default function FilePortalModel({ onClose }: Props) {
                                   {t('PDF Page Limitation')}:{' '}
                                   {t('{{pages}} Pages', { pages: 300 })}
                                 </li>
-                                <li>{t('Video Length Limitation')}: {t('{{hours}} hour', { hours: 1 })}</li>
-                                <li>{t('Audio Length Limitation')}: {t('{{hours}} hours', { hours: 8 })}</li>
+                                <li>
+                                  {t('Video Length Limitation')}:{' '}
+                                  {t('{{hours}} hour', { hours: 1 })}
+                                </li>
+                                <li>
+                                  {t('Audio Length Limitation')}:{' '}
+                                  {t('{{hours}} hours', { hours: 8 })}
+                                </li>
                                 <li>{t('Image Size Limitation')}: 20 MB</li>
                               </ul>
                             </AlertDescription>
@@ -117,7 +123,7 @@ export default function FilePortalModel({ onClose }: Props) {
                       validateAndUploadFiles(
                         createFileList(files),
                         uploadFiles,
-                        () => { },
+                        () => {},
                         t,
                       );
                     }}

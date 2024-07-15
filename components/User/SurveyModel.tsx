@@ -107,9 +107,9 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
       })
         .filter(([key, value]) => value)
         .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {}) as {
-          value: string;
-          label: string;
-        }[];
+        value: string;
+        label: string;
+      }[];
       stateVar === selectedUseCases && setSelectedUseCases(newState);
       stateVar === selectedFeatures && setSelectedFeatures(newState);
       stateVar === selectedPreferred && setSelectedPreferred(newState);
@@ -348,7 +348,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                             </label>
                             {option.value === 'other_usecase' &&
                               selectedUseCases[
-                              option.value as keyof typeof selectedUseCases
+                                option.value as keyof typeof selectedUseCases
                               ] && (
                                 <input
                                   type="text"
@@ -406,7 +406,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
 
                             {option.value === 'other_feature' &&
                               selectedFeatures[
-                              option.value as keyof typeof selectedUseCases
+                                option.value as keyof typeof selectedUseCases
                               ] && (
                                 <input
                                   type="text"
@@ -463,7 +463,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                             </label>
                             {option.value === 'other_preferred' &&
                               selectedPreferred[
-                              option.value as keyof typeof selectedUseCases
+                                option.value as keyof typeof selectedUseCases
                               ] && (
                                 <input
                                   type="text"

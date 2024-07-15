@@ -115,7 +115,7 @@ export async function setTagsToOneTimeCode(
 
 export async function bulkEditTagsForSelectedSubmissions(
   messageSubmissionIds: number[],
-  tagIds: number[]
+  tagIds: number[],
 ): Promise<boolean> {
   try {
     await supabase
@@ -144,7 +144,7 @@ export async function bulkEditTagsForSelectedSubmissions(
 
 export async function bulkEditTitlesForSelectedSubmissions(
   messageSubmissionIds: number[],
-  newTitle: string
+  newTitle: string,
 ): Promise<boolean> {
   try {
     const { error } = await supabase
