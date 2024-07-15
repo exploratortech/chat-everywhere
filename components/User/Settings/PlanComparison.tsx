@@ -288,7 +288,7 @@ const UltraPlanContent = ({
         interval={priceType}
       />
 
-      {user?.plan === 'pro' && user.proPlanExpirationDate && (
+      {user?.plan === 'ultra' && user.proPlanExpirationDate && (
         <PlanExpirationDate expirationDate={user.proPlanExpirationDate} />
       )}
     </>
