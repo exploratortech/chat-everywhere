@@ -38,7 +38,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     );
   } catch (err) {
     const bodyData = JSON.parse(rawBody.toString());
-    // The fakeEvent is only available in the non-prod environment, its used by Cypress `api/cypress/test-payment-event`
+    // The fakeEvent is only available in the non-prod environment, its used by Cypress `api/cypress/test-subscription-plan-payment`
     if (!isProd && bodyData.fakeEvent) {
       event = bodyData.fakeEvent;
       isFakeEvent = true;

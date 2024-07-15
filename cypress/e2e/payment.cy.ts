@@ -50,10 +50,10 @@ describe('Test Payment Flow', () => {
       expect($el).to.have.text('Free');
     });
 
-    // calls the `/api/cypress/test-payment-event` endpoint to test the payment flow.
+    // calls the `/api/cypress/test-subscription-plan-payment` endpoint to test the payment flow.
     cy.request({
       method: 'POST',
-      url: '/api/cypress/test-payment-event',
+      url: '/api/cypress/test-subscription-plan-payment',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -84,10 +84,10 @@ describe('Test Payment Flow', () => {
       expect($el).to.have.text('Free');
     });
 
-    // calls the `/api/cypress/test-payment-event` endpoint to test the payment flow.
+    // calls the `/api/cypress/test-subscription-plan-payment` endpoint to test the payment flow.
     cy.request({
       method: 'POST',
-      url: '/api/cypress/test-payment-event',
+      url: '/api/cypress/test-subscription-plan-payment',
       headers: {
         'Content-Type': 'application/json',
       },

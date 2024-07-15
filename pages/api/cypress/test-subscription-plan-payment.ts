@@ -1,3 +1,4 @@
+// This file is intended for testing the subscription plan payment process.
 import { TEST_PAYMENT_USER } from '@/cypress/e2e/account';
 import { getHomeUrl } from '@/utils/app/api';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
