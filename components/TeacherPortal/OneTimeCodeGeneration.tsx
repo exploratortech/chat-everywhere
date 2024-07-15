@@ -47,6 +47,12 @@ const OneTimeCodeGeneration = () => {
     toast.success(t('Copied to clipboard'));
   };
 
+  const confirmAndRegenerateCode = () => {
+    const userConfirmed = window.confirm(t("Are you sure you want to regenerate a new code?")!);
+    if (userConfirmed) {
+      regenerateCode();
+    }
+  };
   // Trigger code invalidation and refetch
   const regenerateCode = () => {
     setInvalidateCode(true);
@@ -108,7 +114,7 @@ const OneTimeCodeGeneration = () => {
           )}
           <button
             className="mx-auto my-3 flex w-fit items-center gap-3 rounded border text-sm py-2 px-4 hover:opacity-50 border-neutral-600 text-white md:mb-0 md:mt-2"
-            onClick={regenerateCode}
+            onClick={confirmAndRegenerateCode}
             disabled={isManuallyRegenerating}
           >
             {isManuallyRegenerating ? (
