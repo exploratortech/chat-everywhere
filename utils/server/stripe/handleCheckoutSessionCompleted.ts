@@ -142,7 +142,7 @@ async function handleSubscription(
   );
   // NOTE: Since the stripeSubscriptionId is fake, we use the current date to simulate the expiration date
   const currentPeriodEnd = dayjs
-    .unix(isFakeEvent ? dayjs().add(2, 'month').unix() : subscription.current_period_end)
+    .unix(isFakeEvent ? dayjs().add(1, 'month').unix() : subscription.current_period_end)
     .utc()
     .toDate();
 
