@@ -114,10 +114,12 @@
     "zustand": "^4.5.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.7.0",
     "@mozilla/readability": "^0.4.4",
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.9",
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
+    "@types/eslint__js": "^8.42.3",
     "@types/jsdom": "^21.1.1",
     "@types/mixpanel-browser": "^2.38.2",
     "@types/node": "^18.15.0",
@@ -128,6 +130,7 @@
     "@types/react-transition-group": "^4.4.6",
     "@types/uuid": "^9.0.1",
     "@types/voucher-code-generator": "^1.1.1",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@vitest/coverage-c8": "^0.29.7",
     "autoprefixer": "^10.4.14",
     "copy-webpack-plugin": "^12.0.2",
@@ -138,6 +141,8 @@
     "eslint-config-next": "^14.2.5",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-tailwindcss": "^3.17.4",
+    "eslint-plugin-unused-imports": "^3.0.0",
     "gpt-3-encoder": "^1.1.4",
     "husky": "^9.0.11",
     "jsdom": "^21.1.1",
@@ -146,10 +151,11 @@
     "postcss": "^8.4.21",
     "postcss-nesting": "^12.0.0",
     "prettier": "^3.3.3",
-    "prettier-plugin-tailwindcss": "^0.2.5",
+    "prettier-plugin-tailwindcss": "^0.6.5",
     "tailwindcss": "^3.2.7",
     "ts-node": "^10.9.1",
-    "typescript": "4.9.5",
+    "typescript": "^4.9.5",
+    "typescript-eslint": "^7.16.0",
     "vitest": "^0.29.7"
   },
   "husky": {
@@ -159,8 +165,8 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+      "prettier --write",
+      "eslint --fix"
     ]
   }
 }
