@@ -160,7 +160,6 @@ export const aiPainterLlmHandler = async ({
   try {
     while (isFunctionCallRequired) {
       const requestedFunctionCalls = await AIStream({
-        countryCode: countryCode,
         systemPrompt: llmHandlerPrompt + prompt,
         messages: innerWorkingMessages,
         onUpdateToken: (token: string) => {

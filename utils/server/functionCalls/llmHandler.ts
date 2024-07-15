@@ -87,7 +87,6 @@ export const llmHandler = async ({
   try {
     while (isFunctionCallRequired) {
       const requestedFunctionCalls = await AIStream({
-        countryCode: countryCode,
         systemPrompt: llmHandlerPrompt,
         messages: innerWorkingMessages,
         onUpdateToken: (token: string) => {

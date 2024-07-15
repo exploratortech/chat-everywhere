@@ -124,7 +124,6 @@ const handler = async (req: Request): Promise<Response> => {
       messageToStreamBack,
       userIdentifier || undefined,
       pluginId === '' ? 'Default mode message' : null,
-      country,
     );
 
     return new Response(stream);
