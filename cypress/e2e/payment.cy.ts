@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { TEST_PAYMENT_USER } from "./account";
 
 describe('Test Payment Flow', () => {
@@ -66,9 +67,17 @@ describe('Test Payment Flow', () => {
     cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
       expect($el).to.have.text('Pro');
     });
+
+    cy.get('[data-cy="settings-button"]').click();
+    cy.get('[data-cy="chatbar-settings-modal"]')
+      .scrollIntoView()
+      .should('be.visible');
+    cy.get('[data-cy="chatbar-settings-modal"]').within(() => {
+      const newExpirationDate = dayjs().add(1, 'month').format('MMM DD, YYYY');
+      cy.contains(`Expires on: ${newExpirationDate}`);
+    });
   });
 
-  // DOING: add test for Ultra plan
   it('upgrade to ultra plan', () => {
     // Make sure the user is on Free plan.
     cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
@@ -93,6 +102,20 @@ describe('Test Payment Flow', () => {
     cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
       expect($el).to.have.text('Ultra');
     });
+
+    cy.get('[data-cy="settings-button"]').click();
+    cy.get('[data-cy="chatbar-settings-modal"]')
+      .scrollIntoView()
+      .should('be.visible');
+    cy.get('[data-cy="chatbar-settings-modal"]').within(() => {
+      const newExpirationDate = dayjs().add(1, 'month').format('MMM DD, YYYY');
+      cy.contains(`Expires on: ${newExpirationDate}`);
+    });
+  });
+
+
+  it('cancel subscription', () => {
+
   });
 });
 
