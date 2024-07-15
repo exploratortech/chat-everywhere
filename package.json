@@ -17,7 +17,8 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "prepare": "husky",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "eslint": "eslint"
   },
   "dependencies": {
     "@ctrl/react-adsense": "^1.6.2",

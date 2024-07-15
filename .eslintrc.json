@@ -1,8 +1,14 @@
 {
-  "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:prettier/recommended"
+  ],
+  "ignorePatterns": [
+    "firebase/*"
+  ],
   "rules": {
     "prettier/prettier": [
-      "error",
+      "warn",
       {
         "singleQuote": true,
         "endOfLine": "auto"
@@ -11,8 +17,15 @@
   },
   "overrides": [
     {
-      "files": ["**/*.ts", "**/*.tsx"],
-      "plugins": ["@typescript-eslint", "unused-imports", "tailwindcss"],
+      "files": [
+        "**/*.ts",
+        "**/*.tsx"
+      ],
+      "plugins": [
+        "@typescript-eslint",
+        "unused-imports",
+        "tailwindcss"
+      ],
       "extends": [
         "plugin:tailwindcss/recommended",
         "next/core-web-vitals",
@@ -22,13 +35,6 @@
         "project": "./tsconfig.json"
       },
       "rules": {
-        "prettier/prettier": [
-          "error",
-          {
-            "singleQuote": true,
-            "endOfLine": "auto"
-          }
-        ],
         "react/destructuring-assignment": "off",
         "react/require-default-props": "off",
         "react/jsx-props-no-spreading": "off",
@@ -50,7 +56,8 @@
           {
             "argsIgnorePattern": "^_"
           }
-        ]
+        ],
+        "tailwindcss/migration-from-tailwind-2": "off"
       }
     }
   ]
