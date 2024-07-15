@@ -17,7 +17,7 @@ export type MjRequest = MjImageGenRequest | MjButtonCommandRequest;
 
 export interface BasedMjJob {
   jobId: string;
-  myMidJourneyMessageId: string;
+  myMidJourneyMessageId?: string;
   status: JobStatus;
   enqueuedAt: string;
   startProcessingAt?: string;
