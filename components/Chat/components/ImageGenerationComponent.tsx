@@ -1,31 +1,24 @@
 import { IconCloudDownload } from '@tabler/icons-react';
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 
-import { useTranslation } from 'next-i18next';
 import Image from 'next/image';
 
 import dayjs from 'dayjs';
 
 type Props = {
   src: string;
-  messageIndex: number;
   generationPrompt: string;
-  title?: string; // where message ID is being passed down
 };
 
 export const ImageGenerationComponent: FC<Props> = ({
   src,
-  title: buttonMessageId,
-  messageIndex,
   generationPrompt,
 }) => {
-  const { t } = useTranslation('chat');
   const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
-  const [imageOperationInProgress, setImageOperationInProgress] =
-    useState(false);
 
   return (
-    <div className="flex flex-row h-[13rem] xxs:h-[15rem] xs:h-[18rem] sm:h-[22rem] md:h-[34rem] lg:h-[40rem] justify-center items-center">
+    <div className="flex h-52 flex-row items-center justify-center xxs:h-60 xs:h-72 sm:h-[22rem] md:h-[34rem] lg:h-[40rem]">
       <div className="relative h-fit">
         <Image
           src={src}
@@ -41,20 +34,12 @@ export const ImageGenerationComponent: FC<Props> = ({
           }}
           onLoad={() => setIsImageLoaded(true)}
         />
-        {imageOperationInProgress && (
-          <div className="absolute w-full h-full top-0 left-0 bg-gray-800 opacity-50">
-            <div
-              className="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-white rounded-full opacity-100 absolute bottom-3 right-3"
-              aria-label="loading"
-            />
-          </div>
-        )}
       </div>
 
       {isImageLoaded && (
-        <div className="flex flex-col ml-2 text-gray-500 dark:text-gray-400">
+        <div className="ml-2 flex flex-col text-gray-500 dark:text-gray-400">
           <button
-            className="hover:text-gray-700 dark:hover:text-gray-300 h-fit mt-1 cursor-pointer"
+            className="mt-1 h-fit cursor-pointer hover:text-gray-700 dark:hover:text-gray-300"
             onClick={() =>
               downloadFile(
                 src,

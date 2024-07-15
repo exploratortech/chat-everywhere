@@ -8,7 +8,7 @@ import {
   IconSettings,
   IconTags,
 } from '@tabler/icons-react';
-import React, { cloneElement, useContext, useEffect } from 'react';
+import React, { cloneElement } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -75,13 +75,13 @@ export default function Sidebar({ className = '' }: Props) {
       <a
         key={`${i} ${item.name}`}
         href="#"
-        className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+        className={`px-6 py-2 text-neutral-400 outline-none hover:bg-neutral-900 hover:text-neutral-200 tablet:px-2 tablet:py-4
           ${slug === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
           ${item.overrideClassName ? item.overrideClassName : ''}
           `}
         onClick={item.callback}
       >
-        <div className="flex gap-2 items-center ">
+        <div className="flex items-center gap-2 ">
           {cloneElement(item.icon, {
             className: iconClass,
           })}
@@ -101,7 +101,7 @@ export default function Sidebar({ className = '' }: Props) {
             width={200}
             height={200}
           />
-          <p className="text-center mb-5">
+          <p className="mb-5 text-center">
             {t('Scan the QR code or')}
             <a
               href="https://line.me/R/ti/g/cR6EoQ_ggL"
@@ -128,58 +128,48 @@ export default function Sidebar({ className = '' }: Props) {
   };
 
   return (
-    <div className={`${className} flex justify-between flex-col`}>
+    <div className={`${className} flex flex-col justify-between`}>
       <div>
-        <b className="pt-6 px-6 block select-none tablet:hidden">
+        <b className="block select-none px-6 pt-6 tablet:hidden">
           {t('Teacher Portal')}
         </b>
-        <div className="py-6 flex flex-col">
+        <div className="flex flex-col py-6">
           <Link
             href={'/teacher-portal/one-time-code'}
-            className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+            className={`px-6 py-2 text-neutral-400 outline-none hover:bg-neutral-900 hover:text-neutral-200 tablet:px-2 tablet:py-4
           ${slug === 'one-time-code' ? 'bg-neutral-900 text-neutral-100' : ''}
           `}
           >
-            <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
               <IconRating12Plus className={iconClass} />
               <div className="tablet:hidden">{t('One-time code')}</div>
             </div>
           </Link>
           <Link
             href={'/teacher-portal/shared-message'}
-            className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
-                ${
-                  slug === 'shared-message'
-                    ? 'bg-neutral-900 text-neutral-100'
-                    : ''
-                }
-                `}
+            className={`px-6 py-2 text-neutral-400 outline-none hover:bg-neutral-900 hover:text-neutral-200 tablet:px-2 tablet:py-4 ${slug === 'shared-message' ? 'bg-neutral-900 text-neutral-100' : ''} `}
           >
-            <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
               <IconBuildingBroadcastTower className={iconClass} />
               <div className="tablet:hidden">{t('Shared messages')}</div>
             </div>
           </Link>
           <Link
             href={'/teacher-portal/tags'}
-            className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+            className={`px-6 py-2 text-neutral-400 outline-none hover:bg-neutral-900 hover:text-neutral-200 tablet:px-2 tablet:py-4
             ${slug === 'tags' ? 'bg-neutral-900 text-neutral-100' : ''}
             `}
           >
-            <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
               <IconTags className={iconClass} />
               <div className="tablet:hidden">{t('Tags')}</div>
             </div>
           </Link>
           <Link
             href={'/teacher-portal/teacher-prompt'}
-            className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
-            ${
-              slug === 'teacher-prompt' ? 'bg-neutral-900 text-neutral-100' : ''
-            }
-            `}
+            className={`px-6 py-2 text-neutral-400 outline-none hover:bg-neutral-900 hover:text-neutral-200 tablet:px-2 tablet:py-4 ${slug === 'teacher-prompt' ? 'bg-neutral-900 text-neutral-100' : ''} `}
           >
-            <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
               <IconPrompt className={iconClass} />
               <div className="tablet:hidden">{t('Teacher Prompt')}</div>
             </div>
@@ -190,11 +180,11 @@ export default function Sidebar({ className = '' }: Props) {
       <div className="flex flex-col">
         <Link
           href={'/teacher-portal/settings'}
-          className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-9000 tablet:px-2 tablet:py-4
+          className={`px-6 py-2 text-neutral-400 outline-none hover:bg-neutral-900 hover:text-neutral-200 tablet:px-2 tablet:py-4
           ${slug === 'settings' ? 'bg-neutral-900 text-neutral-100' : ''}
           `}
         >
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center gap-2">
             <IconSettings className={iconClass} />
             <div className="tablet:hidden">{t('Settings')}</div>
           </div>

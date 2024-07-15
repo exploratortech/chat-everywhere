@@ -14,7 +14,7 @@ import {
   subtractCredit,
 } from '@/utils/server/supabase';
 
-import { ChatBody } from '@/types/chat';
+import type { ChatBody } from '@/types/chat';
 import { type Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { PluginID } from '@/types/plugin';

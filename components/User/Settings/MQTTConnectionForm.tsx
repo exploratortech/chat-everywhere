@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { mqttConnectionType } from '@/types/data';
+import type { mqttConnectionType } from '@/types/data';
 
 import {
   StyledButton,
@@ -30,8 +30,8 @@ const SimpleFieldLayout: React.FC<{
   value: string;
   className?: string;
 }> = ({ label, value, className }) => (
-  <div className={`flex flex-col mb-1 ${className}`}>
-    <span className="text-sm mb-1">{label}</span>
+  <div className={`mb-1 flex flex-col ${className}`}>
+    <span className="mb-1 text-sm">{label}</span>
     <p className="p-3 pr-10 text-[14px] leading-3 text-gray-400">{value}</p>
   </div>
 );
@@ -77,8 +77,8 @@ export const MQTTConnectionForm: React.FC<MQTTConnectionFormProps> = ({
               onChange={(e) =>
                 handleInputChange(connection.id, 'receiver', e.target.checked)
               }
-              className={`grow-0 mx-2 ${
-                connection?.receiver ? 'text-red-500 font-semibold' : ''
+              className={`mx-2 grow-0 ${
+                connection?.receiver ? 'font-semibold text-red-500' : ''
               }`}
               placeholder={t('Receiver') || ''}
             />
@@ -108,7 +108,7 @@ export const MQTTConnectionForm: React.FC<MQTTConnectionFormProps> = ({
                     e.target.checked,
                   )
                 }
-                className="grow-0 mx-2"
+                className="mx-2 grow-0"
                 placeholder={t('Dynamic') || ''}
               />
               <StyledInput
@@ -125,7 +125,7 @@ export const MQTTConnectionForm: React.FC<MQTTConnectionFormProps> = ({
               />
             </div>
           )}
-          <div className="flex justify-between w-full">
+          <div className="flex w-full justify-between">
             <div className="flex">
               <StyledButton type="submit">{t('Update')}</StyledButton>
               <StyledButton
@@ -139,7 +139,7 @@ export const MQTTConnectionForm: React.FC<MQTTConnectionFormProps> = ({
               </StyledButton>
             </div>
             <StyledButton
-              className="ml-2 border-red-500 hover:bg-red-500 hover:border-red-500"
+              className="ml-2 border-red-500 hover:border-red-500 hover:bg-red-500"
               type="button"
               onClick={() =>
                 connection.id && handleDeleteConnection(connection.id)
@@ -153,7 +153,7 @@ export const MQTTConnectionForm: React.FC<MQTTConnectionFormProps> = ({
     );
 
   return (
-    <div className="mb-4 border border-gray-400 p-4 rounded-sm">
+    <div className="mb-4 rounded-sm border border-gray-400 p-4">
       <form
         onSubmit={(e) => handleUpdateConnection(connection.id, e)}
         className="flex flex-col"
@@ -162,8 +162,8 @@ export const MQTTConnectionForm: React.FC<MQTTConnectionFormProps> = ({
           <SimpleFieldLayout label={t('Name')} value={connection.name || ''} />
           <StyledToggle
             checked={connection?.receiver || false}
-            className={`grow-0 mx-2 ${
-              connection?.receiver ? 'text-red-500 font-semibold' : ''
+            className={`mx-2 grow-0 ${
+              connection?.receiver ? 'font-semibold text-red-500' : ''
             }`}
             placeholder={t('Receiver') || ''}
             disabled
@@ -178,7 +178,7 @@ export const MQTTConnectionForm: React.FC<MQTTConnectionFormProps> = ({
           <div className="flex items-baseline">
             <StyledToggle
               checked={connection.dynamicInput || false}
-              className="grow-0 mx-2"
+              className="mx-2 grow-0"
               placeholder={t('Dynamic') || ''}
               disabled
             />
@@ -194,7 +194,7 @@ export const MQTTConnectionForm: React.FC<MQTTConnectionFormProps> = ({
           </div>
         )}
 
-        <div className="flex justify-between w-full">
+        <div className="flex w-full justify-between">
           <div className="flex">
             <StyledButton
               onClick={(e) => {

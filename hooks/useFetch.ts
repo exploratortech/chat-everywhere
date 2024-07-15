@@ -37,8 +37,6 @@ export const useFetch = () => {
         const contentType = response.headers.get('content-type');
         const contentDisposition = response.headers.get('content-disposition');
 
-        const headers = response.headers;
-
         const result =
           contentType &&
           (contentType?.indexOf('application/json') !== -1 ||

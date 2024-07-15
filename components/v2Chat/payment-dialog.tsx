@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import { UserProfile } from '@/types/user';
+import type { UserProfile } from '@/types/user';
 
 import {
   Alert,
@@ -115,7 +115,7 @@ export const PaymentDialog = ({
                     Current plan
                   </Button>
                   {userProfile.proPlanExpirationDate && (
-                    <p className="text-xs mt-0.5 text-gray-500">
+                    <p className="mt-0.5 text-xs text-gray-500">
                       *Expires on{' '}
                       {dayjs(userProfile.proPlanExpirationDate).format(
                         'YYYY-MM-DD',
@@ -128,7 +128,7 @@ export const PaymentDialog = ({
                   <Button variant={'destructive'} onClick={upgradeLinkOnClick}>
                     TWD$80
                   </Button>
-                  <p className="text-xs mt-0.5 text-gray-500">
+                  <p className="mt-0.5 text-xs text-gray-500">
                     *For limited time
                   </p>
                 </>
@@ -137,7 +137,7 @@ export const PaymentDialog = ({
           </Alert>
           {!isPaidUser && (
             <div className="flex flex-col items-center">
-              <div className="flex justify-between w-full">
+              <div className="flex w-full justify-between">
                 <Input
                   placeholder="Promo code"
                   value={promoCode}
@@ -161,7 +161,7 @@ export const PaymentDialog = ({
               </div>
               {isPromoCodeValid !== null && (
                 <p
-                  className={`text-xs w-full mt-2 ${
+                  className={`mt-2 w-full text-xs ${
                     isPromoCodeValid ? 'text-gray-600' : 'text-red-500'
                   }`}
                 >

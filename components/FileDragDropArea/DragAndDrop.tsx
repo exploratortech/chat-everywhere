@@ -65,7 +65,7 @@ const DragAndDrop: React.FC<DragAndDropProps> = ({ onFilesDrop }) => {
   return (
     <div
       {...dragProps}
-      className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
     >
       <p className="text-2xl font-semibold text-white">
         {t('Drag files here')}

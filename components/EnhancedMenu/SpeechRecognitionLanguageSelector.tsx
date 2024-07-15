@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getAvailableSpeechSourceLanguages } from '@/utils/app/i18n';
-import { saveOutputLanguage } from '@/utils/app/outputLanguage';
 import { saveSpeechRecognitionLanguage } from '@/utils/app/speechRecognitionLanguage.ts';
 
 import HomeContext from '@/components/home/home.context';
@@ -19,12 +18,12 @@ const SpeechRecognitionLanguageSelector = () => {
 
   return (
     <div className="flex flex-row items-center justify-between">
-      <label className="text-left text-sm text-neutral-700 dark:text-neutral-400 mr-2">
+      <label className="mr-2 text-left text-sm text-neutral-700 dark:text-neutral-400">
         {t('Voice language')}
       </label>
-      <div className="rounded-lg border border-neutral-200 bg-transparent text-neutral-900 dark:border-neutral-600 dark:text-white w-fit pr-1 focus:outline-none">
+      <div className="w-fit rounded-lg border border-neutral-200 bg-transparent pr-1 text-neutral-900 focus:outline-none dark:border-neutral-600 dark:text-white">
         <select
-          className="w-max-20 bg-transparent p-2 focus:outline-none"
+          className="bg-transparent p-2 focus:outline-none"
           placeholder={t('Select a lang') || ''}
           value={speechRecognitionLanguage}
           onChange={(e) => {

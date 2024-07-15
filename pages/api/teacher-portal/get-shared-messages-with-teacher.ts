@@ -1,6 +1,6 @@
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
 interface SharedMessageItem {

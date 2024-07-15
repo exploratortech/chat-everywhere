@@ -10,7 +10,7 @@ export default function UserAccountBadge() {
     if (user.plan === 'ultra') {
       return (
         <span
-          className="bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] text-xs font-medium py-0.5 rounded bg-gray-700 text-indigo-400 mr-0"
+          className="mr-0 rounded bg-gray-700 bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] py-0.5 text-xs font-medium text-indigo-400"
           style={{
             color: 'transparent',
             WebkitBackgroundClip: 'text',
@@ -27,7 +27,7 @@ export default function UserAccountBadge() {
     if (user.plan === 'pro') {
       return (
         <span
-          className="bg-indigo-100 text-indigo-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-indigo-400 border border-indigo-400"
+          className="mr-2 rounded border border-indigo-400 bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800 dark:bg-gray-700 dark:text-indigo-400"
           data-cy="user-account-badge"
         >
           Pro
@@ -38,7 +38,7 @@ export default function UserAccountBadge() {
     if (user.plan === 'edu') {
       return (
         <span
-          className="text-xs font-medium mr-2 px-2.5 py-0.5 rounded bg-gray-700 text-green-400 border border-green-400"
+          className="mr-2 rounded border border-green-400 bg-gray-700 px-2.5 py-0.5 text-xs font-medium text-green-400"
           data-cy="user-account-badge"
         >
           Edu
@@ -48,7 +48,7 @@ export default function UserAccountBadge() {
 
     return (
       <span
-        className="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-400 border border-gray-500"
+        className="mr-2 rounded border border-gray-500 bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-700 dark:text-gray-400"
         data-cy="user-account-badge"
       >
         Free

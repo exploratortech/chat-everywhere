@@ -2,9 +2,9 @@ import { Badge } from './ui/badge';
 
 export function EmptyScreen() {
   return (
-    <div className="mx-auto max-w-2xl px-4 mt-20">
+    <div className="mx-auto mt-20 max-w-2xl px-4">
       <div className="rounded-lg border bg-background p-8">
-        <div className="flex align-middle mb-1">
+        <div className="mb-1 flex align-middle">
           <h1 className="text-lg font-semibold">
             Welcome to Chat Everywhere v2
           </h1>

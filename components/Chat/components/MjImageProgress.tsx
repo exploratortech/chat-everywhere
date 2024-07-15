@@ -20,22 +20,18 @@ export default function MjImageProgress({
   const { t: chatT } = useTranslation('chat');
   return (
     <details
-      className={`${state === 'loading' ? 'bg-white disabled' : ''} ${
-        state === 'completed' ? 'bg-green-200' : ''
-      } ${
-        state === 'error' ? 'bg-red-200' : ''
-      } relative my-4 block text-black rounded-lg`}
+      className={`${state === 'loading' ? 'disabled bg-white' : ''} ${state === 'completed' ? 'bg-green-200' : ''} ${state === 'error' ? 'bg-red-200' : ''} relative my-4 block rounded-lg text-black`}
       open={state === 'loading' || state === 'error'}
     >
-      <summary className="cursor-pointer p-2 flex gap-2 items-center justify-between">
-        <div className="flex gap-2 items-center flex-grow font-bold">
+      <summary className="flex cursor-pointer items-center justify-between gap-2 p-2">
+        <div className="flex grow items-center gap-2 font-bold">
           {state === 'loading' && <Spinner size="16px" />}
 
           {state === 'loading' && 'Loading...'}
           {state === 'loading' && percentage && (
             <ProgressBar
               completed={+percentage}
-              className="basis-[50%]"
+              className="basis-1/2"
               bgColor="#70cc60"
               height="15px"
               labelSize="12px"
@@ -55,11 +51,9 @@ export default function MjImageProgress({
         )}
       </summary>
       <main>
-        <div className="panel p-2 max-h-full whitespace-pre-line">
-          {content}
-        </div>
+        <div className="max-h-full whitespace-pre-line p-2">{content}</div>
         {errorMessage && (
-          <div className="panel p-2 max-h-full whitespace-pre-line">
+          <div className="max-h-full whitespace-pre-line p-2">
             {`${t('Error')}: ${chatT(errorMessage)} `}
           </div>
         )}

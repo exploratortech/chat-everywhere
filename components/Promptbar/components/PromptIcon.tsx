@@ -1,6 +1,6 @@
 import { IconBulb, IconBulbFilled } from '@tabler/icons-react';
 
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 const PromptIcon = ({
   prompt,

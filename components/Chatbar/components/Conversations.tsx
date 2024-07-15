@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { Conversation } from '@/types/chat';
+import type { Conversation } from '@/types/chat';
 
 import HomeContext from '@/components/home/home.context';
 

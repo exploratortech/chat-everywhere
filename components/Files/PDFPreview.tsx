@@ -32,7 +32,7 @@ const PDFPreview = ({ objectPath }: { objectPath: string }) => {
     return <div>Error: {error}</div>;
   }
   return (
-    <div className="w-[50dvw] largeDesktop:w-[750px] mobile:w-full !h-[70dvh] max-w-[800px] flex items-center justify-center">
+    <div className="flex !h-[70dvh] w-[50dvw] max-w-[800px] items-center justify-center mobile:w-full largeDesktop:w-[750px]">
       {pdfUrl && (
         <iframe key={windowWidth} src={pdfUrl} width="100%" height="100%" />
       )}

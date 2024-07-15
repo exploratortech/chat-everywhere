@@ -14,15 +14,11 @@ export default function AiPainterProgress({
 }: AiPainterProgressProps) {
   return (
     <details
-      className={`${state === 'loading' ? 'bg-white disabled' : ''} ${
-        state === 'completed' ? 'bg-green-200' : ''
-      } ${
-        state === 'error' ? 'bg-red-200' : ''
-      } relative my-4 block text-black rounded-lg`}
+      className={`${state === 'loading' ? 'disabled bg-white' : ''} ${state === 'completed' ? 'bg-green-200' : ''} ${state === 'error' ? 'bg-red-200' : ''} relative my-4 block rounded-lg text-black`}
       open={state === 'loading' || state === 'error'}
     >
-      <summary className="cursor-pointer p-2 flex gap-2 items-center justify-between">
-        <div className="flex gap-2 items-center flex-grow font-bold">
+      <summary className="flex cursor-pointer items-center justify-between gap-2 p-2">
+        <div className="flex grow items-center gap-2 font-bold">
           {state === 'loading' && <Spinner size="16px" />}
           {state === 'loading' && 'Loading...'}
           {state === 'error' && <IconX size="16px" />}
@@ -38,7 +34,7 @@ export default function AiPainterProgress({
         )}
       </summary>
       <main>
-        <div className="panel p-2 max-h-full">{content}</div>
+        <div className="max-h-full p-2">{content}</div>
       </main>
     </details>
   );

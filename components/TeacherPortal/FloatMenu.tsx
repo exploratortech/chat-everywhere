@@ -1,10 +1,11 @@
-import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import useSharedMessagesWithTeacher from '@/hooks/useSharedMessagesWithTeacher';
 
-import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
-import { Tag } from '@/types/tags';
+import type { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
+import type { Tag } from '@/types/tags';
 
 import { Button } from '../ui/button';
 import TagEditorPopup from './Tags/TagEditorPopUp';

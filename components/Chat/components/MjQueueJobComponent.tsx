@@ -8,7 +8,7 @@ import useReplaceCompletedContent from '@/hooks/mjQueue/useReplaceCompletedConte
 import useRetryMjJob from '@/hooks/mjQueue/useRetryMjJob';
 import useIsStreaming from '@/hooks/useIsStreaming';
 
-import {
+import type {
   CompletedMjJob,
   FailedMjJob,
   MjJob,
@@ -64,9 +64,7 @@ const ProcessingJobComponent = ({
       } else {
         return (
           <>
-            <div>{`📝 ${mjImageT('Prompt used')}: ${
-              job.mjRequest.enhancedPrompt
-            }`}</div>
+            <div>{`📝 ${mjImageT('Prompt used')}: ${job.mjRequest.enhancedPrompt}`}</div>{' '}
             <div>{`🚀 ${mjImageT(
               'AI Image service is processing your request...',
             )}`}</div>
@@ -84,18 +82,18 @@ const ProcessingJobComponent = ({
   };
   return (
     <details
-      className={`relative my-4 block text-black rounded-lg bg-white`}
+      className={`relative my-4 block rounded-lg bg-white text-black`}
       open
     >
-      <summary className="cursor-pointer p-2 flex gap-2 items-center justify-between">
-        <div className="flex gap-2 items-center flex-grow font-bold">
+      <summary className="flex cursor-pointer items-center justify-between gap-2 p-2">
+        <div className="flex grow items-center gap-2 font-bold">
           <Spinner size="16px" />
           {mjImageT(job.status === 'PROCESSING' ? 'GENERATING' : job.status)}
 
           {job.status === 'PROCESSING' && !!job.progress && (
             <ProgressBar
               completed={job.progress ? +job.progress : 1}
-              className="basis-[50%]"
+              className="basis-1/2"
               bgColor="#70cc60"
               height="15px"
               labelSize="12px"
@@ -105,7 +103,7 @@ const ProcessingJobComponent = ({
         </div>
       </summary>
       <main>
-        <div className="panel p-2 max-h-full whitespace-pre-line">
+        <div className="max-h-full whitespace-pre-line p-2">
           {job.status === 'QUEUED' && (
             <div>{`${mjImageT('Queue Position')}: ${job.position}`}</div>
           )}
@@ -156,13 +154,11 @@ const CompletedJobComponent = ({
 
   return (
     <details
-      className={`${job.status === 'COMPLETED' ? 'bg-green-200' : ''} ${
-        job.status === 'FAILED' ? 'bg-red-200' : ''
-      } relative my-4 block text-black rounded-lg`}
+      className={`${job.status === 'COMPLETED' ? 'bg-green-200' : ''} ${job.status === 'FAILED' ? 'bg-red-200' : ''} relative my-4 block rounded-lg text-black`}
       open
     >
-      <summary className="cursor-pointer p-2 flex gap-2 items-center justify-between">
-        <div className="flex gap-2 items-center flex-grow font-bold">
+      <summary className="flex cursor-pointer items-center justify-between gap-2 p-2">
+        <div className="flex grow items-center gap-2 font-bold">
           {job.status === 'FAILED' && <IconX size="16px" />}
           {job.status === 'COMPLETED' && <IconCheck size="16px" />}
 
@@ -170,25 +166,25 @@ const CompletedJobComponent = ({
         </div>
       </summary>
       <main>
-        <div className="panel p-2 max-h-full whitespace-pre-line">
+        <div className=" max-h-full whitespace-pre-line p-2">
           {`${mjImageT('Enqueued At')}: ${dayjs(job.enqueuedAt).format(
             'YYYY-MM-DD HH:mm:ss',
           )}`}
         </div>
         {job.status === 'COMPLETED' && (
-          <div className="panel p-2 max-h-full whitespace-pre-line">
+          <div className=" max-h-full whitespace-pre-line p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={job.imageUrl} alt="content" />
           </div>
         )}
         {job.status === 'FAILED' && job.reason && (
-          <div className="panel p-2 max-h-full whitespace-pre-line">
+          <div className=" max-h-full whitespace-pre-line p-2">
             {`${t('Error')}: ${chatT(job.reason)} `}
           </div>
         )}
         {/* If a job is expired it may not have a mjRequest */}
         {job.status === 'FAILED' && job.mjRequest && (
-          <div className="w-full flex my-3 justify-center">
+          <div className="my-3 flex w-full justify-center">
             <Button
               variant={'destructive'}
               className="px-8"

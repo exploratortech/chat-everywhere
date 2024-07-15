@@ -60,11 +60,11 @@ export const LineConnectionButton = () => {
       />
       {isConnectedWithLine ? (
         <div className="flex items-center">
-          <p className="text-xs text-neutral-400 cursor-default">
+          <p className="cursor-default text-xs text-neutral-400">
             {t('Connected with LINE')}
           </p>
           <button
-            className="border border-neutral-600 hover:bg-gray-200 text-gray-800 p-1 rounded-sm text-xs dark:text-gray-100 dark:hover:bg-transparent ml-2"
+            className="ml-2 rounded-sm border border-neutral-600 p-1 text-xs text-gray-800 hover:bg-gray-200 dark:text-gray-100 dark:hover:bg-transparent"
             onClick={lineDisconnectOnClick}
             disabled={disconnecting}
           >
@@ -73,7 +73,7 @@ export const LineConnectionButton = () => {
         </div>
       ) : (
         <button
-          className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent ${
+          className={`rounded-md border border-neutral-600 px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 dark:text-gray-100 dark:hover:bg-transparent ${
             !user || (!isPaidUser && '!text-gray-400')
           }`}
           onClick={lineConnectOnClick}

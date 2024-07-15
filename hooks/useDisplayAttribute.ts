@@ -1,4 +1,5 @@
-import { MutableRefObject, useEffect, useState } from 'react';
+import type { MutableRefObject } from 'react';
+import { useEffect, useState } from 'react';
 
 const useDisplayAttribute = <T extends HTMLElement>(
   elementRef: MutableRefObject<T | null>,

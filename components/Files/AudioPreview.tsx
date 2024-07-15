@@ -34,11 +34,11 @@ const AudioPreview = ({ objectPath }: { objectPath: string }) => {
   }
 
   return (
-    <div className="w-[50dvw] largeDesktop:w-[750px] mobile:w-full h-full max-w-[800px] flex items-center justify-center">
+    <div className="flex h-full w-[50dvw] max-w-[800px] items-center justify-center mobile:w-full largeDesktop:w-[750px]">
       {audioUrl && (
         <audio
           controls
-          className="w-full max-h-full"
+          className="max-h-full w-full"
           onError={() => setError('Failed to load audio')}
         >
           <source src={audioUrl} type="audio/mpeg" />

@@ -2,11 +2,11 @@ import React from 'react';
 
 export function ImageGenerationSpinner() {
   return (
-    <div className="max-w-md space-y-2 text-gray-500 list-inside dark:text-gray-400 ml-12">
+    <div className="ml-12 max-w-md list-inside space-y-2 text-gray-500 dark:text-gray-400">
       <div className="flex items-center">
         <svg
           aria-hidden="true"
-          className="w-4 h-4 me-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600 mr-2"
+          className="me-2 mr-2 size-4 animate-spin fill-blue-600 text-gray-200 dark:text-gray-600"
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

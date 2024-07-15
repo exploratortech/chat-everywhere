@@ -1,11 +1,12 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import type { FC } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
 import useTeacherPrompt from '@/hooks/teacherPortal/useTeacherPrompt';
 
 import { PluginID } from '@/types/plugin';
-import { TeacherPromptForTeacherPortal } from '@/types/prompt';
+import type { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -206,16 +207,16 @@ export const TeacherPromptModal: FC<Props> = ({
         </div>
         <label
           htmlFor="toggleIsEnable"
-          className="inline-flex relative items-center cursor-pointer"
+          className="relative inline-flex cursor-pointer items-center"
         >
           <input
             type="checkbox"
             id="toggleIsEnable"
-            className="sr-only peer"
+            className="peer sr-only"
             checked={isEnable}
             onChange={(e) => setIsEnable(e.target.checked)}
           />
-          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+          <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-green-800"></div>
         </label>
       </div>
       <div>
@@ -223,7 +224,7 @@ export const TeacherPromptModal: FC<Props> = ({
           <div className="flex flex-col gap-6">
             <Button
               type="button"
-              className="w-full px-4 py-2 mt-6 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
+              className="mt-6 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
               onClick={handleSubmit}
             >
               {t('Save')}

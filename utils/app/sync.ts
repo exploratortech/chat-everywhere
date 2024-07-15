@@ -1,14 +1,14 @@
-import { Conversation } from '@/types/chat';
-import { LatestExportFormat } from '@/types/export';
-import { FolderInterface } from '@/types/folder';
-import { Prompt } from '@/types/prompt';
-import { User, UserConversation } from '@/types/user';
+import type { Conversation } from '@/types/chat';
+import type { LatestExportFormat } from '@/types/export';
+import type { FolderInterface } from '@/types/folder';
+import type { Prompt } from '@/types/prompt';
+import type { User, UserConversation } from '@/types/user';
 
 import { cleanConversationHistory } from './clean';
 import { cleanData, getExportableData } from './importExport';
 import { sortByRankAndFolder, sortByRankAndFolderType } from './rank';
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 type MergeableObjectCollectionHash = {
   [id: string]: MergeableObject;
@@ -78,7 +78,7 @@ const updateUserRemoteData = async (
       throw new Error(error.message);
     }
   } else {
-    const { data, error } = await supabase.from('user_conversations').insert({
+    const { error } = await supabase.from('user_conversations').insert({
       uid: user.id,
       conversations: dataPackage,
     });

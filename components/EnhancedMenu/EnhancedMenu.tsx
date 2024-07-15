@@ -56,11 +56,11 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
       <div
         ref={ref}
         data-cy="chat-enhanced-menu-container"
-        className={`absolute w-full h-fit left-0 overflow-hidden
-          bg-white dark:bg-[#343541] text-black dark:text-white 
-          z-10 rounded-md -translate-y-[100%]
-          border dark:border-gray-900/50 shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]
-          transition-all ease-in-out ${
+        className={`absolute left-0 z-10 h-fit w-full
+          -translate-y-full overflow-hidden rounded-md border 
+          bg-white text-black shadow-[0_0_10px_rgba(0,0,0,0.10)]
+          transition-all ease-in-out dark:border-gray-900/50 dark:bg-[#343541]
+          dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] ${
             showMenuAnimation ? '-top-2 opacity-90' : 'top-8 opacity-0'
           }`}
         style={{
@@ -68,10 +68,10 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
         }}
       >
         <div
-          className="relative w-full px-4 py-2 flex flex-col"
+          className="relative flex w-full flex-col px-4 py-2"
           data-cy="chat-enhanced-menu"
         >
-          <div className="flex flex-row w-full justify-between items-center pb-2 mb-2 border-b gap-4 dark:border-gray-900/50 mobile:!flex-col mobile:items-stretch">
+          <div className="mb-2 flex w-full flex-row items-center justify-between gap-4 border-b pb-2 dark:border-gray-900/50 mobile:!flex-col mobile:items-stretch">
             <SpeechRecognitionLanguageSelector />
             {/* Disable until MyMidjourneyAPI supports this */}
             {/* {currentMessage?.pluginId === PluginID.IMAGE_GEN && (
@@ -79,7 +79,7 @@ const EnhancedMenu = forwardRef<HTMLDivElement, EnhancedMenuProps>(
             )} */}
             {isPaidUser && <ConversationModeToggle />}
           </div>
-          <div className="flex flex-col md:flex-row w-full justify-between">
+          <div className="flex w-full flex-col justify-between md:flex-row">
             <ModeSelector />
             <ConversationStyleSelector />
             {currentMessage?.pluginId !== PluginID.IMAGE_GEN && (

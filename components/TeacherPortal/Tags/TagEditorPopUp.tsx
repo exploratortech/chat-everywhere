@@ -1,10 +1,11 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
-import { Tag as TagType } from '@/types/tags';
+import type { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
+import type { Tag as TagType } from '@/types/tags';
 
 import { Button } from '../../ui/button';
 import EditableTagSelector from './EditableTagSelector';
@@ -99,7 +100,7 @@ const TagEditorPopup = ({
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap items-center gap-2">
         <EditableTagSelector
           allTags={allTags}
           selectedTags={selectedTags}

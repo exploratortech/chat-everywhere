@@ -12,7 +12,8 @@ import {
   OPENAI_API_KEY,
 } from '@/utils/app/const';
 
-import { OpenAIModel, OpenAIModelID, OpenAIModels } from '@/types/openai';
+import type { OpenAIModel } from '@/types/openai';
+import { OpenAIModelID } from '@/types/openai';
 
 type EndpointInfo = {
   endpoint: string | undefined;

@@ -1,7 +1,8 @@
+/* eslint-disable prettier/prettier */
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconClearAll } from '@tabler/icons-react';
+import type { MutableRefObject } from 'react';
 import {
-  MutableRefObject,
   memo,
   useCallback,
   useContext,
@@ -22,9 +23,10 @@ import { DEFAULT_FIRST_MESSAGE_TO_GPT } from '@/utils/app/const';
 import { handleImageToPromptSend } from '@/utils/app/image-to-prompt';
 import { throttle } from '@/utils/data/throttle';
 
-import { Conversation, Message } from '@/types/chat';
+import type { Conversation, Message } from '@/types/chat';
 import { PluginID, Plugins } from '@/types/plugin';
-import { Prompt, isTeacherPrompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
+import { isTeacherPrompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -59,7 +61,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       outputLanguage,
       currentMessage,
       messageIsStreaming,
-      showFilePortalModel,
     },
     handleUpdateConversation,
     dispatch: homeDispatch,
@@ -345,10 +346,10 @@ Continue from "${lastWords}<your response>"`;
         <ErrorMessageDiv error={modelError} />
       ) : (
         <>
-          <div className="max-h-full h-full overflow-x-hidden flex flex-col">
+          <div className="flex h-full max-h-full flex-col overflow-x-hidden">
             {selectedConversation?.messages.length === 0 ? (
               <>
-                <div className="mx-auto flex max-w-[350px] flex-col space-y-10 pt-12 md:px-4 sm:max-w-[600px] ">
+                <div className="mx-auto flex max-w-[350px] flex-col space-y-10 pt-12 sm:max-w-[600px] md:px-4 ">
                   <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
                     <NewConversationMessagesContainer
                       customInstructionOnClick={(
@@ -396,8 +397,8 @@ Continue from "${lastWords}<your response>"`;
             ) : (
               <>
                 <div
-                  className="justify-center items-center border flex tablet:hidden
-                  border-b-neutral-300 bg-neutral-100 py-[0.625rem] text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 sticky top-0 z-10"
+                  className="sticky top-0 z-10 flex items-center
+                  justify-center border border-b-neutral-300 bg-neutral-100 py-2.5 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200 tablet:hidden"
                 >
                   <CustomInstructionInUseIndicator />
                   {selectedConversation?.name}
@@ -436,7 +437,7 @@ Continue from "${lastWords}<your response>"`;
                 {loading && <ChatLoader />}
 
                 <div
-                  className="h-[1px] bg-white dark:bg-[#343541]"
+                  className="h-px bg-white dark:bg-[#343541]"
                   ref={messagesEndRef}
                 />
               </>

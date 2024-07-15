@@ -2,10 +2,10 @@ import { getHomeUrl } from '@/utils/app/api';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { generateImage } from '@/utils/v2Chat/openAiApiUtils';
 
-import { FunctionCall } from '@/types/chat';
-import { mqttConnectionType } from '@/types/data';
+import type { FunctionCall } from '@/types/chat';
+import type { mqttConnectionType } from '@/types/data';
 import { PluginID } from '@/types/plugin';
-import { UserProfile } from '@/types/user';
+import type { UserProfile } from '@/types/user';
 
 import {
   addUsageEntry,

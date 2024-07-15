@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
-import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
-import { Tag } from '@/types/tags';
+import type { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
+import type { Tag } from '@/types/tags';
 
 import useShareMessageFilterStore from '@/components/TeacherPortal/share-message-filter.store';
 
@@ -24,9 +24,9 @@ const Filter = memo(
   }) => {
     const { selectedTags } = useShareMessageFilterStore();
     return (
-      <div className="flex justify-between gap-4 items-start">
+      <div className="flex items-start justify-between gap-4">
         <TagFilter tags={tags} />
-        <div className="flex gap-4 items-center">
+        <div className="flex items-center gap-4">
           <Export
             selectedTags={selectedTags}
             allSharedMessages={allSharedMessages}

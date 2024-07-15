@@ -7,8 +7,8 @@ import {
 import { AIStream } from '@/utils/server/functionCalls/AIStream';
 import { triggerHelperFunction } from '@/utils/server/functionCalls/llmHandlerHelpers';
 
-import { FunctionCall, Message } from '@/types/chat';
-import { UserProfile } from '@/types/user';
+import type { FunctionCall, Message } from '@/types/chat';
+import type { UserProfile } from '@/types/user';
 
 type handlerType = {
   user: UserProfile;

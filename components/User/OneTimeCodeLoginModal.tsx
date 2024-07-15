@@ -43,7 +43,7 @@ async function oneTimeCodeLogin(code: string, uniqueId: string, t: any) {
 }
 
 const OneTimeCodeLoginModal = memo(
-  ({ className = '', open, onOpen, onClose }: Props) => {
+  ({ className = '', open, onClose }: Props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [code, setCode] = useState('');
     const [uniqueId, setUniqueId] = useState('');
@@ -104,7 +104,7 @@ const OneTimeCodeLoginModal = memo(
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-3xl tablet:max-w-max h-max transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
+                <Dialog.Panel className="grid h-max w-full max-w-3xl grid-rows-[max-content_1fr] overflow-hidden rounded-2xl bg-neutral-800 p-6 text-left align-middle text-neutral-200 shadow-xl transition-all mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:max-w-max">
                   <div
                     className={cn(
                       'invisible',
@@ -164,7 +164,7 @@ const OneTimeCodeLoginModal = memo(
                     <div>
                       <button
                         type="submit"
-                        className="w-full px-4 py-2 mt-2 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
+                        className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
                       >
                         {authT('Sign in')}
                       </button>

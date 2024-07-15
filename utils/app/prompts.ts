@@ -1,4 +1,4 @@
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 import dayjs from 'dayjs';
 

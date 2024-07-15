@@ -110,7 +110,7 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
 
     return (
       <div
-        className={`absolute w-1.5 h-1.5 m-1.5 top-0 right-0 bg-green-500 rounded-full`}
+        className={`absolute right-0 top-0 m-1.5 size-1.5 rounded-full bg-green-500`}
       />
     );
   }, [loadingStt, isSpeechRecognitionActive, isMicrophoneDisabled]);
@@ -119,7 +119,7 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
     if (isMicrophoneDisabled) {
       return (
         <IconMicrophoneOff
-          className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full opacity-50"
+          className="rounded-full bg-white text-zinc-500 opacity-50 dark:bg-[#40414F] dark:text-zinc-400"
           size={18}
         />
       );
@@ -127,14 +127,14 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
     if (isConversing) {
       return (
         <IconPlayerStop
-          className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full"
+          className="rounded-full bg-white text-zinc-500 dark:bg-[#40414F] dark:text-zinc-400"
           size={18}
         />
       );
     }
     return (
       <IconMicrophone
-        className="text-zinc-500 bg-white dark:text-zinc-400 dark:bg-[#40414F] rounded-full"
+        className="rounded-full bg-white text-zinc-500 dark:bg-[#40414F] dark:text-zinc-400"
         size={18}
       />
     );
@@ -175,7 +175,7 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
   return (
     <div
       className={`
-        w-9 h-9 bg-white dark:bg-[#40414F] rounded-full
+        size-9 rounded-full bg-white dark:bg-[#40414F]
         ${
           loadingStt || isConversing || isSpeechRecognitionActive
             ? 'z-[1100]'
@@ -184,18 +184,13 @@ const VoiceInputButton = ({ onClick }: VoiceInputButtonProps) => {
       `}
     >
       <div className="relative">
-        <canvas
-          className="w-full h-full"
-          width="36"
-          height="36"
-          ref={canvasRef}
-        />
+        <canvas className="size-full" width="36" height="36" ref={canvasRef} />
         {loadingStt ? (
-          <div className="absolute top-[0.7rem] left-3 h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
+          <div className="absolute left-3 top-[0.7rem] size-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
         ) : (
           <>
             <button
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-2 bg-transparent"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-transparent p-2"
               onClick={handleClick}
               onMouseDown={(e) => {
                 // Prevents closing enhanced menu if its opened

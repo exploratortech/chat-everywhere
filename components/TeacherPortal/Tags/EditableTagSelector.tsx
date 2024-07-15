@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Tag as TagType } from '@/types/tags';
+import type { Tag as TagType } from '@/types/tags';
 
 import * as TagComponent from '@/components/TeacherPortal/Tags/Tag';
 

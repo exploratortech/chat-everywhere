@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';

@@ -1,10 +1,11 @@
 import { IconArrowDown } from '@tabler/icons-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+import { useEffect, useRef, useState } from 'react';
+import type { VirtuosoHandle } from 'react-virtuoso';
+import { Virtuoso } from 'react-virtuoso';
 
 import { throttle } from '@/utils/data/throttle';
 
-import { Message } from '@/types/chat';
+import type { Message } from '@/types/chat';
 
 import { ChatMessage } from './ChatMessage';
 
@@ -98,9 +99,9 @@ const VirtualList = ({
         }}
       />
       {showScrollDownButton && (
-        <div className="z-10 absolute bottom-0 right-0 mb-4 mr-4 pb-20">
+        <div className="absolute bottom-0 right-0 z-10 mb-4 mr-4 pb-20">
           <button
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-200 text-gray-700 shadow-md hover:shadow-lg dark:bg-gray-700 dark:text-gray-200"
+            className="flex size-7 items-center justify-center rounded-full bg-neutral-200 text-gray-700 shadow-md hover:shadow-lg dark:bg-gray-700 dark:text-gray-200"
             onClick={handleScrollDown}
           >
             <IconArrowDown size={18} />

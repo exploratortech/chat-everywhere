@@ -3,7 +3,7 @@ import { NotionRenderer } from 'react-notion-x';
 
 import Spinner from '../Spinner/Spinner';
 
-import { ExtendedRecordMap } from 'notion-types';
+import type { ExtendedRecordMap } from 'notion-types';
 
 interface Props {
   pageId: string;
@@ -24,7 +24,7 @@ function NewsPage({ pageId }: Props) {
   if (recordMap) {
     return (
       <NotionRenderer
-        className="overflow-y-scroll m-2 !w-full"
+        className="m-2 !w-full overflow-y-scroll"
         recordMap={recordMap}
         fullPage={false}
         header={true}

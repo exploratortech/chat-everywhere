@@ -38,7 +38,7 @@ const ItemPerPage = () => {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="flex-shrink-0">{t('Show')}</span>
+      <span className="shrink-0">{t('Show')}</span>
       <Select
         onValueChange={(value) => {
           handleValueChange(value);

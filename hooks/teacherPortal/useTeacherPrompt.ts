@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import { TeacherPromptForTeacherPortal } from '@/types/prompt';
+import type { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import useTeacherPortalLoading from './useTeacherPortalLoading';
 

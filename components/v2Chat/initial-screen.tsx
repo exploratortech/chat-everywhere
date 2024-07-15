@@ -16,18 +16,18 @@ export const InitialScreen = () => {
   }, []);
 
   return (
-    <div className="v2-container flex flex-col min-h-screen justify-center items-center">
+    <div className="v2-container flex min-h-screen flex-col items-center justify-center">
       <Card className="w-full max-w-md sm:max-w-sm">
-        <CardHeader className="flex justify-center w-full">
-          <div className="text-center flex flex-col">
+        <CardHeader className="flex w-full justify-center">
+          <div className="flex flex-col text-center">
             <a
-              className="text-xl font-serif"
+              className="font-serif text-xl"
               href="https://intro.chateverywhere.app"
               target="_blank"
             >
               Chat Everywhere v2
             </a>
-            <div className="w-full flex justify-center mt-1">
+            <div className="mt-1 flex w-full justify-center">
               <Badge variant={'outline'} className="w-fit">
                 Beta
               </Badge>
@@ -43,13 +43,13 @@ export const InitialScreen = () => {
             providers={['google']}
             redirectTo={redirectUrl}
           />
-          <div className="text-xs text-neutral-400 text-center">
+          <div className="text-center text-xs text-neutral-400">
             By signing up, you agree to our
             <a
               href="https://intro.chateverywhere.app/terms-of-service.html"
               target="_blank"
               rel="noreferrer"
-              className="underline ml-1"
+              className="ml-1 underline"
             >
               Terms of Service.
             </a>

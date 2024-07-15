@@ -3,7 +3,7 @@ import React from 'react';
 
 const AdMessage = ({ googleAdSenseId }: { googleAdSenseId: string }) => (
   <div
-    className={`group px-4 flex justify-center`}
+    className={`group flex justify-center px-4`}
     style={{ overflowWrap: 'anywhere' }}
   >
     <Adsense

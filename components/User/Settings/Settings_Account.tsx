@@ -62,27 +62,27 @@ export default function Settings_Account() {
 
   return (
     <div>
-      <h1 className="font-bold mb-4">{t('Account')}</h1>
+      <h1 className="mb-4 font-bold">{t('Account')}</h1>
 
       <div className="mx-auto max-w-2xl">
-        <div className="rounded-2xl flex flex-col">
+        <div className="flex flex-col rounded-2xl">
           {!isPaidUser && (
-            <span className="text-sm mb-2">
+            <span className="mb-2 text-sm">
               {t(
                 'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime!',
               )}
             </span>
           )}
           {isPaidUser && user?.isInReferralTrial && (
-            <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
+            <div className="mb-3 flex items-center gap-2 text-xs leading-5 text-neutral-400">
               <IconCircleCheck className="text-green-500" size={19} />
               <p className="flex items-center">
                 {t('Enjoy our pro plan experience during your trial!')}
               </p>
             </div>
           )}
-          <div className="flex flex-col md:flex-row justify-center gap-4 mb-3">
-            <div className="flex flex-col  border rounded-lg p-4 text-neutral-400 border-neutral-400 md:w-1/2">
+          <div className="mb-3 flex flex-col justify-center gap-4 md:flex-row">
+            <div className="flex flex-col  rounded-lg border border-neutral-400 p-4 text-neutral-400 md:w-1/2">
               <span className="text-2xl font-bold">Free</span>
               <div className="text-xs leading-5">
                 {PlanDetail.free.features.map((feature, index) => (
@@ -90,7 +90,7 @@ export default function Settings_Account() {
                 ))}
               </div>
             </div>
-            <div className="flex flex-col border rounded-lg p-4 mt-4 md:mt-0 md:ml-2 md:w-1/2">
+            <div className="mt-4 flex flex-col rounded-lg border p-4 md:ml-2 md:mt-0 md:w-1/2">
               {user?.plan === 'ultra' ? (
                 <UltraPlanContent />
               ) : (
@@ -103,11 +103,11 @@ export default function Settings_Account() {
                     target="_blank"
                     rel="noreferrer"
                     onClick={() => upgradeLinkOnClick()}
-                    className="px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
+                    className="mt-4 cursor-pointer rounded-lg border border-none bg-white bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] px-4 py-2 text-center text-sm font-semibold text-white shadow focus:outline-none"
                   >
                     {t('Upgrade')}
                   </a>
-                  <p className="text-xs text-neutral-400 mt-2">
+                  <p className="mt-2 text-xs text-neutral-400">
                     {t('No Strings Attached - Cancel Anytime!')}
                   </p>
                 </div>
@@ -115,7 +115,7 @@ export default function Settings_Account() {
 
               {(user?.plan === 'pro' || user?.plan === 'ultra') &&
                 user.proPlanExpirationDate && (
-                  <div className="text-left text-neutral-500 p-2 text-xs">
+                  <div className="p-2 text-left text-xs text-neutral-500">
                     {`${t('Expires on')}: 
                             ${dayjs(user.proPlanExpirationDate).format(
                               'll',
@@ -135,7 +135,7 @@ export default function Settings_Account() {
                   href={subscriptionManagementLink()}
                   target="_blank"
                   rel="noreferrer"
-                  className="underline cursor-pointer"
+                  className="cursor-pointer underline"
                 >
                   {t('here')}
                 </a>
@@ -143,31 +143,31 @@ export default function Settings_Account() {
               </p>
             )}
 
-            <p className="text-xs text-neutral-400 mt-2">
+            <p className="mt-2 text-xs text-neutral-400">
               {t('If you have any questions, please contact us at ')}
               <a
                 target="_blank"
                 rel="noreferrer"
-                className="underline cursor-pointer"
+                className="cursor-pointer underline"
                 href="mailto:jack@exploratorlabs.com"
               >
                 jack@exploratorlabs.com
               </a>
             </p>
             {user && (
-              <p className="text-xs text-neutral-400 mt-2">
+              <p className="mt-2 text-xs text-neutral-400">
                 {t('Your registration email is')} {user?.email}
               </p>
             )}
           </div>
         </div>
 
-        <div className="flex justify-end mt-4">
+        <div className="mt-4 flex justify-end">
           {user && (
             <div className="flex flex-row items-center">
               {!isPaidUser && (
                 <span
-                  className="pr-2 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer text-xs"
+                  className="cursor-pointer pr-2 text-xs text-neutral-500 hover:text-neutral-700 focus:outline-none"
                   onClick={() =>
                     setDisplayReferralCodeEnterer(!displayReferralCodeEnterer)
                   }
@@ -177,7 +177,7 @@ export default function Settings_Account() {
               )}
 
               <span
-                className="px-4 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer mr-2 text-xs"
+                className="mr-2 cursor-pointer px-4 text-xs text-neutral-500 hover:text-neutral-700 focus:outline-none"
                 onClick={changePasswordOnClick}
               >
                 {t('Change password')}
@@ -185,9 +185,9 @@ export default function Settings_Account() {
             </div>
           )}
         </div>
-        <div className="inline-flex items-center justify-center w-full">
-          <hr className="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
-          <span className="absolute px-3 text-white -translate-x-1/2 left-1/2 bg-[#171717]">
+        <div className="inline-flex w-full items-center justify-center">
+          <hr className="my-8 h-px w-64 border-0 bg-gray-200 dark:bg-gray-700" />
+          <span className="absolute left-1/2 -translate-x-1/2 bg-[#171717] px-3 text-white">
             {t('Integrations (pro plan)')}
           </span>
         </div>
@@ -202,7 +202,7 @@ const ProPlanContent = () => {
   return (
     <>
       <span className="text-2xl font-bold">Pro</span>
-      <span className="text-sm mb-2">{t('USD$9.99 / month')}</span>
+      <span className="mb-2 text-sm">{t('USD$9.99 / month')}</span>
       <div className="text-xs leading-5">
         <FeatureItem featureName={t('Everything in free plan')} />
         <FeatureItem featureName={t('Priority response time')} />
@@ -219,7 +219,7 @@ const UltraPlanContent = () => {
   return (
     <>
       <span
-        className="text-2xl font-bold bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] font-medium rounded bg-gray-700 text-indigo-400"
+        className="rounded bg-gray-700 bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] text-2xl font-medium text-indigo-400"
         style={{
           color: 'transparent',
           WebkitBackgroundClip: 'text',

@@ -4,7 +4,7 @@ import {
 } from '@/utils/server/auth';
 import { createTeacherPrompt } from '@/utils/server/supabase/teacher-prompt';
 
-import { TeacherPromptForTeacherPortal } from '@/types/prompt';
+import type { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 export const config = {
   runtime: 'edge',

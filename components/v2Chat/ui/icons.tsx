@@ -476,10 +476,7 @@ function IconChevronUpDown({
   );
 }
 
-function IconOpenInNewTab({
-  className,
-  ...props
-}: React.ComponentProps<'svg'>) {
+function IconOpenInNewTab() {
   return (
     <svg
       width="15"
@@ -498,7 +495,7 @@ function IconOpenInNewTab({
   );
 }
 
-function IconProfile({ className, ...props }: React.ComponentProps<'svg'>) {
+function IconProfile({}: React.ComponentProps<'svg'>) {
   return (
     <svg
       width="15"

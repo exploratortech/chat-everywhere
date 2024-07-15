@@ -10,10 +10,8 @@ import {
 import updateUserAccount from './updateUserAccount';
 
 import dayjs from 'dayjs';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
-const MONTHLY_PRO_PLAN_SUBSCRIPTION =
-  process.env.STRIPE_PLAN_CODE_MONTHLY_PRO_PLAN_SUBSCRIPTION;
 const ONE_TIME_PRO_PLAN_FOR_1_MONTH =
   process.env.STRIPE_PLAN_CODE_ONE_TIME_PRO_PLAN_FOR_1_MONTH;
 

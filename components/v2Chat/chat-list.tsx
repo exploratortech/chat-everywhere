@@ -59,7 +59,7 @@ export function ChatList({
 
   return (
     <div
-      className="relative w-screen pl-4 sm:pl-0 sm:max-w-3xl overflow-auto flex flex-col-reverse h-[calc(99vh-4rem)] pb-[6rem] justify-start"
+      className="relative flex h-[calc(99vh-4rem)] w-screen flex-col-reverse justify-start overflow-auto pb-24 pl-4 sm:max-w-3xl sm:pl-0"
       id="scrollableDiv"
     >
       <InfiniteScroll
@@ -75,9 +75,7 @@ export function ChatList({
         {messages.map((message, index) => (
           <div
             key={message.id}
-            className={`h-full w-[90vw] md:w-[44rem] max-screen ${
-              index === messages.length - 1 ? 'mt-10' : ''
-            }`}
+            className={`h-full w-[90vw] md:w-[44rem] ${index === messages.length - 1 ? 'mt-10' : ''}`}
           >
             <ChatMessage message={message} />
             {index !== 0 && <Separator className="my-4 md:my-8" />}
@@ -89,7 +87,7 @@ export function ChatList({
                 <ImageContainer url={message.metadata.imageUrl} />
               )}
             {message.metadata?.imageGenerationStatus === 'failed' && (
-              <Alert variant="destructive" className="max-w-xs mb-6">
+              <Alert variant="destructive" className="mb-6 max-w-xs">
                 <AlertTitle>Error!</AlertTitle>
                 <AlertDescription>
                   Unable to generate image, please try again

@@ -20,7 +20,7 @@ import {
   subtractCredit,
 } from '@/utils/server/supabase';
 
-import { MjJob } from '@/types/mjJob';
+import type { MjJob } from '@/types/mjJob';
 import { PluginID } from '@/types/plugin';
 
 export const config = {

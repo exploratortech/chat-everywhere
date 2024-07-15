@@ -15,8 +15,8 @@ import {
 } from '@/utils/server/functionCalls/llmHandlerHelpers';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
-import { FunctionCall, Message } from '@/types/chat';
-import { UserProfile } from '@/types/user';
+import type { FunctionCall, Message } from '@/types/chat';
+import type { UserProfile } from '@/types/user';
 
 type handlerType = {
   user: UserProfile;

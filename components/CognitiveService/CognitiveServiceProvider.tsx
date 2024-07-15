@@ -15,7 +15,8 @@ import { voiceMap } from '@/utils/app/i18n';
 
 import HomeContext from '../home/home.context';
 
-import dayjs, { Dayjs } from 'dayjs';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import {
   AudioConfig,
   CancellationReason,

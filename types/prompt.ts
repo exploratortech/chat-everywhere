@@ -1,5 +1,5 @@
-import { OpenAIModel } from './openai';
-import { PluginID } from './plugin';
+import type { OpenAIModel } from './openai';
+import type { PluginID } from './plugin';
 
 export type Prompt = RegularPrompt | CustomInstructionPrompt | TeacherPrompt;
 export interface RegularPrompt {

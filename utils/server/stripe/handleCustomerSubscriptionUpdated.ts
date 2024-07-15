@@ -3,7 +3,7 @@ import updateUserAccount from './updateUserAccount';
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 dayjs.extend(utc);
 

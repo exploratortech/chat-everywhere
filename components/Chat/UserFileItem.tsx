@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useFetchFileList } from '@/hooks/file/useFetchFileList';
 
-import { UserFile } from '@/types/UserFile';
+import type { UserFile } from '@/types/UserFile';
 
 import {
   Tooltip,
@@ -56,7 +56,7 @@ const UserFileItem: React.FC<UserFileItemProps> = ({ file, onRemove }) => {
         >
           <IconAlertCircleFilled className="text-red-500" />
           {file.filename}
-          <div className="h-full cursor-pointer group-hover:visible invisible flex items-center">
+          <div className="invisible flex h-full cursor-pointer items-center group-hover:visible">
             <IconX className="" size={14} onClick={() => onRemove(file)} />
           </div>
         </div>
@@ -72,7 +72,7 @@ const UserFileItem: React.FC<UserFileItemProps> = ({ file, onRemove }) => {
     >
       <UserFileItemIcon fileType={file.filetype} />
       {file.filename}
-      <div className="h-full cursor-pointer group-hover:visible invisible flex items-center">
+      <div className="invisible flex h-full cursor-pointer items-center group-hover:visible">
         <IconX className="" size={14} onClick={() => onRemove(file)} />
       </div>
     </div>

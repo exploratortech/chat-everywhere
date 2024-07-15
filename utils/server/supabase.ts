@@ -1,13 +1,11 @@
 import { DefaultMonthlyCredits } from '@/utils/config';
 
-import { PluginID } from '@/types/plugin';
-import { RawRefereeProfile } from '@/types/referral';
-import { UserProfile, UserProfileQueryProps } from '@/types/user';
+import type { PluginID } from '@/types/plugin';
+import type { RawRefereeProfile } from '@/types/referral';
+import type { UserProfile, UserProfileQueryProps } from '@/types/user';
 
-import {
-  CodeGenerationPayloadType,
-  generateReferralCodeAndExpirationDate,
-} from './referralCode';
+import type { CodeGenerationPayloadType } from './referralCode';
+import { generateReferralCodeAndExpirationDate } from './referralCode';
 
 import { createClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
@@ -299,7 +297,7 @@ export const getReferralCode = async (
 ): Promise<CodeGenerationPayloadType> => {
   try {
     const supabase = getAdminSupabaseClient();
-    const { data: record, error } = await supabase
+    const { data: record } = await supabase
       .from('profiles')
       .select('referral_code, referral_code_expiration_date')
       .eq('plan', 'edu')
@@ -365,7 +363,7 @@ export const regenerateReferralCode = async (
 ): Promise<CodeGenerationPayloadType> => {
   try {
     const supabase = getAdminSupabaseClient();
-    const { data: record, error: getProfileError } = await supabase
+    const { error: getProfileError } = await supabase
       .from('profiles')
       .select('referral_code')
       .eq('plan', 'edu')
@@ -375,7 +373,7 @@ export const regenerateReferralCode = async (
 
     const { code: newGeneratedCode, expiresAt: newExpirationDate } =
       generateReferralCodeAndExpirationDate();
-    const { data: newRecord, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from('profiles')
       .update({
         referral_code: newGeneratedCode,

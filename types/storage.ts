@@ -1,6 +1,6 @@
-import { Conversation } from './chat';
-import { FolderInterface } from './folder';
-import { Prompt } from './prompt';
+import type { Conversation } from './chat';
+import type { FolderInterface } from './folder';
+import type { Prompt } from './prompt';
 
 // keep track of local storage schema
 export interface LocalStorage {

@@ -17,7 +17,7 @@ import {
 import { isPaidUserByAuthToken } from '@/utils/server/supabase';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
-import { ChatBody } from '@/types/chat';
+import type { ChatBody } from '@/types/chat';
 import { type Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 

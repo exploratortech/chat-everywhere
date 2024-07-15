@@ -44,36 +44,36 @@ const ImageContainer = ({ url }: { url: string }) => {
     <>
       <Dialog open={showDialog} onOpenChange={(open) => setShowDialog(open)}>
         <DialogContent className="max-w-lg">
-          <div className="flex items-center space-x-2 flex-col p-3">
+          <div className="flex flex-col items-center space-x-2 p-3">
             <img src={url} alt="Generated Image" />
-            <div className="flex flex-row justify-between w-full">
+            <div className="flex w-full flex-row justify-between">
               <Button
                 type="submit"
                 size="sm"
-                className="px-3 mt-3"
+                className="mt-3 px-3"
                 disabled={downloadLoading}
                 onClick={downloadImage}
               >
                 <span className="sr-only">Download</span>
-                <IconDownload className="h-4 w-4" />
+                <IconDownload className="size-4" />
               </Button>
               <Button
                 type="submit"
                 size="sm"
-                className="px-3 mt-3"
+                className="mt-3 px-3"
                 disabled={downloadLoading}
                 onClick={openImageInNewTab}
               >
                 <span className="sr-only">Open in new tab</span>
-                <IconOpenInNewTab className="h-4 w-4" />
+                <IconOpenInNewTab className="size-4" />
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-      <div className="max-w-xs mb-5 ml-12">
+      <div className="mb-5 ml-12 max-w-xs">
         <Card
-          className="p-3 cursor-pointer"
+          className="cursor-pointer p-3"
           onClick={() => setShowDialog(true)}
         >
           <img src={url} alt="Generated Image" />

@@ -100,7 +100,7 @@ export async function setTagsToOneTimeCode(
   one_time_code_id: string,
   tag_ids: number[],
 ): Promise<boolean> {
-  const { data, error } = await supabase.rpc('set_tags_to_one_time_code', {
+  const { error } = await supabase.rpc('set_tags_to_one_time_code', {
     one_time_code_id_param: one_time_code_id,
     tag_ids_param: tag_ids,
   });

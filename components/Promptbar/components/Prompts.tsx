@@ -1,6 +1,7 @@
-import { FC, useContext } from 'react';
+import type { FC } from 'react';
+import { useContext } from 'react';
 
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 

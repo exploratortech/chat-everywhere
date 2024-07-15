@@ -2,7 +2,7 @@ import { useContext, useMemo } from 'react';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 
-import { FolderInterface } from '@/types/folder';
+import type { FolderInterface } from '@/types/folder';
 
 import Folder from '@/components/Folder';
 import { PromptComponent } from '@/components/Promptbar/components/Prompt';

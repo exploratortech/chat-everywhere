@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 
-import { Message } from '@/types/chat';
+import type { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
 import AiPainter from '../components/AiPainter';
@@ -32,7 +32,6 @@ const AssistantRespondMessage = memo(
     const ImgComponent = useMemo(() => {
       const Component = ({
         src,
-        title,
         alt,
         node,
       }: React.DetailedHTMLProps<
@@ -99,12 +98,7 @@ const AssistantRespondMessage = memo(
         }
 
         return (
-          <ImageGenerationComponent
-            src={src}
-            title={title}
-            messageIndex={messageIndex}
-            generationPrompt={alt || ''}
-          />
+          <ImageGenerationComponent src={src} generationPrompt={alt || ''} />
         );
       };
       Component.displayName = 'ImgComponent';
@@ -113,7 +107,6 @@ const AssistantRespondMessage = memo(
 
     const CodeComponent = useMemo(() => {
       const Component: React.FC<any> = ({
-        node,
         inline,
         className,
         children,
@@ -139,7 +132,7 @@ const AssistantRespondMessage = memo(
 
     return (
       <MemoizedReactMarkdown
-        className="prose dark:prose-invert min-w-full"
+        className="prose min-w-full dark:prose-invert"
         remarkPlugins={[remarkGfm, remarkBreaks]}
         rehypePlugins={[rehypeRaw]}
         components={{
@@ -200,7 +193,7 @@ const AssistantRespondMessage = memo(
             }
             return <div {...props}>{children}</div>;
           },
-          a({ node, children, href, ...props }) {
+          a({ children, href, ...props }) {
             return (
               <a
                 href={href}

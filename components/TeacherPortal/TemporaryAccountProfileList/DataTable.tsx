@@ -1,5 +1,5 @@
+import type { ColumnDef } from '@tanstack/react-table';
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -9,7 +9,7 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TempAccountProfiles } from '@/types/one-time-code';
+import type { TempAccountProfiles } from '@/types/one-time-code';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -98,7 +98,7 @@ export function DataTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex my-4 items-center">
+      <div className="my-4 flex items-center">
         <div>
           <Button
             onClick={() =>

@@ -1,9 +1,5 @@
-import React, {
-  PropsWithChildren,
-  useCallback,
-  useContext,
-  useEffect,
-} from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useCallback, useContext } from 'react';
 
 import {
   saveConversations,
@@ -13,16 +9,12 @@ import { saveFolders } from '@/utils/app/folders';
 import { savePrompts } from '@/utils/app/prompts';
 import { reorderFolder, reorderItem } from '@/utils/app/rank';
 
-import { DragDataType } from '@/types/drag';
+import type { DragDataType } from '@/types/drag';
 
 import HomeContext from '../home/home.context';
 
-import {
-  DragDropContext as Component,
-  DragStart,
-  DropResult,
-} from '@hello-pangea/dnd';
-import dayjs from 'dayjs';
+import type { DragStart, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext as Component } from '@hello-pangea/dnd';
 
 export const DragDropContext = ({ children }: PropsWithChildren) => {
   const {
@@ -62,6 +54,7 @@ export const DragDropContext = ({ children }: PropsWithChildren) => {
 
       // Retrieve the drop location which will either be a folder or
       // nothing (null).
+      // eslint-disable-next-line unused-imports/no-unused-vars
       const [_, droppableId] = destination.droppableId.split(':');
       const folder = folders.find((folder) => folder.id === droppableId);
 

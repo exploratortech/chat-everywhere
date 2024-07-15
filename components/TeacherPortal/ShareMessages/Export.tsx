@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
-import { Tag } from '@/types/tags';
+import type { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
+import type { Tag } from '@/types/tags';
 
 import { Button } from '../../ui/button';
 

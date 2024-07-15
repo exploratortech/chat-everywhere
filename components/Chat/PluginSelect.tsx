@@ -1,8 +1,10 @@
-import { FC, useEffect, useRef } from 'react';
+import type { FC } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Plugin, PluginList } from '@/types/plugin';
+import type { Plugin } from '@/types/plugin';
+import { PluginList } from '@/types/plugin';
 
 interface Props {
   plugin: Plugin | null;

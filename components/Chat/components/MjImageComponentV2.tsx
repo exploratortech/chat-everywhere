@@ -1,4 +1,3 @@
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconHelp } from '@tabler/icons-react';
 import React, { memo, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import useRunButtonCommand from '@/hooks/mjQueue/useRunButtonCommand';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
-import Spinner from '@/components/Spinner';
 import HomeContext from '@/components/home/home.context';
 
 import { LineShareButton } from '../LineShareButton';
@@ -79,16 +77,16 @@ export default memo(function MjImageComponentV2({
         <img
           src={src}
           alt=""
-          className={`w-full m-0 transition-all duration-500 `}
+          className={`m-0 w-full transition-all duration-500 `}
         />
         <button
-          className={`absolute top-0 right-0 p-1 cursor-pointer z-10`}
+          className={`absolute right-0 top-0 z-10 cursor-pointer p-1`}
           onClick={helpButtonOnClick}
         >
           <IconHelp size={isMobileLayout ? 16 : undefined} />
         </button>
 
-        <div className={`absolute bottom-0 right-0 p-1 z-10 gap-2 flex`}>
+        <div className={`absolute bottom-0 right-0 z-10 flex gap-2 p-1`}>
           <button>
             <LineShareButton
               imageFileUrl={src}
@@ -105,7 +103,7 @@ export default memo(function MjImageComponentV2({
         </div>
 
         {isImageGrid && (
-          <div className="grid grid-cols-2 grid-rows-2 absolute top-0 right-0 w-full h-full">
+          <div className="absolute right-0 top-0 grid size-full grid-cols-2 grid-rows-2">
             <NumberDisplay number={1} />
             <NumberDisplay number={2} />
             <NumberDisplay number={3} />
@@ -113,18 +111,18 @@ export default memo(function MjImageComponentV2({
           </div>
         )}
       </div>
-      <div className={`transition-all duration-500 w-full h-full`}>
+      <div className={`size-full transition-all duration-500`}>
         {messageIsStreaming ? (
           // Button selections
-          <div className={`flex-col gap-2 justify-center items-center h-full`}>
+          <div className={`h-full flex-col items-center justify-center gap-2`}>
             {mjImageT('Image processing... ')}
           </div>
         ) : (
           // Button selections
-          <div className="flex gap-2 flex-col">
+          <div className="flex flex-col gap-2">
             <button
               data-cy="mj-image-v2-download-button"
-              className="max-w-max cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
+              className="max-w-max cursor-pointer select-none border border-white px-4 py-2 font-bold text-white transition-all duration-500 hover:bg-white hover:text-black"
               onClick={() => {
                 downloadFile(
                   src,
@@ -136,7 +134,7 @@ export default memo(function MjImageComponentV2({
             </button>
             <div
               data-cy="mj-image-v2-button-container"
-              className={`flex flex-wrap gap-2 items-center h-full mobile:text-sm`}
+              className={`flex h-full flex-wrap items-center gap-2 mobile:text-sm`}
             >
               {validButtons.map((command, index) => {
                 return (
@@ -164,9 +162,9 @@ export default memo(function MjImageComponentV2({
 }, areEqual);
 function NumberDisplay({ number }: { number: number }) {
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="flex size-full items-center justify-center">
       <span
-        className="text-white text-8xl opacity-[.3] font-semibold px-2 py-1"
+        className="px-2 py-1 text-8xl font-semibold text-white opacity-[.3]"
         style={{
           textShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)',
           outline: '1px solid white',

@@ -4,19 +4,15 @@ import { DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import { normalizeMessages } from '@/utils/server/index';
 
-import { FunctionCall, Message } from '@/types/chat';
+import type { FunctionCall, Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 
 import { ChatEndpointManager } from '../ChatEndpointManager';
 
-import {
-  ParsedEvent,
-  ReconnectInterval,
-  createParser,
-} from 'eventsource-parser';
+import type { ParsedEvent, ReconnectInterval } from 'eventsource-parser';
+import { createParser } from 'eventsource-parser';
 
 type AIStreamProps = {
-  countryCode: string;
   systemPrompt: string;
   messages: Message[];
   onUpdateToken: (token: string) => void;
@@ -30,7 +26,6 @@ type AIStreamResponseType = {
 }[];
 
 export const AIStream = async ({
-  countryCode,
   systemPrompt,
   messages,
   onUpdateToken,

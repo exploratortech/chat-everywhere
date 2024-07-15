@@ -13,11 +13,8 @@ import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 // @ts-expect-error
 import * as wasm from '@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
 import { geolocation } from '@vercel/edge';
-import {
-  ParsedEvent,
-  ReconnectInterval,
-  createParser,
-} from 'eventsource-parser';
+import type { ParsedEvent, ReconnectInterval } from 'eventsource-parser';
+import { createParser } from 'eventsource-parser';
 
 export const config = {
   runtime: 'edge',

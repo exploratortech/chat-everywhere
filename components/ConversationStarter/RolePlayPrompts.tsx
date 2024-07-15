@@ -1,9 +1,10 @@
 import { IconSchool } from '@tabler/icons-react';
-import { FC, useContext } from 'react';
+import type { FC } from 'react';
+import { useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Prompt, TeacherPrompt } from '@/types/prompt';
+import type { Prompt, TeacherPrompt } from '@/types/prompt';
 
 import PromptIcon from '../Promptbar/components/PromptIcon';
 
@@ -55,11 +56,11 @@ export const RolePlayPrompts: FC<Props> = ({
   const isStudent = isTempUser;
 
   return (
-    <div className="mt-5 flex flex-col text-sm overflow-y-auto h-64 max-h-[25vh] font-normal">
-      {formattedTeacherPrompts.map((prompt, index) => (
+    <div className="mt-5 flex h-64 max-h-[25vh] flex-col overflow-y-auto text-sm font-normal">
+      {formattedTeacherPrompts.map((prompt) => (
         <div
           key={prompt.id}
-          className="mb-2 cursor-pointer rounded-md border border-neutral-200 bg-transparent p-1 pr-2 text-neutral-400 dark:border-neutral-600 dark:text-white flex justify-center items-center"
+          className="mb-2 flex cursor-pointer items-center justify-center rounded-md border border-neutral-200 bg-transparent p-1 pr-2 text-neutral-400 dark:border-neutral-600 dark:text-white"
           onClick={() => {
             customInstructionOnClick({
               ...prompt,
@@ -73,10 +74,10 @@ export const RolePlayPrompts: FC<Props> = ({
           <div className="flex justify-start truncate">{prompt.name}</div>
         </div>
       ))}
-      {customInstructions.map((prompt, index) => (
+      {customInstructions.map((prompt) => (
         <div
           key={prompt.id}
-          className="mb-2 cursor-pointer rounded-md border border-neutral-200 bg-transparent p-1 pr-2 text-neutral-400 dark:border-neutral-600 dark:text-white flex justify-center items-center"
+          className="mb-2 flex cursor-pointer items-center justify-center rounded-md border border-neutral-200 bg-transparent p-1 pr-2 text-neutral-400 dark:border-neutral-600 dark:text-white"
           onClick={() => {
             customInstructionOnClick(prompt);
           }}

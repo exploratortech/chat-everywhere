@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import useTeacherSettings from '@/hooks/teacherPortal/useTeacherSettings';
 
-import { SortBy as SortByType } from '@/types/filter_sortby';
+import type { SortBy as SortByType } from '@/types/filter_sortby';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -81,7 +81,7 @@ const SortBy = memo(() => {
       </PopoverTrigger>
       <PopoverContent className="border-neutral-800">
         <div className="flex flex-col gap-2">
-          <div className="flex items-baseline justify-between h-">
+          <div className="flex items-baseline justify-between">
             <h1>Sort by</h1>
 
             <Button
@@ -99,7 +99,7 @@ const SortBy = memo(() => {
             </Button>
           </div>
           <Separator />
-          <div className="grid grid-cols-2 gap-2 grid-flow-row">
+          <div className="grid grid-flow-row grid-cols-2 gap-2">
             <Select
               value={sortBy.sortKey}
               onValueChange={(value) => {

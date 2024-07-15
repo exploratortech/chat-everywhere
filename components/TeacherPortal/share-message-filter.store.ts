@@ -1,5 +1,5 @@
-import { SortBy } from '@/types/filter_sortby';
-import { Tag } from '@/types/tags';
+import type { SortBy } from '@/types/filter_sortby';
+import type { Tag } from '@/types/tags';
 
 import { create } from 'zustand';
 

@@ -1,8 +1,7 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
 
-import { TeacherSettingsInPortal } from '@/types/teacher-settings';
+import type { TeacherSettingsInPortal } from '@/types/teacher-settings';
 
 import useTeacherPortalLoading from './useTeacherPortalLoading';
 

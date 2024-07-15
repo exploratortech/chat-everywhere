@@ -1,4 +1,3 @@
-import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
 import { decode } from 'base64-arraybuffer';
