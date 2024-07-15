@@ -18,7 +18,8 @@
     "cypress:run": "cypress run",
     "prepare": "husky",
     "pre-commit": "lint-staged",
-    "eslint": "eslint"
+    "lint:fix": "eslint --fix .",
+    "lint:format": "prettier --write ."
   },
   "dependencies": {
     "@ctrl/react-adsense": "^1.6.2",

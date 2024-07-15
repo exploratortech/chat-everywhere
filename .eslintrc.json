@@ -1,7 +1,8 @@
 {
   "extends": [
     "next/core-web-vitals",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "prettier"
   ],
   "ignorePatterns": [
     "firebase/*"
@@ -11,7 +12,8 @@
       "warn",
       {
         "singleQuote": true,
-        "endOfLine": "auto"
+        "endOfLine": "auto",
+        "bracketSpacing": true
       }
     ]
   },
@@ -29,7 +31,8 @@
       "extends": [
         "plugin:tailwindcss/recommended",
         "next/core-web-vitals",
-        "plugin:prettier/recommended"
+        "plugin:prettier/recommended",
+        "prettier"
       ],
       "parserOptions": {
         "project": "./tsconfig.json"
