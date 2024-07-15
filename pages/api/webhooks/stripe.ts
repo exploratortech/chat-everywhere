@@ -75,6 +75,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         console.log('✅ customer.subscription.deleted');
         await handleCustomerSubscriptionDeleted(
           event.data.object as Stripe.Subscription,
+          isFakeEvent,
         );
         break;
       default:
