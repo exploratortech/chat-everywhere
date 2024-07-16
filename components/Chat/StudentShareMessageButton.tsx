@@ -1,15 +1,13 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconBallpen, IconLoader } from '@tabler/icons-react';
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 import { truncateText } from '@/utils/data/truncateText';
-
-import { encode } from 'base64-arraybuffer';
 
 interface StudentShareMessageBtnProps {
   className?: string;
@@ -31,20 +29,13 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
   const [loading, setLoading] = useState(false);
   const supabase = useSupabaseClient();
 
-  let imageFileInBase64: String | null = null;
-
   const shareOnClick = async () => {
     setLoading(true);
-    if (imageFileUrl) {
-      const response = await fetch(imageFileUrl);
-      const blob = await response.arrayBuffer();
-      imageFileInBase64 = encode(blob);
-    }
     const payload = {
       accessToken: (await supabase.auth.getSession()).data.session
         ?.access_token,
       messageContent: messageContent,
-      imageFile: imageFileInBase64,
+      imageFileUrl,
     };
     try {
       const response = await fetch('/api/create-message-submission', {

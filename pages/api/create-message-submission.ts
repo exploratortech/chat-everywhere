@@ -1,31 +1,34 @@
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
-import { decode } from 'base64-arraybuffer';
 import { v4 } from 'uuid';
+import { z } from 'zod';
 
 export const config = {
   runtime: 'edge',
   preferredRegion: 'icn1',
 };
 
+const requestBodySchema = z.object({
+  accessToken: z.string(),
+  messageContent: z.string(),
+  imageFileUrl: z.string().nullable(),
+});
+
 const handler = async (req: Request) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  const { accessToken, messageContent, imageFile } = (await req.json()) as {
-    accessToken: string;
-    messageContent: string;
-    imageFile: string | null;
-  };
+  let parsedBody;
+  try {
+    parsedBody = requestBodySchema.parse(await req.json());
+  } catch (e) {
+    return new Response('Invalid request body', { status: 400 });
+  }
+
+  const { accessToken, messageContent, imageFileUrl } = parsedBody;
 
   const supabase = getAdminSupabaseClient();
-
-  if (!accessToken || (messageContent === '' && !imageFile)) {
-    return new Response('Missing accessToken or messageContent or imageFile', {
-      status: 400,
-    });
-  }
 
   const userRes = await supabase.auth.getUser(accessToken);
 
@@ -69,8 +72,15 @@ const handler = async (req: Request) => {
 
   let imagePublicUrl = '';
 
-  if (imageFile) {
-    const imageFileBlob = decode(imageFile);
+  if (imageFileUrl) {
+    const response = await fetch(imageFileUrl);
+    if (!response.ok) {
+      console.error('Error downloading image:', response.statusText);
+      return new Response('Error downloading image', {
+        status: 500,
+      });
+    }
+    const imageFileBlob = await response.blob();
     const originalImagePath = `${userId}-${v4()}.png`;
 
     // 1. Upload the image file to Supabase Storage
@@ -88,7 +98,7 @@ const handler = async (req: Request) => {
     }
 
     // 2. Retrieve the public URL of the image file
-    const { data } = await supabase.storage
+    const { data } = supabase.storage
       .from('student_message_submissions_image')
       .getPublicUrl(originalImagePath);
     imagePublicUrl = data.publicUrl || '';
