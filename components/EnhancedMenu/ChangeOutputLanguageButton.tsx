@@ -25,13 +25,13 @@ function ChangeOutputLanguageButton() {
   ];
 
   return (
-    <div className="flex flex-row items-center justify-between mt-2 md:justify-start md:mt-0">
-      <label className="text-left text-sm text-neutral-700 dark:text-neutral-400 mr-2">
+    <div className="mt-2 flex flex-row items-center justify-between md:mt-0 md:justify-start">
+      <label className="mr-2 text-left text-sm text-neutral-700 dark:text-neutral-400">
         {t('Language')}
       </label>
-      <div className="rounded-lg border border-neutral-200 bg-transparent text-neutral-900 dark:border-neutral-600 dark:text-white w-fit pr-1 focus:outline-none">
+      <div className="w-fit rounded-lg border border-neutral-200 bg-transparent pr-1 text-neutral-900 focus:outline-none dark:border-neutral-600 dark:text-white">
         <select
-          className="w-max-20 bg-transparent p-2 focus:outline-none"
+          className="bg-transparent p-2 focus:outline-none"
           placeholder={t('Select a lang') || ''}
           value={outputLanguage}
           onChange={(e) => {

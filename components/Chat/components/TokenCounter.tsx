@@ -83,7 +83,7 @@ function TokenCounter({
   return (
     <div className={`${className} flex items-center`}>
       <IconCircleLetterT
-        className="inline-block mx-[.4rem]"
+        className="mx-[.4rem] inline-block"
         size={18}
         strokeWidth={2}
       />

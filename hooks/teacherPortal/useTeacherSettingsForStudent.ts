@@ -1,7 +1,7 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useQuery } from '@tanstack/react-query';
 
-import { TeacherSettings } from '@/types/teacher-settings';
+import type { TeacherSettings } from '@/types/teacher-settings';
 
 const useTeacherSettingsForStudent = () => {
   const supabase = useSupabaseClient();

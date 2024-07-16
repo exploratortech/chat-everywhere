@@ -1,6 +1,6 @@
 import { useContext, useRef } from 'react';
 
-import { DragDataType } from '@/types/drag';
+import type { DragDataType } from '@/types/drag';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -50,18 +50,18 @@ const DropArea = ({
 
   return (
     <div
-      className="relative transition-[height] ease-out duration-200 h-0"
+      className="relative h-0 transition-[height] duration-200 ease-out"
       ref={indicatorRef}
     >
-      <div className="w-full h-full overflow-hidden">
-        <div className="w-full h-full rounded-lg border-2 border-indigo-400" />
+      <div className="size-full overflow-hidden">
+        <div className="size-full rounded-lg border-2 border-indigo-400" />
       </div>
       <div
         className={`
-          absolute h-8 my-auto top-0 left-0 right-0 -translate-y-1/2
+          absolute inset-x-0 top-0 my-auto h-8 -translate-y-1/2
           ${
             isDragTypeAllowed
-              ? 'pointer-events-auto h-[3rem]'
+              ? 'pointer-events-auto h-12'
               : 'pointer-events-none h-8'
           }
         `}

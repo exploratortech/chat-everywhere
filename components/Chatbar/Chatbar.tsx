@@ -6,11 +6,7 @@ import { event } from 'nextjs-google-analytics';
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 import useMediaQuery from '@/hooks/useMediaQuery';
 
-import {
-  DEFAULT_SYSTEM_PROMPT,
-  DEFAULT_TEMPERATURE,
-  newDefaultConversation,
-} from '@/utils/app/const';
+import { newDefaultConversation } from '@/utils/app/const';
 import {
   getNonDeletedCollection,
   saveConversation,
@@ -21,9 +17,8 @@ import {
   handleImportConversations,
 } from '@/utils/app/importExport';
 
-import { Conversation } from '@/types/chat';
-import { SupportedExportFormats } from '@/types/export';
-import { OpenAIModels } from '@/types/openai';
+import type { Conversation } from '@/types/chat';
+import type { SupportedExportFormats } from '@/types/export';
 
 import { ChatFolders } from './components/ChatFolders';
 import { ChatbarSettings } from './components/ChatbarSettings';
@@ -32,9 +27,8 @@ import HomeContext from '@/components/home/home.context';
 
 import Sidebar from '../Sidebar';
 import ChatbarContext from './Chatbar.context';
-import { ChatbarInitialState, initialState } from './Chatbar.state';
-
-import { v4 as uuidv4 } from 'uuid';
+import type { ChatbarInitialState } from './Chatbar.state';
+import { initialState } from './Chatbar.state';
 
 export const Chatbar = () => {
   const { t } = useTranslation('sidebar');

@@ -22,8 +22,8 @@ import { SurveyModel } from '@/components/User/SurveyModel';
 import { UsageCreditModel } from '@/components/User/UsageCreditModel';
 import VoiceInputActiveOverlay from '@/components/Voice/VoiceInputActiveOverlay';
 
-import FilePortalModel from '../User/File/FilePortalModel';
 import { useCognitiveService } from '../CognitiveService/CognitiveServiceProvider';
+import FilePortalModel from '../User/File/FilePortalModel';
 import HomeContext from './home.context';
 
 const Home = () => {
@@ -95,7 +95,7 @@ const Home = () => {
         onNewConversation={handleNewConversation}
       />
 
-      <div className="flex items-stretch flex-1 w-full overflow-hidden">
+      <div className="flex w-full flex-1 items-stretch overflow-hidden">
         <Chatbar />
         <div className="flex flex-1">
           <Chat stopConversationRef={stopConversationRef} />

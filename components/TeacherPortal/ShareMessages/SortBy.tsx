@@ -1,8 +1,10 @@
 import { IconSortAscending } from '@tabler/icons-react';
-import React, { useEffect, memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SortBy as SortByType } from '@/types/filter_sortby';
+import useTeacherSettings from '@/hooks/teacherPortal/useTeacherSettings';
+
+import type { SortBy as SortByType } from '@/types/filter_sortby';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,8 +25,6 @@ import useShareMessageFilterStore from '../share-message-filter.store';
 
 import { cn } from '@/lib/utils';
 
-import useTeacherSettings from '@/hooks/teacherPortal/useTeacherSettings';
-
 const SORT_BY_OPTIONS = [
   {
     label: 'Submitted at',
@@ -44,7 +44,10 @@ const SortBy = memo(() => {
   const { data: settings } = fetchSettingsQuery;
   const { t } = useTranslation('model');
 
-  const handleValueChange = (sortKey?: SortByType['sortKey'], sortOrder?: SortByType['sortOrder']) => {
+  const handleValueChange = (
+    sortKey?: SortByType['sortKey'],
+    sortOrder?: SortByType['sortOrder'],
+  ) => {
     // Get the current sortBy state to fill in the missing value if only one is provided
     const currentSortBy = sortBy;
     // If a new sortKey or sortOrder is provided, use it; otherwise, fall back to the current state
@@ -78,7 +81,7 @@ const SortBy = memo(() => {
       </PopoverTrigger>
       <PopoverContent className="border-neutral-800">
         <div className="flex flex-col gap-2">
-          <div className="flex items-baseline justify-between h-">
+          <div className="flex items-baseline justify-between">
             <h1>Sort by</h1>
 
             <Button
@@ -88,7 +91,7 @@ const SortBy = memo(() => {
                 isNotSortByDefault() ? 'visible' : 'invisible',
               )}
               onClick={() => {
-                handleValueChange('created_at', 'desc')
+                handleValueChange('created_at', 'desc');
                 resetSortBy();
               }}
             >
@@ -96,11 +99,11 @@ const SortBy = memo(() => {
             </Button>
           </div>
           <Separator />
-          <div className="grid grid-cols-2 gap-2 grid-flow-row">
+          <div className="grid grid-flow-row grid-cols-2 gap-2">
             <Select
               value={sortBy.sortKey}
               onValueChange={(value) => {
-                handleValueChange(value as SortByType['sortKey'], undefined)
+                handleValueChange(value as SortByType['sortKey'], undefined);
               }}
               defaultValue={sortBy.sortKey}
             >
@@ -118,7 +121,7 @@ const SortBy = memo(() => {
             <Select
               value={sortBy.sortOrder}
               onValueChange={(value) => {
-                handleValueChange(undefined, value as SortByType['sortOrder'])
+                handleValueChange(undefined, value as SortByType['sortOrder']);
               }}
               defaultValue={sortBy.sortOrder}
             >

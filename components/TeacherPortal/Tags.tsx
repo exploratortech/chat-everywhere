@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 
-import { Tag as TagType } from '@/types/tags';
+import type { Tag as TagType } from '@/types/tags';
 
 import { Button } from '../ui/button';
 import NewTagButton from './Tags/NewTagButton';
@@ -47,8 +47,8 @@ const Tags = () => {
   };
   return (
     <div>
-      <h1 className="font-bold mb-4">{t('Tags')}</h1>
-      <div className="flex gap-4 flex-wrap mb-8 content-start">
+      <h1 className="mb-4 font-bold">{t('Tags')}</h1>
+      <div className="mb-8 flex flex-wrap content-start gap-4">
         {tags.map((tag) => (
           <Tag
             key={tag.id}

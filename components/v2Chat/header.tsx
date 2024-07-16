@@ -4,7 +4,7 @@ import React from 'react';
 import { cn } from '@/utils/v2Chat/utils';
 
 import type { UserProfile } from '@/types/user';
-import { ConversationType } from '@/types/v2Chat/chat';
+import type { ConversationType } from '@/types/v2Chat/chat';
 
 import { Sidebar } from '@/components/v2Chat/sidebar';
 import { SidebarList } from '@/components/v2Chat/sidebar-list';
@@ -37,7 +37,7 @@ export function Header({
   };
 
   return (
-    <div className="sticky top-0 z-50 flex items-center justify-between w-full h-16 px-4 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl">
+    <div className="sticky top-0 z-50 flex h-16 w-full shrink-0 items-center justify-between border-b bg-gradient-to-b from-background/10 via-background/50 to-background/80 px-4 backdrop-blur-xl">
       <div className="flex items-center">
         <Sidebar onNewChatClick={startNewChat}>
           <SidebarList
@@ -57,7 +57,7 @@ export function Header({
         </div>
       </div>
       {selectedConversationId && (
-        <div className="hidden md:flex flex-row font-semibold">
+        <div className="hidden flex-row font-semibold md:flex">
           <a href="https://intro.chateverywhere.app" target="_blank">
             <span className="font-serif">Chat Everywhere v2</span>
           </a>

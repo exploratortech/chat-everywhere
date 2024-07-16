@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import { useTranslation } from 'next-i18next';
 
 import { trackEvent } from '@/utils/app/eventTracking';
-import { CodeGenerationPayloadType } from '@/utils/server/referralCode';
+import type { CodeGenerationPayloadType } from '@/utils/server/referralCode';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -64,47 +64,43 @@ const ReferralModel = memo(({ onClose }: Props) => {
     toast.success(t('Copied to clipboard'));
   };
 
-  const {
-    isFetching: isRegenerating,
-    isError,
-    error: queryError,
-    refetch: queryReferralCodeRefetch,
-  } = useQuery<{ code: string; expiresAt: string }, Error>(
-    ['regenerateReferralCode'],
-    async () => {
-      const response = await fetch('/api/referral/regenerate-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'user-id': user!.id,
-        },
-      });
-
-      const data = (await response.json()) as {
-        code: string;
-        expiresAt: string;
-      };
-      return data;
-    },
-    {
-      enabled: false,
-      retry: false,
-      onError: (error) => {
-        console.error(error);
-      },
-      onSuccess: (code) => {
-        dispatch({
-          field: 'user',
-          value: {
-            ...user,
-            referralCode: code.code,
-            referralCodeExpirationDate: code.expiresAt,
+  const { isFetching: isRegenerating, refetch: queryReferralCodeRefetch } =
+    useQuery<{ code: string; expiresAt: string }, Error>(
+      ['regenerateReferralCode'],
+      async () => {
+        const response = await fetch('/api/referral/regenerate-code', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'user-id': user!.id,
           },
         });
-        toast.success(t('A new referral code has been regenerated'));
+
+        const data = (await response.json()) as {
+          code: string;
+          expiresAt: string;
+        };
+        return data;
       },
-    },
-  );
+      {
+        enabled: false,
+        retry: false,
+        onError: (error) => {
+          console.error(error);
+        },
+        onSuccess: (data: { code: string; expiresAt: string }) => {
+          dispatch({
+            field: 'user',
+            value: {
+              ...user,
+              referralCode: data.code,
+              referralCodeExpirationDate: data.expiresAt,
+            },
+          });
+          toast.success(t('A new referral code has been regenerated'));
+        },
+      },
+    );
 
   return (
     <Transition appear show={true} as={Fragment}>
@@ -133,28 +129,28 @@ const ReferralModel = memo(({ onClose }: Props) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-[100rem] tablet:max-w-[90vw] h-fit transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
-                <div className="mb-3 flex flex-row justify-between items-center">
+              <Dialog.Panel className="grid h-fit w-full max-w-[100rem] grid-rows-[max-content_1fr] overflow-hidden rounded-2xl bg-neutral-800 p-6 text-left align-middle text-neutral-200 shadow-xl transition-all mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:max-w-[90vw]">
+                <div className="mb-3 flex flex-row items-center justify-between">
                   <h1 className="text-xl">{sideBarT('Referral Program')}</h1>
-                  <button className="w-max min-h-[34px]" onClick={onClose}>
+                  <button className="min-h-[34px] w-max" onClick={onClose}>
                     <IconX></IconX>
                   </button>
                 </div>
 
                 {isLoading && (
-                  <div className="flex mt-[50%]">
+                  <div className="mt-[50%] flex">
                     <Spinner size="16px" className="mx-auto" />
                   </div>
                 )}
                 {!isLoading && (
                   <div>
-                    <div className="flex select-none justify-between items-center flex-wrap gap-2">
+                    <div className="flex select-none flex-wrap items-center justify-between gap-2">
                       <div
                         onClick={handleCopy}
-                        className="cursor-pointer flex-shrink-0"
+                        className="shrink-0 cursor-pointer"
                       >
                         {`${t('Your referral code is')}: `}
-                        <span className="inline  bg-sky-100 font-bold text-sm text-slate-900 font-mono rounded dark:bg-slate-600 dark:text-slate-200 text-primary-500 p-1">
+                        <span className="inline rounded bg-sky-100 p-1 font-mono text-sm font-bold text-slate-900 dark:bg-slate-600 dark:text-slate-200">
                           {user?.referralCode}
                         </span>
                       </div>
@@ -165,7 +161,7 @@ const ReferralModel = memo(({ onClose }: Props) => {
                       )}
                     </div>
                     <button
-                      className="mx-auto my-3 flex w-fit items-center gap-3 rounded border text-sm py-2 px-4 hover:opacity-50 border-neutral-600  text-white md:mb-0 md:mt-2"
+                      className="mx-auto my-3 flex w-fit items-center gap-3 rounded border border-neutral-600 px-4 py-2 text-sm text-white  hover:opacity-50 md:mb-0 md:mt-2"
                       onClick={() => {
                         trackEvent('Regenerate referral code clicked');
                         queryReferralCodeRefetch();

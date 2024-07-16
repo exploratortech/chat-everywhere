@@ -6,7 +6,7 @@ import {
   getUserProfile,
 } from '@/utils/server/supabase';
 
-import { MjButtonCommandRequest } from '@/types/mjJob';
+import type { MjButtonCommandRequest } from '@/types/mjJob';
 
 export const config = {
   runtime: 'edge',

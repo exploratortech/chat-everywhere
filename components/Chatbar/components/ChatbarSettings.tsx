@@ -89,7 +89,7 @@ export const ChatbarSettings = () => {
   return (
     <div className="min-h-min">
       <CloudSyncStatusComponent />
-      <div className="flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm overflow-auto">
+      <div className="flex flex-col items-center space-y-1 overflow-auto border-t border-white/20 pt-1 text-sm">
         {filteredConversations.length > 0 ||
         filteredFolders.length > 0 ||
         filteredPromptFolders.length > 0 ||
@@ -165,7 +165,7 @@ export const ChatbarSettings = () => {
         )}
         {!user && (
           <SidebarButton
-            className="flex-grow"
+            className="grow"
             text={t('One-time code login')}
             icon={<IconNews size={18} />}
             onClick={() => {
@@ -179,7 +179,7 @@ export const ChatbarSettings = () => {
 
         <div className="flex w-full">
           <SidebarButton
-            className="flex-grow"
+            className="grow"
             text={t('Latest Updates')}
             icon={<IconNews size={18} />}
             onClick={() => {

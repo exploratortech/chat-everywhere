@@ -1,10 +1,10 @@
-import { UserProfile } from '@/types/user';
+import type { UserProfile } from '@/types/user';
 
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { Resend } from 'resend';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

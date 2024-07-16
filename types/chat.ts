@@ -1,7 +1,7 @@
-import { UserFile } from './UserFile';
-import { OpenAIModel } from './openai';
-import { PluginID } from './plugin';
-import { Prompt } from './prompt';
+import type { UserFile } from './UserFile';
+import type { OpenAIModel } from './openai';
+import type { PluginID } from './plugin';
+import type { Prompt } from './prompt';
 
 export interface Message {
   role: Role;

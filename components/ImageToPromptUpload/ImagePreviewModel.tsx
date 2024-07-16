@@ -44,18 +44,18 @@ export default function ImagePreviewModel({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="p-4 w-full max-w-[1150px] tablet:max-w-[90vw] h-[calc(100vh-100px)] transform overflow-hidden rounded-2xl  text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex flex-col mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
-                <h1 className="my-3 bold text-xl">{t('Image preview')}</h1>
+              <Dialog.Panel className="flex h-[calc(100vh-100px)] max-h-[750px] w-full max-w-[1150px] flex-col overflow-hidden rounded-2xl  bg-neutral-800 p-4 text-left align-middle text-neutral-200 shadow-xl transition-all mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:max-h-[unset] tablet:max-w-[90vw]">
+                <h1 className="my-3 text-xl">{t('Image preview')}</h1>
                 <div className="flex items-center justify-center">
                   {filename}
                 </div>
-                <div className="flex items-center justify-center w-full h-full max-h-[50dvh] border border-gray-400">
+                <div className="flex size-full max-h-[50dvh] items-center justify-center border border-gray-400">
                   <img src={preview} alt="" className="h-full object-contain" />
                 </div>
-                <div className="flex h-max items-center gap-2 justify-center">
+                <div className="flex h-max items-center justify-center gap-2">
                   <button
                     type="button"
-                    className="w-full px-4 py-2 mt-6 border rounded-lg shadow  focus:outline-none border-neutral-800 border-opacity-50 bg-white text-black hover:bg-neutral-300"
+                    className="mt-6 w-full rounded-lg border border-neutral-800 border-opacity-50 bg-white  px-4 py-2 text-black shadow hover:bg-neutral-300 focus:outline-none"
                     onClick={() => {
                       onConfirm();
                     }}
@@ -64,7 +64,7 @@ export default function ImagePreviewModel({
                   </button>
                   <button
                     type="button"
-                    className="w-full px-4 py-2 mt-6 border rounded-lg shadow  focus:outline-none border-neutral-100 hover:border-neutral-300 bg-transparent text-white hover:bg-neutral-300 hover:text-black"
+                    className="mt-6 w-full rounded-lg border border-neutral-100 bg-transparent px-4  py-2 text-white shadow hover:border-neutral-300 hover:bg-neutral-300 hover:text-black focus:outline-none"
                     onClick={() => {
                       onClose();
                     }}

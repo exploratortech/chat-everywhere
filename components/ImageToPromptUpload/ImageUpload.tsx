@@ -1,5 +1,5 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -17,7 +17,7 @@ const ImageToPromptUpload = () => {
   const { t: commonT } = useTranslation('common');
 
   const {
-    state: { user, selectedConversation, conversations, messageIsStreaming },
+    state: { user, selectedConversation, conversations },
     dispatch: homeDispatch,
     stopConversationRef,
   } = useContext(HomeContext);
@@ -64,7 +64,7 @@ const ImageToPromptUpload = () => {
         // each user has a folder to store their images
         const newFilename =
           `${user?.id}` + '/' + `${v4()}.${filenameExtension}`;
-        const { data, error } = await supabaseClient.storage
+        const { error } = await supabaseClient.storage
           .from('image-to-prompt')
           .upload(newFilename, imageFile, {
             cacheControl: '3600',
@@ -75,7 +75,7 @@ const ImageToPromptUpload = () => {
           clearFile();
           throw error;
         }
-        const imageUrl = await supabaseClient.storage
+        const imageUrl = supabaseClient.storage
           .from('image-to-prompt')
           .getPublicUrl(newFilename).data.publicUrl;
         return imageUrl;
@@ -131,8 +131,8 @@ const ImageToPromptUpload = () => {
   ]);
 
   return (
-    <div className="flex flex-row items-center justify-end w-full mobile:justify-between">
-      <label className="text-left text-sm text-neutral-700 dark:text-neutral-400 mr-2">
+    <div className="flex w-full flex-row items-center justify-end mobile:justify-between">
+      <label className="mr-2 text-left text-sm text-neutral-700 dark:text-neutral-400">
         {imageToPromptT('Image to Prompt')}
       </label>
       <DropZone onDropCallback={fileInputOnChange} />

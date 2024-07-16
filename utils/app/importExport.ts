@@ -1,9 +1,9 @@
-import { Dispatch } from 'react';
+import type { Dispatch } from 'react';
 
-import { ActionType } from '@/hooks/useCreateReducer';
+import type { ActionType } from '@/hooks/useCreateReducer';
 
-import { Conversation } from '@/types/chat';
-import {
+import type { Conversation } from '@/types/chat';
+import type {
   ExportFormatV1,
   ExportFormatV2,
   ExportFormatV3,
@@ -12,7 +12,7 @@ import {
   SupportedExportFormats,
 } from '@/types/export';
 
-import { HomeInitialState } from '@/components/home/home.state';
+import type { HomeInitialState } from '@/components/home/home.state';
 
 import { cleanConversationHistory, cleanFolders, cleanPrompts } from './clean';
 import { RANK_INTERVAL, newDefaultConversation } from './const';

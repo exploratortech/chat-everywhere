@@ -1,4 +1,4 @@
-import { UserFile } from '@/types/UserFile';
+import type { UserFile } from '@/types/UserFile';
 
 import { MAX_FILE_DROP_COUNT } from './const';
 import { validateFile } from './file';

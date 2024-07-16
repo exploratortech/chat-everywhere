@@ -25,12 +25,10 @@ const useDeviceDetect = (): DeviceInfo => {
     const isIPad = Boolean(agent.match(/iPad/i));
     const isIOS = Boolean(agent.match(/iPhone|iPad|iPod/i));
     const isMobile = Boolean(
-      agent.match(
-        /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i,
-      ),
+      agent.match(/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i),
     );
     const isTablet = isIPad || (isAndroid && window.outerWidth >= 768);
-    const isDesktop = Boolean(agent.match(/Win|Macintosh|MacIntel|Linux/i))
+    const isDesktop = Boolean(agent.match(/Win|Macintosh|MacIntel|Linux/i));
 
     setDeviceInfo({
       isAndroid,

@@ -100,12 +100,12 @@ export default function Sidebar({
       <a
         key={`${i} ${item.name}`}
         href="#"
-        className={`outline-none py-2 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 tablet:px-2 tablet:py-4
+        className={`px-6 py-2 text-neutral-400 outline-none hover:bg-neutral-900 hover:text-neutral-200 tablet:px-2 tablet:py-4
           ${showing === item.value ? 'bg-neutral-900 text-neutral-100' : ''}
           `}
         onClick={item.callback}
       >
-        <div className="flex gap-2 items-center ">
+        <div className="flex items-center gap-2 ">
           {cloneElement(item.icon, {
             className: iconClass,
           })}
@@ -115,19 +115,19 @@ export default function Sidebar({
     ));
 
   return (
-    <div className={`${className} flex justify-between flex-col`}>
+    <div className={`${className} flex flex-col justify-between`}>
       <div>
-        <b className="pt-6 px-6 block select-none tablet:hidden">
+        <b className="block select-none px-6 pt-6 tablet:hidden">
           {t('Settings')}
         </b>
-        <div className="py-6 flex flex-col">{getRenderItems(items)}</div>
+        <div className="flex flex-col py-6">{getRenderItems(items)}</div>
       </div>
 
       <div className="flex flex-col">
         {!disableFooterItems && getRenderItems(footerItems)}
         <a
           href="#"
-          className="outline-none py-5 px-6 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 flex gap-2 items-center tablet:px-2"
+          className="flex items-center gap-2 px-6 py-5 text-neutral-400 outline-none hover:bg-neutral-900 hover:text-neutral-200 tablet:px-2"
           data-cy="sign-out-confirmation-button"
           onClick={() => {
             if (user) {

@@ -8,7 +8,11 @@ import {
   isLatestExportFormat,
 } from '@/utils/app/importExport';
 
-import { ExportFormatV1, ExportFormatV2, ExportFormatV4 } from '@/types/export';
+import type {
+  ExportFormatV1,
+  ExportFormatV2,
+  ExportFormatV4,
+} from '@/types/export';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 
 import { describe, expect, it } from 'vitest';

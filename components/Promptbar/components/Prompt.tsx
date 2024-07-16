@@ -1,13 +1,8 @@
 import { IconCheck, IconTrash, IconX } from '@tabler/icons-react';
-import {
-  KeyboardEvent,
-  MouseEventHandler,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import type { KeyboardEvent, MouseEventHandler } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
@@ -91,9 +86,9 @@ export const PromptComponent = ({ prompt, draggableIndex }: Props) => {
         >
           <Dialog>
             <DialogTrigger className="w-full" asChild>
-              <div className="relative w-full flex justify-between items-center">
+              <div className="relative flex w-full items-center justify-between">
                 <div
-                  className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90 translate-x-0 z-10"
+                  className="z-10 flex w-full translate-x-0 cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90"
                   onKeyDown={handleButtonFocusKeyDown}
                   onMouseLeave={() => {
                     setIsDeleting(false);
@@ -107,7 +102,7 @@ export const PromptComponent = ({ prompt, draggableIndex }: Props) => {
                   <div
                     className={`${
                       isDeleting || isRenaming ? 'pr-12' : 'pr-4'
-                    } relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3`}
+                    } relative max-h-5 flex-1 truncate break-all text-left text-[12.5px] leading-3`}
                   >
                     {prompt.name}
                   </div>
@@ -132,7 +127,7 @@ export const PromptComponent = ({ prompt, draggableIndex }: Props) => {
                 )}
               </div>
             </DialogTrigger>
-            <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[90dvh] max-h-[90dvh] overflow-y-scroll">
+            <DialogContent className="max-h-[90dvh] overflow-y-scroll bg-white dark:bg-[#202123] mobile:h-[90dvh]">
               <PromptModal
                 prompt={prompt}
                 onClose={() => setShowModal(false)}

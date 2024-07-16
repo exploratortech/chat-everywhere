@@ -1,6 +1,9 @@
 // This is a handler to execute and return the result of a function call to LLM.
 // This would seat between the endpoint and LLM.
-import { DEFAULT_SYSTEM_PROMPT, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  RESPONSE_IN_CHINESE_PROMPT,
+} from '@/utils/app/const';
 import { AIStream } from '@/utils/server/functionCalls/AIStream';
 import {
   getFunctionCallsFromMqttConnections,
@@ -12,8 +15,8 @@ import {
 } from '@/utils/server/functionCalls/llmHandlerHelpers';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
-import { FunctionCall, Message } from '@/types/chat';
-import { UserProfile } from '@/types/user';
+import type { FunctionCall, Message } from '@/types/chat';
+import type { UserProfile } from '@/types/user';
 
 type handlerType = {
   user: UserProfile;
@@ -78,13 +81,12 @@ export const llmHandler = async ({
   );
 
   if (countryCode?.includes('TW')) {
-    llmHandlerPrompt += RESPONSE_IN_CHINESE_PROMPT
+    llmHandlerPrompt += RESPONSE_IN_CHINESE_PROMPT;
   }
 
   try {
     while (isFunctionCallRequired) {
       const requestedFunctionCalls = await AIStream({
-        countryCode: countryCode,
         systemPrompt: llmHandlerPrompt,
         messages: innerWorkingMessages,
         onUpdateToken: (token: string) => {

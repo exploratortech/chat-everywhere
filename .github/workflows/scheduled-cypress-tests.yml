@@ -28,7 +28,6 @@ jobs:
         env:
           CYPRESS_HOST_URL: 'https://chateverywhere.app'
           CYPRESS_PRO_ACCOUNT_PASSOWORD_PRODUCTION: ${{secrets.CYPRESS_PRO_ACCOUNT_PASSOWORD_PRODUCTION}}
-          
 
       - uses: actions/upload-artifact@v1
         if: failure()
@@ -41,7 +40,7 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-            
+
       - name: Send email on failure
         if: failure()
         uses: dawidd6/action-send-mail@v3
@@ -51,14 +50,14 @@ jobs:
           secure: true
           username: resend
           password: ${{secrets.RESEND_API_KEY}}
-          subject: "Daily Cypress Tests Failed - Chat Everywhere"
+          subject: 'Daily Cypress Tests Failed - Chat Everywhere'
           body: |
             The scheduled Cypress tests for Chat Everywhere have failed.
-            
+
             Repository: ${{ github.repository }}
             Workflow: ${{ github.workflow }}
             Run ID: ${{ github.run_id }}
-            
+
             Please check the GitHub Actions logs for more details:
             https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           to: derek@exploratorlabs.com,jack@exploratorlabs.com

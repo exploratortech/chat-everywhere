@@ -1,20 +1,16 @@
 import { getAccessToken } from '@/utils/server/google/auth';
 
-import { Message } from '@/types/chat';
+import type { Message } from '@/types/chat';
 
 import { logEvent } from './api';
 
-import {
+import type {
   Content,
   GenerateContentResponse,
   GenerationConfig,
-  SafetyRating,
 } from '@google-cloud/vertexai';
-import {
-  ParsedEvent,
-  ReconnectInterval,
-  createParser,
-} from 'eventsource-parser';
+import type { ParsedEvent, ReconnectInterval } from 'eventsource-parser';
+import { createParser } from 'eventsource-parser';
 
 // Refer to this page for all the available models: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models
 

@@ -1,4 +1,4 @@
-import { PRO_USER } from "./account";
+import { PRO_USER } from './account';
 
 describe('Free user usage', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
@@ -23,7 +23,9 @@ describe('Pro user usage', () => {
   const isRunningOnProduction = hostUrl === 'https://chateverywhere.app';
 
   beforeEach(() => {
-    const password = isRunningOnProduction ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION') : PRO_USER.password;
+    const password = isRunningOnProduction
+      ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION')
+      : PRO_USER.password;
 
     cy.session(
       'user',
@@ -61,4 +63,4 @@ describe('Pro user usage', () => {
   });
 });
 
-export { };
+export {};

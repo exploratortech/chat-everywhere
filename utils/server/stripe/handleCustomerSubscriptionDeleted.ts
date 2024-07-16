@@ -1,7 +1,7 @@
 import getCustomerEmailByCustomerID from './getCustomerEmailByCustomerID';
 import updateUserAccount from './updateUserAccount';
 
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 export default async function handleCustomerSubscriptionDeleted(
   session: Stripe.Subscription,

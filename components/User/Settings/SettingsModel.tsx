@@ -1,8 +1,10 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconX } from '@tabler/icons-react';
-import React, { Dispatch, Fragment, createContext, useContext } from 'react';
+import type { Dispatch } from 'react';
+import React, { Fragment, createContext, useContext } from 'react';
 
-import { ActionType, useCreateReducer } from '@/hooks/useCreateReducer';
+import type { ActionType } from '@/hooks/useCreateReducer';
+import { useCreateReducer } from '@/hooks/useCreateReducer';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -70,18 +72,18 @@ export default function SettingsModel({ onClose }: Props) {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-[70vw] xl:max-w-3xl tablet:max-w-[90vw] h-[calc(80vh-100px)] transform overflow-hidden rounded-2xl text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
+                <Dialog.Panel className="flex h-[calc(80vh-100px)] max-h-[750px] w-full max-w-[70vw] overflow-hidden rounded-2xl bg-neutral-800 text-left align-middle text-neutral-200 shadow-xl transition-all xl:max-w-3xl mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:max-h-[unset] tablet:max-w-[90vw]">
                   <Sidebar
-                    className="bg-neutral-800 flex-shrink-0 flex-grow-0"
+                    className="shrink-0 grow-0 bg-neutral-800"
                     disableFooterItems={!user || !isPaidUser}
                   />
-                  <div className="p-6 bg-neutral-900 flex-grow relative overflow-y-auto">
+                  <div className="relative grow overflow-y-auto bg-neutral-900 p-6">
                     {showing === 'account' && <Settings_Account />}
                     {showing === 'app' && <Settings_App />}
                     {showing === 'data' && <Settings_Data />}
                     {showing === 'mqtt' && <Settings_MQTT />}
                     <button
-                      className="w-max min-h-[34px] p-4 absolute top-0 right-0"
+                      className="absolute right-0 top-0 min-h-[34px] w-max p-4"
                       onClick={onClose}
                     >
                       <IconX />

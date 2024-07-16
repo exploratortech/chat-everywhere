@@ -1,4 +1,4 @@
-import { KeyValuePair } from './data';
+import type { KeyValuePair } from './data';
 
 export interface Plugin {
   id: PluginID;

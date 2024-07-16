@@ -2,10 +2,8 @@ import { IconMoon, IconSun } from '@tabler/icons-react';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  SpeechSpeedType,
-  useCognitiveService,
-} from '@/components/CognitiveService/CognitiveServiceProvider';
+import type { SpeechSpeedType } from '@/components/CognitiveService/CognitiveServiceProvider';
+import { useCognitiveService } from '@/components/CognitiveService/CognitiveServiceProvider';
 import { SidebarButton } from '@/components/Sidebar/SidebarButton';
 import HomeContext from '@/components/home/home.context';
 
@@ -32,7 +30,7 @@ export default function Settings_App() {
 
   return (
     <div>
-      <h1 className="font-bold mb-4">{t('App')}</h1>
+      <h1 className="mb-4 font-bold">{t('App')}</h1>
       <SidebarButton
         text={lightMode === 'light' ? t('Dark mode') : t('Light mode')}
         icon={
@@ -47,13 +45,13 @@ export default function Settings_App() {
       />
       {isPaidUser && (
         <>
-          <div className="inline-flex items-center justify-center w-full">
-            <hr className="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
-            <span className="absolute px-3 text-white -translate-x-1/2 left-1/2 bg-[#171717]">
+          <div className="inline-flex w-full items-center justify-center">
+            <hr className="my-8 h-px w-64 border-0 bg-gray-200 dark:bg-gray-700" />
+            <span className="absolute left-1/2 -translate-x-1/2 bg-[#171717] px-3 text-white">
               {t('Speech configuration')}
             </span>
           </div>
-          <div className="flex mt-0 md:space-x-4 bg-transparent items-center">
+          <div className="mt-0 flex items-center bg-transparent md:space-x-4">
             <div className="w-1/2">
               <label
                 htmlFor="speechSpeed"
@@ -68,7 +66,7 @@ export default function Settings_App() {
                 name="speechSpeed"
                 value={speechSpeedConfig}
                 onChange={(e) => speechSpeedOnChange(e.target.value)}
-                className="mt-1 block w-full pl-3 pr-10 py-2 focus:outline-none text-sm rounded-md bg-[#171717] text-end"
+                className="mt-1 block w-full rounded-md bg-[#171717] py-2 pl-3 pr-10 text-end text-sm focus:outline-none"
               >
                 <option value={'slow'}>{t('Slow')}</option>
                 <option value={'normal'}>{t('Normal')}</option>

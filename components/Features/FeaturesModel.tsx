@@ -11,7 +11,7 @@ import React, {
 
 import { useTranslation } from 'next-i18next';
 
-import { ChatEverywhereFeatures } from '@/types/notion';
+import type { ChatEverywhereFeatures } from '@/types/notion';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -106,17 +106,17 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-[80vh] transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
-                <div className="mb-3 flex flex-row justify-between items-center">
+              <Dialog.Panel className="grid h-[80vh] w-full max-w-3xl grid-rows-[max-content_1fr] overflow-hidden rounded-2xl bg-neutral-800 p-6 text-left align-middle text-neutral-200 shadow-xl transition-all mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:max-w-[90vw]">
+                <div className="mb-3 flex flex-row items-center justify-between">
                   <h1>{t('Feature Introduction')}</h1>
 
                   {!selectPageId ? (
-                    <button className="w-max min-h-[34px]" onClick={onClose}>
+                    <button className="min-h-[34px] w-max" onClick={onClose}>
                       <IconX></IconX>
                     </button>
                   ) : (
                     <button
-                      className="w-max px-4 py-1 border rounded-lg shadow focus:outline-none border-neutral-800 border-opacity-50 bg-white text-black hover:bg-neutral-300 "
+                      className="w-max rounded-lg border border-neutral-800 border-opacity-50 bg-white px-4 py-1 text-black shadow hover:bg-neutral-300 focus:outline-none "
                       onClick={() => setSelectedPageId(null)}
                     >
                       {t('Back')}
@@ -127,15 +127,15 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
                 <ul
                   className={`${
                     selectPageId || isLoading ? 'hidden' : ''
-                  } overflow-y-auto list-outside list-disc cursor-pointer`}
+                  } cursor-pointer list-outside list-disc overflow-y-auto`}
                 >
                   {featuresList.map((featureItem, index) => (
                     <li
-                      className="mb-3 hover:bg-black/50 p-3 rounded-md"
+                      className="mb-3 rounded-md p-3 hover:bg-black/50"
                       key={`${featureItem.id} ${index}`}
                       onClick={() => setSelectedPageId(featureItem.id)}
                     >
-                      <div className="flex gap-2 justify-between">
+                      <div className="flex justify-between gap-2">
                         <h3 className="text-sm font-medium leading-5">
                           {featureItem.title}{' '}
                           {featureItem.tier.length > 0 &&
@@ -146,7 +146,7 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
                               />
                             ))}
                         </h3>
-                        <label className="italic text-xs">
+                        <label className="text-xs italic">
                           {formatDatetime(featureItem.lastEditedTime)}
                         </label>
                       </div>
@@ -163,7 +163,7 @@ const FeaturesModel = memo(({ className = '', open, onClose }: Props) => {
                   />
                 )}
                 {isLoading && (
-                  <div className="flex mt-[50%]">
+                  <div className="mt-[50%] flex">
                     <Spinner size="16px" className="mx-auto" />
                   </div>
                 )}

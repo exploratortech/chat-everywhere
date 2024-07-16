@@ -1,6 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Auth, UpdatePassword } from '@supabase/auth-ui-react';
-import { FC, Fragment, useContext, useEffect } from 'react';
+import type { FC } from 'react';
+import { Fragment, useContext, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
@@ -8,7 +9,7 @@ import { useTranslation } from 'next-i18next';
 import HomeContext from '@/components/home/home.context';
 
 import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 type Props = {
   onClose: () => void;
@@ -103,7 +104,7 @@ export const AuthModel: FC<Props> = ({ onClose, supabase }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200">
+              <Dialog.Panel className="w-full max-w-md overflow-hidden rounded-2xl bg-neutral-800 p-6 text-left align-middle text-neutral-200 shadow-xl transition-all">
                 {!user && (
                   <>
                     <div>
@@ -130,7 +131,7 @@ export const AuthModel: FC<Props> = ({ onClose, supabase }) => {
                         },
                       }}
                     />
-                    <div className="text-xs text-neutral-400 text-center">
+                    <div className="text-center text-xs text-neutral-400">
                       {t('By signing up, you agree to our ')}
                       <a
                         href="https://intro.chateverywhere.app/terms-of-service.html"

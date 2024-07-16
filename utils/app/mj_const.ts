@@ -6,7 +6,7 @@ export const MJ_INVALID_USER_ACTION_LIST = [
   'INVALID_PARAMETER',
   'JOB_ACTION_RESTRICTED',
   'MODERATION_OUTAGE',
-  'Vary (Region)'
+  'Vary (Region)',
 ];
 export const MJ_ALLOWED_COMMAND_LIST = [
   '🪄 Make Variations',

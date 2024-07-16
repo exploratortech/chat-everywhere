@@ -1,8 +1,11 @@
 import { truncateLogMessage } from '@/utils/server/api';
 
 import { BaseCallbackHandler } from 'langchain/callbacks';
-import { Serialized } from 'langchain/dist/load/serializable';
-import { AgentAction, AgentFinish, ChainValues } from 'langchain/dist/schema';
+import type {
+  AgentAction,
+  AgentFinish,
+  ChainValues,
+} from 'langchain/dist/schema';
 
 export class CustomStreamCallbackHandler extends BaseCallbackHandler {
   name = 'MyCallbackHandler';
@@ -18,7 +21,7 @@ export class CustomStreamCallbackHandler extends BaseCallbackHandler {
     this.writeToStream = writeToStream;
   }
 
-  async handleChainStart(chain: Serialized) {
+  async handleChainStart() {
     console.log('handleChainStart');
     await this.writer.ready;
     await this.writeToStream('```Online \n');

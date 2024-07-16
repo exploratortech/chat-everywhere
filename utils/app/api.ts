@@ -1,8 +1,9 @@
 import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from '@/utils/app/const';
 
-import { Conversation } from '@/types/chat';
+import type { Conversation } from '@/types/chat';
 import { OpenAIModels } from '@/types/openai';
-import { Plugin, PluginID } from '@/types/plugin';
+import type { Plugin } from '@/types/plugin';
+import { PluginID } from '@/types/plugin';
 
 import dayjs from 'dayjs';
 

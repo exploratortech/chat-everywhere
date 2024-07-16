@@ -1,4 +1,3 @@
-import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
 import { decode } from 'base64-arraybuffer';
@@ -65,7 +64,8 @@ const handler = async (req: Request) => {
   const temporaryAccountId = profileData[0].temp_account_id;
   const teacherProfileId = profileData[0].teacher_profile_id;
   const student_name = profileData[0].uniqueid;
-  const tagIds = profileData[0].tag_ids.filter((id: string) => id !== null) || [];  
+  const tagIds =
+    profileData[0].tag_ids.filter((id: string) => id !== null) || [];
 
   let imagePublicUrl = '';
 

@@ -14,8 +14,8 @@ const TeacherPrompt = () => {
 
   return (
     <div>
-      <h1 className="font-bold mb-4">{t('Teacher Prompt')}</h1>
-      <div className="flex flex-col gap-4 mb-8 content-start">
+      <h1 className="mb-4 font-bold">{t('Teacher Prompt')}</h1>
+      <div className="mb-8 flex flex-col content-start gap-4">
         {prompts &&
           prompts.map((prompt, index) => (
             <Fragment key={index}>

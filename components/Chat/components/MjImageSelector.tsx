@@ -41,7 +41,7 @@ export default function MjImageSelector({
     );
   } else {
     return (
-      <div id="mj-image-selection" className="grid grid-cols-2 gap-0 my-4">
+      <div id="mj-image-selection" className="my-4 grid grid-cols-2 gap-0">
         {imageList.map((image, index) => (
           // DO NOT EDIT THE <IMG> TAG BELOW. IT WILL BE SWAPPED OUT BY THE ReactMarkdown COMPONENT.
           // eslint-disable-next-line @next/next/no-img-element

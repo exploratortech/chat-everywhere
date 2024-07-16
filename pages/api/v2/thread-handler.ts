@@ -1,19 +1,18 @@
 // This serverless function is responsible for generating an image for a message
 // and storing it in the thread.
 // Refer to README_v2.md for workflow breakdown
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { generateDallEImage } from '@/utils/server/functionCalls/imageGeneration';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 import {
-  cancelCurrentThreadRun,
   submitToolOutput,
   updateMetadataOfMessage,
   waitForRunToComplete,
 } from '@/utils/v2Chat/openAiApiUtils';
 
-import { OpenAIRunType, v2ConversationType } from '@/types/v2Chat/chat';
+import type { OpenAIRunType, v2ConversationType } from '@/types/v2Chat/chat';
 
 interface RequestBody {
   threadId: string;

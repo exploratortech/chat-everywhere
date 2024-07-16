@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Tag } from '@/types/tags';
+import type { Tag } from '@/types/tags';
 
 import * as TagComponent from '@/components/TeacherPortal/Tags/Tag';
 import useShareMessageFilterStore from '@/components/TeacherPortal/share-message-filter.store';

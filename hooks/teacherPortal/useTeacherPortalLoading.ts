@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 
 import { TeacherPortalContext } from '@/components/TeacherPortal/teacher-portal.context';
 

@@ -18,8 +18,8 @@ export const StyledInput = ({
   className = '',
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <div className={`flex flex-col my-2 ${className}`}>
-    <span className="text-sm mb-1">{props.placeholder}</span>
+  <div className={`my-2 flex flex-col ${className}`}>
+    <span className="mb-1 text-sm">{props.placeholder}</span>
     <input
       className="flex-1 rounded-md border border-neutral-600 bg-[#202123] px-4 py-3 pr-10 text-[14px] leading-3 text-white"
       type="text"
@@ -32,10 +32,10 @@ export const StyledToggle = ({
   className = '',
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <div className={`flex flex-col my-2 items-center ${className}`}>
-    <span className="text-sm mb-1">{props.placeholder}</span>
+  <div className={`my-2 flex flex-col items-center ${className}`}>
+    <span className="mb-1 text-sm">{props.placeholder}</span>
     <input
-      className="flex-1 rounded-md border border-neutral-600 bg-[#202123] px-4 py-3 pr-10 leading-3 text-white w-3"
+      className="w-3 flex-1 rounded-md border border-neutral-600 bg-[#202123] px-4 py-3 pr-10 leading-3 text-white"
       type="checkbox"
       {...props}
     />

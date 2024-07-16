@@ -2,10 +2,10 @@ import { getHomeUrl } from '@/utils/app/api';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { generateImage } from '@/utils/v2Chat/openAiApiUtils';
 
-import { FunctionCall } from '@/types/chat';
-import { mqttConnectionType } from '@/types/data';
+import type { FunctionCall } from '@/types/chat';
+import type { mqttConnectionType } from '@/types/data';
 import { PluginID } from '@/types/plugin';
-import { UserProfile } from '@/types/user';
+import type { UserProfile } from '@/types/user';
 
 import {
   addUsageEntry,
@@ -389,7 +389,7 @@ export const triggerMqttConnection = async (
     (mqttConnection: mqttConnectionType) =>
       mqttConnection.name &&
       mqttConnection.name.replace(/\s/g, '-') ===
-      connectionName.replace('mqtt-', ''),
+        connectionName.replace('mqtt-', ''),
   );
 
   if (!mqttConnection) return 'Failed';
@@ -429,7 +429,7 @@ export const retrieveMqttConnectionPayload = async (
     (mqttConnection: mqttConnectionType) =>
       mqttConnection.name &&
       mqttConnection.name.replace(/\s/g, '-') ===
-      connectionName.replace('mqttreceiver-', ''),
+        connectionName.replace('mqttreceiver-', ''),
   );
 
   if (!mqttConnection) return 'Failed';

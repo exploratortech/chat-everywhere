@@ -107,7 +107,7 @@ export const deepEqual = (obj1: any, obj2: any): boolean => {
       return false;
     }
 
-    for (const key in obj1) {
+    for (const key of Object.keys(obj1)) {
       if (!(key in obj2)) {
         return false;
       }

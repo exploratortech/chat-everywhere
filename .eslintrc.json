@@ -1,3 +1,74 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:prettier/recommended",
+    "prettier"
+  ],
+  "ignorePatterns": ["firebase/*"],
+  "rules": {
+    "prettier/prettier": [
+      "warn",
+      {
+        "singleQuote": true,
+        "endOfLine": "auto",
+        "bracketSpacing": true,
+        "printWidth": 80
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "plugins": ["@typescript-eslint", "unused-imports", "tailwindcss"],
+      "extends": [
+        "plugin:tailwindcss/recommended",
+        "next/core-web-vitals",
+        "plugin:prettier/recommended",
+        "prettier"
+      ],
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      },
+      "rules": {
+        "react/destructuring-assignment": "off",
+        "react/require-default-props": "off",
+        "react/jsx-props-no-spreading": "off",
+        "react-hooks/exhaustive-deps": "off",
+        "@next/next/no-img-element": "off",
+        "@typescript-eslint/comma-dangle": "off",
+        "@typescript-eslint/consistent-type-imports": "error",
+        "no-restricted-syntax": [
+          "error",
+          "ForInStatement",
+          "LabeledStatement",
+          "WithStatement"
+        ],
+        "import/prefer-default-export": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "unused-imports/no-unused-imports": "error",
+        "unused-imports/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_"
+          }
+        ],
+        "tailwindcss/migration-from-tailwind-2": "off",
+        "max-len": [
+          "warn",
+          {
+            "code": 80,
+            "tabWidth": 2,
+            "comments": 80,
+            "ignorePattern": ".*",
+            "ignoreComments": true,
+            "ignoreTrailingComments": true,
+            "ignoreUrls": true,
+            "ignoreStrings": true,
+            "ignoreTemplateLiterals": true,
+            "ignoreRegExpLiterals": true
+          }
+        ]
+      }
+    }
+  ]
 }

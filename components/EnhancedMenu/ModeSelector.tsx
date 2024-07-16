@@ -81,13 +81,13 @@ const ModeSelector = () => {
 
   return (
     <div className="flex flex-row items-center justify-between md:justify-start">
-      <label className="text-left text-sm text-neutral-700 dark:text-neutral-400 mr-2">
+      <label className="mr-2 text-left text-sm text-neutral-700 dark:text-neutral-400">
         {t('Mode')}
       </label>
-      <div className="rounded-lg border border-neutral-200 bg-transparent text-neutral-900 dark:border-neutral-600 dark:text-white w-fit pr-1 focus:outline-none">
+      <div className="w-fit rounded-lg border border-neutral-200 bg-transparent pr-1 text-neutral-900 focus:outline-none dark:border-neutral-600 dark:text-white">
         <select
           data-cy="chat-mode-selector"
-          className="w-max-20 bg-transparent p-2 focus:outline-none"
+          className="bg-transparent p-2 focus:outline-none"
           placeholder={t('Select a lang') || ''}
           value={currentSelectedPluginId}
           onChange={(e) => {
@@ -120,27 +120,27 @@ const ModeSelector = () => {
             <>
               <option
                 value={PluginID.GPT4}
-                className="dark:bg-[#343541] dark:text-white text-yellow-600"
+                className="text-yellow-600 dark:bg-[#343541] dark:text-white"
               >
                 {t('GPT-4')}
               </option>
               <option
                 value={PluginID.IMAGE_GEN}
-                className="dark:bg-[#343541] dark:text-white text-yellow-600"
+                className="text-yellow-600 dark:bg-[#343541] dark:text-white"
               >
                 {t('AI Image')}
               </option>
               {hasMqttConnection && (
                 <option
                   value={PluginID.mqtt}
-                  className="dark:bg-[#343541] dark:text-white text-yellow-600"
+                  className="text-yellow-600 dark:bg-[#343541] dark:text-white"
                 >
                   {t('MQTT')}
                 </option>
               )}
               <option
                 value={PluginID.aiPainter}
-                className="dark:bg-[#343541] dark:text-white text-yellow-600"
+                className="text-yellow-600 dark:bg-[#343541] dark:text-white"
               >
                 {t('AI Painter')}
               </option>
@@ -149,7 +149,7 @@ const ModeSelector = () => {
           {isUltraUser && (
             <option
               value={PluginID.GEMINI}
-              className="dark:bg-[#343541] dark:text-white text-yellow-600"
+              className="text-yellow-600 dark:bg-[#343541] dark:text-white"
             >
               {t('Gemini')}
             </option>

@@ -3,14 +3,14 @@ import {
   getOrGenerateUserId,
 } from '@/utils/data/taggingHelper';
 
-import { Conversation } from '@/types/chat';
-import { FolderInterface } from '@/types/folder';
-import {
+import type { Conversation } from '@/types/chat';
+import type { FolderInterface } from '@/types/folder';
+import type {
   MjButtonCommandRequest,
   MjImageGenRequest,
   MjJob,
 } from '@/types/mjJob';
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 import posthog from 'posthog-js';
 

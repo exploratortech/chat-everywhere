@@ -1,11 +1,11 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 import {
   getAdminSupabaseClient,
   getUserProfile,
 } from '@/utils/server/supabase';
 
-import { UserProfile } from '@/types/user';
+import type { UserProfile } from '@/types/user';
 
 import { getTeacherSettingsForStudent } from './supabase/teacher-settings';
 

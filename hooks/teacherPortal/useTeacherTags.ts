@@ -2,7 +2,7 @@ import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
-import { Tag } from '@/types/tags';
+import type { Tag } from '@/types/tags';
 
 import useTeacherPortalLoading from './useTeacherPortalLoading';
 

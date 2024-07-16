@@ -4,8 +4,8 @@ import {
 } from '@/utils/server/auth';
 import { getAccessToken } from '@/utils/server/google/auth';
 
-import { UserFile } from '@/types/UserFile';
-import { StorageObject } from '@/types/google-storage';
+import type { UserFile } from '@/types/UserFile';
+import type { StorageObject } from '@/types/google-storage';
 
 export const config = {
   runtime: 'edge',
