@@ -6,6 +6,7 @@ import type { Tag } from '@/types/tags';
 
 import { Button } from '../../ui/button';
 
+import dayjs from 'dayjs';
 import { marked } from 'marked';
 
 const Export = ({
@@ -50,7 +51,6 @@ const Export = ({
       filteredSubmissions = allSharedMessages;
     }
     // Convert submissions to HTML
-    const exportDate = new Date().toLocaleString();
     const exportSelection =
       selectedMessageIds.length > 0
         ? `Selected Messages (${selectedMessageIds.length})`
@@ -97,10 +97,10 @@ const Export = ({
       ${styles}
       <header>
         <h1>Export from Chat Everywhere (Teacher's portal)</h1>
-        <p>Export Date: ${new Date(exportDate).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}, ${new Date(exportDate).toLocaleTimeString('en-US')}</p>
+        <p>Export Date: ${dayjs().format('MMM DD, YYYY')}</p>
         <p>Selection: ${exportSelection}</p>
       </header>
-
+    
       ${filteredSubmissions
         ?.map((submission) => {
           // Convert markdown message content to HTML
@@ -109,7 +109,7 @@ const Export = ({
           <div class='submission'>
             <h2>${submission.student_name}</h2>
             <p>Tags: ${submission.message_tags.map((tag) => tag.name).join(', ')}</p>
-            <p>Submitted at: ${new Date(submission.created_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+            <p>Submitted at: ${dayjs(submission.created_at).format('MMM DD, YYYY')}</p>
             <div>${messageContentHtml}</div>
             ${submission.image_file_url ? `<img src="${submission.image_file_url}" alt="Student work">` : ''}
           </div>
