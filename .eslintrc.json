@@ -4,30 +4,22 @@
     "plugin:prettier/recommended",
     "prettier"
   ],
-  "ignorePatterns": [
-    "firebase/*"
-  ],
+  "ignorePatterns": ["firebase/*"],
   "rules": {
     "prettier/prettier": [
       "warn",
       {
         "singleQuote": true,
         "endOfLine": "auto",
-        "bracketSpacing": true
+        "bracketSpacing": true,
+        "printWidth": 80
       }
     ]
   },
   "overrides": [
     {
-      "files": [
-        "**/*.ts",
-        "**/*.tsx"
-      ],
-      "plugins": [
-        "@typescript-eslint",
-        "unused-imports",
-        "tailwindcss"
-      ],
+      "files": ["**/*.ts", "**/*.tsx"],
+      "plugins": ["@typescript-eslint", "unused-imports", "tailwindcss"],
       "extends": [
         "plugin:tailwindcss/recommended",
         "next/core-web-vitals",
@@ -60,7 +52,22 @@
             "argsIgnorePattern": "^_"
           }
         ],
-        "tailwindcss/migration-from-tailwind-2": "off"
+        "tailwindcss/migration-from-tailwind-2": "off",
+        "max-len": [
+          "warn",
+          {
+            "code": 80,
+            "tabWidth": 2,
+            "comments": 80,
+            "ignorePattern": ".*",
+            "ignoreComments": true,
+            "ignoreTrailingComments": true,
+            "ignoreUrls": true,
+            "ignoreStrings": true,
+            "ignoreTemplateLiterals": true,
+            "ignoreRegExpLiterals": true
+          }
+        ]
       }
     }
   ]

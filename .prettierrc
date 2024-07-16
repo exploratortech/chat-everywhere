@@ -2,6 +2,7 @@
   "trailingComma": "all",
   "singleQuote": true,
   "endOfLine": "auto",
+  "printWidth": 80,
   "plugins": [
     "prettier-plugin-tailwindcss",
     "@trivago/prettier-plugin-sort-imports"
