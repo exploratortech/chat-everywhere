@@ -82,8 +82,7 @@ const SortBy = memo(() => {
       <PopoverContent className="border-neutral-800">
         <div className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between">
-            <h1>Sort by</h1>
-
+            <h1>{t('Sort by')}</h1>
             <Button
               variant={'link'}
               className={cn(
@@ -131,7 +130,7 @@ const SortBy = memo(() => {
               <SelectContent className="border-neutral-800">
                 {['asc', 'desc'].map((option) => (
                   <SelectItem key={option} value={option}>
-                    {option.toUpperCase()}
+                    {t(option.toUpperCase())}
                   </SelectItem>
                 ))}
               </SelectContent>
