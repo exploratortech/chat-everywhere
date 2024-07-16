@@ -1,6 +1,7 @@
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
-import { z } from 'zod';
+
 import { v4 } from 'uuid';
+import { z } from 'zod';
 
 export const config = {
   runtime: 'edge',
@@ -29,11 +30,6 @@ const handler = async (req: Request) => {
 
   const supabase = getAdminSupabaseClient();
 
-  if (!accessToken || (messageContent === '' && !imageFileUrl)) {
-    return new Response('Missing accessToken or messageContent or imageFileUrl', {
-      status: 400,
-    });
-  }
   const userRes = await supabase.auth.getUser(accessToken);
 
   if (!userRes || userRes.error) {
@@ -71,7 +67,8 @@ const handler = async (req: Request) => {
   const temporaryAccountId = profileData[0].temp_account_id;
   const teacherProfileId = profileData[0].teacher_profile_id;
   const student_name = profileData[0].uniqueid;
-  const tagIds = profileData[0].tag_ids.filter((id: string) => id !== null) || [];  
+  const tagIds =
+    profileData[0].tag_ids.filter((id: string) => id !== null) || [];
 
   let imagePublicUrl = '';
 
