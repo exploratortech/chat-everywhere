@@ -12,6 +12,7 @@ export interface Message {
   showHintForLargeContextResponse?: boolean; // Use to indicate if the response can be improved by using a gpt3.5 16k model
   // Google cloud storage objects
   fileList?: UserFile[];
+  isPartialResponse?: boolean; // Use to indicate if the response is being truncated due to the output token limit
 }
 
 export type Role = 'assistant' | 'user' | 'function';

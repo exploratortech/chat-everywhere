@@ -140,18 +140,19 @@ export const removeSecondLastLine = (originalText: string): string => {
   return originalText.replace(toBeRemovedString, '');
 };
 
-export const addContinueButton = (originalText: string): string => {
-  const textLength = originalText.length;
-  // if text length < 10, we take whole text, else we take last 10 chars
-  const maxChunkLength = textLength < 10 ? textLength : textLength - 10;
-  const lastWords = originalText.slice(-maxChunkLength);
-  const cleanedLastWords = lastWords.replace(/[\n`#*<>]/g, ' ');
+export const getLastChunkOfText = (originalText: string): string => {
+  // Split the text into paragraphs
+  const paragraphs = originalText.split(/\n\s*\n/);
 
-  const continueButtonHtml = `<div id="chat-continue-button" data-last-words="${cleanedLastWords}"></div>`;
-  const result = `${originalText}\n ${continueButtonHtml} \n `;
+  // Get the last paragraph
+  const lastParagraph = paragraphs[paragraphs.length - 1];
 
-  return result;
+  // Extract the last 100 characters from the last paragraph
+  const lastChunk = lastParagraph.slice(-100).trim();
+
+  return lastChunk;
 };
+
 export const capitalizeFirstLetter = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
