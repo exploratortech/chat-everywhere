@@ -167,7 +167,7 @@
     }
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx},.eslintignore": [
+    "*.{js,jsx,ts,tsx}": [
       "prettier --write",
       "eslint --fix"
     ]
