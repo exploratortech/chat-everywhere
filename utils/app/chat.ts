@@ -23,7 +23,7 @@ import {
   removeTempHtmlString,
 } from './htmlStringHandler';
 import { reorderItem } from './rank';
-import { addContinueButton, removeSecondLastLine } from './ui';
+import { removeSecondLastLine } from './ui';
 
 import '@formatjs/intl-segmenter/polyfill';
 import dayjs from 'dayjs';
@@ -257,6 +257,7 @@ async function handleDataResponse(
   let text = '';
   let largeContextResponse = false;
   let showHintForLargeContextResponse = false;
+  let isPartialResponse = false;
 
   while (!done) {
     if (stopConversationRef.current === true) {
@@ -295,7 +296,7 @@ async function handleDataResponse(
 
     if (text.includes('[PLACEHOLDER_FOR_CONTINUE_BUTTON]')) {
       text = text.replace('[PLACEHOLDER_FOR_CONTINUE_BUTTON]', '');
-      text = addContinueButton(text);
+      isPartialResponse = true;
     }
 
     // We can use this command to trigger the initial stream of Edge function response
@@ -314,6 +315,7 @@ async function handleDataResponse(
           largeContextResponse,
           showHintForLargeContextResponse,
           pluginId: plugin?.id || null,
+          isPartialResponse,
         },
       ];
       updatedConversation = {
@@ -334,6 +336,7 @@ async function handleDataResponse(
               content: removeRedundantTempHtmlString(text),
               largeContextResponse,
               showHintForLargeContextResponse,
+              isPartialResponse,
             };
           }
           return message;

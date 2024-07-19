@@ -21,6 +21,7 @@ import type { UserFile } from '@/types/UserFile';
 import type { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
+import ContinueChat from './components/ContinueChat';
 import TokenCounter from './components/TokenCounter';
 import HomeContext from '@/components/home/home.context';
 
@@ -38,13 +39,21 @@ import { cn } from '@/lib/utils';
 interface Props {
   message: Message;
   messageIndex: number;
+  isLastMessage: boolean;
   messageIsStreaming: boolean;
   onEdit?: (editedMessage: Message, index: number) => void;
   onContinue: (lastWords: string) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, onEdit, onContinue, messageIsStreaming, messageIndex }) => {
+  ({
+    message,
+    onEdit,
+    onContinue,
+    messageIsStreaming,
+    messageIndex,
+    isLastMessage,
+  }) => {
     const { t } = useTranslation('chat');
     const { i18n } = useTranslation();
 
@@ -443,7 +452,6 @@ export const ChatMessage: FC<Props> = memo(
                     formattedMessage={formattedMessage}
                     messageIndex={messageIndex}
                     messagePluginId={message.pluginId}
-                    onContinue={onContinue}
                   />
                   {highlight && (
                     <div className="absolute -inset-2 z-[1100] rounded-lg p-2 dark:bg-[#444654]">
@@ -458,6 +466,15 @@ export const ChatMessage: FC<Props> = memo(
                     <CopyButton />
                   </div>
                 </div>
+                {isLastMessage && message.isPartialResponse && (
+                  <div className="my-4 w-full">
+                    <ContinueChat
+                      originalMessage={message.content}
+                      onContinue={onContinue}
+                    />
+                  </div>
+                )}
+
                 <div className="mt-3 flex w-full flex-row items-center justify-between">
                   <div className="flex flex-row items-center">
                     {(message.pluginId === PluginID.GPT4 ||

@@ -81,6 +81,7 @@ const VirtualList = ({
               <ChatMessage
                 message={message}
                 messageIndex={index}
+                isLastMessage={index === messages.length - 1}
                 messageIsStreaming={messageIsStreaming}
                 onEdit={onEdit}
                 onContinue={onContinue}
