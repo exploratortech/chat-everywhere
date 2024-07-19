@@ -60,8 +60,6 @@ const handler = async (req: VercelRequest): Promise<Response> => {
 
     const resizedImageUrl = `${imageUrl}&w=${width}&h=${height}&q=70`;
 
-    console.log('Resized Image URL:', resizedImageUrl);
-
     return new Response(null, {
       status: 307,
       headers: {
