@@ -142,7 +142,7 @@ export const translateAndEnhancePrompt = async (prompt: string) => {
       });
     } else if (functionName === 'generate-image') {
       console.log('resultPrompt', functionParameters.prompt);
-      return functionParameters.prompt;
+      return functionParameters.prompt as string;
     }
   } catch (error) {
     throw error;

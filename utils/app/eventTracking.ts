@@ -142,6 +142,10 @@ export type PayloadType = {
   // Teacher portal
   tempAccountName?: string;
 
+  // Image Generation
+  usedOnDemandCredit?: boolean;
+  lastUsedKey?: MjJob['lastUsedKey'];
+
   // MJ Queue
   mjImageGenType?: MjImageGenRequest['type'] | MjButtonCommandRequest['type'];
   mjImageGenButtonCommand?: string;
@@ -158,6 +162,7 @@ export type PayloadType = {
   mjQueueCleanupJobOneWeekAgo?: string;
   mjQueueCleanupJobFiveMinutesAgo?: string;
   mjQueueJobDetail?: MjJob;
+
 };
 
 export interface UserPostHogProfile {

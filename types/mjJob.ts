@@ -23,6 +23,8 @@ export interface BasedMjJob {
   startProcessingAt?: string;
   userId: string;
   mjRequest: MjRequest;
+  usedOnDemandCredit?: boolean;
+  lastUsedKey?: 'our-discord-key' | 'on-demand-credit-key';
 }
 export interface QueuedMjJob extends BasedMjJob {
   status: 'QUEUED';

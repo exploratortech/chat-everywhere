@@ -51,6 +51,7 @@ const handleFailedStatus = async (reqBody: any) => {
     status: 'FAILED',
     reason: errorMessage,
   } as Partial<FailedMjJob>);
+
   const logOriginalEventPromise = OriginalMjLogEvent({
     userId: jobInfo.userId,
     startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
