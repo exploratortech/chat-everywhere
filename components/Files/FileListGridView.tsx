@@ -35,27 +35,27 @@ export function FileListGridView({
         {userFiles && userFiles.length === 0 ? (
           <div className="text-center">{t('No files uploaded')}</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {userFiles &&
               userFiles.map((file, index) => (
                 <div
                   key={`${file.id}-${index}`}
-                  className="border rounded-lg shadow-sm overflow-hidden"
+                  className="overflow-hidden rounded-lg border shadow-sm"
                   title={file.filename}
                 >
                   <FilePreviewModal file={file}>
-                    <div className="group h-full hover:bg-neutral-800 p-4 flex flex-col items-center justify-start">
-                      <div className="flex items-center content-start justify-center w-12 h-12 bg-neutral-800 rounded-full my-4">
+                    <div className="group flex h-full flex-col items-center justify-start p-4 hover:bg-neutral-800">
+                      <div className="my-4 flex size-12 content-start items-center justify-center rounded-full bg-neutral-800">
                         <UserFileItemIcon fileType={file.filetype} />
                       </div>
-                      <div className="font-medium text-center mb-2 h-[3rem] overflow-hidden">
+                      <div className="mb-2 h-12 overflow-hidden text-center font-medium">
                         {file.filename}
                       </div>
-                      <div className="text-neutral-400 text-sm text-center">
+                      <div className="text-center text-sm text-neutral-400">
                         <RelativeTimeComponent time={file.timeCreated} /> -{' '}
                         {formatFileSize(file.size)}
                       </div>
-                      <div className="flex items-center justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity mt-4">
+                      <div className="mt-4 flex items-center justify-end space-x-2 opacity-0 transition-opacity group-hover:opacity-100">
                         <DownloadButton
                           objectPath={file.objectPath}
                           fileName={file.filename}

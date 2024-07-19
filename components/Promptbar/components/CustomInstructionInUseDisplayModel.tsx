@@ -1,8 +1,10 @@
-import { FC, useEffect, useRef } from 'react';
+import type { FC } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
-import { Prompt, isTeacherPrompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
+import { isTeacherPrompt } from '@/types/prompt';
 
 interface CustomInstructionInUseDisplayProps {
   prompt: Prompt;
@@ -17,6 +19,7 @@ const CustomInstructionInUseDisplayModel: FC<
   const modalRef = useRef<HTMLDivElement>(null);
 
   const isTeacherCustomInstructionPrompt = isTeacherPrompt(prompt);
+
   const title = chatT(
     isTeacherCustomInstructionPrompt
       ? 'Teacher Custom Instruction ({{customInstructionPromptName}}) is in use'
@@ -44,9 +47,9 @@ const CustomInstructionInUseDisplayModel: FC<
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="fixed inset-0 z-10 overflow-hidden">
-        <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div className="flex min-h-screen items-center justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
           <div
             className="hidden sm:inline-block sm:h-screen sm:align-middle"
             aria-hidden="true"
@@ -54,18 +57,18 @@ const CustomInstructionInUseDisplayModel: FC<
 
           <div
             ref={modalRef}
-            className="dark:border-netural-400 inline-block max-h-[400px] transform overflow-y-auto rounded-lg border border-gray-300 bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all dark:bg-[#202123] sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg mobile:max-h-[70dvh] mobile:h-[70dvh] mobile:w-[calc(100dvw-1rem)] sm:p-6 sm:align-middle"
+            className="inline-block max-h-[400px] overflow-y-auto rounded-lg border border-gray-300 bg-white px-4 pb-4 pt-5 text-left align-bottom shadow-xl transition-all dark:bg-[#202123] sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg sm:p-6 sm:align-middle mobile:h-[70dvh] mobile:max-h-[70dvh] mobile:w-[calc(100dvw-1rem)]"
             role="dialog"
           >
-            <div className="text-center text-lg mb-4 font-bold whitespace-pre-wrap">
-              {title}
+            <div className="mb-4 whitespace-pre-wrap text-center text-lg font-bold">
+              {title.toString()}
             </div>
 
             <div className="text-sm font-bold text-black dark:text-neutral-200">
               {t('Name')}
             </div>
             <input
-              className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#6B7280] dark:text-neutral-100 opacity-50"
+              className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 opacity-50 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#6B7280] dark:text-neutral-100"
               placeholder={t('A name for your prompt.') || ''}
               value={prompt.name}
               disabled
@@ -75,7 +78,7 @@ const CustomInstructionInUseDisplayModel: FC<
               {t('Description')}
             </div>
             <textarea
-              className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#6B7280] dark:text-neutral-100 opacity-50"
+              className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 opacity-50 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#6B7280] dark:text-neutral-100"
               style={{ resize: 'none' }}
               placeholder={t('A description for your prompt.') || ''}
               disabled
@@ -87,7 +90,7 @@ const CustomInstructionInUseDisplayModel: FC<
               {t('Prompt')}
             </div>
             <textarea
-              className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#6B7280] dark:text-neutral-100 opacity-50"
+              className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 opacity-50 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#6B7280] dark:text-neutral-100"
               style={{ resize: 'none' }}
               placeholder={
                 t(

@@ -1,4 +1,4 @@
-import { SubscriptionPlan } from './user';
+import type { SubscriptionPlan } from './user';
 
 export interface RawRefereeProfile {
   id: string;

@@ -1,9 +1,10 @@
 import { IconTag } from '@tabler/icons-react';
-import { Dispatch, SetStateAction, memo, useEffect, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import { memo, useEffect } from 'react';
 
 import useTeacherOneTimeCodeTagsManagement from '@/hooks/teacherPortal/useTeacherOneTimeCodeTagsManagement';
 
-import { Tag } from '@/types/tags';
+import type { Tag } from '@/types/tags';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -53,9 +54,9 @@ const AddTagsToOneTimeCodeDropdown = memo(
 
     return (
       <div className="flex flex-row gap-2">
-        <div className="flex flex-rows items-center gap-2">
+        <div className="flex flex-row items-center gap-2">
           {selectedTags.map((tag) => (
-            <span key={tag.id} className="text-neutral-400 text-xs">
+            <span key={tag.id} className="text-xs text-neutral-400">
               {tag.name}
             </span>
           ))}
@@ -70,10 +71,10 @@ const AddTagsToOneTimeCodeDropdown = memo(
                 selectedTags.length > 0 ? 'bg-neutral-700' : '',
               )}
             >
-              <IconTag className="w-4 h-4" />
+              <IconTag className="size-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 flex flex-col gap-4 p-4 border-0 shadow-lg bg-neutral-800">
+          <DropdownMenuContent className="flex w-56 flex-col gap-4 border-0 bg-neutral-800 p-4 shadow-lg">
             {tags.map((tag) => (
               <div key={tag.id} className="flex items-center space-x-2">
                 <Checkbox
@@ -87,7 +88,7 @@ const AddTagsToOneTimeCodeDropdown = memo(
                 </Checkbox>
                 <label
                   htmlFor={`dropdown-tag-${tag.id}`}
-                  className="cursor-pointer w-full text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="w-full cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   {tag.name}
                 </label>

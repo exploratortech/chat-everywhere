@@ -14,18 +14,6 @@ export const useLogger = () => {
   const logGeneralEvent = (eventName: string) => {
     // Fail silently to avoid impacting user experience
     try {
-      let logEventName = eventName;
-
-      if (user) {
-        if (user.plan !== 'free') {
-          logEventName += ' (paid account)';
-        } else {
-          logEventName += ' (free account)';
-        }
-      } else {
-        logEventName += ' (no-login)';
-      }
-
       let eventPayload = {
         category: 'Usages',
         userEmail: user?.email || 'N/A',

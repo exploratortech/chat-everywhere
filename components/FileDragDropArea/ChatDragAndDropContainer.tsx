@@ -8,7 +8,7 @@ import {
   validateAndUploadFiles,
 } from '@/utils/app/uploadFileHelper';
 
-import { UserFile } from '@/types/UserFile';
+import type { UserFile } from '@/types/UserFile';
 import { PluginID } from '@/types/plugin';
 
 import HomeContext from '../home/home.context';
@@ -56,7 +56,7 @@ const ChatDragAndDropContainer = () => {
         />
       )}
       {isUploading && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
           <p className="text-2xl font-semibold text-white">{t('Loading...')}</p>
         </div>
       )}

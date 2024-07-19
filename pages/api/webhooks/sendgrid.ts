@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
@@ -29,7 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     'x-twilio-email-event-webhook-timestamp'
   ] as string;
   const payload = req.body;
-  
+
   const eventWebhook = new EventWebhook();
   const key = eventWebhook.convertPublicKeyToECDSA(publicKey);
   const isValidWebHookEvent = eventWebhook.verifySignature(

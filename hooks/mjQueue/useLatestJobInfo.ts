@@ -5,8 +5,8 @@ import { updateConversationWithNewContentByIdentifier } from '@/utils/app/conver
 import { trackEvent } from '@/utils/app/eventTracking';
 import { MjQueueJobComponentHandler } from '@/utils/app/streamHandler';
 
-import { FailedMjJob } from './../../types/mjJob';
-import { MjJob } from '@/types/mjJob';
+import type { FailedMjJob } from './../../types/mjJob';
+import type { MjJob } from '@/types/mjJob';
 
 import HomeContext from '@/components/home/home.context';
 

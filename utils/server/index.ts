@@ -8,16 +8,13 @@ import {
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import { logEvent } from '@/utils/server/api';
 
-import { Message } from '@/types/chat';
-import { OpenAIModel, OpenAIModelID } from '@/types/openai';
+import type { Message } from '@/types/chat';
+import type { OpenAIModel } from '@/types/openai';
 
 import { ChatEndpointManager } from './ChatEndpointManager';
 
-import {
-  ParsedEvent,
-  ReconnectInterval,
-  createParser,
-} from 'eventsource-parser';
+import type { ParsedEvent, ReconnectInterval } from 'eventsource-parser';
+import { createParser } from 'eventsource-parser';
 
 export class OpenAIError extends Error {
   type: string;
@@ -45,19 +42,28 @@ export class OpenAIError extends Error {
 export const normalizeMessages = (messages: Message[]) =>
   messages.map(({ role, content, name }) => ({ role, content, name }));
 
-export const OpenAIStream = async (
-  model: OpenAIModel,
-  systemPrompt: string,
-  temperature: number,
-  messages: Message[],
-  customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
-  userIdentifier?: string,
-  eventName?: EventNameTypes | null,
-  requestCountryCode?: string,
-) => {
+export const OpenAIStream = async ({
+  model,
+  systemPrompt,
+  temperature,
+  messages,
+  customMessageToStreamBack = null, // Stream this string at the end of the streaming
+  userIdentifier,
+  eventName = null,
+  usePriorityEndpoint = false,
+}: {
+  model: OpenAIModel;
+  systemPrompt: string;
+  temperature: number;
+  messages: Message[];
+  customMessageToStreamBack?: string | null;
+  userIdentifier?: string;
+  eventName?: EventNameTypes | null;
+  usePriorityEndpoint?: boolean;
+}) => {
   const log = new Logger();
 
-  const endpointManager = new ChatEndpointManager(model);
+  const endpointManager = new ChatEndpointManager(model, usePriorityEndpoint);
 
   let attempt = 0;
   let attemptLogs = '';

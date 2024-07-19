@@ -49,15 +49,15 @@ export function PromptForm({
       }}
       ref={formRef}
     >
-      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-background px-8 sm:rounded-md sm:border sm:px-12 bg-white">
+      <div className="relative flex max-h-60 w-full grow flex-col overflow-hidden bg-white px-8 sm:rounded-md sm:border sm:px-12">
         {isLoading ? (
           <div
             role="status"
-            className="absolute left-0 top-4 h-8 w-8 rounded-full bg-background p-0 sm:left-4"
+            className="absolute left-0 top-4 size-8 rounded-full bg-background p-0 sm:left-4"
           >
             <svg
               aria-hidden="true"
-              className="inline w-6 h-6 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+              className="inline size-6 animate-spin fill-blue-600 text-gray-200 dark:text-gray-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

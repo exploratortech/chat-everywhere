@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { userProfileQuery } from '@/utils/server/supabase';
 
-import { UserProfile } from '@/types/user';
+import type { UserProfile } from '@/types/user';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -106,11 +106,11 @@ export const ReferralCodeEnter = () => {
     <div className="my-2 text-sm">
       <h2>{t('Referral code')}</h2>
       <form
-        className="flex items-center gap-2 justify-between"
+        className="flex items-center justify-between gap-2"
         onSubmit={handleSubmit}
       >
         <input
-          className="w-[70%] my-2 rounded-md border border-neutral-500 px-4 py-1 text-white shadow focus:outline-none bg-transparent dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
+          className="my-2 w-[70%] rounded-md border border-neutral-500 bg-transparent px-4 py-1 text-white shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
           placeholder={
             t('Please enter a referral code to start your trial') || ''
           }
@@ -119,14 +119,14 @@ export const ReferralCodeEnter = () => {
         />
         <button
           type="submit"
-          className="px-4 py-[.23rem] h-min border rounded-md shadow text-black disabled:bg-slate-400 disabled:border-none  bg-slate-200 hover:bg-slate-300 focus:outline-none w-fit"
+          className="h-min w-fit rounded-md border bg-slate-200 px-4 py-[.23rem] text-black shadow  hover:bg-slate-300 focus:outline-none disabled:border-none disabled:bg-slate-400"
           disabled={!referralCode || isLoading}
         >
           {isLoading ? t('Loading...') : t('Submit')}
         </button>
       </form>
       {isError && (
-        <div className="text-red-500 text-sm my-2">
+        <div className="my-2 text-sm text-red-500">
           {t(queryError?.message)}
         </div>
       )}

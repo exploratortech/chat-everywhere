@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { VirtuosoGrid } from 'react-virtuoso';
 
-import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
+import type { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
 
 import SharedMessageItem from './SharedMessageItem';
 
@@ -62,7 +62,7 @@ const gridComponents = {
   }: React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>) => (
     <div
       {...props}
-      className="mobile:w-full w-[300px] flex flex-none content-stretch box-border"
+      className="box-border flex w-[300px] flex-none content-stretch mobile:w-full"
     >
       {children}
     </div>

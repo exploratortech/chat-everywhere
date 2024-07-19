@@ -34,13 +34,13 @@ const VideoPreview = ({ objectPath }: { objectPath: string }) => {
   }
 
   return (
-    <div className="max-w-[800px] mobile:max-w-[90dvw] max-h-[90dvh] w-full h-full flex items-center justify-center">
+    <div className="flex size-full max-h-[90dvh] max-w-[800px] items-center justify-center mobile:max-w-[90dvw]">
       {videoUrl && (
         <video
           controls
           width="100%"
           height="auto"
-          className="max-w-full max-h-full object-contain"
+          className="max-h-full max-w-full object-contain"
           onError={() => setError('Failed to load video')}
         >
           <source src={videoUrl} type="video/mp4" />

@@ -1,7 +1,7 @@
-import { ExportFormatV4 } from './export';
-import { PluginID } from './plugin';
+import type { ExportFormatV4 } from './export';
+import type { PluginID } from './plugin';
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface User extends UserProfile {
   email: string;
@@ -31,6 +31,7 @@ export interface UserProfile {
   isTeacherAccount: boolean;
   associatedTeacherId: string | undefined;
   tempUserUniqueId: string | undefined;
+  enabledPriorityEndpoint: boolean;
 }
 
 export interface CreditUsage {

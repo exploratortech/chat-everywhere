@@ -77,8 +77,4 @@ const voiceMap: { [language: string]: string } = {
   'hi-IN': 'hi-IN-SwaraNeural',
 };
 
-export {
-  getAvailableLocales,
-  getAvailableSpeechSourceLanguages,
-  voiceMap,
-};
+export { getAvailableLocales, getAvailableSpeechSourceLanguages, voiceMap };

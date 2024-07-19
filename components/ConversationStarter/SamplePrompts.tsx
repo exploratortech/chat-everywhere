@@ -1,4 +1,5 @@
-import { FC, useState, useEffect } from 'react';
+import type { FC } from 'react';
+
 import { useTranslation } from 'next-i18next';
 
 const DEMO_PROMPTS = [
@@ -22,7 +23,7 @@ export const SamplePrompts: FC<Props> = ({ promptOnClick }) => {
   const { t } = useTranslation('prompts');
 
   return (
-    <div className="mt-5 flex flex-col text-sm overflow-y-auto h-64">
+    <div className="mt-5 flex h-64 flex-col overflow-y-auto text-sm">
       {DEMO_PROMPTS.map((prompt, index) => (
         <div
           key={index}

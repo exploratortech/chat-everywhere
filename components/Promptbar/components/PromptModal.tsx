@@ -1,11 +1,16 @@
 import { IconFileImport } from '@tabler/icons-react';
-import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import type { FC, KeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Tooltip } from 'react-tooltip';
 
 import { useTranslation } from 'next-i18next';
 
-import { CustomInstructionPrompt, Prompt, RegularPrompt } from '@/types/prompt';
+import type {
+  CustomInstructionPrompt,
+  Prompt,
+  RegularPrompt,
+} from '@/types/prompt';
 
 import TokenCounter from '@/components/Chat/components/TokenCounter';
 import { DialogClose, DialogFooter } from '@/components/ui/dialog';
@@ -104,7 +109,7 @@ export const PromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
         onChange={(e) => setContent(e.target.value)}
         rows={7}
       />
-      <div className="flex w-full justify-end items-center">
+      <div className="flex w-full items-center justify-end">
         <input
           type="file"
           accept=".txt"
@@ -141,7 +146,7 @@ export const PromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
       </div>
 
       {displayFileImportMessage && (
-        <div className="mt-2 text-sm text-yellow-300 font-italic">
+        <div className="mt-2 text-sm text-yellow-300">
           {t(
             "Please be aware that for long files, it's best to use this prompt in default mode as a Pro member because it can handle much longer context.",
           )}
@@ -154,12 +159,12 @@ export const PromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
         </div>
         <label
           htmlFor="toggleCustomInstruction"
-          className="inline-flex relative items-center cursor-pointer"
+          className="relative inline-flex cursor-pointer items-center"
         >
           <input
             type="checkbox"
             id="toggleCustomInstruction"
-            className="sr-only peer"
+            className="peer sr-only"
             checked={prompt.isCustomInstruction}
             onChange={(e) =>
               onUpdatePrompt({
@@ -168,14 +173,14 @@ export const PromptModal: FC<Props> = ({ prompt, onUpdatePrompt }) => {
               } as RegularPrompt | CustomInstructionPrompt)
             }
           />
-          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+          <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-green-800"></div>
         </label>
       </div>
       <DialogFooter className="sm:justify-start">
         <DialogClose asChild>
           <button
             type="button"
-            className="w-full px-4 py-2 mt-6 border rounded-lg shadow cursor-pointer border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300 disabled:dark:bg-slate-400 disabled:cursor-not-allowed"
+            className="mt-6 w-full cursor-pointer rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow hover:bg-neutral-100 focus:outline-none disabled:cursor-not-allowed dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300 disabled:dark:bg-slate-400"
             disabled={isOverTokenLimit}
             onClick={() => {
               const updatedPrompt = {

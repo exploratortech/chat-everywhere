@@ -13,11 +13,8 @@ import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
 // @ts-expect-error
 import * as wasm from '@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
 import { geolocation } from '@vercel/edge';
-import {
-  ParsedEvent,
-  ReconnectInterval,
-  createParser,
-} from 'eventsource-parser';
+import type { ParsedEvent, ReconnectInterval } from 'eventsource-parser';
+import { createParser } from 'eventsource-parser';
 
 export const config = {
   runtime: 'edge',
@@ -81,7 +78,9 @@ const handler = async (req: Request): Promise<Response> => {
       messages: [
         {
           role: 'system',
-          content: country?.includes('TW') ? DEFAULT_SYSTEM_PROMPT + RESPONSE_IN_CHINESE_PROMPT : DEFAULT_SYSTEM_PROMPT,
+          content: country?.includes('TW')
+            ? DEFAULT_SYSTEM_PROMPT + RESPONSE_IN_CHINESE_PROMPT
+            : DEFAULT_SYSTEM_PROMPT,
         },
         {
           role: 'user',
@@ -117,7 +116,8 @@ const handler = async (req: Request): Promise<Response> => {
         );
       } else {
         throw new Error(
-          `OpenAI API returned an error: ${decoder.decode(result?.value) || result.statusText
+          `OpenAI API returned an error: ${
+            decoder.decode(result?.value) || result.statusText
           }`,
         );
       }

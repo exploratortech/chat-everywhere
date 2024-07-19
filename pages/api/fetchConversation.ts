@@ -12,7 +12,6 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'POST') {
     const { accessible_id } = await req.json();
 
-    const res = new Response();
     if (!accessible_id) {
       return new Response(
         JSON.stringify({ error: 'Missing accessible_id parameter' }),

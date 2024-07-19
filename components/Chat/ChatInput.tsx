@@ -1,14 +1,12 @@
 import { IconPlayerStop, IconRepeat, IconSend } from '@tabler/icons-react';
+import type { KeyboardEvent, MutableRefObject } from 'react';
 import {
-  KeyboardEvent,
-  MutableRefObject,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
-  useTransition,
 } from 'react';
 
 import { useTranslation } from 'next-i18next';
@@ -21,10 +19,10 @@ import useFocusHandler from '@/hooks/useFocusInputHandler';
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
 
-import { UserFile } from '@/types/UserFile';
-import { Message } from '@/types/chat';
+import type { UserFile } from '@/types/UserFile';
+import type { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 import TokenCounter from './components/TokenCounter';
 import HomeContext from '@/components/home/home.context';
@@ -61,7 +59,6 @@ export const ChatInput = ({
       prompts: originalPrompts,
       currentMessage,
       showSettingsModel,
-      user,
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -308,7 +305,7 @@ export const ChatInput = ({
   };
 
   const handleSubmit = (updatedVariables: string[]) => {
-    const newContent = content?.replace(/{{(.*?)}}/g, (match, variable) => {
+    const newContent = content?.replace(/{{(.*?)}}/g, (_match, variable) => {
       const index = variables.indexOf(variable);
       return updatedVariables[index];
     });
@@ -330,9 +327,7 @@ export const ChatInput = ({
     if (textareaRef && textareaRef.current) {
       textareaRef.current.style.height = 'inherit';
       textareaRef.current.style.height = `${textareaRef.current?.scrollHeight}px`;
-      textareaRef.current.style.overflow = `${
-        textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'
-      }`;
+      textareaRef.current.style.overflow = `${textareaRef?.current?.scrollHeight > 400 ? 'auto' : 'hidden'}`;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
@@ -400,22 +395,14 @@ export const ChatInput = ({
       )}
     >
       <div
-        className={` ${
-          enhancedMenuDisplayValue === 'none'
-            ? 'mt-[1.5rem] md:mt-[3rem]'
-            : `${
-                isAiImagePluginSelected
-                  ? 'mt-[16.9rem] md:mt-[12.8rem]'
-                  : 'mt-[14rem] md:mt-[10rem]'
-              }`
-        } stretch mx-2 mt-4 mb-4 flex flex-row gap-3 md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-3xl transition-all ease-in-out`}
+        className={` ${enhancedMenuDisplayValue === 'none' ? 'mt-6 md:mt-12' : `${isAiImagePluginSelected ? 'mt-[16.9rem] md:mt-[12.8rem]' : 'mt-56 md:mt-40'}`} mx-2 my-4 flex flex-row gap-3 transition-all ease-in-out md:mx-4 md:last:mb-6 lg:mx-auto lg:max-w-3xl`}
       >
         {/* Disable stop generating button for image generation until implemented */}
         {messageIsStreaming &&
           !isConversing &&
           currentMessage?.pluginId !== PluginID.IMAGE_GEN && (
             <button
-              className="absolute top-0 left-0 right-0 mx-auto mb-3 flex w-fit items-center gap-3 rounded border border-neutral-200 bg-white py-2 px-4 text-black hover:opacity-50 dark:border-neutral-600 dark:bg-[#343541] dark:text-white md:mb-0 md:mt-2"
+              className="absolute inset-x-0 top-0 mx-auto mb-3 flex w-fit items-center gap-3 rounded border border-neutral-200 bg-white px-4 py-2 text-black hover:opacity-50 dark:border-neutral-600 dark:bg-[#343541] dark:text-white md:mb-0 md:mt-2"
               onClick={handleStopConversation}
             >
               <IconPlayerStop size={16} /> {t('Stop Generating')}
@@ -427,7 +414,7 @@ export const ChatInput = ({
           selectedConversation &&
           selectedConversation.messages.length > 0 && (
             <button
-              className="absolute top-0 left-0 right-0 mx-auto mb-3 flex w-fit items-center gap-3 rounded border border-neutral-200 bg-white py-2 px-4 text-black hover:opacity-50 dark:border-neutral-600 dark:bg-[#343541] dark:text-white md:mb-0 md:mt-2 disabled:opacity-25"
+              className="absolute inset-x-0 top-0 mx-auto mb-3 flex w-fit items-center gap-3 rounded border border-neutral-200 bg-white px-4 py-2 text-black hover:opacity-50 disabled:opacity-25 dark:border-neutral-600 dark:bg-[#343541] dark:text-white md:mb-0 md:mt-2"
               onClick={() => onRegenerate()}
             >
               <IconRepeat size={16} /> {t('Regenerate response')}
@@ -435,65 +422,35 @@ export const ChatInput = ({
           )}
 
         <div
-          className={`relative mx-2 flex w-full flex-grow flex-col rounded-md
+          className={`relative mx-2 flex w-full grow flex-col rounded-md
             border bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)]
             dark:bg-[#40414F] dark:text-white
             dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4
-            ${
-              isOverTokenLimit && !isSpeechRecognitionActive
-                ? '!border-red-500 dark:!border-red-600'
-                : ''
-            }
-            ${
-              !currentMessage || currentMessage.pluginId === null
-                ? 'border-black/10 dark:border-gray-900/50'
-                : currentMessage.pluginId === PluginID.GEMINI
-                ? 'border-yellow-500 dark:border-yellow-400'
-                : 'border-blue-800 dark:border-blue-700'
-            }
+            ${isOverTokenLimit && !isSpeechRecognitionActive ? '!border-red-500 dark:!border-red-600' : ''} ${!currentMessage || currentMessage.pluginId === null ? 'border-black/10 dark:border-gray-900/50' : currentMessage.pluginId === PluginID.GEMINI ? 'border-yellow-500 dark:border-yellow-400' : 'border-blue-800 dark:border-blue-700'}
           `}
         >
           <EnhancedMenu ref={menuRef} isFocused={isFocused} />
 
           <div className="flex items-start">
-            <div className="flex items-center pt-1 pl-1">
+            <div className="flex items-center pl-1 pt-1">
               <VoiceInputButton onClick={() => setIsFocused(false)} />
-              <button className="rounded-sm p-1 text-zinc-500 dark:text-zinc-400 cursor-default">
+              <button className="cursor-default rounded-sm p-1 text-zinc-500 dark:text-zinc-400">
                 {getPluginIcon(currentMessage?.pluginId)}
               </button>
             </div>
 
-            <div className="flex flex-col w-full">
+            <div className="flex w-full flex-col">
               <textarea
                 data-cy="chat-input"
                 onFocus={() => setIsFocused(true)}
                 ref={textareaRef}
-                className={`
-                  m-0 w-full resize-none bg-transparent pt-3 pr-8 pl-2 bg-white text-black dark:bg-[#40414F] dark:text-white outline-none rounded-md
-                  ${
-                    isSpeechRecognitionActive || isConversing
-                      ? 'pointer-events-none'
-                      : ''
-                  }
-                  ${
-                    isOverTokenLimit && isSpeechRecognitionActive
-                      ? 'border !border-red-500 dark:!border-red-600'
-                      : 'border-0'
-                  }
-                `}
+                className={` m-0 w-full resize-none rounded-md bg-white pl-2 pr-8 pt-3 text-black outline-none dark:bg-[#40414F] dark:text-white ${isSpeechRecognitionActive || isConversing ? 'pointer-events-none' : ''} ${isOverTokenLimit && isSpeechRecognitionActive ? 'border !border-red-500 dark:!border-red-600' : 'border-0'} `}
                 style={{
-                  paddingBottom: `${
-                    isCloseToTokenLimit || isOverTokenLimit ? '2.2' : '0.75'
-                  }rem `,
+                  paddingBottom: `${isCloseToTokenLimit || isOverTokenLimit ? '2.2' : '0.75'}rem `,
                   resize: 'none',
                   bottom: `${textareaRef?.current?.scrollHeight}px`,
                   maxHeight: '400px',
-                  overflow: `${
-                    textareaRef.current &&
-                    textareaRef.current.scrollHeight > 400
-                      ? 'auto'
-                      : 'hidden'
-                  }`,
+                  overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400 ? 'auto' : 'hidden'}`,
                 }}
                 placeholder={t('Type a message ...') || ''}
                 value={content}
@@ -506,7 +463,7 @@ export const ChatInput = ({
               {currentMessage &&
                 currentMessage.fileList &&
                 currentMessage.fileList.length > 0 && (
-                  <div className="flex flex-row gap-2 p-2 flex-wrap">
+                  <div className="flex flex-row flex-wrap gap-2 p-2">
                     {currentMessage.fileList.map((file, index) => {
                       return (
                         <UserFileItem
@@ -535,14 +492,8 @@ export const ChatInput = ({
 
           <TokenCounter
             className={`
-              ${isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''}
-              ${
-                isCloseToTokenLimit || isOverTokenLimit
-                  ? 'visible'
-                  : 'invisible'
-              }
-              ${isSpeechRecognitionActive ? 'pointer-events-none' : ''}
-              absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400
+              ${isOverTokenLimit ? '!text-red-500 dark:text-red-600' : ''} ${isCloseToTokenLimit || isOverTokenLimit ? 'visible' : 'invisible'} ${isSpeechRecognitionActive ? 'pointer-events-none' : ''}
+              absolute bottom-2 right-2 text-sm text-neutral-500 dark:text-neutral-400
             `}
             value={content}
             setIsOverLimit={setIsOverTokenLimit}
@@ -556,7 +507,7 @@ export const ChatInput = ({
               data-cy="chat-send-button"
             >
               {messageIsStreaming ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
+                <div className="size-4 animate-spin rounded-full border-t-2 text-zinc-500 dark:text-zinc-400"></div>
               ) : (
                 <IconSend size={18} />
               )}
@@ -564,7 +515,7 @@ export const ChatInput = ({
           )}
 
           {showPromptList && filteredPrompts.length > 0 && (
-            <div className="absolute bottom-12 w-full z-20">
+            <div className="absolute bottom-12 z-20 w-full">
               <PromptList
                 activePromptIndex={activePromptIndex}
                 prompts={filteredPrompts}
@@ -575,7 +526,7 @@ export const ChatInput = ({
             </div>
           )}
           {showFileList && filteredFiles.length > 0 && (
-            <div className="absolute bottom-12 w-full z-20">
+            <div className="absolute bottom-12 z-20 w-full">
               <FileList
                 fileListRef={fileListRef}
                 activeFileIndex={activeFileIndex}

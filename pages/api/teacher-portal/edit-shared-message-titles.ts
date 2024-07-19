@@ -16,34 +16,40 @@ const handler = async (req: Request): Promise<Response> => {
   if (!userProfile || !userProfile.isTeacherAccount)
     return unauthorizedResponse;
 
-  const { messageSubmissionIds, title} = await req.json();
+  const { messageSubmissionIds, title } = await req.json();
 
   if (!messageSubmissionIds) {
     return new Response('No submissions selected', { status: 400 });
   }
 
   try {
-      const success = await bulkEditTitlesForSelectedSubmissions(messageSubmissionIds, title);
-      if (!success) {
+    const success = await bulkEditTitlesForSelectedSubmissions(
+      messageSubmissionIds,
+      title,
+    );
+    if (!success) {
       throw new Error('Failed to update titles in the database');
-      }
-      return new Response(
+    }
+    return new Response(
       JSON.stringify({
-          success: true,
-          message: 'Titles updated successfully',
+        success: true,
+        message: 'Titles updated successfully',
       }),
       { status: 200 },
-      );
+    );
   } catch (error) {
-      return new Response(JSON.stringify({
-          error: 'Internal server error',
-          details: (error as Error).message
-      }), {
-          status: 500,
-          headers: {
-              'Content-Type': 'application/json'
-          }
-      });
+    return new Response(
+      JSON.stringify({
+        error: 'Internal server error',
+        details: (error as Error).message,
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
   }
 };
 export default handler;

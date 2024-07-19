@@ -4,7 +4,7 @@ import {
   IconPlus,
   IconRotateClockwise,
 } from '@tabler/icons-react';
-import { ReactNode, useContext } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SidebarToggleButton } from './components/SidebarToggleButton';
@@ -43,7 +43,6 @@ const Sidebar = <T,>({
   toggleOpen,
   handleCreateItem,
   handleCreateFolder,
-  showMobileButton = true,
 }: Props<T>) => {
   const { t } = useTranslation('promptbar');
 
@@ -52,24 +51,19 @@ const Sidebar = <T,>({
       className={`
         ${isOpen ? 'w-[260px]' : 'w-0'}
         ${side === 'left' ? 'tablet:left-0' : 'tablet:right-0'}
-        transition-all ease-linear relative box-content bg-[#202123] tablet:h-[calc(100%-48px)] tablet:fixed tablet:z-10
+        relative box-content bg-[#202123] transition-all ease-linear tablet:fixed tablet:z-10 tablet:h-[calc(100%-48px)]
       `}
     >
       <div
         className={`
-          ${isOpen ? 'tablet:visible !bg-[#202123]/90' : ''}
-          fixed invisible left-0 w-full h-full bg-transparent transition-all ease-linear -z-10
+          ${isOpen ? '!bg-[#202123]/90 tablet:visible' : ''}
+          invisible fixed left-0 -z-10 size-full bg-transparent transition-all ease-linear
         `}
         onClick={toggleOpen}
       />
       <div
         className={`
-          absolute block tablet:hidden z-50
-          ${
-            side === 'left'
-              ? 'right-0 translate-x-full'
-              : 'left-0 -translate-x-full'
-          }
+          absolute z-50 block tablet:hidden ${side === 'left' ? 'right-0 translate-x-full' : 'left-0 -translate-x-full'}
         `}
       >
         <SidebarToggleButton onClick={toggleOpen} isOpen={isOpen} />
@@ -78,12 +72,12 @@ const Sidebar = <T,>({
         className={`
           ${side === 'left' && !isOpen ? '-translate-x-full' : ''}
           ${side === 'right' && !isOpen ? 'translate-x-full' : ''}
-          transition-all ease-linear flex w-[260px] h-full flex-none flex-col p-2 space-y-2 text-[14px]
+          flex h-full w-[260px] flex-none flex-col space-y-2 p-2 text-[14px] transition-all ease-linear
         `}
       >
         <div className="flex items-center">
           <button
-            className="text-sidebar flex w-[190px] flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md border border-white/20 p-3 text-white transition-colors duration-200 hover:bg-gray-500/10"
+            className=" flex w-[190px] shrink-0 cursor-pointer select-none items-center gap-3 rounded-md border border-white/20 p-3 text-white transition-colors duration-200 hover:bg-gray-500/10"
             onClick={() => {
               handleCreateItem();
               handleSearchTerm('');
@@ -94,7 +88,7 @@ const Sidebar = <T,>({
           </button>
 
           <button
-            className="ml-2 flex flex-shrink-0 cursor-pointer items-center gap-3 rounded-md border border-white/20 p-3 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10"
+            className="ml-2 flex shrink-0 cursor-pointer items-center gap-3 rounded-md border border-white/20 p-3 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10"
             onClick={handleCreateFolder}
           >
             <IconFolderPlus size={16} />
@@ -106,7 +100,7 @@ const Sidebar = <T,>({
           onSearch={handleSearchTerm}
         />
 
-        <div className="flex-1 overflow-x-hidden overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="flex border-b border-white/20 pb-2">
             {folderComponent}
           </div>
@@ -122,18 +116,14 @@ const Sidebar = <T,>({
 
           {items?.length == 0 && (
             <div className="mt-8 select-none text-center text-white opacity-50">
-              <IconMistOff className="sm:hidden mx-auto mb-3" />
+              <IconMistOff className="mx-auto mb-3 sm:hidden" />
               <span className="text-[14px] leading-normal">
                 {t('No prompts.')}
               </span>
             </div>
           )}
           <div
-            className={`mt-2 transition-all duration-500 rounded-lg ${
-              !itemsIsImporting && items?.length > 0
-                ? 'visible opacity-100'
-                : 'invisible opacity-0'
-            }`}
+            className={`mt-2 rounded-lg transition-all duration-500 ${!itemsIsImporting && items?.length > 0 ? 'visible opacity-100' : 'invisible opacity-0'}`}
           >
             {itemComponent}
           </div>

@@ -7,7 +7,11 @@ import {
 } from '@/utils/server/mjServiceServerHelper';
 import { addCredit, getUserProfile } from '@/utils/server/supabase';
 
-import { CompletedMjJob, FailedMjJob, ProcessingMjJob } from '@/types/mjJob';
+import type {
+  CompletedMjJob,
+  FailedMjJob,
+  ProcessingMjJob,
+} from '@/types/mjJob';
 import { PluginID } from '@/types/plugin';
 
 import dayjs from 'dayjs';

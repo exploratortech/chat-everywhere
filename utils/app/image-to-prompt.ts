@@ -1,11 +1,11 @@
-import { Dispatch, MutableRefObject } from 'react';
+import type { Dispatch, MutableRefObject } from 'react';
 
-import { ActionType } from '@/hooks/useCreateReducer';
+import type { ActionType } from '@/hooks/useCreateReducer';
 
-import { Conversation, Message } from '@/types/chat';
+import type { Conversation, Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
-import { HomeInitialState } from '@/components/home/home.state';
+import type { HomeInitialState } from '@/components/home/home.state';
 
 import {
   saveConversation,

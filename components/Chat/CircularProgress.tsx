@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -35,7 +35,7 @@ const CircularProgress: React.FC<CircularProgressProps> = ({
   const seconds = Math.round(milliseconds / 1000);
 
   return (
-    <div className="flex justify-center items-center p-1 rounded-lg">
+    <div className="flex items-center justify-center rounded-lg p-1">
       <svg width={size} height={size}>
         <circle
           stroke={backgroundColor}

@@ -20,11 +20,7 @@ import {
   subtractCredit,
 } from '@/utils/server/supabase';
 
-import {
-  MjButtonCommandRequest,
-  MjImageGenRequest,
-  MjJob,
-} from '@/types/mjJob';
+import type { MjButtonCommandRequest, MjImageGenRequest } from '@/types/mjJob';
 import { PluginID } from '@/types/plugin';
 
 export const config = {
@@ -128,7 +124,7 @@ const handler = async (req: Request) => {
     });
 
     // Add usedOnDemandCredit to jobInfo
-    jobInfo.usedOnDemandCredit = requestBody?.useOnDemand
+    jobInfo.usedOnDemandCredit = requestBody?.useOnDemand;
 
     return retryWithDifferentApiKey(async (currentHeaders) => {
       generationPrompt = generateMjPrompt(
@@ -141,7 +137,10 @@ const handler = async (req: Request) => {
 
       // Add last used key to jobInfo
       const currentApiKey = currentHeaders.Authorization.split(' ')[1];
-      jobInfo.lastUsedKey = currentApiKey === MY_MIDJOURNEY_API_KEY ? 'our-discord-key' : 'on-demand-credit-key';
+      jobInfo.lastUsedKey =
+        currentApiKey === MY_MIDJOURNEY_API_KEY
+          ? 'our-discord-key'
+          : 'on-demand-credit-key';
 
       const imageGenerationResponse = await fetch(
         `https://api.mymidjourney.ai/api/v1/midjourney/imagine`,
@@ -183,7 +182,8 @@ const handler = async (req: Request) => {
           userId: jobInfo.userId,
           startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
           errorMessage: 'Image generation failed',
-          promptBeforeProcessing: (jobInfo.mjRequest as MjImageGenRequest).userPrompt,
+          promptBeforeProcessing: (jobInfo.mjRequest as MjImageGenRequest)
+            .userPrompt,
           generationPrompt: generationPrompt,
         });
         console.log({
@@ -203,7 +203,8 @@ const handler = async (req: Request) => {
           userId: jobInfo.userId,
           startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,
           errorMessage: 'Failed during submitting request',
-          promptBeforeProcessing: (jobInfo.mjRequest as MjImageGenRequest).userPrompt,
+          promptBeforeProcessing: (jobInfo.mjRequest as MjImageGenRequest)
+            .userPrompt,
           generationPrompt: generationPrompt,
         });
 
@@ -212,14 +213,12 @@ const handler = async (req: Request) => {
 
       return responseJson;
     }, headers);
-  };
+  }
 
-  const buttonCommand = async (
-    headers: {
-      Authorization: string;
-      'Content-Type': string;
-    },
-  ) => {
+  const buttonCommand = async (headers: {
+    Authorization: string;
+    'Content-Type': string;
+  }) => {
     if (!jobInfo) return;
     if (jobInfo.mjRequest.type !== 'MJ_BUTTON_COMMAND') {
       throw new Error('Invalid job type for the calling method');
@@ -244,7 +243,8 @@ const handler = async (req: Request) => {
       if (!imageGenerationResponse.ok) {
         if (
           ContentFilterErrorMessageListFromMyMidjourneyProvider.some(
-            (errorMessage) => imageGenerationResponseText.includes(errorMessage),
+            (errorMessage) =>
+              imageGenerationResponseText.includes(errorMessage),
           )
         ) {
           throw new Error('Image generation failed due to content filter', {
@@ -258,7 +258,9 @@ const handler = async (req: Request) => {
         throw new Error('Image generation failed');
       }
 
-      const imageGenerationResponseJson = JSON.parse(imageGenerationResponseText);
+      const imageGenerationResponseJson = JSON.parse(
+        imageGenerationResponseText,
+      );
 
       if (
         imageGenerationResponseJson.success !== true ||
@@ -302,7 +304,6 @@ const handler = async (req: Request) => {
       return await operation(retryHeaders);
     }
   };
-
 
   let hasSubtractedUserCredit = false;
   try {
@@ -398,7 +399,6 @@ const generateMjPrompt = (
 
   return resultPrompt;
 };
-
 
 async function subtractedUserCredit(userId: string): Promise<boolean> {
   try {

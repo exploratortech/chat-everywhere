@@ -1,4 +1,8 @@
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_TEMPERATURE,
+  RESPONSE_IN_CHINESE_PROMPT,
+} from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
@@ -10,10 +14,11 @@ import {
   subtractCredit,
 } from '@/utils/server/supabase';
 
-import { ChatBody } from '@/types/chat';
+import type { ChatBody } from '@/types/chat';
 import { type Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
+
 import { geolocation } from '@vercel/edge';
 
 const supabase = getAdminSupabaseClient();
@@ -55,6 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
   if (!user || user.plan === 'free') return unauthorizedResponse;
 
   const isUserInUltraPlan = user.plan === 'ultra';
+  const usePriorityEndpoint = user.enabledPriorityEndpoint;
 
   if (
     !isUserInUltraPlan &&
@@ -78,7 +84,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     promptToSend = prompt;
     if (!promptToSend) {
-      promptToSend = DEFAULT_SYSTEM_PROMPT
+      promptToSend = DEFAULT_SYSTEM_PROMPT;
     }
 
     if (country?.includes('TW')) {
@@ -93,10 +99,10 @@ const handler = async (req: Request): Promise<Response> => {
     messageToSend = messages;
 
     if (selectedOutputLanguage) {
-      messageToSend[
-        messageToSend.length - 1
-      ].content = `${selectedOutputLanguage} ${messageToSend[messageToSend.length - 1].content
-      }`;
+      messageToSend[messageToSend.length - 1].content =
+        `${selectedOutputLanguage} ${
+          messageToSend[messageToSend.length - 1].content
+        }`;
     }
 
     if (!isUserInUltraPlan) {
@@ -104,15 +110,16 @@ const handler = async (req: Request): Promise<Response> => {
       await subtractCredit(data.user.id, PluginID.GPT4);
     }
 
-    const stream = await OpenAIStream(
-      OpenAIModels[OpenAIModelID.GPT_4O],
-      promptToSend,
-      temperatureToUse,
-      messageToSend,
-      null,
-      data.user.id,
-      'GPT4 mode message',
-    );
+    const stream = await OpenAIStream({
+      model: OpenAIModels[OpenAIModelID.GPT_4O],
+      systemPrompt: promptToSend,
+      temperature: temperatureToUse,
+      messages: messageToSend,
+      customMessageToStreamBack: null,
+      userIdentifier: data.user.id,
+      eventName: 'GPT4 mode message',
+      usePriorityEndpoint,
+    });
 
     return new Response(stream);
   } catch (error) {

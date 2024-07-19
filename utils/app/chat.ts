@@ -1,8 +1,10 @@
-import { UserFile } from '@/types/UserFile';
-import { ChatBody, Conversation, Message } from '@/types/chat';
-import { Plugin, PluginID } from '@/types/plugin';
-import { Prompt, isTeacherPrompt } from '@/types/prompt';
-import { User } from '@/types/user';
+import type { UserFile } from '@/types/UserFile';
+import type { ChatBody, Conversation, Message } from '@/types/chat';
+import type { Plugin } from '@/types/plugin';
+import { PluginID } from '@/types/plugin';
+import type { Prompt } from '@/types/prompt';
+import { isTeacherPrompt } from '@/types/prompt';
+import type { User } from '@/types/user';
 
 import { getOrGenerateUserId } from '../data/taggingHelper';
 import { getEndpoint } from './api';
@@ -21,7 +23,7 @@ import {
   removeTempHtmlString,
 } from './htmlStringHandler';
 import { reorderItem } from './rank';
-import { addContinueButton, removeSecondLastLine } from './ui';
+import { removeSecondLastLine } from './ui';
 
 import '@formatjs/intl-segmenter/polyfill';
 import dayjs from 'dayjs';
@@ -240,8 +242,8 @@ async function handleDataResponse(
     const customName = updatedConversation.customInstructionPrompt
       ? updatedConversation.customInstructionPrompt.name
       : content.length > 30
-      ? content.substring(0, 30) + '...'
-      : content;
+        ? content.substring(0, 30) + '...'
+        : content;
     updatedConversation = {
       ...updatedConversation,
       name: customName,
@@ -255,6 +257,7 @@ async function handleDataResponse(
   let text = '';
   let largeContextResponse = false;
   let showHintForLargeContextResponse = false;
+  let isPartialResponse = false;
 
   while (!done) {
     if (stopConversationRef.current === true) {
@@ -293,7 +296,7 @@ async function handleDataResponse(
 
     if (text.includes('[PLACEHOLDER_FOR_CONTINUE_BUTTON]')) {
       text = text.replace('[PLACEHOLDER_FOR_CONTINUE_BUTTON]', '');
-      text = addContinueButton(text);
+      isPartialResponse = true;
     }
 
     // We can use this command to trigger the initial stream of Edge function response
@@ -312,6 +315,7 @@ async function handleDataResponse(
           largeContextResponse,
           showHintForLargeContextResponse,
           pluginId: plugin?.id || null,
+          isPartialResponse,
         },
       ];
       updatedConversation = {
@@ -332,6 +336,7 @@ async function handleDataResponse(
               content: removeRedundantTempHtmlString(text),
               largeContextResponse,
               showHintForLargeContextResponse,
+              isPartialResponse,
             };
           }
           return message;

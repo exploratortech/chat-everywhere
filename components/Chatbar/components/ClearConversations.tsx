@@ -1,5 +1,6 @@
 import { IconTrash } from '@tabler/icons-react';
-import { FC, useContext } from 'react';
+import type { FC } from 'react';
+import { useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
@@ -15,7 +16,9 @@ export const ClearConversations: FC = () => {
     <SidebarButton
       text={t('Clear conversations')}
       icon={<IconTrash size={18} />}
-      onClick={() => dispatch({ field: 'showClearConversationsModal', value: true })}
+      onClick={() =>
+        dispatch({ field: 'showClearConversationsModal', value: true })
+      }
     />
   );
 };

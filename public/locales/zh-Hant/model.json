@@ -257,5 +257,9 @@
   "Unable to load your information, please try again later.": "無法載入您的資料，請稍後再試。",
   "Preview not supported for this file type": "此檔案類型不支援預覽。",
   "Your browser does not support the audio player": "您的瀏覽器不支援音訊播放器",
-  "Your browser does not support the video player": "您的瀏覽器不支援視訊播放器"
+  "Your browser does not support the video player": "您的瀏覽器不支援視訊播放器",
+  "Are you sure you want to regenerate a new code?": "您確定要重新生成一個新的代碼嗎？",
+  "Sort by": "排序方式",
+  "DESC": "降序",
+  "ASC": "升序"
 }

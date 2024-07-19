@@ -11,8 +11,8 @@ import { useTranslation } from 'react-i18next';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import { RefereeProfile } from '@/types/referral';
-import { SubscriptionPlan } from '@/types/user';
+import type { RefereeProfile } from '@/types/referral';
+import type { SubscriptionPlan } from '@/types/user';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -62,7 +62,7 @@ export default function ReferralProgramData() {
     },
   );
   return (
-    <div className="text-center my-4 select-none">
+    <div className="my-4 select-none text-center">
       <h1 className="text-xl">{t('Referral Data')}</h1>
       {isSuccess && data.referees.length > 0 && (
         <>
@@ -115,8 +115,8 @@ const RefereesTable = ({ referees }: { referees: RefereeProfile[] }) => {
 
   return (
     <div>
-      <div className="mb-6 mx-auto overflow-x-scroll tablet:w-[calc(85dvw-1.5rem)] w-[calc(100%-1.5rem)]">
-        <table className="min-w-max w-full my-10 ">
+      <div className="mx-auto mb-6 w-[calc(100%-1.5rem)] overflow-x-scroll tablet:w-[calc(85dvw-1.5rem)]">
+        <table className="my-10 w-full min-w-max ">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
@@ -163,31 +163,31 @@ const RefereesTable = ({ referees }: { referees: RefereeProfile[] }) => {
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-center gap-2 flex-wrap">
+      <div className="flex flex-wrap items-center justify-center gap-2">
         <div className="flex items-center justify-center gap-2">
           <button
-            className="border rounded p-1"
+            className="rounded border p-1"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
             {'<<'}
           </button>
           <button
-            className="border rounded p-1"
+            className="rounded border p-1"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
             {'<'}
           </button>
           <button
-            className="border rounded p-1"
+            className="rounded border p-1"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
             {'>'}
           </button>
           <button
-            className="border rounded p-1"
+            className="rounded border p-1"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
           >
@@ -211,7 +211,7 @@ const RefereesTable = ({ referees }: { referees: RefereeProfile[] }) => {
                 const page = e.target.value ? Number(e.target.value) - 1 : 0;
                 table.setPageIndex(page);
               }}
-              className="border p-1 rounded w-16 text-black"
+              className="w-16 rounded border p-1 text-black"
             />
           </span>
           <select

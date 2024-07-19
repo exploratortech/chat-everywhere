@@ -15,7 +15,7 @@ const HelpTagTooltip = () => {
     <TooltipProvider>
       <Tooltip delayDuration={0}>
         <TooltipTrigger asChild>
-          <Button variant="outline" size="icon" className="w-[20px] h-[20px]">
+          <Button variant="outline" size="icon" className="size-[20px]">
             <IconHelpCircle size={20} />
           </Button>
         </TooltipTrigger>

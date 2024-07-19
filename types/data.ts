@@ -10,7 +10,7 @@ export type mqttConnectionType = {
   topic?: string;
   payload?: string;
   dynamicInput?: boolean;
-  receiver?: boolean
+  receiver?: boolean;
 };
 
 export type newMqttConnectionType = Pick<

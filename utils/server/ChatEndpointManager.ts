@@ -12,7 +12,8 @@ import {
   OPENAI_API_KEY,
 } from '@/utils/app/const';
 
-import { OpenAIModel, OpenAIModelID, OpenAIModels } from '@/types/openai';
+import type { OpenAIModel } from '@/types/openai';
+import { OpenAIModelID } from '@/types/openai';
 
 type EndpointInfo = {
   endpoint: string | undefined;
@@ -26,15 +27,20 @@ export class ChatEndpointManager {
   private useBackupEndpoint: boolean = false;
   private model: OpenAIModel;
 
-  constructor(model: OpenAIModel) {
+  constructor(model: OpenAIModel, usePriorityEndpoint: boolean = false) {
     this.model = model;
-    const { endpoints, keys, tpm } = this.getEndpointConfigByModel(model);
-    this.endpoints = endpoints.map((endpoint, index) => ({
-      endpoint,
-      key: keys[index],
-      weight: tpm[index],
-      isThrottled: false,
-    }));
+    if (usePriorityEndpoint) {
+      this.useBackupEndpoint = true;
+      this.addBackupEndpoint();
+    } else {
+      const { endpoints, keys, tpm } = this.getEndpointConfigByModel(model);
+      this.endpoints = endpoints.map((endpoint, index) => ({
+        endpoint,
+        key: keys[index],
+        weight: tpm[index],
+        isThrottled: false,
+      }));
+    }
   }
 
   private getEndpointConfigByModel(model: OpenAIModel) {
@@ -60,7 +66,7 @@ export class ChatEndpointManager {
     }
   }
 
-  // Add OPENAI ENDPOINT as a backup endpoint
+  // NOTE: Using priority endpoint as the backup endpoint
   // This will be selected if all endpoints are throttled
   private addBackupEndpoint() {
     this.endpoints.push({
@@ -148,7 +154,7 @@ export class ChatEndpointManager {
     }
 
     // Determine the URL based on the endpoint domain
-    const baseUrl = endpoint.includes('openai.com')
+    const baseUrl = endpoint.includes(OPENAI_API_HOST)
       ? `${endpoint}/v1/chat/completions`
       : `${endpoint}/openai/deployments/${this.model.deploymentName}/chat/completions?api-version=2024-02-01`;
 
@@ -159,12 +165,12 @@ export class ChatEndpointManager {
       stream: true,
       presence_penalty: 0,
       frequency_penalty: 0,
-      model: endpoint.includes('openai.com') ? this.model.id : undefined,
+      model: endpoint.includes(OPENAI_API_HOST) ? this.model.id : undefined,
     };
 
     const requestHeaders = {
       'Content-Type': 'application/json',
-      ...(endpoint.includes('openai.com')
+      ...(endpoint.includes(OPENAI_API_HOST)
         ? { Authorization: `Bearer ${apiKey}` }
         : { 'api-key': apiKey }),
     };

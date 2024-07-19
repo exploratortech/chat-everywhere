@@ -256,8 +256,8 @@ export default function Settings_MQTT() {
 
   return (
     <div>
-      <h1 className="font-bold mb-4">{t('MQTT')}</h1>
-      <p className="text-sm text-gray-500 mb-2">
+      <h1 className="mb-4 font-bold">{t('MQTT')}</h1>
+      <p className="mb-2 text-sm text-gray-500">
         {t(
           '(Advance user only) Send MQTT payload to your IoT devices. Integrate AI into your control network.',
         )}
@@ -265,7 +265,7 @@ export default function Settings_MQTT() {
 
       {loading && <p>{t('Loading ...')}</p>}
 
-      <h2 className="font-bold mb-2">{t('Connections')}</h2>
+      <h2 className="mb-2 font-bold">{t('Connections')}</h2>
       {mqttConnections.map((connection) => (
         <MQTTConnectionForm
           key={connection.id}
@@ -283,7 +283,7 @@ export default function Settings_MQTT() {
 
       <hr className="my-4" />
       <form onSubmit={handleAddConnection} className="mb-4 flex flex-col">
-        <h2 className="font-bold mb-2">{t('Add Connection')}</h2>
+        <h2 className="mb-2 font-bold">{t('Add Connection')}</h2>
         <div className="flex justify-between">
           <StyledInput
             value={newConnection?.name || ''}
@@ -304,7 +304,7 @@ export default function Settings_MQTT() {
                 receiver: e.target.checked,
               })
             }
-            className="grow-0 mx-2"
+            className="mx-2 grow-0"
             placeholder={t('Receiver') || ''}
           />
         </div>
@@ -332,7 +332,7 @@ export default function Settings_MQTT() {
                   dynamicInput: e.target.checked,
                 })
               }
-              className="grow-0 mx-2"
+              className="mx-2 grow-0"
               placeholder={t('Dynamic') || ''}
             />
             <StyledInput
@@ -349,7 +349,7 @@ export default function Settings_MQTT() {
             />
           </div>
         ) : (
-          <p className="text-sm mb-2 underline">
+          <p className="mb-2 text-sm underline">
             {t(
               'You can send message to the topic specified (with retained flag on), Chat Everywhere will be able to access the latest message.',
             )}
@@ -358,7 +358,7 @@ export default function Settings_MQTT() {
         <StyledButton type="submit" disabled={!newConnection}>
           {t('Add Connection')}
         </StyledButton>
-        <span className="text-xs mt-2">
+        <span className="mt-2 text-xs">
           {t('Currently only support')}
           <a
             href="https://www.emqx.com/en/mqtt/public-mqtt5-broker"
@@ -366,7 +366,7 @@ export default function Settings_MQTT() {
           >
             (Website)
           </a>
-          :<span className="italic ml-2">broker.emqx.io</span>
+          :<span className="ml-2 italic">broker.emqx.io</span>
         </span>
       </form>
     </div>
