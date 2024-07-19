@@ -29,12 +29,13 @@ const handler = async (req: VercelRequest): Promise<Response> => {
   const query = url.searchParams.get('q') || '';
   const width = url.searchParams.get('width') || '960';
   const height = url.searchParams.get('height') || '640';
+  const key = url.searchParams.get('key') || '';
 
   const unSplashKeys = (process.env.UNSPLASH_ACCESS_KEYS || '').split(',');
   const randomKey =
     unSplashKeys[Math.floor(Math.random() * unSplashKeys.length)];
 
-  const unsplashUrl = `https://api.unsplash.com/photos/random/?query=${query}&client_id=${randomKey}&count=1&orientation=${width > height ? 'landscape' : 'portrait'}`;
+  const unsplashUrl = `https://api.unsplash.com/photos/random/?query=${query}&client_id=${key || randomKey}&count=1&orientation=${width > height ? 'landscape' : 'portrait'}`;
 
   try {
     const response = await fetch(unsplashUrl);
