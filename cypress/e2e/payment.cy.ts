@@ -113,7 +113,7 @@ describe('Test Payment Flow', () => {
     });
   });
 
-  it('Make sure downgrade event is working', () => {
+  it('Make sure custom remove subscription event is working', () => {
     // Make the user to Pro plan by calling the /api/cypress/test-subscription-plan-payment endpoint
     cy.request({
       method: 'POST',
