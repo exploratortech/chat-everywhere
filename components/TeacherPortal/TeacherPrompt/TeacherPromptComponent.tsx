@@ -2,11 +2,11 @@ import { useState } from 'react';
 
 import useTeacherPrompt from '@/hooks/teacherPortal/useTeacherPrompt';
 
-import { TeacherPromptForTeacherPortal } from '@/types/prompt';
+import type { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { TeacherPromptModal } from '@/components/TeacherPortal/TeacherPrompt/TeacherPromptModal';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 import { cn } from '@/lib/utils';
 
@@ -29,16 +29,16 @@ export const TeacherPromptComponent = ({ prompt }: Props) => {
           className={cn('bg-transparent', { 'opacity-40': !prompt.is_enable })}
         >
           <CardContent className="py-4">
-            <div className="font-semibold leading-none items-center tracking-tight flex justify-between">
+            <div className="flex items-center justify-between font-semibold leading-none tracking-tight">
               <div className="py-2">{prompt.name}</div>
             </div>
-            <div className="text-sm text-muted-foreground text-start">
+            <div className="text-start text-sm text-muted-foreground">
               {prompt.description}
             </div>
           </CardContent>
         </Card>
       </div>
-      <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[90dvh] max-h-[90dvh] overflow-y-scroll">
+      <DialogContent className="max-h-[90dvh] overflow-y-scroll bg-white dark:bg-[#202123] mobile:h-[90dvh]">
         <TeacherPromptModal
           prompt={prompt}
           onUpdatePrompt={handleUpdate}

@@ -1,4 +1,4 @@
-import { Conversation } from '@/types/chat';
+import type { Conversation } from '@/types/chat';
 
 import { load } from 'cheerio';
 

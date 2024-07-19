@@ -1,15 +1,14 @@
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
-import {
+import type {
   MessageMetaDataType,
   MessageType,
   OpenAIMessageType,
   OpenAIRunType,
   OpenAiImageResponseType,
-  activeRunStatuses,
 } from '@/types/v2Chat/chat';
+import { activeRunStatuses } from '@/types/v2Chat/chat';
 
-import { getDalle3EndpointAndKeys } from '../server/api';
 import { OPENAI_API_HOST } from '../app/const';
 
 export const addOpenAiMessageToThread = async (
@@ -256,7 +255,8 @@ export const waitForRunToComplete = async (
     }
     if (Date.now() - startTime > timeoutLimit) {
       throw new Error(
-        `Timeout after ${timeoutLimit / 1000
+        `Timeout after ${
+          timeoutLimit / 1000
         } seconds while waiting for run to complete. Run status: ${run.status}`,
       );
     }
@@ -342,20 +342,4 @@ const authorizedOpenAiRequest = async (
   };
   console.log('hitting openai endpoint: ', url);
   return fetch(url, { ...options, headers });
-};
-
-// Move this function from utils/server/index.ts to here for serverless function compatibility reason
-const authorizedDalle3AzureRequest = async (options: RequestInit = {}) => {
-  const { endpoint, key } = getDalle3EndpointAndKeys();
-  if (!endpoint || !key) {
-    throw new Error('Failed to get Azure DALL-E 3 endpoint and key');
-  }
-
-  const headers = {
-    'api-key': key || '',
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-  console.log('hitting endpoint: ', endpoint);
-  return fetch(endpoint, { ...options, headers });
 };

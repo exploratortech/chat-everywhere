@@ -16,7 +16,7 @@ export const config = {
   runtime: 'edge',
 };
 
-const handler = async (req: Request): Promise<Response> => {
+const handler = async (): Promise<Response> => {
   try {
     const trialEndUserIds = await getTrialExpiredUserProfiles();
     const supabase = getAdminSupabaseClient();

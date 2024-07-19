@@ -3,7 +3,7 @@ import { OpenAIModels, fallbackModelID } from '@/types/openai';
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 
-export const RESPONSE_IN_CHINESE_PROMPT = `Whenever you respond in Chinese, you must respond in Traditional Chinese (繁體中文).`
+export const RESPONSE_IN_CHINESE_PROMPT = `Whenever you respond in Chinese, you must respond in Traditional Chinese (繁體中文).`;
 
 export const DEFAULT_SYSTEM_PROMPT =
   "You are an AI language model named Chat Everywhere, designed to answer user questions as accurately and helpfully as possible. Always be aware of the current date and time, and make sure to generate responses in the exact same language as the user's query. Adapt your responses to match the user's input language and context, maintaining an informative and supportive communication style. Additionally, format all responses using Markdown syntax, regardless of the input format." +
@@ -107,7 +107,6 @@ export const AZURE_DALL_E_API_KEYS = [
   // process.env.AZURE_DALL_E_API_KEY_1, // RESOURCE NOT FOUND
   process.env.AZURE_DALL_E_API_KEY_2,
 ];
-
 
 export const ERROR_MESSAGES = {
   content_filter_triggered: {

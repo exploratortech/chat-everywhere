@@ -1,5 +1,3 @@
-
-
 const FREE_USER = {
   email: 'cypress@exploratorlabs.com',
   password: 'chateverywhere',

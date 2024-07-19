@@ -20,7 +20,7 @@ import {
   subtractCredit,
 } from '@/utils/server/supabase';
 
-import { MjJob } from '@/types/mjJob';
+import type { MjJob } from '@/types/mjJob';
 import { PluginID } from '@/types/plugin';
 
 export const config = {
@@ -196,7 +196,9 @@ const imageGeneration = async (job: MjJob) => {
     },
   });
 
-  console.log('Fetching image generation response from Midjourney API(imagine)...');
+  console.log(
+    'Fetching image generation response from Midjourney API(imagine)...',
+  );
   const imageGenerationResponse = await fetch(
     `https://api.mymidjourney.ai/api/v1/midjourney/imagine`,
     {
@@ -261,6 +263,10 @@ const imageGeneration = async (job: MjJob) => {
 
     throw new Error('Image generation failed');
   }
+
+  await MjQueueJob.update(job.jobId, {
+    myMidJourneyMessageId: imageGenerationResponseJson.messageId,
+  });
 };
 
 const buttonCommand = async (job: MjJob) => {
@@ -268,7 +274,9 @@ const buttonCommand = async (job: MjJob) => {
     throw new Error('Invalid job type for the calling method');
   }
 
-  console.log('Fetching image generation response from Midjourney API(button)...');
+  console.log(
+    'Fetching image generation response from Midjourney API(button)...',
+  );
   const imageGenerationResponse = await fetch(
     `https://api.mymidjourney.ai/api/v1/midjourney/button`,
     {
@@ -311,6 +319,10 @@ const buttonCommand = async (job: MjJob) => {
     console.error('Failed during submitting request');
     throw new Error('Image generation failed');
   }
+
+  await MjQueueJob.update(job.jobId, {
+    myMidJourneyMessageId: imageGenerationResponseJson.messageId,
+  });
 };
 
 async function subtractedUserCredit(userId: string): Promise<boolean> {

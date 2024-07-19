@@ -24,7 +24,8 @@
   height: 6px;
 }
 
-html, body {
+html,
+body {
   overscroll-behavior-y: none;
 }
 

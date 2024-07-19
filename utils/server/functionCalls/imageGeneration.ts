@@ -24,18 +24,18 @@ export const generateDallEImage = async ({
   });
 
   const imageGenerationResponse = await generateImage(prompt);
-  
-  if(!imageGenerationResponse.data) {
+
+  if (!imageGenerationResponse.data) {
     console.error('imageGenerationResponse: ', imageGenerationResponse);
     throw new Error(imageGenerationResponse.errorMessage);
   }
 
   const generatedImageInBase64 = imageGenerationResponse.data[0].b64_json;
 
-  if(!generatedImageInBase64) {
+  if (!generatedImageInBase64) {
     throw new Error('Failed to generate image');
   }
-  
+
   console.log('Image generated successfully, storing to Supabase storage ...');
 
   // Store image in Supabase storage

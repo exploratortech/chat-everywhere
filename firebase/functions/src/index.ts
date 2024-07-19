@@ -1,19 +1,19 @@
-import {getMDContentOfArticle} from "./utils/webbrowser-tools";
+import { getMDContentOfArticle } from './utils/webbrowser-tools';
 
-import bundledChromium from "chrome-aws-lambda";
-import * as logger from "firebase-functions/logger";
-import {https} from "firebase-functions/v2";
-import {Browser, chromium} from "playwright-core";
+import bundledChromium from 'chrome-aws-lambda';
+import * as logger from 'firebase-functions/logger';
+import { https } from 'firebase-functions/v2';
+import { Browser, chromium } from 'playwright-core';
 
 let browser = null as null | Browser;
 let browserTimeout = null as null | NodeJS.Timeout;
-const envProjectId = JSON.parse(process.env.FIREBASE_CONFIG || "{}").projectId;
+const envProjectId = JSON.parse(process.env.FIREBASE_CONFIG || '{}').projectId;
 
 export const webContent = https.onRequest(
   {
-    minInstances: envProjectId === "chat-everywhere-api" ? 1 : 0,
-    region: "asia-east1",
-    memory: "2GiB",
+    minInstances: envProjectId === 'chat-everywhere-api' ? 1 : 0,
+    region: 'asia-east1',
+    memory: '2GiB',
     concurrency: 2,
     timeoutSeconds: 540,
   },
@@ -76,8 +76,8 @@ export const webContent = https.onRequest(
       const MAX_RETRIES = 3;
       for (let i = 0; i < MAX_RETRIES; i++) {
         try {
-          await page.goto(url, {timeout: 60000});  // 2 minutes
-          break;  // If the page loads successfully, break out of the loop
+          await page.goto(url, { timeout: 60000 }); // 2 minutes
+          break; // If the page loads successfully, break out of the loop
         } catch (error) {
           console.error(`Failed to load page (attempt ${i + 1}):`, error);
           if (i < MAX_RETRIES - 1) {

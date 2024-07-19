@@ -2,14 +2,12 @@ import { IconPlus } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { DEFAULT_FIRST_MESSAGE_TO_GPT } from '@/utils/app/const';
-
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
-import { TeacherPromptForTeacherPortal } from '@/types/prompt';
+import type { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 import { TeacherPromptModal } from './TeacherPromptModal';
 
@@ -18,7 +16,6 @@ interface Props {
 }
 const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
   const { t } = useTranslation('model');
-  const { t: promptT } = useTranslation('prompts');
 
   const [open, setOpen] = useState(false);
   return (
@@ -37,7 +34,7 @@ const NewTeacherPromptButton = ({ onCreatePrompt }: Props) => {
         </Button>
       </div>
 
-      <DialogContent className="bg-white dark:bg-[#202123] mobile:h-[90dvh] max-h-[90dvh] overflow-y-scroll">
+      <DialogContent className="max-h-[90dvh] overflow-y-scroll bg-white dark:bg-[#202123] mobile:h-[90dvh]">
         <TeacherPromptModal
           prompt={{
             name: '',

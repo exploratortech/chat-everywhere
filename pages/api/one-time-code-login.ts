@@ -26,9 +26,8 @@ const handler = async (req: Request): Promise<Response> => {
       await verifyCodeAndGetMaxTempAccountQuota(code);
 
     // 2. Check if the teacher profile has reached the max temp account quota
-    const activeStudentAccountsNumber = await findActiveStudentAccountsNumber(
-      teacherProfileId,
-    );
+    const activeStudentAccountsNumber =
+      await findActiveStudentAccountsNumber(teacherProfileId);
     if (activeStudentAccountsNumber >= maxTempAccountQuota) {
       throw new Error('Max temp account quota reached');
     }

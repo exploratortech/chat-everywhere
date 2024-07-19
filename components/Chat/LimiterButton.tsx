@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 
@@ -33,7 +33,7 @@ export default function LimiterButton({
     <>
       <button
         id="limiter-tooltip"
-        className="absolute top-0 right-0 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+        className="absolute right-0 top-0 rounded-sm p-1 text-neutral-800 opacity-60 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
         onClick={() => {}}
       >
         <CircularProgress

@@ -1,13 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { getLastChunkOfText } from '@/utils/app/ui';
+
 import { Button } from '@/components/ui/button';
 
 const ContinueChat = ({
-  lastWords,
+  originalMessage,
   onContinue,
 }: {
-  lastWords: string;
+  originalMessage: string;
   onContinue: (lastWords: string) => void;
 }) => {
   const { t } = useTranslation('common');
@@ -16,7 +18,7 @@ const ContinueChat = ({
       <Button
         variant={'outline'}
         onClick={() => {
-          onContinue(lastWords);
+          onContinue(getLastChunkOfText(originalMessage));
         }}
       >
         {t('Continue')}

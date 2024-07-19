@@ -256,5 +256,7 @@
   "Unable to load your information, please try again later.": "无法载入您的信息，请稍后再试。",
   "Preview not supported for this file type": "此文件类型不支持预览。",
   "Your browser does not support the audio player": "您的浏览器不支持音频播放器",
-  "Your browser does not support the video player": "您的浏览器不支持视频播放器"
+  "Your browser does not support the video player": "您的浏览器不支持视频播放器",
+  "Are you sure you want to regenerate a new code?": "您确定要重新生成一个新的代码吗？",
+  "Sort by": "排序方式"
 }

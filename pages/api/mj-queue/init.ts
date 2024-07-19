@@ -6,7 +6,7 @@ import {
   getUserProfile,
 } from '@/utils/server/supabase';
 
-import { MjImageGenRequest } from '@/types/mjJob';
+import type { MjImageGenRequest } from '@/types/mjJob';
 
 export const config = {
   runtime: 'edge',

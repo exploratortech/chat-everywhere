@@ -1,7 +1,6 @@
 // NOTE: Please make sure all of users are existed in the Production database
 // The tests in this file will also be run in Production environment daily as a health check
-
-import { PRIORITY_USER, PRO_USER } from "./account";
+import { PRIORITY_USER, PRO_USER } from './account';
 
 describe('Free user usage', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
@@ -27,7 +26,9 @@ describe('Pro user usage', () => {
   const isRunningOnProduction = hostUrl === 'https://chateverywhere.app';
 
   beforeEach(() => {
-    const password = isRunningOnProduction ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION') : PRO_USER.password;
+    const password = isRunningOnProduction
+      ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION')
+      : PRO_USER.password;
 
     cy.session(
       'pro-user',
@@ -73,7 +74,9 @@ describe('Priority user usage', () => {
 
   beforeEach(() => {
     // NOTE: The priority user uses the same password as the Pro user in Production
-    const password = isRunningOnProduction ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION') : PRIORITY_USER.password;
+    const password = isRunningOnProduction
+      ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION')
+      : PRIORITY_USER.password;
 
     cy.session(
       'priority-user',
@@ -112,4 +115,4 @@ describe('Priority user usage', () => {
   });
 });
 
-export { };
+export {};

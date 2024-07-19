@@ -1,7 +1,8 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useCallback, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
-import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
+import type { LoadingBarRef } from 'react-top-loading-bar';
+import LoadingBar from 'react-top-loading-bar';
 
 import { useTranslation } from 'next-i18next';
 import Head from 'next/head';
@@ -45,13 +46,13 @@ import {
 import { syncData } from '@/utils/app/sync';
 import { deepEqual } from '@/utils/app/ui';
 
-import { Conversation } from '@/types/chat';
-import { KeyValuePair } from '@/types/data';
-import { DragData } from '@/types/drag';
-import { LatestExportFormat } from '@/types/export';
-import { FolderInterface, FolderType } from '@/types/folder';
+import type { Conversation } from '@/types/chat';
+import type { KeyValuePair } from '@/types/data';
+import type { DragData } from '@/types/drag';
+import type { LatestExportFormat } from '@/types/export';
+import type { FolderInterface, FolderType } from '@/types/folder';
 import { OpenAIModels, fallbackModelID } from '@/types/openai';
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 import { useFetchCreditUsage } from '@/components/Hooks/useFetchCreditUsage';
 import OrientationBlock from '@/components/Mobile/OrientationBlock';
@@ -59,7 +60,8 @@ import OrientationBlock from '@/components/Mobile/OrientationBlock';
 import { CognitiveServiceProvider } from '../CognitiveService/CognitiveServiceProvider';
 import { DragDropContext } from '../DropArea/DragDropContext';
 import HomeContext from '../home/home.context';
-import { HomeInitialState, initialState } from '../home/home.state';
+import type { HomeInitialState } from '../home/home.state';
+import { initialState } from '../home/home.state';
 
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -488,8 +490,9 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
 
     const folders = localStorage.getItem('folders');
     if (folders) {
-      const parsedFolders: FolderInterface[] =
-        sortByRankAndFolderType(JSON.parse(folders));
+      const parsedFolders: FolderInterface[] = sortByRankAndFolderType(
+        JSON.parse(folders),
+      );
       cleanedFolders = cleanFolders(parsedFolders);
       dispatch({ field: 'folders', value: cleanedFolders });
     }
@@ -616,9 +619,7 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({
         </Head>
         <LoadingBar color={'white'} ref={loadingRef} />
         <CognitiveServiceProvider>
-          <DragDropContext>
-            {children}
-          </DragDropContext>
+          <DragDropContext>{children}</DragDropContext>
         </CognitiveServiceProvider>
       </HomeContext.Provider>
     </OrientationBlock>

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   IconCheck,
   IconCopy,
@@ -6,15 +7,8 @@ import {
   IconTrash,
   IconUser,
 } from '@tabler/icons-react';
-import {
-  FC,
-  memo,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { FC } from 'react';
+import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 import { event } from 'nextjs-google-analytics';
@@ -23,10 +17,11 @@ import { updateConversation } from '@/utils/app/conversation';
 import { getPluginIcon } from '@/utils/app/ui';
 import { modifyParagraphs } from '@/utils/data/onlineOutputModifier';
 
-import { UserFile } from '@/types/UserFile';
-import { Message } from '@/types/chat';
+import type { UserFile } from '@/types/UserFile';
+import type { Message } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
+import ContinueChat from './components/ContinueChat';
 import TokenCounter from './components/TokenCounter';
 import HomeContext from '@/components/home/home.context';
 
@@ -44,13 +39,21 @@ import { cn } from '@/lib/utils';
 interface Props {
   message: Message;
   messageIndex: number;
+  isLastMessage: boolean;
   messageIsStreaming: boolean;
   onEdit?: (editedMessage: Message, index: number) => void;
   onContinue: (lastWords: string) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, onEdit, onContinue, messageIsStreaming, messageIndex }) => {
+  ({
+    message,
+    onEdit,
+    onContinue,
+    messageIsStreaming,
+    messageIndex,
+    isLastMessage,
+  }) => {
     const { t } = useTranslation('chat');
     const { i18n } = useTranslation();
 
@@ -258,13 +261,13 @@ export const ChatMessage: FC<Props> = memo(
         return (
           <IconCheck
             size={size}
-            className={` !text-green-500 !dark:text-green-400 h-fit ${className}`}
+            className={` !dark:text-green-400 h-fit !text-green-500 ${className}`}
           />
         );
       } else {
         return (
           <button
-            className={`translate-x-[1000px] text-gray-500 hover:text-gray-700 focus:translate-x-0 group-hover:translate-x-0 dark:text-gray-400 dark:hover:text-gray-300 h-fit ${className}`}
+            className={`h-fit translate-x-[1000px] text-gray-500 hover:text-gray-700 focus:translate-x-0 group-hover:translate-x-0 dark:text-gray-400 dark:hover:text-gray-300 ${className}`}
             onClick={copyOnClick}
           >
             <IconCopy size={size} />
@@ -292,30 +295,27 @@ export const ChatMessage: FC<Props> = memo(
         }}
       >
         <div className="relative m-auto flex gap-4 py-4 text-base md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
-          <div className="min-w-[40px] text-center font-bold flex flex-col justify-start flex-wrap content-center">
+          <div className="flex min-w-[40px] flex-col flex-wrap content-center justify-start text-center font-bold">
             {message.role === 'assistant' ? (
               message.pluginId ? (
                 getPluginIcon(message.pluginId, 28)
               ) : (
-                <div className="flex flex-col justify-center items-center">
+                <div className="flex flex-col items-center justify-center">
                   <IconRobot size={28} />
                   {(message.largeContextResponse ||
                     message.showHintForLargeContextResponse) && (
                     <span
                       onClick={large16kModelBadgeOnClick}
-                      className={`px-2 mt-2 cursor-pointer border text-xs font-medium rounded ${
-                        message.showHintForLargeContextResponse
-                          ? 'text-gray-800 dark:text-gray-400 border-gray-500 line-through'
-                          : 'bg-yellow-100 text-yellow-800 dark:bg-gray-700 dark:text-yellow-300 border-yellow-300'
-                      }`}
+                      className={`mt-2 cursor-pointer rounded border px-2 text-xs font-medium ${message.showHintForLargeContextResponse ? 'border-gray-500 text-gray-800 line-through dark:text-gray-400' : 'border-yellow-300 bg-yellow-100 text-yellow-800 dark:bg-gray-700 dark:text-yellow-300'}`}
                     >
-                      16K
+                      {' '}
+                      16K{' '}
                     </span>
-                  )}
+                  )}{' '}
                 </div>
               )
             ) : (
-              <div className="flex flex-col justify-center items-center">
+              <div className="flex flex-col items-center justify-center">
                 <IconUser size={30} />
               </div>
             )}
@@ -326,15 +326,12 @@ export const ChatMessage: FC<Props> = memo(
               <div className="flex w-full flex-col md:justify-between">
                 {isEditing ? (
                   <div
-                    className={`flex w-full flex-col relative ${
-                      isOverTokenLimit
-                        ? 'before:z-0 before:absolute before:border-2 before:border-red-500 before:dark:border-red-600 before:-top-3 before:-bottom-3 before:-inset-3'
-                        : ''
-                    }`}
+                    className={`relative flex w-full flex-col ${isOverTokenLimit ? 'before:absolute before:-inset-3 before:z-0 before:border-2 before:border-red-500 before:dark:border-red-600' : ''}`}
                   >
+                    {' '}
                     <textarea
                       ref={textareaRef}
-                      className="relative z-1 w-full resize-none whitespace-pre-wrap border-none dark:bg-[#343541] focus:outline-none"
+                      className="relative w-full resize-none whitespace-pre-wrap border-none focus:outline-none dark:bg-[#343541]"
                       value={messageContent}
                       onChange={handleInputChange}
                       onKeyDown={handlePressEnter}
@@ -350,8 +347,7 @@ export const ChatMessage: FC<Props> = memo(
                         overflow: 'hidden',
                       }}
                     />
-
-                    <div className="relative z-1 mt-10 flex justify-center space-x-4">
+                    <div className="relative mt-10 flex justify-center space-x-4">
                       <button
                         className="h-[40px] rounded-md bg-blue-500 px-4 py-1 text-sm font-medium text-white enabled:hover:bg-blue-600 disabled:opacity-50"
                         onClick={handleEditMessage}
@@ -380,7 +376,7 @@ export const ChatMessage: FC<Props> = memo(
                         isCloseToTokenLimit || isOverTokenLimit
                           ? 'visible'
                           : 'invisible'
-                      } absolute right-2 bottom-2 text-sm text-neutral-500 dark:text-neutral-400`}
+                      } absolute bottom-2 right-2 text-sm text-neutral-500 dark:text-neutral-400`}
                       value={messageContent}
                       setIsOverLimit={setIsOverTokenLimit}
                       setIsCloseToLimit={setIsCloseToTokenLimit}
@@ -404,19 +400,19 @@ export const ChatMessage: FC<Props> = memo(
                         })}
                     </div>
                     {!isEditing && (
-                      <div className="flex flex-row items-center mt-3 w-full">
+                      <div className="mt-3 flex w-full flex-row items-center">
                         <button
-                          className={`text-gray-500 hover:!text-gray-300 h-fit mr-2`}
+                          className={`mr-2 h-fit text-gray-500 hover:!text-gray-300`}
                           onClick={toggleEditing}
                         >
                           <IconEdit size={18} fill="none" />
                         </button>
                         <CopyButton
-                          className="translate-x-[unset] !text-gray-500 hover:!text-gray-300 mr-2"
+                          className="mr-2 translate-x-[unset] !text-gray-500 hover:!text-gray-300"
                           size={18}
                         />
                         <button
-                          className={`text-gray-500 hover:!text-gray-300 h-fit mr-2`}
+                          className={`mr-2 h-fit text-gray-500 hover:!text-gray-300`}
                           onClick={handleDeleteMessage}
                         >
                           <IconTrash size={18} />
@@ -448,15 +444,17 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : (
               <div className="flex w-full flex-col md:justify-between">
-                <div className="relative flex flex-row justify-between" data-cy="assistant-respond-message">
+                <div
+                  className="relative flex flex-row justify-between"
+                  data-cy="assistant-respond-message"
+                >
                   <AssistantRespondMessage
                     formattedMessage={formattedMessage}
                     messageIndex={messageIndex}
                     messagePluginId={message.pluginId}
-                    onContinue={onContinue}
                   />
                   {highlight && (
-                    <div className="absolute z-[1100] -left-2 -top-2 -right-2 -bottom-2 p-2 dark:bg-[#444654] rounded-lg">
+                    <div className="absolute -inset-2 z-[1100] rounded-lg p-2 dark:bg-[#444654]">
                       <AssistantRespondMessage
                         formattedMessage={formattedMessage}
                         messageIndex={messageIndex}
@@ -464,11 +462,20 @@ export const ChatMessage: FC<Props> = memo(
                       />
                     </div>
                   )}
-                  <div className="flex m-1 tablet:hidden">
+                  <div className="m-1 flex tablet:hidden">
                     <CopyButton />
                   </div>
                 </div>
-                <div className="flex flex-row items-center mt-3 w-full justify-between">
+                {isLastMessage && message.isPartialResponse && (
+                  <div className="my-4 w-full">
+                    <ContinueChat
+                      originalMessage={message.content}
+                      onContinue={onContinue}
+                    />
+                  </div>
+                )}
+
+                <div className="mt-3 flex w-full flex-row items-center justify-between">
                   <div className="flex flex-row items-center">
                     {(message.pluginId === PluginID.GPT4 ||
                       message.pluginId === PluginID.GPT4O ||

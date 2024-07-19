@@ -1,5 +1,6 @@
 import { IconCheck, IconClipboard, IconDownload } from '@tabler/icons-react';
-import { FC, memo, useState } from 'react';
+import type { FC } from 'react';
+import { memo, useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
@@ -69,7 +70,7 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
     return (
       <div className="flex items-center">
         <button
-          className="flex gap-1.5 items-center rounded bg-none p-1 text-xs text-white"
+          className="flex items-center gap-1.5 rounded bg-none p-1 text-xs text-white"
           onClick={copyToClipboard}
         >
           {isCopied ? (
@@ -93,7 +94,7 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
 
   return (
     <div className="codeblock relative font-sans text-[16px]">
-      <div className="flex items-center justify-between py-1 px-4">
+      <div className="flex items-center justify-between px-4 py-1">
         <span className="text-xs lowercase text-white">{language}</span>
         {renderActionButtons()}
       </div>
@@ -107,7 +108,7 @@ export const CodeBlock: FC<Props> = memo(({ language, value }) => {
       </SyntaxHighlighter>
 
       {value.length > 500 && (
-        <div className="flex justify-end py-1 px-4">
+        <div className="flex justify-end px-4 py-1">
           {renderActionButtons()}
         </div>
       )}

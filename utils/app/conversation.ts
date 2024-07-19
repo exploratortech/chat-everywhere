@@ -1,7 +1,7 @@
 import { swapHtmlSegmentByDataIdentifier } from '@/utils/app/htmlStringHandler';
 
-import { Conversation } from '@/types/chat';
-import { Message } from '@/types/chat';
+import type { Conversation } from '@/types/chat';
+import type { Message } from '@/types/chat';
 
 import dayjs from 'dayjs';
 

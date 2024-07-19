@@ -1,6 +1,6 @@
 import { useContext, useEffect } from 'react';
 
-import { MjJob } from '@/types/mjJob';
+import type { MjJob } from '@/types/mjJob';
 
 import HomeContext from '@/components/home/home.context';
 

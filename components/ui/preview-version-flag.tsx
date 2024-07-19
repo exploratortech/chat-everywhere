@@ -1,6 +1,6 @@
 import { cn } from '../../lib/utils';
 
-import { type ClassValue, clsx } from 'clsx';
+import { type ClassValue } from 'clsx';
 
 const PreviewVersionFlag = ({ className = '' }: { className?: ClassValue }) => {
   return (

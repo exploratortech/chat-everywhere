@@ -12,7 +12,8 @@ import {
   OPENAI_API_KEY,
 } from '@/utils/app/const';
 
-import { OpenAIModel, OpenAIModelID } from '@/types/openai';
+import type { OpenAIModel } from '@/types/openai';
+import { OpenAIModelID } from '@/types/openai';
 
 type EndpointInfo = {
   endpoint: string | undefined;
@@ -26,7 +27,7 @@ export class ChatEndpointManager {
   private useBackupEndpoint: boolean = false;
   private model: OpenAIModel;
 
-  constructor(model: OpenAIModel, usePriorityEndpoint: boolean = false,) {
+  constructor(model: OpenAIModel, usePriorityEndpoint: boolean = false) {
     this.model = model;
     if (usePriorityEndpoint) {
       this.useBackupEndpoint = true;
@@ -40,7 +41,6 @@ export class ChatEndpointManager {
         isThrottled: false,
       }));
     }
-
   }
 
   private getEndpointConfigByModel(model: OpenAIModel) {

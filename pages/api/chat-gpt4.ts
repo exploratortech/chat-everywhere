@@ -1,4 +1,8 @@
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE, RESPONSE_IN_CHINESE_PROMPT } from '@/utils/app/const';
+import {
+  DEFAULT_SYSTEM_PROMPT,
+  DEFAULT_TEMPERATURE,
+  RESPONSE_IN_CHINESE_PROMPT,
+} from '@/utils/app/const';
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { OpenAIError, OpenAIStream } from '@/utils/server';
 import {
@@ -10,10 +14,11 @@ import {
   subtractCredit,
 } from '@/utils/server/supabase';
 
-import { ChatBody } from '@/types/chat';
+import type { ChatBody } from '@/types/chat';
 import { type Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 import { PluginID } from '@/types/plugin';
+
 import { geolocation } from '@vercel/edge';
 
 const supabase = getAdminSupabaseClient();
@@ -79,7 +84,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     promptToSend = prompt;
     if (!promptToSend) {
-      promptToSend = DEFAULT_SYSTEM_PROMPT
+      promptToSend = DEFAULT_SYSTEM_PROMPT;
     }
 
     if (country?.includes('TW')) {
@@ -94,10 +99,10 @@ const handler = async (req: Request): Promise<Response> => {
     messageToSend = messages;
 
     if (selectedOutputLanguage) {
-      messageToSend[
-        messageToSend.length - 1
-      ].content = `${selectedOutputLanguage} ${messageToSend[messageToSend.length - 1].content
-      }`;
+      messageToSend[messageToSend.length - 1].content =
+        `${selectedOutputLanguage} ${
+          messageToSend[messageToSend.length - 1].content
+        }`;
     }
 
     if (!isUserInUltraPlan) {

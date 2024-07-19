@@ -1,7 +1,7 @@
-import { MjJob } from '@/types/mjJob';
+import type { MjJob } from '@/types/mjJob';
 
+import type { PayloadType } from '../app/eventTracking';
 import {
-  PayloadType,
   serverSideTrackEvent,
   serverSideTrackSystemEvent,
 } from '../app/eventTracking';

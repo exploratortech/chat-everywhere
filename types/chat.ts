@@ -1,7 +1,7 @@
-import { UserFile } from './UserFile';
-import { OpenAIModel } from './openai';
-import { PluginID } from './plugin';
-import { Prompt } from './prompt';
+import type { UserFile } from './UserFile';
+import type { OpenAIModel } from './openai';
+import type { PluginID } from './plugin';
+import type { Prompt } from './prompt';
 
 export interface Message {
   role: Role;
@@ -12,6 +12,7 @@ export interface Message {
   showHintForLargeContextResponse?: boolean; // Use to indicate if the response can be improved by using a gpt3.5 16k model
   // Google cloud storage objects
   fileList?: UserFile[];
+  isPartialResponse?: boolean; // Use to indicate if the response is being truncated due to the output token limit
 }
 
 export type Role = 'assistant' | 'user' | 'function';

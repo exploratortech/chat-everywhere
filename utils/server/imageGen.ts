@@ -1,4 +1,4 @@
-import { FunctionCall } from '@/types/chat';
+import type { FunctionCall } from '@/types/chat';
 
 import { OPENAI_API_HOST } from '../app/const';
 

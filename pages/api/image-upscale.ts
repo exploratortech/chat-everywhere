@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
 
   const requestBody = await req.json();
 
-  const { buttonMessageId, imagePosition, operation } = requestBody;
+  const { buttonMessageId, imagePosition } = requestBody;
 
   const requestHeader = {
     Authorization: `Bearer ${process.env.MY_MIDJOURNEY_API_KEY || ''}`,
@@ -74,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
   if (fileUploadError) throw fileUploadError;
 
-  const { data: imagePublicUrlData } = await supabase.storage
+  const { data: imagePublicUrlData } = supabase.storage
     .from('ai-images')
     .getPublicUrl(imageFileName);
 

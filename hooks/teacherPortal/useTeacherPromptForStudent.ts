@@ -1,7 +1,7 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useQuery } from '@tanstack/react-query';
 
-import { TeacherPromptForTeacherPortal } from '@/types/prompt';
+import type { TeacherPromptForTeacherPortal } from '@/types/prompt';
 
 const useTeacherPromptForStudent = () => {
   const supabase = useSupabaseClient();

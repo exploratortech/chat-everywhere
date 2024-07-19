@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
@@ -10,8 +10,7 @@ import {
 } from '@/utils/app/conversation';
 import { savePrompts } from '@/utils/app/prompts';
 
-import { OpenAIModels } from '@/types/openai';
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 import { PromptFolders } from './components/PromptFolders';
 import { Prompts } from './components/Prompts';
@@ -19,10 +18,10 @@ import HomeContext from '@/components/home/home.context';
 
 import Sidebar from '../Sidebar';
 import PromptbarContext from './PromptBar.context';
-import { PromptbarInitialState, initialState } from './Promptbar.state';
+import type { PromptbarInitialState } from './Promptbar.state';
+import { initialState } from './Promptbar.state';
 
 import dayjs from 'dayjs';
-import { v4 as uuidv4 } from 'uuid';
 
 const Promptbar = () => {
   const { t } = useTranslation('promptbar');
@@ -32,7 +31,7 @@ const Promptbar = () => {
   });
 
   const {
-    state: { prompts, defaultModelId, showChatbar, showPromptbar },
+    state: { prompts, showChatbar, showPromptbar },
     dispatch: homeDispatch,
     handleCreateFolder,
     handleCreatePrompt,

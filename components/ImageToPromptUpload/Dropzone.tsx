@@ -1,10 +1,8 @@
 import { IconCirclePlus } from '@tabler/icons-react';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-
-import HomeContext from '@/components/home/home.context';
 
 interface DropZoneProps {
   onDropCallback: (file: File) => void;
@@ -29,9 +27,7 @@ function DropZone({ onDropCallback }: DropZoneProps) {
 
   return (
     <div
-      className={`flex justify-between items-center p-[.4rem]  cursor-pointer w-[50%] rounded-lg border border-neutral-200 ${
-        isDragActive ? 'bg-blue-500 dark:bg-blue-800 ' : 'bg-transparent'
-      } text-neutral-900 dark:border-neutral-600 dark:text-white  pr-1 focus:outline-none`}
+      className={`flex w-1/2 cursor-pointer items-center  justify-between rounded-lg border border-neutral-200 p-[.4rem] ${isDragActive ? 'bg-blue-500 dark:bg-blue-800 ' : 'bg-transparent'} pr-1 text-neutral-900 focus:outline-none  dark:border-neutral-600 dark:text-white`}
       {...getRootProps()}
       onClick={() => {
         document.getElementById('upload-images-to-text')?.click();

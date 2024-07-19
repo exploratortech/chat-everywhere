@@ -4,7 +4,7 @@ import {
   getUserProfile,
 } from '@/utils/server/supabase';
 
-import { PluginID } from '@/types/plugin';
+import type { PluginID } from '@/types/plugin';
 
 // Note that this function is intended to run asynchronously to avoid blocking the main thread.
 // And it will fail silently if there is any error.

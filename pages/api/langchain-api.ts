@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 import {
   formatMessage,
@@ -15,7 +16,7 @@ import {
 } from '@/utils/server/supabase';
 import { retrieveUserSessionAndLogUsages } from '@/utils/server/usagesTracking';
 
-import { ChatBody } from '@/types/chat';
+import type { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
@@ -48,7 +49,7 @@ const unauthorizedResponse = new Response('Unauthorized', { status: 401 });
 
 const supabase = getAdminSupabaseClient();
 
-const handler = async (req: NextRequest, res: any) => {
+const handler = async (req: NextRequest) => {
   retrieveUserSessionAndLogUsages(req, PluginID.LANGCHAIN_CHAT);
 
   const userToken = req.headers.get('user-token');
@@ -85,7 +86,7 @@ const handler = async (req: NextRequest, res: any) => {
   };
 
   const callbackHandlers = {
-    handleChainStart: async (chain: any) => {
+    handleChainStart: async () => {
       console.log('handleChainStart');
       await writer.ready;
       await writePluginsActions('Thinking ... \n');
@@ -149,7 +150,7 @@ const handler = async (req: NextRequest, res: any) => {
         responseMessage += token;
       }
     },
-    handleChainError: async (err: any, verbose: any) => {
+    handleChainError: async (err: any) => {
       await writer.ready;
       // This is a hack to get the output from the LLM
       if (err.message.includes('Could not parse LLM output: ')) {

@@ -1,40 +1,42 @@
-import { serverSideTrackEvent } from '@/utils/app/eventTracking';
+import type { NextApiRequest, NextApiResponse } from 'next';
+
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
-import { decode } from 'base64-arraybuffer';
 import { v4 } from 'uuid';
+import { z } from 'zod';
 
-export const config = {
-  runtime: 'edge',
-  preferredRegion: 'icn1',
-};
+const requestBodySchema = z.object({
+  accessToken: z.string(),
+  messageContent: z.string(),
+  imageFileUrl: z.string().nullable(),
+});
 
-const handler = async (req: Request) => {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { accessToken, messageContent, imageFile } = (await req.json()) as {
-    accessToken: string;
-    messageContent: string;
-    imageFile: string | null;
-  };
+  let parsedBody;
+  try {
+    parsedBody = requestBodySchema.parse(req.body);
+  } catch (e) {
+    return res.status(400).json({ message: 'Invalid request body' });
+  }
+
+  const { accessToken, messageContent, imageFileUrl } = parsedBody;
 
   const supabase = getAdminSupabaseClient();
-
-  if (!accessToken || (messageContent === '' && !imageFile)) {
-    return new Response('Missing accessToken or messageContent or imageFile', {
-      status: 400,
-    });
-  }
 
   const userRes = await supabase.auth.getUser(accessToken);
 
   if (!userRes || userRes.error) {
     console.error('No user found with this access token');
-    return new Response('No user found with this access token', {
-      status: 400,
-    });
+    return res
+      .status(400)
+      .json({ message: 'No user found with this access token' });
   }
 
   const userId = userRes.data.user.id;
@@ -46,9 +48,9 @@ const handler = async (req: Request) => {
 
   if (!profileData || profileError) {
     console.error('Error fetching temp account teacher profile:', profileError);
-    return new Response('Error fetching temp account teacher profile:', {
-      status: 500,
-    });
+    return res
+      .status(500)
+      .json({ message: 'Error fetching temp account teacher profile' });
   }
 
   if (
@@ -57,20 +59,30 @@ const handler = async (req: Request) => {
     !profileData[0].teacher_profile_id
   ) {
     console.error('No temp_account_id found or no teacher_profile_id found');
-    return new Response(
-      'No temp_account_id found or no teacher_profile_id found',
-      { status: 400 },
-    );
+    return res.status(400).json({
+      message: 'No temp_account_id found or no teacher_profile_id found',
+    });
   }
   const temporaryAccountId = profileData[0].temp_account_id;
   const teacherProfileId = profileData[0].teacher_profile_id;
   const student_name = profileData[0].uniqueid;
-  const tagIds = profileData[0].tag_ids.filter((id: string) => id !== null) || [];  
+  const tagIds =
+    profileData[0].tag_ids.filter((id: string) => id !== null) || [];
 
   let imagePublicUrl = '';
 
-  if (imageFile) {
-    const imageFileBlob = decode(imageFile);
+  if (imageFileUrl) {
+    const response = await fetch(imageFileUrl);
+    if (!response.ok) {
+      console.error('Error downloading image:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
+      return res.status(500).json({ message: 'Error downloading image' });
+    }
+    const imageFileBlob = await response.blob();
     const originalImagePath = `${userId}-${v4()}.png`;
 
     // 1. Upload the image file to Supabase Storage
@@ -82,13 +94,13 @@ const handler = async (req: Request) => {
 
     if (storageError) {
       console.error('Error uploading image to Supabase Storage:', storageError);
-      return new Response('Error uploading image to Supabase Storage', {
-        status: 500,
-      });
+      return res
+        .status(500)
+        .json({ message: 'Error uploading image to Supabase Storage' });
     }
 
     // 2. Retrieve the public URL of the image file
-    const { data } = await supabase.storage
+    const { data } = supabase.storage
       .from('student_message_submissions_image')
       .getPublicUrl(originalImagePath);
     imagePublicUrl = data.publicUrl || '';
@@ -111,12 +123,10 @@ const handler = async (req: Request) => {
       'Error inserting message and tags via pg function:',
       messageAndTagsResponse.error,
     );
-    return new Response('Error inserting message and tags', { status: 500 });
+    return res
+      .status(500)
+      .json({ message: 'Error inserting message and tags' });
   }
 
-  return new Response(JSON.stringify(messageAndTagsResponse.data), {
-    status: 200,
-  });
-};
-
-export default handler;
+  return res.status(200).json(messageAndTagsResponse.data);
+}

@@ -1,11 +1,15 @@
-import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import useSharedMessagesWithTeacher from '@/hooks/useSharedMessagesWithTeacher';
+
+import type { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
+import type { Tag } from '@/types/tags';
+
 import { Button } from '../ui/button';
-import { Tag } from '@/types/tags';
 import TagEditorPopup from './Tags/TagEditorPopUp';
 import TitleEditorPopup from './Tags/TitleEditorPopUp';
-import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
 
 import { cn } from '@/lib/utils';
 
@@ -44,7 +48,7 @@ const FloatMenu = ({
   const toggleTitleEditor = () => {
     setIsTitleEditorVisible(!isTitleEditorVisible);
   };
-  
+
   return (
     <div
       className={cn(
@@ -60,22 +64,22 @@ const FloatMenu = ({
       <div className={cn('flex items-center')}>
         {isTagEditorVisible ? (
           <>
-          <TagEditorPopup
-            selectedMessageIds={selectedMessageIds}
-            submissions={submissions}
-            allTags={tags}
-            setIsTagEditorVisible={setIsTagEditorVisible}
-            refetchTags={refetchTags}
-          />
-          <Button
-            variant={'link'}
-            size={'lg'}
-            onClick={() => {
-              setIsTagEditorVisible(false);
-            }}
-          >
-            {t('Go back')}
-          </Button>
+            <TagEditorPopup
+              selectedMessageIds={selectedMessageIds}
+              submissions={submissions}
+              allTags={tags}
+              setIsTagEditorVisible={setIsTagEditorVisible}
+              refetchTags={refetchTags}
+            />
+            <Button
+              variant={'link'}
+              size={'lg'}
+              onClick={() => {
+                setIsTagEditorVisible(false);
+              }}
+            >
+              {t('Go back')}
+            </Button>
           </>
         ) : isTitleEditorVisible ? (
           <>
@@ -85,11 +89,11 @@ const FloatMenu = ({
               refetchTags={refetchTags}
             />
             <Button
-            variant={'link'}
-            size={'lg'}
-            onClick={() => {
-              setIsTitleEditorVisible(false);
-            }}
+              variant={'link'}
+              size={'lg'}
+              onClick={() => {
+                setIsTitleEditorVisible(false);
+              }}
             >
               {t('Go back')}
             </Button>
@@ -121,14 +125,14 @@ const FloatMenu = ({
               {`${t('Edit titles')} (${selectedMessageIds.length})`}
             </Button>
             <Button
-            variant={'link'}
-            size={'lg'}
-            onClick={() => {
-              setSelectedMessageIds([]);
-            }}
-          >
-            {t('Clear selection')}
-          </Button>
+              variant={'link'}
+              size={'lg'}
+              onClick={() => {
+                setSelectedMessageIds([]);
+              }}
+            >
+              {t('Clear selection')}
+            </Button>
           </>
         )}
       </div>

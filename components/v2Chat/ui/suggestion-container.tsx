@@ -21,11 +21,11 @@ export const SuggestionContainer: React.FC<SuggestionContainerProps> = ({
   return (
     <>
       {suggestions.length > 0 && !isChatResponseLoading && (
-        <div className="flex flex-wrap justify-center items-center">
+        <div className="flex flex-wrap items-center justify-center">
           {suggestions.map((suggestion, index) => (
             <button
               key={index}
-              className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md m-2"
+              className="m-2 rounded-md bg-gray-100 px-4 py-2 hover:bg-gray-200"
               onClick={() => suggestionOnClick(suggestion)}
             >
               {suggestion}

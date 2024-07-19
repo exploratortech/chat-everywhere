@@ -4,7 +4,7 @@ import {
   getUserProfile,
 } from '@/utils/server/supabase';
 
-import { ChatBody } from '@/types/chat';
+import type { ChatBody } from '@/types/chat';
 
 import { geolocation } from '@vercel/edge';
 

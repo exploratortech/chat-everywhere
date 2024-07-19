@@ -1,9 +1,7 @@
-import {
-  EventNameTypes,
-  serverSideTrackEvent,
-} from '@/utils/app/eventTracking';
+import type { EventNameTypes } from '@/utils/app/eventTracking';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 
-import { Message } from '@/types/chat';
+import type { Message } from '@/types/chat';
 
 // @ts-expect-error
 import * as wasm from '../../node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm?module';
@@ -19,7 +17,7 @@ import { getTokenCountForPrompt } from './google';
 
 import tiktokenModel from '@dqbd/tiktoken/encoders/cl100k_base.json';
 import { Tiktoken, init } from '@dqbd/tiktoken/lite/init';
-import { Content } from '@google-cloud/vertexai';
+import type { Content } from '@google-cloud/vertexai';
 
 const tokenCounterBuffer = 100;
 
@@ -142,7 +140,6 @@ export const getStringTokenCount = async (string: string): Promise<number> => {
 // Returns an array of all endpoints and keys. Japan endpoint will be prioritized if requestCountryCode is TW/HK/MO (disabled for now due to instability)
 export const getEndpointsAndKeys = (
   includeGPT4: boolean = false,
-  requestCountryCode?: string,
 ): [(string | undefined)[], (string | undefined)[]] => {
   const endpoints: (string | undefined)[] = includeGPT4
     ? [...AZURE_OPENAI_GPT_4_ENDPOINTS]
@@ -160,14 +157,13 @@ export const getEndpointsAndKeys = (
   return [filteredEndpoints, filteredKeys];
 };
 
-
 export const getDalle3EndpointAndKeys = (): {
   endpoint: string | undefined;
   key: string | undefined;
 } => {
   const endpoint =
     AZURE_DALL_E_3_ENDPOINTS[
-    Math.floor(Math.random() * AZURE_DALL_E_3_ENDPOINTS.length)
+      Math.floor(Math.random() * AZURE_DALL_E_3_ENDPOINTS.length)
     ];
   const keyIndex = AZURE_DALL_E_3_ENDPOINTS.indexOf(endpoint);
   const key = AZURE_DALL_E_API_KEYS[keyIndex];

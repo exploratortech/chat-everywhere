@@ -5,21 +5,16 @@ import {
   type EventNameTypes,
   serverSideTrackEvent,
 } from '@/utils/app/eventTracking';
-import {
-  shortenMessagesBaseOnTokenLimit,
-} from '@/utils/server/api';
+import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import { logEvent } from '@/utils/server/api';
 
-import { Message } from '@/types/chat';
-import { OpenAIModel } from '@/types/openai';
+import type { Message } from '@/types/chat';
+import type { OpenAIModel } from '@/types/openai';
 
 import { ChatEndpointManager } from './ChatEndpointManager';
 
-import {
-  ParsedEvent,
-  ReconnectInterval,
-  createParser,
-} from 'eventsource-parser';
+import type { ParsedEvent, ReconnectInterval } from 'eventsource-parser';
+import { createParser } from 'eventsource-parser';
 
 export class OpenAIError extends Error {
   type: string;
@@ -55,7 +50,6 @@ export const OpenAIStream = async ({
   customMessageToStreamBack = null, // Stream this string at the end of the streaming
   userIdentifier,
   eventName = null,
-  requestCountryCode,
   usePriorityEndpoint = false,
 }: {
   model: OpenAIModel;
@@ -65,7 +59,6 @@ export const OpenAIStream = async ({
   customMessageToStreamBack?: string | null;
   userIdentifier?: string;
   eventName?: EventNameTypes | null;
-  requestCountryCode?: string;
   usePriorityEndpoint?: boolean;
 }) => {
   const log = new Logger();
@@ -147,19 +140,23 @@ export const OpenAIStream = async ({
             message: result.error,
           });
 
-          attemptLogs += `Attempt ${attempt + 1}: Error - ${result.error.message
-            }\n`;
+          attemptLogs += `Attempt ${attempt + 1}: Error - ${
+            result.error.message
+          }\n`;
         } else {
           console.error(
             new Error(
-              `Chat endpoint returned an error: ${decoder.decode(result?.value) || result.statusText
+              `Chat endpoint returned an error: ${
+                decoder.decode(result?.value) || result.statusText
               }`,
             ),
           );
 
-          attemptLogs += `Attempt ${attempt + 1
-            }: Error - Chat endpoint returned an error: ${decoder.decode(result?.value) || result.statusText
-            }\n`;
+          attemptLogs += `Attempt ${
+            attempt + 1
+          }: Error - Chat endpoint returned an error: ${
+            decoder.decode(result?.value) || result.statusText
+          }\n`;
         }
 
         attempt += 1;
@@ -276,8 +273,9 @@ export const OpenAIStream = async ({
         attemptLogs,
       });
 
-      attemptLogs += `Attempt ${attempt}: Error - ${(error as Error).message
-        }\n`;
+      attemptLogs += `Attempt ${attempt}: Error - ${
+        (error as Error).message
+      }\n`;
     }
   }
 

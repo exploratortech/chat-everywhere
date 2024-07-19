@@ -6,10 +6,10 @@ import {
   sortByRankAndFolderType,
 } from '@/utils/app/rank';
 
-import { Conversation } from '@/types/chat';
-import { FolderInterface } from '@/types/folder';
+import type { Conversation } from '@/types/chat';
+import type { FolderInterface } from '@/types/folder';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 const createFolder = (
   id: string,
@@ -337,4 +337,3 @@ describe('Rank Functions', () => {
     });
   });
 });
-

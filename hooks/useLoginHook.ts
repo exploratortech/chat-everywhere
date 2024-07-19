@@ -1,18 +1,20 @@
-import { Session, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { Dispatch, useEffect } from 'react';
+import type { Session } from '@supabase/auth-helpers-react';
+import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import type { Dispatch } from 'react';
+import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
 import { updateUserInfo } from '@/utils/app/eventTracking';
 import { userProfileQuery } from '@/utils/server/supabase';
 
-import { User } from '@/types/user';
+import type { User } from '@/types/user';
 
-import { HomeInitialState } from '@/components/home/home.state';
+import type { HomeInitialState } from '@/components/home/home.state';
 
 import useTeacherPromptForStudent from './teacherPortal/useTeacherPromptForStudent';
 import useTeacherSettingsForStudent from './teacherPortal/useTeacherSettingsForStudent';
-import { ActionType } from './useCreateReducer';
+import type { ActionType } from './useCreateReducer';
 
 const useLoginHook = (
   user: User | null,
@@ -108,8 +110,6 @@ const useLoginHook = (
       });
   };
 
-
-
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'INITIAL_SESSION') {
@@ -125,7 +125,6 @@ const useLoginHook = (
           handleUserProfileUpdate(session);
         }
       }
-
     });
 
     return () => {

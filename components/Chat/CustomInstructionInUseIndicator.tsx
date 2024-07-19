@@ -37,7 +37,7 @@ const CustomInstructionInUseIndicator = () => {
     return (
       <>
         <div
-          className="group relative h-2 w-2 mx-2 cursor-pointer"
+          className="group relative mx-2 size-2 cursor-pointer"
           onClick={() => setShowModal(true)}
         >
           <div
@@ -53,7 +53,7 @@ const CustomInstructionInUseIndicator = () => {
               isTeacherCustomInstructionPrompt ? 'bg-blue-500' : 'bg-green-500',
             )}
           ></div>
-          <span className="absolute top-6 scale-0 rounded bg-gray-800 p-2 text-xs text-white group-hover:scale-100 !w-max">
+          <span className="absolute top-6 !w-max scale-0 rounded bg-gray-800 p-2 text-xs text-white group-hover:scale-100">
             {t(
               'Custom Instruction ({{customInstructionPromptName}}) is in use',
               {
@@ -73,9 +73,9 @@ const CustomInstructionInUseIndicator = () => {
   } else if (selectedConversation?.customInstructionPrompt) {
     return (
       <>
-        <div className="group relative h-2 w-2 mx-2">
-          <div className="h-2 w-2 bg-red-500 rounded-full absolute"></div>
-          <span className="absolute top-6 scale-0 rounded bg-gray-800 p-2 text-xs text-white !w-max">
+        <div className="group relative mx-2 size-2">
+          <div className="absolute size-2 rounded-full bg-red-500"></div>
+          <span className="absolute top-6 !w-max scale-0 rounded bg-gray-800 p-2 text-xs text-white">
             {t('Custom Instruction only available in Chat mode')}
           </span>
         </div>

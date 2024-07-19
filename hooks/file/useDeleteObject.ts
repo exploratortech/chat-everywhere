@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import { UserFile } from '@/types/UserFile';
+import type { UserFile } from '@/types/UserFile';
 
 import HomeContext from '@/components/home/home.context';
 

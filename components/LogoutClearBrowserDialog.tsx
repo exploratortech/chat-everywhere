@@ -29,7 +29,6 @@ export function LogoutClearBrowserDialog({
   const { t } = useTranslation('model');
   const {
     state: { isRequestingLogout },
-    dispatch: homeDispatch,
   } = useContext(HomeContext);
   const hasRequestedLogout = useMemo(
     () => isRequestingLogout !== null,
