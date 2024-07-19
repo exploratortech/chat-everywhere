@@ -24,6 +24,7 @@ export const retrieveUserSessionAndLogUsages = async (
     if (!user) return;
 
     await addUsageEntry(pluginId || 'gpt-3.5', data.user.id);
+    return user;
   } catch (e) {
     console.log(e);
   }

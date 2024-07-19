@@ -42,18 +42,28 @@ export class OpenAIError extends Error {
 export const normalizeMessages = (messages: Message[]) =>
   messages.map(({ role, content, name }) => ({ role, content, name }));
 
-export const OpenAIStream = async (
-  model: OpenAIModel,
-  systemPrompt: string,
-  temperature: number,
-  messages: Message[],
-  customMessageToStreamBack?: string | null, // Stream this string at the end of the streaming
-  userIdentifier?: string,
-  eventName?: EventNameTypes | null,
-) => {
+export const OpenAIStream = async ({
+  model,
+  systemPrompt,
+  temperature,
+  messages,
+  customMessageToStreamBack = null, // Stream this string at the end of the streaming
+  userIdentifier,
+  eventName = null,
+  usePriorityEndpoint = false,
+}: {
+  model: OpenAIModel;
+  systemPrompt: string;
+  temperature: number;
+  messages: Message[];
+  customMessageToStreamBack?: string | null;
+  userIdentifier?: string;
+  eventName?: EventNameTypes | null;
+  usePriorityEndpoint?: boolean;
+}) => {
   const log = new Logger();
 
-  const endpointManager = new ChatEndpointManager(model);
+  const endpointManager = new ChatEndpointManager(model, usePriorityEndpoint);
 
   let attempt = 0;
   let attemptLogs = '';

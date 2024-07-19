@@ -114,18 +114,20 @@ async function findActiveStudentAccountsNumber(
 }
 
 async function createTempUser(code: string, codeId: string, uniqueId: string) {
-  // get teacher profile id by codeId
-  const { data: oneTimeCodeData, error: oneTimeCodeError } = await supabase
+  // Fetch the teacher profile using the codeId
+  const { data: teacherProfile, error: teacherProfileError } = await supabase
     .from('one_time_codes')
-    .select('teacher_profile_id')
+    .select('teacher_profile_id, profiles(enabled_priority_endpoint)')
     .eq('id', codeId)
     .single();
 
-  if (oneTimeCodeError) {
-    throw oneTimeCodeError;
+  if (teacherProfileError) {
+    throw teacherProfileError;
   }
 
-  const teacherProfileId = oneTimeCodeData.teacher_profile_id;
+  const isEnabledPriorityEndpoint = !!(
+    teacherProfile.profiles as unknown as { enabled_priority_endpoint: boolean }
+  ).enabled_priority_endpoint;
 
   const randomUniqueId = uuidv4().replace(/-/g, '');
   const randomEmail = `temp-user-${code}-${randomUniqueId}@chateverywhere.app`;
@@ -148,7 +150,7 @@ async function createTempUser(code: string, codeId: string, uniqueId: string) {
         one_time_code_id: codeId,
         profile_id: userId,
         uniqueId: uniqueId,
-        teacher_profile_id: teacherProfileId,
+        teacher_profile_id: teacherProfile.teacher_profile_id,
       },
     ]);
   if (createTempProfileError) {
@@ -158,7 +160,10 @@ async function createTempUser(code: string, codeId: string, uniqueId: string) {
   // update profile
   const { error: updateProfileError } = await supabase
     .from('profiles')
-    .update({ plan: 'ultra' })
+    .update({
+      plan: 'ultra',
+      enabled_priority_endpoint: isEnabledPriorityEndpoint,
+    })
     .eq('id', userId);
 
   if (updateProfileError) {

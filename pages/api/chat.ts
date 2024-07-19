@@ -48,7 +48,10 @@ export const config = {
 };
 
 const handler = async (req: Request): Promise<Response> => {
-  retrieveUserSessionAndLogUsages(req);
+  const userProfile = await retrieveUserSessionAndLogUsages(req);
+
+  const usePriorityEndpoint = !!userProfile?.enabledPriorityEndpoint;
+
   const { country } = geolocation(req);
 
   const log = new Logger();
@@ -114,17 +117,18 @@ const handler = async (req: Request): Promise<Response> => {
       messageToStreamBack = '[16K-Optional]';
     }
 
-    const stream = await OpenAIStream(
-      useLargerContextWindowModel
+    const stream = await OpenAIStream({
+      model: useLargerContextWindowModel
         ? OpenAIModels[OpenAIModelID.GPT_3_5_16K]
         : OpenAIModels[OpenAIModelID.GPT_3_5],
-      promptToSend,
-      temperatureToUse,
-      messagesToSend,
-      messageToStreamBack,
-      userIdentifier || undefined,
-      pluginId === '' ? 'Default mode message' : null,
-    );
+      systemPrompt: promptToSend,
+      temperature: temperatureToUse,
+      messages: messagesToSend,
+      customMessageToStreamBack: messageToStreamBack,
+      userIdentifier: userIdentifier || undefined,
+      eventName: pluginId === '' ? 'Default mode message' : null,
+      usePriorityEndpoint: usePriorityEndpoint,
+    });
 
     return new Response(stream);
   } catch (error) {

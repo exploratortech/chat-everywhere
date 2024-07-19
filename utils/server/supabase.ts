@@ -482,12 +482,13 @@ export const userProfileQuery = async ({
     line_access_token?: string;
     temporary_account_profiles: any[];
     is_teacher_account: boolean;
+    enabled_priority_endpoint: boolean;
   } | null = null;
   if (userId) {
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId)',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId), enabled_priority_endpoint',
       )
       .eq('id', userId)
       .single();
@@ -500,7 +501,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId)',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId), enabled_priority_endpoint',
       )
       .eq('email', email)
       .single();
@@ -580,6 +581,7 @@ export const userProfileQuery = async ({
     isTeacherAccount: isTeacherAccount,
     associatedTeacherId: associatedTeacherId,
     tempUserUniqueId: tempUserUniqueId,
+    enabledPriorityEndpoint: userProfile.enabled_priority_endpoint,
   } as UserProfile;
 };
 

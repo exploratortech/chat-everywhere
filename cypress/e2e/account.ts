@@ -18,4 +18,9 @@ const TEACHER_USER = {
   password: 'chateverywhere',
 };
 
-export { FREE_USER, PRO_USER, ULTRA_USER, TEACHER_USER };
+const PRIORITY_USER = {
+  email: 'cypress+priority@exploratorlabs.com',
+  password: 'chateverywhere',
+};
+
+export { FREE_USER, PRO_USER, ULTRA_USER, TEACHER_USER, PRIORITY_USER };

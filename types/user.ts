@@ -31,6 +31,7 @@ export interface UserProfile {
   isTeacherAccount: boolean;
   associatedTeacherId: string | undefined;
   tempUserUniqueId: string | undefined;
+  enabledPriorityEndpoint: boolean;
 }
 
 export interface CreditUsage {

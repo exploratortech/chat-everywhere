@@ -9,6 +9,8 @@ import type {
 } from '@/types/v2Chat/chat';
 import { activeRunStatuses } from '@/types/v2Chat/chat';
 
+import { OPENAI_API_HOST } from '../app/const';
+
 export const addOpenAiMessageToThread = async (
   threadId: string,
   message: MessageType,
@@ -113,7 +115,7 @@ export const getOpenAiLatestRunObject = async (
 export const generateImage = async (
   prompt: string,
 ): Promise<OpenAiImageResponseType & { errorMessage?: string }> => {
-  const openAiUrl = 'https://api.openai.com/v1/images/generations';
+  const openAiUrl = `${OPENAI_API_HOST}/v1/images/generations`;
 
   const payload = {
     model: 'dall-e-3',

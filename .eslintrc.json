@@ -4,7 +4,9 @@
     "plugin:prettier/recommended",
     "prettier"
   ],
-  "ignorePatterns": ["firebase/*"],
+  "ignorePatterns": [
+    "firebase/**/*"
+  ],
   "rules": {
     "prettier/prettier": [
       "warn",
@@ -18,8 +20,15 @@
   },
   "overrides": [
     {
-      "files": ["**/*.ts", "**/*.tsx"],
-      "plugins": ["@typescript-eslint", "unused-imports", "tailwindcss"],
+      "files": [
+        "**/*.ts",
+        "**/*.tsx"
+      ],
+      "plugins": [
+        "@typescript-eslint",
+        "unused-imports",
+        "tailwindcss"
+      ],
       "extends": [
         "plugin:tailwindcss/recommended",
         "next/core-web-vitals",
