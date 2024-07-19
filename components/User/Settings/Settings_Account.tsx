@@ -28,7 +28,7 @@ export default function Settings_Account() {
   };
 
   const subscriptionManagementLink = () =>
-    processenv.NEXT_PUBLIC_ENV === 'production'
+    process.env.NEXT_PUBLIC_ENV === 'production'
       ? 'https://billing.stripe.com/p/login/5kAbMj0wt5VF6AwaEE'
       : 'https://billing.stripe.com/p/login/test_28o4jFe6GaqK1UY5kk';
 
