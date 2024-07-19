@@ -36,6 +36,7 @@ describe('Test Payment Flow', () => {
 
   // Logout
   after(() => {
+    cy.reload();
     cy.get('[data-cy="settings-button"]').click();
     cy.get('[data-cy="chatbar-settings-modal"]')
       .scrollIntoView()
@@ -141,8 +142,20 @@ describe('Test Payment Flow', () => {
     });
 
     cy.reload();
+    // Make sure the user is on Pro plan but with a extra day from the expiration date
     cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
-      expect($el).to.have.text('Free');
+      expect($el).to.have.text('Pro');
+    });
+    cy.get('[data-cy="settings-button"]').click();
+    cy.get('[data-cy="chatbar-settings-modal"]')
+      .scrollIntoView()
+      .should('be.visible');
+    cy.get('[data-cy="chatbar-settings-modal"]').within(() => {
+      const newExpirationDate = dayjs()
+        .add(1, 'month')
+        .add(1, 'day')
+        .format('MMM DD, YYYY');
+      cy.contains(`Expires on: ${newExpirationDate}`);
     });
   });
 });
