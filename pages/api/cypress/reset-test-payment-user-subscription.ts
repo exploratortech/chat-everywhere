@@ -1,6 +1,6 @@
-import { TEST_PAYMENT_USER } from "@/cypress/e2e/account";
-import { getAdminSupabaseClient } from "@/utils/server/supabase";
+import { getAdminSupabaseClient } from '@/utils/server/supabase';
 
+import { TEST_PAYMENT_USER } from '@/cypress/e2e/account';
 
 export const config = {
   runtime: 'edge',

@@ -1,4 +1,4 @@
-import { PaidPlanLinks } from '@/types/stripe-product';
+import type { PaidPlanLinks } from '@/types/stripe-product';
 
 export const STRIPE_PAID_PLAN_LINKS_PRODUCTION: PaidPlanLinks = {
   'ultra-yearly': {

@@ -1,12 +1,12 @@
 // NOTE: This file is intended for testing the cancel subscription process.
-import { TEST_PAYMENT_USER } from '@/cypress/e2e/account';
 import { getHomeUrl } from '@/utils/app/api';
 import { getAdminSupabaseClient } from '@/utils/server/supabase';
+
+import { TEST_PAYMENT_USER } from '@/cypress/e2e/account';
 
 export const config = {
   runtime: 'edge',
 };
-
 
 const handler = async (req: Request): Promise<Response> => {
   const isProd = process.env.VERCEL_ENV === 'production';
@@ -27,15 +27,15 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('email', TEST_PAYMENT_USER.email)
       .single();
 
-    if (!userProfile) return new Response('Test User not found', { status: 404 });
+    if (!userProfile)
+      return new Response('Test User not found', { status: 404 });
 
     const fakeCancelProPlanSubscriptionEvent = {
-      "data": {
-        "object": {}
+      data: {
+        object: {},
       },
-      "type": "customer.subscription.deleted"
-    }
-
+      type: 'customer.subscription.deleted',
+    };
 
     const response = await fetch(`${getHomeUrl()}/api/webhooks/stripe`, {
       method: 'POST',
@@ -57,6 +57,5 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('Error', { status: 500 });
   }
 };
-
 
 export default handler;

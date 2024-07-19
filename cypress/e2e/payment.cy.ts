@@ -1,9 +1,9 @@
-import dayjs from "dayjs";
-import { TEST_PAYMENT_USER } from "./account";
+import { TEST_PAYMENT_USER } from './account';
+
+import dayjs from 'dayjs';
 
 describe('Test Payment Flow', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
-
 
   beforeEach(() => {
     cy.session(
@@ -34,7 +34,7 @@ describe('Test Payment Flow', () => {
     });
   });
 
-  // Logout 
+  // Logout
   after(() => {
     cy.get('[data-cy="settings-button"]').click();
     cy.get('[data-cy="chatbar-settings-modal"]')
@@ -96,7 +96,6 @@ describe('Test Payment Flow', () => {
       },
     });
 
-
     // Refreshes the page and checks if the user is on Ultra plan.
     cy.reload();
     cy.get('[data-cy="user-account-badge"]', { timeout: 10000 }).then(($el) => {
@@ -112,7 +111,6 @@ describe('Test Payment Flow', () => {
       cy.contains(`Expires on: ${newExpirationDate}`);
     });
   });
-
 
   it('Make sure downgrade event is working', () => {
     // Make the user to Pro plan by calling the /api/cypress/test-subscription-plan-payment endpoint
@@ -148,4 +146,3 @@ describe('Test Payment Flow', () => {
     });
   });
 });
-

@@ -1,4 +1,4 @@
-import { NewStripeProduct } from '@/types/stripe-product';
+import type { NewStripeProduct } from '@/types/stripe-product';
 
 export const STRIPE_PRODUCT_LIST_STAGING: NewStripeProduct[] = [
   {

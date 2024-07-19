@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import { User, UserSubscriptionDetail } from '@/types/user';
+import type { User, UserSubscriptionDetail } from '@/types/user';
 
 export const useUserSubscriptionDetail = ({
   isPaidUser,

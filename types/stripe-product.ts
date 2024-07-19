@@ -1,6 +1,6 @@
-import { SubscriptionPlan } from './paid_plan';
+import type { SubscriptionPlan } from './paid_plan';
 
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 export type StripeProductType = 'top_up' | 'paid_plan';
 

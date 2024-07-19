@@ -11,7 +11,7 @@ import {
 import { trackEvent } from '@/utils/app/eventTracking';
 import { FeatureItem, PlanDetail } from '@/utils/app/ui';
 
-import { User, UserSubscriptionDetail } from '@/types/user';
+import type { User, UserSubscriptionDetail } from '@/types/user';
 
 import Spinner from '@/components/Spinner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -36,25 +36,25 @@ const PlanComparison = ({
 
   if (isPaidUser && !isFetched) {
     return (
-      <div className="w-full h-full min-h-52 flex items-center justify-center">
+      <div className="flex size-full min-h-52 items-center justify-center">
         <Spinner size="16px" />
       </div>
     );
   }
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr] justify-center gap-3 mb-3">
+    <div className="mb-3 grid grid-cols-1 justify-center gap-3 md:grid-cols-[1fr_1fr]">
       {/* Free Plan */}
-      <div className="flex flex-col w-full col-start-1 row-span-1 border rounded-lg p-4 text-neutral-3000 border-neutral-400">
+      <div className="col-start-1 row-span-1 flex w-full flex-col rounded-lg border border-neutral-400 p-4 text-neutral-300">
         <FreePlanContent user={user} />
       </div>
 
       {/* Pro Plan */}
-      <div className="flex flex-col w-full col-start-1 row-span-1 border rounded-lg p-4">
+      <div className="col-start-1 row-span-1 flex w-full flex-col rounded-lg border p-4">
         <ProPlanContent user={user} userSubscription={userSubscriptionDetail} />
       </div>
 
       {/* Ultra Plan */}
-      <div className="flex flex-col w-full col-start-1 row-start-auto md:row-start-1 md:col-start-2 row-span-2 border rounded-lg p-4">
+      <div className="col-start-1 row-span-2 row-start-auto flex w-full flex-col rounded-lg border p-4 md:col-start-2 md:row-start-1">
         <UltraPlanContent
           user={user}
           userSubscription={userSubscriptionDetail}
@@ -71,8 +71,8 @@ const PlanExpirationDate: React.FC<{ expirationDate: string }> = ({
 }) => {
   const { t } = useTranslation('model');
   return (
-    <div className="flex mt-4 grow items-end justify-center">
-      <div className="text-left text-neutral-500 p-2 text-xs">
+    <div className="mt-4 flex grow items-end justify-center">
+      <div className="p-2 text-left text-xs text-neutral-500">
         {`${t('Expires on')}: ${dayjs(expirationDate).format('ll')}`}
       </div>
     </div>
@@ -84,7 +84,7 @@ const FreePlanContent = ({ user }: { user: User | null }) => {
   return (
     <>
       <div className="flex flex-row items-center justify-between gap-2">
-        <span className="text-2xl py-0.5 font-bold">Free</span>
+        <span className="py-0.5 text-2xl font-bold">Free</span>
         {(user?.plan === 'free' || !user) && <CurrentPlanTag />}
       </div>
       <div className="text-xs leading-5">
@@ -136,7 +136,7 @@ const ProPlanContent = ({
     <>
       <div className="flex flex-row items-center justify-between gap-2">
         <span
-          className="text-clip-transparent bg-gradient-pro py-0.5 mr-0 animate-background-gradient-slide bg-500% text-2xl font-bold rounded bg-gray-700"
+          className="text-clip-transparent mr-0 animate-background-gradient-slide rounded bg-gray-700 bg-gradient-pro bg-500% py-0.5 text-2xl font-bold"
           style={{
             color: 'transparent',
             WebkitBackgroundClip: 'text',
@@ -158,16 +158,16 @@ const ProPlanContent = ({
       </div>
       {/* Upgrade button */}
       {showUpgradeToPro && (
-        <div className="flex items-center flex-col">
+        <div className="flex flex-col items-center">
           <a
             target="_blank"
             rel="noreferrer"
             onClick={upgradeLinkOnClick}
-            className="w-full px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
+            className="mt-4 w-full cursor-pointer rounded-lg border border-none bg-white bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] px-4 py-2 text-center text-sm font-semibold text-white shadow focus:outline-none"
           >
             {t('Upgrade')}
           </a>
-          <p className="text-xs text-neutral-400 mt-2">
+          <p className="mt-2 text-xs text-neutral-400">
             {t('No Strings Attached - Cancel Anytime!')}
           </p>
         </div>
@@ -175,9 +175,7 @@ const ProPlanContent = ({
 
       <ChangeSubscriptionButton
         plan="pro"
-        user={user}
         userSubscription={userSubscription}
-        interval="monthly"
       />
 
       {user?.plan === 'pro' && user.proPlanExpirationDate && (
@@ -239,7 +237,7 @@ const UltraPlanContent = ({
     <>
       <div className="flex flex-row items-center justify-between gap-2">
         <span
-          className="text-clip-transparent bg-gradient-ultra py-0.5 mr-0 animate-background-gradient-slide bg-500% text-2xl font-bold rounded bg-gray-700"
+          className="text-clip-transparent mr-0 animate-background-gradient-slide rounded bg-gray-700 bg-gradient-ultra bg-500% py-0.5 text-2xl font-bold"
           style={{
             color: 'transparent',
             WebkitBackgroundClip: 'text',
@@ -267,25 +265,23 @@ const UltraPlanContent = ({
       </div>
       {/* Upgrade button */}
       {showUpgradeToUltra && (
-        <div className="flex items-center flex-col">
+        <div className="flex flex-col items-center">
           <a
             target="_blank"
             rel="noreferrer"
             onClick={upgradeLinkOnClick}
-            className="w-full px-4 py-2 border rounded-lg bg-white shadow border-none text-white font-semibold focus:outline-none mt-4 text-center text-sm cursor-pointer bg-gradient-to-r from-[#fd68a6] to-[#6c62f7]"
+            className="mt-4 w-full cursor-pointer rounded-lg border border-none bg-white bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] px-4 py-2 text-center text-sm font-semibold text-white shadow focus:outline-none"
           >
             {t('Upgrade to Ultra')}
           </a>
-          <p className="text-xs text-neutral-400 mt-2">
+          <p className="mt-2 text-xs text-neutral-400">
             {t('No Strings Attached - Cancel Anytime!')}
           </p>
         </div>
       )}
       <ChangeSubscriptionButton
         plan="ultra"
-        user={user}
         userSubscription={userSubscription}
-        interval={priceType}
       />
 
       {user?.plan === 'ultra' && user.proPlanExpirationDate && (
@@ -297,7 +293,7 @@ const UltraPlanContent = ({
 
 const CurrentPlanTag = () => {
   return (
-    <span className="h-max bg-neutral-600 text-neutral-400 text-[10px]  font-medium mr-2 px-2 py-[.5px] rounded w-max">
+    <span className="mr-2 size-max rounded bg-neutral-600  px-2 py-[.5px] text-[10px] font-medium text-neutral-400">
       CURRENT PLAN
     </span>
   );
@@ -311,17 +307,17 @@ const ProPlanPrice = ({
   const { i18n } = useTranslation('model');
 
   if (userSubscription && userSubscription.subscriptionCurrency === 'twd') {
-    return <span className="text-sm mb-2">{'TWD$249.99 / month'}</span>;
+    return <span className="mb-2 text-sm">{'TWD$249.99 / month'}</span>;
   }
   if (userSubscription && userSubscription.subscriptionCurrency === 'usd') {
-    return <span className="text-sm mb-2">{'USD$9.99 / month'}</span>;
+    return <span className="mb-2 text-sm">{'USD$9.99 / month'}</span>;
   }
   switch (i18n.language) {
     case 'zh-Hant':
     case 'zh':
-      return <span className="text-sm mb-2">{'TWD$249.99 / month'}</span>;
+      return <span className="mb-2 text-sm">{'TWD$249.99 / month'}</span>;
     default:
-      return <span className="text-sm mb-2">{'USD$9.99 / month'}</span>;
+      return <span className="mb-2 text-sm">{'USD$9.99 / month'}</span>;
   }
 };
 
@@ -336,36 +332,36 @@ const UltraPlanPrice = ({
 
   const monthlyPriceComponent = useMemo(() => {
     if (userSubscription && userSubscription.subscriptionCurrency === 'twd') {
-      return <span className="text-sm mb-2">{'TWD$880 / month'}</span>;
+      return <span className="mb-2 text-sm">{'TWD$880 / month'}</span>;
     }
 
     if (userSubscription && userSubscription.subscriptionCurrency === 'usd') {
-      return <span className="text-sm mb-2">{'USD$29.99 / month'}</span>;
+      return <span className="mb-2 text-sm">{'USD$29.99 / month'}</span>;
     }
     if (i18n.language === 'zh-Hant' || i18n.language === 'zh') {
-      return <span className="text-sm mb-2">{'TWD$880 / month'}</span>;
+      return <span className="mb-2 text-sm">{'TWD$880 / month'}</span>;
     } else {
-      return <span className="text-sm mb-2">{'USD$29.99 / month'}</span>;
+      return <span className="mb-2 text-sm">{'USD$29.99 / month'}</span>;
     }
   }, [userSubscription, i18n.language]);
 
   const yearlyPriceComponent = useMemo(() => {
     if (userSubscription && userSubscription.subscriptionCurrency === 'twd') {
-      return <span className="text-sm mb-2">{'TWD$8800 / year'}</span>;
+      return <span className="mb-2 text-sm">{'TWD$8800 / year'}</span>;
     }
     if (userSubscription && userSubscription.subscriptionCurrency === 'usd') {
-      return <span className="text-sm mb-2">{'USD$279.99 / year'}</span>;
+      return <span className="mb-2 text-sm">{'USD$279.99 / year'}</span>;
     }
 
     if (i18n.language === 'zh-Hant' || i18n.language === 'zh') {
-      return <span className="text-sm mb-2">{'TWD$8800 / year'}</span>;
+      return <span className="mb-2 text-sm">{'TWD$8800 / year'}</span>;
     } else {
-      return <span className="text-sm mb-2">{'USD$279.99 / year'}</span>;
+      return <span className="mb-2 text-sm">{'USD$279.99 / year'}</span>;
     }
   }, [userSubscription, i18n.language]);
 
   return (
-    <Tabs defaultValue="monthly" className="mt-2 mb-4 w-full">
+    <Tabs defaultValue="monthly" className="mb-4 mt-2 w-full">
       <TabsList className="w-full">
         <TabsTrigger
           value="monthly"
