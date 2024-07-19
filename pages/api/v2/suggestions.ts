@@ -5,7 +5,7 @@ import {
   getUserProfile,
 } from '@/utils/server/supabase';
 
-import { MessageType } from '@/types/v2Chat/chat';
+import type { MessageType } from '@/types/v2Chat/chat';
 
 export const config = {
   runtime: 'edge',

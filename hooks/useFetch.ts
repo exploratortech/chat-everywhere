@@ -26,8 +26,8 @@ export const useFetch = () => {
       ...(request?.headers
         ? request.headers
         : request?.body && request.body instanceof FormData
-        ? {}
-        : { 'Content-type': 'application/json' }),
+          ? {}
+          : { 'Content-type': 'application/json' }),
     };
 
     return fetch(requestUrl, { ...requestBody, headers, signal })
@@ -37,16 +37,14 @@ export const useFetch = () => {
         const contentType = response.headers.get('content-type');
         const contentDisposition = response.headers.get('content-disposition');
 
-        const headers = response.headers;
-
         const result =
           contentType &&
           (contentType?.indexOf('application/json') !== -1 ||
             contentType?.indexOf('text/plain') !== -1)
             ? response.json()
             : contentDisposition?.indexOf('attachment') !== -1
-            ? response.blob()
-            : response;
+              ? response.blob()
+              : response;
 
         return result;
       })

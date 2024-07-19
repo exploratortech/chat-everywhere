@@ -3,8 +3,8 @@ import {
   getCustomerEmailByCustomerID,
 } from './strip_helper';
 
-import Stripe from 'stripe';
 import { TEST_PAYMENT_USER } from '@/cypress/e2e/account';
+import type Stripe from 'stripe';
 
 export default async function handleCustomerSubscriptionDeleted(
   session: Stripe.Subscription,
@@ -14,7 +14,7 @@ export default async function handleCustomerSubscriptionDeleted(
     await downgradeUserAccount({
       email: TEST_PAYMENT_USER.email,
     });
-    return
+    return;
   }
   const stripeSubscriptionId = session.id;
 

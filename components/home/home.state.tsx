@@ -1,13 +1,13 @@
-import { Conversation, Message } from '@/types/chat';
-import { DragData } from '@/types/drag';
-import { ErrorMessage } from '@/types/error';
-import { FolderInterface } from '@/types/folder';
-import { OpenAIModelID } from '@/types/openai';
-import { Prompt, TeacherPromptForTeacherPortal } from '@/types/prompt';
-import { TeacherSettings } from '@/types/teacher-settings';
-import { CreditUsage, User } from '@/types/user';
+import type { Conversation, Message } from '@/types/chat';
+import type { DragData } from '@/types/drag';
+import type { ErrorMessage } from '@/types/error';
+import type { FolderInterface } from '@/types/folder';
+import type { OpenAIModelID } from '@/types/openai';
+import type { Prompt, TeacherPromptForTeacherPortal } from '@/types/prompt';
+import type { TeacherSettings } from '@/types/teacher-settings';
+import type { CreditUsage, User } from '@/types/user';
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface HomeInitialState {
   appInitialized: boolean;

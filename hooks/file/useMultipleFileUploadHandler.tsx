@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useFileUpload } from '@/hooks/file/useFileUpload';
 
-import { UserFile } from '@/types/UserFile';
+import type { UserFile } from '@/types/UserFile';
 
 import CustomUploadToast from '@/components/Files/CustomUploadToast';
 

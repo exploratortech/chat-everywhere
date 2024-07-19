@@ -1,8 +1,8 @@
-import { FC, MutableRefObject } from 'react';
+import type { FC, MutableRefObject } from 'react';
 
 import { getNonDeletedCollection } from '@/utils/app/conversation';
 
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 interface Props {
   prompts: Prompt[];

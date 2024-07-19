@@ -7,7 +7,7 @@ import {
   handleImportConversations,
 } from '@/utils/app/importExport';
 
-import { SupportedExportFormats } from '@/types/export';
+import type { SupportedExportFormats } from '@/types/export';
 
 import { Import } from '@/components/Settings/Import';
 import { SidebarButton } from '@/components/Sidebar/SidebarButton';
@@ -27,7 +27,7 @@ export default function Settings_Data() {
 
   return (
     <div>
-      <h1 className="font-bold mb-4">{t('Data')}</h1>
+      <h1 className="mb-4 font-bold">{t('Data')}</h1>
       <Import onImport={handleImport} />
       <SidebarButton
         text={t('Export data')}

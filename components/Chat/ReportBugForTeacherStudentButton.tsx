@@ -5,7 +5,7 @@ import React, { useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-import { Conversation, Message } from '@/types/chat';
+import type { Conversation, Message } from '@/types/chat';
 
 import {
   Dialog,

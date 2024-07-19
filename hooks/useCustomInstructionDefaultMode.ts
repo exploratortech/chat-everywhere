@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef } from 'react';
 
-import { Conversation } from '@/types/chat';
+import type { Conversation } from '@/types/chat';
 import { isTeacherPrompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';

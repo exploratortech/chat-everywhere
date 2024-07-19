@@ -1,8 +1,8 @@
 import { getAdminSupabaseClient } from '../supabase';
+
 const supabase = getAdminSupabaseClient();
 
-export async function removeSharedMessagesWithTeacher
-    (
+export async function removeSharedMessagesWithTeacher(
   teacher_profile_id: string,
   message_ids: string[],
 ) {

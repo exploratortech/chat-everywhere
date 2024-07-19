@@ -1,4 +1,4 @@
-import { Pagination as PaginationType } from '@/types/pagination';
+import type { Pagination as PaginationType } from '@/types/pagination';
 
 import {
   Pagination as PaginationContainer,

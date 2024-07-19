@@ -1,5 +1,5 @@
+import type { ColumnDef } from '@tanstack/react-table';
 import {
-  ColumnDef,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -9,7 +9,7 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TempAccountProfiles } from '@/types/one-time-code';
+import type { TempAccountProfiles } from '@/types/one-time-code';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -42,7 +42,7 @@ export function DataTable({
     getFilteredRowModel: getFilteredRowModel(),
     getRowId: (row) => {
       return `${row.id}`;
-    }
+    },
   });
 
   return (
@@ -58,9 +58,9 @@ export function DataTable({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   );
                 })}
@@ -91,14 +91,14 @@ export function DataTable({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  {t('No results')}
+                  {t('No results.')}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-      <div className="flex my-4 items-center">
+      <div className="my-4 flex items-center">
         <div>
           <Button
             onClick={() =>

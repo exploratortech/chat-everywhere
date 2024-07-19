@@ -6,7 +6,7 @@ import StripeHelper, {
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 const supabase = getAdminSupabaseClient();
 dayjs.extend(utc);

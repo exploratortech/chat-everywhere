@@ -1,13 +1,11 @@
 import { DefaultMonthlyCredits } from '@/utils/config';
 
-import { PluginID } from '@/types/plugin';
-import { RawRefereeProfile } from '@/types/referral';
-import { UserProfile, UserProfileQueryProps } from '@/types/user';
+import type { PluginID } from '@/types/plugin';
+import type { RawRefereeProfile } from '@/types/referral';
+import type { UserProfile, UserProfileQueryProps } from '@/types/user';
 
-import {
-  CodeGenerationPayloadType,
-  generateReferralCodeAndExpirationDate,
-} from './referralCode';
+import type { CodeGenerationPayloadType } from './referralCode';
+import { generateReferralCodeAndExpirationDate } from './referralCode';
 
 import { createClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
@@ -299,7 +297,7 @@ export const getReferralCode = async (
 ): Promise<CodeGenerationPayloadType> => {
   try {
     const supabase = getAdminSupabaseClient();
-    const { data: record, error } = await supabase
+    const { data: record } = await supabase
       .from('profiles')
       .select('referral_code, referral_code_expiration_date')
       .eq('plan', 'edu')
@@ -365,7 +363,7 @@ export const regenerateReferralCode = async (
 ): Promise<CodeGenerationPayloadType> => {
   try {
     const supabase = getAdminSupabaseClient();
-    const { data: record, error: getProfileError } = await supabase
+    const { error: getProfileError } = await supabase
       .from('profiles')
       .select('referral_code')
       .eq('plan', 'edu')
@@ -375,7 +373,7 @@ export const regenerateReferralCode = async (
 
     const { code: newGeneratedCode, expiresAt: newExpirationDate } =
       generateReferralCodeAndExpirationDate();
-    const { data: newRecord, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from('profiles')
       .update({
         referral_code: newGeneratedCode,
@@ -484,12 +482,13 @@ export const userProfileQuery = async ({
     line_access_token?: string;
     temporary_account_profiles: any[];
     is_teacher_account: boolean;
+    enabled_priority_endpoint: boolean;
   } | null = null;
   if (userId) {
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId)',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId), enabled_priority_endpoint',
       )
       .eq('id', userId)
       .single();
@@ -502,7 +501,7 @@ export const userProfileQuery = async ({
     const { data: user, error } = await client
       .from('profiles')
       .select(
-        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId)',
+        'id, email, plan, pro_plan_expiration_date, referral_code, referral_code_expiration_date, line_access_token, is_teacher_account, temporary_account_profiles(id,teacher_profile_id,uniqueId), enabled_priority_endpoint',
       )
       .eq('email', email)
       .single();
@@ -560,8 +559,8 @@ export const userProfileQuery = async ({
   const associatedTeacherId = isTempUser
     ? userProfile.temporary_account_profiles[0].teacher_profile_id
     : isTeacherAccount
-    ? userProfile.id
-    : undefined;
+      ? userProfile.id
+      : undefined;
   const tempUserUniqueId = isTempUser
     ? userProfile.temporary_account_profiles[0].uniqueId
     : undefined;
@@ -582,6 +581,7 @@ export const userProfileQuery = async ({
     isTeacherAccount: isTeacherAccount,
     associatedTeacherId: associatedTeacherId,
     tempUserUniqueId: tempUserUniqueId,
+    enabledPriorityEndpoint: userProfile.enabled_priority_endpoint,
   } as UserProfile;
 };
 

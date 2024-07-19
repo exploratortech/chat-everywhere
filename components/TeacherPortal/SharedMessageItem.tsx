@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
+import type { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
 
 import AssistantRespondMessage from '@/components/Chat/ChatMessage/AssistantRespondMessage';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -35,7 +35,7 @@ const SharedMessageItem = memo(
     }) => (
       <div className={cn(className)}>
         <div className="font-bold">{submission.student_name}</div>
-        <div className="flex gap-2 my-2 flex-wrap">
+        <div className="my-2 flex flex-wrap gap-2">
           {submission.message_tags.map((tag) => (
             <Tag key={tag.id} label={tag.name} />
           ))}
@@ -78,9 +78,9 @@ const SharedMessageItem = memo(
         >
           <SubmissionContent
             overflow={false}
-            className="group-hover:blur-[1px] pointer-events-none select-none"
+            className="pointer-events-none select-none group-hover:blur-[1px]"
           />
-          <div className="group-hover:visible invisible absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="invisible absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 group-hover:visible">
             <Button
               onClick={(e) => {
                 e.stopPropagation();
@@ -92,7 +92,7 @@ const SharedMessageItem = memo(
           </div>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="border-0 w-full max-w-3xl tablet:min-w-max h-max transform rounded-2xl text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] max-h-[95dvh] mobile:!max-w-[unset] mobile:!rounded-none">
+          <DialogContent className="grid h-max max-h-[95dvh] w-full max-w-3xl grid-rows-[max-content_1fr] rounded-2xl border-0 bg-neutral-800 text-left align-middle text-neutral-200 shadow-xl transition-all mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:min-w-max">
             <SubmissionContent overflow />
           </DialogContent>
         </Dialog>

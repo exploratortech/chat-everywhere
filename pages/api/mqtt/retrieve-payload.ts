@@ -1,5 +1,5 @@
 // This endpoint will retrieve the last and only retained message on the topic
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 import {
   getAdminSupabaseClient,

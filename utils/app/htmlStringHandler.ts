@@ -1,5 +1,6 @@
 // use in edge only
-import { ComponentClass, FunctionComponent, createElement } from 'react';
+import type { ComponentClass, FunctionComponent } from 'react';
+import { createElement } from 'react';
 import { renderToReadableStream } from 'react-dom/server';
 
 interface GetHtmlStringProps {

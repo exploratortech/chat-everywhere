@@ -5,12 +5,13 @@
 Chat Everywhere 是一個旨在展示大型語言模型功能並讓所有人在無需登錄或地理限制的情況下使用的應用程式。在應用程式開發過程中，我們的社群貢獻了寶貴的意見反饋，使 Chat Everywhere 擁有了官方 ChatGPT 沒有的額外功能。
 
 ## 額外功能
+
 - 文件夾結構
 - 提示範本
 - 導入/導出對話
 - 刪除訊息
 - 多語言支持
-> ^感謝 [開源社群](https://github.com/mckaywrigley/chatbot-ui)
+  > ^感謝 [開源社群](https://github.com/mckaywrigley/chatbot-ui)
 - 分享對話
 - 互聯網連接增強模式（Beta）
 - 響應語言選擇（即將推出）

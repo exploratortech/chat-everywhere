@@ -28,7 +28,7 @@ export default function Settings_Account() {
   };
 
   const subscriptionManagementLink = () =>
-    process.env.NEXT_PUBLIC_ENV === 'production'
+    processenv.NEXT_PUBLIC_ENV === 'production'
       ? 'https://billing.stripe.com/p/login/5kAbMj0wt5VF6AwaEE'
       : 'https://billing.stripe.com/p/login/test_28o4jFe6GaqK1UY5kk';
 
@@ -39,19 +39,19 @@ export default function Settings_Account() {
 
   return (
     <div>
-      <h1 className="font-bold mb-4">{t('Account')}</h1>
+      <h1 className="mb-4 font-bold">{t('Account')}</h1>
 
       <div className="mx-auto max-w-2xl">
-        <div className="rounded-2xl flex flex-col">
+        <div className="flex flex-col rounded-2xl">
           {!isPaidUser && (
-            <span className="text-sm mb-2">
+            <span className="mb-2 text-sm">
               {t(
                 'Unlock all the amazing features by upgrading to our Pro plan, cancel anytime!',
               )}
             </span>
           )}
           {isPaidUser && user?.isInReferralTrial && (
-            <div className="text-xs leading-5 text-neutral-400 flex gap-2 mb-3 items-center">
+            <div className="mb-3 flex items-center gap-2 text-xs leading-5 text-neutral-400">
               <IconCircleCheck className="text-green-500" size={19} />
               <p className="flex items-center">
                 {t('Enjoy our pro plan experience during your trial!')}
@@ -71,7 +71,7 @@ export default function Settings_Account() {
                   href={subscriptionManagementLink()}
                   target="_blank"
                   rel="noreferrer"
-                  className="underline cursor-pointer"
+                  className="cursor-pointer underline"
                 >
                   {t('here')}
                 </a>
@@ -79,31 +79,31 @@ export default function Settings_Account() {
               </p>
             )}
 
-            <p className="text-xs text-neutral-400 mt-2">
+            <p className="mt-2 text-xs text-neutral-400">
               {t('If you have any questions, please contact us at ')}
               <a
                 target="_blank"
                 rel="noreferrer"
-                className="underline cursor-pointer"
+                className="cursor-pointer underline"
                 href="mailto:jack@exploratorlabs.com"
               >
                 jack@exploratorlabs.com
               </a>
             </p>
             {user && (
-              <p className="text-xs text-neutral-400 mt-2">
+              <p className="mt-2 text-xs text-neutral-400">
                 {t('Your registration email is')} {user?.email}
               </p>
             )}
           </div>
         </div>
 
-        <div className="flex justify-end mt-4">
+        <div className="mt-4 flex justify-end">
           {user && (
             <div className="flex flex-row items-center">
               {!isPaidUser && (
                 <span
-                  className="pr-2 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer text-xs"
+                  className="cursor-pointer pr-2 text-xs text-neutral-500 hover:text-neutral-700 focus:outline-none"
                   onClick={() =>
                     setDisplayReferralCodeEnterer(!displayReferralCodeEnterer)
                   }
@@ -113,7 +113,7 @@ export default function Settings_Account() {
               )}
 
               <span
-                className="px-4 text-neutral-500 hover:text-neutral-700 focus:outline-none cursor-pointer mr-2 text-xs"
+                className="mr-2 cursor-pointer px-4 text-xs text-neutral-500 hover:text-neutral-700 focus:outline-none"
                 onClick={changePasswordOnClick}
               >
                 {t('Change password')}
@@ -121,9 +121,9 @@ export default function Settings_Account() {
             </div>
           )}
         </div>
-        <div className="inline-flex items-center justify-center w-full">
-          <hr className="w-64 h-px my-8 bg-gray-200 border-0 dark:bg-gray-700" />
-          <span className="absolute px-3 text-white -translate-x-1/2 left-1/2 bg-[#171717]">
+        <div className="inline-flex w-full items-center justify-center">
+          <hr className="my-8 h-px w-64 border-0 bg-gray-200 dark:bg-gray-700" />
+          <span className="absolute left-1/2 -translate-x-1/2 bg-[#171717] px-3 text-white">
             {t('Integrations (pro plan)')}
           </span>
         </div>

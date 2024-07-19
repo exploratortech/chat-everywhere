@@ -1,6 +1,6 @@
-import { FC, MutableRefObject } from 'react';
+import type { FC, MutableRefObject } from 'react';
 
-import { UserFile } from '@/types/UserFile';
+import type { UserFile } from '@/types/UserFile';
 
 interface Props {
   files: UserFile[];

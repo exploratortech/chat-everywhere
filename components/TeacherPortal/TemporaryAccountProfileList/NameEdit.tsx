@@ -1,5 +1,5 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -78,7 +78,6 @@ export default NameEdit;
 
 const useUpdateStudentName = () => {
   const supabase = useSupabaseClient();
-  const queryClient = useQueryClient();
   const { t } = useTranslation('model');
   const { withLoading } = useTeacherPortalLoading();
 

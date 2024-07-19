@@ -1,7 +1,7 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconRefresh } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import React, { memo, useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
@@ -11,9 +11,9 @@ import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import { OneTimeCodeInfoPayload } from '@/types/one-time-code';
-import { Tag } from '@/types/tags';
-import { Tag as TagType } from '@/types/tags';
+import type { OneTimeCodeInfoPayload } from '@/types/one-time-code';
+import type { Tag } from '@/types/tags';
+import type { Tag as TagType } from '@/types/tags';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -22,6 +22,8 @@ import Spinner from '../Spinner/Spinner';
 import HelpTagTooltip from './HelpTagTooltip';
 import AddTagsToOneTimeCodeDropdown from './Tags/AddTagsToOneTimeCodeDropdown';
 import TemporaryAccountProfileList from './TemporaryAccountProfileList';
+
+import { cn } from '@/lib/utils';
 
 const OneTimeCodeGeneration = () => {
   const { t } = useTranslation('model');
@@ -46,6 +48,14 @@ const OneTimeCodeGeneration = () => {
     toast.success(t('Copied to clipboard'));
   };
 
+  const confirmAndRegenerateCode = () => {
+    const userConfirmed = window.confirm(
+      t('Are you sure you want to regenerate a new code?')!,
+    );
+    if (userConfirmed) {
+      regenerateCode();
+    }
+  };
   // Trigger code invalidation and refetch
   const regenerateCode = () => {
     setInvalidateCode(true);
@@ -64,27 +74,35 @@ const OneTimeCodeGeneration = () => {
       });
   };
 
+  const isManuallyRegenerating =
+    oneTimeCodeQuery.isRefetching && invalidateCode;
   return (
     <div>
-      <h1 className="font-bold mb-4">{t('One-time code')}</h1>
+      <h1 className="mb-4 font-bold">{t('One-time code')}</h1>
       {oneTimeCodeQuery.isLoading ? (
-        <div className="flex mt-[50%]">
+        <div className="mt-[50%] flex">
           <Spinner size="16px" className="mx-auto" />
         </div>
       ) : (
         <>
           {oneTimeCodeQuery.data?.code && (
-            <div className="flex select-none justify-between items-center flex-wrap gap-2">
-              <div
-                onClick={handleCopy}
-                className="cursor-pointer flex-shrink-0"
-              >
+            <div className="flex select-none flex-wrap items-center justify-between gap-2">
+              <div onClick={handleCopy} className="shrink-0 cursor-pointer">
                 {`${t('Your one-time code is')}: `}
-                <span className="inline bg-sky-100 font-bold text-sm text-neutral-900 font-mono rounded dark:bg-neutral-600 dark:text-neutral-200 text-primary-500 p-1">
-                  {oneTimeCodeQuery.data?.code}
+                <span
+                  className={cn(
+                    'min-w-[60px] inline bg-sky-100 font-bold text-sm text-neutral-900 font-mono rounded dark:bg-neutral-600 dark:text-neutral-200 text-primary-500 p-1',
+                    {
+                      'animate-pulse': isManuallyRegenerating,
+                    },
+                  )}
+                >
+                  {isManuallyRegenerating
+                    ? '******'
+                    : oneTimeCodeQuery.data?.code}
                 </span>
               </div>
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <AddTagsToOneTimeCodeDropdown
                   selectedTags={selectedTags}
                   setSelectedTags={setSelectedTags}
@@ -92,22 +110,22 @@ const OneTimeCodeGeneration = () => {
                   oneTimeCodeId={oneTimeCodeQuery.data?.code_id}
                 />
                 <HelpTagTooltip />
-                {oneTimeCodeQuery.data?.expiresAt && (
+                {isManuallyRegenerating ||
+                oneTimeCodeQuery.isLoading ||
+                !oneTimeCodeQuery.data?.expiresAt ? (
+                  <Spinner size="16px" />
+                ) : (
                   <CodeTimeLeft endOfDay={oneTimeCodeQuery.data.expiresAt} />
                 )}
               </div>
             </div>
           )}
           <button
-            className="mx-auto my-3 flex w-fit items-center gap-3 rounded border text-sm py-2 px-4 hover:opacity-50 border-neutral-600 text-white md:mb-0 md:mt-2"
-            onClick={regenerateCode}
-            disabled={oneTimeCodeQuery.isLoading}
+            className="mx-auto my-3 flex w-fit items-center gap-3 rounded border border-neutral-600 px-4 py-2 text-sm text-white hover:opacity-50 md:mb-0 md:mt-2"
+            onClick={confirmAndRegenerateCode}
+            disabled={isManuallyRegenerating}
           >
-            {oneTimeCodeQuery.isLoading ? (
-              <Spinner size="16px" />
-            ) : (
-              <IconRefresh />
-            )}
+            {isManuallyRegenerating ? <Spinner size="16px" /> : <IconRefresh />}
             <div>{t('Regenerate code')}</div>
           </button>
           {oneTimeCodeQuery.data?.code && (

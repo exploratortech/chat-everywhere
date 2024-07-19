@@ -1,5 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { FC, Fragment, useContext, useEffect } from 'react';
+import type { FC } from 'react';
+import { Fragment, useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
@@ -57,7 +58,7 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200">
+              <Dialog.Panel className="w-full max-w-lg overflow-hidden rounded-2xl bg-neutral-800 p-6 text-left align-middle text-neutral-200 shadow-xl transition-all">
                 <div className="mb-3">
                   {t(
                     'As a Pro plan customer, you will receive the monthly credits on the 1st day of every month to use our custom modes. If you need more credits, you can purchase them below.',
@@ -65,8 +66,8 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                 </div>
 
                 <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                  <table className="w-full text-sm text-gray-500 dark:text-gray-400 text-center">
-                    <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                  <table className="w-full text-center text-sm text-gray-500 dark:text-gray-400">
+                    <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
                       <tr>
                         <th scope="col" className="px-6 py-3">
                           {t('Custom Mode')}
@@ -81,10 +82,10 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                      <tr className="border-b bg-white dark:border-gray-700 dark:bg-gray-900">
                         <th
                           scope="row"
-                          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                          className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
                         >
                           GPT-4
                         </th>
@@ -93,21 +94,21 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                         </td>
                         <td
                           className={`px-6 py-4 ${
-                            gpt4Credit === 0 ? 'text-red-400 font-semibold' : ''
+                            gpt4Credit === 0 ? 'font-semibold text-red-400' : ''
                           }`}
                         >
                           {gpt4Credit === null
                             ? DefaultMonthlyCredits[PluginID.GPT4]
                             : gpt4Credit}
                         </td>
-                        <td className="px-6 py-4 flex flex-col text-left">
+                        <td className="flex flex-col px-6 py-4 text-left">
                           {Object.entries(GPT4_CREDIT_PURCHASE_LINKS).map(
                             ([key, value]) => (
                               <a
                                 href={`${value}?prefilled_email=${userEmail}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="font-medium text-blue-600 dark:text-blue-500 hover:underline mb-1.5"
+                                className="mb-1.5 font-medium text-blue-600 hover:underline dark:text-blue-500"
                                 key={key}
                               >
                                 {t('Buy')} {key} {t('credit')}
@@ -116,10 +117,10 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                           )}
                         </td>
                       </tr>
-                      <tr className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                      <tr className="border-b bg-white dark:border-gray-700 dark:bg-gray-900">
                         <th
                           scope="row"
-                          className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                          className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
                         >
                           {t('AI Image')}
                         </th>
@@ -129,7 +130,7 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                         <td
                           className={`px-6 py-4 ${
                             aiImageCredit === 0
-                              ? 'text-red-400 font-semibold'
+                              ? 'font-semibold text-red-400'
                               : ''
                           }`}
                         >
@@ -137,14 +138,14 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                             ? DefaultMonthlyCredits[PluginID.IMAGE_GEN]
                             : aiImageCredit}
                         </td>
-                        <td className="px-6 py-4 flex flex-col text-left">
+                        <td className="flex flex-col px-6 py-4 text-left">
                           {Object.entries(AI_IMAGE_CREDIT_PURCHASE_LINKS).map(
                             ([key, value]) => (
                               <a
                                 href={`${value}?prefilled_email=${userEmail}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="font-medium text-blue-600 dark:text-blue-500 hover:underline mb-1.5"
+                                className="mb-1.5 font-medium text-blue-600 hover:underline dark:text-blue-500"
                                 key={key}
                               >
                                 {t('Buy')} {key} {t('credit')}
@@ -157,7 +158,7 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                   </table>
                 </div>
 
-                <div className="mt-3 text-xs text-neutral-400 leading-4">
+                <div className="mt-3 text-xs leading-4 text-neutral-400">
                   {t(
                     'You will receive an email notification when your credits are ready. You can also check your credit balance in the dashboard.',
                   )}

@@ -1,4 +1,4 @@
-import { MjButtonCommandRequest, MjImageGenRequest } from '@/types/mjJob';
+import type { MjButtonCommandRequest, MjImageGenRequest } from '@/types/mjJob';
 
 export const executeNewImageGen = async (
   job: Omit<MjImageGenRequest, 'type'>,

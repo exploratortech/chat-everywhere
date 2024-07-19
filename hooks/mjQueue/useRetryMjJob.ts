@@ -7,7 +7,7 @@ import {
   executeNewImageGen,
 } from '@/utils/app/mjServiceHelper';
 
-import { FailedMjJob } from '@/types/mjJob';
+import type { FailedMjJob } from '@/types/mjJob';
 
 import HomeContext from '@/components/home/home.context';
 

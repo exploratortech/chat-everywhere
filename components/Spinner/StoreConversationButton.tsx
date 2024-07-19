@@ -1,12 +1,13 @@
 import { IconBrandStackshare, IconLoader } from '@tabler/icons-react';
-import { FC, useState } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import { Conversation } from '@/types/chat';
+import type { Conversation } from '@/types/chat';
 
 interface Props {
   conversation: Conversation;

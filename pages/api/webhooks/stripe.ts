@@ -1,11 +1,11 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { sendReportForStripeWebhookError } from '@/utils/server/resend';
 import handleCheckoutSessionCompleted from '@/utils/server/stripe/handleCheckoutSessionCompleted';
 import handleCustomerSubscriptionDeleted from '@/utils/server/stripe/handleCustomerSubscriptionDeleted';
 import handleCustomerSubscriptionUpdated from '@/utils/server/stripe/handleCustomerSubscriptionUpdated';
 
-import { UserProfile } from './../../../types/user';
+import type { UserProfile } from './../../../types/user';
 
 import getRawBody from 'raw-body';
 import Stripe from 'stripe';
@@ -49,9 +49,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       );
       return res.status(400).send(`Webhook signature verification failed.`);
     }
-
   }
-
 
   try {
     switch (event.type) {

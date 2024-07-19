@@ -17,11 +17,14 @@ export type MjRequest = MjImageGenRequest | MjButtonCommandRequest;
 
 export interface BasedMjJob {
   jobId: string;
+  myMidJourneyMessageId?: string;
   status: JobStatus;
   enqueuedAt: string;
   startProcessingAt?: string;
   userId: string;
   mjRequest: MjRequest;
+  usedOnDemandCredit?: boolean;
+  lastUsedKey?: 'our-discord-key' | 'on-demand-credit-key';
 }
 export interface QueuedMjJob extends BasedMjJob {
   status: 'QUEUED';

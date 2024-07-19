@@ -32,10 +32,10 @@ const AiPainter: React.FC<AiPainterProps> = ({ src, alt }) => {
         <img
           src={src}
           alt={alt}
-          className={`w-full m-0 transition-all duration-500 `}
+          className={`m-0 w-full transition-all duration-500 `}
         />
 
-        <div className="absolute bottom-0 right-0 p-1 z-10 flex gap-2">
+        <div className="absolute bottom-0 right-0 z-10 flex gap-2 p-1">
           <button>
             <LineShareButton
               imageFileUrl={src}
@@ -51,7 +51,7 @@ const AiPainter: React.FC<AiPainterProps> = ({ src, alt }) => {
         </div>
       </div>
       <button
-        className="max-w-max cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
+        className="max-w-max cursor-pointer select-none border border-white px-4 py-2 font-bold text-white transition-all duration-500 hover:bg-white hover:text-black"
         onClick={() => {
           downloadFile(src, filename);
         }}

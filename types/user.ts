@@ -1,12 +1,12 @@
-import { ExportFormatV4 } from './export';
-import { SubscriptionPlan } from './paid_plan';
-import { PluginID } from './plugin';
-import {
+import type { ExportFormatV4 } from './export';
+import type { SubscriptionPlan } from './paid_plan';
+import type { PluginID } from './plugin';
+import type {
   PaidPlanCurrencyType,
   StripeProductPaidPlanType,
 } from './stripe-product';
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type { SubscriptionPlan } from './paid_plan';
 
@@ -36,6 +36,7 @@ export interface UserProfile {
   isTeacherAccount: boolean;
   associatedTeacherId: string | undefined;
   tempUserUniqueId: string | undefined;
+  enabledPriorityEndpoint: boolean;
 }
 
 export interface CreditUsage {

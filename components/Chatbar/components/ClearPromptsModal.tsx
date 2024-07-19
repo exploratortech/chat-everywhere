@@ -1,8 +1,8 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconFolder, IconMessage, IconX } from '@tabler/icons-react';
+import type { PropsWithChildren } from 'react';
 import React, {
   Fragment,
-  PropsWithChildren,
   useCallback,
   useContext,
   useEffect,
@@ -13,14 +13,15 @@ import { useTranslation } from 'react-i18next';
 
 import { event } from 'nextjs-google-analytics';
 
-import { ActionType, useCreateReducer } from '@/hooks/useCreateReducer';
+import type { ActionType } from '@/hooks/useCreateReducer';
+import { useCreateReducer } from '@/hooks/useCreateReducer';
 
 import { getNonDeletedCollection, savePrompts } from '@/utils/app/conversation';
 import { trackEvent } from '@/utils/app/eventTracking';
 import { saveFolders } from '@/utils/app/folders';
 
-import { FolderInterface } from '@/types/folder';
-import { Prompt } from '@/types/prompt';
+import type { FolderInterface } from '@/types/folder';
+import type { Prompt } from '@/types/prompt';
 
 import HomeContext from '@/components/home/home.context';
 import { Button } from '@/components/v2Chat/ui/button';
@@ -247,15 +248,15 @@ export default function ClearPromptsModal() {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="flex flex-col w-full max-w-[70vw] xl:max-w-3xl tablet:max-w-[90vw] h-[calc(80vh-100px)] transform overflow-hidden rounded-2xl text-left align-middle shadow-xl transition-all text-neutral-200 mobile:h-[100dvh] max-h-[750px] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none bg-neutral-900">
-                  <div className="flex gap-2 items-baseline">
-                    <h1 className="font-bold mb-4 px-6 pt-6 pr-2">
+                <Dialog.Panel className="flex h-[calc(80vh-100px)] max-h-[750px] w-full max-w-[70vw] flex-col overflow-hidden rounded-2xl bg-neutral-900 text-left align-middle text-neutral-200 shadow-xl transition-all xl:max-w-3xl mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:max-h-[unset] tablet:max-w-[90vw]">
+                  <div className="flex items-baseline gap-2">
+                    <h1 className="mb-4 px-6 pr-2 pt-6 font-bold">
                       {t('Clear Prompts')}
                     </h1>
                     <Button
                       variant={'link'}
                       size={'sm'}
-                      className="mobile:hidden p-0 text-gray-400 underline"
+                      className="p-0 text-gray-400 underline mobile:hidden"
                       onClick={handleSwitchToClearConversations}
                     >
                       {t('Switch to Clear Conversations')}
@@ -263,15 +264,15 @@ export default function ClearPromptsModal() {
                   </div>
 
                   <Button
-                    className="p-1 absolute top-5 right-5"
+                    className="absolute right-5 top-5 p-1"
                     onClick={handleClose}
                     variant="ghost"
                     type="button"
                   >
                     <IconX />
                   </Button>
-                  <div className="relative flex-1 flex flex-col px-6 overflow-y-auto">
-                    <div className="flex justify-end self-stretch sticky top-0 py-2 bg-neutral-900 z-[1000]">
+                  <div className="relative flex flex-1 flex-col overflow-y-auto px-6">
+                    <div className="sticky top-0 z-[1000] flex justify-end self-stretch bg-neutral-900 py-2">
                       <div className="flex items-center">
                         <label
                           className="select-none"
@@ -280,7 +281,7 @@ export default function ClearPromptsModal() {
                           {t('Select all')}
                         </label>
                         <input
-                          className="form-checkbox w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
+                          className="form-checkbox ml-4 size-5 rounded-md bg-[#343541] text-indigo-400 focus:ring-2 focus:ring-indigo-400 dark:ring-offset-gray-800"
                           onChange={(event) =>
                             handleSelectAll(event.currentTarget.checked)
                           }
@@ -305,14 +306,14 @@ export default function ClearPromptsModal() {
                         <PromptItem key={prompt.id} prompt={prompt} />
                       ))}
                   </div>
-                  <div className="flex flex-col items-stretch xs:flex-row justify-between p-6 gap-x-2 gap-y-4 bg-neutral-900">
+                  <div className="flex flex-col items-stretch justify-between gap-x-2 gap-y-4 bg-neutral-900 p-6 xs:flex-row">
                     <div className="flex items-center">
                       <label htmlFor="clear-folders-checkbox">
                         {t('Clear folders')}
                       </label>
                       <input
                         id="clear-folders-checkbox"
-                        className="form-checkbox w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
+                        className="form-checkbox ml-4 size-5 rounded-md bg-[#343541] text-indigo-400 focus:ring-2 focus:ring-indigo-400 dark:ring-offset-gray-800"
                         checked={deletingFolders}
                         onChange={() => {
                           dispatch({
@@ -329,7 +330,7 @@ export default function ClearPromptsModal() {
                     </div>
                     <div className="flex gap-x-2">
                       <Button
-                        className="flex-1 xs:flex-auto h-10"
+                        className="h-10 flex-1 xs:flex-auto"
                         variant="outline"
                         type="button"
                         onClick={handleClose}
@@ -338,7 +339,7 @@ export default function ClearPromptsModal() {
                       </Button>
                       {confirmingDeletion ? (
                         <Button
-                          className="flex-1 xs:flex-auto h-10"
+                          className="h-10 flex-1 xs:flex-auto"
                           onClick={clearPrompts}
                           variant="default"
                           type="button"
@@ -347,7 +348,7 @@ export default function ClearPromptsModal() {
                         </Button>
                       ) : (
                         <Button
-                          className="flex-1 xs:flex-auto h-10"
+                          className="h-10 flex-1 xs:flex-auto"
                           onClick={() => {
                             dispatch({
                               field: 'confirmingDeletion',
@@ -423,11 +424,11 @@ function FolderItem({ folder, prompts }: FolderItemProp) {
         }}
       >
         <div
-          className={`flex cursor-pointer w-full items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90`}
+          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:!bg-[#343541]/90`}
           onClick={() => setIsOpen(!isOpen)}
         >
           <IconFolder size={18} />
-          <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 pr-12 select-none">
+          <div className="relative max-h-5 flex-1 select-none truncate break-all pr-12 text-left text-[12.5px] leading-4">
             {folder.name}
           </div>
         </div>
@@ -461,10 +462,10 @@ function PromptItem({ prompt }: PromptItemProp) {
       }}
     >
       <div
-        className={`flex w-full items-center gap-3 rounded-lg p-3 text-sm translate-x-0`}
+        className={`flex w-full translate-x-0 items-center gap-3 rounded-lg p-3 text-sm`}
       >
         <IconMessage size={18} />
-        <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-4 pr-12">
+        <div className="relative max-h-5 flex-1 truncate break-all pr-12 text-left text-[12.5px] leading-4">
           {prompt.name}
         </div>
       </div>
@@ -492,10 +493,10 @@ function CheckboxItem({
 
   return (
     <div className="flex flex-row items-center">
-      {padded && <div className="w-[1px] h-full ml-5 dark:bg-white/50" />}
+      {padded && <div className="ml-5 h-full w-px dark:bg-white/50" />}
       {children}
       <input
-        className="form-checkbox w-5 h-5 ml-4 rounded-md text-indigo-400 focus:ring-indigo-400 dark:ring-offset-gray-800 focus:ring-2 bg-[#343541]"
+        className="form-checkbox ml-4 size-5 rounded-md bg-[#343541] text-indigo-400 focus:ring-2 focus:ring-indigo-400 dark:ring-offset-gray-800"
         onChange={() => {
           setIsChecked(!isChecked);
           onCheck && onCheck(!isChecked);

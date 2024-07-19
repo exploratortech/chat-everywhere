@@ -1,24 +1,18 @@
 // This is a simpler rewrite of the OpenAIStream function, which is the main function that handles the AI response.
 // This should be used in tendon with the handler.ts file. For GPT-4 only
-import {
-  DEFAULT_TEMPERATURE,
-} from '@/utils/app/const';
+import { DEFAULT_TEMPERATURE } from '@/utils/app/const';
 import { shortenMessagesBaseOnTokenLimit } from '@/utils/server/api';
 import { normalizeMessages } from '@/utils/server/index';
 
-import { FunctionCall, Message } from '@/types/chat';
+import type { FunctionCall, Message } from '@/types/chat';
 import { OpenAIModelID, OpenAIModels } from '@/types/openai';
 
 import { ChatEndpointManager } from '../ChatEndpointManager';
 
-import {
-  ParsedEvent,
-  ReconnectInterval,
-  createParser,
-} from 'eventsource-parser';
+import type { ParsedEvent, ReconnectInterval } from 'eventsource-parser';
+import { createParser } from 'eventsource-parser';
 
 type AIStreamProps = {
-  countryCode: string;
   systemPrompt: string;
   messages: Message[];
   onUpdateToken: (token: string) => void;
@@ -32,7 +26,6 @@ type AIStreamResponseType = {
 }[];
 
 export const AIStream = async ({
-  countryCode,
   systemPrompt,
   messages,
   onUpdateToken,
@@ -40,9 +33,7 @@ export const AIStream = async ({
 }: AIStreamProps): Promise<AIStreamResponseType> => {
   const model = OpenAIModels[OpenAIModelID.GPT_4O];
 
-  const endpointManager = new ChatEndpointManager(
-    model,
-  );
+  const endpointManager = new ChatEndpointManager(model);
 
   const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
 
@@ -101,14 +92,11 @@ export const AIStream = async ({
 
   if (res.status !== 200) {
     const errorMessage = await res.text();
-    throw new Error(
-      `Error: ${res.status} ${res.statusText} ${errorMessage}`,
-      {
-        cause: {
-          message: `Error: ${res.status} ${res.statusText} ${errorMessage}`,
-        }
-      }
-    );
+    throw new Error(`Error: ${res.status} ${res.statusText} ${errorMessage}`, {
+      cause: {
+        message: `Error: ${res.status} ${res.statusText} ${errorMessage}`,
+      },
+    });
   }
 
   const onParse = (event: ParsedEvent | ReconnectInterval) => {

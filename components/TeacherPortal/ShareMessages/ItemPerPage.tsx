@@ -1,7 +1,9 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import useTeacherSettings from '@/hooks/teacherPortal/useTeacherSettings';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import useTeacherSettings from '@/hooks/teacherPortal/useTeacherSettings';
+
 import {
   Select,
   SelectContent,
@@ -36,7 +38,7 @@ const ItemPerPage = () => {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="flex-shrink-0">{t('Show')}</span>
+      <span className="shrink-0">{t('Show')}</span>
       <Select
         onValueChange={(value) => {
           handleValueChange(value);

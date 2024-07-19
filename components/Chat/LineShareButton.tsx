@@ -1,6 +1,7 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconLoader, IconMessageCircleUp } from '@tabler/icons-react';
-import React, { FC, useContext, useState } from 'react';
+import type { FC } from 'react';
+import React, { useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
@@ -10,7 +11,6 @@ import { truncateText } from '@/utils/data/truncateText';
 
 import HomeContext from '@/components/home/home.context';
 
-import { cn } from '@/lib/utils';
 import { encode } from 'base64-arraybuffer';
 
 interface LineShareButtonProps {
@@ -122,9 +122,9 @@ export const LineShareButton: FC<LineShareButtonProps> = ({
     <>
       <button
         data-tooltip-id="share-line-tooltip"
-        data-tooltip-content={`${t(`Share to LINE`)}${isSelectedText? ': ' + truncateText(messageContent, 15) : ''}`}
+        data-tooltip-content={`${t(`Share to LINE`)}${isSelectedText ? ': ' + truncateText(messageContent, 15) : ''}`}
         data-tooltip-place="bottom"
-        className={`translate-x-[9999px] text-[#4CC764] hover:text-[#17ff44] focus:translate-x-0 group-hover:translate-x-0 h-fit ${className} ${
+        className={`h-fit translate-x-[9999px] text-[#4CC764] hover:text-[#17ff44] focus:translate-x-0 group-hover:translate-x-0 ${className} ${
           loading ? '!translate-x-0' : ''
         }`}
         onClick={shareOnClick}

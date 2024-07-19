@@ -1,11 +1,12 @@
-import { Dispatch, createContext } from 'react';
+import type { Dispatch } from 'react';
+import { createContext } from 'react';
 
-import { ActionType } from '@/hooks/useCreateReducer';
+import type { ActionType } from '@/hooks/useCreateReducer';
 
-import { Conversation } from '@/types/chat';
-import { SupportedExportFormats } from '@/types/export';
+import type { Conversation } from '@/types/chat';
+import type { SupportedExportFormats } from '@/types/export';
 
-import { ChatbarInitialState } from './Chatbar.state';
+import type { ChatbarInitialState } from './Chatbar.state';
 
 export interface ChatbarContextProps {
   state: ChatbarInitialState;

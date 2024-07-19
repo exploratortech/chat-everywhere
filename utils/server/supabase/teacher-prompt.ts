@@ -1,5 +1,5 @@
-import { TeacherPromptForTeacherPortal } from '@/types/prompt';
-import { Database } from '@/types/supabase';
+import type { TeacherPromptForTeacherPortal } from '@/types/prompt';
+import type { Database } from '@/types/supabase';
 
 import { getAdminSupabaseClient } from '../supabase';
 

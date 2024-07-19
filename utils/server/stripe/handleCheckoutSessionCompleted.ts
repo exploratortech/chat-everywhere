@@ -1,11 +1,11 @@
 import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 
 import { PluginID } from '@/types/plugin';
-import {
+import type {
   NewStripeProduct,
   StripeOneTimePaidPlanProduct,
 } from '@/types/stripe-product';
-import { UserProfile } from '@/types/user';
+import type { UserProfile } from '@/types/user';
 
 import {
   addCredit,
@@ -19,7 +19,7 @@ import StripeHelper, {
 
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
 
 const supabase = getAdminSupabaseClient();
 
@@ -137,12 +137,15 @@ async function handleSubscription(
   email: string | undefined,
   isFakeEvent = false,
 ) {
-  const subscription = await StripeHelper.subscription.getSubscriptionById(
-    stripeSubscriptionId,
-  );
+  const subscription =
+    await StripeHelper.subscription.getSubscriptionById(stripeSubscriptionId);
   // NOTE: Since the stripeSubscriptionId is fake, we use the current date to simulate the expiration date
   const currentPeriodEnd = dayjs
-    .unix(isFakeEvent ? dayjs().add(1, 'month').unix() : subscription.current_period_end)
+    .unix(
+      isFakeEvent
+        ? dayjs().add(1, 'month').unix()
+        : subscription.current_period_end,
+    )
     .utc()
     .toDate();
 

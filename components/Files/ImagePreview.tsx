@@ -33,12 +33,12 @@ const ImagePreview = ({ objectPath }: { objectPath: string }) => {
   }
 
   return (
-    <div className="mobile:max-w-[90dvw] max-w-[800px] max-h-[90dvh] w-full h-full flex items-center justify-center">
+    <div className="flex size-full max-h-[90dvh] max-w-[800px] items-center justify-center mobile:max-w-[90dvw]">
       {imageUrl && (
         <img
           src={imageUrl}
           alt="Preview"
-          className="max-w-full max-h-full object-contain"
+          className="max-h-full max-w-full object-contain"
           onError={() => setError('Failed to load image')}
         />
       )}

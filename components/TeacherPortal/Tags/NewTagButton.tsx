@@ -36,7 +36,7 @@ const NewTagButton = ({
           </div>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md text-white">
+      <DialogContent className="text-white sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{t('New Tag')}</DialogTitle>
           <DialogDescription>{t('Enter tag name below')}</DialogDescription>

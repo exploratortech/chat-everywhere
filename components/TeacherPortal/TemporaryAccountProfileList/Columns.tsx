@@ -1,7 +1,7 @@
 import { CaretSortIcon } from '@radix-ui/react-icons';
-import { ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 
-import { TempAccountProfiles } from '@/types/one-time-code';
+import type { TempAccountProfiles } from '@/types/one-time-code';
 
 import CodeTimeLeft from '@/components/Referral/CodeTimeLeft';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import NameEdit from './NameEdit';
 
 import dayjs from 'dayjs';
-import { TFunction } from 'i18next';
+import type { TFunction } from 'i18next';
 
 export function getColumns(
   t: TFunction<'model', undefined>,
@@ -47,7 +47,7 @@ export function getColumns(
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             {t('Name')}
-            <CaretSortIcon className="ml-2 h-4 w-4" />
+            <CaretSortIcon className="ml-2 size-4" />
           </Button>
         );
       },
@@ -70,12 +70,12 @@ export function getColumns(
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             {t('Registered At')}
-            <CaretSortIcon className="ml-2 h-4 w-4" />
+            <CaretSortIcon className="ml-2 size-4" />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase pl-4">
+        <div className="pl-4 lowercase">
           {dayjs(row.getValue('created_at')).format('YYYY-MM-DD HH:mm')}
         </div>
       ),
@@ -89,12 +89,12 @@ export function getColumns(
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             {t('Expired At')}
-            <CaretSortIcon className="ml-2 h-4 w-4" />
+            <CaretSortIcon className="ml-2 size-4" />
           </Button>
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase pl-4">
+        <div className="pl-4 lowercase">
           <CodeTimeLeft endOfDay={row.getValue('expired_at')} timeOnly={true} />
         </div>
       ),

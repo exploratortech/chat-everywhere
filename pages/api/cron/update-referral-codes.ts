@@ -11,7 +11,7 @@ export const config = {
   runtime: 'edge',
 };
 
-const handler = async (req: Request): Promise<Response> => {
+const handler = async (): Promise<Response> => {
   try {
     await batchRefreshReferralCodes();
     return new Response(JSON.stringify({ success: true }), { status: 200 });

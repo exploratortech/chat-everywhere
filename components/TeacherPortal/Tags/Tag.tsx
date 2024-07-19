@@ -23,9 +23,9 @@ const Tag = ({
         onSelect?.();
       }}
     >
-      <span className="px-1.5 py-0.5 rounded mr-1">#{label}</span>
+      <span className="mr-1 rounded px-1.5 py-0.5">#{label}</span>
       {count > 0 && (
-        <span className="text-neutral-500 font-light px-1 py-0.5 rounded">
+        <span className="rounded px-1 py-0.5 font-light text-neutral-500">
           {count}
         </span>
       )}

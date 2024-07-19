@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 function usePreviousState<T>(value: T): T | undefined {
   const ref = useRef<T>();

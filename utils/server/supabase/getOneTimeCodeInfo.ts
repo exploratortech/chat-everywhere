@@ -1,4 +1,4 @@
-import {
+import type {
   OneTimeCodeInfoPayload,
   TempAccountProfiles,
 } from '@/types/one-time-code';
@@ -6,7 +6,7 @@ import {
 import { generateOneCodeAndExpirationDate } from '../referralCode';
 import { getAdminSupabaseClient } from '../supabase';
 
-import { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
 
 export const getOneTimeCodeInfo = async (
