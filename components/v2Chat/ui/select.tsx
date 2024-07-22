@@ -5,11 +5,7 @@ import * as React from 'react';
 
 import { cn } from '@/utils/v2Chat/utils';
 
-import {
-  IconArrowDown,
-  IconCheck,
-  IconChevronUpDown,
-} from '@/components/v2Chat/ui/icons';
+import { IconCheck, IconChevronUpDown } from '@/components/v2Chat/ui/icons';
 
 const Select = SelectPrimitive.Root;
 
@@ -90,9 +86,9 @@ const SelectItem = React.forwardRef<
     )}
     {...props}
   >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+    <span className="absolute left-2 flex size-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <IconCheck className="h-4 w-4" />
+        <IconCheck className="size-4" />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

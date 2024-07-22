@@ -9,8 +9,8 @@ export function UploadProgress({
 }) {
   return (
     <div className="w-full">
-      <div className="flex mb-2 items-center justify-center">
-        <span className="text-xs font-semibold inline-block text-white">
+      <div className="mb-2 flex items-center justify-center">
+        <span className="inline-block text-xs font-semibold text-white">
           {progressNumber}%
         </span>
       </div>

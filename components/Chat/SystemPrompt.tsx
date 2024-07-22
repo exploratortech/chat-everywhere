@@ -1,18 +1,12 @@
-import {
-  FC,
-  KeyboardEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { FC, KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
 import { DEFAULT_SYSTEM_PROMPT } from '@/utils/app/const';
 
-import { Conversation } from '@/types/chat';
-import { Prompt } from '@/types/prompt';
+import type { Conversation } from '@/types/chat';
+import type { Prompt } from '@/types/prompt';
 
 import { PromptList } from './PromptList';
 import { VariableModal } from './VariableModal';

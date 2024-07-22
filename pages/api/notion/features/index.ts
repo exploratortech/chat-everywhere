@@ -1,9 +1,9 @@
-import { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-import { ChatEverywhereFeatures } from '@/types/notion';
+import type { ChatEverywhereFeatures } from '@/types/notion';
 
 import { Client } from '@notionhq/client';
-import { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
+import type { QueryDatabaseParameters } from '@notionhq/client/build/src/api-endpoints';
 
 const featuresDatabaseID = process.env.NOTION_FEATURES_DATABASE_ID as string;
 const notionKey = process.env.NOTION_SECRET_KEY as string;

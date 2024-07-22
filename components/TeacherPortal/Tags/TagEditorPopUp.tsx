@@ -1,18 +1,21 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
-import { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
-import { Tag as TagType } from '@/types/tags';
-import EditableTagSelector from './EditableTagSelector';
-import toast from 'react-hot-toast';
-import { Button } from '../../ui/button';
-import { useTranslation } from 'react-i18next';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+
+import type { StudentMessageSubmission } from '@/types/share-messages-by-teacher-profile';
+import type { Tag as TagType } from '@/types/tags';
+
+import { Button } from '../../ui/button';
+import EditableTagSelector from './EditableTagSelector';
 
 const TagEditorPopup = ({
   selectedMessageIds,
   submissions,
   allTags,
   setIsTagEditorVisible,
-  refetchTags
+  refetchTags,
 }: {
   selectedMessageIds: number[];
   submissions?: StudentMessageSubmission[];
@@ -24,20 +27,20 @@ const TagEditorPopup = ({
   const [selectedTags, setSelectedTags] = useState<TagType[]>([]);
   const [isInitialSelectionDone, setIsInitialSelectionDone] = useState(false);
   const supabase = useSupabaseClient();
-  
+
   // Reset initial selection when selectedMessageIds change
   useEffect(() => {
     setIsInitialSelectionDone(false);
   }, [selectedMessageIds]);
-  
+
   // Effect to preselect tags based on selected submissions
   useEffect(() => {
     if (!isInitialSelectionDone) {
       const preselectedTags = submissions
-        ?.filter(submission => selectedMessageIds.includes(submission.id))
+        ?.filter((submission) => selectedMessageIds.includes(submission.id))
         .reduce((acc: TagType[], submission) => {
-          submission.message_tags.forEach(tag => {
-            if (!acc.find(t => t.id === tag.id)) {
+          submission.message_tags.forEach((tag) => {
+            if (!acc.find((t) => t.id === tag.id)) {
               acc.push(tag);
             }
           });
@@ -51,11 +54,11 @@ const TagEditorPopup = ({
 
   // Handle tag selection changes
   const handleTagSelectionChange = (tag: TagType, isSelected: boolean) => {
-    setSelectedTags(prevSelectedTags => {
+    setSelectedTags((prevSelectedTags) => {
       if (isSelected) {
         return [...prevSelectedTags, tag];
       } else {
-        return prevSelectedTags.filter(t => t.id !== tag.id);
+        return prevSelectedTags.filter((t) => t.id !== tag.id);
       }
     });
   };
@@ -68,17 +71,20 @@ const TagEditorPopup = ({
     }
     const data = {
       messageSubmissionIds: selectedMessageIds,
-      tagIds: selectedTags.map(tag => tag.id),
+      tagIds: selectedTags.map((tag) => tag.id),
     };
     try {
-      const response = await fetch('/api/teacher-portal/bulk-edit-tags-for-selected-submissions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'access-token': accessToken,
+      const response = await fetch(
+        '/api/teacher-portal/bulk-edit-tags-for-selected-submissions',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'access-token': accessToken,
+          },
+          body: JSON.stringify(data),
         },
-        body: JSON.stringify(data),
-      });
+      );
       const responseBody = await response.json();
       if (!response.ok || !responseBody.success) {
         toast.error(t('Failed to update tags'));
@@ -88,13 +94,13 @@ const TagEditorPopup = ({
       refetchTags();
       setIsTagEditorVisible(false);
     } catch (error) {
-        toast.error('Failed to update tags');
+      toast.error('Failed to update tags');
     }
   };
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap items-center gap-2">
         <EditableTagSelector
           allTags={allTags}
           selectedTags={selectedTags}

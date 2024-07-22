@@ -53,7 +53,7 @@ function getAvailableSpeechSourceLanguages() {
 }
 
 const voiceMap: { [language: string]: string } = {
-  'auto': 'en-US-NovaMultilingualNeural',
+  auto: 'en-US-NovaMultilingualNeural',
   'en-US': 'en-US-JennyNeural',
   'zh-TW': 'zh-TW-HsiaoChenNeural',
   'zh-HK': 'zh-HK-HiuMaanNeural',
@@ -77,8 +77,4 @@ const voiceMap: { [language: string]: string } = {
   'hi-IN': 'hi-IN-SwaraNeural',
 };
 
-export {
-  getAvailableLocales,
-  getAvailableSpeechSourceLanguages,
-  voiceMap,
-};
+export { getAvailableLocales, getAvailableSpeechSourceLanguages, voiceMap };

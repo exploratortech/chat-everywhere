@@ -17,9 +17,7 @@ function TierTag({ tier }: Props) {
   }, [tier]);
 
   return (
-    <span
-      className={`${tierColor}  font-medium ml-2 mr-2 px-2.5 py-0.5 rounded`}
-    >
+    <span className={`${tierColor}  mx-2 rounded px-2.5 py-0.5 font-medium`}>
       {tier}
     </span>
   );

@@ -16,7 +16,7 @@ import { appWithTranslation } from 'next-i18next';
 
 import { userProfileQuery } from '@/utils/server/supabase';
 
-import { UserProfile } from '@/types/user';
+import type { UserProfile } from '@/types/user';
 import type {
   ConversationType,
   MessageType,
@@ -369,7 +369,7 @@ const V2Chat = () => {
 
   return (
     <TooltipProvider>
-      <div className="v2-container flex flex-col min-h-screen w-screen">
+      <div className="v2-container flex min-h-screen w-screen flex-col">
         <PaymentDialog
           userProfile={userProfile}
           open={userProfile.plan === 'free' || openPaymentDialog}
@@ -383,7 +383,7 @@ const V2Chat = () => {
           conversations={conversations}
           profileOnClick={() => setOpenPaymentDialog(true)}
         />
-        <main className="group w-full max-h-screen pl-0 animate-in duration-300 ease-in-out">
+        <main className="group max-h-screen w-full pl-0 duration-300 ease-in-out animate-in">
           <div
             className={`flex flex-col items-center ${
               messages.length === 0 ? 'h-screen' : ''

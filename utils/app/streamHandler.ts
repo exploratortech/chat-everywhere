@@ -1,15 +1,10 @@
 import { removeLastLine as removeLastLineF } from './../../utils/app/ui';
 
-import { MjJob } from '@/types/mjJob';
+import type { MjJob } from '@/types/mjJob';
 
 import GeneralHtmlComponentParser from '@/components/Chat/components/GeneralHtmlComponentParser';
-import MjImageProgress from '@/components/Chat/components/MjImageProgress';
-import MjImageSelector, {
-  MjImageSelectorProps,
-} from '@/components/Chat/components/MjImageSelector';
-import MjImageSelectorV2, {
-  MjImageSelectorV2Props,
-} from '@/components/Chat/components/MjImageSelectorV2';
+import type { MjImageSelectorV2Props } from '@/components/Chat/components/MjImageSelectorV2';
+import MjImageSelectorV2 from '@/components/Chat/components/MjImageSelectorV2';
 
 import { generateComponentHTML } from './htmlStringHandler';
 

@@ -1,4 +1,4 @@
-import { PRO_USER } from "./account";
+import { PRO_USER } from './account';
 
 describe('Image generation', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
@@ -8,7 +8,9 @@ describe('Image generation', () => {
     cy.session(
       'user',
       () => {
-        const password = isRunningOnProduction ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION') : PRO_USER.password;
+        const password = isRunningOnProduction
+          ? Cypress.env('PRO_ACCOUNT_PASSOWORD_PRODUCTION')
+          : PRO_USER.password;
         cy.login(PRO_USER.email, password);
       },
       {
@@ -33,10 +35,16 @@ describe('Image generation', () => {
     cy.contains('You have been logged out');
   });
   it('is able to create an image via AI Image Mode (MJ)', () => {
-    cy.get('[data-cy="chat-enhanced-menu-container"]', { timeout: 5000 }).then(() => {
-      // This is to ensure the menu is rendered
-      cy.get('[data-cy="chat-enhanced-menu-container"]').should('have.css', 'display', 'none');
-    })
+    cy.get('[data-cy="chat-enhanced-menu-container"]', { timeout: 5000 }).then(
+      () => {
+        // This is to ensure the menu is rendered
+        cy.get('[data-cy="chat-enhanced-menu-container"]').should(
+          'have.css',
+          'display',
+          'none',
+        );
+      },
+    );
 
     cy.get('[data-cy="chat-input"]', { timeout: 2000 }).then(() => {
       // Ensure the enhanced menu is displayed
@@ -44,12 +52,19 @@ describe('Image generation', () => {
       cy.get('[data-cy="chat-input"]').realMouseDown();
     });
 
-    cy.get('[data-cy="chat-enhanced-menu-container"]').should('have.css', 'display', 'flex');
+    cy.get('[data-cy="chat-enhanced-menu-container"]').should(
+      'have.css',
+      'display',
+      'flex',
+    );
     cy.get('[data-cy="chat-input"]').realClick();
-    cy.get('[data-cy="chat-input"]').type('A fireman is rescuing a cat from a tree.');
-    cy.get('[data-cy="chat-enhanced-menu"]').scrollIntoView().should('be.visible');
+    cy.get('[data-cy="chat-input"]').type(
+      'A fireman is rescuing a cat from a tree.',
+    );
+    cy.get('[data-cy="chat-enhanced-menu"]')
+      .scrollIntoView()
+      .should('be.visible');
     cy.get('[data-cy="chat-mode-selector"]').select('AI Image');
-
 
     cy.get('[data-cy="chat-send-button"]').click();
 
@@ -72,8 +87,7 @@ describe('Image generation', () => {
     //
     // Check if the Remaining Credits are displayed
     cy.get('div[data-cy="credit-counter"]').should('exist');
-
   });
 });
 
-export { };
+export {};

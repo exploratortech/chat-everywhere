@@ -9,7 +9,7 @@ import {
   cancelRunOnThreadIfNeeded,
 } from '@/utils/v2Chat/openAiApiUtils';
 
-import { OpenAIMessageType } from '@/types/v2Chat/chat';
+import type { OpenAIMessageType } from '@/types/v2Chat/chat';
 
 export const config = {
   runtime: 'edge',

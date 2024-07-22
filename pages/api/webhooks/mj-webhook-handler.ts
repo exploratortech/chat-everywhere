@@ -7,7 +7,11 @@ import {
 } from '@/utils/server/mjServiceServerHelper';
 import { addCredit, getUserProfile } from '@/utils/server/supabase';
 
-import { CompletedMjJob, FailedMjJob, ProcessingMjJob } from '@/types/mjJob';
+import type {
+  CompletedMjJob,
+  FailedMjJob,
+  ProcessingMjJob,
+} from '@/types/mjJob';
 import { PluginID } from '@/types/plugin';
 
 import dayjs from 'dayjs';
@@ -47,6 +51,7 @@ const handleFailedStatus = async (reqBody: any) => {
     status: 'FAILED',
     reason: errorMessage,
   } as Partial<FailedMjJob>);
+
   const logOriginalEventPromise = OriginalMjLogEvent({
     userId: jobInfo.userId,
     startTime: jobInfo.startProcessingAt || jobInfo.enqueuedAt,

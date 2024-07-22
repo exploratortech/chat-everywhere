@@ -3,7 +3,7 @@ import { useCallback, useContext, useEffect } from 'react';
 import { updateConversationWithNewContentByIdentifier } from '@/utils/app/conversation';
 import { generateComponentHTML } from '@/utils/app/htmlStringHandler';
 
-import { CompletedMjJob, FailedMjJob } from '@/types/mjJob';
+import type { CompletedMjJob, FailedMjJob } from '@/types/mjJob';
 
 import MjImageSelectorV2 from '@/components/Chat/components/MjImageSelectorV2';
 import HomeContext from '@/components/home/home.context';

@@ -6,7 +6,7 @@ import {
   hasUserRunOutOfCredits,
 } from '@/utils/server/supabase';
 
-import { ChatBody } from '@/types/chat';
+import type { ChatBody } from '@/types/chat';
 import { PluginID } from '@/types/plugin';
 
 import AiPainterProgress from '@/components/Chat/components/AiPainterProgress';

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { Prompt } from '@/types/prompt';
+import type { Prompt } from '@/types/prompt';
 
 interface UsePromptListProps {
   originalPrompts: Prompt[];

@@ -35,7 +35,7 @@ export function ChatMessageActions({
       )}
       {...props}
     >
-      <div className={`${show ? '' : 'w-8 h-8'}`}>
+      <div className={`${show ? '' : 'size-8'}`}>
         <Button
           variant="ghost"
           size="icon"

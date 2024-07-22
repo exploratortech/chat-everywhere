@@ -1,4 +1,4 @@
-import {
+import type {
   TeacherSettings,
   TeacherSettingsInPortal,
 } from '@/types/teacher-settings';

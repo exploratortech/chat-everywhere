@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 
 import { cn } from '@/utils/v2Chat/utils';
 
-import { MessageType } from '@/types/v2Chat/chat';
+import type { MessageType } from '@/types/v2Chat/chat';
 
 import { ChatMessageActions } from '@/components/v2Chat/chat-message-actions';
 import { CodeBlock } from '@/components/v2Chat/ui/codeblock';
@@ -38,7 +38,7 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
       >
         {message.role === 'user' ? <IconUser /> : <IconOpenAI />}
       </div>
-      <div className="flex px-1 ml-4 space-y-2 overflow-hidden">
+      <div className="ml-4 flex space-y-2 overflow-hidden px-1">
         <MemoizedReactMarkdown
           className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
           remarkPlugins={[remarkGfm, remarkMath]}
@@ -46,11 +46,11 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
             p({ children }) {
               return <p className="mb-2 last:mb-0">{children}</p>;
             },
-            code({ node, inline, className, children, ...props }) {
+            code({ inline, className, children, ...props }) {
               if (children.length) {
                 if (children[0] == '▍') {
                   return (
-                    <span className="mt-1 cursor-default animate-pulse">▍</span>
+                    <span className="mt-1 animate-pulse cursor-default">▍</span>
                   );
                 }
 

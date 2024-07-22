@@ -1,7 +1,7 @@
-import { MjJob } from '@/types/mjJob';
+import type { MjJob } from '@/types/mjJob';
 
+import type { PayloadType } from '../app/eventTracking';
 import {
-  PayloadType,
   serverSideTrackEvent,
   serverSideTrackSystemEvent,
 } from '../app/eventTracking';
@@ -34,6 +34,8 @@ export const trackFailedEvent = (jobInfo: MjJob, errorMessage: string) => {
         totalWaitingInQueueTimeInSeconds,
       mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
       mjImageGenErrorMessage: errorMessage,
+      usedOnDemandCredit: jobInfo.usedOnDemandCredit || false,
+      lastUsedKey: jobInfo.lastUsedKey,
     },
   );
   return trackEventPromise;
@@ -64,6 +66,8 @@ export const trackSuccessEvent = (jobInfo: MjJob) => {
       mjImageGenTotalWaitingInQueueTimeInSeconds:
         totalWaitingInQueueTimeInSeconds,
       mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
+      usedOnDemandCredit: jobInfo.usedOnDemandCredit || false,
+      lastUsedKey: jobInfo.lastUsedKey,
     },
   );
 

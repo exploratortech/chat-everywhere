@@ -1,16 +1,12 @@
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { IconBallpen, IconLoader } from '@tabler/icons-react';
-import React, { FC, useContext, useState } from 'react';
+import type { FC } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from 'react-tooltip';
 
 import { trackEvent } from '@/utils/app/eventTracking';
-
-import HomeContext from '@/components/home/home.context';
-
-import { encode } from 'base64-arraybuffer';
-
 import { truncateText } from '@/utils/data/truncateText';
 
 interface StudentShareMessageBtnProps {
@@ -18,7 +14,7 @@ interface StudentShareMessageBtnProps {
   messageContent?: string;
   imageFileUrl?: string;
   size?: number;
-  isSelectedText? : boolean
+  isSelectedText?: boolean;
 }
 
 const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
@@ -29,27 +25,17 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
   isSelectedText = false,
 }) => {
   const { t } = useTranslation('feature');
-  const {
-    state: { user },
-  } = useContext(HomeContext);
+
   const [loading, setLoading] = useState(false);
   const supabase = useSupabaseClient();
 
-  const { dispatch: homeDispatch } = useContext(HomeContext);
-  let imageFileInBase64: String | null = null;
-
   const shareOnClick = async () => {
     setLoading(true);
-    if (imageFileUrl) {
-      const response = await fetch(imageFileUrl);
-      const blob = await response.arrayBuffer();
-      imageFileInBase64 = encode(blob);
-    }
     const payload = {
       accessToken: (await supabase.auth.getSession()).data.session
         ?.access_token,
       messageContent: messageContent,
-      imageFile: imageFileInBase64,
+      imageFileUrl,
     };
     try {
       const response = await fetch('/api/create-message-submission', {
@@ -81,11 +67,9 @@ const StudentShareMessageButton: FC<StudentShareMessageBtnProps> = ({
     <>
       <button
         data-tooltip-id="share-line-tooltip"
-        data-tooltip-content={`${t(`Share to Teacher`)}${isSelectedText? ': ' + truncateText(messageContent, 15) : ''}`}
+        data-tooltip-content={`${t(`Share to Teacher`)}${isSelectedText ? ': ' + truncateText(messageContent, 15) : ''}`}
         data-tooltip-place="bottom"
-        className={`translate-x-[9999px] text-[#4c75c7] hover:text-[#89adf4] focus:translate-x-0 group-hover:translate-x-0 h-fit ${className} ${
-          loading ? '!translate-x-0' : ''
-        }`}
+        className={`h-fit translate-x-[9999px] text-[#4c75c7] hover:text-[#89adf4] focus:translate-x-0 group-hover:translate-x-0 ${className} ${loading ? '!translate-x-0' : ''}`}
         onClick={shareOnClick}
       >
         {loading ? (

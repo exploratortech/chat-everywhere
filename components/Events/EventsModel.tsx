@@ -1,9 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { IconX } from '@tabler/icons-react';
-import React, {
-  Fragment,
-  memo,
-} from 'react';
+import React, { Fragment, memo } from 'react';
 
 import { useTranslation } from 'next-i18next';
 import Image from 'next/image';
@@ -49,25 +46,25 @@ const EventsModel = memo(({ className = '', open, onClose }: Props) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl tablet:max-w-[90vw] h-[80vh] transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 grid grid-rows-[max-content_1fr] mobile:h-[100dvh] mobile:!max-w-[unset] mobile:!rounded-none">
-                <div className="mb-3 flex flex-row justify-between items-center">
+              <Dialog.Panel className="grid h-[80vh] w-full max-w-3xl grid-rows-[max-content_1fr] overflow-hidden rounded-2xl bg-neutral-800 p-6 text-left align-middle text-neutral-200 shadow-xl transition-all mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:max-w-[90vw]">
+                <div className="mb-3 flex flex-row items-center justify-between">
                   <h1>{t('Upcoming events')}</h1>
-                  <button className="w-max min-h-[34px]" onClick={onClose}>
+                  <button className="min-h-[34px] w-max" onClick={onClose}>
                     <IconX></IconX>
                   </button>
                 </div>
-                <div className="flex flex-col justify-between items-center overflow-y-auto">
-                  <div className="flex flex-col justify-between items-center">
+                <div className="flex flex-col items-center justify-between overflow-y-auto">
+                  <div className="flex flex-col items-center justify-between">
                     <Image
                       src="/assets/posters/20240504.jpg"
                       alt="20240504 event"
-                      className="inline-block mb-4"
+                      className="mb-4 inline-block"
                       width="500"
                       height="500"
                     />
                     <div className="flex flex-row gap-2">
                       <button
-                        className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent`}
+                        className={`rounded-md border border-neutral-600 px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 dark:text-gray-100 dark:hover:bg-transparent`}
                         onClick={() => {
                           window.open(
                             'https://docs.google.com/forms/d/e/1FAIpQLSf-9vbM4Qj9xkiwN07N3lZuDxi407cNFx--OGWLxqp8YDOtCg/viewform',
@@ -79,7 +76,7 @@ const EventsModel = memo(({ className = '', open, onClose }: Props) => {
                       </button>
 
                       <button
-                        className={`border border-neutral-600 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-md text-sm dark:text-gray-100 dark:hover:bg-transparent`}
+                        className={`rounded-md border border-neutral-600 px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 dark:text-gray-100 dark:hover:bg-transparent`}
                         onClick={() => {
                           window.open(
                             'https://meet.google.com/oyh-hzir-qdq',

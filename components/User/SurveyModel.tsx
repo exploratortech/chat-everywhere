@@ -1,6 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
-import { FC, Fragment, useContext, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { useTranslation } from 'next-i18next';
@@ -23,7 +24,6 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
   const { t } = useTranslation('survey');
   const {
     state: { user },
-    dispatch: homeDispatch,
   } = useContext(HomeContext);
   const supabaseClient = useSupabaseClient();
 
@@ -105,11 +105,11 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
         ...prev,
         [value]: checked,
       })
-        .filter(([key, value]) => value)
+        .filter(([value]) => value)
         .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {}) as {
-          value: string;
-          label: string;
-        }[];
+        value: string;
+        label: string;
+      }[];
       stateVar === selectedUseCases && setSelectedUseCases(newState);
       stateVar === selectedFeatures && setSelectedFeatures(newState);
       stateVar === selectedPreferred && setSelectedPreferred(newState);
@@ -206,27 +206,27 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md md:max-w-lg transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all bg-neutral-800 text-white">
+              <Dialog.Panel className="w-full max-w-md overflow-hidden rounded-2xl bg-neutral-800 p-6 text-left align-middle text-white shadow-xl transition-all md:max-w-lg">
                 <Dialog.Description>
-                  <div className="rounded-2xl flex flex-col">
-                    <span className="text-lg mb-6">
+                  <div className="flex flex-col rounded-2xl">
+                    <span className="mb-6 text-lg">
                       {t(
                         'Please share your thoughts by completing a brief survey',
                       )}
                     </span>
 
-                    <div className="w-full h-96 overflow-y-scroll">
+                    <div className="h-96 w-full overflow-y-scroll">
                       {/* 1. Name */}
                       <div className="mb-4">
                         <label
                           htmlFor="name"
-                          className="block text-base text-stone-400 mb-2"
+                          className="mb-2 block text-base text-stone-400"
                         >
                           {t('Name (required)')}
                         </label>
                         <label
                           id="error-name"
-                          className="text-sm text-rose-500 mb-1 hidden"
+                          className="mb-1 hidden text-sm text-rose-500"
                         >
                           {t('Please enter name')}
                         </label>
@@ -234,7 +234,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                           type="text"
                           id="name"
                           placeholder={t('John Smith') || 'John Smith'}
-                          className="block w-11/12 bg-inherit text-sm border border-dark rounded py-2 px-4 mb-6 leading-tight focus:outline-none focus:border-2"
+                          className="mb-6 block w-11/12 rounded border bg-inherit px-4 py-2 text-sm leading-tight focus:border-2 focus:outline-none"
                           maxLength={50}
                           onChange={(event) => setName(event.target.value)}
                         />
@@ -244,19 +244,19 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                       <div className="mb-4">
                         <label
                           htmlFor="occupation"
-                          className="block text-base text-stone-400 mb-2"
+                          className="mb-2 block text-base text-stone-400"
                         >
                           {t('Occupation (required)')}
                         </label>
                         <label
                           id="error-occupation"
-                          className="block text-sm text-rose-500 mb-1 hidden"
+                          className="mb-1 hidden text-sm text-rose-500"
                         >
                           {t('Please select your occupation')}
                         </label>
                         <select
                           id="occupation"
-                          className="block w-11/12 bg-inherit text-sm border border-dark rounded py-2 px-4 mb-6 leading-tight focus:outline-none focus:border-2"
+                          className="mb-6 block w-11/12 rounded border bg-inherit px-4 py-2 text-sm leading-tight focus:border-2 focus:outline-none"
                           value={selectedOccupation}
                           onChange={(event) =>
                             setSelectedOccupation(event.target.value)
@@ -282,7 +282,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                           <input
                             type="text"
                             id="otherOccupation"
-                            className="block w-11/12 bg-inherit text-sm border border-dark rounded py-2 px-4 mb-3 leading-tight focus:outline-none focus:border-2"
+                            className="block w-11/12 rounded border bg-inherit px-4 py-2 text-sm leading-tight focus:border-2 focus:outline-none"
                             placeholder={
                               t('Please specify') || 'Please specify'
                             }
@@ -299,7 +299,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                         <div className="mb-4">
                           <label
                             htmlFor="name"
-                            className="block text-base text-stone-400 mb-2"
+                            className="mb-2 block text-base text-stone-400"
                           >
                             {t(
                               'Email (optional if you would like to be contacted)',
@@ -307,7 +307,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                           </label>
                           <input
                             type="email"
-                            className="block w-11/12 bg-inherit text-sm border border-dark rounded py-2 px-4 mb-6 leading-tight focus:outline-none focus:border-2"
+                            className="mb-6 block w-11/12 rounded border bg-inherit px-4 py-2 text-sm leading-tight focus:border-2 focus:outline-none"
                             maxLength={50}
                             onChange={(event) => setEmail(event.target.value)}
                             value={email}
@@ -319,7 +319,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                       <div className="mb-6">
                         <label
                           htmlFor="useCase"
-                          className="block text-base text-stone-400 mb-2"
+                          className="mb-2 block text-base text-stone-400"
                         >
                           {t('What Do You Use Chat Everywhere For?')}
                         </label>
@@ -339,7 +339,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                             />
                             <label
                               htmlFor={option.value}
-                              className="text-sm px-2"
+                              className="px-2 text-sm"
                             >
                               <OptionLabels
                                 key={option.value}
@@ -348,12 +348,12 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                             </label>
                             {option.value === 'other_usecase' &&
                               selectedUseCases[
-                              option.value as keyof typeof selectedUseCases
+                                option.value as keyof typeof selectedUseCases
                               ] && (
                                 <input
                                   type="text"
                                   id="otherUseCase"
-                                  className="block w-11/12 bg-inherit text-sm border border-dark rounded py-2 px-4 mb-3 mt-1 leading-tight focus:outline-none focus:border-2"
+                                  className="mb-3 mt-1 block w-11/12 rounded border bg-inherit px-4 py-2 text-sm leading-tight focus:border-2 focus:outline-none"
                                   placeholder={
                                     t('Please specify') || 'Please specify'
                                   }
@@ -374,7 +374,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                       <div className="mb-6">
                         <label
                           htmlFor="features"
-                          className="block text-base text-stone-400 mb-2"
+                          className="mb-2 block text-base text-stone-400"
                         >
                           {t(
                             'Which Chat Everywhere features appeal to you the most?',
@@ -396,7 +396,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                             />
                             <label
                               htmlFor={option.value}
-                              className="text-sm px-2"
+                              className="px-2 text-sm"
                             >
                               <OptionLabels
                                 key={option.value}
@@ -406,12 +406,12 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
 
                             {option.value === 'other_feature' &&
                               selectedFeatures[
-                              option.value as keyof typeof selectedUseCases
+                                option.value as keyof typeof selectedUseCases
                               ] && (
                                 <input
                                   type="text"
                                   id="otherFeature"
-                                  className="block w-11/12 bg-inherit text-sm border border-dark rounded py-2 px-4 mb-3 mt-1 leading-tight focus:outline-none focus:border-2"
+                                  className="mb-3 mt-1 block w-11/12 rounded border bg-inherit px-4 py-2 text-sm leading-tight focus:border-2 focus:outline-none"
                                   placeholder={
                                     t('Please specify') || 'Please specify'
                                   }
@@ -432,7 +432,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                       <div className="mb-6">
                         <label
                           htmlFor="preferred"
-                          className="block text-base text-stone-400 mb-2"
+                          className="mb-2 block text-base text-stone-400"
                         >
                           {t(
                             'What makes Chat Everywhere your preferred choice over official ChatGPT?',
@@ -454,7 +454,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                             />
                             <label
                               htmlFor={option.value}
-                              className="text-sm px-2"
+                              className="px-2 text-sm"
                             >
                               <OptionLabels
                                 key={option.value}
@@ -463,12 +463,12 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                             </label>
                             {option.value === 'other_preferred' &&
                               selectedPreferred[
-                              option.value as keyof typeof selectedUseCases
+                                option.value as keyof typeof selectedUseCases
                               ] && (
                                 <input
                                   type="text"
                                   id="otherPreferred"
-                                  className="block w-11/12 bg-inherit text-sm border border-dark rounded py-2 px-4 mb-3 mt-1 leading-tight focus:outline-none focus:border-2"
+                                  className="mb-3 mt-1 block w-11/12 rounded border bg-inherit px-4 py-2 text-sm leading-tight focus:border-2 focus:outline-none"
                                   placeholder={
                                     t('Please specify') || 'Please specify'
                                   }
@@ -489,7 +489,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                       <div className="mb-4">
                         <label
                           htmlFor="comment"
-                          className="block text-base text-stone-400 mb-2"
+                          className="mb-2 block text-base text-stone-400"
                         >
                           {t(
                             "Is there anything you'd like to tell us? (Optional)",
@@ -505,7 +505,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                             ) ||
                             'Any comments, feedback or suggestions are welcome!'
                           }
-                          className="block w-11/12 bg-inherit text-sm border border-dark rounded py-2 px-4 mb-6 leading-tight focus:outline-none focus:border-2"
+                          className="mb-6 block w-11/12 rounded border bg-inherit px-4 py-2 text-sm leading-tight focus:border-2 focus:outline-none"
                           maxLength={450}
                           onChange={(event) => setComment(event.target.value)}
                         />
@@ -514,10 +514,10 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
                   </div>
                 </Dialog.Description>
 
-                <div className="flex justify-between mt-4">
+                <div className="mt-4 flex justify-between">
                   <button
                     type="button"
-                    className="px-4 py-2 border rounded-lg shadow border-neutral-500 text-neutral-200 hover:bg-neutral-700 focus:outline-none"
+                    className="rounded-lg border border-neutral-500 px-4 py-2 text-neutral-200 shadow hover:bg-neutral-700 focus:outline-none"
                     onClick={onClose}
                   >
                     {t('Close')}
@@ -525,7 +525,7 @@ export const SurveyModel: FC<Props> = ({ onClose }) => {
 
                   <button
                     type="button"
-                    className="px-4 py-2 border rounded-lg shadow text-black bg-slate-200 hover:bg-slate-300 focus:outline-none"
+                    className="rounded-lg border bg-slate-200 px-4 py-2 text-black shadow hover:bg-slate-300 focus:outline-none"
                     onClick={handleSubmit}
                   >
                     {t('Submit')}

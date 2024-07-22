@@ -1,7 +1,4 @@
-import {
-  batchRefreshReferralCodes,
-  getAdminSupabaseClient,
-} from '../../../utils/server/supabase';
+import { getAdminSupabaseClient } from '../../../utils/server/supabase';
 import { deleteUserById } from '@/utils/server/deleteUserById';
 
 import dayjs from 'dayjs';
@@ -15,7 +12,7 @@ export const config = {
   runtime: 'edge',
 };
 
-const handler = async (req: Request): Promise<Response> => {
+const handler = async (): Promise<Response> => {
   const supabase = getAdminSupabaseClient();
   try {
     // find code where expiresAt is less than current time, and its linked tempAccountProfiles profile id

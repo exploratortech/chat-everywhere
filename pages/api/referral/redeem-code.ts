@@ -2,10 +2,10 @@ import {
   getReferralCodeDetail,
   redeemReferralCode,
 } from '../../../utils/server/supabase';
+import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 import { getUserProfile, resetUserCredits } from '@/utils/server/supabase';
 
 import { PluginID } from '@/types/plugin';
-import { serverSideTrackEvent } from '@/utils/app/eventTracking';
 
 export const config = {
   runtime: 'edge',

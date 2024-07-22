@@ -53,18 +53,18 @@ export default function FilePortalModel({ onClose }: Props) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-[85vw] tablet:max-w-[90vw] h-[85vh] transform overflow-hidden rounded-2xl text-left align-middle shadow-xl transition-all bg-neutral-800 text-neutral-200 flex mobile:h-[100dvh] max-h-[90vh] tablet:max-h-[unset] mobile:!max-w-[unset] mobile:!rounded-none">
-                <div className="bg-neutral-900 flex-grow relative overflow-y-auto">
+              <Dialog.Panel className="flex h-[85vh] max-h-[90vh] w-full max-w-[85vw] overflow-hidden rounded-2xl bg-neutral-800 text-left align-middle text-neutral-200 shadow-xl transition-all mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:max-h-[unset] tablet:max-w-[90vw]">
+                <div className="relative grow overflow-y-auto bg-neutral-900">
                   <div className="p-6">
                     <button
-                      className="w-max min-h-[34px] p-4 absolute top-0 right-0"
+                      className="absolute right-0 top-0 min-h-[34px] w-max p-4"
                       onClick={onClose}
                     >
                       <IconX />
                     </button>
                     <div className="flex flex-col gap-4">
                       <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2 text-neutral-200 font-bold">
+                        <div className="flex items-center gap-2 font-bold text-neutral-200">
                           {sidebarT('File Portal')}
                           <PreviewVersionFlag />
                         </div>
@@ -85,7 +85,7 @@ export default function FilePortalModel({ onClose }: Props) {
                         </div>
                         <div className="p-4">
                           <Alert className="bg-yellow-100 text-black">
-                            <IconAlertCircle className="h-4 w-4 !text-yellow-500 " />
+                            <IconAlertCircle className="size-4 !text-yellow-500 " />
                             <AlertTitle className="text-base font-medium">
                               {t('Warning')}
                             </AlertTitle>
@@ -97,8 +97,14 @@ export default function FilePortalModel({ onClose }: Props) {
                                   {t('PDF Page Limitation')}:{' '}
                                   {t('{{pages}} Pages', { pages: 300 })}
                                 </li>
-                                <li>{t('Video Length Limitation')}: {t('{{hours}} hour', { hours: 1 })}</li>
-                                <li>{t('Audio Length Limitation')}: {t('{{hours}} hours', { hours: 8 })}</li>
+                                <li>
+                                  {t('Video Length Limitation')}:{' '}
+                                  {t('{{hours}} hour', { hours: 1 })}
+                                </li>
+                                <li>
+                                  {t('Audio Length Limitation')}:{' '}
+                                  {t('{{hours}} hours', { hours: 8 })}
+                                </li>
                                 <li>{t('Image Size Limitation')}: 20 MB</li>
                               </ul>
                             </AlertDescription>
@@ -117,7 +123,7 @@ export default function FilePortalModel({ onClose }: Props) {
                       validateAndUploadFiles(
                         createFileList(files),
                         uploadFiles,
-                        () => { },
+                        () => {},
                         t,
                       );
                     }}

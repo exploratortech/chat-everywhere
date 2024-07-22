@@ -6,7 +6,8 @@ import {
   useRef,
   useState,
 } from 'react';
-import LoadingBar, { LoadingBarRef } from 'react-top-loading-bar';
+import type { LoadingBarRef } from 'react-top-loading-bar';
+import LoadingBar from 'react-top-loading-bar';
 
 import { useRouter } from 'next/router';
 
@@ -14,7 +15,7 @@ import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 
 import { withCommonServerSideProps } from '@/utils/withCommonServerSideProps';
 
-import { RouteType } from '@/types/teacher-portal-sub-route';
+import type { RouteType } from '@/types/teacher-portal-sub-route';
 
 import Spinner from '@/components/Spinner';
 import OneTimeCodeGeneration from '@/components/TeacherPortal/OneTimeCodeGeneration';
@@ -108,15 +109,15 @@ const TeacherPortalContent: React.FC<TeacherPortalContentProps> = ({
   return (
     <div className="fixed inset-0 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center text-center mobile:block">
-        <div className="bg-neutral-900 w-full tablet:max-w-[90vw] transform overflow-hidden text-left align-middle shadow-xl transition-all text-neutral-200 flex h-[100dvh] tablet:max-h-[unset] !max-w-[unset] !rounded-none">
-          <Sidebar className="bg-neutral-800 flex-shrink-0 flex-grow-0" />
+        <div className="flex h-dvh w-full !max-w-[unset] overflow-hidden !rounded-none bg-neutral-900 text-left align-middle text-neutral-200 shadow-xl transition-all tablet:max-h-[unset] tablet:max-w-[90vw]">
+          <Sidebar className="shrink-0 grow-0 bg-neutral-800" />
 
           {isLoading ? (
-            <div className="flex-grow relative flex items-center justify-center">
+            <div className="relative flex grow items-center justify-center">
               <Spinner size="16px" />
             </div>
           ) : (
-            <div className="p-6 flex-grow relative overflow-y-auto">
+            <div className="relative grow overflow-y-auto p-6">
               {showing === 'one-time-code' && <OneTimeCodeGeneration />}
               {showing === 'shared-message' && <SharedMessages />}
               {showing === 'tags' && <Tags />}

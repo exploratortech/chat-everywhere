@@ -1,7 +1,8 @@
 import { IconPlus } from '@tabler/icons-react';
-import { FC, useContext } from 'react';
+import type { FC } from 'react';
+import { useContext } from 'react';
 
-import { Conversation } from '@/types/chat';
+import type { Conversation } from '@/types/chat';
 
 import { SidebarToggleButton } from '../Sidebar/components/SidebarToggleButton';
 import HomeContext from '@/components/home/home.context';
@@ -26,7 +27,7 @@ export const Navbar: FC<Props> = ({
   } = useContext(HomeContext);
 
   return (
-    <nav className="hidden tablet:flex w-full items-center bg-[#202123] py-3 px-4 gap-5">
+    <nav className="hidden w-full items-center gap-5 bg-[#202123] px-4 py-3 tablet:flex">
       <SidebarToggleButton
         className="-ml-2"
         onClick={toggleChatbar}
@@ -44,7 +45,7 @@ export const Navbar: FC<Props> = ({
         )}
       </div>
 
-      <div className="flex-grow flex-shrink max-w-[240px] mx-auto text-center overflow-hidden text-ellipsis whitespace-nowrap">
+      <div className="mx-auto max-w-[240px] shrink grow truncate text-center">
         {selectedConversation.name !== 'New conversation' && (
           <div className="flex items-center justify-center gap-2">
             <CustomInstructionInUseIndicator />

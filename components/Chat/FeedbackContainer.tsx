@@ -2,9 +2,10 @@ import { IconThumbDown, IconThumbUp } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
-import { TFunction, useTranslation } from 'next-i18next';
+import type { TFunction } from 'next-i18next';
+import { useTranslation } from 'next-i18next';
 
-import { Conversation } from '@/types/chat';
+import type { Conversation } from '@/types/chat';
 
 type FeedbackContainerProps = {
   conversation: Conversation;
@@ -43,7 +44,7 @@ export const FeedbackContainer: React.FC<FeedbackContainerProps> = ({
     toast.custom(
       () => (
         <div
-          className={`pointer-events-auto flex w-full max-w-md rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-500`}
+          className={`pointer-events-auto flex w-full max-w-md rounded-md bg-white shadow-lg ring-1 ring-black/5 dark:bg-neutral-800`}
         >
           <div className="flex flex-col p-4 text-sm">
             <p>
@@ -59,7 +60,7 @@ export const FeedbackContainer: React.FC<FeedbackContainerProps> = ({
             <div className="mt-2 flex flex-row justify-between">
               <button
                 type="button"
-                className="rounded-md border border-green-300 px-2 py-1 text-neutral-900 bg-green-200 shadow hover:bg-green-300 focus:outline-none"
+                className="rounded-md border border-green-300 bg-green-200 px-2 py-1 text-neutral-900 shadow hover:bg-green-300 focus:outline-none"
                 onClick={() => submitFeedback(isPositiveFeedback)}
               >
                 {t('Sure!')}
@@ -85,7 +86,7 @@ export const FeedbackContainer: React.FC<FeedbackContainerProps> = ({
   return (
     <div className="flex flex-row">
       <button
-        className={`cursor-pointer text-gray-500 hover:text-gray-300 ml-2 ${
+        className={`ml-2 cursor-pointer text-gray-500 hover:text-gray-300 ${
           isThumbsUp === true ? 'text-transparent hover:text-transparent' : ''
         }`}
         onClick={() => {

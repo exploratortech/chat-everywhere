@@ -1,40 +1,40 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
 function useMediaQuery(query: string): boolean {
   const getMatches = (query: string): boolean => {
     if (typeof window !== 'undefined') {
-      return window.matchMedia(query).matches
+      return window.matchMedia(query).matches;
     }
-    return false
-  }
+    return false;
+  };
 
-  const [matches, setMatches] = useState<boolean>(getMatches(query))
+  const [matches, setMatches] = useState<boolean>(getMatches(query));
 
   function handleChange() {
-    setMatches(getMatches(query))
+    setMatches(getMatches(query));
   }
 
   useEffect(() => {
-    const matchMedia = window.matchMedia(query)
+    const matchMedia = window.matchMedia(query);
 
-    handleChange()
+    handleChange();
 
     if (matchMedia.addListener) {
-      matchMedia.addListener(handleChange)
+      matchMedia.addListener(handleChange);
     } else {
-      matchMedia.addEventListener('change', handleChange)
+      matchMedia.addEventListener('change', handleChange);
     }
 
     return () => {
       if (matchMedia.removeListener) {
-        matchMedia.removeListener(handleChange)
+        matchMedia.removeListener(handleChange);
       } else {
-        matchMedia.removeEventListener('change', handleChange)
+        matchMedia.removeEventListener('change', handleChange);
       }
-    }
-  }, [query])
+    };
+  }, [query]);
 
-  return matches
+  return matches;
 }
 
-export default useMediaQuery
+export default useMediaQuery;

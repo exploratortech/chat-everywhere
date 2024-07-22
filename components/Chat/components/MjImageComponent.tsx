@@ -20,7 +20,7 @@ import { getUpdatedAssistantMjConversation } from '@/utils/app/mjImage';
 import { MJ_ALLOWED_COMMAND_LIST } from '@/utils/app/mj_const';
 import { removeSecondLastLine } from '@/utils/app/ui';
 
-import { Conversation, Message } from '@/types/chat';
+import type { Conversation, Message } from '@/types/chat';
 
 import HomeContext from '@/components/home/home.context';
 
@@ -249,7 +249,7 @@ export default function MjImageComponent({
 
   return (
     <div
-      className={`group/image relative focus:z-10 cursor-pointer`}
+      className={`group/image relative cursor-pointer focus:z-10`}
       tabIndex={1}
       onFocus={handleDivFocus}
       onBlur={handleDivBlur}
@@ -260,20 +260,20 @@ export default function MjImageComponent({
         alt=""
         className={`${
           showButtons ? `scale-110` : ''
-        } w-full m-0 transition-all duration-500 `}
+        } m-0 w-full transition-all duration-500 `}
       />
 
       <div
         className={`${
-          showButtons ? `scale-110 drop-shadow-2xl bg-black/75` : ''
-        } transition-all duration-500 absolute top-0 left-0 w-full h-full`}
+          showButtons ? `scale-110 bg-black/75 drop-shadow-2xl` : ''
+        } absolute left-0 top-0 size-full transition-all duration-500`}
       >
         {messageIsStreaming ? (
           // Button selections
           <div
             className={`${
               showButtons ? 'flex' : 'hidden'
-            } flex-col gap-2 justify-center items-center h-full`}
+            } h-full flex-col items-center justify-center gap-2`}
           >
             {mjImageT('Image processing... ')}
           </div>
@@ -282,10 +282,10 @@ export default function MjImageComponent({
           <div
             className={`${
               showButtons ? 'flex' : 'hidden'
-            } mobile:scale-[.75] flex-col gap-2 justify-center items-center h-full mobile:text-sm`}
+            } h-full flex-col items-center justify-center gap-2 mobile:scale-75 mobile:text-sm`}
           >
             <button
-              className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
+              className="cursor-pointer select-none border border-white px-4 py-2 font-bold text-white transition-all duration-500 hover:bg-white hover:text-black"
               onClick={() => {
                 downloadFile(
                   src,
@@ -299,7 +299,7 @@ export default function MjImageComponent({
               return (
                 <button
                   key={`${command}-${index}`}
-                  className="cursor-pointer select-none border border-white text-white font-bold py-2 px-4 hover:bg-white hover:text-black transition-all duration-500"
+                  className="cursor-pointer select-none border border-white px-4 py-2 font-bold text-white transition-all duration-500 hover:bg-white hover:text-black"
                   onClick={() => imageButtonOnClick(command)}
                 >
                   {mjImageT(command)}
@@ -312,7 +312,7 @@ export default function MjImageComponent({
         <button
           className={`${
             showButtons ? 'block' : 'hidden'
-          } absolute top-0 right-0 p-1 cursor-pointer`}
+          } absolute right-0 top-0 cursor-pointer p-1`}
           onClick={helpButtonOnClick}
         >
           <IconHelp size={isMobileLayout ? 16 : undefined} />
@@ -321,7 +321,7 @@ export default function MjImageComponent({
         <div
           className={`${
             showButtons ? 'block' : 'hidden'
-          }  absolute bottom-0 right-0 p-1 flex gap-2`}
+          }  absolute bottom-0 right-0 flex gap-2 p-1`}
         >
           <button>
             <LineShareButton

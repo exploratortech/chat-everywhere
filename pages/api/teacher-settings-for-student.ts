@@ -4,7 +4,7 @@ import {
 } from '@/utils/server/auth';
 import { getTeacherSettingsForStudent } from '@/utils/server/supabase/teacher-settings';
 
-import { TeacherSettings } from '@/types/teacher-settings';
+import type { TeacherSettings } from '@/types/teacher-settings';
 
 export const config = {
   runtime: 'edge',

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { UserFile } from '@/types/UserFile';
+import type { UserFile } from '@/types/UserFile';
 
 import {
   Dialog,
@@ -42,10 +42,10 @@ const FilePreviewModal: React.FC<FilePreviewModalProps> = ({
 
   return (
     <Dialog>
-      <DialogTrigger className="w-full h-full">{children}</DialogTrigger>
-      <DialogContent className="w-max min-h-max mobile:h-[100dvh] mobile:w-[100dvw] tablet:max-w-[100dvw] max-w-[800px]">
+      <DialogTrigger className="size-full">{children}</DialogTrigger>
+      <DialogContent className="min-h-max w-max max-w-[800px] mobile:h-dvh mobile:w-dvw tablet:max-w-[100dvw]">
         <DialogHeader>
-          <DialogTitle className="text-white overflow-hidden max-w-[80dvw] text-ellipsis ">
+          <DialogTitle className="max-w-[80dvw] overflow-hidden text-ellipsis text-white ">
             {file.filename}
           </DialogTitle>
           <DialogDescription>{renderPreview()}</DialogDescription>

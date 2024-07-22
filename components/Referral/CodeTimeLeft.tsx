@@ -30,7 +30,13 @@ const calculateTimeLeft = (endOfDayInput: string) => {
     .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
-export default function CodeTimeLeft({ endOfDay, timeOnly=false }: { endOfDay: string, timeOnly?: boolean}) {
+export default function CodeTimeLeft({
+  endOfDay,
+  timeOnly = false,
+}: {
+  endOfDay: string;
+  timeOnly?: boolean;
+}) {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(endOfDay));
   const { t } = useTranslation('model');
 

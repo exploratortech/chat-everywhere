@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { trackEvent } from '@/utils/app/eventTracking';
 
-import { TempAccountProfiles } from '@/types/one-time-code';
+import type { TempAccountProfiles } from '@/types/one-time-code';
 
 import { getColumns } from './TemporaryAccountProfileList/Columns';
 import DataTable from './TemporaryAccountProfileList/DataTable';
@@ -22,7 +22,7 @@ const TemporaryAccountProfileList = ({
   const { t } = useTranslation('model');
   const queryClient = useQueryClient();
 
-  const { mutate: removeTempAccount, isLoading } = useRemoveTempAccount();
+  const { mutate: removeTempAccount } = useRemoveTempAccount();
 
   const handleRemove = (tempAccountIds: number[]) => {
     removeTempAccount(
@@ -43,7 +43,7 @@ const TemporaryAccountProfileList = ({
 
   return (
     <div className="my-4">
-      <h2 className="text-lg font-bold mb-4">
+      <h2 className="mb-4 text-lg font-bold">
         {t('Active accounts')}{' '}
         <label>{`(${totalActiveTempAccount}/${maxQuota})`}</label>
       </h2>

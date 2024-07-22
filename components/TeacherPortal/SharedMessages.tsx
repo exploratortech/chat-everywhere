@@ -1,23 +1,17 @@
 /* eslint-disable react/display-name */
 import { useSupabaseClient } from '@supabase/auth-helpers-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import React, {
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
 import useTeacherPortalLoading from '@/hooks/teacherPortal/useTeacherPortalLoading';
 import useTeacherTags from '@/hooks/teacherPortal/useTeacherTags';
 
-import { Pagination as PaginationType } from '@/types/pagination';
-import { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
-import { Tag as TagType } from '@/types/tags';
+import type { Pagination as PaginationType } from '@/types/pagination';
+import type { ShareMessagesByTeacherProfilePayload } from '@/types/share-messages-by-teacher-profile';
+import type { Tag as TagType } from '@/types/tags';
 
 import useShareMessageFilterStore from '@/components/TeacherPortal/share-message-filter.store';
 import HomeContext from '@/components/home/home.context';
@@ -63,11 +57,11 @@ const SharedMessages = () => {
         isPeriodicFetchFlag.current = true;
       },
     );
-    // Refresh shared messages and tag filter count after bulk tag edit
-    const refetchTags = () => {
-      queryClient.invalidateQueries(['shared-messages-with-teacher']);
-      queryClient.invalidateQueries(['teacher-tags']);
-    };
+  // Refresh shared messages and tag filter count after bulk tag edit
+  const refetchTags = () => {
+    queryClient.invalidateQueries(['shared-messages-with-teacher']);
+    queryClient.invalidateQueries(['teacher-tags']);
+  };
 
   useEffect(() => {
     if (user) {
@@ -87,10 +81,14 @@ const SharedMessages = () => {
       if (sharedMessages) {
         if (isShiftKey && prev.length > 0) {
           const newSelectedIds = new Set(prev);
-          const start = sharedMessages.findIndex(message => message.id === prev[0]);
-          const end = sharedMessages.findIndex(message => message.id === id);
+          const start = sharedMessages.findIndex(
+            (message) => message.id === prev[0],
+          );
+          const end = sharedMessages.findIndex((message) => message.id === id);
           const [from, to] = start < end ? [start, end] : [end, start];
-          sharedMessages.slice(from, to + 1).forEach(message => newSelectedIds.add(message.id));
+          sharedMessages
+            .slice(from, to + 1)
+            .forEach((message) => newSelectedIds.add(message.id));
           return Array.from(newSelectedIds);
         } else if (prev.includes(id)) {
           return prev.filter((messageId) => messageId !== id);
@@ -103,18 +101,18 @@ const SharedMessages = () => {
   };
 
   return (
-    <div className="flex flex-col gap-1 h-full relative">
-      <h1 className="font-bold mb-4">{t('Shared messages')}</h1>
-      <div className="flex flex-col gap-2 my-4">
+    <div className="relative flex h-full flex-col gap-1">
+      <h1 className="mb-4 font-bold">{t('Shared messages')}</h1>
+      <div className="my-4 flex flex-col gap-2">
         <Filter
-        tags={tags} 
-        allSharedMessages={sharedMessages}
-        selectedMessageIds={selectedMessageIds}
+          tags={tags}
+          allSharedMessages={sharedMessages}
+          selectedMessageIds={selectedMessageIds}
         />
         <Separator />
       </div>
       {isLoading && !sharedMessages && (
-        <div className="flex mt-[50%]">
+        <div className="mt-[50%] flex">
           <Spinner size="16px" className="mx-auto" />
         </div>
       )}
@@ -145,7 +143,7 @@ const SharedMessages = () => {
           selectedMessageIds={selectedMessageIds}
           setSelectedMessageIds={setSelectedMessageIds}
           submissions={sharedMessages?.filter((message) =>
-            selectedMessageIds.includes(message.id)
+            selectedMessageIds.includes(message.id),
           )}
           tags={tags}
           refetchTags={refetchTags}

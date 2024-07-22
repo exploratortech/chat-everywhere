@@ -1,4 +1,4 @@
-import {
+import type {
   CompletedMjJob,
   FailedMjJob,
   MjJob,
@@ -86,9 +86,9 @@ export const MjQueueService = {
         end
       end
 
-      -- Return the table of job IDs
-      return jobIds
-    `;
+    -- Return an object with jobIds and processingCount
+    return cjson.encode({ jobIds = jobIds, processingCount = processingCount })
+`;
 
     const keys = [PROCESSING_QUEUE_KEY, WAITING_QUEUE_KEY];
     const currentTime = Math.floor(Date.now() / 1000);
@@ -98,7 +98,11 @@ export const MjQueueService = {
       currentTime.toString(),
       ttl.toString(),
     ];
-    const jobIds = (await redis.eval(script, keys, args)) as string[];
+    const jobData = (await redis.eval(script, keys, args)) as {
+      jobIds: string[];
+      processingCount: number;
+    };
+    const { jobIds, processingCount } = jobData;
 
     if (Array.isArray(jobIds) && jobIds.length > 0) {
       const tasks = jobIds.map((jobId) => {
@@ -112,6 +116,7 @@ export const MjQueueService = {
             },
             body: JSON.stringify({
               jobId,
+              useOnDemand: processingCount > 10,
             }),
           });
         };

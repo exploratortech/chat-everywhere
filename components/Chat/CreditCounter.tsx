@@ -18,12 +18,12 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-
   if (
     creditUsage === null ||
     (pluginId !== PluginID.GPT4 &&
       pluginId !== PluginID.IMAGE_GEN &&
-      pluginId !== PluginID.GPT4O && pluginId !== PluginID.aiPainter) ||
+      pluginId !== PluginID.GPT4O &&
+      pluginId !== PluginID.aiPainter) ||
     isUltraUser
   )
     return <></>;
@@ -43,12 +43,12 @@ export const CreditCounter: React.FC<Props> = ({ pluginId }) => {
       }
     }
     return result;
-  })()
+  })();
 
   return (
     <div
       data-cy="credit-counter"
-      className="flex items-center justify-center cursor-pointer text-gray-500 hover:text-gray-300 text-xs ml-3"
+      className="ml-3 flex cursor-pointer items-center justify-center text-xs text-gray-500 hover:text-gray-300"
       onClick={() => homeDispatch({ field: 'showUsageModel', value: true })}
     >
       {t('Remaining Credits')}: {remainingCredits}

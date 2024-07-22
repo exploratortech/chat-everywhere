@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { User } from '@/types/user';
+import type { User } from '@/types/user';
 
 import usePreviousState from './usePreviousState';
 

@@ -240,7 +240,9 @@ export const reorderItem = (
   // Find the index of the item that's being dragged in the
   // "super collection". The super collection contains all
   // conversations sorted using sortByRankAndFolder().
-  const superSourceIndex = superCollection.findIndex((item) => item.id === targetId);
+  const superSourceIndex = superCollection.findIndex(
+    (item) => item.id === targetId,
+  );
 
   // Retrieve the item from the super collection.
   let updatedCollection = [...superCollection];

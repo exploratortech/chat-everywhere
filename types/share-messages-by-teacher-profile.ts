@@ -1,6 +1,6 @@
-import { Tag } from './tags';
+import type { Tag } from './tags';
 
-import { Pagination } from '@supabase/supabase-js';
+import type { Pagination } from '@supabase/supabase-js';
 
 export interface StudentMessageSubmission {
   id: number;

@@ -3,11 +3,11 @@ export const ConversationLoadingSpinner = ({
 }: {
   className?: string;
 }) => (
-  <div className={`relative mx-auto max-w-2xl px-4 h-full ${className}`}>
-    <div className="flex justify-center items-center h-full mt-5">
+  <div className={`relative mx-auto h-full max-w-2xl px-4 ${className}`}>
+    <div className="mt-5 flex h-full items-center justify-center">
       <svg
         aria-hidden="true"
-        className="w-10 h-10 me-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600 mr-2"
+        className="me-2 mr-2 size-10 animate-spin fill-blue-600 text-gray-200 dark:text-gray-600"
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

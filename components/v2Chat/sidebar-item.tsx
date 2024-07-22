@@ -25,7 +25,7 @@ export function SidebarItem({
       className="relative cursor-pointer"
       onClick={() => conversationOnSelect(conversation.id)}
     >
-      <div className="absolute left-2 top-1 flex h-6 w-6 items-center justify-center">
+      <div className="absolute left-2 top-1 flex size-6 items-center justify-center">
         <IconMessage className="mr-2" />
       </div>
       <div
