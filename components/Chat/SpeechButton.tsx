@@ -81,7 +81,6 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
     if (playingSpeech && isComponentCurrentlyBeingPlayed) {
       closePlayer();
       closeSpeechSynthesizer();
-      x;
     } else {
       const sanitizedInputText = normalizePunctuations(
         removeEmojisOnly(inputText),
