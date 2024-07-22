@@ -14,9 +14,12 @@ export const useConversation = () => {
   const segmenter = useRef<Intl.Segmenter>();
 
   useEffect(() => {
-    segmenter.current = new Intl.Segmenter(outputLanguage || 'en', {
-      granularity: 'sentence',
-    });
+    segmenter.current = new Intl.Segmenter(
+      outputLanguage === 'auto' ? 'en' : outputLanguage,
+      {
+        granularity: 'sentence',
+      },
+    );
   }, [outputLanguage]);
 
   useEffect(() => {

@@ -32,7 +32,7 @@ function ChangeOutputLanguageButton() {
       <div className="w-fit rounded-lg border border-neutral-200 bg-transparent pr-1 text-neutral-900 focus:outline-none dark:border-neutral-600 dark:text-white">
         <select
           className="bg-transparent p-2 focus:outline-none"
-          placeholder={t('Select a lang') || ''}
+          placeholder={t('Select a lang') || 'auto'}
           value={outputLanguage}
           onChange={(e) => {
             homeDispatch({ field: 'outputLanguage', value: e.target.value });
