@@ -113,7 +113,7 @@ describe('Test Payment Flow', () => {
     });
   });
 
-  it('Make sure custom remove subscription event is working', () => {
+  it('cancel subscription event should not cancel the plan immediately', () => {
     // Make the user to Pro plan by calling the /api/cypress/test-subscription-plan-payment endpoint
     cy.request({
       method: 'POST',
