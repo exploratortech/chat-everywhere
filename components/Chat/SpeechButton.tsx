@@ -82,11 +82,14 @@ export const SpeechButton: React.FC<Props> = ({ inputText }) => {
       closePlayer();
       closeSpeechSynthesizer();
     } else {
-      const sanitizedInputText = normalizePunctuations(
-        removeEmojisOnly(inputText),
-      ).trim();
-
-      console.log('sanitizedInputText: ', sanitizedInputText);
+      let sanitizedInputText;
+      try {
+        sanitizedInputText = normalizePunctuations(
+          removeEmojisOnly(inputText),
+        ).trim();
+      } catch (error) {
+        sanitizedInputText = inputText;
+      }
 
       await playMessage(sanitizedInputText, componentSpeechId);
       logGeneralEvent('speech');
