@@ -63,7 +63,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   const { t } = useTranslation('chat');
   const { t: modelTranslate } = useTranslation('model');
   const {
-    state: { user, isUltraUser },
+    state: { user, isUltraUser, isPaidUser },
     dispatch,
   } = useContext(HomeContext);
 
@@ -158,6 +158,15 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         >
           <span className="flex flex-row flex-wrap items-center justify-center text-sm leading-4">
             {getEventDisplayMessage(t)} 🎉
+          </span>
+        </div>
+      )}
+
+      {isPaidUser && (
+        <div className="mt-4 flex cursor-pointer items-center justify-center rounded-md border border-red-500 bg-red-100 p-2 dark:border-red-700 dark:bg-red-200">
+          <span className="flex flex-row flex-wrap items-center justify-center px-2 text-sm font-semibold leading-4 text-red-700">
+            {t(`You may experience interruptions in GPT-4, AI Painter, AI Image modes due to Microsoft Azure service interruption. We are working on restoring
+            these features as soon as possible. Sorry for the inconvenience.`)}
           </span>
         </div>
       )}
