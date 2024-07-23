@@ -261,5 +261,6 @@
   "Are you sure you want to regenerate a new code?": "您確定要重新生成一個新的代碼嗎？",
   "Sort by": "排序方式",
   "DESC": "降序",
-  "ASC": "升序"
+  "ASC": "升序",
+  "You may experience interruptions in GPT-4, AI Painter, AI Image modes due to Microsoft Azure service interruption. We are working on restoring these features as soon as possible. Sorry for the inconvenience.": "由於 Microsoft Azure 的服務中斷，目前GPT-4, AI 繪畫和 AI 生圖模式可能會出現問題。我們團隊正在努力恢復這些功能，對您造成的不便，我們深感抱歉。"
 }
