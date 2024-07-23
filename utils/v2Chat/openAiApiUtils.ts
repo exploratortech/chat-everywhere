@@ -10,6 +10,7 @@ import type {
 import { activeRunStatuses } from '@/types/v2Chat/chat';
 
 import { OPENAI_API_HOST } from '../app/const';
+import { getDalle3EndpointAndKeys } from '../server/api';
 
 export const addOpenAiMessageToThread = async (
   threadId: string,
@@ -114,9 +115,8 @@ export const getOpenAiLatestRunObject = async (
 
 export const generateImage = async (
   prompt: string,
+  usePriorityEndpoint: boolean = false,
 ): Promise<OpenAiImageResponseType & { errorMessage?: string }> => {
-  const openAiUrl = `${OPENAI_API_HOST}/v1/images/generations`;
-
   const payload = {
     model: 'dall-e-3',
     prompt: prompt,
@@ -131,18 +131,18 @@ export const generateImage = async (
   const maxRetries = 5;
 
   while (retries < maxRetries) {
-    // TODO: We need to fix this after Azure opted-out the content-filter
-    // if (retries < 4) {
-    //   response = await authorizedDalle3AzureRequest({
-    //     method: 'POST',
-    //     body: JSON.stringify(payload),
-    //   });
-    // } else {
-    response = await authorizedOpenAiRequest(openAiUrl, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-    // }
+    if (usePriorityEndpoint) {
+      const openAiUrl = `${OPENAI_API_HOST}/v1/images/generations`;
+      response = await authorizedOpenAiRequest(openAiUrl, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    } else {
+      response = await authorizedDalle3AzureRequest({
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    }
 
     if (response.status !== 429 && response.status !== 404) {
       break;
@@ -329,7 +329,6 @@ export const submitToolOutput = async (
   }
 };
 
-// Move this function from utils/server/index.ts to here for serverless function compatibility reason
 const authorizedOpenAiRequest = async (
   url: string,
   options: RequestInit = {},
@@ -342,4 +341,19 @@ const authorizedOpenAiRequest = async (
   };
   console.log('hitting openai endpoint: ', url);
   return fetch(url, { ...options, headers });
+};
+
+const authorizedDalle3AzureRequest = async (options: RequestInit = {}) => {
+  const { endpoint, key } = getDalle3EndpointAndKeys();
+  if (!endpoint || !key) {
+    throw new Error('Failed to get Azure DALL-E 3 endpoint and key');
+  }
+
+  const headers = {
+    'api-key': key || '',
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+  console.log('hitting azure endpoint: ', endpoint);
+  return fetch(endpoint, { ...options, headers });
 };
