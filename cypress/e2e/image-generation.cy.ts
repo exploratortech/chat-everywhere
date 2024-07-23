@@ -36,12 +36,17 @@ describe('Pro User using Image generation', () => {
   });
   it('is able to create an image via AI Image Mode (MJ)', () => {
     mjImageGenerationModeTest();
+    // Check if the Remaining Credits are displayed
+    cy.get('div[data-cy="credit-counter"]').should('exist');
   });
 
   it('is able to create an image via AI Painter Mode', () => {
     aiPainterModeTest();
+    // Check if the Remaining Credits are displayed
+    cy.get('div[data-cy="credit-counter"]').should('exist');
   });
 });
+
 describe('Priority User using Image generation', () => {
   const hostUrl = Cypress.env('HOST_URL') || 'http://localhost:3000';
   const isRunningOnProduction = hostUrl === 'https://chateverywhere.app';
@@ -78,10 +83,14 @@ describe('Priority User using Image generation', () => {
   });
   it('is able to create an image via AI Image Mode (MJ)', () => {
     mjImageGenerationModeTest();
+    // Ultra user do not need to check the remaining credits
+    cy.get('div[data-cy="credit-counter"]').should('not.exist');
   });
 
   it('is able to create an image via AI Painter Mode', () => {
     aiPainterModeTest();
+    // Ultra user do not need to check the remaining credits
+    cy.get('div[data-cy="credit-counter"]').should('not.exist');
   });
 });
 
@@ -137,9 +146,6 @@ function mjImageGenerationModeTest() {
       });
     });
   });
-  //
-  // Check if the Remaining Credits are displayed
-  cy.get('div[data-cy="credit-counter"]').should('exist');
 }
 function aiPainterModeTest() {
   cy.get('[data-cy="chat-enhanced-menu-container"]', { timeout: 5000 }).then(
