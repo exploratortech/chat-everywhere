@@ -8,6 +8,7 @@ import {
   AZURE_OPENAI_GPT_4_TPM,
   AZURE_OPENAI_KEYS,
   AZURE_OPENAI_TPM,
+  DEFAULT_TEMPERATURE,
   OPENAI_API_HOST,
   OPENAI_API_KEY,
 } from '@/utils/app/const';
@@ -146,12 +147,12 @@ export class ChatEndpointManager {
 
   public getFetchOptions({
     messagesToSendInArray,
-    temperature,
+    temperature = DEFAULT_TEMPERATURE,
     functionCallsToSend = [],
     stream = true,
   }: {
     messagesToSendInArray: any[];
-    temperature: number;
+    temperature?: number;
     functionCallsToSend?: FunctionCall[];
     stream?: boolean;
   }): {
