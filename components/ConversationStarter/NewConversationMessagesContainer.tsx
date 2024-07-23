@@ -63,7 +63,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
   const { t } = useTranslation('chat');
   const { t: modelTranslate } = useTranslation('model');
   const {
-    state: { user, isUltraUser, isPaidUser },
+    state: { user, isUltraUser },
     dispatch,
   } = useContext(HomeContext);
 
@@ -162,7 +162,8 @@ export const NewConversationMessagesContainer: FC<Props> = ({
         </div>
       )}
 
-      {isPaidUser && (
+      {/* Turn this on when service experience interruptions */}
+      {/* {isPaidUser && (
         <div className="mt-4 flex cursor-pointer items-center justify-center rounded-md border border-red-500 bg-red-100 p-2 dark:border-red-700 dark:bg-red-200">
           <span className="flex flex-row flex-wrap items-center justify-center px-2 text-sm font-semibold leading-4 text-red-700">
             {modelTranslate(
@@ -170,7 +171,7 @@ export const NewConversationMessagesContainer: FC<Props> = ({
             )}
           </span>
         </div>
-      )}
+      )} */}
 
       <div
         className="mt-4 flex cursor-pointer items-center justify-center rounded-md border border-neutral-200 p-2 dark:border-neutral-600 dark:bg-none"
