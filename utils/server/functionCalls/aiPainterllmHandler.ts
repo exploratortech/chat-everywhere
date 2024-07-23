@@ -156,6 +156,7 @@ export const aiPainterLlmHandler = async ({
   ];
   let isFunctionCallRequired = true;
   let innerWorkingMessages = messages;
+  const usePriorityEndpoint = user.enabledPriorityEndpoint;
 
   try {
     while (isFunctionCallRequired) {
@@ -166,6 +167,7 @@ export const aiPainterLlmHandler = async ({
           onUpdate(token);
         },
         functionCalls: functionCallsToSend,
+        usePriorityEndpoint: usePriorityEndpoint,
       });
 
       // No function call required, exiting

@@ -8,10 +8,12 @@ import {
   AZURE_OPENAI_GPT_4_TPM,
   AZURE_OPENAI_KEYS,
   AZURE_OPENAI_TPM,
+  DEFAULT_TEMPERATURE,
   OPENAI_API_HOST,
   OPENAI_API_KEY,
 } from '@/utils/app/const';
 
+import type { FunctionCall } from '@/types/chat';
 import type { OpenAIModel } from '@/types/openai';
 import { OpenAIModelID } from '@/types/openai';
 
@@ -130,19 +132,29 @@ export class ChatEndpointManager {
   public getTotalEndpoints(): EndpointInfo[] {
     return this.endpoints;
   }
+
   public getThrottledEndpoints(): EndpointInfo[] {
     return this.endpoints.filter((e) => e.isThrottled);
   }
+
   public getAvailableEndpoints(): EndpointInfo[] {
     return this.endpoints.filter((e) => !e.isThrottled);
   }
 
+  public getRetryStatusCodes(): number[] {
+    return [404, 429, 500, 503];
+  }
+
   public getFetchOptions({
     messagesToSendInArray,
-    temperature,
+    temperature = DEFAULT_TEMPERATURE,
+    functionCallsToSend = [],
+    stream = true,
   }: {
     messagesToSendInArray: any[];
-    temperature: number;
+    temperature?: number;
+    functionCallsToSend?: FunctionCall[];
+    stream?: boolean;
   }): {
     url: string;
     options: RequestInit;
@@ -162,10 +174,12 @@ export class ChatEndpointManager {
       messages: messagesToSendInArray,
       max_tokens: this.model.completionTokenLimit,
       temperature,
-      stream: true,
+      stream,
       presence_penalty: 0,
       frequency_penalty: 0,
       model: endpoint.includes(OPENAI_API_HOST) ? this.model.id : undefined,
+      functions:
+        functionCallsToSend.length > 0 ? functionCallsToSend : undefined,
     };
 
     const requestHeaders = {

@@ -84,6 +84,8 @@ export const llmHandler = async ({
     llmHandlerPrompt += RESPONSE_IN_CHINESE_PROMPT;
   }
 
+  const usePriorityEndpoint = user.enabledPriorityEndpoint;
+
   try {
     while (isFunctionCallRequired) {
       const requestedFunctionCalls = await AIStream({
@@ -93,6 +95,7 @@ export const llmHandler = async ({
           onUpdate(token);
         },
         functionCalls: functionCallsToSend,
+        usePriorityEndpoint: usePriorityEndpoint,
       });
 
       // No function call required, exiting

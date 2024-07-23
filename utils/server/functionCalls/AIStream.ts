@@ -18,6 +18,7 @@ type AIStreamProps = {
   onUpdateToken: (token: string) => void;
   functionCalls: FunctionCall[];
   useOpenAI?: boolean;
+  usePriorityEndpoint?: boolean;
 };
 
 type AIStreamResponseType = {
@@ -30,20 +31,14 @@ export const AIStream = async ({
   messages,
   onUpdateToken,
   functionCalls,
+  usePriorityEndpoint,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
   const model = OpenAIModels[OpenAIModelID.GPT_4O];
 
-  const endpointManager = new ChatEndpointManager(model);
-
-  const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
+  const endpointManager = new ChatEndpointManager(model, usePriorityEndpoint);
 
   let functionCallName = '',
     functionCallArgumentInJsonString = '';
-
-  const openAIEndpoint = endpoint || '';
-  const openAIKey = apiKey || '';
-
-  let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2024-02-01`;
 
   const messagesToSend = await shortenMessagesBaseOnTokenLimit(
     '',
@@ -73,19 +68,16 @@ export const AIStream = async ({
     bodyToSend.functions = functionCalls;
   }
 
-  const requestHeaders: { [header: string]: string } = {
-    'Content-Type': 'application/json',
-  };
-
-  requestHeaders['api-key'] = openAIKey;
-
   let res;
 
+  const { url, options } = endpointManager.getFetchOptions({
+    messagesToSendInArray,
+    functionCallsToSend: functionCalls,
+    stream: true,
+  });
   console.log('Sending request to: ' + url);
   res = await fetch(url, {
-    headers: requestHeaders,
-    method: 'POST',
-    body: JSON.stringify(bodyToSend),
+    ...options,
   });
 
   const decoder = new TextDecoder();

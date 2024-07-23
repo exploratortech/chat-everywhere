@@ -98,13 +98,13 @@ export const AZURE_OPENAI_GPT_4O_TPM = [
 
 export const AZURE_DALL_E_3_ENDPOINTS = [
   process.env.AZURE_DALL_E_3_ENDPOINT_0,
-  // process.env.AZURE_DALL_E_3_ENDPOINT_1, // RESOURCE NOT FOUND
+  process.env.AZURE_DALL_E_3_ENDPOINT_1,
   process.env.AZURE_DALL_E_3_ENDPOINT_2,
 ];
 
 export const AZURE_DALL_E_API_KEYS = [
   process.env.AZURE_DALL_E_API_KEY_0,
-  // process.env.AZURE_DALL_E_API_KEY_1, // RESOURCE NOT FOUND
+  process.env.AZURE_DALL_E_API_KEY_1,
   process.env.AZURE_DALL_E_API_KEY_2,
 ];
 

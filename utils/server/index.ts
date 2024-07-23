@@ -114,7 +114,7 @@ export const OpenAIStream = async ({
       const encoder = new TextEncoder();
       const decoder = new TextDecoder();
 
-      if (res.status === 429 || res.status === 500 || res.status === 404) {
+      if (endpointManager.getRetryStatusCodes().includes(res.status)) {
         endpointManager.markEndpointAsThrottled(endpoint);
         attempt += 1;
         continue;

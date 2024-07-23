@@ -22,6 +22,7 @@ import {
 
 import type { MjButtonCommandRequest, MjImageGenRequest } from '@/types/mjJob';
 import { PluginID } from '@/types/plugin';
+import type { UserProfile } from '@/types/user';
 
 export const config = {
   runtime: 'edge',
@@ -99,6 +100,11 @@ const handler = async (req: Request) => {
     return new Response('Invalid job id', { status: 400 });
   }
 
+  const userProfile = await getUserProfile(jobInfo.userId);
+  if (!userProfile) {
+    throw new Error('User profile not found');
+  }
+
   async function imageGeneration(headers: {
     Authorization: string;
     'Content-Type': string;
@@ -111,7 +117,12 @@ const handler = async (req: Request) => {
     const imageStyle = jobInfo.mjRequest.imageStyle;
     const imageQuality = jobInfo.mjRequest.imageQuality;
     const temperature = jobInfo.mjRequest.temperature || undefined;
-    let generationPrompt = await translateAndEnhancePrompt(userPrompt);
+
+    const usePriorityEndpoint = userProfile.enabledPriorityEndpoint;
+    let generationPrompt = await translateAndEnhancePrompt(
+      userPrompt,
+      usePriorityEndpoint,
+    );
     if (!generationPrompt) {
       throw new Error('Failed to generate prompt');
     }
@@ -307,7 +318,7 @@ const handler = async (req: Request) => {
 
   let hasSubtractedUserCredit = false;
   try {
-    hasSubtractedUserCredit = await subtractedUserCredit(jobInfo.userId);
+    hasSubtractedUserCredit = await subtractedUserCredit(userProfile);
     if (jobInfo.mjRequest.type === 'MJ_BUTTON_COMMAND') {
       await buttonCommand(requestHeader);
     }
@@ -400,23 +411,22 @@ const generateMjPrompt = (
   return resultPrompt;
 };
 
-async function subtractedUserCredit(userId: string): Promise<boolean> {
+async function subtractedUserCredit(
+  userProfile: UserProfile,
+): Promise<boolean> {
   try {
     console.log('Checking if user has run out of credits...');
-    const userProfile = await getUserProfile(userId);
-    if (!userProfile) {
-      throw new Error('User profile not found');
-    }
+
     const isUserInUltraPlan = userProfile.plan === 'ultra';
     if (isUserInUltraPlan) {
       return false;
     }
-    if (await hasUserRunOutOfCredits(userId, PluginID.IMAGE_GEN)) {
+    if (await hasUserRunOutOfCredits(userProfile.id, PluginID.IMAGE_GEN)) {
       throw new Error('User has run out of credits');
     }
 
-    await addUsageEntry(PluginID.IMAGE_GEN, userId);
-    await subtractCredit(userId, PluginID.IMAGE_GEN);
+    await addUsageEntry(PluginID.IMAGE_GEN, userProfile.id);
+    await subtractCredit(userProfile.id, PluginID.IMAGE_GEN);
     return true;
   } catch (error) {
     console.error('Error subtracting user credit', error);

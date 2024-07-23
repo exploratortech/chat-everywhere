@@ -204,7 +204,11 @@ export const triggerHelperFunction = async (
         };
 
         try {
-          const imageGenerationResponse = await generateImage(prompt);
+          const usePriorityEndpoint = user?.enabledPriorityEndpoint;
+          const imageGenerationResponse = await generateImage(
+            prompt,
+            usePriorityEndpoint,
+          );
 
           if (!imageGenerationResponse.data) {
             console.error('imageGenerationResponse: ', imageGenerationResponse);

@@ -39,11 +39,13 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
   return (
     <div
       id="ai-painter-result"
+      data-cy="ai-painter-result-container"
       className="my-4 grid grid-cols-2 gap-4 rounded-md bg-white p-4 mobile:p-2"
     >
       {results.map((result, index) => (
         <div className="group/ai-painter-result relative" key={result.url}>
           <img
+            data-cy={`ai-painter-result-image-${index + 1}`}
             src={result.url}
             alt={result.prompt}
             loading="lazy"
@@ -71,6 +73,7 @@ const AiPainterResult: React.FC<AiPainterResultProps> = ({ results }) => {
           </div>
           <div className="absolute top-0 hidden size-full items-center justify-center bg-black opacity-60 group-hover/ai-painter-result:flex ">
             <button
+              data-cy={`ai-painter-result-download-button-${index + 1}`}
               className="max-w-max cursor-pointer select-none border border-white px-4 py-2 font-bold text-white transition-all duration-500 hover:bg-white hover:text-black"
               disabled={isDownloading}
               onClick={() => {
