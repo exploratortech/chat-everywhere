@@ -37,15 +37,8 @@ export const AIStream = async ({
 
   const endpointManager = new ChatEndpointManager(model, usePriorityEndpoint);
 
-  const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
-
   let functionCallName = '',
     functionCallArgumentInJsonString = '';
-
-  const openAIEndpoint = endpoint || '';
-  const openAIKey = apiKey || '';
-
-  let url = `${openAIEndpoint}/openai/deployments/${model.deploymentName}/chat/completions?api-version=2024-02-01`;
 
   const messagesToSend = await shortenMessagesBaseOnTokenLimit(
     '',
@@ -75,19 +68,16 @@ export const AIStream = async ({
     bodyToSend.functions = functionCalls;
   }
 
-  const requestHeaders: { [header: string]: string } = {
-    'Content-Type': 'application/json',
-  };
-
-  requestHeaders['api-key'] = openAIKey;
-
   let res;
 
+  const { url, options } = endpointManager.getFetchOptions({
+    messagesToSendInArray,
+    functionCallsToSend: functionCalls,
+    stream: true,
+  });
   console.log('Sending request to: ' + url);
   res = await fetch(url, {
-    headers: requestHeaders,
-    method: 'POST',
-    body: JSON.stringify(bodyToSend),
+    ...options,
   });
 
   const decoder = new TextDecoder();
