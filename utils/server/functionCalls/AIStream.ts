@@ -18,6 +18,7 @@ type AIStreamProps = {
   onUpdateToken: (token: string) => void;
   functionCalls: FunctionCall[];
   useOpenAI?: boolean;
+  usePriorityEndpoint?: boolean;
 };
 
 type AIStreamResponseType = {
@@ -30,10 +31,11 @@ export const AIStream = async ({
   messages,
   onUpdateToken,
   functionCalls,
+  usePriorityEndpoint,
 }: AIStreamProps): Promise<AIStreamResponseType> => {
   const model = OpenAIModels[OpenAIModelID.GPT_4O];
 
-  const endpointManager = new ChatEndpointManager(model);
+  const endpointManager = new ChatEndpointManager(model, usePriorityEndpoint);
 
   const { endpoint, key: apiKey } = endpointManager.getEndpointAndKey() || {};
 
