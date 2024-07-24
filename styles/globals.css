@@ -161,3 +161,10 @@ body {
     }
   }
 }
+
+.text-clip-transparent {
+  color: transparent;
+  -webkit-background-clip: text;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: transparent;
+}

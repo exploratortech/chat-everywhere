@@ -11,6 +11,8 @@
   "Upload": "上传",
   "File uploaded successfully": "文件上传成功",
   "File upload failed": "文件上传失败",
+  "There was a problem when changing subscription plan, please contact support team": "当您更改订阅方案时，发生问题，请联系支援团队",
+  "There was a problem fetching user subscription detail, please contact support team": "取得使用者订阅详情时，发生问题，请联系支援团队",
   "Error": "错误",
   "Retry": "重试",
   "Report a bug in this conversation to Chat Everywhere": "在此对话中报告错误",

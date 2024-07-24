@@ -41,7 +41,7 @@ export const PlanDetail = {
       'LINE connection',
       'Unlimited GPT-4',
       'Unlimited MidJourney generation',
-      'Chat with document (coming soon)',
+      'Chat with document',
     ],
   },
   combinedSimplify: [

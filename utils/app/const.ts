@@ -1,7 +1,17 @@
 import { OpenAIModels, fallbackModelID } from '@/types/openai';
+import type { SubscriptionPlan } from '@/types/user';
 
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
+
+export {
+  STRIPE_PAID_PLAN_LINKS,
+  STRIPE_PLAN_CODE_GPT4_CREDIT,
+  STRIPE_PLAN_CODE_IMAGE_CREDIT,
+  GPT4_CREDIT_PURCHASE_LINKS,
+  AI_IMAGE_CREDIT_PURCHASE_LINKS,
+  V2_CHAT_UPGRADE_LINK,
+} from './stripe/stripe_config';
 
 export const RESPONSE_IN_CHINESE_PROMPT = `Whenever you respond in Chinese, you must respond in Traditional Chinese (繁體中文).`;
 
@@ -128,6 +138,13 @@ export const newDefaultConversation = {
   folderId: null,
   lastUpdateAtUTC: dayjs().valueOf(),
 };
+
+export const OrderedSubscriptionPlans: SubscriptionPlan[] = [
+  'free',
+  'pro',
+  'ultra',
+  'edu',
+];
 
 // Gemini File Upload Constants
 // NOTE: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models

@@ -91,6 +91,14 @@ module.exports = {
             transform: 'translateX(-100%)',
           },
         },
+        'background-gradient-slide': {
+          '0%': {
+            backgroundPosition: '-20% 50%',
+          },
+          '100%': {
+            backgroundPosition: '100% 50%',
+          },
+        },
       },
       animation: {
         'slide-from-left':
@@ -99,6 +107,17 @@ module.exports = {
           'slide-to-left 0.25s cubic-bezier(0.82, 0.085, 0.395, 0.895)',
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'background-gradient-slide':
+          'background-gradient-slide 6s linear infinite',
+      },
+      backgroundSize: {
+        '500%': '500% 100%',
+      },
+      backgroundImage: {
+        'gradient-ultra':
+          'linear-gradient(to right, #fd68a6, #6c62f7, #fd68a6)',
+        'gradient-pro':
+          'linear-gradient(to right, rgb(99 102 241), rgb(129 140 248), rgb(99 102 241))',
       },
     },
   },

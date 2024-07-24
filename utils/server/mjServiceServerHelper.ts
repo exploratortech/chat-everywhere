@@ -35,7 +35,7 @@ export const trackFailedEvent = (jobInfo: MjJob, errorMessage: string) => {
       mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
       mjImageGenErrorMessage: errorMessage,
       usedOnDemandCredit: jobInfo.usedOnDemandCredit || false,
-      lastUsedKey: jobInfo.lastUsedKey
+      lastUsedKey: jobInfo.lastUsedKey,
     },
   );
   return trackEventPromise;
@@ -67,7 +67,7 @@ export const trackSuccessEvent = (jobInfo: MjJob) => {
         totalWaitingInQueueTimeInSeconds,
       mjImageGenTotalProcessingTimeInSeconds: totalProcessingTimeInSeconds,
       usedOnDemandCredit: jobInfo.usedOnDemandCredit || false,
-      lastUsedKey: jobInfo.lastUsedKey
+      lastUsedKey: jobInfo.lastUsedKey,
     },
   );
 
@@ -82,8 +82,8 @@ export const trackCleanupJobEvent = ({
   fiveMinutesAgo,
 }: {
   event:
-  | 'MJ Queue Cleanup Completed / Failed Job'
-  | 'MJ Queue Cleanup Processing Job';
+    | 'MJ Queue Cleanup Completed / Failed Job'
+    | 'MJ Queue Cleanup Processing Job';
   executedAt: string;
   enqueuedAt: string;
   oneWeekAgo?: string;
@@ -120,8 +120,9 @@ export const OriginalMjLogEvent = async ({
   if (errorMessage) {
     payloadToLog.imageGenerationFailed = 'true';
     payloadToLog.imageGenerationErrorMessage = errorMessage;
-    payloadToLog.imageGenerationPrompt = `${promptBeforeProcessing || 'N/A'
-      } -> ${generationPrompt || 'N/A'}`;
+    payloadToLog.imageGenerationPrompt = `${
+      promptBeforeProcessing || 'N/A'
+    } -> ${generationPrompt || 'N/A'}`;
   }
 
   await serverSideTrackEvent(userId, 'AI image generation', payloadToLog);

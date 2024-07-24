@@ -72,7 +72,7 @@ export default function SettingsModel({ onClose }: Props) {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="flex h-[calc(80vh-100px)] max-h-[750px] w-full max-w-[70vw] overflow-hidden rounded-2xl bg-neutral-800 text-left align-middle text-neutral-200 shadow-xl transition-all xl:max-w-3xl mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:max-h-[unset] tablet:max-w-[90vw]">
+                <Dialog.Panel className="flex h-[calc(80vh-100px)] max-h-[750px] w-full max-w-[80vw] transform overflow-hidden rounded-2xl bg-neutral-800 text-left align-middle text-neutral-200 shadow-xl transition-all xl:max-w-3xl mobile:h-dvh mobile:!max-w-[unset] mobile:!rounded-none tablet:max-h-[unset] tablet:max-w-[90vw]">
                   <Sidebar
                     className="shrink-0 grow-0 bg-neutral-800"
                     disableFooterItems={!user || !isPaidUser}

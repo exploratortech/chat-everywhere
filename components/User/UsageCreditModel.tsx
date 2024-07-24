@@ -4,6 +4,10 @@ import { Fragment, useContext } from 'react';
 
 import { useTranslation } from 'next-i18next';
 
+import {
+  AI_IMAGE_CREDIT_PURCHASE_LINKS,
+  GPT4_CREDIT_PURCHASE_LINKS,
+} from '@/utils/app/const';
 import { DefaultMonthlyCredits } from '@/utils/config';
 
 import { PluginID } from '@/types/plugin';
@@ -12,16 +16,6 @@ import HomeContext from '@/components/home/home.context';
 
 type Props = {
   onClose: () => void;
-};
-
-const gpt4CreditPurchaseLinks = {
-  '50': 'https://buy.stripe.com/28o03Z0vE3Glak09AJ',
-  '150': 'https://buy.stripe.com/cN2dUP6U2dgV0JqcMW',
-  '300': 'https://buy.stripe.com/dR6g2Xemu5Otcs83cn',
-};
-const aiImageCreditPurchaseLinks = {
-  '100': 'https://buy.stripe.com/fZeg2Xdiq4Kp8bS9AT',
-  '500': 'https://buy.stripe.com/8wMg2XcemccR2Ry8wQ',
 };
 
 export const UsageCreditModel: FC<Props> = ({ onClose }) => {
@@ -108,7 +102,7 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                             : gpt4Credit}
                         </td>
                         <td className="flex flex-col px-6 py-4 text-left">
-                          {Object.entries(gpt4CreditPurchaseLinks).map(
+                          {Object.entries(GPT4_CREDIT_PURCHASE_LINKS).map(
                             ([key, value]) => (
                               <a
                                 href={`${value}?prefilled_email=${userEmail}`}
@@ -145,7 +139,7 @@ export const UsageCreditModel: FC<Props> = ({ onClose }) => {
                             : aiImageCredit}
                         </td>
                         <td className="flex flex-col px-6 py-4 text-left">
-                          {Object.entries(aiImageCreditPurchaseLinks).map(
+                          {Object.entries(AI_IMAGE_CREDIT_PURCHASE_LINKS).map(
                             ([key, value]) => (
                               <a
                                 href={`${value}?prefilled_email=${userEmail}`}

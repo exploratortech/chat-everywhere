@@ -1,13 +1,18 @@
 import type { ExportFormatV4 } from './export';
+import type { SubscriptionPlan } from './paid_plan';
 import type { PluginID } from './plugin';
+import type {
+  PaidPlanCurrencyType,
+  StripeProductPaidPlanType,
+} from './stripe-product';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+
+export type { SubscriptionPlan } from './paid_plan';
 
 export interface User extends UserProfile {
   email: string;
 }
-
-export type SubscriptionPlan = 'free' | 'pro' | 'ultra' | 'edu';
 
 export interface UserConversation {
   id: string;
@@ -56,3 +61,8 @@ export type UserProfileQuery = RequiredOne<
   UserProfileQueryProps,
   'userId' | 'email'
 >;
+
+export interface UserSubscriptionDetail {
+  userPlan: StripeProductPaidPlanType | null;
+  subscriptionCurrency: PaidPlanCurrencyType;
+}

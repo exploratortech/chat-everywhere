@@ -10,13 +10,7 @@ export default function UserAccountBadge() {
     if (user.plan === 'ultra') {
       return (
         <span
-          className="mr-0 rounded bg-gray-700 bg-gradient-to-r from-[#fd68a6] to-[#6c62f7] py-0.5 text-xs font-medium text-indigo-400"
-          style={{
-            color: 'transparent',
-            WebkitBackgroundClip: 'text',
-            WebkitTextStrokeWidth: '1px',
-            WebkitTextStrokeColor: 'transparent',
-          }}
+          className="text-clip-transparent mr-0 animate-background-gradient-slide rounded bg-gradient-ultra bg-500% py-0.5 text-xs font-medium"
           data-cy="user-account-badge"
         >
           Ultra
@@ -27,7 +21,7 @@ export default function UserAccountBadge() {
     if (user.plan === 'pro') {
       return (
         <span
-          className="mr-2 rounded border border-indigo-400 bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800 dark:bg-gray-700 dark:text-indigo-400"
+          className="text-clip-transparent mr-0 animate-background-gradient-slide rounded bg-gradient-pro bg-500% py-0.5 text-xs font-medium"
           data-cy="user-account-badge"
         >
           Pro
