@@ -162,7 +162,6 @@ export type PayloadType = {
   mjQueueCleanupJobOneWeekAgo?: string;
   mjQueueCleanupJobFiveMinutesAgo?: string;
   mjQueueJobDetail?: MjJob;
-
 };
 
 export interface UserPostHogProfile {

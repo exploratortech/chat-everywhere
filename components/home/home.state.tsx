@@ -100,7 +100,7 @@ export const initialState: HomeInitialState = {
   messageError: false,
   searchTerm: '',
   defaultModelId: undefined,
-  outputLanguage: '',
+  outputLanguage: 'auto',
   currentDrag: undefined,
 
   // Supabase / Cloud Sync
